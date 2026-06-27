@@ -16,10 +16,10 @@ B1a is R2 contract, schema, fixture, test, and evidence work. It does not implem
 ## Verification
 
 - Foundation tests: 34.
-- B1a tests: 26.
-- Reproducible total: 60 passed tests.
-- Latest technical CI: `28298953265`, success on Python 3.12.3.
-- Codex review threads: 20 total, 0 unresolved.
+- B1a tests: 29.
+- Reproducible total: 63 passed tests.
+- Latest technical CI: `28299389645`, success on Python 3.12.3.
+- Codex review threads: 23 total, 0 unresolved.
 - Current metadata-synchronized head requires final CI and Codex review before squash merge.
 
 ## Confirmed invariants
@@ -28,12 +28,14 @@ B1a is R2 contract, schema, fixture, test, and evidence work. It does not implem
 - one rule method payload only;
 - `CUSTOM_VARIABLE` requires at least one declared dependency;
 - rounding policy is owned by Calculation Profile `rounding_policy_ref`;
+- every Calculation Profile version is a complete immutable reference snapshot;
 - scope wildcards use omission only and tenant boundaries are mandatory;
 - rule resolution is deterministic and fail-closed;
 - eligible candidates carry complete ordering tuples;
 - zero remains a VALID value, not a state;
 - Actual and Scenario remain isolated;
-- safe expressions are typed, arity constrained, and currency aware;
+- safe expressions are typed, arity constrained, currency aware, and comparisons return BOOLEAN;
+- metric units represent `MONEY_PER_ITEM` explicitly;
 - purchases use explicit quantity and amount metrics;
 - Calculation Profile references use `{id, version, content_hash}`;
 - golden values require an independent oracle.
