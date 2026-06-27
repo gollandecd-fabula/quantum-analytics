@@ -16,13 +16,19 @@ scope:
 artifacts:
   contracts: 7
   schemas: 6
+  artifact_manifest:
+    package_version: 6
+    tracked_artifacts: 157
+    self_excluded: true
   test_files:
+    - tests/test_b1a_artifact_manifest.py
     - tests/test_b1a_contract_alignment.py
     - tests/test_b1a_contract_edge_cases.py
     - tests/test_b1a_custom_variable_dependency.py
     - tests/test_b1a_execution_state.py
     - tests/test_b1a_financial_contracts.py
     - tests/test_b1a_money_currency.py
+    - tests/test_b1a_rate_rule_typing.py
     - tests/test_b1a_review_regressions.py
     - tests/test_b1a_rounding_mapping.py
     - tests/test_b1a_rounding_ownership.py
@@ -30,12 +36,12 @@ artifacts:
 
 checks:
   foundation_tests: 34
-  b1a_tests: 29
-  total_tests: 63
-  last_technical_ci_run: 28299389645
+  b1a_tests: 33
+  total_tests: 67
+  last_technical_ci_run: 28303919943
   last_technical_ci_status: SUCCESS
   python: 3.12.3
-  review_threads_total: 23
+  review_threads_total: 26
   review_threads_unresolved: 0
   current_head_ci: PENDING_AFTER_METADATA_SYNC
   current_head_review: PENDING_AFTER_METADATA_SYNC
@@ -44,7 +50,9 @@ remediation_complete:
   - canonical typed states and valid zero
   - immutable versioned references and complete profile snapshots
   - tenant-safe omission-only scope resolution
+  - explicit Actual and Scenario mode isolation vectors
   - fail-closed validation and exclusive method payloads
+  - RATE rules require RATE unit and null currency
   - custom variable bases require declared dependencies
   - complete reproducible ordering tuples
   - typed safe expressions including boolean comparison results
@@ -52,6 +60,7 @@ remediation_complete:
   - money per item metric unit representation
   - rounding policy owned by Calculation Profile reference
   - explicit purchase quantity and amount metrics
+  - artifact manifest verifies every tracked path hash and byte size
 
 limitations:
   - metric catalogue remains DRAFT_ONLY
