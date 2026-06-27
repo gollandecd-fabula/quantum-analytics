@@ -1,7 +1,7 @@
 # CURRENT STATE
 
 Date: 2026-06-27
-Status: `FOUNDATION_PR_READY_AFTER_REVIEW_WITH_BLOCKERS`
+Status: `FOUNDATION_BOOTSTRAP_MERGED_WITH_BLOCKERS`
 Active contract: `STAGE-A-FOUNDATION-v1`
 Completed unit: `A6 — DATA_PROOF`
 Current unit: `FOUNDATION_CLOSURE_BLOCKER_RESOLUTION`
@@ -15,29 +15,29 @@ Current unit: `FOUNDATION_CLOSURE_BLOCKER_RESOLUTION`
 - A6 synthetic Data Proof passes.
 - Repository `gollandecd-fabula/quantum-analytics` is connected and intentionally public during the free development phase.
 - Final repository access is intended to return to private/invited access after the development phase; application access remains a separate authorization control.
-- Initial `main` commit exists.
-- Working branch `bootstrap/foundation-v5` exists.
-- Pull Request #2 imports the verified FOUNDATION bootstrap and is Ready for review/merge.
-- Issue #1 tracks the import and closure evidence.
+- Pull Request #2 was squash-merged into protected `main` on 2026-06-27.
+- Merge commit: `4aa2e69cd985879271b44ad3345f73e972add845`.
+- Source branch `bootstrap/foundation-v5` is retained for audit and rollback reference.
+- Issue #1 tracks the original bootstrap import and closure evidence.
 - Hidden `.github` files were restored through the GitHub Connector.
 - Thirteen `.gitkeep` files were normalized from zero bytes to one LF because the Connector blocks empty file creation.
 - GitHub workflow `Foundation CI` exists with read-only repository permissions and no third-party Actions.
-- GitHub runner uses Python 3.12.3 and passes 34 Foundation tests on run `28291222601`.
+- Pre-merge current-head run `28291287382` passed 34 Foundation tests on Python 3.12.3.
 - Active ruleset `Protect main` (ID `18204094`) applies to `main`.
 - The ruleset requires Pull Requests, required check `foundation`, up-to-date branches, and conversation resolution.
 - The ruleset blocks force pushes and branch deletion and has an empty bypass list.
-- Codex review identified 1 P1 and 3 P2 defects; all four were fixed, regression-tested, answered, and resolved.
+- Codex review identified 1 P1 and 3 P2 defects; all four were fixed, regression-tested, answered, and resolved before merge.
 - Hosting is restricted by `Q-DEPLOY-001` to Railway, Vercel, or Cloudflare, with free-tier proof required before final selection.
 - No production, marketplace, or commercial data mutation occurred.
 
 ## Review remediation
 
-- Canonical provenance schema now allows `source_adapter_version`.
+- Canonical provenance schema allows `source_adapter_version`.
 - JSON proof ledger rejects conflicting duplicate `event_id` values before append.
 - Canonical event payload and provenance are recursively detached and immutable.
 - Non-finite gross amounts (`NaN`, `Infinity`, `-Infinity`) are semantic validation errors and follow the quarantine path.
 - Five regression tests cover the four review findings and immutable ledger serialization.
-- All review threads on PR #2 are resolved.
+- All review threads on PR #2 were resolved before merge.
 
 ## A6 result
 
@@ -54,16 +54,17 @@ Current unit: `FOUNDATION_CLOSURE_BLOCKER_RESOLUTION`
 - Same-header semantic drift was quarantined.
 - Evidence Chain links metric, events, source records, normalization rule, and source-file SHA-256.
 - Historical local run: 29 tests passed.
-- Current GitHub CI run: 34 tests passed.
+- Final pre-merge GitHub CI run: 34 tests passed.
 
 ## Repository import verification
 
-Status: `PASS_WITH_DOCUMENTED_NORMALIZATION`
+Status: `PASS_MERGED_WITH_DOCUMENTED_NORMALIZATION`
 
-- Main documentation, source, schemas, tests, proof artifacts, `.github`, and placeholder paths are present.
-- PR #2 remains unmerged pending final current-head CI after governance metadata refresh.
+- Main documentation, source, schemas, tests, proof artifacts, `.github`, and placeholder paths are present in `main`.
+- PR #2 is merged.
 - Package manifest v5 remains the source package record.
 - Placeholder normalization affects no runtime, financial, schema, or test semantics.
+- The available Connector cannot list push-triggered runs for the squash merge commit; this is an observability limitation, not evidence of a failed run.
 
 ## Repository control verification
 
