@@ -39,9 +39,44 @@ illustrative data, never system defaults.
 }
 ```
 
-Numbers are decimal strings. JSON floating-point numbers are forbidden.
-`NaN`, `Infinity`, exponential notation, and locale-formatted values are
-forbidden.
+`MONEY`, `DECIMAL`, and `RATE` literal values are normalized decimal strings.
+JSON floating-point numbers, `NaN`, `Infinity`, exponential notation, and
+locale-formatted values are forbidden.
+
+### Integer literal
+
+```json
+{
+  "kind": "LITERAL",
+  "value": "12",
+  "value_type": "INTEGER",
+  "currency": null,
+  "unit": "ITEM"
+}
+```
+
+`INTEGER` literals use normalized integer strings. Decimal points and
+exponential notation are forbidden, so `"12.5"` is not an integer literal.
+
+### Boolean literal
+
+```json
+{
+  "kind": "LITERAL",
+  "value": true,
+  "value_type": "BOOLEAN",
+  "currency": null,
+  "unit": "BOOLEAN"
+}
+```
+
+`BOOLEAN` literals use JSON booleans `true` or `false`. Numeric or string
+substitutes such as `1`, `0`, `"true"`, or `"false"` are forbidden.
+
+A `MONEY` literal requires an explicit ISO 4217 currency. All other literal
+value types require `currency: null`. A mismatch between `value`, `value_type`,
+or currency metadata is `EXPRESSION_TYPE_MISMATCH` or
+`EXPRESSION_CURRENCY_MISMATCH` and fails closed.
 
 ### Variable
 
@@ -161,7 +196,8 @@ Canonical expression JSON uses:
 - UTF-8;
 - sorted object keys;
 - no insignificant whitespace;
-- decimal strings in normalized non-exponential form;
+- normalized decimal or integer strings for numeric literals;
+- JSON booleans for boolean literals;
 - argument order preserved.
 
 The SHA-256 of canonical JSON is stored in the rule and calculation profile.
