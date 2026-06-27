@@ -59,7 +59,41 @@
           "maxItems": 16,
           "items": {"$ref": "#/$defs/expression"}
         }
-      }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {"operator": {"enum": ["NEGATE", "ABS"]}},
+            "required": ["operator"]
+          },
+          "then": {"properties": {"arguments": {"minItems": 1, "maxItems": 1}}}
+        },
+        {
+          "if": {
+            "properties": {
+              "operator": {
+                "enum": [
+                  "SUBTRACT", "MULTIPLY", "DIVIDE", "EQUAL", "LESS_THAN",
+                  "LESS_OR_EQUAL", "GREATER_THAN", "GREATER_OR_EQUAL"
+                ]
+              }
+            },
+            "required": ["operator"]
+          },
+          "then": {"properties": {"arguments": {"minItems": 2, "maxItems": 2}}}
+        },
+        {
+          "if": {"properties": {"operator": {"const": "IF"}}, "required": ["operator"]},
+          "then": {"properties": {"arguments": {"minItems": 3, "maxItems": 3}}}
+        },
+        {
+          "if": {
+            "properties": {"operator": {"enum": ["ADD", "MIN", "MAX"]}},
+            "required": ["operator"]
+          },
+          "then": {"properties": {"arguments": {"minItems": 2, "maxItems": 16}}}
+        }
+      ]
     },
     "expression": {
       "oneOf": [
