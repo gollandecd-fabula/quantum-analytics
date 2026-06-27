@@ -72,10 +72,11 @@ class B1aContractAlignmentTests(unittest.TestCase):
 
         for branch in branches:
             operator_rule = branch["if"].get("properties", {}).get("operator")
-            if operator_rule is None:
+            then_properties = branch["then"].get("properties", {})
+            arguments = then_properties.get("arguments")
+            if operator_rule is None or arguments is None:
                 continue
             operators = operator_rule.get("enum") or [operator_rule["const"]]
-            arguments = branch["then"]["properties"]["arguments"]
             for operator in operators:
                 arities[operator] = (arguments["minItems"], arguments["maxItems"])
 
