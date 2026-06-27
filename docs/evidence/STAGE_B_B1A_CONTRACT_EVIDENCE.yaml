@@ -1,6 +1,6 @@
 evidence_id: STAGE-B-B1A-CONTRACT-EVIDENCE-v1
 unit: B1a
-status: LATEST_REVIEW_PENDING
+status: FINAL_REVIEW_PENDING
 tracking_issue: 7
 pull_request: 8
 risk_class: R2
@@ -26,14 +26,14 @@ artifacts:
 
 checks:
   foundation_tests: 34
-  b1a_tests: 17
-  total_tests: 51
-  ci_run: 28293979927
+  b1a_tests: 19
+  total_tests: 53
+  ci_run: 28295167667
   ci_status: SUCCESS
   python: 3.12.3
-  review_threads_total: 10
+  review_threads_total: 12
   review_threads_unresolved: 0
-  latest_head_review: PENDING
+  latest_head_review: PENDING_AFTER_METADATA_SYNC
 
 remediation_complete:
   - typed-state and valid-zero alignment
@@ -42,9 +42,11 @@ remediation_complete:
   - fail-closed overlap cycle and unit-mismatch vectors
   - exactly one rule method payload
   - safe-expression operator arity
+  - typed literal value representations
   - unambiguous rounding-point mapping
   - lexicographic scope specificity
   - schema-conformant expression examples
+  - explicit purchase quantity and amount metrics
 
 limitations:
   - metric catalogue remains DRAFT_ONLY
@@ -52,4 +54,4 @@ limitations:
   - external JSON Schema validation is not yet evidence
   - B1b requires explicit R3 approval
 
-next_gate: B1A_LATEST_HEAD_REVIEW
+next_gate: B1A_FINAL_HEAD_REVIEW
