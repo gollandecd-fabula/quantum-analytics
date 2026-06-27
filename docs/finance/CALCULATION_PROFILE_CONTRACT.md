@@ -68,7 +68,12 @@ immutable version.
 
 ## Completeness
 
-Before publication, the profile validator confirms:
+Every Calculation Profile version, including `DRAFT` and `SHADOW`, is a complete
+immutable snapshot that satisfies the machine-readable schema. In-progress
+editor state with unfinished references is not a Calculation Profile and does
+not receive a profile version or profile hash.
+
+Before publication, the profile validator additionally confirms:
 
 - every required metric input has an eligible rule or approved source;
 - no rule-resolution conflict exists;
@@ -79,8 +84,8 @@ Before publication, the profile validator confirms:
 - Source Authority status is adequate for the requested publication class;
 - no DRAFT, SUSPENDED, or RETIRED rule is selected for Actual publication.
 
-A profile may exist in `DRAFT` or `SHADOW` with incomplete references, but it
-cannot publish a VALID Actual metric.
+A schema-valid `DRAFT` or `SHADOW` profile remains non-publishable because of its
+lifecycle status, not because its immutable reference snapshot is incomplete.
 
 ## Lifecycle
 
