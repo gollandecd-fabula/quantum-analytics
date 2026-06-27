@@ -38,10 +38,10 @@ checks:
   foundation_tests: 34
   b1a_tests: 33
   total_tests: 67
-  last_technical_ci_run: 28303919943
+  last_technical_ci_run: 28304452418
   last_technical_ci_status: SUCCESS
   python: 3.12.3
-  review_threads_total: 26
+  review_threads_total: 27
   review_threads_unresolved: 0
   current_head_ci: PENDING_AFTER_METADATA_SYNC
   current_head_review: PENDING_AFTER_METADATA_SYNC
@@ -55,7 +55,7 @@ remediation_complete:
   - RATE rules require RATE unit and null currency
   - custom variable bases require declared dependencies
   - complete reproducible ordering tuples
-  - typed safe expressions including boolean comparison results
+  - typed safe expressions including boolean comparison type currency and unit
   - currency metadata on every MONEY expression node
   - money per item metric unit representation
   - rounding policy owned by Calculation Profile reference
