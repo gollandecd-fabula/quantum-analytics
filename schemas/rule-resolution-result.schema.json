@@ -43,6 +43,8 @@
           },
           "ordering_tuple": {
             "type": ["array", "null"],
+            "minItems": 4,
+            "maxItems": 4,
             "prefixItems": [
               {"type": "array", "minItems": 6, "maxItems": 6, "items": {"type": "integer", "minimum": 0, "maximum": 1}},
               {"type": "integer"},
@@ -60,7 +62,7 @@
             },
             "then": {
               "properties": {
-                "ordering_tuple": {"type": "array"},
+                "ordering_tuple": {"type": "array", "minItems": 4, "maxItems": 4},
                 "exclusion_reasons": {"maxItems": 0}
               }
             },
