@@ -1,7 +1,8 @@
 evidence_id: STAGE-B-B1A-CONTRACT-EVIDENCE-v1
 unit: B1a
-status: READY_FOR_CI_AND_REVIEW
+status: CI_PASS_REVIEW_PENDING
 tracking_issue: 7
+pull_request: 8
 branch: build-b1a-financial-contracts
 risk_class: R2
 
@@ -38,8 +39,13 @@ artifacts:
     - docs/governance/CURRENT_STATE.md
 
 checks:
-  new_test_count: 10
-  ci: PENDING
+  foundation_previous_test_count: 34
+  b1a_new_test_count: 10
+  total_test_count: 44
+  ci:
+    run_id: 28292470434
+    status: SUCCESS
+    python: 3.12.3
   independent_review: PENDING
   stage_state_sync: COMPLETE
 
@@ -57,6 +63,7 @@ invariants:
 limitations:
   - metric catalogue remains DRAFT_ONLY
   - Source Authority remains DRAFT
+  - external JSON Schema engine validation is not yet evidence
   - B1b implementation requires explicit R3 approval
 
-next_gate: B1A_CONTRACT_REVIEW
+next_gate: B1A_INDEPENDENT_REVIEW
