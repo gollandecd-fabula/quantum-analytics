@@ -1,0 +1,54 @@
+Spreadsheet runtime warmup failed during python startup
+Traceback (most recent call last):
+  File "/tmp/tmp.yTcnQsZYiA/artifact_tool_v2-2.8.4/artifact_tool/patches/warm_spreadsheet_runtime_on_startup.py", line 26, in warm_spreadsheet_runtime_on_startup
+  File "/tmp/tmp.yTcnQsZYiA/artifact_tool_v2-2.8.4/artifact_tool/spreadsheet_warmup.py", line 785, in warm_spreadsheet_runtime
+  File "/tmp/tmp.yTcnQsZYiA/artifact_tool_v2-2.8.4/artifact_tool/spreadsheet_warmup.py", line 720, in _warm_feature_flows
+  File "/tmp/tmp.yTcnQsZYiA/artifact_tool_v2-2.8.4/artifact_tool/spreadsheet_warmup.py", line 704, in _warm_collaboration_flows
+  File "/tmp/tmp.yTcnQsZYiA/artifact_tool_v2-2.8.4/artifact_tool/generated/interface/models.py", line 30820, in hydrate_crdt_from_proto
+  File "/tmp/tmp.yTcnQsZYiA/artifact_tool_v2-2.8.4/artifact_tool/rpc/remote.py", line 749, in __call__
+  File "/tmp/tmp.yTcnQsZYiA/artifact_tool_v2-2.8.4/artifact_tool/rpc/client.py", line 150, in call
+artifact_tool.rpc.client.RemoteError: hydrateCrdtFromProto requires an empty collaborative document.
+Spreadsheet runtime warmup failed during python startup
+Traceback (most recent call last):
+  File "/tmp/tmp.yTcnQsZYiA/artifact_tool_v2-2.8.4/artifact_tool/patches/warm_spreadsheet_runtime_on_startup.py", line 26, in warm_spreadsheet_runtime_on_startup
+  File "/tmp/tmp.yTcnQsZYiA/artifact_tool_v2-2.8.4/artifact_tool/spreadsheet_warmup.py", line 785, in warm_spreadsheet_runtime
+  File "/tmp/tmp.yTcnQsZYiA/artifact_tool_v2-2.8.4/artifact_tool/spreadsheet_warmup.py", line 720, in _warm_feature_flows
+  File "/tmp/tmp.yTcnQsZYiA/artifact_tool_v2-2.8.4/artifact_tool/spreadsheet_warmup.py", line 704, in _warm_collaboration_flows
+  File "/tmp/tmp.yTcnQsZYiA/artifact_tool_v2-2.8.4/artifact_tool/generated/interface/models.py", line 30820, in hydrate_crdt_from_proto
+  File "/tmp/tmp.yTcnQsZYiA/artifact_tool_v2-2.8.4/artifact_tool/rpc/remote.py", line 749, in __call__
+  File "/tmp/tmp.yTcnQsZYiA/artifact_tool_v2-2.8.4/artifact_tool/rpc/client.py", line 150, in call
+artifact_tool.rpc.client.RemoteError: hydrateCrdtFromProto requires an empty collaborative document.
+test_same_headers_can_have_different_semantics (test_a6_fingerprints.A6FingerprintTests.test_same_headers_can_have_different_semantics) ... ok
+test_structural_fingerprint_is_deterministic (test_a6_fingerprints.A6FingerprintTests.test_structural_fingerprint_is_deterministic) ... ok
+test_return_links_to_reversed_sale (test_a6_normalization.A6NormalizationTests.test_return_links_to_reversed_sale) ... ok
+test_revision_links_to_superseded_event (test_a6_normalization.A6NormalizationTests.test_revision_links_to_superseded_event) ... ok
+test_semantic_validation_rejects_bad_quantity (test_a6_normalization.A6NormalizationTests.test_semantic_validation_rejects_bad_quantity) ... ok
+test_evidence_chain_yields_expected_current_amount (test_a6_proof_pipeline.A6ProofPipelineTests.test_evidence_chain_yields_expected_current_amount) ... ok
+test_exact_replay_is_idempotent (test_a6_proof_pipeline.A6ProofPipelineTests.test_exact_replay_is_idempotent) ... ok
+test_semantic_drift_is_quarantined (test_a6_proof_pipeline.A6ProofPipelineTests.test_semantic_drift_is_quarantined) ... ok
+test_unknown_schema_is_quarantined (test_a6_proof_pipeline.A6ProofPipelineTests.test_unknown_schema_is_quarantined) ... ok
+test_known_schema_matches (test_a6_schema_detection.A6SchemaDetectionTests.test_known_schema_matches) ... ok
+test_unknown_schema_is_diagnostic (test_a6_schema_detection.A6SchemaDetectionTests.test_unknown_schema_is_diagnostic) ... ok
+test_event_cannot_reverse_itself (test_canonical_event.CanonicalEventTests.test_event_cannot_reverse_itself) ... ok
+test_payload_is_immutable_view (test_canonical_event.CanonicalEventTests.test_payload_is_immutable_view) ... ok
+test_revision_must_start_at_one (test_canonical_event.CanonicalEventTests.test_revision_must_start_at_one) ... ok
+test_canonical_json_hash_is_order_independent (test_idempotency.IdempotencyTests.test_canonical_json_hash_is_order_independent) ... ok
+test_event_revision_participates_in_key (test_idempotency.IdempotencyTests.test_event_revision_participates_in_key) ... ok
+test_file_key_changes_with_adapter_version (test_idempotency.IdempotencyTests.test_file_key_changes_with_adapter_version) ... ok
+test_path_escape_is_rejected (test_local_raw_storage.LocalRawStorageTests.test_path_escape_is_rejected) ... ok
+test_same_key_with_different_bytes_is_rejected (test_local_raw_storage.LocalRawStorageTests.test_same_key_with_different_bytes_is_rejected) ... ok
+test_write_and_idempotent_replay (test_local_raw_storage.LocalRawStorageTests.test_write_and_idempotent_replay) ... ok
+test_foundation_migration_contains_required_constraints (test_migration_contract.MigrationContractTests.test_foundation_migration_contains_required_constraints) ... ok
+test_foundation_migration_is_non_destructive (test_migration_contract.MigrationContractTests.test_foundation_migration_is_non_destructive) ... ok
+test_api_is_read_only (test_runtime_health.RuntimeHealthTests.test_api_is_read_only) ... ok
+test_worker_is_explicitly_idle_without_queue (test_runtime_health.RuntimeHealthTests.test_worker_is_explicitly_idle_without_queue) ... ok
+test_worker_is_read_only (test_runtime_health.RuntimeHealthTests.test_worker_is_read_only) ... ok
+test_empty_with_zero_is_rejected (test_typed_states.TypedValueTests.test_empty_with_zero_is_rejected) ... ok
+test_missing_factory_rejects_valid_state (test_typed_states.TypedValueTests.test_missing_factory_rejects_valid_state) ... ok
+test_unavailable_requires_reason (test_typed_states.TypedValueTests.test_unavailable_requires_reason) ... ok
+test_valid_zero_is_not_empty (test_typed_states.TypedValueTests.test_valid_zero_is_not_empty) ... ok
+
+----------------------------------------------------------------------
+Ran 29 tests in 0.023s
+
+OK

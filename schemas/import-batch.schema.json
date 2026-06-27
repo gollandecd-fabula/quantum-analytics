@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://quantum.local/schemas/import-batch.schema.json",
+  "title": "Quantum Import Batch",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "import_batch_id",
+    "organization_id",
+    "marketplace_account_id",
+    "source_file_sha256",
+    "source_file_name",
+    "state",
+    "created_at"
+  ],
+  "properties": {
+    "import_batch_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "organization_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "marketplace_account_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_file_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "source_file_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_file_size": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "adapter_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "adapter_version": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "schema_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "state": {
+      "type": "string",
+      "enum": [
+        "RECEIVED",
+        "FINGERPRINTED",
+        "ADAPTER_SELECTED",
+        "VALIDATING",
+        "QUARANTINED",
+        "NORMALIZING",
+        "RECONCILING",
+        "PUBLISHED",
+        "PARTIALLY_PUBLISHED",
+        "FAILED",
+        "RESTATED"
+      ]
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "completed_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "trace_id": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

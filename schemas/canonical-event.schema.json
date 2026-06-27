@@ -1,0 +1,175 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://quantum.local/schemas/canonical-event.schema.json",
+  "title": "Quantum Canonical Event",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "event_id",
+    "organization_id",
+    "marketplace_account_id",
+    "event_type",
+    "event_time",
+    "recognition_time",
+    "stable_business_key",
+    "source_row_key",
+    "revision",
+    "idempotency_key",
+    "import_batch_id",
+    "source_record_id",
+    "schema_version",
+    "payload",
+    "provenance",
+    "status",
+    "created_at"
+  ],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "organization_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "marketplace_account_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "ORDER_CREATED",
+        "ORDER_CANCELLED",
+        "SALE_RECOGNIZED",
+        "RETURN_INITIATED",
+        "RETURN_ACCEPTED",
+        "RETURN_REJECTED",
+        "ITEM_RESTOCKED",
+        "ITEM_WRITTEN_OFF",
+        "ITEM_LOST",
+        "COMPENSATION_RECOGNIZED",
+        "CHARGE_RECOGNIZED",
+        "PAYOUT_RECOGNIZED",
+        "INVENTORY_SNAPSHOT",
+        "PRODUCT_IDENTITY_UPDATED",
+        "ADJUSTMENT_RECOGNIZED"
+      ]
+    },
+    "event_time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "recognition_time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "stable_business_key": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_row_key": {
+      "type": "string",
+      "minLength": 1
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "idempotency_key": {
+      "type": "string",
+      "minLength": 1
+    },
+    "semantic_payload_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "supersedes_event_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "reversal_of_event_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "import_batch_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_record_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "schema_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "payload": {
+      "type": "object",
+      "minProperties": 1
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_file_sha256",
+        "source_adapter",
+        "normalization_rule_version",
+        "actor",
+        "trace_id"
+      ],
+      "properties": {
+        "source_file_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "source_adapter": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_schema_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "normalization_rule_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "product_master_version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "actor": {
+          "type": "string",
+          "minLength": 1
+        },
+        "trace_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "VALID",
+        "SUPERSEDED",
+        "REVERSED",
+        "CONFLICT",
+        "BLOCKED"
+      ]
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

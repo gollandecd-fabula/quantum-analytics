@@ -1,0 +1,147 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://quantum.local/schemas/configuration-rule.schema.json",
+  "title": "Quantum Configuration Rule",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "rule_id",
+    "rule_type",
+    "scope",
+    "method",
+    "base",
+    "unit",
+    "currency",
+    "valid_from",
+    "priority",
+    "version",
+    "status",
+    "actor"
+  ],
+  "properties": {
+    "rule_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "rule_type": {
+      "type": "string",
+      "enum": [
+        "COST",
+        "TAX",
+        "OTHER_EXPENSE",
+        "ALLOCATION",
+        "ROUNDING"
+      ]
+    },
+    "scope": {
+      "type": "object",
+      "minProperties": 1
+    },
+    "method": {
+      "type": "string",
+      "minLength": 1
+    },
+    "value": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^-?[0-9]+(\\.[0-9]+)?$"
+    },
+    "rate": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^-?[0-9]+(\\.[0-9]+)?$"
+    },
+    "base": {
+      "type": "string",
+      "minLength": 1
+    },
+    "unit": {
+      "type": "string",
+      "minLength": 1
+    },
+    "currency": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 3
+    },
+    "valid_from": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "valid_to": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "priority": {
+      "type": "integer"
+    },
+    "exclusivity_group": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "source": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "DRAFT",
+        "SHADOW",
+        "PILOT",
+        "ACTIVE",
+        "SUSPENDED",
+        "RETIRED"
+      ]
+    },
+    "actor": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "oneOf": [
+    {
+      "required": [
+        "value"
+      ],
+      "properties": {
+        "value": {
+          "type": "string"
+        },
+        "rate": {
+          "type": "null"
+        }
+      }
+    },
+    {
+      "required": [
+        "rate"
+      ],
+      "properties": {
+        "rate": {
+          "type": "string"
+        },
+        "value": {
+          "type": "null"
+        }
+      }
+    }
+  ]
+}

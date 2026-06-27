@@ -1,0 +1,27 @@
+project: Quantum Analytics
+stage: A_FOUNDATION
+unit: A0_1_GITHUB_SOURCE_OF_TRUTH_RESOLUTION
+status: BLOCKED_EXTERNAL_WITH_PORTABLE_BOOTSTRAP
+generated_on: "2026-06-27"
+source:
+  constitution_file: "Вставленная ​​уценка.md"
+  constitution_sha256: "c03a05820ca082336d0d68ae4f24d5498d3a5eee0630d459ed12d3a700a675dd"
+github:
+  authenticated_owner: "gollandecd-fabula"
+  accessible_repository: "gollandecd-fabula/codex-training"
+  accessible_repository_purpose: "Codex training"
+  quantum_repository_found: false
+  repository_creation_tool_available: false
+actions:
+  github_write_performed: false
+  external_data_changed: false
+portable_bootstrap:
+  root: "quantum-analytics-bootstrap"
+  artifact_manifest_sha256: "180188c78ff370a258df9643ee36179daf86c7762fc2a0dd18eb5490b3e13981"
+release:
+  blocked: true
+  reasons:
+    - dedicated_github_repository_not_connected
+    - implementation_not_started
+    - stage_a_definition_of_done_not_met
+next_executable_unit: A1_CONSTITUTION_MATERIALIZATION_IN_GITHUB

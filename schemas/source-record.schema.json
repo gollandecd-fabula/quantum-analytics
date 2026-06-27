@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://quantum.local/schemas/source-record.schema.json",
+  "title": "Quantum Source Record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "source_record_id",
+    "import_batch_id",
+    "source_row_key",
+    "raw_row_hash",
+    "raw_payload",
+    "validation_status",
+    "created_at"
+  ],
+  "properties": {
+    "source_record_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "import_batch_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_row_key": {
+      "type": "string",
+      "minLength": 1
+    },
+    "raw_row_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "raw_payload": {
+      "type": "object"
+    },
+    "structural_fingerprint": {
+      "type": "string",
+      "minLength": 1
+    },
+    "semantic_fingerprint": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "validation_status": {
+      "type": "string",
+      "enum": [
+        "VALID",
+        "QUARANTINED",
+        "INVALID"
+      ]
+    },
+    "quarantine_reason": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "adapter_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "adapter_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "validation_status": {
+            "const": "QUARANTINED"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "quarantine_reason"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+# CURRENT STATE
+
+Date: 2026-06-27
+Status: `FOUNDATION_LOCAL_PROOF_COMPLETE_WITH_BLOCKERS`
+Active contract: `STAGE-A-FOUNDATION-v1`
+Completed unit: `A6 — DATA_PROOF`
+Next executable unit: `FOUNDATION_CLOSURE_BLOCKER_RESOLUTION`
+
+## Confirmed
+
+- A0 through A6 completed locally.
+- Constitution v3.0 / Plan v152.0 is materialized.
+- A4 Data Contract is machine-readable.
+- A5 Platform Foundation has executable API and Worker skeletons.
+- A6 synthetic Data Proof passes.
+- Dedicated Quantum GitHub repository is not connected.
+
+## A6 result
+
+- Synthetic Wildberries-like CSV created.
+- Source bytes retained under their SHA-256 key.
+- Structural and semantic fingerprints generated.
+- Registered synthetic schema matched.
+- Four canonical events published.
+- Exact replay inserted zero new events and identified four duplicates.
+- `sale-002` revision 2 supersedes revision 1.
+- Return event reverses `sale-001`.
+- Current synthetic gross-sale proof equals 1400.00 RUB.
+- Unknown schema was quarantined.
+- Same-header semantic drift was quarantined.
+- Evidence Chain links metric, events, source records, normalization rule,
+  and source-file SHA-256.
+- 29 local tests pass.
+
+## Foundation closure blockers
+
+1. No dedicated private GitHub repository is connected.
+2. No protected `main`, Pull Request, commit, or GitHub CI evidence.
+3. PostgreSQL migration has not been applied or integration-tested.
+4. Production object storage is not implemented.
+5. Restore, rollback, backup, security, and staging evidence are incomplete.
+6. Real Wildberries schemas and Source Authority rules remain unverified.
+7. No anonymized representative marketplace file has been admitted.
+
+## Release state
+
+`RELEASE_BLOCKED`
