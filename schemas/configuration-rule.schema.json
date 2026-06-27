@@ -21,26 +21,19 @@
     "scope": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "organization_id", "marketplace_account_id", "marketplace",
-        "product_id", "product_group_id", "calculation_profile_id",
-        "scenario_id"
-      ],
+      "required": ["organization_id"],
+      "description": "organization_id is mandatory. Every other scope dimension is optional; omission is the only wildcard encoding. Present optional dimensions must be non-empty strings and null is forbidden.",
       "properties": {
         "organization_id": {"type": "string", "minLength": 1},
-        "marketplace_account_id": {"type": ["string", "null"], "minLength": 1},
-        "marketplace": {"type": ["string", "null"], "minLength": 1},
-        "product_id": {"type": ["string", "null"], "minLength": 1},
-        "product_group_id": {"type": ["string", "null"], "minLength": 1},
-        "calculation_profile_id": {"type": ["string", "null"], "minLength": 1},
-        "scenario_id": {"type": ["string", "null"], "minLength": 1}
+        "marketplace_account_id": {"type": "string", "minLength": 1},
+        "marketplace": {"type": "string", "minLength": 1},
+        "product_id": {"type": "string", "minLength": 1},
+        "product_group_id": {"type": "string", "minLength": 1},
+        "calculation_profile_id": {"type": "string", "minLength": 1},
+        "scenario_id": {"type": "string", "minLength": 1}
       },
       "not": {
-        "required": ["product_id", "product_group_id"],
-        "properties": {
-          "product_id": {"type": "string"},
-          "product_group_id": {"type": "string"}
-        }
+        "required": ["product_id", "product_group_id"]
       }
     },
     "method": {"type": "string", "enum": ["FIXED_VALUE", "RATE", "SAFE_EXPRESSION"]},
