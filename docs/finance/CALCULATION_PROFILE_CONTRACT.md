@@ -25,11 +25,28 @@ edited in place.
 
 ## Snapshot references
 
+Every immutable artifact reference uses one canonical shape:
+
+```json
+{
+  "id": "stable-domain-identifier",
+  "version": 1,
+  "content_hash": "64-lowercase-hex-characters"
+}
+```
+
+The common key `id` stores the stable identifier appropriate to the referenced
+domain. For example, it contains a rule's logical rule identifier inside
+`rule_refs`, a metric definition identifier inside `metric_definition_refs`,
+and a rounding-policy identifier inside `rounding_policy_ref`. Alternate keys
+such as `rule_id`, `metric_id`, or `policy_id` are not valid inside Calculation
+Profile references in contract v1.
+
 The profile contains sorted immutable references to:
 
-- configuration rules: `rule_id`, `version`, `content_hash`;
-- metric definitions: `metric_id`, `version`, `content_hash`;
-- rounding policy: `policy_id`, `version`, `content_hash`;
+- configuration rules: `id`, `version`, `content_hash`;
+- metric definitions: `id`, `version`, `content_hash`;
+- rounding policy: `id`, `version`, `content_hash`;
 - Source Authority Matrix version and hash;
 - Product Master version and hash when product identity is relevant;
 - resolver contract version;
@@ -37,7 +54,9 @@ The profile contains sorted immutable references to:
 - accounting-view vocabulary version;
 - optional approved tolerance-policy reference.
 
-A reference without a content hash is invalid.
+A reference without a stable `id`, positive integer `version`, or content hash is
+invalid. Aliases such as `latest` are forbidden because they do not identify an
+immutable version.
 
 ## Mode isolation
 
@@ -77,7 +96,7 @@ never silently promoted by changing its content.
 Canonical profile JSON uses:
 
 - UTF-8 and sorted object keys;
-- references sorted by stable identifier then version;
+- reference arrays sorted by `id`, then positive integer `version`;
 - timestamps normalized to UTC ISO 8601;
 - decimal values, when present in embedded approved metadata, represented as
   normalized strings;
