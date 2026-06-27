@@ -18,6 +18,7 @@ artifacts:
   schemas: 6
   test_files:
     - tests/test_b1a_contract_alignment.py
+    - tests/test_b1a_custom_variable_dependency.py
     - tests/test_b1a_execution_state.py
     - tests/test_b1a_financial_contracts.py
     - tests/test_b1a_money_currency.py
@@ -28,28 +29,25 @@ artifacts:
 
 checks:
   foundation_tests: 34
-  b1a_tests: 25
-  total_tests: 59
-  last_technical_ci_run: 28298583275
+  b1a_tests: 26
+  total_tests: 60
+  last_technical_ci_run: 28298953265
   last_technical_ci_status: SUCCESS
   python: 3.12.3
-  review_threads_total: 19
+  review_threads_total: 20
   review_threads_unresolved: 0
   current_head_ci: PENDING_AFTER_METADATA_SYNC
   current_head_review: PENDING_AFTER_METADATA_SYNC
 
 remediation_complete:
   - canonical typed states and valid zero
-  - immutable numeric profile versions
-  - canonical profile reference shape
+  - immutable versioned references
   - tenant-safe omission-only scope resolution
-  - fail-closed overlap cycle unit and currency validation
-  - exclusive rule method payloads
+  - fail-closed validation and exclusive method payloads
+  - custom variable bases require declared dependencies
   - complete reproducible ordering tuples
-  - typed safe-expression literals and operator arity
-  - currency metadata on every MONEY expression node
-  - rounding policy owned exclusively by Calculation Profile reference
-  - versioned rounding-point mapping
+  - typed safe expressions and MONEY currency metadata
+  - rounding policy owned by Calculation Profile reference
   - explicit purchase quantity and amount metrics
 
 limitations:
