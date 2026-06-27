@@ -11,24 +11,28 @@ SCOPE_ORDER=("product_id","product_group_id","marketplace_account_id","marketpla
 
 def load_json(path:Path)->dict[str,Any]: return json.loads(path.read_text(encoding="utf-8"))
 
+def scope_has_explicit_null(scope:dict[str,Any])->bool:
+    return any(value is None for value in scope.values())
+
 def candidate_matches(context:dict[str,Any],candidate:dict[str,Any])->bool:
     scope=candidate["scope"]
-    if not context.get("organization_id") or scope.get("organization_id")!=context["organization_id"]: return False
-    return all(scope.get(k) is None or context.get(k)==scope.get(k) for k in SCOPE_ORDER)
+    if scope_has_explicit_null(scope):return False
+    if not context.get("organization_id") or scope.get("organization_id")!=context["organization_id"]:return False
+    return all(k not in scope or context.get(k)==scope[k] for k in SCOPE_ORDER)
 
 def ordering_tuple(candidate:dict[str,Any])->tuple[Any,...]:
     scope=candidate["scope"]
-    return (tuple(1 if scope.get(k) is not None else 0 for k in SCOPE_ORDER),candidate["priority"],candidate["valid_from"],candidate["version"])
+    return (tuple(1 if k in scope else 0 for k in SCOPE_ORDER),candidate["priority"],candidate["valid_from"],candidate["version"])
 
 def resolve_vector(vector:dict[str,Any])->tuple[str,str|None]:
     eligible=[x for x in vector["candidates"] if candidate_matches(vector["context"],x)]
-    if not eligible: return "BLOCKED",None
+    if not eligible:return "BLOCKED",None
     ranked=sorted(eligible,key=ordering_tuple,reverse=True)
-    if len(ranked)>1 and ordering_tuple(ranked[0])==ordering_tuple(ranked[1]): return "CONFLICT",None
+    if len(ranked)>1 and ordering_tuple(ranked[0])==ordering_tuple(ranked[1]):return "CONFLICT",None
     return "VALID",ranked[0]["rule_id"]
 
 def has_cycle(graph:dict[str,list[str]])->bool:
-    visiting:set[str]=set(); visited:set[str]=set()
+    visiting:set[str]=set();visited:set[str]=set()
     def visit(node:str)->bool:
         if node in visiting:return True
         if node in visited:return False
@@ -38,8 +42,9 @@ def has_cycle(graph:dict[str,list[str]])->bool:
     return any(visit(node) for node in graph)
 
 def scopes_intersect(a:dict[str,Any],b:dict[str,Any])->bool:
+    if scope_has_explicit_null(a) or scope_has_explicit_null(b):return False
     if a.get("organization_id")!=b.get("organization_id"):return False
-    return all(a.get(k) is None or b.get(k) is None or a.get(k)==b.get(k) for k in SCOPE_ORDER)
+    return all(k not in a or k not in b or a[k]==b[k] for k in SCOPE_ORDER)
 
 def intervals_overlap(a:dict[str,Any],b:dict[str,Any])->bool:
     return (b.get("valid_to") is None or a["valid_from"]<b["valid_to"]) and (a.get("valid_to") is None or b["valid_from"]<a["valid_to"])
@@ -82,14 +87,25 @@ class B1aFinancialContractTests(unittest.TestCase):
         for v in vectors:
             with self.subTest(vector=v["id"]):
                 self.assertTrue(v["context"].get("organization_id"))
+                self.assertFalse(scope_has_explicit_null(v["context"]))
                 self.assertTrue(all(x["scope"].get("organization_id") for x in v["candidates"]))
+                self.assertTrue(all(not scope_has_explicit_null(x["scope"]) for x in v["candidates"]))
                 self.assertEqual(resolve_vector(v),(v["expected_state"],v["expected_rule_id"]))
+
+    def test_resolution_matcher_rejects_explicit_null_scope_wildcards(self):
+        context={"organization_id":"org-a","product_id":"p1"}
+        invalid={"rule_id":"invalid-null","version":1,"scope":{"organization_id":"org-a","product_id":None},"priority":0,"valid_from":"2026-01-01T00:00:00Z"}
+        valid={"rule_id":"omitted-wildcard","version":1,"scope":{"organization_id":"org-a"},"priority":0,"valid_from":"2026-01-01T00:00:00Z"}
+        self.assertFalse(candidate_matches(context,invalid))
+        self.assertTrue(candidate_matches(context,valid))
 
     def test_validation_vectors_cover_claimed_fail_closed_blockers(self):
         vectors=load_json(VECTORS)["validation_vectors"]
         self.assertEqual({v["kind"] for v in vectors},{"EXCLUSIVITY_OVERLAP","DEPENDENCY_CYCLE","UNIT_MISMATCH"})
         for v in vectors:
-            with self.subTest(vector=v["id"]):self.assertEqual(diagnostic(v),v["expected_diagnostic"])
+            with self.subTest(vector=v["id"]):
+                if v["kind"]=="EXCLUSIVITY_OVERLAP":self.assertTrue(all(not scope_has_explicit_null(rule["scope"]) for rule in v["rules"]))
+                self.assertEqual(diagnostic(v),v["expected_diagnostic"])
 
     def test_dependency_cycles_are_detected(self):
         self.assertFalse(has_cycle({"a":["b"],"b":["c"],"c":[]}))
