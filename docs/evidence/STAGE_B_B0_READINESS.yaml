@@ -51,8 +51,8 @@ readiness_matrix:
       - typed-state contract
       - regression tests preserving zero versus missing states
   - capability: Idempotent intake and schema quarantine
-    status: READY_FOR_SYNTHETIC_PROOF
-    limitation: Production durability and real Wildberries schemas are not proven
+    status: PARTIAL
+    limitation: Synthetic proof passes; production durability and real Wildberries schemas are not proven
   - capability: Configuration-rule schema
     status: PARTIAL
     evidence:
