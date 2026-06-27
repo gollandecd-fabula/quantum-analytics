@@ -1,6 +1,6 @@
 evidence_id: STAGE-B-B1A-CONTRACT-EVIDENCE-v1
 unit: B1a
-status: FINAL_REVIEW_PENDING
+status: READY_FOR_MERGE_SUBJECT_TO_CURRENT_HEAD_GATES
 tracking_issue: 7
 pull_request: 8
 risk_class: R2
@@ -29,30 +29,26 @@ checks:
   foundation_tests: 34
   b1a_tests: 24
   total_tests: 58
-  ci_run: 28296767917
-  ci_status: SUCCESS
+  last_technical_ci_run: 28297320482
+  last_technical_ci_status: SUCCESS
   python: 3.12.3
-  review_threads_total: 17
+  review_threads_total: 18
   review_threads_unresolved: 0
-  latest_head_review: PENDING_AFTER_METADATA_SYNC
+  reviewed_technical_head: b23159d5d4d3e4f5ceafde2c95865b14fa997312
+  current_metadata_head_ci: PENDING
+  current_metadata_head_review: PENDING
 
 remediation_complete:
-  - typed-state and valid-zero alignment
+  - canonical typed states and valid zero
   - immutable numeric profile versions
-  - canonical profile reference shape uses id version and content_hash
-  - organization boundary in resolution vectors
-  - fail-closed overlap cycle and unit-mismatch vectors
-  - exactly one rule method payload
-  - omission-only wildcard scope encoding
-  - resolution fixtures omit wildcard keys and reject explicit nulls
-  - eligible candidates require complete ordering tuples
-  - ineligible candidates require exclusion reasons and null tuples
-  - safe-expression operator arity
-  - typed literal value representations
-  - MONEY currency required on literal variable and operation nodes
-  - unambiguous rounding-point mapping
-  - lexicographic scope specificity
-  - schema-conformant expression examples
+  - canonical profile reference shape
+  - tenant-safe omission-only scope resolution
+  - fail-closed overlap cycle unit and currency validation
+  - exclusive rule method payloads
+  - complete reproducible ordering tuples
+  - typed safe-expression literals and operator arity
+  - currency metadata on every MONEY expression node
+  - versioned rounding-point mapping
   - explicit purchase quantity and amount metrics
 
 limitations:
@@ -61,4 +57,4 @@ limitations:
   - external JSON Schema validation is not yet evidence
   - B1b requires explicit R3 approval
 
-next_gate: B1A_FINAL_HEAD_REVIEW
+next_gate: B1A_CURRENT_HEAD_CI_AND_REVIEW
