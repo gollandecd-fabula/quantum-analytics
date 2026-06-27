@@ -64,6 +64,42 @@ class B1aContractAlignmentTests(unittest.TestCase):
         self.assertEqual(arities["MIN"], (2, 16))
         self.assertEqual(arities["MAX"], (2, 16))
 
+    def test_safe_expression_literals_are_bound_to_declared_types(self) -> None:
+        schema = load_json(ROOT / "schemas/safe-expression.schema.json")
+        literal = schema["$defs"]["literal"]
+        branches = literal["allOf"]
+
+        self.assertIn("integerString", schema["$defs"])
+        self.assertEqual(schema["$defs"]["integerString"]["pattern"], "^-?(0|[1-9][0-9]*)$")
+        self.assertEqual(
+            literal["properties"]["value"]["oneOf"],
+            [{"$ref": "#/$defs/decimalString"}, {"type": "boolean"}],
+        )
+
+        observed: dict[str, dict[str, Any]] = {}
+        for branch in branches:
+            value_type_rule = branch["if"]["properties"]["value_type"]
+            labels = value_type_rule.get("enum") or [value_type_rule["const"]]
+            for label in labels:
+                observed[label] = branch["then"]["properties"]
+
+        self.assertEqual(observed["MONEY"]["value"]["$ref"], "#/$defs/decimalString")
+        self.assertEqual(observed["DECIMAL"]["value"]["$ref"], "#/$defs/decimalString")
+        self.assertEqual(observed["RATE"]["value"]["$ref"], "#/$defs/decimalString")
+        self.assertEqual(observed["INTEGER"]["value"]["$ref"], "#/$defs/integerString")
+        self.assertEqual(observed["BOOLEAN"]["value"]["type"], "boolean")
+        self.assertEqual(branches[-1]["then"]["properties"]["currency"]["type"], "string")
+        self.assertEqual(branches[-1]["else"]["properties"]["currency"]["type"], "null")
+
+    def test_metric_catalogue_has_explicit_purchase_flow_contracts(self) -> None:
+        catalogue = (ROOT / "docs/finance/METRIC_CATALOGUE.md").read_text(encoding="utf-8")
+
+        self.assertIn("| `purchased_units` | OPERATIONAL | INTEGER / ITEM |", catalogue)
+        self.assertIn("| `purchase_amount` | OPERATIONAL | MONEY |", catalogue)
+        self.assertIn("purchases are a separate inventory flow", catalogue)
+        self.assertIn("cannot be inferred from orders, sales, inventory changes, payout", catalogue)
+        self.assertIn("is not automatically included in `product_cost_amount`", catalogue)
+
     def test_financial_contract_docs_match_machine_readable_contracts(self) -> None:
         configuration = (ROOT / "docs/finance/CONFIGURATION_RULE_CONTRACT.md").read_text(encoding="utf-8")
         expression = (ROOT / "docs/finance/SAFE_EXPRESSION_CONTRACT.md").read_text(encoding="utf-8")
@@ -76,6 +112,8 @@ class B1aContractAlignmentTests(unittest.TestCase):
         self.assertIn('"kind": "LITERAL"', expression)
         self.assertIn('"currency": null', expression)
         self.assertIn('"unit": "DIMENSIONLESS"', expression)
+        self.assertIn('"value": true', expression)
+        self.assertIn('"value_type": "INTEGER"', expression)
         self.assertIn("machine-readable schema enforces these arities", expression)
 
 
