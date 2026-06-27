@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://quantum.local/schemas/safe-expression.schema.json",
+  "title": "Quantum Safe Financial Expression",
+  "$ref": "#/$defs/expression",
+  "$defs": {
+    "decimalString": {
+      "type": "string",
+      "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+    },
+    "valueType": {
+      "type": "string",
+      "enum": ["MONEY", "DECIMAL", "RATE", "INTEGER", "BOOLEAN"]
+    },
+    "literal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "value", "value_type", "currency", "unit"],
+      "properties": {
+        "kind": {"const": "LITERAL"},
+        "value": {"$ref": "#/$defs/decimalString"},
+        "value_type": {"$ref": "#/$defs/valueType"},
+        "currency": {"type": ["string", "null"], "pattern": "^[A-Z]{3}$"},
+        "unit": {"type": ["string", "null"], "minLength": 1}
+      }
+    },
+    "variable": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "name", "value_type", "currency", "unit"],
+      "properties": {
+        "kind": {"const": "VARIABLE"},
+        "name": {"type": "string", "pattern": "^[a-z][a-z0-9_.-]{0,127}$"},
+        "value_type": {"$ref": "#/$defs/valueType"},
+        "currency": {"type": ["string", "null"], "pattern": "^[A-Z]{3}$"},
+        "unit": {"type": ["string", "null"], "minLength": 1}
+      }
+    },
+    "operation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "operator", "value_type", "currency", "unit", "arguments"],
+      "properties": {
+        "kind": {"const": "OPERATION"},
+        "operator": {
+          "type": "string",
+          "enum": [
+            "ADD", "SUBTRACT", "MULTIPLY", "DIVIDE", "NEGATE", "ABS",
+            "MIN", "MAX", "IF", "EQUAL", "LESS_THAN", "LESS_OR_EQUAL",
+            "GREATER_THAN", "GREATER_OR_EQUAL"
+          ]
+        },
+        "value_type": {"$ref": "#/$defs/valueType"},
+        "currency": {"type": ["string", "null"], "pattern": "^[A-Z]{3}$"},
+        "unit": {"type": ["string", "null"], "minLength": 1},
+        "arguments": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "items": {"$ref": "#/$defs/expression"}
+        }
+      }
+    },
+    "expression": {
+      "oneOf": [
+        {"$ref": "#/$defs/literal"},
+        {"$ref": "#/$defs/variable"},
+        {"$ref": "#/$defs/operation"}
+      ]
+    }
+  }
+}
