@@ -49,9 +49,29 @@ Rounding may occur only at explicitly named points:
 - `REPORT_PRESENTATION`;
 - `EXPORT_PRESENTATION`.
 
+The `application_points` array is a set. Array order has no semantic effect.
+
 A metric definition lists its permitted points. Rounding after every arithmetic
 operation is forbidden unless an approved metric contract explicitly requires
 it and the golden baseline proves the behavior.
+
+## Application point mapping
+
+Contract v1 has one unambiguous mapping:
+
+| Application point | Mode field | Scale field |
+|---|---|---|
+| `RULE_INPUT_NORMALIZATION` | `calculation_mode` | `calculation_scale` |
+| `RULE_COMPONENT_RESULT` | `calculation_mode` | `calculation_scale` |
+| `METRIC_FINAL_ACCOUNTING` | `calculation_mode` | `money_scale` for MONEY, `rate_scale` for RATE/DECIMAL |
+| `REPORT_PRESENTATION` | `presentation_mode` | currency-specific presentation scale or `presentation_scale` |
+| `EXPORT_PRESENTATION` | `presentation_mode` | currency-specific presentation scale or `presentation_scale` |
+
+Different modes for individual application points are not representable and are therefore forbidden in v1.
+
+A policy that attempts to interpret an accounting point through
+`presentation_mode`, a presentation/export point through `calculation_mode`, or
+the array order as precedence fails with `ROUNDING_POINT_MAPPING_VIOLATION`.
 
 ## Intermediate versus presentation rounding
 
@@ -106,6 +126,7 @@ The SHA-256 is calculated over canonical JSON excluding the hash field.
 - `ROUNDING_MODE_UNSUPPORTED`;
 - `ROUNDING_SCALE_INVALID`;
 - `ROUNDING_POINT_FORBIDDEN`;
+- `ROUNDING_POINT_MAPPING_VIOLATION`;
 - `ROUNDING_CURRENCY_INVALID`;
 - `ROUNDING_HASH_MISMATCH`;
 - `ROUNDING_PRESENTATION_USED_AS_INPUT`.
