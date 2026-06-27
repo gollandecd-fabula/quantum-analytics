@@ -1,0 +1,58 @@
+evidence_id: STAGE-B-B1A-CONTRACT-EVIDENCE-v1
+unit: B1a
+status: READY_FOR_CI_AND_REVIEW
+tracking_issue: 7
+branch: build-b1a-financial-contracts
+risk_class: R2
+
+scope:
+  contracts_and_schemas_only: true
+  calculation_kernel: NOT_IMPLEMENTED
+  active_financial_rules: NONE
+  real_commercial_data: NOT_ADMITTED
+  marketplace_write_capability: DISABLED
+  release_state: RELEASE_BLOCKED
+
+artifacts:
+  contracts:
+    - docs/finance/CONFIGURATION_RULE_CONTRACT.md
+    - docs/finance/RULE_RESOLUTION_CONTRACT.md
+    - docs/finance/SAFE_EXPRESSION_CONTRACT.md
+    - docs/finance/CALCULATION_PROFILE_CONTRACT.md
+    - docs/finance/ROUNDING_POLICY.md
+    - docs/finance/METRIC_CATALOGUE.md
+    - docs/finance/GOLDEN_ORACLE_PLAN.md
+  schemas:
+    - schemas/configuration-rule.schema.json
+    - schemas/safe-expression.schema.json
+    - schemas/rounding-policy.schema.json
+    - schemas/calculation-profile.schema.json
+    - schemas/metric-definition.schema.json
+    - schemas/rule-resolution-result.schema.json
+  tests:
+    - tests/test_b1a_financial_contracts.py
+    - tests/contracts/fixtures/b1a-rule-resolution-vectors.json
+
+checks:
+  new_test_count: 9
+  ci: PENDING
+  independent_review: PENDING
+  stage_state_sync: PENDING
+
+invariants:
+  - no fixed commercial defaults
+  - one explicit rule method payload
+  - deterministic resolution and fail-closed ties
+  - Actual and Scenario isolation
+  - dependency-cycle rejection
+  - no arbitrary code or implicit currency conversion
+  - decimal contract values and versioned rounding
+  - explicit accounting view and expense boundary
+  - immutable calculation-profile references
+
+limitations:
+  - metric catalogue remains DRAFT_ONLY
+  - Source Authority remains DRAFT
+  - B1b implementation requires explicit R3 approval
+
+next_gate: B1A_CONTRACT_REVIEW
