@@ -1,0 +1,47 @@
+{
+  "contract_version": "evidence-chain-v1",
+  "valid_graph": {
+    "organization_id": "org-synthetic",
+    "mode": "ACTUAL",
+    "scenario_id": null,
+    "root_node_id": "metric-result",
+    "nodes": [
+      {"node_id":"metric-result","node_type":"METRIC_SNAPSHOT","organization_id":"org-synthetic","mode":"ACTUAL","scenario_id":null},
+      {"node_id":"metric-definition","node_type":"METRIC_DEFINITION","organization_id":"org-synthetic","mode":"ACTUAL","scenario_id":null},
+      {"node_id":"profile","node_type":"CALCULATION_PROFILE","organization_id":"org-synthetic","mode":"ACTUAL","scenario_id":null},
+      {"node_id":"resolution","node_type":"RULE_RESOLUTION","organization_id":"org-synthetic","mode":"ACTUAL","scenario_id":null},
+      {"node_id":"rule","node_type":"CONFIGURATION_RULE","organization_id":"org-synthetic","mode":"ACTUAL","scenario_id":null},
+      {"node_id":"rounding","node_type":"ROUNDING_POLICY","organization_id":"org-synthetic","mode":"ACTUAL","scenario_id":null},
+      {"node_id":"authority","node_type":"SOURCE_AUTHORITY","organization_id":"org-synthetic","mode":"ACTUAL","scenario_id":null},
+      {"node_id":"transformation","node_type":"TRANSFORMATION","organization_id":"org-synthetic","mode":"ACTUAL","scenario_id":null},
+      {"node_id":"event","node_type":"CANONICAL_EVENT","organization_id":"org-synthetic","mode":"ACTUAL","scenario_id":null},
+      {"node_id":"record","node_type":"SOURCE_RECORD","organization_id":"org-synthetic","mode":"ACTUAL","scenario_id":null},
+      {"node_id":"file","node_type":"SOURCE_FILE","organization_id":"org-synthetic","mode":"ACTUAL","scenario_id":null},
+      {"node_id":"freshness","node_type":"FRESHNESS_ASSESSMENT","organization_id":"org-synthetic","mode":"ACTUAL","scenario_id":null},
+      {"node_id":"confidence","node_type":"CONFIDENCE_ASSESSMENT","organization_id":"org-synthetic","mode":"ACTUAL","scenario_id":null}
+    ],
+    "edges": [
+      {"from":"metric-result","to":"metric-definition","type":"RESULT_DEFINED_BY","sequence":0},
+      {"from":"metric-result","to":"profile","type":"RESULT_CALCULATED_WITH","sequence":0},
+      {"from":"metric-result","to":"resolution","type":"RESULT_USES_RESOLUTION","sequence":0},
+      {"from":"profile","to":"rule","type":"PROFILE_SELECTS_RULE","sequence":0},
+      {"from":"profile","to":"rounding","type":"PROFILE_USES_ROUNDING","sequence":0},
+      {"from":"profile","to":"authority","type":"PROFILE_USES_SOURCE_AUTHORITY","sequence":0},
+      {"from":"metric-result","to":"transformation","type":"RESULT_USES_TRANSFORMATION","sequence":0},
+      {"from":"metric-result","to":"event","type":"RESULT_DERIVED_FROM_EVENT","sequence":0},
+      {"from":"event","to":"record","type":"EVENT_NORMALIZED_FROM_RECORD","sequence":0},
+      {"from":"record","to":"file","type":"RECORD_READ_FROM_FILE","sequence":0},
+      {"from":"metric-result","to":"freshness","type":"RESULT_HAS_FRESHNESS","sequence":0},
+      {"from":"metric-result","to":"confidence","type":"RESULT_HAS_CONFIDENCE","sequence":0}
+    ]
+  },
+  "invalid_vectors": [
+    {"id":"missing_source_file_path","mutation":{"remove_node":"file"},"expected_diagnostic":"EVIDENCE_REQUIRED_PATH_MISSING"},
+    {"id":"unknown_edge_target","mutation":{"edge":{"from":"event","to":"missing","type":"EVENT_NORMALIZED_FROM_RECORD","sequence":1}},"expected_diagnostic":"EVIDENCE_NODE_MISSING"},
+    {"id":"cross_tenant_node","mutation":{"node_id":"rule","organization_id":"other-org"},"expected_diagnostic":"EVIDENCE_TENANT_MISMATCH"},
+    {"id":"scenario_node_in_actual_graph","mutation":{"node_id":"rule","mode":"SCENARIO","scenario_id":"scenario-1"},"expected_diagnostic":"EVIDENCE_MODE_CONTAMINATION"},
+    {"id":"calculation_cycle","mutation":{"edge":{"from":"file","to":"metric-result","type":"RESULT_USES_TRANSFORMATION","sequence":1}},"expected_diagnostic":"EVIDENCE_GRAPH_CYCLE"},
+    {"id":"non_positive_version","mutation":{"reference_version":0},"expected_diagnostic":"EVIDENCE_VERSION_INVALID"},
+    {"id":"hash_mismatch","mutation":{"content_hash":"0"},"expected_diagnostic":"EVIDENCE_HASH_MISMATCH"}
+  ]
+}
