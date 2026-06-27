@@ -23,10 +23,20 @@ not implicit and is unavailable in contract v1.
 
 ## Node kinds
 
+All examples include the metadata required by
+`schemas/safe-expression.schema.json`. Currency codes shown in examples are
+illustrative data, never system defaults.
+
 ### Decimal literal
 
 ```json
-{"kind":"LITERAL","value":"12.50","value_type":"DECIMAL"}
+{
+  "kind": "LITERAL",
+  "value": "12.50",
+  "value_type": "DECIMAL",
+  "currency": null,
+  "unit": "DIMENSIONLESS"
+}
 ```
 
 Numbers are decimal strings. JSON floating-point numbers are forbidden.
@@ -36,7 +46,13 @@ forbidden.
 ### Variable
 
 ```json
-{"kind":"VARIABLE","name":"gross_sales_amount","value_type":"MONEY"}
+{
+  "kind": "VARIABLE",
+  "name": "gross_sales_amount",
+  "value_type": "MONEY",
+  "currency": "EUR",
+  "unit": "MONEY"
+}
 ```
 
 The name must exist in the explicit dependency list and approved variable
@@ -46,10 +62,27 @@ registry. Unknown or dynamically constructed names are forbidden.
 
 ```json
 {
-  "kind":"OPERATION",
-  "operator":"MULTIPLY",
-  "value_type":"MONEY",
-  "arguments":[...]
+  "kind": "OPERATION",
+  "operator": "MULTIPLY",
+  "value_type": "MONEY",
+  "currency": "EUR",
+  "unit": "MONEY",
+  "arguments": [
+    {
+      "kind": "VARIABLE",
+      "name": "gross_sales_amount",
+      "value_type": "MONEY",
+      "currency": "EUR",
+      "unit": "MONEY"
+    },
+    {
+      "kind": "LITERAL",
+      "value": "0.10",
+      "value_type": "RATE",
+      "currency": null,
+      "unit": "RATE"
+    }
+  ]
 }
 ```
 
@@ -63,11 +96,12 @@ registry. Unknown or dynamically constructed names are forbidden.
 - `ABS` — exactly one numeric value;
 - `MIN` — two or more compatible values;
 - `MAX` — two or more compatible values;
-- `IF` — boolean condition plus equal-type true/false branches;
-- `EQUAL`, `LESS_THAN`, `LESS_OR_EQUAL`, `GREATER_THAN`, `GREATER_OR_EQUAL` — compatible operands, boolean result.
+- `IF` — exactly three arguments: boolean condition plus equal-type true/false branches;
+- `EQUAL`, `LESS_THAN`, `LESS_OR_EQUAL`, `GREATER_THAN`, `GREATER_OR_EQUAL` — exactly two compatible operands, boolean result.
 
-Rounding is not an expression operator. It is applied only at versioned policy
-application points.
+The machine-readable schema enforces these arities fail-closed. Rounding is not
+an expression operator. It is applied only at versioned policy application
+points.
 
 ## Explicitly forbidden capabilities
 
