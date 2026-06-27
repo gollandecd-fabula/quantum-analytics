@@ -1,9 +1,8 @@
 evidence_id: STAGE-B-B1A-CONTRACT-EVIDENCE-v1
 unit: B1a
-status: CI_PASS_REVIEW_PENDING
+status: LATEST_REVIEW_PENDING
 tracking_issue: 7
 pull_request: 8
-branch: build-b1a-financial-contracts
 risk_class: R2
 
 scope:
@@ -15,55 +14,42 @@ scope:
   release_state: RELEASE_BLOCKED
 
 artifacts:
-  contracts:
-    - docs/finance/CONFIGURATION_RULE_CONTRACT.md
-    - docs/finance/RULE_RESOLUTION_CONTRACT.md
-    - docs/finance/SAFE_EXPRESSION_CONTRACT.md
-    - docs/finance/CALCULATION_PROFILE_CONTRACT.md
-    - docs/finance/ROUNDING_POLICY.md
-    - docs/finance/METRIC_CATALOGUE.md
-    - docs/finance/GOLDEN_ORACLE_PLAN.md
-  schemas:
-    - schemas/configuration-rule.schema.json
-    - schemas/safe-expression.schema.json
-    - schemas/rounding-policy.schema.json
-    - schemas/calculation-profile.schema.json
-    - schemas/metric-definition.schema.json
-    - schemas/rule-resolution-result.schema.json
-  tests:
-    - tests/test_b1a_financial_contracts.py
+  contracts: 7
+  schemas: 6
+  test_files:
+    - tests/test_b1a_contract_alignment.py
     - tests/test_b1a_execution_state.py
+    - tests/test_b1a_financial_contracts.py
+    - tests/test_b1a_review_regressions.py
+    - tests/test_b1a_rounding_mapping.py
     - tests/contracts/fixtures/b1a-rule-resolution-vectors.json
-  state:
-    - docs/evidence/STAGE_B_EXECUTION_STATE.yaml
-    - docs/governance/CURRENT_STATE.md
 
 checks:
-  foundation_previous_test_count: 34
-  b1a_new_test_count: 10
-  total_test_count: 44
-  ci:
-    run_id: 28292518502
-    status: SUCCESS
-    python: 3.12.3
-  independent_review: PENDING
-  stage_state_sync: COMPLETE
+  foundation_tests: 34
+  b1a_tests: 17
+  total_tests: 51
+  ci_run: 28293979927
+  ci_status: SUCCESS
+  python: 3.12.3
+  review_threads_total: 10
+  review_threads_unresolved: 0
+  latest_head_review: PENDING
 
-invariants:
-  - no fixed commercial defaults
-  - one explicit rule method payload
-  - deterministic resolution and fail-closed ties
-  - Actual and Scenario isolation
-  - dependency-cycle rejection
-  - no arbitrary code or implicit currency conversion
-  - decimal contract values and versioned rounding
-  - explicit accounting view and expense boundary
-  - immutable calculation-profile references
+remediation_complete:
+  - typed-state and valid-zero alignment
+  - immutable numeric profile versions
+  - organization boundary in resolution vectors
+  - fail-closed overlap cycle and unit-mismatch vectors
+  - exactly one rule method payload
+  - safe-expression operator arity
+  - unambiguous rounding-point mapping
+  - lexicographic scope specificity
+  - schema-conformant expression examples
 
 limitations:
   - metric catalogue remains DRAFT_ONLY
   - Source Authority remains DRAFT
-  - external JSON Schema engine validation is not yet evidence
-  - B1b implementation requires explicit R3 approval
+  - external JSON Schema validation is not yet evidence
+  - B1b requires explicit R3 approval
 
-next_gate: B1A_INDEPENDENT_REVIEW
+next_gate: B1A_LATEST_HEAD_REVIEW
