@@ -39,7 +39,7 @@ Contracts:
 
 Machine-readable schemas:
 
-- configuration rule;
+- configuration rule with omission-only wildcard scope encoding;
 - safe expression;
 - rounding policy;
 - calculation profile;
@@ -59,17 +59,18 @@ Tests and evidence:
 ## Verification
 
 - Foundation tests: 34.
-- B1a tests: 19.
-- Reproducible total: 53 passed tests.
-- Latest successful CI before final metadata synchronization: run `28295167667`, Python 3.12.3.
-- Independent Codex review produced 12 P1/P2 threads across multiple reviewed heads.
-- All 12 threads are resolved after contract, schema, catalogue, fixture, and test corrections.
+- B1a tests: 20.
+- Reproducible total: 54 passed tests.
+- Latest successful CI before final metadata synchronization: run `28295579493`, Python 3.12.3.
+- Independent Codex review produced 13 P1/P2 threads across multiple reviewed heads.
+- All 13 threads are resolved after contract, schema, catalogue, fixture, and test corrections.
 - Fresh CI and Codex review are required for this final metadata-synchronized head.
 
 ## Confirmed invariants
 
 - no fixed commercial cost, tax, tax-base, other-expense, allocation, or rounding default;
 - exactly one rule method payload is present;
+- only `organization_id` is mandatory in rule scope; absent optional dimensions are the sole wildcard encoding and explicit nulls are forbidden;
 - organization boundary and lexicographic scope specificity are deterministic;
 - unresolved semantic ties fail closed as `CONFLICT`;
 - missing required configuration becomes `BLOCKED`, not zero;
