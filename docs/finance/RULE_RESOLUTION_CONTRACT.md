@@ -138,11 +138,17 @@ Every resolution attempt records:
 
 - context hash;
 - candidate rule IDs and versions;
+- eligibility state for every candidate;
 - exclusion reasons;
 - ordering tuple for eligible candidates;
 - selected rule or typed conflict/missing state;
 - resolver contract version;
 - actor, timestamp, and trace ID.
+
+An eligible candidate always records its complete ordering tuple and has no
+exclusion reasons. An ineligible candidate records at least one exclusion reason
+and has `ordering_tuple: null`. These representations are mutually exclusive;
+an eligible candidate without its tuple is an invalid trace.
 
 The trace is part of the Evidence Chain and must be reproducible.
 
