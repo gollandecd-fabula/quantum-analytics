@@ -8,7 +8,7 @@ Tracking issue: `#7`
 
 A Configuration Rule represents one explicit, versioned financial input or
 calculation instruction. Rules replace all hardcoded assumptions for product
-cost, tax rate, tax base, other expenses, allocation, and rounding.
+cost, tax rate, tax base, other expenses, and allocation.
 
 A rule is configuration, not a marketplace event. A rule never rewrites the
 canonical event ledger and never becomes active merely because it exists.
@@ -19,10 +19,20 @@ canonical event ledger and never becomes active merely because it exists.
 - `TAX` — tax rate and tax base selection.
 - `OTHER_EXPENSE` — any user-defined expense not represented by a dedicated source event.
 - `ALLOCATION` — explicit allocation of a common amount to a supported target scope.
-- `ROUNDING` — reference to an approved rounding policy.
 
 No product category, marketplace, brand, currency, cost, tax rate, tax base, or
 other-expense value is a system constant.
+
+## Rounding policy ownership
+
+Rounding policy is not a Configuration Rule type in contract v1. A Calculation
+Profile references one immutable approved rounding policy through
+`rounding_policy_ref` using the canonical `{id, version, content_hash}` shape.
+
+A `FIXED_VALUE`, `RATE`, or `SAFE_EXPRESSION` rule cannot substitute for a
+rounding-policy reference. This keeps financial input resolution separate from
+rounding-policy selection and prevents two competing rounding authorities inside
+one Calculation Profile.
 
 ## Typed scope
 
