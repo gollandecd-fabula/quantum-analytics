@@ -145,6 +145,22 @@
         },
         {
           "if": {
+            "properties": {
+              "operator": {
+                "enum": ["EQUAL", "LESS_THAN", "LESS_OR_EQUAL", "GREATER_THAN", "GREATER_OR_EQUAL"]
+              }
+            },
+            "required": ["operator"]
+          },
+          "then": {
+            "properties": {
+              "value_type": {"const": "BOOLEAN"},
+              "currency": {"type": "null"}
+            }
+          }
+        },
+        {
+          "if": {
             "properties": {"value_type": {"const": "MONEY"}},
             "required": ["value_type"]
           },
