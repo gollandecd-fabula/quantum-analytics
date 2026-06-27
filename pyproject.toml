@@ -1,0 +1,20 @@
+[build-system]
+requires = []
+build-backend = "quantum_build_backend"
+
+[project]
+name = "quantum-analytics"
+version = "0.0.1"
+description = "Foundation skeleton for Quantum Analytics"
+requires-python = ">=3.12"
+dependencies = []
+
+[project.scripts]
+quantum-api = "quantum.api.main:main"
+quantum-worker = "quantum.worker.main:main"
+quantum-ci = "quantum.scripts.ci:main"
+
+[tool.quantum]
+architecture = "modular-monolith"
+runtime_entry_points = ["api", "worker"]
+marketplace_write_enabled = false

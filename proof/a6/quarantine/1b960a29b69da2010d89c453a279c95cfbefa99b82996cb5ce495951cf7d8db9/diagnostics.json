@@ -1,0 +1,88 @@
+{
+  "status": "QUARANTINED",
+  "reason": "SEMANTIC_VALIDATION_FAILED",
+  "diagnostics": [
+    "row=2: quantity: invalid integer"
+  ],
+  "source_file_sha256": "1b960a29b69da2010d89c453a279c95cfbefa99b82996cb5ce495951cf7d8db9",
+  "structural_fingerprint": {
+    "descriptor": {
+      "format": "csv",
+      "encoding": "utf-8-sig",
+      "delimiter": ",",
+      "quotechar": "\"",
+      "headers": [
+        "row_id",
+        "operation_id",
+        "operation_type",
+        "event_time",
+        "recognition_time",
+        "product_external_id",
+        "quantity",
+        "gross_amount",
+        "currency",
+        "revision",
+        "supersedes_event_id",
+        "reversal_of_event_id"
+      ],
+      "column_count": 12
+    },
+    "sha256": "2a83f54c59020885352db7f6d431e28a23e0c49ad3e5e3ef2a241c33e18917d2"
+  },
+  "semantic_fingerprint": {
+    "descriptor": {
+      "column_types": {
+        "currency": [
+          "string"
+        ],
+        "event_time": [
+          "datetime"
+        ],
+        "gross_amount": [
+          "decimal"
+        ],
+        "operation_id": [
+          "string"
+        ],
+        "operation_type": [
+          "string"
+        ],
+        "product_external_id": [
+          "string"
+        ],
+        "quantity": [
+          "integer",
+          "string"
+        ],
+        "recognition_time": [
+          "datetime"
+        ],
+        "reversal_of_event_id": [
+          "empty",
+          "string"
+        ],
+        "revision": [
+          "integer"
+        ],
+        "row_id": [
+          "integer"
+        ],
+        "supersedes_event_id": [
+          "empty",
+          "string"
+        ]
+      },
+      "enum_samples": {
+        "currency": [
+          "RUB"
+        ],
+        "operation_type": [
+          "RETURN",
+          "SALE"
+        ]
+      },
+      "row_count": 4
+    },
+    "sha256": "faeae956e2e62ece83c0ff412f3dffb40f5f75c45d1724a431cbc8764ac39659"
+  }
+}

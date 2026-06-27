@@ -1,0 +1,47 @@
+{
+  "project": "Quantum Analytics",
+  "macro_stage": "A_FOUNDATION",
+  "local_units_completed": [
+    "A0",
+    "A1",
+    "A2",
+    "A3",
+    "A4",
+    "A5",
+    "A6"
+  ],
+  "stage_definition_of_done_met": false,
+  "blocking_gaps": [
+    {
+      "id": "GAP-FND-001",
+      "severity": "HIGH",
+      "gap": "Dedicated GitHub repository is not connected",
+      "required_evidence": "private repository URL, initial commit SHA, protected main"
+    },
+    {
+      "id": "GAP-FND-002",
+      "severity": "HIGH",
+      "gap": "No repository CI or Pull Request evidence",
+      "required_evidence": "immutable action pins, required checks, passing PR"
+    },
+    {
+      "id": "GAP-FND-003",
+      "severity": "HIGH",
+      "gap": "PostgreSQL migration not applied or integration-tested",
+      "required_evidence": "ephemeral database test, constraints, rollback rehearsal"
+    },
+    {
+      "id": "GAP-FND-004",
+      "severity": "HIGH",
+      "gap": "Production object storage and recovery not proven",
+      "required_evidence": "immutable upload, hash verification, restore proof"
+    },
+    {
+      "id": "GAP-FND-005",
+      "severity": "HIGH",
+      "gap": "Real Wildberries source semantics not verified",
+      "required_evidence": "anonymized representative file and approved source contract"
+    }
+  ],
+  "release_blocked": true
+}

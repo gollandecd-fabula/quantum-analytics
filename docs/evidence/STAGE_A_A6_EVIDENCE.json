@@ -1,0 +1,100 @@
+{
+  "project": "Quantum Analytics",
+  "stage": "A_FOUNDATION",
+  "unit": "A6_DATA_PROOF",
+  "status": "PASS_LOCAL_SYNTHETIC",
+  "risk_class": "R3",
+  "approved_by_user": true,
+  "generated_on": "2026-06-27",
+  "source": {
+    "type": "synthetic_csv",
+    "file": "tests/contracts/fixtures/a6/wb-synthetic-valid.csv",
+    "sha256": "b9eb38af52a26f3d90eb4dbd26cc0667c1f55f5670398fb4c8f1b38643cf9ea1",
+    "real_commercial_data": false
+  },
+  "fingerprints": {
+    "structural": "2a83f54c59020885352db7f6d431e28a23e0c49ad3e5e3ef2a241c33e18917d2",
+    "semantic": "58da41e7f590f1a2926aa75e1cb986f76b020a0397e6cde253db1bb8b9c16ea0"
+  },
+  "publication": {
+    "first_import_inserted_events": 4,
+    "replay_inserted_events": 0,
+    "replay_duplicate_events": 4,
+    "ledger_event_count": 4,
+    "source_record_count": 4
+  },
+  "history_proof": {
+    "superseded_event": "evt-sale-002-r1",
+    "active_revision": "evt-sale-002-r2",
+    "reversed_event": "evt-sale-001-r1",
+    "reversal_event": "evt-return-001-r1"
+  },
+  "quarantine": {
+    "unknown_schema": "PASS",
+    "semantic_drift_same_headers": "PASS",
+    "diagnostic_packages": 2
+  },
+  "evidence_chain": {
+    "metric_id": "proof.current_gross_sales_amount",
+    "metric_version": "1.0",
+    "state": "VALID",
+    "value": "1400.00",
+    "value_type": "decimal",
+    "unit": "RUB",
+    "calculation_profile_version": "a6-proof-profile-v1",
+    "rounding_policy_version": "no-rounding-proof-v1",
+    "active_event_ids": [
+      "evt-sale-002-r2"
+    ],
+    "excluded_events": [
+      {
+        "event_id": "evt-sale-001-r1",
+        "reason": "REVERSED"
+      },
+      {
+        "event_id": "evt-sale-002-r1",
+        "reason": "SUPERSEDED"
+      }
+    ],
+    "canonical_event_ids": [
+      "evt-return-001-r1",
+      "evt-sale-001-r1",
+      "evt-sale-002-r1",
+      "evt-sale-002-r2"
+    ],
+    "source_record_ids": [
+      "src-b9eb38af52a2-1",
+      "src-b9eb38af52a2-2",
+      "src-b9eb38af52a2-3",
+      "src-b9eb38af52a2-4"
+    ],
+    "source_records_file": "source-records.jsonl",
+    "source_file_sha256": "b9eb38af52a26f3d90eb4dbd26cc0667c1f55f5670398fb4c8f1b38643cf9ea1",
+    "normalization_rule_versions": [
+      "wb-synthetic-normalization-v1"
+    ],
+    "limitations": [
+      "synthetic_data_only",
+      "not_a_production_financial_metric",
+      "no_tax_cost_or_other_expense_rules_applied"
+    ]
+  },
+  "validation": {
+    "local_ci": "PASS",
+    "tests_passed": 29,
+    "raw_hash_recalculation": "PASS",
+    "idempotency_unique_keys": "PASS",
+    "hardcoded_business_constant_audit": "PASS"
+  },
+  "limitations": [
+    "synthetic_source_only",
+    "json_ledger_is_not_production_database",
+    "local_raw_storage_is_not_production_object_storage",
+    "source_authority_not_activated",
+    "no_real_wildberries_contract_verified"
+  ],
+  "release": {
+    "blocked": true,
+    "reason": "FOUNDATION_DEFINITION_OF_DONE_NOT_MET"
+  }
+}

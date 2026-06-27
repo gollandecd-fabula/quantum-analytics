@@ -1,0 +1,50 @@
+project: Quantum Analytics
+stage: A_FOUNDATION
+unit: A4_DATA_CONTRACT
+status: PASS
+risk_class: R3
+approved_by_user: true
+generated_on: "2026-06-27"
+contracts:
+  typed_state: "1.0"
+  provenance: "1.0"
+  idempotency: "1.0"
+  revision_reversal_supersession: "1.0"
+  source_authority_matrix: "1.0"
+  data_quality_state_model: "1.0"
+schemas:
+  count: 5
+fixtures:
+  count: 4
+validation:
+  - artifact: schemas/typed-value.schema.json
+    result: SCHEMA_VALID
+  - artifact: schemas/source-record.schema.json
+    result: SCHEMA_VALID
+  - artifact: schemas/import-batch.schema.json
+    result: SCHEMA_VALID
+  - artifact: schemas/canonical-event.schema.json
+    result: SCHEMA_VALID
+  - artifact: schemas/configuration-rule.schema.json
+    result: SCHEMA_VALID
+  - artifact: valid-typed-zero.json
+    result: PASS
+  - artifact: valid-unavailable.json
+    result: PASS
+  - artifact: valid-canonical-event.json
+    result: PASS
+  - artifact: invalid-empty-as-zero.json
+    result: REJECTED_AS_EXPECTED
+hardcoded_financial_constant_audit: PASS
+source_authority_rows_active: 0
+source_authority_rows_draft: 10
+release:
+  blocked: true
+  reasons:
+    - dedicated_github_repository_not_connected
+    - platform_foundation_not_implemented
+    - source_contracts_not_verified
+next_unit:
+  id: A5_PLATFORM_FOUNDATION
+  risk_class: R1
+  macro_stage_change: false

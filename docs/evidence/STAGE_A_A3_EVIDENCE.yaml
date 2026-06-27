@@ -1,0 +1,31 @@
+project: Quantum Analytics
+stage: A_FOUNDATION
+unit: A3_SOURCE_RECOVERY_AND_AUDIT
+status: PASS
+generated_on: "2026-06-27"
+recovered_artifacts:
+  - Quantum_Analytics_19_key_metrics_v1.1.docx
+  - 06_THREAT_MODEL.md
+  - 04_TARGET_ARCHITECTURE.md
+  - 07_ACCEPTANCE_TEST_MATRIX.md
+  - 03_GAP_MATRIX.md
+  - FORENSIC_AUDIT_REPORT_v0.2.1.md
+classifications:
+  active_authority: 1
+  revise: 3
+  reuse_with_scope_review: 1
+  selective_reuse_only: 1
+  historical_reference: 1
+evidence_transfer:
+  legacy_test_results_accepted_for_quantum: false
+decisions:
+  legacy_C40_allowed: false
+  github_mutation_pipeline_in_mvp: false
+  new_foundation_acceptance_plan_created: true
+artifact_manifest_sha256: "b927f4c9ab65497e50ed6b403c035d0c47dff6e3ece04d5fb46b74c32216cdde"
+next_unit:
+  id: A4_DATA_CONTRACT
+  risk_class: R3
+  approval_required: true
+release:
+  blocked: true

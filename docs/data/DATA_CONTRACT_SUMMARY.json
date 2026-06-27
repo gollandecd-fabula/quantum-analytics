@@ -1,0 +1,37 @@
+{
+  "project": "Quantum Analytics",
+  "stage": "A4_DATA_CONTRACT",
+  "version": "1.0",
+  "date": "2026-06-27",
+  "risk_class": "R3",
+  "contracts": {
+    "typed_states": [
+      "VALID",
+      "EMPTY",
+      "BLOCKED",
+      "UNAVAILABLE",
+      "CONFLICT",
+      "INVALID",
+      "NOT_APPLICABLE"
+    ],
+    "canonical_event": {
+      "append_only": true,
+      "stable_business_key_required": true,
+      "source_row_key_required": true,
+      "revision_required": true,
+      "idempotency_key_required": true,
+      "provenance_required": true
+    },
+    "history": {
+      "revision": "new immutable event revision",
+      "reversal": "separate negating event",
+      "supersession": "explicit link; old event retained"
+    },
+    "source_authority": {
+      "activation_requires_real_source_contract": true,
+      "initial_rows_status": "DRAFT"
+    }
+  },
+  "release_blocked": true,
+  "next_unit": "A5_PLATFORM_FOUNDATION"
+}

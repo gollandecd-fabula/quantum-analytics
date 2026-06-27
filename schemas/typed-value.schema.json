@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://quantum.local/schemas/typed-value.schema.json",
+  "title": "Quantum Typed Value",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "state",
+    "value",
+    "value_type",
+    "reason_code"
+  ],
+  "properties": {
+    "state": {
+      "type": "string",
+      "enum": [
+        "VALID",
+        "EMPTY",
+        "BLOCKED",
+        "UNAVAILABLE",
+        "CONFLICT",
+        "INVALID",
+        "NOT_APPLICABLE"
+      ]
+    },
+    "value": {},
+    "value_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "decimal",
+        "integer",
+        "string",
+        "boolean",
+        "date",
+        "datetime",
+        "json",
+        null
+      ]
+    },
+    "unit": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "reason_code": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "source_record_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "observed_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "metadata": {
+      "type": "object"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "state": {
+            "const": "VALID"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "value": {
+            "not": {
+              "type": "null"
+            }
+          },
+          "value_type": {
+            "type": "string"
+          },
+          "reason_code": {
+            "type": "null"
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "value": {
+            "type": "null"
+          },
+          "reason_code": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  ]
+}

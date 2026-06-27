@@ -1,0 +1,625 @@
+{
+  "project": "Quantum Analytics",
+  "generated_on": "2026-06-27",
+  "package_version": "5",
+  "source_constitution_file": "Вставленная ​​уценка.md",
+  "source_constitution_sha256": "c03a05820ca082336d0d68ae4f24d5498d3a5eee0630d459ed12d3a700a675dd",
+  "artifact_count": 123,
+  "artifacts": [
+    {
+      "path": ".github/CODEOWNERS",
+      "sha256": "4165b00645a3d82376d6d184f5b78b1f54b6901584a386e5113a08dbbf86a6f8",
+      "size_bytes": 124
+    },
+    {
+      "path": ".github/ISSUE_TEMPLATE/adapter-drift.yml",
+      "sha256": "e18cabb3751315adccbd960b772c242bbf6ec18c23cc00b03fbdf4e8b3ac5bf2",
+      "size_bytes": 858
+    },
+    {
+      "path": ".github/ISSUE_TEMPLATE/conflict.yml",
+      "sha256": "c84ad000ece93614b23b567838c9921cbc63e88173682e2973458ede3a8108aa",
+      "size_bytes": 853
+    },
+    {
+      "path": ".github/ISSUE_TEMPLATE/defect.yml",
+      "sha256": "bb9a9eafb0d6233737c9b446668f337bfdc1392a932fe82cf11abe3b7cee5e72",
+      "size_bytes": 846
+    },
+    {
+      "path": ".github/ISSUE_TEMPLATE/incident.yml",
+      "sha256": "dec3016672066155d62b96add23fb2da481793a9e3c46688bca223177bc7ca4a",
+      "size_bytes": 852
+    },
+    {
+      "path": ".github/ISSUE_TEMPLATE/requirement.yml",
+      "sha256": "523c65d90b39cc987fac9284eb6c50df09b76acb21227fc3233fd3f6ce5954c6",
+      "size_bytes": 857
+    },
+    {
+      "path": ".github/ISSUE_TEMPLATE/risk.yml",
+      "sha256": "e0ff157c3564263d7059e0b60354eeb09a6a1971a15f4f510184937e0460d0ae",
+      "size_bytes": 854
+    },
+    {
+      "path": ".github/pull_request_template.md",
+      "sha256": "4d77d51327b4d42135306882bb6d8f95f1f7755b7df5e8971bb9fc6796c3b68a",
+      "size_bytes": 238
+    },
+    {
+      "path": "README.md",
+      "sha256": "afdd66dd0a9c6a8839e30597bcee0146e23ee44ade9b4868c4e0f81763ad9345",
+      "size_bytes": 741
+    },
+    {
+      "path": "adapters/wildberries/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "apps/api/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "apps/worker/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "docs/adr/ADR-001-CANONICAL-EVENT-LEDGER.md",
+      "sha256": "faed753d14ca9ab79da751257686d4cf5fd2423e0970a77cd12c414de239e7f4",
+      "size_bytes": 1196
+    },
+    {
+      "path": "docs/adr/ADR-002-TYPED-MISSING-STATES.md",
+      "sha256": "11cbfb62df34050e3cb5c4240015331981508fa2703987c8b911db3c0b048fdd",
+      "size_bytes": 493
+    },
+    {
+      "path": "docs/adr/ADR-003-TECHNOLOGY-BASELINE.md",
+      "sha256": "4ca49625a15799c33b8b63673bb2a4c8dc4093f9ac5bb3e43ff059f912b17405",
+      "size_bytes": 1368
+    },
+    {
+      "path": "docs/architecture/ARCHITECTURE_BASELINE.md",
+      "sha256": "3531af5d8683ce60f5c431d59e27382c184bf353466d63e663769b03d38b6616",
+      "size_bytes": 2106
+    },
+    {
+      "path": "docs/architecture/MODULE_BOUNDARIES.md",
+      "sha256": "c78bd87638718d4c363ea6c62a8b6fac03ba823321aa668dc66f577539c23d4b",
+      "size_bytes": 707
+    },
+    {
+      "path": "docs/data/CANONICAL_EVENT_CONTRACT.md",
+      "sha256": "d30b007d42ec66f6d32832e82d7f437b040e0a13f79a9346aa9df71c718dbfb3",
+      "size_bytes": 434
+    },
+    {
+      "path": "docs/data/DATA_CONTRACT_SUMMARY.json",
+      "sha256": "8cf3463c7ac17c06e60de80d928bc51689e2a76fd1242389edc9a718c6d9eb83",
+      "size_bytes": 930
+    },
+    {
+      "path": "docs/data/DATA_QUALITY_STATE_MODEL.md",
+      "sha256": "06cd3a637f002f4a4ff76483512d09959984680ae5088854838c786a269d12c1",
+      "size_bytes": 830
+    },
+    {
+      "path": "docs/data/IDEMPOTENCY_CONTRACT.md",
+      "sha256": "47080d0bbf4c55bdd71d61110a79220db39bac118bb663747d0e5bffa71fb6c0",
+      "size_bytes": 1720
+    },
+    {
+      "path": "docs/data/PROVENANCE_CONTRACT.md",
+      "sha256": "569447926a7945e1097f96d5a4770e75bf481a6313e32265d37fbce01d1bc606",
+      "size_bytes": 1574
+    },
+    {
+      "path": "docs/data/REVISION_REVERSAL_SUPERSESSION_CONTRACT.md",
+      "sha256": "d2163ba40be808eb3f35e904a60a1cccb4b8143c96e3d26129f03df6996f1a19",
+      "size_bytes": 1743
+    },
+    {
+      "path": "docs/data/SOURCE_AUTHORITY_MATRIX.md",
+      "sha256": "159a45085fc21d3ed98ba39cade5713699151b46db494b12b33d503dbc88d640",
+      "size_bytes": 2787
+    },
+    {
+      "path": "docs/data/SOURCE_INVENTORY.md",
+      "sha256": "dc20dff3e185959b712d652def4e4a26c3ea8fa91f26176434476d389971a93e",
+      "size_bytes": 1693
+    },
+    {
+      "path": "docs/data/TYPED_STATE_CONTRACT.md",
+      "sha256": "4f2591d26512c59c80d56a06849b9328faa29ea1b25d9bf93042450b6befb578",
+      "size_bytes": 2354
+    },
+    {
+      "path": "docs/data/WB_SYNTHETIC_SCHEMA_CONTRACT.md",
+      "sha256": "78ad58db8ba12b2eab6a2dca2339e439acc3e85914e41e9409b3785279baea78",
+      "size_bytes": 1133
+    },
+    {
+      "path": "docs/evidence/A5_LOCAL_CI_LOG.txt",
+      "sha256": "768274ca417fc5559e6d7722ff9a8e2ce5c0859096bdcb65643dd60ef629790c",
+      "size_bytes": 4429
+    },
+    {
+      "path": "docs/evidence/A6_LOCAL_CI_LOG.txt",
+      "sha256": "74fb5da14dcccdb593720598d2538604256c9751c67734c300953a1ab8a175e6",
+      "size_bytes": 5861
+    },
+    {
+      "path": "docs/evidence/FOUNDATION_CLOSURE_GAP_REPORT.json",
+      "sha256": "ecf9de31740f6e94e1907f20190f3e27534ea811a057fbcbd300846f7227f91f",
+      "size_bytes": 1338
+    },
+    {
+      "path": "docs/evidence/STAGE_A_A3_EVIDENCE.yaml",
+      "sha256": "ac71df416ab83a733c8d610c00b57540b836a082f1fc8b7ab79ebc0b883fa2fa",
+      "size_bytes": 856
+    },
+    {
+      "path": "docs/evidence/STAGE_A_A4_EVIDENCE.yaml",
+      "sha256": "9e07fd82291716cca0672e16dc54dc134450503fa115314e73b3db715496ccda",
+      "size_bytes": 1341
+    },
+    {
+      "path": "docs/evidence/STAGE_A_A5_EVIDENCE.yaml",
+      "sha256": "0570ece48f11d6a9f523ec082e4a1795c686d4d34f05c4187a3f73b020c26ff3",
+      "size_bytes": 1008
+    },
+    {
+      "path": "docs/evidence/STAGE_A_A6_EVIDENCE.json",
+      "sha256": "6925e55265b3d54d5ff9dcca53090e16303c29141656fa3e416c0da9ddd7ed0f",
+      "size_bytes": 2905
+    },
+    {
+      "path": "docs/evidence/STAGE_A_BOOTSTRAP_EVIDENCE.yaml",
+      "sha256": "17971ca738f6f7bde776d152d06078d3cdd635d298f0f3ce3ef176c2e496b1d0",
+      "size_bytes": 1020
+    },
+    {
+      "path": "docs/finance/ROUNDING_POLICY.md",
+      "sha256": "1cb3190404043912e7aca6c6b07f240d7c344e83ae949c7a587aedf822f56929",
+      "size_bytes": 279
+    },
+    {
+      "path": "docs/governance/CONFLICT_REGISTER.md",
+      "sha256": "b67977515a7aaa8b7057f4df282c375fcc7c59470b6358683bd0221c5cdfeeb3",
+      "size_bytes": 500
+    },
+    {
+      "path": "docs/governance/CONSTITUTION.md",
+      "sha256": "713f01500b7ffaa032bf22b37da35cf49505d9e528a09c74ec64da7fa156a307",
+      "size_bytes": 23991
+    },
+    {
+      "path": "docs/governance/CURRENT_STATE.md",
+      "sha256": "3c3eb83c67849a700e56aff693648f910618c3271e76691e45732cfae473ab60",
+      "size_bytes": 1704
+    },
+    {
+      "path": "docs/governance/DECISION_LEDGER.md",
+      "sha256": "6ed690801eaf94960eabf842b0d39ff11bc37dd1579faac7762ff4121f8fbe16",
+      "size_bytes": 2560
+    },
+    {
+      "path": "docs/governance/LEGACY_REUSE_MATRIX.md",
+      "sha256": "44b95678fea243f3a28609e1327a9039aa3333c48c475fff68cf4fb399f835cb",
+      "size_bytes": 2243
+    },
+    {
+      "path": "docs/governance/MIGRATION_NOTES.md",
+      "sha256": "d015bf6dd69ef574cc34749e74af6b78b9faae1ea7710eac60d6da36509e1541",
+      "size_bytes": 628
+    },
+    {
+      "path": "docs/governance/RISK_REGISTER.md",
+      "sha256": "75358c9812b546674d45733fe6ebb81bcc10ff153afabd3bdba1b2927f00bfac",
+      "size_bytes": 3002
+    },
+    {
+      "path": "docs/governance/RUNTIME_PROTOCOL.md",
+      "sha256": "8db24c05d60b7157e99903d6251fc305dd6f32cc19d21975a86d4eb746a2f2e7",
+      "size_bytes": 1063
+    },
+    {
+      "path": "docs/governance/SCOPE.md",
+      "sha256": "1ca25ed7b9cb3badc99a611cbc243a443f4b742341d800433148e545f309a30f",
+      "size_bytes": 974
+    },
+    {
+      "path": "docs/operations/BOOTSTRAP_IMPORT_INSTRUCTIONS.md",
+      "sha256": "ca078cf46137a5b92580494c861a91ee17fb707599f68c461638e7ad771283db",
+      "size_bytes": 569
+    },
+    {
+      "path": "docs/operations/CI_BASELINE.md",
+      "sha256": "de03e17bbfc15d4b4546d59d0dd4facf30de80fefac822b92f34fa4774948eb9",
+      "size_bytes": 640
+    },
+    {
+      "path": "docs/operations/LOCAL_RUNBOOK.md",
+      "sha256": "f4cd459aaae11948504604fd2b7139a6445065ae4c166916bb99e417b5f62ab8",
+      "size_bytes": 476
+    },
+    {
+      "path": "docs/qa/A6_DATA_PROOF_PLAN.md",
+      "sha256": "1ec116ed2ddcc6c2299348db0b97e3558048fc6f20599f1225bf986b66433de4",
+      "size_bytes": 711
+    },
+    {
+      "path": "docs/qa/ACCEPTANCE_BASELINE.md",
+      "sha256": "77ad75814f9bad392bc38da6e1c6dbaed5afc8630de3ad01d8d4fd95f483f52d",
+      "size_bytes": 419
+    },
+    {
+      "path": "docs/qa/ACCEPTANCE_PLAN_FOUNDATION.md",
+      "sha256": "0db1c27d5ac2e1657059d1640509c5bb5c4eec109f12eeba2a7864f87c0a3504",
+      "size_bytes": 2575
+    },
+    {
+      "path": "docs/requirements/Q-METRICS-001.md",
+      "sha256": "c651dbe1c23bd58f3121a41f44b1b469ba4b8aacba364e1ae58f4fbd77fc7860",
+      "size_bytes": 1338
+    },
+    {
+      "path": "docs/requirements/REQUIREMENTS_SNAPSHOT.md",
+      "sha256": "de991abfd1d2cf8d0fa1950ec4c2c634f66e2936ce5e2800489c592f19d58cc4",
+      "size_bytes": 1299
+    },
+    {
+      "path": "docs/security/SECURITY_BASELINE.md",
+      "sha256": "1ee42eea1fb0326c6a8bb422b7eba782531245c1227f1cd05f7f1c9df33a74e6",
+      "size_bytes": 500
+    },
+    {
+      "path": "docs/stage-contracts/STAGE-A-FOUNDATION-v1.md",
+      "sha256": "d316439ba15ce8622fa844f3e44a80972cd4a8ca0c2c3c24cccd819f0e7f6eed",
+      "size_bytes": 2026
+    },
+    {
+      "path": "migrations/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "migrations/0001_foundation.sql",
+      "sha256": "cbf71da9e9d1c22e17ae2c6a4aa29b73a5000040049075ce25c5de62ada2c757",
+      "size_bytes": 3705
+    },
+    {
+      "path": "migrations/README.md",
+      "sha256": "ec8cb58790eae5a0dc4f9b6b692abf6c82b45e91555bf33ac41527aef2323ecc",
+      "size_bytes": 388
+    },
+    {
+      "path": "modules/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "proof/a6/ledger/events.json",
+      "sha256": "e787edd291a778d4b2e5bf9fe2382e405e07b4a485a961e96eeba7f6bdfd08d3",
+      "size_bytes": 8407
+    },
+    {
+      "path": "proof/a6/ledger/source-records.jsonl",
+      "sha256": "0759815aaf78908d91b6a26f1fb5f0914401a94acab4a75cc14af82203d9c272",
+      "size_bytes": 3498
+    },
+    {
+      "path": "proof/a6/proof-summary.json",
+      "sha256": "8ebe8e677938491a7e07b93a839c5c79bb675359601c404a46df7f58f5dacc42",
+      "size_bytes": 8532
+    },
+    {
+      "path": "proof/a6/quarantine/0528c6f2959e6474b4330078d0a38c0e0610396d0b10e1ec419213a85bc79048/diagnostics.json",
+      "sha256": "f71c307361397e415c7236b8e77b066ba4628e699c60670b714def909062cb57",
+      "size_bytes": 888
+    },
+    {
+      "path": "proof/a6/quarantine/0528c6f2959e6474b4330078d0a38c0e0610396d0b10e1ec419213a85bc79048/wb-synthetic-unknown-schema.csv",
+      "sha256": "0528c6f2959e6474b4330078d0a38c0e0610396d0b10e1ec419213a85bc79048",
+      "size_bytes": 263
+    },
+    {
+      "path": "proof/a6/quarantine/1b960a29b69da2010d89c453a279c95cfbefa99b82996cb5ce495951cf7d8db9/diagnostics.json",
+      "sha256": "e12029588d5d5331b5682f9e6e2e24dfb49b08604066b8fb4c4c67d987b851e8",
+      "size_bytes": 1918
+    },
+    {
+      "path": "proof/a6/quarantine/1b960a29b69da2010d89c453a279c95cfbefa99b82996cb5ce495951cf7d8db9/wb-synthetic-semantic-drift.csv",
+      "sha256": "1b960a29b69da2010d89c453a279c95cfbefa99b82996cb5ce495951cf7d8db9",
+      "size_bytes": 569
+    },
+    {
+      "path": "proof/a6/raw/sha256/b9/b9eb38af52a26f3d90eb4dbd26cc0667c1f55f5670398fb4c8f1b38643cf9ea1",
+      "sha256": "b9eb38af52a26f3d90eb4dbd26cc0667c1f55f5670398fb4c8f1b38643cf9ea1",
+      "size_bytes": 567
+    },
+    {
+      "path": "pyproject.toml",
+      "sha256": "4f5bb80bc8ac9dcc4559d5382baa16528ab2a3f621f7091c896c9c8bcbb616d2",
+      "size_bytes": 493
+    },
+    {
+      "path": "quantum_build_backend.py",
+      "sha256": "9b2087db750c918787d70c58af4e8f3490df3193a9b354f04b026dd94aeed2df",
+      "size_bytes": 417
+    },
+    {
+      "path": "schemas/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "schemas/canonical-event.schema.json",
+      "sha256": "26438b951b7c8f4c263dd301a3a516bfefaeaafd7446a4d8d70f4388d706e1ef",
+      "size_bytes": 3636
+    },
+    {
+      "path": "schemas/configuration-rule.schema.json",
+      "sha256": "373ae465cc70790150078b02007adf74935e43cf98ff0b8a3a84020ac8c76510",
+      "size_bytes": 2443
+    },
+    {
+      "path": "schemas/import-batch.schema.json",
+      "sha256": "91a0e45333cb0f9cdb568a6e21acbd374ce938aee20a2ec5772e5365ed0fe671",
+      "size_bytes": 1747
+    },
+    {
+      "path": "schemas/source-record.schema.json",
+      "sha256": "148d71d9bff6a5d30ea2cca03a4079788553e643bda49f3a80800df54bcf72e9",
+      "size_bytes": 1673
+    },
+    {
+      "path": "schemas/typed-value.schema.json",
+      "sha256": "661239fcd427e82afe077c42c9dc9000667d1a0d640aeb63137bcab0d03e55d6",
+      "size_bytes": 1912
+    },
+    {
+      "path": "scripts/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "src/quantum/__init__.py",
+      "sha256": "2e8c5f3594f8f3c6dfb4cb06409efb5ede8b89dfba46696511b6cbe9ac8cc858",
+      "size_bytes": 48
+    },
+    {
+      "path": "src/quantum/adapters/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "src/quantum/adapters/wildberries/__init__.py",
+      "sha256": "31edf855d03e45709b4834a07d9483ae3058eebb60d1181de7678f20ec0eb989",
+      "size_bytes": 128
+    },
+    {
+      "path": "src/quantum/adapters/wildberries/synthetic.py",
+      "sha256": "dc4c58cb07dce8aad1a42b970a14d96e20b94fb1fde9a4419e9e0fae587c84db",
+      "size_bytes": 5929
+    },
+    {
+      "path": "src/quantum/api/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "src/quantum/api/main.py",
+      "sha256": "dc92a900cb4d347339763191520a6848736b631c46e1ccd86455c7efbeafe253",
+      "size_bytes": 1757
+    },
+    {
+      "path": "src/quantum/application/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "src/quantum/application/ports.py",
+      "sha256": "8bdd58e707de71594a1e01d1c8c7686fef0f96a4567bb93d9c828033cf03251a",
+      "size_bytes": 1332
+    },
+    {
+      "path": "src/quantum/domain/__init__.py",
+      "sha256": "02addb14fd0dcaa66102bb7b6fbb24c58f77f043a948eae129d8845de3b12208",
+      "size_bytes": 162
+    },
+    {
+      "path": "src/quantum/domain/events.py",
+      "sha256": "0c6efc1dfad74ba10f7edb8723d137ae369b3cf9ca73e29d83f7b5187ffe8db7",
+      "size_bytes": 2570
+    },
+    {
+      "path": "src/quantum/domain/idempotency.py",
+      "sha256": "2b4fdf7dd1ab6254fd4ed39163335ef9f8fd0b639d51592954e32ab73270592f",
+      "size_bytes": 1541
+    },
+    {
+      "path": "src/quantum/domain/states.py",
+      "sha256": "2507c177aaa3cd303f00663cf818882e81348b6bb2ac726204848df53053a641",
+      "size_bytes": 2771
+    },
+    {
+      "path": "src/quantum/infrastructure/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "src/quantum/infrastructure/json_event_ledger.py",
+      "sha256": "90b75120f1b848ed4330428e2c8f67c2459ca17ff851005344a8e97ee73b2d47",
+      "size_bytes": 2832
+    },
+    {
+      "path": "src/quantum/infrastructure/local_raw_storage.py",
+      "sha256": "c3d4345d3653944b16262a9f3e50f5f7f9f0521767ecdd6aa583387f341daa4f",
+      "size_bytes": 3227
+    },
+    {
+      "path": "src/quantum/ingestion/__init__.py",
+      "sha256": "9143ba077d7c2811f08a9c543cebf1233fd1c354c9d83d14d5e6e77e935cf373",
+      "size_bytes": 256
+    },
+    {
+      "path": "src/quantum/ingestion/fingerprints.py",
+      "sha256": "cdd458eb0c763b351f53bbc492a66f090df02d771ecb7424e9608e08d09342ef",
+      "size_bytes": 2495
+    },
+    {
+      "path": "src/quantum/ingestion/proof_pipeline.py",
+      "sha256": "fa1c38dda1276c9081e0b7e050191b68f040a43cf5a0d36b1e224f11731207e7",
+      "size_bytes": 8715
+    },
+    {
+      "path": "src/quantum/ingestion/schema_registry.py",
+      "sha256": "0f51d78116abbe48252abd6de94f3a7f77144e892ebb80fb779218f399d2aa1a",
+      "size_bytes": 2108
+    },
+    {
+      "path": "src/quantum/scripts/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "src/quantum/scripts/a6_proof.py",
+      "sha256": "12a47afe80b1619b3659c2286e39ece83205dbeaf2bc2042f02712c6562d6360",
+      "size_bytes": 1941
+    },
+    {
+      "path": "src/quantum/scripts/ci.py",
+      "sha256": "bc50c7ffa25d812d8bfed728881328e04536d92afec64f44f30aaa9f738ee2f2",
+      "size_bytes": 1585
+    },
+    {
+      "path": "src/quantum/worker/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "src/quantum/worker/main.py",
+      "sha256": "45b0ae266706e9524c25807f7413300614bd2e718e30bdd93bcbe35b9e692c10",
+      "size_bytes": 838
+    },
+    {
+      "path": "tests/contracts/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "tests/contracts/fixtures/a6/wb-synthetic-semantic-drift.csv",
+      "sha256": "1b960a29b69da2010d89c453a279c95cfbefa99b82996cb5ce495951cf7d8db9",
+      "size_bytes": 569
+    },
+    {
+      "path": "tests/contracts/fixtures/a6/wb-synthetic-unknown-schema.csv",
+      "sha256": "0528c6f2959e6474b4330078d0a38c0e0610396d0b10e1ec419213a85bc79048",
+      "size_bytes": 263
+    },
+    {
+      "path": "tests/contracts/fixtures/a6/wb-synthetic-valid.csv",
+      "sha256": "b9eb38af52a26f3d90eb4dbd26cc0667c1f55f5670398fb4c8f1b38643cf9ea1",
+      "size_bytes": 567
+    },
+    {
+      "path": "tests/contracts/fixtures/invalid-empty-as-zero.json",
+      "sha256": "cf21d403f35bb799f4d53a52eace98a8c5e488a94514292bde620ab1444eebe6",
+      "size_bytes": 215
+    },
+    {
+      "path": "tests/contracts/fixtures/valid-canonical-event.json",
+      "sha256": "ae244dc0ff8c78a218c8c86a7bf5fd8531ff5120a7dbfd049ccad55f93a0634e",
+      "size_bytes": 1564
+    },
+    {
+      "path": "tests/contracts/fixtures/valid-typed-zero.json",
+      "sha256": "751352a504c55d58bbca4ec190dda0d882a846ac401fea5d6d849fbd93a463ef",
+      "size_bytes": 207
+    },
+    {
+      "path": "tests/contracts/fixtures/valid-unavailable.json",
+      "sha256": "11007dc1d08898d0a337112b20b32917ac1045bca9c38e02380304e8b35c9401",
+      "size_bytes": 239
+    },
+    {
+      "path": "tests/e2e/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "tests/golden/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "tests/properties/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "tests/reconciliation/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "tests/security/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "tests/test_a6_fingerprints.py",
+      "sha256": "979840670a4797eb127476c7750fbfb8d8ede53e8a3c06438cc8b2b07cd0894c",
+      "size_bytes": 1121
+    },
+    {
+      "path": "tests/test_a6_normalization.py",
+      "sha256": "c4ca30837ea9f39dea37d1ae4f35a2ad631bf084aafb4b7a810b73f22f8aaabc",
+      "size_bytes": 1679
+    },
+    {
+      "path": "tests/test_a6_proof_pipeline.py",
+      "sha256": "6bc980174e3916a1a5a88b5f818056bd1957dbb92735e37b6545a1620e0501c0",
+      "size_bytes": 2999
+    },
+    {
+      "path": "tests/test_a6_schema_detection.py",
+      "sha256": "d49bdd56920547e7bfdae155a24bb4b44cc64d5a6e699a4366304b02f3cc8d51",
+      "size_bytes": 982
+    },
+    {
+      "path": "tests/test_canonical_event.py",
+      "sha256": "2eae94aebaf2a91f9f6156e22395ae11eef6feb188cf1fb52c499872b3a0271a",
+      "size_bytes": 1454
+    },
+    {
+      "path": "tests/test_idempotency.py",
+      "sha256": "414f17245a2f34b15f2c0c49a2429ebaaf5958d70bc6b4410e1abc8e24f7db4b",
+      "size_bytes": 1301
+    },
+    {
+      "path": "tests/test_local_raw_storage.py",
+      "sha256": "7ee9c70cf683aa89105db3eea8adbf548f02f66509fd3d82331521f1375722ff",
+      "size_bytes": 2195
+    },
+    {
+      "path": "tests/test_migration_contract.py",
+      "sha256": "cd236c9c370ce6a30d398f3cf39b453d974273b74e004b780cd5343b80b7ef6b",
+      "size_bytes": 1009
+    },
+    {
+      "path": "tests/test_runtime_health.py",
+      "sha256": "4ad29dad4572393473985dc1e3f5f67cfc95b36ca1f98c966b5610dde840135a",
+      "size_bytes": 655
+    },
+    {
+      "path": "tests/test_typed_states.py",
+      "sha256": "8a394ba58d77fa30a065b109a156ea4429cf591834381d54435f2e79f54c472f",
+      "size_bytes": 1178
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "state": "VALID",
+  "value": "0.00",
+  "value_type": "decimal",
+  "unit": "RUB",
+  "reason_code": null,
+  "source_record_id": "src_demo_zero",
+  "observed_at": "2026-06-01T12:00:00Z",
+  "metadata": {}
+}

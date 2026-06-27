@@ -1,0 +1,43 @@
+project: Quantum Analytics
+stage: A_FOUNDATION
+unit: A5_PLATFORM_FOUNDATION
+status: PASS_LOCAL
+risk_class: R1
+generated_on: "2026-06-27"
+technology:
+  language: "Python"
+  minimum_version: "3.12"
+  third_party_runtime_dependencies: 0
+architecture:
+  style: modular_monolith
+  entry_points:
+    - api
+    - worker
+implementation:
+  domain_invariants: true
+  idempotency_key_functions: true
+  immutable_local_raw_storage: true
+  postgresql_ddl_created: true
+  postgresql_ddl_applied: false
+  marketplace_write_enabled: false
+validation:
+  local_ci: PASS
+  tests_passed: 18
+  forbidden_financial_constant_audit: PASS
+  forbidden_marketplace_write_marker_audit: PASS
+  external_network_calls: 0
+  external_mutations: 0
+limitations:
+  - no_connected_repository
+  - no_active_github_actions
+  - no_database_driver
+  - no_applied_migration
+  - no_production_object_storage
+  - no_authentication
+  - no_durable_queue
+release:
+  blocked: true
+next_unit:
+  id: A6_DATA_PROOF
+  risk_class: R3
+  approval_required: true
