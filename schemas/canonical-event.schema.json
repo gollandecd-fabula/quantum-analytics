@@ -131,6 +131,10 @@
           "type": "string",
           "minLength": 1
         },
+        "source_adapter_version": {
+          "type": "string",
+          "minLength": 1
+        },
         "source_schema_id": {
           "type": [
             "string",
