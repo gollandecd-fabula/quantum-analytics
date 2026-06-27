@@ -1,19 +1,20 @@
 # CURRENT STATE
 
 Date: 2026-06-27
-Status: `BUILD_B0_IN_PROGRESS`
+Status: `BUILD_B0_READY_FOR_MERGE`
 Active contract: `STAGE-B-BUILD-v1`
 Completed macro-stage: `A — FOUNDATION`
 Current unit: `B0 — BUILD_READINESS_AND_STAGE_CONTRACT`
 Tracking issue: `#5`
 Working branch: `build-b0-readiness-contract`
+Pull Request: `#6`
 
 ## Authority
 
 - Constitution v3.0 / Plan v152.0 remains authoritative.
 - The user explicitly approved the start of Macro-stage B: BUILD.
 - Decision `DEC-024` records the approval.
-- R3 and R4 work still requires separate explicit approval.
+- R3 and R4 work still require separate explicit approval.
 
 ## Confirmed Foundation baseline
 
@@ -33,6 +34,17 @@ Working branch: `build-b0-readiness-contract`
 - `docs/evidence/STAGE_B_B0_READINESS.yaml` created.
 - Decision Ledger updated with Macro-stage B approval.
 - Risk Register updated for current Foundation status and BUILD risks.
+
+## B0 verification
+
+- Pull Request #6 changes documentation and governance artifacts only.
+- Foundation CI run `28291890784` passed on the initial B0 head.
+- Independent Codex review identified two P2 consistency findings.
+- Readiness status vocabulary was corrected to the declared set.
+- Explicit dependencies and tests were added for every unit B0–B8.
+- Both review threads were answered and resolved.
+- Foundation CI run `28292021463` passed after the corrections.
+- A local clone-based extra audit was unavailable because the local container could not resolve `github.com`; GitHub-native CI and review evidence remain authoritative.
 
 ## B0 readiness result
 
@@ -70,7 +82,7 @@ BLOCKED or NOT STARTED:
 
 ## Approval gates
 
-- B1a financial contracts and resolution design is R2 and may proceed after B0 review under protected PR workflow and independent verification.
+- B1a financial contracts and resolution design is R2 and may proceed after B0 merge under protected PR workflow and independent verification.
 - B1b financial kernel implementation is R3 and is not approved.
 - B2 reconciliation implementation is R3 and is not approved.
 - B6 decision-support implementation is R3 and is not approved.
