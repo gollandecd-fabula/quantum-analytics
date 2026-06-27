@@ -20,18 +20,19 @@ artifacts:
     - tests/test_b1a_contract_alignment.py
     - tests/test_b1a_execution_state.py
     - tests/test_b1a_financial_contracts.py
+    - tests/test_b1a_money_currency.py
     - tests/test_b1a_review_regressions.py
     - tests/test_b1a_rounding_mapping.py
     - tests/contracts/fixtures/b1a-rule-resolution-vectors.json
 
 checks:
   foundation_tests: 34
-  b1a_tests: 20
-  total_tests: 54
-  ci_run: 28295579493
+  b1a_tests: 22
+  total_tests: 56
+  ci_run: 28296145692
   ci_status: SUCCESS
   python: 3.12.3
-  review_threads_total: 13
+  review_threads_total: 15
   review_threads_unresolved: 0
   latest_head_review: PENDING_AFTER_METADATA_SYNC
 
@@ -42,8 +43,10 @@ remediation_complete:
   - fail-closed overlap cycle and unit-mismatch vectors
   - exactly one rule method payload
   - omission-only wildcard scope encoding
+  - resolution fixtures omit wildcard keys and reject explicit nulls
   - safe-expression operator arity
   - typed literal value representations
+  - MONEY currency required on literal variable and operation nodes
   - unambiguous rounding-point mapping
   - lexicographic scope specificity
   - schema-conformant expression examples
