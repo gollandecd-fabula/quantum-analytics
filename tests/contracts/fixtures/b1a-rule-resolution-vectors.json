@@ -6,11 +6,9 @@
       "context": {
         "organization_id": "org-a",
         "product_id": "p1",
-        "product_group_id": null,
         "marketplace_account_id": "a1",
         "marketplace": "WB",
-        "calculation_profile_id": "cp1",
-        "scenario_id": null
+        "calculation_profile_id": "cp1"
       },
       "candidates": [
         {
@@ -18,12 +16,8 @@
           "version": 1,
           "scope": {
             "organization_id": "org-a",
-            "product_id": null,
-            "product_group_id": null,
             "marketplace_account_id": "a1",
-            "marketplace": "WB",
-            "calculation_profile_id": null,
-            "scenario_id": null
+            "marketplace": "WB"
           },
           "priority": 100,
           "valid_from": "2026-01-01T00:00:00Z"
@@ -34,11 +28,8 @@
           "scope": {
             "organization_id": "org-a",
             "product_id": "p1",
-            "product_group_id": null,
             "marketplace_account_id": "a1",
-            "marketplace": "WB",
-            "calculation_profile_id": null,
-            "scenario_id": null
+            "marketplace": "WB"
           },
           "priority": 0,
           "valid_from": "2026-01-01T00:00:00Z"
@@ -51,12 +42,8 @@
       "id": "priority_breaks_equal_scope",
       "context": {
         "organization_id": "org-a",
-        "product_id": null,
-        "product_group_id": null,
         "marketplace_account_id": "a1",
-        "marketplace": "WB",
-        "calculation_profile_id": null,
-        "scenario_id": null
+        "marketplace": "WB"
       },
       "candidates": [
         {
@@ -64,12 +51,8 @@
           "version": 1,
           "scope": {
             "organization_id": "org-a",
-            "product_id": null,
-            "product_group_id": null,
             "marketplace_account_id": "a1",
-            "marketplace": "WB",
-            "calculation_profile_id": null,
-            "scenario_id": null
+            "marketplace": "WB"
           },
           "priority": 10,
           "valid_from": "2026-01-01T00:00:00Z"
@@ -79,12 +62,8 @@
           "version": 1,
           "scope": {
             "organization_id": "org-a",
-            "product_id": null,
-            "product_group_id": null,
             "marketplace_account_id": "a1",
-            "marketplace": "WB",
-            "calculation_profile_id": null,
-            "scenario_id": null
+            "marketplace": "WB"
           },
           "priority": 20,
           "valid_from": "2026-01-01T00:00:00Z"
@@ -97,12 +76,7 @@
       "id": "later_valid_from_breaks_equal_priority",
       "context": {
         "organization_id": "org-a",
-        "product_id": null,
-        "product_group_id": null,
-        "marketplace_account_id": null,
-        "marketplace": "WB",
-        "calculation_profile_id": null,
-        "scenario_id": null
+        "marketplace": "WB"
       },
       "candidates": [
         {
@@ -110,12 +84,7 @@
           "version": 3,
           "scope": {
             "organization_id": "org-a",
-            "product_id": null,
-            "product_group_id": null,
-            "marketplace_account_id": null,
-            "marketplace": "WB",
-            "calculation_profile_id": null,
-            "scenario_id": null
+            "marketplace": "WB"
           },
           "priority": 0,
           "valid_from": "2026-01-01T00:00:00Z"
@@ -125,12 +94,7 @@
           "version": 1,
           "scope": {
             "organization_id": "org-a",
-            "product_id": null,
-            "product_group_id": null,
-            "marketplace_account_id": null,
-            "marketplace": "WB",
-            "calculation_profile_id": null,
-            "scenario_id": null
+            "marketplace": "WB"
           },
           "priority": 0,
           "valid_from": "2026-06-01T00:00:00Z"
@@ -143,12 +107,7 @@
       "id": "version_breaks_equal_validity",
       "context": {
         "organization_id": "org-a",
-        "product_id": null,
-        "product_group_id": null,
-        "marketplace_account_id": null,
-        "marketplace": null,
-        "calculation_profile_id": "cp1",
-        "scenario_id": null
+        "calculation_profile_id": "cp1"
       },
       "candidates": [
         {
@@ -156,12 +115,7 @@
           "version": 1,
           "scope": {
             "organization_id": "org-a",
-            "product_id": null,
-            "product_group_id": null,
-            "marketplace_account_id": null,
-            "marketplace": null,
-            "calculation_profile_id": "cp1",
-            "scenario_id": null
+            "calculation_profile_id": "cp1"
           },
           "priority": 0,
           "valid_from": "2026-01-01T00:00:00Z"
@@ -171,12 +125,7 @@
           "version": 2,
           "scope": {
             "organization_id": "org-a",
-            "product_id": null,
-            "product_group_id": null,
-            "marketplace_account_id": null,
-            "marketplace": null,
-            "calculation_profile_id": "cp1",
-            "scenario_id": null
+            "calculation_profile_id": "cp1"
           },
           "priority": 0,
           "valid_from": "2026-01-01T00:00:00Z"
@@ -188,26 +137,14 @@
     {
       "id": "complete_tie_is_conflict",
       "context": {
-        "organization_id": "org-a",
-        "product_id": null,
-        "product_group_id": null,
-        "marketplace_account_id": null,
-        "marketplace": null,
-        "calculation_profile_id": null,
-        "scenario_id": null
+        "organization_id": "org-a"
       },
       "candidates": [
         {
           "rule_id": "tie-a",
           "version": 1,
           "scope": {
-            "organization_id": "org-a",
-            "product_id": null,
-            "product_group_id": null,
-            "marketplace_account_id": null,
-            "marketplace": null,
-            "calculation_profile_id": null,
-            "scenario_id": null
+            "organization_id": "org-a"
           },
           "priority": 0,
           "valid_from": "2026-01-01T00:00:00Z"
@@ -216,13 +153,7 @@
           "rule_id": "tie-b",
           "version": 1,
           "scope": {
-            "organization_id": "org-a",
-            "product_id": null,
-            "product_group_id": null,
-            "marketplace_account_id": null,
-            "marketplace": null,
-            "calculation_profile_id": null,
-            "scenario_id": null
+            "organization_id": "org-a"
           },
           "priority": 0,
           "valid_from": "2026-01-01T00:00:00Z"
@@ -235,12 +166,7 @@
       "id": "missing_required_rule_is_blocked",
       "context": {
         "organization_id": "org-a",
-        "product_id": "missing",
-        "product_group_id": null,
-        "marketplace_account_id": null,
-        "marketplace": null,
-        "calculation_profile_id": null,
-        "scenario_id": null
+        "product_id": "missing"
       },
       "candidates": [],
       "expected_state": "BLOCKED",
@@ -250,12 +176,7 @@
       "id": "actual_ignores_scenario_rule",
       "context": {
         "organization_id": "org-a",
-        "product_id": "p1",
-        "product_group_id": null,
-        "marketplace_account_id": null,
-        "marketplace": null,
-        "calculation_profile_id": null,
-        "scenario_id": null
+        "product_id": "p1"
       },
       "candidates": [
         {
@@ -263,12 +184,7 @@
           "version": 1,
           "scope": {
             "organization_id": "org-a",
-            "product_id": "p1",
-            "product_group_id": null,
-            "marketplace_account_id": null,
-            "marketplace": null,
-            "calculation_profile_id": null,
-            "scenario_id": null
+            "product_id": "p1"
           },
           "priority": 0,
           "valid_from": "2026-01-01T00:00:00Z"
@@ -279,10 +195,6 @@
           "scope": {
             "organization_id": "org-a",
             "product_id": "p1",
-            "product_group_id": null,
-            "marketplace_account_id": null,
-            "marketplace": null,
-            "calculation_profile_id": null,
             "scenario_id": "s1"
           },
           "priority": 100,
@@ -296,12 +208,7 @@
       "id": "cross_organization_rule_is_excluded",
       "context": {
         "organization_id": "org-a",
-        "product_id": "p1",
-        "product_group_id": null,
-        "marketplace_account_id": null,
-        "marketplace": null,
-        "calculation_profile_id": null,
-        "scenario_id": null
+        "product_id": "p1"
       },
       "candidates": [
         {
@@ -309,12 +216,7 @@
           "version": 1,
           "scope": {
             "organization_id": "org-b",
-            "product_id": "p1",
-            "product_group_id": null,
-            "marketplace_account_id": null,
-            "marketplace": null,
-            "calculation_profile_id": null,
-            "scenario_id": null
+            "product_id": "p1"
           },
           "priority": 1000,
           "valid_from": "2026-01-01T00:00:00Z"
@@ -324,12 +226,7 @@
           "version": 1,
           "scope": {
             "organization_id": "org-a",
-            "product_id": "p1",
-            "product_group_id": null,
-            "marketplace_account_id": null,
-            "marketplace": null,
-            "calculation_profile_id": null,
-            "scenario_id": null
+            "product_id": "p1"
           },
           "priority": 0,
           "valid_from": "2026-01-01T00:00:00Z"
@@ -349,12 +246,7 @@
           "exclusivity_group": "product-cost",
           "scope": {
             "organization_id": "org-a",
-            "product_id": "p1",
-            "product_group_id": null,
-            "marketplace_account_id": null,
-            "marketplace": null,
-            "calculation_profile_id": null,
-            "scenario_id": null
+            "product_id": "p1"
           },
           "valid_from": "2026-01-01T00:00:00Z",
           "valid_to": "2026-07-01T00:00:00Z"
@@ -364,12 +256,7 @@
           "exclusivity_group": "product-cost",
           "scope": {
             "organization_id": "org-a",
-            "product_id": "p1",
-            "product_group_id": null,
-            "marketplace_account_id": null,
-            "marketplace": null,
-            "calculation_profile_id": null,
-            "scenario_id": null
+            "product_id": "p1"
           },
           "valid_from": "2026-06-01T00:00:00Z",
           "valid_to": null
