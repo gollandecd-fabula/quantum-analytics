@@ -1,7 +1,7 @@
 # CURRENT STATE
 
 Date: 2026-06-27
-Status: `BUILD_B1A_LATEST_REVIEW_PENDING`
+Status: `BUILD_B1A_FINAL_REVIEW_PENDING`
 Active contract: `STAGE-B-BUILD-v1`
 Live execution state: `docs/evidence/STAGE_B_EXECUTION_STATE.yaml`
 Completed macro-stage: `A — FOUNDATION`
@@ -31,10 +31,10 @@ Pull Request: `#8`
 Contracts:
 
 - configuration rule and deterministic resolution;
-- safe expression;
+- safe expression with typed literal representations;
 - calculation profile;
 - versioned rounding policy;
-- draft metric catalogue;
+- draft metric catalogue with separate purchase quantity and amount flows;
 - independent golden-oracle plan.
 
 Machine-readable schemas:
@@ -59,12 +59,12 @@ Tests and evidence:
 ## Verification
 
 - Foundation tests: 34.
-- B1a tests: 17.
-- Reproducible total: 51 passed tests.
-- Latest successful CI before metadata synchronization: run `28293979927`, Python 3.12.3.
-- Independent Codex review produced 10 P1/P2 threads across multiple reviewed heads.
-- All 10 threads are resolved after contract, schema, fixture, and test corrections.
-- Fresh CI and Codex review are required for the metadata-synchronized latest head.
+- B1a tests: 19.
+- Reproducible total: 53 passed tests.
+- Latest successful CI before final metadata synchronization: run `28295167667`, Python 3.12.3.
+- Independent Codex review produced 12 P1/P2 threads across multiple reviewed heads.
+- All 12 threads are resolved after contract, schema, catalogue, fixture, and test corrections.
+- Fresh CI and Codex review are required for this final metadata-synchronized head.
 
 ## Confirmed invariants
 
@@ -76,14 +76,16 @@ Tests and evidence:
 - numeric zero remains a `VALID` value, not a typed state;
 - Actual and Scenario remain isolated;
 - dependency cycles, unsafe expressions, invalid arity, overlap, and unit mismatch fail closed;
+- decimal, integer, and boolean literal representations match their declared types;
+- purchases are represented by explicit quantity and amount metrics and are not inferred from sales, inventory, payout, or configured product cost;
 - rounding-point mapping is unambiguous and versioned;
 - calculation profiles reference immutable positive integer versions and content hashes;
 - golden values require an independent oracle and are not approved in B1a.
 
 ## Remaining B1a gate
 
-- latest-head CI must pass;
-- latest-head Codex review must complete;
+- final-head CI must pass;
+- final-head Codex review must complete;
 - any new findings must be fixed and resolved;
 - PR #8 must be squash-merged through protected `main`.
 
