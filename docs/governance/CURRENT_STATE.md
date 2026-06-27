@@ -52,6 +52,7 @@ Tests and evidence:
 - strict resolver matcher with explicit-null rejection;
 - contract-alignment tests;
 - MONEY currency-node test;
+- rounding-policy ownership test;
 - execution-state test;
 - financial contract tests;
 - review-regression tests;
@@ -61,18 +62,18 @@ Tests and evidence:
 ## Verification
 
 - Foundation tests: 34.
-- B1a tests: 24.
-- Reproducible total: 58 passed tests.
-- Latest technical CI: run `28297320482`, Python 3.12.3, success.
-- Independent Codex review produced 18 P1/P2 threads across multiple reviewed heads.
-- All 18 threads are resolved.
-- Technical head `b23159d5d4d3e4f5ceafde2c95865b14fa997312` received a clean review after remediation.
-- Current metadata-only head must pass CI and Codex review before squash merge.
+- B1a tests: 25.
+- Reproducible total: 59 passed tests.
+- Latest technical CI: run `28298583275`, Python 3.12.3, success.
+- Independent Codex review produced 19 P1/P2 threads across multiple reviewed heads.
+- All 19 threads are resolved.
+- Current metadata-synchronized head must pass CI and Codex review before squash merge.
 
 ## Confirmed invariants
 
 - no fixed commercial cost, tax, tax-base, other-expense, allocation, or rounding default;
 - exactly one rule method payload is present;
+- rounding policy is not a Configuration Rule type and is referenced exclusively by Calculation Profile `rounding_policy_ref`;
 - only `organization_id` is mandatory in rule scope; absent optional dimensions are the sole wildcard encoding and explicit nulls are forbidden;
 - resolver fixtures and matcher use the same omission-only wildcard semantics;
 - organization boundary and lexicographic scope specificity are deterministic;
@@ -92,8 +93,8 @@ Tests and evidence:
 
 ## Remaining B1a gate
 
-- current metadata-only head CI must pass;
-- current metadata-only head Codex review must complete with no unresolved findings;
+- current metadata-synchronized head CI must pass;
+- current metadata-synchronized head Codex review must complete with no unresolved findings;
 - PR #8 must be squash-merged through protected `main`.
 
 ## Approval gates
