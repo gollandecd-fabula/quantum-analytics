@@ -76,20 +76,26 @@ class B1aContractAlignmentTests(unittest.TestCase):
             [{"$ref": "#/$defs/decimalString"}, {"type": "boolean"}],
         )
 
-        observed: dict[str, dict[str, Any]] = {}
+        value_rules: dict[str, dict[str, Any]] = {}
+        currency_rule: dict[str, Any] | None = None
         for branch in branches:
             value_type_rule = branch["if"]["properties"]["value_type"]
             labels = value_type_rule.get("enum") or [value_type_rule["const"]]
-            for label in labels:
-                observed[label] = branch["then"]["properties"]
+            then_properties = branch["then"]["properties"]
+            if "value" in then_properties:
+                for label in labels:
+                    value_rules[label] = then_properties["value"]
+            if labels == ["MONEY"] and "currency" in then_properties:
+                currency_rule = branch
 
-        self.assertEqual(observed["MONEY"]["value"]["$ref"], "#/$defs/decimalString")
-        self.assertEqual(observed["DECIMAL"]["value"]["$ref"], "#/$defs/decimalString")
-        self.assertEqual(observed["RATE"]["value"]["$ref"], "#/$defs/decimalString")
-        self.assertEqual(observed["INTEGER"]["value"]["$ref"], "#/$defs/integerString")
-        self.assertEqual(observed["BOOLEAN"]["value"]["type"], "boolean")
-        self.assertEqual(branches[-1]["then"]["properties"]["currency"]["type"], "string")
-        self.assertEqual(branches[-1]["else"]["properties"]["currency"]["type"], "null")
+        self.assertEqual(value_rules["MONEY"]["$ref"], "#/$defs/decimalString")
+        self.assertEqual(value_rules["DECIMAL"]["$ref"], "#/$defs/decimalString")
+        self.assertEqual(value_rules["RATE"]["$ref"], "#/$defs/decimalString")
+        self.assertEqual(value_rules["INTEGER"]["$ref"], "#/$defs/integerString")
+        self.assertEqual(value_rules["BOOLEAN"]["type"], "boolean")
+        self.assertIsNotNone(currency_rule)
+        self.assertEqual(currency_rule["then"]["properties"]["currency"]["type"], "string")
+        self.assertEqual(currency_rule["else"]["properties"]["currency"]["type"], "null")
 
     def test_metric_catalogue_has_explicit_purchase_flow_contracts(self) -> None:
         catalogue = (ROOT / "docs/finance/METRIC_CATALOGUE.md").read_text(encoding="utf-8")
