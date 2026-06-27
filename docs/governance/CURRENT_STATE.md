@@ -1,10 +1,10 @@
 # CURRENT STATE
 
 Date: 2026-06-27
-Status: `FOUNDATION_LOCAL_PROOF_COMPLETE_WITH_BLOCKERS`
+Status: `FOUNDATION_REPOSITORY_MATERIALIZED_WITH_BLOCKERS`
 Active contract: `STAGE-A-FOUNDATION-v1`
 Completed unit: `A6 — DATA_PROOF`
-Next executable unit: `FOUNDATION_CLOSURE_BLOCKER_RESOLUTION`
+Current unit: `FOUNDATION_CLOSURE_BLOCKER_RESOLUTION`
 
 ## Confirmed
 
@@ -13,7 +13,14 @@ Next executable unit: `FOUNDATION_CLOSURE_BLOCKER_RESOLUTION`
 - A4 Data Contract is machine-readable.
 - A5 Platform Foundation has executable API and Worker skeletons.
 - A6 synthetic Data Proof passes.
-- Dedicated Quantum GitHub repository is not connected.
+- Dedicated private repository `gollandecd-fabula/quantum-analytics` is connected.
+- Initial `main` commit exists.
+- Working branch `bootstrap/foundation-v5` exists.
+- Draft Pull Request #2 imports the verified FOUNDATION bootstrap.
+- Issue #1 tracks the import and closure evidence.
+- Hidden `.github` files were restored through the GitHub Connector.
+- Thirteen `.gitkeep` files were normalized from zero bytes to one LF because the Connector blocks empty file creation.
+- No production, marketplace, or commercial data mutation occurred.
 
 ## A6 result
 
@@ -28,14 +35,22 @@ Next executable unit: `FOUNDATION_CLOSURE_BLOCKER_RESOLUTION`
 - Current synthetic gross-sale proof equals 1400.00 RUB.
 - Unknown schema was quarantined.
 - Same-header semantic drift was quarantined.
-- Evidence Chain links metric, events, source records, normalization rule,
-  and source-file SHA-256.
+- Evidence Chain links metric, events, source records, normalization rule, and source-file SHA-256.
 - 29 local tests pass.
+
+## Repository import verification
+
+Status: `PASS_WITH_DOCUMENTED_NORMALIZATION`
+
+- Main documentation, source, schemas, tests, proof artifacts, `.github`, and placeholder paths are present.
+- Draft PR #2 remains unmerged.
+- Package manifest v5 remains the source package record.
+- Placeholder normalization affects no runtime, financial, schema, or test semantics.
 
 ## Foundation closure blockers
 
-1. No dedicated private GitHub repository is connected.
-2. No protected `main`, Pull Request, commit, or GitHub CI evidence.
+1. `main` branch protection is not configured.
+2. Required GitHub checks are not configured and have no passing run evidence.
 3. PostgreSQL migration has not been applied or integration-tested.
 4. Production object storage is not implemented.
 5. Restore, rollback, backup, security, and staging evidence are incomplete.
