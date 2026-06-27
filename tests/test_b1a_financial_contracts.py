@@ -16,8 +16,12 @@ def scope_has_explicit_null(scope:dict[str,Any])->bool:
 
 def candidate_matches(context:dict[str,Any],candidate:dict[str,Any])->bool:
     scope=candidate["scope"]
+    mode=context.get("mode")
+    if mode not in {"ACTUAL","SCENARIO"}:return False
     if scope_has_explicit_null(scope):return False
     if not context.get("organization_id") or scope.get("organization_id")!=context["organization_id"]:return False
+    if mode=="ACTUAL" and "scenario_id" in scope:return False
+    if mode=="SCENARIO" and not context.get("scenario_id"):return False
     return all(k not in scope or context.get(k)==scope[k] for k in SCOPE_ORDER)
 
 def ordering_tuple(candidate:dict[str,Any])->tuple[Any,...]:
@@ -83,21 +87,28 @@ class B1aFinancialContractTests(unittest.TestCase):
         for bad in ("EVAL","EXEC","IMPORT","SHELL","SQL","ROUND","RANDOM"):self.assertNotIn(bad,ops)
 
     def test_resolution_vectors_enforce_order_tenant_boundary_and_fail_closed(self):
-        vectors=load_json(VECTORS)["vectors"];self.assertGreaterEqual(len(vectors),8)
+        vectors=load_json(VECTORS)["vectors"];self.assertGreaterEqual(len(vectors),9)
         for v in vectors:
             with self.subTest(vector=v["id"]):
                 self.assertTrue(v["context"].get("organization_id"))
+                self.assertIn(v["context"].get("mode"),{"ACTUAL","SCENARIO"})
                 self.assertFalse(scope_has_explicit_null(v["context"]))
                 self.assertTrue(all(x["scope"].get("organization_id") for x in v["candidates"]))
                 self.assertTrue(all(not scope_has_explicit_null(x["scope"]) for x in v["candidates"]))
                 self.assertEqual(resolve_vector(v),(v["expected_state"],v["expected_rule_id"]))
 
     def test_resolution_matcher_rejects_explicit_null_scope_wildcards(self):
-        context={"organization_id":"org-a","product_id":"p1"}
+        context={"organization_id":"org-a","mode":"ACTUAL","product_id":"p1"}
         invalid={"rule_id":"invalid-null","version":1,"scope":{"organization_id":"org-a","product_id":None},"priority":0,"valid_from":"2026-01-01T00:00:00Z"}
         valid={"rule_id":"omitted-wildcard","version":1,"scope":{"organization_id":"org-a"},"priority":0,"valid_from":"2026-01-01T00:00:00Z"}
         self.assertFalse(candidate_matches(context,invalid))
         self.assertTrue(candidate_matches(context,valid))
+
+    def test_resolution_matcher_enforces_mode_isolation(self):
+        candidate={"rule_id":"scenario","version":1,"scope":{"organization_id":"org-a","scenario_id":"s1"},"priority":0,"valid_from":"2026-01-01T00:00:00Z"}
+        self.assertFalse(candidate_matches({"organization_id":"org-a","mode":"ACTUAL","scenario_id":"s1"},candidate))
+        self.assertTrue(candidate_matches({"organization_id":"org-a","mode":"SCENARIO","scenario_id":"s1"},candidate))
+        self.assertFalse(candidate_matches({"organization_id":"org-a","mode":"SCENARIO"},candidate))
 
     def test_validation_vectors_cover_claimed_fail_closed_blockers(self):
         vectors=load_json(VECTORS)["validation_vectors"]
