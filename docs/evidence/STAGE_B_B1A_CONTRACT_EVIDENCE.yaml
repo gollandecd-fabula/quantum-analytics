@@ -26,12 +26,12 @@ artifacts:
 
 checks:
   foundation_tests: 34
-  b1a_tests: 19
-  total_tests: 53
-  ci_run: 28295167667
+  b1a_tests: 20
+  total_tests: 54
+  ci_run: 28295579493
   ci_status: SUCCESS
   python: 3.12.3
-  review_threads_total: 12
+  review_threads_total: 13
   review_threads_unresolved: 0
   latest_head_review: PENDING_AFTER_METADATA_SYNC
 
@@ -41,6 +41,7 @@ remediation_complete:
   - organization boundary in resolution vectors
   - fail-closed overlap cycle and unit-mismatch vectors
   - exactly one rule method payload
+  - omission-only wildcard scope encoding
   - safe-expression operator arity
   - typed literal value representations
   - unambiguous rounding-point mapping
