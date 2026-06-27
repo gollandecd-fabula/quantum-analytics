@@ -44,9 +44,15 @@ class B1aReviewRegressionTests(unittest.TestCase):
     def test_eligible_candidates_require_reproducible_ordering_tuples(self) -> None:
         schema = load_schema("rule-resolution-result.schema.json")
         candidate = schema["properties"]["candidates"]["items"]
+        tuple_schema = candidate["properties"]["ordering_tuple"]
         condition = candidate["allOf"][0]
         contract = (FINANCE / "RULE_RESOLUTION_CONTRACT.md").read_text(encoding="utf-8")
 
+        self.assertEqual(tuple_schema["minItems"], 4)
+        self.assertEqual(tuple_schema["maxItems"], 4)
+        self.assertEqual(len(tuple_schema["prefixItems"]), 4)
+        self.assertEqual(tuple_schema["prefixItems"][0]["minItems"], 6)
+        self.assertEqual(tuple_schema["prefixItems"][0]["maxItems"], 6)
         self.assertEqual(
             condition["if"],
             {
@@ -55,6 +61,8 @@ class B1aReviewRegressionTests(unittest.TestCase):
             },
         )
         self.assertEqual(condition["then"]["properties"]["ordering_tuple"]["type"], "array")
+        self.assertEqual(condition["then"]["properties"]["ordering_tuple"]["minItems"], 4)
+        self.assertEqual(condition["then"]["properties"]["ordering_tuple"]["maxItems"], 4)
         self.assertEqual(condition["then"]["properties"]["exclusion_reasons"]["maxItems"], 0)
         self.assertEqual(condition["else"]["properties"]["ordering_tuple"]["type"], "null")
         self.assertEqual(condition["else"]["properties"]["exclusion_reasons"]["minItems"], 1)
