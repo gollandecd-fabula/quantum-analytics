@@ -57,6 +57,7 @@ class B1aContractEdgeCaseTests(unittest.TestCase):
         result = matches[0]["then"]["properties"]
         self.assertEqual(result["value_type"], {"const": "BOOLEAN"})
         self.assertEqual(result["currency"], {"type": "null"})
+        self.assertEqual(result["unit"], {"const": "BOOLEAN"})
 
 
 if __name__ == "__main__":
