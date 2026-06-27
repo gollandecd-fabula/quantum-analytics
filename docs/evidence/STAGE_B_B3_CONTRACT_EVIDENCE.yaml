@@ -1,0 +1,68 @@
+evidence_id: STAGE-B-B3-CONTRACT-EVIDENCE-v1
+unit: B3
+status: READY_FOR_DEPENDENCY_CI
+tracking_issue: 9
+branch: build-b3-metric-evidence-contracts
+risk_class: R2
+
+scope:
+  contracts_schemas_tests_only: true
+  financial_calculation_kernel: NOT_IMPLEMENTED
+  metric_publication: NOT_IMPLEMENTED
+  active_financial_rules: NONE
+  source_authority_activation: NONE
+  real_commercial_data: NOT_ADMITTED
+  marketplace_write_capability: DISABLED
+  release_state: RELEASE_BLOCKED
+
+predecessor_gate:
+  b1a_artifacts_required_in_main: true
+  verification: tests/test_b3_evidence_contracts.py
+  status: PENDING_CI
+
+artifacts:
+  contracts:
+    - docs/evidence/METRIC_SNAPSHOT_CONTRACT.md
+    - docs/evidence/EVIDENCE_CHAIN_CONTRACT.md
+  schemas:
+    - schemas/metric-result.schema.json
+    - schemas/evidence-chain.schema.json
+  fixtures:
+    - tests/contracts/fixtures/b3-evidence-chain-vectors.json
+  tests:
+    - tests/test_b3_evidence_contracts.py
+
+checks:
+  b3_new_test_count: 9
+  ci: PENDING
+  independent_review: PENDING
+  unresolved_findings: UNKNOWN
+
+invariants:
+  - canonical Stage A4 typed states only
+  - numeric zero remains VALID
+  - positive immutable versions and SHA-256 references
+  - exact organization boundary on every node
+  - Actual and Scenario evidence isolation
+  - complete path from metric to source file SHA-256
+  - acyclic calculation graph
+  - missing or mismatched evidence fails closed
+  - immutable recalculation and restatement history
+  - freshness confidence limitations accounting view and expense boundary are explicit
+
+invalid_vectors:
+  - missing required source-file path
+  - unknown edge target
+  - cross-tenant node
+  - Scenario node in Actual graph
+  - calculation cycle
+  - non-positive version
+  - hash mismatch
+
+limitations:
+  - B1b financial calculation remains R3 and not approved
+  - reconciliation-result semantics remain B2-gated
+  - no production object storage or real source contracts
+  - no metric is calculated or published in B3
+
+next_gate: B3_DEPENDENCY_AND_CONTRACT_CI
