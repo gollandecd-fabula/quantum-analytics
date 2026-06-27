@@ -1,9 +1,7 @@
 from __future__ import annotations
 
-import base64
 import hashlib
 import json
-import lzma
 import subprocess
 import unittest
 from pathlib import Path
@@ -11,6 +9,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST_PATH = ROOT / "docs/evidence/ARTIFACT_MANIFEST.json"
 MANIFEST_REPO_PATH = "docs/evidence/ARTIFACT_MANIFEST.json"
+ARTIFACT_FIELDS = ["path", "sha256", "size_bytes"]
 B1A_SCHEMAS = {
     "schemas/calculation-profile.schema.json",
     "schemas/configuration-rule.schema.json",
@@ -36,11 +35,7 @@ def expected_manifest(current: dict) -> dict:
     for path in tracked_paths():
         data = (ROOT / path).read_bytes()
         artifacts.append(
-            {
-                "path": path,
-                "sha256": hashlib.sha256(data).hexdigest(),
-                "size_bytes": len(data),
-            }
+            [path, hashlib.sha256(data).hexdigest(), len(data)]
         )
 
     return {
@@ -50,31 +45,20 @@ def expected_manifest(current: dict) -> dict:
         "source_constitution_file": current["source_constitution_file"],
         "source_constitution_sha256": current["source_constitution_sha256"],
         "artifact_count": len(artifacts),
+        "artifact_fields": ARTIFACT_FIELDS,
         "artifacts": artifacts,
     }
-
-
-def emit_regenerated_manifest(manifest: dict) -> None:
-    payload = json.dumps(
-        manifest, ensure_ascii=False, separators=(",", ":")
-    ).encode("utf-8")
-    encoded = base64.b64encode(
-        lzma.compress(payload, preset=9 | lzma.PRESET_EXTREME)
-    ).decode("ascii")
-    print(f"MANIFEST_LZMA_B64={encoded}")
 
 
 class B1aArtifactManifestTests(unittest.TestCase):
     def test_manifest_matches_current_tracked_tree(self) -> None:
         current = json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
-        expected = expected_manifest(current)
-        if current != expected:
-            emit_regenerated_manifest(expected)
-        self.assertEqual(current, expected)
+        self.assertEqual(current, expected_manifest(current))
 
     def test_manifest_contains_all_b1a_schemas(self) -> None:
         current = json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
-        paths = {entry["path"] for entry in current["artifacts"]}
+        self.assertEqual(current["artifact_fields"], ARTIFACT_FIELDS)
+        paths = {entry[0] for entry in current["artifacts"]}
         self.assertTrue(B1A_SCHEMAS.issubset(paths), B1A_SCHEMAS - paths)
 
 
