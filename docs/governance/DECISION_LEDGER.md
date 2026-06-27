@@ -24,3 +24,4 @@
 | DEC-020 | 2026-06-27 | Do not activate Source Authority from synthetic fixtures | ACTIVE | A6 R3 gate |
 | DEC-021 | 2026-06-27 | Treat same-header semantic type drift as quarantine condition | ACTIVE | A6 R3 gate |
 | DEC-022 | 2026-06-27 | Prove replay using durable local JSON ledger without claiming production durability | ACTIVE | A6 R3 gate |
+| DEC-023 | 2026-06-27 | Final application hosting is restricted to Railway, Vercel, or Cloudflare; initial operation must target free plans and application access must be limited to approved registered users | ACTIVE | User |
