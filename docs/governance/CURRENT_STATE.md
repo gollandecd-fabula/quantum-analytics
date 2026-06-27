@@ -1,92 +1,108 @@
 # CURRENT STATE
 
 Date: 2026-06-27
-Status: `FOUNDATION_BOOTSTRAP_MERGED_WITH_BLOCKERS`
-Active contract: `STAGE-A-FOUNDATION-v1`
-Completed unit: `A6 — DATA_PROOF`
-Current unit: `FOUNDATION_CLOSURE_BLOCKER_RESOLUTION`
+Status: `BUILD_B0_READY_FOR_MERGE`
+Active contract: `STAGE-B-BUILD-v1`
+Completed macro-stage: `A — FOUNDATION`
+Current unit: `B0 — BUILD_READINESS_AND_STAGE_CONTRACT`
+Tracking issue: `#5`
+Working branch: `build-b0-readiness-contract`
+Pull Request: `#6`
 
-## Confirmed
+## Authority
 
-- A0 through A6 completed locally.
-- Constitution v3.0 / Plan v152.0 is materialized.
-- A4 Data Contract is machine-readable.
-- A5 Platform Foundation has executable API and Worker skeletons.
-- A6 synthetic Data Proof passes.
-- Repository `gollandecd-fabula/quantum-analytics` is connected and intentionally public during the free development phase.
-- Final repository access is intended to return to private/invited access after the development phase; application access remains a separate authorization control.
-- Pull Request #2 was squash-merged into protected `main` on 2026-06-27.
-- Merge commit: `4aa2e69cd985879271b44ad3345f73e972add845`.
-- Source branch `bootstrap/foundation-v5` is retained for audit and rollback reference.
-- Issue #1 tracks the original bootstrap import and closure evidence.
-- Hidden `.github` files were restored through the GitHub Connector.
-- Thirteen `.gitkeep` files were normalized from zero bytes to one LF because the Connector blocks empty file creation.
-- GitHub workflow `Foundation CI` exists with read-only repository permissions and no third-party Actions.
-- Pre-merge current-head run `28291287382` passed 34 Foundation tests on Python 3.12.3.
-- Active ruleset `Protect main` (ID `18204094`) applies to `main`.
-- The ruleset requires Pull Requests, required check `foundation`, up-to-date branches, and conversation resolution.
-- The ruleset blocks force pushes and branch deletion and has an empty bypass list.
-- Codex review identified 1 P1 and 3 P2 defects; all four were fixed, regression-tested, answered, and resolved before merge.
-- Hosting is restricted by `Q-DEPLOY-001` to Railway, Vercel, or Cloudflare, with free-tier proof required before final selection.
-- No production, marketplace, or commercial data mutation occurred.
+- Constitution v3.0 / Plan v152.0 remains authoritative.
+- The user explicitly approved the start of Macro-stage B: BUILD.
+- Decision `DEC-024` records the approval.
+- R3 and R4 work still require separate explicit approval.
 
-## Review remediation
+## Confirmed Foundation baseline
 
-- Canonical provenance schema allows `source_adapter_version`.
-- JSON proof ledger rejects conflicting duplicate `event_id` values before append.
-- Canonical event payload and provenance are recursively detached and immutable.
-- Non-finite gross amounts (`NaN`, `Infinity`, `-Infinity`) are semantic validation errors and follow the quarantine path.
-- Five regression tests cover the four review findings and immutable ledger serialization.
-- All review threads on PR #2 were resolved before merge.
+- A0 through A6 and repository closure are complete.
+- Pull Requests #2 and #4 are merged into protected `main`.
+- Issues #1 and #3 are closed as completed.
+- Ruleset `Protect main` is active.
+- Foundation CI passed 34 tests on Python 3.12.3 before the FOUNDATION merge.
+- Marketplace write capability remains disabled.
+- No real commercial data or secrets are stored in GitHub.
 
-## A6 result
+## B0 artifacts
 
-- Synthetic Wildberries-like CSV created.
-- Source bytes retained under their SHA-256 key.
-- Structural and semantic fingerprints generated.
-- Registered synthetic schema matched.
-- Four canonical events published.
-- Exact replay inserted zero new events and identified four duplicates.
-- `sale-002` revision 2 supersedes revision 1.
-- Return event reverses `sale-001`.
-- Current synthetic gross-sale proof equals 1400.00 RUB.
-- Unknown schema was quarantined.
-- Same-header semantic drift was quarantined.
-- Evidence Chain links metric, events, source records, normalization rule, and source-file SHA-256.
-- Historical local run: 29 tests passed.
-- Final pre-merge GitHub CI run: 34 tests passed.
+- `docs/stage-contracts/STAGE-B-BUILD-v1.md` created.
+- `docs/requirements/BUILD_REQUIREMENTS_SNAPSHOT.md` created.
+- `docs/qa/ACCEPTANCE_PLAN_BUILD.md` created.
+- `docs/evidence/STAGE_B_B0_READINESS.yaml` created.
+- Decision Ledger updated with Macro-stage B approval.
+- Risk Register updated for current Foundation status and BUILD risks.
 
-## Repository import verification
+## B0 verification
 
-Status: `PASS_MERGED_WITH_DOCUMENTED_NORMALIZATION`
+- Pull Request #6 changes documentation and governance artifacts only.
+- Foundation CI run `28291890784` passed on the initial B0 head.
+- Independent Codex review identified two P2 consistency findings.
+- Readiness status vocabulary was corrected to the declared set.
+- Explicit dependencies and tests were added for every unit B0–B8.
+- Both review threads were answered and resolved.
+- Foundation CI run `28292021463` passed after the corrections.
+- A local clone-based extra audit was unavailable because the local container could not resolve `github.com`; GitHub-native CI and review evidence remain authoritative.
 
-- Main documentation, source, schemas, tests, proof artifacts, `.github`, and placeholder paths are present in `main`.
-- PR #2 is merged.
-- Package manifest v5 remains the source package record.
-- Placeholder normalization affects no runtime, financial, schema, or test semantics.
-- The available Connector cannot list push-triggered runs for the squash merge commit; this is an observability limitation, not evidence of a failed run.
+## B0 readiness result
 
-## Repository control verification
+Status: `PASS_WITH_GATES`
 
-Status: `PASS_WITH_UI_EVIDENCE`
+READY:
 
-- Repository visibility: `public` during the free development phase.
-- Default branch: `main`.
-- Ruleset: `Protect main`, active, target `main`.
-- Required status check: `foundation` from GitHub Actions.
-- Required Pull Request and conversation resolution are enabled.
-- Force pushes and branch deletion are blocked.
-- Bypass list is empty.
+- GitHub source of truth and protected branch workflow;
+- modular-monolith baseline;
+- canonical event, typed states, idempotency, revision/reversal/supersession;
+- synthetic intake, quarantine, and minimal Evidence Chain proof;
+- BUILD Stage Contract, requirements snapshot, and acceptance plan.
 
-## Foundation closure blockers
+PARTIAL:
 
-1. PostgreSQL migration has not been applied or integration-tested.
-2. Production object storage is not implemented.
-3. Restore, rollback, backup, security, and staging evidence are incomplete.
-4. Real Wildberries schemas and Source Authority rules remain unverified.
-5. No anonymized representative marketplace file has been admitted.
-6. Railway, Vercel, and Cloudflare have not yet completed comparative free-tier staging proof.
-7. Authentication and approved-user-only application access are specified but not implemented.
+- configuration-rule schema;
+- core metric requirement;
+- rounding policy;
+- Source Authority Matrix;
+- production metric Evidence Chain;
+- security baseline.
+
+BLOCKED or NOT STARTED:
+
+- financial calculation kernel;
+- reconciliation and restatement;
+- PostgreSQL integration evidence;
+- durable object storage;
+- verified real Wildberries source semantics;
+- reporting and exports;
+- UX and Exception Inbox;
+- decision support;
+- authentication and tenant isolation;
+- Railway/Vercel/Cloudflare staging proof.
+
+## Approval gates
+
+- B1a financial contracts and resolution design is R2 and may proceed after B0 merge under protected PR workflow and independent verification.
+- B1b financial kernel implementation is R3 and is not approved.
+- B2 reconciliation implementation is R3 and is not approved.
+- B6 decision-support implementation is R3 and is not approved.
+- B7 external authentication and tenant-isolation implementation is R3 and is not approved.
+- Real or anonymized commercial data has not been admitted.
+- Final hosting platform has not been selected.
+- Production release and Macro-stage C are not approved.
+
+## Next executable unit
+
+`B1a — FINANCIAL_RULE_CONTRACTS_AND_RESOLUTION`
+
+Planned scope:
+
+- typed rule and scope vocabulary;
+- deterministic precedence and overlap controls;
+- safe-expression contract;
+- versioned calculation-profile and rounding contracts;
+- metric catalogue and golden-oracle plan;
+- contracts and tests only, without active commercial defaults.
 
 ## Release state
 
