@@ -23,20 +23,20 @@ artifacts:
     - tests/test_b1a_money_currency.py
     - tests/test_b1a_review_regressions.py
     - tests/test_b1a_rounding_mapping.py
+    - tests/test_b1a_rounding_ownership.py
     - tests/contracts/fixtures/b1a-rule-resolution-vectors.json
 
 checks:
   foundation_tests: 34
-  b1a_tests: 24
-  total_tests: 58
-  last_technical_ci_run: 28297320482
+  b1a_tests: 25
+  total_tests: 59
+  last_technical_ci_run: 28298583275
   last_technical_ci_status: SUCCESS
   python: 3.12.3
-  review_threads_total: 18
+  review_threads_total: 19
   review_threads_unresolved: 0
-  reviewed_technical_head: b23159d5d4d3e4f5ceafde2c95865b14fa997312
-  current_metadata_head_ci: PENDING
-  current_metadata_head_review: PENDING
+  current_head_ci: PENDING_AFTER_METADATA_SYNC
+  current_head_review: PENDING_AFTER_METADATA_SYNC
 
 remediation_complete:
   - canonical typed states and valid zero
@@ -48,6 +48,7 @@ remediation_complete:
   - complete reproducible ordering tuples
   - typed safe-expression literals and operator arity
   - currency metadata on every MONEY expression node
+  - rounding policy owned exclusively by Calculation Profile reference
   - versioned rounding-point mapping
   - explicit purchase quantity and amount metrics
 
