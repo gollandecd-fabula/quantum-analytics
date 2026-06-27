@@ -45,19 +45,14 @@
     },
     "method": {"type": "string", "enum": ["FIXED_VALUE", "RATE", "SAFE_EXPRESSION"]},
     "value": {
-      "type": ["string", "null"],
+      "type": "string",
       "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
     },
     "rate": {
-      "type": ["string", "null"],
+      "type": "string",
       "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
     },
-    "expression": {
-      "oneOf": [
-        {"$ref": "safe-expression.schema.json"},
-        {"type": "null"}
-      ]
-    },
+    "expression": {"$ref": "safe-expression.schema.json"},
     "base": {
       "type": "string",
       "enum": [
@@ -109,41 +104,34 @@
   },
   "allOf": [
     {
-      "if": {"properties": {"method": {"const": "FIXED_VALUE"}}},
+      "if": {"properties": {"method": {"const": "FIXED_VALUE"}}, "required": ["method"]},
       "then": {
-        "required": ["value", "rate", "expression"],
-        "properties": {
-          "value": {"type": "string"},
-          "rate": {"type": "null"},
-          "expression": {"type": "null"}
+        "required": ["value"],
+        "not": {"anyOf": [{"required": ["rate"]}, {"required": ["expression"]}]}
+      }
+    },
+    {
+      "if": {"properties": {"method": {"const": "RATE"}}, "required": ["method"]},
+      "then": {
+        "required": ["rate"],
+        "not": {
+          "anyOf": [
+            {"required": ["value"]},
+            {"required": ["expression"]},
+            {"properties": {"base": {"const": "NONE"}}, "required": ["base"]}
+          ]
         }
       }
     },
     {
-      "if": {"properties": {"method": {"const": "RATE"}}},
+      "if": {"properties": {"method": {"const": "SAFE_EXPRESSION"}}, "required": ["method"]},
       "then": {
-        "required": ["value", "rate", "expression"],
-        "properties": {
-          "value": {"type": "null"},
-          "rate": {"type": "string"},
-          "expression": {"type": "null"}
-        },
-        "not": {"properties": {"base": {"const": "NONE"}}}
+        "required": ["expression"],
+        "not": {"anyOf": [{"required": ["value"]}, {"required": ["rate"]}]}
       }
     },
     {
-      "if": {"properties": {"method": {"const": "SAFE_EXPRESSION"}}},
-      "then": {
-        "required": ["value", "rate", "expression"],
-        "properties": {
-          "value": {"type": "null"},
-          "rate": {"type": "null"},
-          "expression": {"$ref": "safe-expression.schema.json"}
-        }
-      }
-    },
-    {
-      "if": {"properties": {"unit": {"enum": ["MONEY", "MONEY_PER_ITEM", "MONEY_PER_ORDER", "MONEY_PER_EVENT", "MONEY_PER_PERIOD"]}}},
+      "if": {"properties": {"unit": {"enum": ["MONEY", "MONEY_PER_ITEM", "MONEY_PER_ORDER", "MONEY_PER_EVENT", "MONEY_PER_PERIOD"]}}, "required": ["unit"]},
       "then": {"properties": {"currency": {"type": "string"}}},
       "else": {"properties": {"currency": {"type": "null"}}}
     }
