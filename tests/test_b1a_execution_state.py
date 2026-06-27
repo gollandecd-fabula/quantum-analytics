@@ -15,7 +15,7 @@ class B1aExecutionStateTests(unittest.TestCase):
         self.assertRegex(state, r"B1a:\n    state: IN_PROGRESS")
         self.assertIn("source_of_truth_for_live_unit_state: true", state)
         self.assertIn("Live execution state: `docs/evidence/STAGE_B_EXECUTION_STATE.yaml`", current)
-        self.assertIn("Status: `BUILD_B1A_IN_PROGRESS`", current)
+        self.assertIn("Status: `BUILD_B1A_REVIEW_PENDING`", current)
         self.assertIn("B1b financial calculation implementation is R3 and is not approved", current)
 
 
