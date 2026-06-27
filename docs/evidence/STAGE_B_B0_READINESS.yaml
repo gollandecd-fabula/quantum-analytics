@@ -1,0 +1,163 @@
+evidence_id: STAGE-B-B0-READINESS-v1
+project: Quantum Analytics
+generated_on: 2026-06-27
+macro_stage: B
+unit: B0
+status: PASS_WITH_GATES
+tracking_issue: 5
+branch: build-b0-readiness-contract
+stage_contract: docs/stage-contracts/STAGE-B-BUILD-v1.md
+
+user_authority:
+  macro_stage_b_approved: true
+  approval_text: запуск разрешен
+  r3_implementation_approved: false
+  r4_production_approved: false
+
+foundation_baseline:
+  repository_source_of_truth: READY
+  protected_main: READY
+  foundation_pr_merged: READY
+  foundation_ci:
+    status: READY
+    tests_passed: 34
+    python: 3.12.3
+  marketplace_write_capability: DISABLED
+  real_commercial_data_in_repository: false
+
+readiness_matrix:
+  - capability: GitHub governance and traceability
+    status: READY
+    evidence:
+      - Issues 1 and 3 closed as completed
+      - Pull Requests 2 and 4 merged
+      - Protect main ruleset active
+  - capability: Modular-monolith baseline
+    status: READY
+    evidence:
+      - docs/architecture/ARCHITECTURE_BASELINE.md
+      - docs/architecture/MODULE_BOUNDARIES.md
+      - API and Worker entry points
+  - capability: Canonical event and corrections
+    status: READY
+    evidence:
+      - canonical-event schema
+      - revision, reversal, and supersession contract
+      - append-only proof ledger
+  - capability: Typed data-quality states
+    status: READY
+    evidence:
+      - typed-value schema
+      - typed-state contract
+      - regression tests preserving zero versus missing states
+  - capability: Idempotent intake and schema quarantine
+    status: READY_FOR_SYNTHETIC_PROOF
+    limitation: Production durability and real Wildberries schemas are not proven
+  - capability: Configuration-rule schema
+    status: PARTIAL
+    evidence:
+      - schemas/configuration-rule.schema.json
+    gaps:
+      - typed scope vocabulary
+      - approved method vocabulary or safe expression contract
+      - deterministic resolution algorithm
+      - overlap and exclusivity diagnostics
+      - dependency-cycle detection
+      - immutable calculation-profile snapshot
+  - capability: Core metric requirement
+    status: PARTIAL
+    evidence:
+      - docs/requirements/Q-METRICS-001.md
+    gaps:
+      - requirement remains NOT_APPROVED_FOR_IMPLEMENTATION
+      - final metric catalogue and expense boundaries are not approved
+  - capability: Rounding policy
+    status: PARTIAL
+    evidence:
+      - docs/finance/ROUNDING_POLICY.md
+    gaps:
+      - policy remains DRAFT
+      - no approved golden calculation or independent oracle
+  - capability: Source Authority Matrix
+    status: PARTIAL
+    limitation: All real-source rows remain DRAFT; synthetic fixtures cannot activate authority
+  - capability: Financial calculation kernel
+    status: NOT_STARTED
+    gate: R3_EXPLICIT_USER_APPROVAL
+  - capability: Reconciliation and restatement
+    status: NOT_STARTED
+    gate: R3_EXPLICIT_USER_APPROVAL
+  - capability: Evidence Chain
+    status: PARTIAL
+    evidence:
+      - A6 synthetic proof links metric, events, source records, source file, and SHA-256
+    gaps:
+      - calculation-profile snapshot
+      - rounding version
+      - production metric-result contract
+  - capability: PostgreSQL integration
+    status: BLOCKED
+    blocker: Migration has not been applied or integration-tested with a real driver and transactions
+  - capability: Durable object storage
+    status: BLOCKED
+    blocker: Local filesystem adapter is foundation-only
+  - capability: Real Wildberries source semantics
+    status: BLOCKED
+    blocker: No representative anonymized file or verified source contract admitted
+  - capability: Reporting and exports
+    status: NOT_STARTED
+  - capability: UX and Exception Inbox
+    status: NOT_STARTED
+  - capability: Decision support and scenarios
+    status: NOT_STARTED
+    gate: R3_EXPLICIT_USER_APPROVAL
+  - capability: Authentication and tenant isolation
+    status: NOT_STARTED
+    gate: R3_EXPLICIT_USER_APPROVAL_FOR_EXTERNAL_ACCESS
+  - capability: Security review
+    status: PARTIAL
+    evidence:
+      - docs/security/SECURITY_BASELINE.md
+    gaps:
+      - threat model
+      - authorization tests
+      - tenant-isolation tests
+      - SBOM and dependency evidence
+  - capability: Deployment platform proof
+    status: NOT_STARTED
+    candidates:
+      - Railway
+      - Vercel
+      - Cloudflare
+    gate: FINAL_PLATFORM_SELECTION_REQUIRES_USER_DECISION
+  - capability: BUILD acceptance plan
+    status: READY
+    evidence:
+      - docs/qa/ACCEPTANCE_PLAN_BUILD.md
+
+blocking_conflicts: []
+
+non_blocking_constraints:
+  - B1b, B2, B6, and B7 are R3 and remain gated
+  - real or anonymized commercial data requires explicit admission approval
+  - production release remains blocked
+  - Macro-stage C cannot start without explicit user approval
+
+created_artifacts:
+  - docs/stage-contracts/STAGE-B-BUILD-v1.md
+  - docs/requirements/BUILD_REQUIREMENTS_SNAPSHOT.md
+  - docs/qa/ACCEPTANCE_PLAN_BUILD.md
+  - docs/evidence/STAGE_B_B0_READINESS.yaml
+
+next_executable_unit:
+  id: B1a
+  name: FINANCIAL_RULE_CONTRACTS_AND_RESOLUTION
+  risk: R2
+  approval_needed: false
+  constraints:
+    - contracts and tests only until R3 gate
+    - no active commercial defaults
+    - no real commercial data
+    - independent review required before approval
+
+release_state: RELEASE_BLOCKED
