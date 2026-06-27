@@ -32,7 +32,7 @@ Contracts:
 
 - configuration rule and deterministic resolution;
 - safe expression with typed literal and currency metadata rules;
-- calculation profile;
+- calculation profile with canonical immutable reference shape;
 - versioned rounding policy;
 - draft metric catalogue with separate purchase quantity and amount flows;
 - independent golden-oracle plan.
@@ -42,9 +42,9 @@ Machine-readable schemas:
 - configuration rule with omission-only wildcard scope encoding;
 - safe expression with typed values and currency constraints on every node kind;
 - rounding policy;
-- calculation profile;
+- calculation profile with `{id, version, content_hash}` references;
 - metric definition;
-- rule-resolution result.
+- rule-resolution result with eligible-dependent trace requirements.
 
 Tests and evidence:
 
@@ -61,11 +61,11 @@ Tests and evidence:
 ## Verification
 
 - Foundation tests: 34.
-- B1a tests: 22.
-- Reproducible total: 56 passed tests.
-- Latest successful CI before final metadata synchronization: run `28296145692`, Python 3.12.3.
-- Independent Codex review produced 15 P1/P2 threads across multiple reviewed heads.
-- All 15 threads are resolved after contract, schema, catalogue, fixture, matcher, and test corrections.
+- B1a tests: 24.
+- Reproducible total: 58 passed tests.
+- Latest successful CI before final metadata synchronization: run `28296767917`, Python 3.12.3.
+- Independent Codex review produced 17 P1/P2 threads across multiple reviewed heads.
+- All 17 threads are resolved after contract, schema, catalogue, fixture, matcher, and test corrections.
 - Fresh CI and Codex review are required for this final metadata-synchronized head.
 
 ## Confirmed invariants
@@ -75,6 +75,8 @@ Tests and evidence:
 - only `organization_id` is mandatory in rule scope; absent optional dimensions are the sole wildcard encoding and explicit nulls are forbidden;
 - resolver fixtures and matcher use the same omission-only wildcard semantics;
 - organization boundary and lexicographic scope specificity are deterministic;
+- eligible candidates always contain complete ordering tuples and no exclusion reasons;
+- ineligible candidates contain at least one exclusion reason and a null ordering tuple;
 - unresolved semantic ties fail closed as `CONFLICT`;
 - missing required configuration becomes `BLOCKED`, not zero;
 - numeric zero remains a `VALID` value, not a typed state;
@@ -84,7 +86,7 @@ Tests and evidence:
 - every MONEY literal, variable, and operation carries an explicit ISO currency; non-MONEY nodes use `currency: null`;
 - purchases are represented by explicit quantity and amount metrics and are not inferred from sales, inventory, payout, or configured product cost;
 - rounding-point mapping is unambiguous and versioned;
-- calculation profiles reference immutable positive integer versions and content hashes;
+- Calculation Profile references use canonical `{id, version, content_hash}` objects with positive integer versions;
 - golden values require an independent oracle and are not approved in B1a.
 
 ## Remaining B1a gate
