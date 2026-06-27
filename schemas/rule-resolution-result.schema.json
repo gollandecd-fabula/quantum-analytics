@@ -5,19 +5,13 @@
   "type": "object",
   "additionalProperties": false,
   "required": [
-    "resolver_contract_version", "context_hash", "state", "selected_rule",
-    "diagnostic_code", "candidates", "actor", "resolved_at", "trace_id"
+    "resolver_contract_version", "context_hash", "state", "diagnostic_code",
+    "candidates", "actor", "resolved_at", "trace_id"
   ],
   "properties": {
     "resolver_contract_version": {"type": "string", "minLength": 1},
     "context_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
     "state": {"type": "string", "enum": ["VALID", "BLOCKED", "CONFLICT", "UNAVAILABLE"]},
-    "selected_rule": {
-      "oneOf": [
-        {"$ref": "#/$defs/ruleRef"},
-        {"type": "null"}
-      ]
-    },
     "diagnostic_code": {
       "type": ["string", "null"],
       "enum": [
@@ -32,10 +26,11 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["rule", "eligible", "exclusion_reasons", "ordering_tuple"],
+        "required": ["rule", "eligible", "selected", "exclusion_reasons", "ordering_tuple"],
         "properties": {
           "rule": {"$ref": "#/$defs/ruleRef"},
           "eligible": {"type": "boolean"},
+          "selected": {"type": "boolean"},
           "exclusion_reasons": {
             "type": "array",
             "uniqueItems": true,
@@ -68,6 +63,7 @@
             },
             "else": {
               "properties": {
+                "selected": {"const": false},
                 "ordering_tuple": {"type": "null"},
                 "exclusion_reasons": {"minItems": 1}
               }
@@ -85,24 +81,36 @@
       "if": {"properties": {"state": {"const": "VALID"}}, "required": ["state"]},
       "then": {
         "properties": {
-          "selected_rule": {"$ref": "#/$defs/ruleRef"},
           "diagnostic_code": {"type": "null"},
           "candidates": {
             "type": "array",
             "minItems": 1,
             "contains": {
               "type": "object",
-              "properties": {"eligible": {"const": true}},
-              "required": ["eligible"]
+              "properties": {
+                "eligible": {"const": true},
+                "selected": {"const": true}
+              },
+              "required": ["eligible", "selected"]
             },
-            "minContains": 1
+            "minContains": 1,
+            "maxContains": 1
           }
         }
       },
       "else": {
         "properties": {
-          "selected_rule": {"type": "null"},
-          "diagnostic_code": {"type": "string"}
+          "diagnostic_code": {"type": "string"},
+          "candidates": {
+            "type": "array",
+            "contains": {
+              "type": "object",
+              "properties": {"selected": {"const": true}},
+              "required": ["selected"]
+            },
+            "minContains": 0,
+            "maxContains": 0
+          }
         }
       }
     }
