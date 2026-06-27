@@ -31,7 +31,7 @@ Pull Request: `#8`
 Contracts:
 
 - configuration rule and deterministic resolution;
-- safe expression with typed literal representations;
+- safe expression with typed literal and currency metadata rules;
 - calculation profile;
 - versioned rounding policy;
 - draft metric catalogue with separate purchase quantity and amount flows;
@@ -40,7 +40,7 @@ Contracts:
 Machine-readable schemas:
 
 - configuration rule with omission-only wildcard scope encoding;
-- safe expression;
+- safe expression with typed values and currency constraints on every node kind;
 - rounding policy;
 - calculation profile;
 - metric definition;
@@ -48,8 +48,10 @@ Machine-readable schemas:
 
 Tests and evidence:
 
-- resolution and validation vectors;
+- omission-only resolution and validation vectors;
+- strict resolver matcher with explicit-null rejection;
 - contract-alignment tests;
+- MONEY currency-node test;
 - execution-state test;
 - financial contract tests;
 - review-regression tests;
@@ -59,11 +61,11 @@ Tests and evidence:
 ## Verification
 
 - Foundation tests: 34.
-- B1a tests: 20.
-- Reproducible total: 54 passed tests.
-- Latest successful CI before final metadata synchronization: run `28295579493`, Python 3.12.3.
-- Independent Codex review produced 13 P1/P2 threads across multiple reviewed heads.
-- All 13 threads are resolved after contract, schema, catalogue, fixture, and test corrections.
+- B1a tests: 22.
+- Reproducible total: 56 passed tests.
+- Latest successful CI before final metadata synchronization: run `28296145692`, Python 3.12.3.
+- Independent Codex review produced 15 P1/P2 threads across multiple reviewed heads.
+- All 15 threads are resolved after contract, schema, catalogue, fixture, matcher, and test corrections.
 - Fresh CI and Codex review are required for this final metadata-synchronized head.
 
 ## Confirmed invariants
@@ -71,6 +73,7 @@ Tests and evidence:
 - no fixed commercial cost, tax, tax-base, other-expense, allocation, or rounding default;
 - exactly one rule method payload is present;
 - only `organization_id` is mandatory in rule scope; absent optional dimensions are the sole wildcard encoding and explicit nulls are forbidden;
+- resolver fixtures and matcher use the same omission-only wildcard semantics;
 - organization boundary and lexicographic scope specificity are deterministic;
 - unresolved semantic ties fail closed as `CONFLICT`;
 - missing required configuration becomes `BLOCKED`, not zero;
@@ -78,6 +81,7 @@ Tests and evidence:
 - Actual and Scenario remain isolated;
 - dependency cycles, unsafe expressions, invalid arity, overlap, and unit mismatch fail closed;
 - decimal, integer, and boolean literal representations match their declared types;
+- every MONEY literal, variable, and operation carries an explicit ISO currency; non-MONEY nodes use `currency: null`;
 - purchases are represented by explicit quantity and amount metrics and are not inferred from sales, inventory, payout, or configured product cost;
 - rounding-point mapping is unambiguous and versioned;
 - calculation profiles reference immutable positive integer versions and content hashes;
