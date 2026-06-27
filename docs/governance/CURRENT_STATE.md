@@ -18,8 +18,8 @@ B1a is R2 contract, schema, fixture, test, and evidence work. It does not implem
 - Foundation tests: 34.
 - B1a tests: 33.
 - Reproducible total: 67 passed tests.
-- Latest technical CI: `28303919943`, success on Python 3.12.3.
-- Codex review threads: 26 total, 0 unresolved.
+- Latest technical CI: `28304452418`, success on Python 3.12.3.
+- Codex review threads: 27 total, 0 unresolved.
 - Artifact manifest v6 verifies 157 tracked artifacts by SHA-256 and byte size.
 - Current metadata-synchronized head requires final CI and Codex review before squash merge.
 
@@ -36,7 +36,7 @@ B1a is R2 contract, schema, fixture, test, and evidence work. It does not implem
 - ACTUAL rejects Scenario rules; SCENARIO requires `scenario_id` and supports matching overrides;
 - eligible candidates carry complete ordering tuples;
 - zero remains a VALID value, not a state;
-- safe expressions are typed, arity constrained, currency aware, and comparisons return BOOLEAN;
+- safe expressions are typed and arity constrained; comparisons require `BOOLEAN`, `currency: null`, and `unit: BOOLEAN`;
 - metric units represent `MONEY_PER_ITEM` explicitly;
 - purchases use explicit quantity and amount metrics;
 - Calculation Profile references use `{id, version, content_hash}`;
