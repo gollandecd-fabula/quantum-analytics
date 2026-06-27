@@ -27,23 +27,26 @@ artifacts:
 
 checks:
   foundation_tests: 34
-  b1a_tests: 22
-  total_tests: 56
-  ci_run: 28296145692
+  b1a_tests: 24
+  total_tests: 58
+  ci_run: 28296767917
   ci_status: SUCCESS
   python: 3.12.3
-  review_threads_total: 15
+  review_threads_total: 17
   review_threads_unresolved: 0
   latest_head_review: PENDING_AFTER_METADATA_SYNC
 
 remediation_complete:
   - typed-state and valid-zero alignment
   - immutable numeric profile versions
+  - canonical profile reference shape uses id version and content_hash
   - organization boundary in resolution vectors
   - fail-closed overlap cycle and unit-mismatch vectors
   - exactly one rule method payload
   - omission-only wildcard scope encoding
   - resolution fixtures omit wildcard keys and reject explicit nulls
+  - eligible candidates require complete ordering tuples
+  - ineligible candidates require exclusion reasons and null tuples
   - safe-expression operator arity
   - typed literal value representations
   - MONEY currency required on literal variable and operation nodes
