@@ -8,7 +8,7 @@ import unittest
 
 from test_b1a_artifact_manifest import MANIFEST_PATH, expected_manifest
 
-CHUNK_SIZE = 2500
+CHUNK_SIZE = 1000
 
 
 class ArtifactManifestPayloadTests(unittest.TestCase):
