@@ -31,13 +31,17 @@ artifacts:
     - schemas/rule-resolution-result.schema.json
   tests:
     - tests/test_b1a_financial_contracts.py
+    - tests/test_b1a_execution_state.py
     - tests/contracts/fixtures/b1a-rule-resolution-vectors.json
+  state:
+    - docs/evidence/STAGE_B_EXECUTION_STATE.yaml
+    - docs/governance/CURRENT_STATE.md
 
 checks:
-  new_test_count: 9
+  new_test_count: 10
   ci: PENDING
   independent_review: PENDING
-  stage_state_sync: PENDING
+  stage_state_sync: COMPLETE
 
 invariants:
   - no fixed commercial defaults
