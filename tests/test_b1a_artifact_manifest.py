@@ -3,9 +3,9 @@ from __future__ import annotations
 import base64
 import hashlib
 import json
+import lzma
 import subprocess
 import unittest
-import zlib
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -56,13 +56,12 @@ def expected_manifest(current: dict) -> dict:
 
 def emit_regenerated_manifest(manifest: dict) -> None:
     payload = json.dumps(
-        manifest, ensure_ascii=False, indent=2, sort_keys=False
-    ).encode("utf-8") + b"\n"
-    encoded = base64.b64encode(zlib.compress(payload, level=9)).decode("ascii")
-    print("MANIFEST_ZLIB_B64_BEGIN")
-    for index in range(0, len(encoded), 800):
-        print(encoded[index:index + 800])
-    print("MANIFEST_ZLIB_B64_END")
+        manifest, ensure_ascii=False, separators=(",", ":")
+    ).encode("utf-8")
+    encoded = base64.b64encode(
+        lzma.compress(payload, preset=9 | lzma.PRESET_EXTREME)
+    ).decode("ascii")
+    print(f"MANIFEST_LZMA_B64={encoded}")
 
 
 class B1aArtifactManifestTests(unittest.TestCase):
