@@ -43,6 +43,28 @@ class B1aContractAlignmentTests(unittest.TestCase):
 
         self.assertEqual(observed, expected)
 
+    def test_scope_wildcards_use_omission_not_explicit_nulls(self) -> None:
+        schema = load_json(ROOT / "schemas/configuration-rule.schema.json")
+        scope = schema["properties"]["scope"]
+        optional_dimensions = {
+            "marketplace_account_id",
+            "marketplace",
+            "product_id",
+            "product_group_id",
+            "calculation_profile_id",
+            "scenario_id",
+        }
+
+        self.assertEqual(scope["required"], ["organization_id"])
+        self.assertIn("omission is the only wildcard encoding", scope["description"])
+        for dimension in optional_dimensions:
+            self.assertEqual(scope["properties"][dimension]["type"], "string")
+            self.assertEqual(scope["properties"][dimension]["minLength"], 1)
+        self.assertEqual(
+            scope["not"],
+            {"required": ["product_id", "product_group_id"]},
+        )
+
     def test_safe_expression_schema_enforces_operator_arities(self) -> None:
         schema = load_json(ROOT / "schemas/safe-expression.schema.json")
         branches = schema["$defs"]["operation"]["allOf"]
@@ -111,6 +133,7 @@ class B1aContractAlignmentTests(unittest.TestCase):
         expression = (ROOT / "docs/finance/SAFE_EXPRESSION_CONTRACT.md").read_text(encoding="utf-8")
 
         self.assertIn("versioned lexicographic vector", configuration)
+        self.assertIn("absence means wildcard", configuration)
         self.assertIn("product_id,", configuration)
         self.assertIn("Priority is considered", configuration)
         self.assertIn("unused\npayload properties are omitted", configuration)
