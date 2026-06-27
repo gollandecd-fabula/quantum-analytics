@@ -6,63 +6,53 @@ Tracking issue: `#7`
 
 ## Purpose
 
-This contract defines deterministic selection of configuration-rule versions
-for one calculation context. It does not evaluate financial formulas.
+The resolver chooses configuration deterministically for one calculation
+context and returns either exactly one selected candidate or a typed non-value
+state. It never guesses, silently chooses between equal candidates, or converts
+missing configuration to zero.
 
-## Inputs
+## Context
 
-Resolution requires an explicit context:
+The resolver receives an explicit context containing:
 
-- organization identifier;
-- marketplace account and marketplace where known;
-- canonical product and optional product group;
-- calculation profile;
-- mode: `ACTUAL` or `SCENARIO`;
-- scenario identifier for Scenario mode;
+- `organization_id`;
+- calculation mode: `ACTUAL` or `SCENARIO`;
 - calculation instant;
-- requested rule type or output identifier.
+- optional marketplace account;
+- optional marketplace;
+- optional product;
+- optional product group;
+- Calculation Profile identifier;
+- Scenario identifier when mode is Scenario.
 
-No context field is inferred from ambient process state.
+Wall-clock time and ambient tenant state are forbidden inputs.
 
 ## Candidate filtering
 
-Candidates are filtered in this order:
+A rule is eligible only when all conditions hold:
 
-1. stable rule/output identifier or requested rule type;
-2. lifecycle eligibility;
-3. calculation mode and scenario isolation;
-4. validity interval;
-5. organization boundary;
-6. optional scope dimensions;
-7. currency and unit compatibility;
-8. dependency availability;
-9. approval state required by the target profile.
+1. organization matches exactly;
+2. lifecycle status is allowed by the profile and publication class;
+3. calculation instant is inside `[valid_from, valid_to)`;
+4. every scoped dimension matches the context;
+5. Actual/Scenario isolation holds;
+6. dependencies are available and valid;
+7. no exclusion, suspension, or approval gate blocks the rule.
 
-A candidate failing any filter is excluded with a diagnostic reason.
+For scope matching, `organization_id` is always present and must match exactly.
+For every other supported scope dimension, an omitted property is the only
+wildcard encoding. A present property, including an explicit null, is not a
+wildcard and fails validation before resolution. Unknown scope properties are
+invalid.
 
-## Lifecycle eligibility
+An Actual context ignores Scenario-scoped rules. A Scenario context may use the
+explicit inherited Actual versions contained in its Calculation Profile and
+matching Scenario overrides.
 
-- Actual publication accepts `ACTIVE` only.
-- Shadow comparison accepts `ACTIVE` and `SHADOW` but labels results separately.
-- Pilot calculation accepts `ACTIVE` and the explicitly named `PILOT` set.
-- Scenario calculation uses Scenario-scoped rules plus explicitly inherited Actual rules.
-- `DRAFT`, `SUSPENDED`, and `RETIRED` are never newly selected.
+## Specificity
 
-## Deterministic ordering
-
-After filtering, candidates are ordered lexicographically by:
-
-1. scope specificity, descending;
-2. priority, descending;
-3. `valid_from`, descending;
-4. version, descending.
-
-`rule_id` is not a semantic tie-breaker. It may be used only for stable display
-of an already-conflicting set.
-
-## Specificity vector
-
-Specificity is represented as a fixed vector, not only a sum:
+Organization equality is a mandatory precondition and does not contribute to
+specificity. Specificity is the lexicographic vector:
 
 ```text
 (product_id,
@@ -74,94 +64,121 @@ Specificity is represented as a fixed vector, not only a sum:
 ```
 
 Each component is `1` when constrained by the rule and `0` when wildcard. The
-vector is compared left to right. This prevents two materially different
-scopes from becoming indistinguishable merely because they have the same count
-of constrained dimensions.
+vector is compared left to right. It is not replaced by a count of constrained
+dimensions.
 
-The order above is part of the versioned contract. Changing it requires a new
-contract version, impact preview, golden vectors, and approval.
+## Deterministic ordering
 
-## Winner and conflict
+Eligible candidates are ordered by:
 
-- Zero candidates: result `BLOCKED` with `RULE_REQUIRED_MISSING` when the metric requires the rule; otherwise the optional component is absent, not zero.
-- One candidate: selected.
-- Multiple candidates with a unique highest ordering tuple: highest candidate selected.
-- Multiple candidates sharing the complete highest ordering tuple: result `CONFLICT` with `RULE_RESOLUTION_TIE`.
+1. specificity vector, descending;
+2. explicit priority, descending;
+3. `valid_from`, descending;
+4. immutable rule version, descending.
 
-A lexical identifier or creation timestamp must not silently choose among a
-semantic tie.
+The complete ordering tuple is:
 
-## Exclusivity and additive components
+```text
+(specificity_vector, priority, valid_from, version)
+```
 
-Before resolution, activation validation checks intervals for rules sharing an
-`exclusivity_group`. Any overlapping eligible intervals in intersecting scopes
-produce `RULE_EXCLUSIVITY_OVERLAP` and prevent activation.
+Every eligible candidate records this complete tuple. A truncated tuple is
+invalid because it cannot reproduce the winner. An ineligible candidate records
+`ordering_tuple: null` and at least one exclusion reason.
 
-Rules are additive only when a metric definition lists their output identifiers
-as distinct additive components. Two rules of type `OTHER_EXPENSE` are not
-implicitly additive.
+Rule identifiers are not a financial tie-breaker. If two candidates remain
+equal across the full ordering tuple, resolution returns `CONFLICT` with
+`RULE_RESOLUTION_TIE`.
 
-## Scope intersection
+## Selection authority
 
-Two scopes intersect when there exists at least one calculation context matching
-both. A wildcard intersects every value. Different explicit values in the same
-dimension do not intersect.
+Candidate trace is the sole machine-readable authority for the selected rule.
+Every candidate records `selected: true` or `selected: false`.
 
-A rule containing both product and product-group restrictions is invalid in
-contract v1. Therefore membership resolution cannot create an undocumented
-intersection.
+- A `VALID` result contains exactly one candidate with both `eligible: true` and
+  `selected: true`.
+- The selected rule is the immutable `rule` reference inside that candidate.
+- Other eligible candidates use `selected: false`.
+- Ineligible candidates always use `selected: false`.
+- `BLOCKED`, `CONFLICT`, and `UNAVAILABLE` results contain no selected candidate.
 
-## Scenario isolation
+Contract v1 deliberately has no separate top-level `selected_rule` field. A
+duplicated rule reference cannot be proven equal to an array element by standard
+JSON Schema and would create two competing selection authorities.
 
-- Actual resolution ignores every rule with `scenario_id`.
-- Scenario resolution requires a scenario identifier.
-- Scenario rules may override inherited Actual rules using the same ordering
-  only inside that scenario.
-- Scenario selections and profile hashes are stored separately from Actual.
-- No Scenario status transition can activate an Actual rule.
+## Output states
 
-## Dependency graph
+- `VALID` — exactly one selected eligible candidate is returned.
+- `BLOCKED` — a required rule is absent or approval blocks calculation.
+- `CONFLICT` — equal eligible rules or a forbidden overlap prevent selection.
+- `UNAVAILABLE` — a required external dependency is unavailable.
 
-Rules and metric definitions form a directed graph. Validation requires:
+Numeric zero belongs only inside a `VALID` typed value after rule evaluation. It
+is not a resolution state.
 
-- every referenced node exists in the selected contract set;
-- graph is acyclic;
-- output types and units are compatible at every edge;
-- Actual nodes cannot depend on Scenario nodes;
-- unpublished or blocked nodes cannot be hidden by zero substitution.
+## Trace
 
-Cycle diagnostics include the complete ordered cycle path.
+Each result records:
 
-## Resolution trace
-
-Every resolution attempt records:
-
-- context hash;
-- candidate rule IDs and versions;
-- eligibility state for every candidate;
-- exclusion reasons;
-- ordering tuple for eligible candidates;
-- selected rule or typed conflict/missing state;
 - resolver contract version;
-- actor, timestamp, and trace ID.
+- normalized context hash;
+- result state;
+- diagnostic code where applicable;
+- every considered candidate;
+- candidate eligibility;
+- candidate selection marker;
+- exclusion reasons;
+- complete ordering tuple for eligible candidates;
+- actor, resolution time, and trace identifier.
 
-An eligible candidate always records its complete ordering tuple and has no
-exclusion reasons. An ineligible candidate records at least one exclusion reason
-and has `ordering_tuple: null`. These representations are mutually exclusive;
-an eligible candidate without its tuple is an invalid trace.
+## Fail-closed behavior
 
-The trace is part of the Evidence Chain and must be reproducible.
+The resolver does not select a rule when:
 
-## Test vectors
+- required configuration is missing;
+- an unresolved complete tie exists;
+- an exclusivity overlap exists;
+- a dependency is unknown, invalid, or cyclic;
+- units or currencies are incompatible;
+- the selected rule is not approved for the requested publication class.
 
-B1a maintains machine-readable vectors covering:
+Only calculations depending on the blocked rule are blocked. Unrelated metrics
+remain independently evaluable.
 
-- more-specific scope wins;
-- priority wins within identical scope specificity;
-- later validity start wins after equal priority;
-- later version wins after equal validity start;
-- complete tie produces `CONFLICT`;
-- missing required rule produces `BLOCKED`;
-- Actual ignores Scenario rules;
-- exclusivity overlap blocks activation;
-- cycle and unit mismatch fail closed.
+## Preview
+
+A proposed rule version can be evaluated in preview without activation. Preview
+uses the same resolver contract and returns:
+
+- current selected candidate;
+- proposed selected candidate;
+- affected scopes and periods;
+- conflicts and blocked dependencies;
+- metrics potentially affected;
+- direction or amount of change only when safely computable.
+
+Preview cannot mutate Actual profiles or activate a rule.
+
+## Golden vectors
+
+Machine-readable vectors cover:
+
+- product scope beating account scope;
+- priority breaking equal specificity;
+- later validity breaking equal priority;
+- version breaking equal validity;
+- complete tie returning `CONFLICT`;
+- missing required rule returning `BLOCKED`;
+- Actual ignoring Scenario rules;
+- Scenario override beating inherited Actual rule;
+- cross-organization exclusion;
+- overlap, cycle, and unit-mismatch diagnostics.
+
+Each resolution context declares `ACTUAL` or `SCENARIO` explicitly. Omitting mode
+is invalid rather than defaulting to Actual.
+
+## Gate
+
+B1a defines the contract, schema, vectors, and tests. Production resolver code,
+active-rule evaluation, and financial-result changes are B1b R3 work and are not
+authorized here.
