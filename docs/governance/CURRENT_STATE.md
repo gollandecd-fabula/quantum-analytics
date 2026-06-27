@@ -61,7 +61,9 @@ Schemas:
 Tests and evidence:
 
 - `tests/contracts/fixtures/b1a-rule-resolution-vectors.json`;
-- `tests/test_b1a_financial_contracts.py` with 9 contract tests;
+- `tests/test_b1a_financial_contracts.py` with 9 financial contract tests;
+- `tests/test_b1a_execution_state.py` with 1 live-state test;
+- 10 new B1a tests in total;
 - `docs/evidence/STAGE_B_B1A_CONTRACT_EVIDENCE.yaml`;
 - `docs/evidence/STAGE_B_EXECUTION_STATE.yaml`.
 
@@ -82,7 +84,7 @@ Tests and evidence:
 
 ## Pending B1a verification
 
-- run Foundation CI plus 9 B1a contract tests;
+- run Foundation CI plus 10 B1a contract tests;
 - inspect test failures and correct automatically within B1a;
 - verify live execution-state consistency;
 - open protected Pull Request;
