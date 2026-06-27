@@ -69,12 +69,14 @@ Tests and evidence:
 
 ## B1a verification
 
-- Initial PR #8 CI run `28292470434` completed successfully on Python 3.12.3.
+- Initial PR #8 CI run `28292470434` passed before evidence synchronization.
+- One transient-state assertion failed after CURRENT_STATE advanced to review-pending.
+- The focused test was corrected without weakening B0/B1a/R3 semantic assertions.
+- Corrected-head CI run `28292518502` completed successfully on Python 3.12.3.
 - Existing Foundation suite: 34 tests.
 - New B1a suite: 10 tests.
 - Reproducible total: 44 passed tests.
-- All new B1a tests are visible as `ok` in the job log.
-- Current-head CI after evidence updates is pending.
+- A final documentation-only CI is required for the current head after this synchronization.
 - Independent Codex review is pending.
 
 ## Contract invariants
@@ -94,7 +96,7 @@ Tests and evidence:
 
 ## Remaining B1a gate
 
-- latest-head Foundation CI must pass;
+- final documentation-only Foundation CI must pass;
 - PR #8 must be Ready for review;
 - independent Codex review must inspect the latest head;
 - all findings must be fixed and conversations resolved;
