@@ -71,7 +71,9 @@ class B1aContractAlignmentTests(unittest.TestCase):
         arities: dict[str, tuple[int, int]] = {}
 
         for branch in branches:
-            operator_rule = branch["if"]["properties"]["operator"]
+            operator_rule = branch["if"].get("properties", {}).get("operator")
+            if operator_rule is None:
+                continue
             operators = operator_rule.get("enum") or [operator_rule["const"]]
             arguments = branch["then"]["properties"]["arguments"]
             for operator in operators:
