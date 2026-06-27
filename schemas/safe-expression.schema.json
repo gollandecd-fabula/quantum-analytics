@@ -155,7 +155,8 @@
           "then": {
             "properties": {
               "value_type": {"const": "BOOLEAN"},
-              "currency": {"type": "null"}
+              "currency": {"type": "null"},
+              "unit": {"const": "BOOLEAN"}
             }
           }
         },
