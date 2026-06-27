@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://quantum.local/schemas/rule-resolution-result.schema.json",
+  "title": "Quantum Rule Resolution Result v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "resolver_contract_version", "context_hash", "state", "selected_rule",
+    "diagnostic_code", "candidates", "actor", "resolved_at", "trace_id"
+  ],
+  "properties": {
+    "resolver_contract_version": {"type": "string", "minLength": 1},
+    "context_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "state": {"type": "string", "enum": ["VALID", "BLOCKED", "CONFLICT", "UNAVAILABLE"]},
+    "selected_rule": {
+      "oneOf": [
+        {"$ref": "#/$defs/ruleRef"},
+        {"type": "null"}
+      ]
+    },
+    "diagnostic_code": {
+      "type": ["string", "null"],
+      "enum": [
+        null, "RULE_REQUIRED_MISSING", "RULE_RESOLUTION_TIE",
+        "RULE_EXCLUSIVITY_OVERLAP", "RULE_DEPENDENCY_UNKNOWN",
+        "RULE_DEPENDENCY_CYCLE", "RULE_UNIT_MISMATCH",
+        "RULE_CURRENCY_MISMATCH", "RULE_NOT_APPROVED"
+      ]
+    },
+    "candidates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["rule", "eligible", "exclusion_reasons", "ordering_tuple"],
+        "properties": {
+          "rule": {"$ref": "#/$defs/ruleRef"},
+          "eligible": {"type": "boolean"},
+          "exclusion_reasons": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {"type": "string", "minLength": 1}
+          },
+          "ordering_tuple": {
+            "type": ["array", "null"],
+            "prefixItems": [
+              {"type": "array", "minItems": 6, "maxItems": 6, "items": {"type": "integer", "minimum": 0, "maximum": 1}},
+              {"type": "integer"},
+              {"type": "string", "format": "date-time"},
+              {"type": "integer", "minimum": 1}
+            ],
+            "items": false
+          }
+        }
+      }
+    },
+    "actor": {"type": "string", "minLength": 1},
+    "resolved_at": {"type": "string", "format": "date-time"},
+    "trace_id": {"type": "string", "minLength": 1}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"state": {"const": "VALID"}}},
+      "then": {
+        "properties": {
+          "selected_rule": {"$ref": "#/$defs/ruleRef"},
+          "diagnostic_code": {"type": "null"}
+        }
+      },
+      "else": {
+        "properties": {
+          "selected_rule": {"type": "null"},
+          "diagnostic_code": {"type": "string"}
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "ruleRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rule_id", "version", "content_hash"],
+      "properties": {
+        "rule_id": {"type": "string", "minLength": 1},
+        "version": {"type": "integer", "minimum": 1},
+        "content_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+      }
+    }
+  }
+}
