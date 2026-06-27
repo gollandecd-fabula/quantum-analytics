@@ -1,7 +1,7 @@
 # CURRENT STATE
 
 Date: 2026-06-27
-Status: `FOUNDATION_REPOSITORY_CI_PASS_WITH_BLOCKERS`
+Status: `FOUNDATION_REPOSITORY_CONTROLS_ACTIVE_WITH_BLOCKERS`
 Active contract: `STAGE-A-FOUNDATION-v1`
 Completed unit: `A6 — DATA_PROOF`
 Current unit: `FOUNDATION_CLOSURE_BLOCKER_RESOLUTION`
@@ -13,7 +13,8 @@ Current unit: `FOUNDATION_CLOSURE_BLOCKER_RESOLUTION`
 - A4 Data Contract is machine-readable.
 - A5 Platform Foundation has executable API and Worker skeletons.
 - A6 synthetic Data Proof passes.
-- Dedicated private repository `gollandecd-fabula/quantum-analytics` is connected.
+- Repository `gollandecd-fabula/quantum-analytics` is connected and intentionally public during the free development phase.
+- Final repository access is intended to return to private/invited access after the development phase; application access remains a separate authorization control.
 - Initial `main` commit exists.
 - Working branch `bootstrap/foundation-v5` exists.
 - Draft Pull Request #2 imports the verified FOUNDATION bootstrap.
@@ -21,8 +22,11 @@ Current unit: `FOUNDATION_CLOSURE_BLOCKER_RESOLUTION`
 - Hidden `.github` files were restored through the GitHub Connector.
 - Thirteen `.gitkeep` files were normalized from zero bytes to one LF because the Connector blocks empty file creation.
 - GitHub workflow `Foundation CI` exists with read-only repository permissions and no third-party Actions.
-- Pull Request workflow run `28289475778` completed successfully.
-- GitHub runner used Python 3.12.3 and passed 29 tests.
+- GitHub runner uses Python 3.12 and passes 29 Foundation tests.
+- Active ruleset `Protect main` (ID `18204094`) applies to `main`.
+- The ruleset requires Pull Requests, required check `foundation`, up-to-date branches, and conversation resolution.
+- The ruleset blocks force pushes and branch deletion and has an empty bypass list.
+- Hosting is restricted by `Q-DEPLOY-001` to Railway, Vercel, or Cloudflare, with free-tier proof required before final selection.
 - No production, marketplace, or commercial data mutation occurred.
 
 ## A6 result
@@ -50,15 +54,27 @@ Status: `PASS_WITH_DOCUMENTED_NORMALIZATION`
 - Package manifest v5 remains the source package record.
 - Placeholder normalization affects no runtime, financial, schema, or test semantics.
 
+## Repository control verification
+
+Status: `PASS_WITH_UI_EVIDENCE`
+
+- Repository visibility: `public` during the free development phase.
+- Default branch: `main`.
+- Ruleset: `Protect main`, active, target `main`.
+- Required status check: `foundation` from GitHub Actions.
+- Required Pull Request and conversation resolution are enabled.
+- Force pushes and branch deletion are blocked.
+- Bypass list is empty.
+
 ## Foundation closure blockers
 
-1. `main` branch protection is not configured.
-2. The passing `foundation` check is not yet required by repository rules.
-3. PostgreSQL migration has not been applied or integration-tested.
-4. Production object storage is not implemented.
-5. Restore, rollback, backup, security, and staging evidence are incomplete.
-6. Real Wildberries schemas and Source Authority rules remain unverified.
-7. No anonymized representative marketplace file has been admitted.
+1. PostgreSQL migration has not been applied or integration-tested.
+2. Production object storage is not implemented.
+3. Restore, rollback, backup, security, and staging evidence are incomplete.
+4. Real Wildberries schemas and Source Authority rules remain unverified.
+5. No anonymized representative marketplace file has been admitted.
+6. Railway, Vercel, and Cloudflare have not yet completed comparative free-tier staging proof.
+7. Authentication and approved-user-only application access are specified but not implemented.
 
 ## Release state
 
