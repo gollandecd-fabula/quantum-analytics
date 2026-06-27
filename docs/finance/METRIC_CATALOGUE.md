@@ -21,6 +21,8 @@ SHA-256, rounding policy, Source Authority, actor, reason, and trace evidence.
 |---|---|---|---|---|---|
 | `orders_count` | OPERATIONAL | INTEGER / ORDER | EVENT_AGGREGATE | accepted order events | none |
 | `ordered_units` | OPERATIONAL | INTEGER / ITEM | EVENT_AGGREGATE | ordered quantity | none |
+| `purchased_units` | OPERATIONAL | INTEGER / ITEM | EXTERNAL_SOURCE | admitted purchase quantity source or accepted purchase events | none; purchases are a separate inventory flow |
+| `purchase_amount` | OPERATIONAL | MONEY | EXTERNAL_SOURCE | admitted purchase amount source with currency and source evidence | purchase acquisition amount only; not sales revenue, payout, or product-cost allocation |
 | `gross_sales_units` | OPERATIONAL | INTEGER / ITEM | EVENT_AGGREGATE | recognized sale quantity | none |
 | `returned_units` | OPERATIONAL | INTEGER / ITEM | EVENT_AGGREGATE | accepted return quantity | none |
 | `net_sold_units` | OPERATIONAL | INTEGER / ITEM | DERIVED | gross sales units, returned units | none |
@@ -46,6 +48,8 @@ SHA-256, rounding policy, Source Authority, actor, reason, and trace evidence.
 ## Semantic constraints
 
 - Orders, sales, purchases, returns, charges, payouts, and inventory are separate flows.
+- `purchased_units` and `purchase_amount` require admitted purchase evidence and cannot be inferred from orders, sales, inventory changes, payout, or a configured product-cost rule.
+- `purchase_amount` is an acquisition-flow metric and is not automatically included in `product_cost_amount`, `net_marketplace_income_amount`, or `net_profit_amount`; any allocation or recognition requires a separately approved metric/rule contract.
 - A payout is not revenue and is not silently used as a sales metric.
 - `net_sold_units` does not treat missing return data as zero.
 - A zero denominator produces `BLOCKED`, not infinity, zero, or an empty value.
