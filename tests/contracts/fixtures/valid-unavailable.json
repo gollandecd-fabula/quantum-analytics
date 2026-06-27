@@ -1,0 +1,10 @@
+{
+  "state": "UNAVAILABLE",
+  "value": null,
+  "value_type": null,
+  "unit": null,
+  "reason_code": "SOURCE_DOES_NOT_PROVIDE_FIELD",
+  "source_record_id": "src_demo_unavailable",
+  "observed_at": "2026-06-01T12:00:00Z",
+  "metadata": {}
+}

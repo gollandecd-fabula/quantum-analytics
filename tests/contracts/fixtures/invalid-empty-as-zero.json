@@ -1,0 +1,10 @@
+{
+  "state": "EMPTY",
+  "value": "0.00",
+  "value_type": "decimal",
+  "unit": "RUB",
+  "reason_code": "SOURCE_EMPTY",
+  "source_record_id": "src_invalid",
+  "observed_at": "2026-06-01T12:00:00Z",
+  "metadata": {}
+}

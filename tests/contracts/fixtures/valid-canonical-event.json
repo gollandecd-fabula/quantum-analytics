@@ -1,0 +1,51 @@
+{
+  "event_id": "evt_sale_001",
+  "organization_id": "org_demo",
+  "marketplace_account_id": "mp_demo",
+  "event_type": "SALE_RECOGNIZED",
+  "event_time": "2026-06-01T12:00:00Z",
+  "recognition_time": "2026-06-01T12:00:00Z",
+  "stable_business_key": "sale:demo:001",
+  "source_row_key": "sheet1:row:2",
+  "revision": 1,
+  "idempotency_key": "idem:demo:sale:001:r1",
+  "semantic_payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "supersedes_event_id": null,
+  "reversal_of_event_id": null,
+  "import_batch_id": "batch_demo_001",
+  "source_record_id": "src_demo_001",
+  "schema_version": "1.0",
+  "payload": {
+    "gross_amount": {
+      "state": "VALID",
+      "value": "1250.00",
+      "value_type": "decimal",
+      "unit": "RUB",
+      "reason_code": null,
+      "source_record_id": "src_demo_001",
+      "observed_at": "2026-06-01T12:00:00Z",
+      "metadata": {}
+    },
+    "quantity": {
+      "state": "VALID",
+      "value": 1,
+      "value_type": "integer",
+      "unit": "item",
+      "reason_code": null,
+      "source_record_id": "src_demo_001",
+      "observed_at": "2026-06-01T12:00:00Z",
+      "metadata": {}
+    }
+  },
+  "provenance": {
+    "source_file_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "source_adapter": "wildberries-draft",
+    "source_schema_id": "wb-demo-v1",
+    "normalization_rule_version": "norm-1",
+    "product_master_version": null,
+    "actor": "worker",
+    "trace_id": "trace-demo-001"
+  },
+  "status": "VALID",
+  "created_at": "2026-06-01T12:00:01Z"
+}

@@ -1,0 +1,228 @@
+{
+  "events": [
+    {
+      "event_id": "evt-sale-001-r1",
+      "organization_id": "org-synthetic",
+      "marketplace_account_id": "wb-synthetic-account",
+      "event_type": "SALE_RECOGNIZED",
+      "event_time": "2026-06-01T10:00:00+00:00",
+      "recognition_time": "2026-06-01T10:05:00+00:00",
+      "stable_business_key": "sale-001",
+      "source_row_key": "csv:row:1",
+      "revision": 1,
+      "idempotency_key": "6837bc1cafa89bb8b70b94c259a7c1e829861f3e82aacaf650db8accada18889",
+      "semantic_payload_hash": "178371886df1d27e17c58d7c52b20718ddb8058d2a4d0b6dfdf71f573943b0e1",
+      "supersedes_event_id": null,
+      "reversal_of_event_id": null,
+      "import_batch_id": "batch-b9eb38af52a26f3d",
+      "source_record_id": "src-b9eb38af52a2-1",
+      "schema_version": "wb-synthetic-operations-v1",
+      "payload": {
+        "product_external_id": {
+          "state": "VALID",
+          "value": "product-demo-a",
+          "value_type": "string",
+          "unit": null,
+          "reason_code": null,
+          "source_record_id": "src-b9eb38af52a2-1"
+        },
+        "quantity": {
+          "state": "VALID",
+          "value": 1,
+          "value_type": "integer",
+          "unit": "item",
+          "reason_code": null,
+          "source_record_id": "src-b9eb38af52a2-1"
+        },
+        "gross_amount": {
+          "state": "VALID",
+          "value": "1000.00",
+          "value_type": "decimal",
+          "unit": "RUB",
+          "reason_code": null,
+          "source_record_id": "src-b9eb38af52a2-1"
+        }
+      },
+      "provenance": {
+        "source_file_sha256": "b9eb38af52a26f3d90eb4dbd26cc0667c1f55f5670398fb4c8f1b38643cf9ea1",
+        "source_adapter": "wildberries-synthetic",
+        "source_adapter_version": "1.0",
+        "source_schema_id": "wb-synthetic-operations-v1",
+        "normalization_rule_version": "wb-synthetic-normalization-v1",
+        "product_master_version": null,
+        "actor": "a6-proof-worker",
+        "trace_id": "trace-b9eb38af52a26f3d"
+      },
+      "status": "VALID",
+      "created_at": "2026-06-01T10:05:00+00:00"
+    },
+    {
+      "event_id": "evt-sale-002-r1",
+      "organization_id": "org-synthetic",
+      "marketplace_account_id": "wb-synthetic-account",
+      "event_type": "SALE_RECOGNIZED",
+      "event_time": "2026-06-02T11:00:00+00:00",
+      "recognition_time": "2026-06-02T11:05:00+00:00",
+      "stable_business_key": "sale-002",
+      "source_row_key": "csv:row:2",
+      "revision": 1,
+      "idempotency_key": "148df8823a47f6c18a5dd30dc4e39aee4d6d74a39b857e60d5e5e7ac74ff3f56",
+      "semantic_payload_hash": "03cd61122f8ce3e3b36ad2eaa96e1f59e52c249c3f412fc592878384dc786d5a",
+      "supersedes_event_id": null,
+      "reversal_of_event_id": null,
+      "import_batch_id": "batch-b9eb38af52a26f3d",
+      "source_record_id": "src-b9eb38af52a2-2",
+      "schema_version": "wb-synthetic-operations-v1",
+      "payload": {
+        "product_external_id": {
+          "state": "VALID",
+          "value": "product-demo-b",
+          "value_type": "string",
+          "unit": null,
+          "reason_code": null,
+          "source_record_id": "src-b9eb38af52a2-2"
+        },
+        "quantity": {
+          "state": "VALID",
+          "value": 1,
+          "value_type": "integer",
+          "unit": "item",
+          "reason_code": null,
+          "source_record_id": "src-b9eb38af52a2-2"
+        },
+        "gross_amount": {
+          "state": "VALID",
+          "value": "1500.00",
+          "value_type": "decimal",
+          "unit": "RUB",
+          "reason_code": null,
+          "source_record_id": "src-b9eb38af52a2-2"
+        }
+      },
+      "provenance": {
+        "source_file_sha256": "b9eb38af52a26f3d90eb4dbd26cc0667c1f55f5670398fb4c8f1b38643cf9ea1",
+        "source_adapter": "wildberries-synthetic",
+        "source_adapter_version": "1.0",
+        "source_schema_id": "wb-synthetic-operations-v1",
+        "normalization_rule_version": "wb-synthetic-normalization-v1",
+        "product_master_version": null,
+        "actor": "a6-proof-worker",
+        "trace_id": "trace-b9eb38af52a26f3d"
+      },
+      "status": "VALID",
+      "created_at": "2026-06-02T11:05:00+00:00"
+    },
+    {
+      "event_id": "evt-sale-002-r2",
+      "organization_id": "org-synthetic",
+      "marketplace_account_id": "wb-synthetic-account",
+      "event_type": "SALE_RECOGNIZED",
+      "event_time": "2026-06-02T11:00:00+00:00",
+      "recognition_time": "2026-06-03T09:00:00+00:00",
+      "stable_business_key": "sale-002",
+      "source_row_key": "csv:row:3",
+      "revision": 2,
+      "idempotency_key": "e10acfe176386161e00f6d1580862638433a454caab23fefe849d0d35c4c362b",
+      "semantic_payload_hash": "1b34df922ec3c9838233a02ea3d87837353d9a9569230d2494d02b1480e563fb",
+      "supersedes_event_id": "evt-sale-002-r1",
+      "reversal_of_event_id": null,
+      "import_batch_id": "batch-b9eb38af52a26f3d",
+      "source_record_id": "src-b9eb38af52a2-3",
+      "schema_version": "wb-synthetic-operations-v1",
+      "payload": {
+        "product_external_id": {
+          "state": "VALID",
+          "value": "product-demo-b",
+          "value_type": "string",
+          "unit": null,
+          "reason_code": null,
+          "source_record_id": "src-b9eb38af52a2-3"
+        },
+        "quantity": {
+          "state": "VALID",
+          "value": 1,
+          "value_type": "integer",
+          "unit": "item",
+          "reason_code": null,
+          "source_record_id": "src-b9eb38af52a2-3"
+        },
+        "gross_amount": {
+          "state": "VALID",
+          "value": "1400.00",
+          "value_type": "decimal",
+          "unit": "RUB",
+          "reason_code": null,
+          "source_record_id": "src-b9eb38af52a2-3"
+        }
+      },
+      "provenance": {
+        "source_file_sha256": "b9eb38af52a26f3d90eb4dbd26cc0667c1f55f5670398fb4c8f1b38643cf9ea1",
+        "source_adapter": "wildberries-synthetic",
+        "source_adapter_version": "1.0",
+        "source_schema_id": "wb-synthetic-operations-v1",
+        "normalization_rule_version": "wb-synthetic-normalization-v1",
+        "product_master_version": null,
+        "actor": "a6-proof-worker",
+        "trace_id": "trace-b9eb38af52a26f3d"
+      },
+      "status": "VALID",
+      "created_at": "2026-06-03T09:00:00+00:00"
+    },
+    {
+      "event_id": "evt-return-001-r1",
+      "organization_id": "org-synthetic",
+      "marketplace_account_id": "wb-synthetic-account",
+      "event_type": "RETURN_ACCEPTED",
+      "event_time": "2026-06-04T14:00:00+00:00",
+      "recognition_time": "2026-06-04T14:05:00+00:00",
+      "stable_business_key": "return-001",
+      "source_row_key": "csv:row:4",
+      "revision": 1,
+      "idempotency_key": "9217f15a61763e1b6d48600e7a2e8d189b85c3ba54c704e24215310bf574e35d",
+      "semantic_payload_hash": "95abd6604251e6fa6036dd353c93cded845fc4a83094c59748d7ffecfc06aed4",
+      "supersedes_event_id": null,
+      "reversal_of_event_id": "evt-sale-001-r1",
+      "import_batch_id": "batch-b9eb38af52a26f3d",
+      "source_record_id": "src-b9eb38af52a2-4",
+      "schema_version": "wb-synthetic-operations-v1",
+      "payload": {
+        "product_external_id": {
+          "state": "VALID",
+          "value": "product-demo-a",
+          "value_type": "string",
+          "unit": null,
+          "reason_code": null,
+          "source_record_id": "src-b9eb38af52a2-4"
+        },
+        "quantity": {
+          "state": "VALID",
+          "value": 1,
+          "value_type": "integer",
+          "unit": "item",
+          "reason_code": null,
+          "source_record_id": "src-b9eb38af52a2-4"
+        },
+        "gross_amount": {
+          "state": "VALID",
+          "value": "1000.00",
+          "value_type": "decimal",
+          "unit": "RUB",
+          "reason_code": null,
+          "source_record_id": "src-b9eb38af52a2-4"
+        }
+      },
+      "provenance": {
+        "source_file_sha256": "b9eb38af52a26f3d90eb4dbd26cc0667c1f55f5670398fb4c8f1b38643cf9ea1",
+        "source_adapter": "wildberries-synthetic",
+        "source_adapter_version": "1.0",
+        "source_schema_id": "wb-synthetic-operations-v1",
+        "normalization_rule_version": "wb-synthetic-normalization-v1",
+        "product_master_version": null,
+        "actor": "a6-proof-worker",
+        "trace_id": "trace-b9eb38af52a26f3d"
+      },
+      "status": "VALID",
+      "created_at": "2026-06-04T14:05:00+00:00"
+    }
+  ]
+}
