@@ -124,6 +124,15 @@
       }
     },
     {
+      "if": {
+        "properties": {"base": {"const": "CUSTOM_VARIABLE"}},
+        "required": ["base"]
+      },
+      "then": {
+        "properties": {"dependencies": {"minItems": 1}}
+      }
+    },
+    {
       "if": {"properties": {"unit": {"enum": ["MONEY", "MONEY_PER_ITEM", "MONEY_PER_ORDER", "MONEY_PER_EVENT", "MONEY_PER_PERIOD"]}}, "required": ["unit"]},
       "then": {"properties": {"currency": {"type": "string"}}},
       "else": {"properties": {"currency": {"type": "null"}}}
