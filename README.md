@@ -10,9 +10,11 @@ Universal read-only marketplace analytics platform.
 - Active stage contract: `docs/stage-contracts/STAGE-A-FOUNDATION-v1.md`
 - Repository: `gollandecd-fabula/quantum-analytics`
 - Working branch: `bootstrap/foundation-v5`
-- Draft Pull Request: `#2 — FOUNDATION: import verified bootstrap v5`
+- Pull Request: `#2 — FOUNDATION: import verified bootstrap v5` — Ready for merge
 - Bootstrap import status: `PASS_WITH_DOCUMENTED_NORMALIZATION`
-- GitHub check: `Foundation CI / foundation — PASS (29 tests)`
+- Repository controls: `Protect main` ruleset — Active
+- GitHub check: `Foundation CI / foundation — PASS (34 tests)`
+- Review remediation: 1 P1 and 3 P2 findings fixed; all review threads resolved
 
 ## Architecture baseline
 
@@ -31,4 +33,4 @@ MVP is read-only. External marketplace write tokens, write methods, and producti
 
 `RELEASE_BLOCKED`
 
-The dedicated repository is connected, the verified bootstrap is present in Draft PR #2, and the Foundation CI check passes. Merge remains blocked until `main` protection, PostgreSQL integration evidence, production object-storage and recovery evidence, and representative Wildberries source contracts are available.
+The governed repository baseline is ready for merge into protected `main`. Production release remains blocked until PostgreSQL integration evidence, production object-storage and recovery evidence, representative Wildberries source contracts, approved-user authentication, and free-tier staging proof for Railway, Vercel, or Cloudflare are available.
