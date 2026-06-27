@@ -16,7 +16,7 @@
     "content_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
     "rule_type": {
       "type": "string",
-      "enum": ["COST", "TAX", "OTHER_EXPENSE", "ALLOCATION", "ROUNDING"]
+      "enum": ["COST", "TAX", "OTHER_EXPENSE", "ALLOCATION"]
     },
     "scope": {
       "type": "object",
