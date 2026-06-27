@@ -3,6 +3,7 @@
 Date: 2026-06-27
 Status: `BUILD_B1A_IN_PROGRESS`
 Active contract: `STAGE-B-BUILD-v1`
+Live execution state: `docs/evidence/STAGE_B_EXECUTION_STATE.yaml`
 Completed macro-stage: `A — FOUNDATION`
 Completed unit: `B0 — BUILD_READINESS_AND_STAGE_CONTRACT`
 Current unit: `B1a — FINANCIAL_RULE_CONTRACTS_AND_RESOLUTION`
@@ -14,6 +15,8 @@ Working branch: `build-b1a-financial-contracts`
 - Constitution v3.0 / Plan v152.0 remains authoritative.
 - Macro-stage B was explicitly approved and recorded in `DEC-024`.
 - B1a is R2 contracts/schemas/tests work allowed by Stage Contract B after B0 merge.
+- The Stage Contract file is an immutable normative and initial-plan snapshot.
+- `STAGE_B_EXECUTION_STATE.yaml` and this document are the live unit-state sources.
 - B1b, B2, B6, B7, all R4 work, real-data admission, rule activation, and production remain separately gated.
 
 ## Completed B0 baseline
@@ -59,7 +62,8 @@ Tests and evidence:
 
 - `tests/contracts/fixtures/b1a-rule-resolution-vectors.json`;
 - `tests/test_b1a_financial_contracts.py` with 9 contract tests;
-- `docs/evidence/STAGE_B_B1A_CONTRACT_EVIDENCE.yaml`.
+- `docs/evidence/STAGE_B_B1A_CONTRACT_EVIDENCE.yaml`;
+- `docs/evidence/STAGE_B_EXECUTION_STATE.yaml`.
 
 ## Contract invariants
 
@@ -80,7 +84,7 @@ Tests and evidence:
 
 - run Foundation CI plus 9 B1a contract tests;
 - inspect test failures and correct automatically within B1a;
-- synchronize Stage Contract live-state summary;
+- verify live execution-state consistency;
 - open protected Pull Request;
 - obtain independent Codex review;
 - resolve all findings and re-run CI;
