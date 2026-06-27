@@ -1,7 +1,7 @@
 # CURRENT STATE
 
 Date: 2026-06-27
-Status: `BUILD_B1A_FINAL_REVIEW_PENDING`
+Status: `BUILD_B1A_READY_FOR_MERGE`
 Active contract: `STAGE-B-BUILD-v1`
 Live execution state: `docs/evidence/STAGE_B_EXECUTION_STATE.yaml`
 Completed macro-stage: `A — FOUNDATION`
@@ -44,7 +44,7 @@ Machine-readable schemas:
 - rounding policy;
 - calculation profile with `{id, version, content_hash}` references;
 - metric definition;
-- rule-resolution result with eligible-dependent trace requirements.
+- rule-resolution result with complete eligible-candidate trace requirements.
 
 Tests and evidence:
 
@@ -63,10 +63,11 @@ Tests and evidence:
 - Foundation tests: 34.
 - B1a tests: 24.
 - Reproducible total: 58 passed tests.
-- Latest successful CI before final metadata synchronization: run `28296767917`, Python 3.12.3.
-- Independent Codex review produced 17 P1/P2 threads across multiple reviewed heads.
-- All 17 threads are resolved after contract, schema, catalogue, fixture, matcher, and test corrections.
-- Fresh CI and Codex review are required for this final metadata-synchronized head.
+- Latest technical CI: run `28297320482`, Python 3.12.3, success.
+- Independent Codex review produced 18 P1/P2 threads across multiple reviewed heads.
+- All 18 threads are resolved.
+- Technical head `b23159d5d4d3e4f5ceafde2c95865b14fa997312` received a clean review after remediation.
+- Current metadata-only head must pass CI and Codex review before squash merge.
 
 ## Confirmed invariants
 
@@ -75,7 +76,7 @@ Tests and evidence:
 - only `organization_id` is mandatory in rule scope; absent optional dimensions are the sole wildcard encoding and explicit nulls are forbidden;
 - resolver fixtures and matcher use the same omission-only wildcard semantics;
 - organization boundary and lexicographic scope specificity are deterministic;
-- eligible candidates always contain complete ordering tuples and no exclusion reasons;
+- eligible candidates contain exactly four ordering components and no exclusion reasons;
 - ineligible candidates contain at least one exclusion reason and a null ordering tuple;
 - unresolved semantic ties fail closed as `CONFLICT`;
 - missing required configuration becomes `BLOCKED`, not zero;
@@ -91,9 +92,8 @@ Tests and evidence:
 
 ## Remaining B1a gate
 
-- final-head CI must pass;
-- final-head Codex review must complete;
-- any new findings must be fixed and resolved;
+- current metadata-only head CI must pass;
+- current metadata-only head Codex review must complete with no unresolved findings;
 - PR #8 must be squash-merged through protected `main`.
 
 ## Approval gates
