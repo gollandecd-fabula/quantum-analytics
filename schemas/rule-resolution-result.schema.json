@@ -51,7 +51,27 @@
             ],
             "items": false
           }
-        }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {"eligible": {"const": true}},
+              "required": ["eligible"]
+            },
+            "then": {
+              "properties": {
+                "ordering_tuple": {"type": "array"},
+                "exclusion_reasons": {"maxItems": 0}
+              }
+            },
+            "else": {
+              "properties": {
+                "ordering_tuple": {"type": "null"},
+                "exclusion_reasons": {"minItems": 1}
+              }
+            }
+          }
+        ]
       }
     },
     "actor": {"type": "string", "minLength": 1},
@@ -60,7 +80,7 @@
   },
   "allOf": [
     {
-      "if": {"properties": {"state": {"const": "VALID"}}},
+      "if": {"properties": {"state": {"const": "VALID"}}, "required": ["state"]},
       "then": {
         "properties": {
           "selected_rule": {"$ref": "#/$defs/ruleRef"},
