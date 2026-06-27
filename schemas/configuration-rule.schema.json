@@ -1,147 +1,151 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://quantum.local/schemas/configuration-rule.schema.json",
-  "title": "Quantum Configuration Rule",
+  "title": "Quantum Configuration Rule v1",
   "type": "object",
   "additionalProperties": false,
   "required": [
-    "rule_id",
-    "rule_type",
-    "scope",
-    "method",
-    "base",
-    "unit",
-    "currency",
-    "valid_from",
-    "priority",
-    "version",
-    "status",
-    "actor"
+    "rule_id", "version", "content_hash", "rule_type", "scope", "method",
+    "base", "unit", "currency", "dependencies", "valid_from", "valid_to",
+    "priority", "exclusivity_group", "status", "source", "actor",
+    "created_at", "change_reason", "approval_reference", "supersedes"
   ],
   "properties": {
-    "rule_id": {
-      "type": "string",
-      "minLength": 1
-    },
+    "rule_id": {"type": "string", "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,127}$"},
+    "version": {"type": "integer", "minimum": 1},
+    "content_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
     "rule_type": {
       "type": "string",
-      "enum": [
-        "COST",
-        "TAX",
-        "OTHER_EXPENSE",
-        "ALLOCATION",
-        "ROUNDING"
-      ]
+      "enum": ["COST", "TAX", "OTHER_EXPENSE", "ALLOCATION", "ROUNDING"]
     },
     "scope": {
       "type": "object",
-      "minProperties": 1
-    },
-    "method": {
-      "type": "string",
-      "minLength": 1
-    },
-    "value": {
-      "type": [
-        "string",
-        "null"
+      "additionalProperties": false,
+      "required": [
+        "organization_id", "marketplace_account_id", "marketplace",
+        "product_id", "product_group_id", "calculation_profile_id",
+        "scenario_id"
       ],
-      "pattern": "^-?[0-9]+(\\.[0-9]+)?$"
+      "properties": {
+        "organization_id": {"type": "string", "minLength": 1},
+        "marketplace_account_id": {"type": ["string", "null"], "minLength": 1},
+        "marketplace": {"type": ["string", "null"], "minLength": 1},
+        "product_id": {"type": ["string", "null"], "minLength": 1},
+        "product_group_id": {"type": ["string", "null"], "minLength": 1},
+        "calculation_profile_id": {"type": ["string", "null"], "minLength": 1},
+        "scenario_id": {"type": ["string", "null"], "minLength": 1}
+      },
+      "not": {
+        "required": ["product_id", "product_group_id"],
+        "properties": {
+          "product_id": {"type": "string"},
+          "product_group_id": {"type": "string"}
+        }
+      }
+    },
+    "method": {"type": "string", "enum": ["FIXED_VALUE", "RATE", "SAFE_EXPRESSION"]},
+    "value": {
+      "type": ["string", "null"],
+      "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
     },
     "rate": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "pattern": "^-?[0-9]+(\\.[0-9]+)?$"
+      "type": ["string", "null"],
+      "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+    },
+    "expression": {
+      "oneOf": [
+        {"$ref": "safe-expression.schema.json"},
+        {"type": "null"}
+      ]
     },
     "base": {
       "type": "string",
-      "minLength": 1
+      "enum": [
+        "NONE", "UNIT", "ORDER", "EVENT", "PERIOD", "GROSS_SALES",
+        "NET_SALES", "PAYOUT", "PRODUCT_COST", "CUSTOM_VARIABLE"
+      ]
     },
     "unit": {
       "type": "string",
-      "minLength": 1
-    },
-    "currency": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "minLength": 3
-    },
-    "valid_from": {
-      "type": "string",
-      "format": "date-time"
-    },
-    "valid_to": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "format": "date-time"
-    },
-    "priority": {
-      "type": "integer"
-    },
-    "exclusivity_group": {
-      "type": [
-        "string",
-        "null"
+      "enum": [
+        "MONEY", "MONEY_PER_ITEM", "MONEY_PER_ORDER", "MONEY_PER_EVENT",
+        "MONEY_PER_PERIOD", "RATE", "DIMENSIONLESS"
       ]
     },
-    "source": {
-      "type": [
-        "string",
-        "null"
-      ]
+    "currency": {"type": ["string", "null"], "pattern": "^[A-Z]{3}$"},
+    "dependencies": {
+      "type": "array",
+      "uniqueItems": true,
+      "maxItems": 128,
+      "items": {"type": "string", "pattern": "^[a-z][a-z0-9_.:-]{0,127}$"}
     },
-    "version": {
-      "type": "integer",
-      "minimum": 1
-    },
+    "valid_from": {"type": "string", "format": "date-time"},
+    "valid_to": {"type": ["string", "null"], "format": "date-time"},
+    "priority": {"type": "integer", "minimum": -100000, "maximum": 100000},
+    "exclusivity_group": {"type": ["string", "null"], "minLength": 1},
     "status": {
       "type": "string",
-      "enum": [
-        "DRAFT",
-        "SHADOW",
-        "PILOT",
-        "ACTIVE",
-        "SUSPENDED",
-        "RETIRED"
-      ]
+      "enum": ["DRAFT", "SHADOW", "PILOT", "ACTIVE", "SUSPENDED", "RETIRED"]
     },
-    "actor": {
-      "type": "string",
-      "minLength": 1
+    "source": {"type": "string", "minLength": 1},
+    "actor": {"type": "string", "minLength": 1},
+    "created_at": {"type": "string", "format": "date-time"},
+    "change_reason": {"type": "string", "minLength": 1},
+    "approval_reference": {"type": ["string", "null"], "minLength": 1},
+    "supersedes": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["rule_id", "version"],
+          "properties": {
+            "rule_id": {"type": "string", "minLength": 1},
+            "version": {"type": "integer", "minimum": 1}
+          }
+        },
+        {"type": "null"}
+      ]
     }
   },
-  "oneOf": [
+  "allOf": [
     {
-      "required": [
-        "value"
-      ],
-      "properties": {
-        "value": {
-          "type": "string"
-        },
-        "rate": {
-          "type": "null"
+      "if": {"properties": {"method": {"const": "FIXED_VALUE"}}},
+      "then": {
+        "required": ["value", "rate", "expression"],
+        "properties": {
+          "value": {"type": "string"},
+          "rate": {"type": "null"},
+          "expression": {"type": "null"}
         }
       }
     },
     {
-      "required": [
-        "rate"
-      ],
-      "properties": {
-        "rate": {
-          "type": "string"
+      "if": {"properties": {"method": {"const": "RATE"}}},
+      "then": {
+        "required": ["value", "rate", "expression"],
+        "properties": {
+          "value": {"type": "null"},
+          "rate": {"type": "string"},
+          "expression": {"type": "null"}
         },
-        "value": {
-          "type": "null"
+        "not": {"properties": {"base": {"const": "NONE"}}}
+      }
+    },
+    {
+      "if": {"properties": {"method": {"const": "SAFE_EXPRESSION"}}},
+      "then": {
+        "required": ["value", "rate", "expression"],
+        "properties": {
+          "value": {"type": "null"},
+          "rate": {"type": "null"},
+          "expression": {"$ref": "safe-expression.schema.json"}
         }
       }
+    },
+    {
+      "if": {"properties": {"unit": {"enum": ["MONEY", "MONEY_PER_ITEM", "MONEY_PER_ORDER", "MONEY_PER_EVENT", "MONEY_PER_PERIOD"]}}},
+      "then": {"properties": {"currency": {"type": "string"}}},
+      "else": {"properties": {"currency": {"type": "null"}}}
     }
   ]
 }
