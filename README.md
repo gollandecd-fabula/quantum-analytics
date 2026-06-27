@@ -12,6 +12,7 @@ Universal read-only marketplace analytics platform.
 - Working branch: `bootstrap/foundation-v5`
 - Draft Pull Request: `#2 — FOUNDATION: import verified bootstrap v5`
 - Bootstrap import status: `PASS_WITH_DOCUMENTED_NORMALIZATION`
+- GitHub check: `Foundation CI / foundation — PASS (29 tests)`
 
 ## Architecture baseline
 
@@ -30,4 +31,4 @@ MVP is read-only. External marketplace write tokens, write methods, and producti
 
 `RELEASE_BLOCKED`
 
-The repository is connected and the verified bootstrap is present in a Draft Pull Request. Merge remains blocked until repository CI, protected `main`, PostgreSQL integration evidence, recovery evidence, and representative Wildberries source contracts are available.
+The dedicated repository is connected, the verified bootstrap is present in Draft PR #2, and the Foundation CI check passes. Merge remains blocked until `main` protection, PostgreSQL integration evidence, production object-storage and recovery evidence, and representative Wildberries source contracts are available.
