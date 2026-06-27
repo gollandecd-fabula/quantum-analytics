@@ -63,6 +63,8 @@ def validate_row(row: Mapping[str, str]) -> None:
         gross_amount = Decimal(row["gross_amount"])
     except InvalidOperation as exc:
         raise ValueError("gross_amount: invalid decimal") from exc
+    if not gross_amount.is_finite():
+        raise ValueError("gross_amount: must be finite")
     if gross_amount < 0:
         raise ValueError("gross_amount: must be non-negative")
 
