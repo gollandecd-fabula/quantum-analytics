@@ -1,10 +1,22 @@
 from __future__ import annotations
 
+from collections.abc import Mapping as MappingABC
 from dataclasses import dataclass
 from datetime import datetime
 from enum import StrEnum
 from types import MappingProxyType
 from typing import Any, Mapping
+
+
+def _deep_freeze(value: Any) -> Any:
+    """Create a detached, recursively immutable representation."""
+    if isinstance(value, MappingABC):
+        return MappingProxyType({key: _deep_freeze(item) for key, item in value.items()})
+    if isinstance(value, (list, tuple)):
+        return tuple(_deep_freeze(item) for item in value)
+    if isinstance(value, (set, frozenset)):
+        return frozenset(_deep_freeze(item) for item in value)
+    return value
 
 
 class EventStatus(StrEnum):
@@ -70,5 +82,5 @@ class CanonicalEvent:
         if not self.provenance:
             raise ValueError("provenance must not be empty.")
 
-        object.__setattr__(self, "payload", MappingProxyType(dict(self.payload)))
-        object.__setattr__(self, "provenance", MappingProxyType(dict(self.provenance)))
+        object.__setattr__(self, "payload", _deep_freeze(self.payload))
+        object.__setattr__(self, "provenance", _deep_freeze(self.provenance))
