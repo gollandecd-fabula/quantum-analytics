@@ -1,7 +1,7 @@
 # CURRENT STATE
 
 Date: 2026-06-27
-Status: `BUILD_B1A_IN_PROGRESS`
+Status: `BUILD_B1A_REVIEW_PENDING`
 Active contract: `STAGE-B-BUILD-v1`
 Live execution state: `docs/evidence/STAGE_B_EXECUTION_STATE.yaml`
 Completed macro-stage: `A — FOUNDATION`
@@ -9,6 +9,7 @@ Completed unit: `B0 — BUILD_READINESS_AND_STAGE_CONTRACT`
 Current unit: `B1a — FINANCIAL_RULE_CONTRACTS_AND_RESOLUTION`
 Tracking issue: `#7`
 Working branch: `build-b1a-financial-contracts`
+Pull Request: `#8`
 
 ## Authority
 
@@ -37,7 +38,7 @@ B1a defines financial contracts and executable contract tests only. It does not:
 - change marketplace write capability;
 - deploy externally.
 
-## B1a artifacts created
+## B1a artifacts
 
 Contracts:
 
@@ -63,9 +64,18 @@ Tests and evidence:
 - `tests/contracts/fixtures/b1a-rule-resolution-vectors.json`;
 - `tests/test_b1a_financial_contracts.py` with 9 financial contract tests;
 - `tests/test_b1a_execution_state.py` with 1 live-state test;
-- 10 new B1a tests in total;
 - `docs/evidence/STAGE_B_B1A_CONTRACT_EVIDENCE.yaml`;
 - `docs/evidence/STAGE_B_EXECUTION_STATE.yaml`.
+
+## B1a verification
+
+- Initial PR #8 CI run `28292470434` completed successfully on Python 3.12.3.
+- Existing Foundation suite: 34 tests.
+- New B1a suite: 10 tests.
+- Reproducible total: 44 passed tests.
+- All new B1a tests are visible as `ok` in the job log.
+- Current-head CI after evidence updates is pending.
+- Independent Codex review is pending.
 
 ## Contract invariants
 
@@ -82,15 +92,13 @@ Tests and evidence:
 - calculation profiles snapshot immutable versions and content hashes;
 - golden values require an independent oracle and are not approved in B1a.
 
-## Pending B1a verification
+## Remaining B1a gate
 
-- run Foundation CI plus 10 B1a contract tests;
-- inspect test failures and correct automatically within B1a;
-- verify live execution-state consistency;
-- open protected Pull Request;
-- obtain independent Codex review;
-- resolve all findings and re-run CI;
-- merge only after required checks pass.
+- latest-head Foundation CI must pass;
+- PR #8 must be Ready for review;
+- independent Codex review must inspect the latest head;
+- all findings must be fixed and conversations resolved;
+- protected squash merge must succeed.
 
 ## Approval gates
 
