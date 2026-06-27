@@ -3,6 +3,7 @@
 Date: 2026-06-27
 Status: `BUILD_B1A_READY_FOR_MERGE`
 Active contract: `STAGE-B-BUILD-v1`
+Live execution state: `docs/evidence/STAGE_B_EXECUTION_STATE.yaml`
 Current unit: `B1a — FINANCIAL_RULE_CONTRACTS_AND_RESOLUTION`
 Tracking issue: `#7`
 Working branch: `build-b1a-financial-contracts`
