@@ -43,12 +43,29 @@ allows intersection semantics.
 
 ## Scope specificity
 
-For deterministic resolution, each matched optional dimension contributes one
-specificity point. `organization_id` is mandatory and does not contribute a
-point. The resolver compares specificity only after lifecycle, validity,
-scenario, and exclusivity filtering.
+Organization equality is a mandatory tenant-boundary filter and is evaluated
+before specificity. It is never a wildcard and never contributes to ordering.
 
-Specificity is derived, never supplied by the user.
+For deterministic resolution, specificity is the versioned lexicographic vector:
+
+```text
+(product_id,
+ product_group_id,
+ marketplace_account_id,
+ marketplace,
+ calculation_profile_id,
+ scenario_id)
+```
+
+Each component is `1` when the rule constrains that dimension and `0` when the
+dimension is wildcard. Vectors are compared left to right. Therefore a
+product-specific rule outranks account- or marketplace-only rules regardless of
+the number of lower-order dimensions they constrain. Priority is considered
+only after the complete specificity vector is equal.
+
+Specificity is derived, never supplied by the user. Changing the vector order
+requires a new contract version, impact preview, updated machine-readable test
+vectors, and independent review.
 
 ## Methods
 
@@ -58,9 +75,10 @@ Exactly one method is selected:
 - `RATE` — decimal rate applied to an explicit base;
 - `SAFE_EXPRESSION` — typed declarative expression defined by the Safe Expression Contract.
 
-Exactly one of `value`, `rate`, or `expression` is present. A fixed value does
-not silently acquire a rate base. A rate always names its base. An expression
-lists all variable dependencies explicitly.
+Exactly one of `value`, `rate`, or `expression` is present. The two unused
+payload properties are omitted, not present as `null`. A fixed value does not
+silently acquire a rate base. A rate always names its base. An expression lists
+all variable dependencies explicitly.
 
 ## Bases
 
@@ -120,9 +138,10 @@ version they used.
 
 ## Priority and exclusivity
 
-Priority is an integer used only after scope matching. Higher values win.
-Priority cannot resolve a forbidden overlap inside the same
-`exclusivity_group`; such overlap is a validation error before activation.
+Priority is an integer used only after scope matching and equality of the full
+specificity vector. Higher values win. Priority cannot resolve a forbidden
+overlap inside the same `exclusivity_group`; such overlap is a validation error
+before activation.
 
 Rules without an exclusivity group may coexist only when the metric contract
 explicitly declares their expense components additive. Addition is never
