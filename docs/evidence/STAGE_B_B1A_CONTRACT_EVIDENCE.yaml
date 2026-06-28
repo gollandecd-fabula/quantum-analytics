@@ -2,7 +2,7 @@ evidence_id: STAGE-B-B1A-CONTRACT-EVIDENCE-v1
 unit: B1a
 status: READY_FOR_MERGE_SUBJECT_TO_CURRENT_HEAD_GATES
 tracking_issue: 7
-pull_request: 8
+pull_request: 13
 risk_class: R2
 
 scope:
