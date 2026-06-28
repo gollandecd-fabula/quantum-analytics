@@ -1,4 +1,4 @@
-evidence_id: STAGE-B-B3-CONTRACT-EVIDENCE-v12
+evidence_id: STAGE-B-B3-CONTRACT-EVIDENCE-v13
 unit: B3
 status: REMEDIATED_REVIEW_GATED
 tracking_issue: 9
@@ -49,6 +49,7 @@ checks:
   base_public_invariant_alignment_tests: PASS_LOCAL_TARGETED
   malformed_container_value_tests: PASS_LOCAL_TARGETED
   rfc3339_timestamp_separator_tests: PASS_LOCAL_TARGETED
+  singleton_edge_cardinality_tests: PASS_LOCAL_TARGETED
   github_ci_policy: REQUIRED_ON_CURRENT_PR_MERGE_RESULT
   independent_review: REQUIRED_ON_CURRENT_PR_HEAD_AND_DIFF
   transient_ci_result_source: GITHUB_CHECKS
@@ -69,6 +70,7 @@ verified_invariants:
   - long acyclic evidence paths validate without recursion failure
   - malformed JSON container values fail closed without runtime exceptions
   - schema date-time fields require RFC 3339 T or t separators and explicit offsets
+  - singleton evidence relations reject multiple well-typed targets
 
 limitations:
   - JSON Schemas are declarative; runtime verifier enforces B3 invariants
