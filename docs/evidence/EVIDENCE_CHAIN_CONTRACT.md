@@ -55,7 +55,16 @@ The chain contains:
 - `replay_key` identifying the deterministic reproduction request;
 - actor and creation timestamp.
 
-Canonical JSON uses UTF-8, sorted object keys, compact separators, and preserves array order where order is semantic. Content hashes exclude their own `content_hash` field.
+Canonical JSON uses UTF-8, sorted object keys, compact separators, and preserves array order where order is semantic.
+
+To prevent a circular hash dependency, Evidence Chain `content_hash` is computed with both top-level `content_hash` and the backlink `metric_result_hash` omitted. The immutable sequence is:
+
+1. calculate the Evidence Chain content hash without those two fields;
+2. place that chain hash in `Metric Result.evidence_chain_ref`;
+3. calculate the Metric Result hash without its own `result_hash`;
+4. store the resulting Metric Result hash in the Evidence Chain backlink.
+
+The backlink must equal the final Metric Result hash, but changing only the backlink does not change the Evidence Chain content hash. All other Evidence Chain fields remain covered by the hash.
 
 Reproduction succeeds only when the recorded inputs produce the same input fingerprint, Evidence Chain hash, and Metric Result hash. A mismatch creates a new diagnostic record; it never mutates the prior snapshot.
 
