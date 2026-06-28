@@ -1,43 +1,45 @@
 # CURRENT STATE
 
 Date: 2026-06-28
-Status: `BUILD_B3_IN_PROGRESS`
+Status: `BUILD_B3_READY_FOR_MERGE_SUBJECT_TO_CURRENT_HEAD_GATES`
 Active contract: `STAGE-B-BUILD-v1`
 Live execution state: `docs/evidence/STAGE_B_EXECUTION_STATE.yaml`
 Current unit: `B3 — METRIC_SNAPSHOTS_AND_EVIDENCE_CHAIN`
 Tracking issue: `#11`
 Working branch: `build-b3-metric-evidence`
-Pull Request: `PENDING`
+Pull Request: `#14`
 
 ## Completed dependency
 
-B1a was squash-merged as commit `ff6bc6e23d3df7d877230578c4de0f02f20fce0d` through PR #8. Its exact-head CI run `28317157742` succeeded and the review record reported 31 resolved threads.
+B1a was squash-merged as `ff6bc6e23d3df7d877230578c4de0f02f20fce0d`; permanent cleanup reached `main` in `40c8ef94b4826257c2935d3ac499009734be758f`.
 
-## B3 scope
+## B3 delivered scope
 
-B3 is R2 contract/schema/fixture/test/reversible implementation work for immutable Metric Results and Evidence Chain. It includes post-B1a governance synchronization and removal of temporary diagnostics.
+- immutable Metric Result contract and JSON Schema;
+- Evidence Chain contract and JSON Schema;
+- deterministic acyclic content hashes and input fingerprint;
+- fail-closed semantic validator;
+- explicit result → event → transformation / source record → source file links;
+- recalculation actor consistency;
+- synthetic metric-to-source-file fixture;
+- typed-state, freshness, scenario-isolation, audit, graph-integrity and overlay-hygiene tests.
 
-B3 does not authorize:
+## QA
 
-- B1b calculation-kernel implementation;
-- activation of cost, tax, allocation, other-expense, or rounding rules;
-- B2 reconciliation;
-- real or anonymized commercial data;
-- marketplace write capability;
-- deployment or production release.
+- inherited tests: 68;
+- B3 tests: 16;
+- total permanent tests: 84;
+- remediation CI run `28318737935`: SUCCESS;
+- Codex review threads: 2 total / 0 unresolved.
 
-## Current outputs
+## Remaining current-head gates
 
-- Metric Result human contract and JSON Schema;
-- Evidence Chain human contract and JSON Schema;
-- deterministic anti-cycle hash protocol;
-- fail-closed evidence semantic validator;
-- synthetic metric-to-file fixture;
-- B3 traceability, integrity, typed-state, freshness, and recalculation tests.
+- synchronized artifact overlay;
+- successful CI on the final metadata head;
+- clean independent Codex rereview of that exact head;
+- protected squash merge of PR #14.
 
-## Gate
-
-B3 remains `IN_PROGRESS` until exact-head CI succeeds, artifact evidence is synchronized, independent Codex review has zero unresolved findings, and the protected Pull Request is merged.
+B3 does not authorize B1b/B2/R3 financial execution, real commercial data, marketplace writes, deployment, or production release.
 
 B1b remains R3 with approval `NOT_GRANTED`.
 
