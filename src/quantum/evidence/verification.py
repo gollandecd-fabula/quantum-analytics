@@ -76,6 +76,12 @@ _UNITS = frozenset({
     "MONEY", "MONEY_PER_ITEM", "ITEM", "ORDER", "EVENT", "PERCENT", "RATIO",
     "COUNT",
 })
+_MODES = frozenset({"ACTUAL", "SCENARIO"})
+_VALUE_TYPES = frozenset({"MONEY", "INTEGER", "DECIMAL", "RATE"})
+_MONEY_UNITS = frozenset({"MONEY", "MONEY_PER_ITEM"})
+_ACCOUNTING_VIEWS = frozenset({"OPERATIONAL", "SETTLEMENT", "TAX_RECOGNITION"})
+_FRESHNESS_STATES = frozenset({"CURRENT", "STALE", "UNKNOWN", "NOT_APPLICABLE"})
+_CONFIDENCE_STATES = frozenset({"HIGH", "MEDIUM", "LOW", "UNKNOWN", "NOT_APPLICABLE"})
 _ROUNDING_APPLICATION_POINTS = frozenset({
     "RULE_INPUT_NORMALIZATION",
     "RULE_COMPONENT_RESULT",
@@ -131,6 +137,10 @@ def _is_hash(value: object) -> bool:
     return isinstance(value, str) and _HASH_RE.fullmatch(value) is not None
 
 
+def _is_allowed_string(value: object, allowed: frozenset[str]) -> bool:
+    return isinstance(value, str) and value in allowed
+
+
 def _valid_datetime(value: object) -> bool:
     if not isinstance(value, str):
         return False
@@ -179,7 +189,7 @@ def verify_evidence_chain(
         _append(errors, "EVIDENCE_TENANT_MISMATCH")
     mode = graph.get("mode")
     scenario_id = graph.get("scenario_id")
-    if mode not in {"ACTUAL", "SCENARIO"}:
+    if not _is_allowed_string(mode, _MODES):
         _append(errors, "EVIDENCE_MODE_CONTAMINATION")
     elif mode == "ACTUAL" and scenario_id is not None:
         _append(errors, "EVIDENCE_MODE_CONTAMINATION")
@@ -224,7 +234,7 @@ def verify_evidence_chain(
             _append(errors, "EVIDENCE_NODE_DUPLICATE")
             continue
         nodes[node_id] = raw_node
-        if raw_node.get("node_type") not in NODE_TYPES:
+        if not _is_allowed_string(raw_node.get("node_type"), NODE_TYPES):
             _append(errors, "EVIDENCE_NODE_TYPE_INVALID")
         ref = raw_node.get("artifact_ref")
         if not _valid_ref(ref):
@@ -479,8 +489,10 @@ def verify_metric_snapshot(snapshot: object) -> tuple[str, ...]:
         not isinstance(rounding, Mapping)
         or set(rounding) != {"policy_ref", "application_point", "resolved_mode", "resolved_scale"}
         or not _valid_ref(rounding.get("policy_ref"))
-        or rounding.get("application_point") not in _ROUNDING_APPLICATION_POINTS
-        or rounding.get("resolved_mode") not in _ROUNDING_MODES
+        or not _is_allowed_string(
+            rounding.get("application_point"), _ROUNDING_APPLICATION_POINTS
+        )
+        or not _is_allowed_string(rounding.get("resolved_mode"), _ROUNDING_MODES)
         or not _is_non_negative_int(rounding.get("resolved_scale"))
         or int(rounding.get("resolved_scale", 29)) > 28
     ):
@@ -517,29 +529,29 @@ def verify_metric_snapshot(snapshot: object) -> tuple[str, ...]:
     unit = snapshot.get("unit")
     currency = snapshot.get("currency")
     reason_code = snapshot.get("reason_code")
-    if state not in _STATES:
+    if not _is_allowed_string(state, _STATES):
         _append(errors, "METRIC_SNAPSHOT_STATE_INVALID")
     elif state == "VALID":
-        if value is None or value_type not in {"MONEY", "INTEGER", "DECIMAL", "RATE"}:
+        if value is None or not _is_allowed_string(value_type, _VALUE_TYPES):
             _append(errors, "METRIC_SNAPSHOT_VALUE_INVALID")
-        if unit not in _UNITS or reason_code is not None:
+        if not _is_allowed_string(unit, _UNITS) or reason_code is not None:
             _append(errors, "METRIC_SNAPSHOT_VALUE_INVALID")
         if value_type == "MONEY":
             if not isinstance(value, str) or not _DECIMAL_RE.fullmatch(value):
                 _append(errors, "METRIC_SNAPSHOT_VALUE_INVALID")
-            if unit not in {"MONEY", "MONEY_PER_ITEM"} or not (
+            if not _is_allowed_string(unit, _MONEY_UNITS) or not (
                 isinstance(currency, str) and re.fullmatch(r"[A-Z]{3}", currency)
             ):
                 _append(errors, "METRIC_SNAPSHOT_VALUE_INVALID")
         elif value_type == "INTEGER":
             if not isinstance(value, int) or isinstance(value, bool) or currency is not None:
                 _append(errors, "METRIC_SNAPSHOT_VALUE_INVALID")
-            if unit in {"MONEY", "MONEY_PER_ITEM"}:
+            if isinstance(unit, str) and unit in _MONEY_UNITS:
                 _append(errors, "METRIC_SNAPSHOT_VALUE_INVALID")
-        elif value_type in {"DECIMAL", "RATE"}:
+        elif isinstance(value_type, str) and value_type in {"DECIMAL", "RATE"}:
             if not isinstance(value, str) or not _DECIMAL_RE.fullmatch(value) or currency is not None:
                 _append(errors, "METRIC_SNAPSHOT_VALUE_INVALID")
-            if unit in {"MONEY", "MONEY_PER_ITEM"}:
+            if isinstance(unit, str) and unit in _MONEY_UNITS:
                 _append(errors, "METRIC_SNAPSHOT_VALUE_INVALID")
     else:
         if any(item is not None for item in (value, value_type, unit, currency)):
@@ -550,16 +562,16 @@ def verify_metric_snapshot(snapshot: object) -> tuple[str, ...]:
     expenses = snapshot.get("expense_boundary")
     if (
         not isinstance(expenses, list)
-        or any(item not in _EXPENSES for item in expenses)
+        or any(not _is_allowed_string(item, _EXPENSES) for item in expenses)
         or len(set(map(str, expenses))) != len(expenses)
     ):
         _append(errors, "METRIC_SNAPSHOT_EXPENSE_BOUNDARY_INVALID")
 
-    if snapshot.get("accounting_view") not in {"OPERATIONAL", "SETTLEMENT", "TAX_RECOGNITION"}:
+    if not _is_allowed_string(snapshot.get("accounting_view"), _ACCOUNTING_VIEWS):
         _append(errors, "METRIC_SNAPSHOT_ACCOUNTING_VIEW_INVALID")
-    if snapshot.get("data_freshness_state") not in {"CURRENT", "STALE", "UNKNOWN", "NOT_APPLICABLE"}:
+    if not _is_allowed_string(snapshot.get("data_freshness_state"), _FRESHNESS_STATES):
         _append(errors, "METRIC_SNAPSHOT_FRESHNESS_INVALID")
-    if snapshot.get("confidence_state") not in {"HIGH", "MEDIUM", "LOW", "UNKNOWN", "NOT_APPLICABLE"}:
+    if not _is_allowed_string(snapshot.get("confidence_state"), _CONFIDENCE_STATES):
         _append(errors, "METRIC_SNAPSHOT_CONFIDENCE_INVALID")
     for field in ("confidence_reasons", "limitations"):
         value_list = snapshot.get(field)
