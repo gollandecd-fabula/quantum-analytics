@@ -1,4 +1,4 @@
-evidence_id: STAGE-B-B3-CONTRACT-EVIDENCE-v8
+evidence_id: STAGE-B-B3-CONTRACT-EVIDENCE-v9
 unit: B3
 status: REMEDIATED_REVIEW_GATED
 tracking_issue: 9
@@ -28,6 +28,7 @@ artifacts:
     - schemas/evidence-chain.schema.json
   runtime:
     - src/quantum/evidence/__init__.py
+    - src/quantum/evidence/runtime_validation.py
     - src/quantum/evidence/verification.py
   fixture:
     - tests/contracts/fixtures/b3-evidence-chain-vectors.json
@@ -39,7 +40,8 @@ artifacts:
 checks:
   b3_test_method_count: 27
   temporary_monkey_patch_tests: 0
-  runtime_verifier_location: src/quantum/evidence/verification.py
+  runtime_verifier_location: src/quantum/evidence/runtime_validation.py
+  base_verification_engine_location: src/quantum/evidence/verification.py
   primary_diagnostic_policy: src/quantum/evidence/__init__.py
   malformed_input_fail_closed_tests: PASS_LOCAL_STATIC
   source_byte_loader_gate_tests: PASS_LOCAL_STATIC
@@ -57,6 +59,9 @@ verified_invariants:
   - selected policies and authorities require approved evidence
   - strict verification can load retained bytes and compare their hash
   - primary diagnostics use explicit root-cause priority
+  - optional snapshot locators are null or non-empty strings
+  - decimal and rate values cannot use money units
+  - long evidence paths fail closed without recursive validator crashes
 
 limitations:
   - JSON Schemas are declarative; runtime verifier enforces B3 invariants
