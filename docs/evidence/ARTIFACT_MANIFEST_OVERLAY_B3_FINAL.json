@@ -1,13 +1,38 @@
 {
-  "overlay_version": 2,
+  "overlay_version": 3,
   "base_runtime_overlay_git_blob_sha": "07dcf6840e9b9ed3890cb2dcdeff92e009812f73",
   "hash_encoding": "sha256-base64",
-  "reason": "Final B3 manifest reconciliation.",
+  "reason": "Final B3 reconciliation.",
   "entries": [
     [
       "docs/evidence/EVIDENCE_CHAIN_CONTRACT.md",
       "eBQm23Yrq5DzqUX6uBaGoWMC+QUKFsdCg1ijK+hcHuc=",
       6989
+    ],
+    [
+      "docs/evidence/STAGE_B_B3_CONTRACT_EVIDENCE.yaml",
+      "HooHQMnNRmmwLRXqusIpI6QHgoYxO+1SRlHGS3CriQU=",
+      2429
+    ],
+    [
+      "docs/evidence/STAGE_B_B3_EXECUTION_STATE.yaml",
+      "zsIyJ+aazu9YVe45nMKaGq5me1W+DXFv9LXIzvW+3dk=",
+      1538
+    ],
+    [
+      "docs/evidence/STAGE_B_EXECUTION_STATE.yaml",
+      "CThJfLSIHE7+ggY0ttJGxZ0O7hjYDJqPDuIDQJY9oFE=",
+      1489
+    ],
+    [
+      "docs/governance/CURRENT_STATE.md",
+      "cr1NQV543JiVBhCgugf4VIjRTaSIFOznHpLZcOUPoow=",
+      1315
+    ],
+    [
+      "docs/governance/CURRENT_STATE_B3.md",
+      "WtxF2Uxb063LCJydYz2kIjjKaupuwZ/uEJK3zzQ7P2U=",
+      1493
     ],
     [
       "src/quantum/evidence/__init__.py",
