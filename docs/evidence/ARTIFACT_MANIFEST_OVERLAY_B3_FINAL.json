@@ -1,0 +1,24 @@
+{
+  "overlay_version": 1,
+  "base_runtime_overlay_git_blob_sha": "07dcf6840e9b9ed3890cb2dcdeff92e009812f73",
+  "hash_encoding": "sha256-base64",
+  "reason": "Final B3 manifest reconciliation after CI diagnostics.",
+  "entries": [
+    [
+      "docs/evidence/EVIDENCE_CHAIN_CONTRACT.md",
+      "eBQm23Yrq5DzqUX6uBaGoWMC+QUKFsdCg1ijK+hcHuc=",
+      6989
+    ],
+    [
+      "tests/test_a0_manifest_diagnostic.py",
+      "iKjzzbBAtezftrLoDRZpdzrTesNxvcCcmFhEGIcznMs=",
+      1582
+    ],
+    [
+      "tests/test_b1a_artifact_manifest.py",
+      "AuijiYJM/eY/9okS+/eXEQ4MYxB0pAHL8pyETmdDU9g=",
+      4540
+    ]
+  ],
+  "remove_paths": []
+}
