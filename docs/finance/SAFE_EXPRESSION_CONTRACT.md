@@ -134,9 +134,10 @@ registry. Unknown or dynamically constructed names are forbidden.
 - `IF` — exactly three arguments: boolean condition plus equal-type true/false branches;
 - `EQUAL`, `LESS_THAN`, `LESS_OR_EQUAL`, `GREATER_THAN`, `GREATER_OR_EQUAL` — exactly two compatible operands, boolean result.
 
-The machine-readable schema enforces these arities fail-closed. Rounding is not
-an expression operator. It is applied only at versioned policy application
-points.
+The machine-readable JSON Schema enforces node shape, allowlisted operators,
+operator arity, literal representation, and local result metadata constraints.
+Rounding is not an expression operator. It is applied only at versioned policy
+application points.
 
 ## Explicitly forbidden capabilities
 
@@ -162,6 +163,40 @@ points.
 - Other combinations are invalid unless introduced by a later contract version.
 - Comparison operands must be compatible and return `BOOLEAN`.
 - `IF` branches must have identical type, unit, and currency.
+
+## Mandatory semantic validation
+
+JSON Schema success is necessary but is not sufficient approval or activation
+evidence. Before an expression version can be approved, published, activated,
+or included in a Calculation Profile, a deterministic semantic validator must
+recursively derive the signature of every node as:
+
+```text
+(value_type, unit, currency)
+```
+
+The validator must then:
+
+1. apply the operator-specific compatibility matrix in this contract;
+2. reject incompatible child value types;
+3. reject incompatible units;
+4. reject incompatible or implicit currencies;
+5. verify that the operation node's declared result signature equals the
+   derived result signature;
+6. return a typed diagnostic and no inferred value when any check fails.
+
+At minimum, the executable B1a semantic vectors reject:
+
+- arithmetic between different currencies;
+- arithmetic between incompatible value types;
+- comparison of incompatible units or currencies;
+- operation result metadata that disagrees with the derived result signature.
+
+The mandatory diagnostics are `EXPRESSION_TYPE_MISMATCH`,
+`EXPRESSION_UNIT_MISMATCH`, and `EXPRESSION_CURRENCY_MISMATCH`. An activation
+path that checks only `schemas/safe-expression.schema.json` is non-conformant.
+The B1a semantic validator is contract-validation evidence only; it does not
+calculate financial values.
 
 ## Typed-state propagation
 
