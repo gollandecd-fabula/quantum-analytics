@@ -1,7 +1,7 @@
 {
   "overlay_version": 4,
   "base_manifest_git_blob_sha": "498f5cd7440b1bc2c361dd940dead8fc06cd2c1d",
-  "reason": "Cumulative manifest overlay for the permanent B1a cleanup baseline and B3 recovery remediations: canonical graph hashing, deterministic transformation order, typed metric payloads, currency constraints, fixtures, tests, evidence, and governance state.",
+  "reason": "Cumulative manifest overlay for the permanent B1a cleanup baseline and B3 recovery remediations: byte-verified Evidence Chain schema, canonical graph hashing, deterministic transformation order, typed metric payloads, currency constraints, fixtures, tests, evidence, and governance state.",
   "control_paths_excluded_from_payload": [
     "docs/evidence/ARTIFACT_MANIFEST.json",
     "docs/evidence/ARTIFACT_MANIFEST_OVERLAY.json"
@@ -54,8 +54,8 @@
     ],
     [
       "schemas/evidence-chain.schema.json",
-      "97be434e1bad03e1fb84e22b09aa1fe8b7dd3ce1ebac1437e99c1d2fd6c049d7",
-      4756
+      "4087797703b6a1187f58b346f3b985eab4dee35bb4f9bd85d2055049d37545c7",
+      6266
     ],
     [
       "schemas/metric-result.schema.json",
