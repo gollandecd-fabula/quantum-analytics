@@ -1,40 +1,44 @@
 # CURRENT STATE
 
 Date: 2026-06-28
-Status: `BUILD_B1A_READY_FOR_MERGE`
+Status: `BUILD_B3_IN_PROGRESS`
 Active contract: `STAGE-B-BUILD-v1`
 Live execution state: `docs/evidence/STAGE_B_EXECUTION_STATE.yaml`
-Current unit: `B1a — FINANCIAL_RULE_CONTRACTS_AND_RESOLUTION`
-Tracking issue: `#7`
-Working branch: `build-b1a-financial-contracts`
-Pull Request: `#8`
+Current unit: `B3 — METRIC_SNAPSHOTS_AND_EVIDENCE_CHAIN`
+Tracking issue: `#11`
+Working branch: `build-b3-metric-evidence`
+Pull Request: `PENDING`
 
-## Scope
+## Completed dependency
 
-B1a is R2 contract/schema/fixture/test/evidence work only. No calculation kernel, active rules, real commercial data, marketplace writes, or production authorization. Source Authority remains DRAFT.
+B1a was squash-merged as commit `ff6bc6e23d3df7d877230578c4de0f02f20fce0d` through PR #8. Its exact-head CI run `28317157742` succeeded and the review record reported 31 resolved threads.
 
-## Verification
+## B3 scope
 
-- 34 Foundation tests.
-- 34 B1a tests.
-- 68 total tests passed.
-- Technical CI `28307956212`: success.
-- 31 Codex threads; 0 unresolved.
-- Manifest v6 verifies 158 tracked artifacts.
+B3 is R2 contract/schema/fixture/test/reversible implementation work for immutable Metric Results and Evidence Chain. It includes post-B1a governance synchronization and removal of temporary diagnostics.
 
-## Invariants
+B3 does not authorize:
 
-- deterministic tenant-safe and mode-isolated resolution;
-- explicit `calculation_instant` with `[valid_from, valid_to)` filtering;
-- complete ordering evidence and exactly one selected eligible candidate;
-- typed unit/currency-safe expressions and rules;
-- `NEGATE` and `ABS` require numeric results and operands;
-- immutable Calculation Profiles;
-- explicit purchase and per-item money metrics;
-- reproducible tracked-tree evidence.
+- B1b calculation-kernel implementation;
+- activation of cost, tax, allocation, other-expense, or rounding rules;
+- B2 reconciliation;
+- real or anonymized commercial data;
+- marketplace write capability;
+- deployment or production release.
+
+## Current outputs
+
+- Metric Result human contract and JSON Schema;
+- Evidence Chain human contract and JSON Schema;
+- deterministic anti-cycle hash protocol;
+- fail-closed evidence semantic validator;
+- synthetic metric-to-file fixture;
+- B3 traceability, integrity, typed-state, freshness, and recalculation tests.
 
 ## Gate
 
-Current metadata-synchronized head requires CI success, clean Codex review, and protected squash merge of PR #8. B1b remains R3 and is not approved.
+B3 remains `IN_PROGRESS` until exact-head CI succeeds, artifact evidence is synchronized, independent Codex review has zero unresolved findings, and the protected Pull Request is merged.
+
+B1b remains R3 with approval `NOT_GRANTED`.
 
 `RELEASE_BLOCKED`
