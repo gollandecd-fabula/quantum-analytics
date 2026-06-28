@@ -7,7 +7,7 @@ macro_stage: B
 status: ACTIVE
 current_unit: B3
 tracking_issue: 9
-working_branch: build-b3-metric-evidence-contracts-v3
+working_branch: build-b3-metric-evidence-contracts-v4
 
 units:
   B0:
@@ -31,7 +31,8 @@ units:
     state: REMEDIATED_REVIEW_GATED
     issue: 9
     risk: R2
-    runtime_verifier: src/quantum/evidence/verification.py
+    runtime_verifier: src/quantum/evidence/runtime_validation.py
+    base_verification_engine: src/quantum/evidence/verification.py
     test_method_count: 27
     temporary_patch_tests: 0
     ci_policy: REQUIRED_ON_CURRENT_PR_MERGE_RESULT
