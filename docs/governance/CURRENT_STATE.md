@@ -6,7 +6,7 @@ Active contract: `STAGE-B-BUILD-v1`
 Live execution state: `docs/evidence/STAGE_B_EXECUTION_STATE.yaml`
 Current unit: `B3 — METRIC_SNAPSHOTS_AND_EVIDENCE_CHAIN`
 Tracking issue: `#9`
-Working branch: `build-b3-metric-evidence-contracts-v3`
+Working branch: `build-b3-metric-evidence-contracts-v4`
 
 ## Scope
 
@@ -16,13 +16,16 @@ marketplaces, deploy services, or authorize release.
 
 ## B3 remediation
 
-- Evidence Chain and Metric Snapshot verification moved into
-  `src/quantum/evidence/verification.py`;
+- the base verification engine is in `src/quantum/evidence/verification.py`;
+- strict public runtime validation is in
+  `src/quantum/evidence/runtime_validation.py` and exported by
+  `src/quantum/evidence/__init__.py`;
 - order-dependent `test_000_*` monkey patch removed;
 - malformed inputs, duplicate nodes/edges, orphan nodes, cycles, timestamps,
-  typed states and source-byte verification now have deterministic diagnostics;
+  typed states, optional locators, value/unit bindings and source-byte checks
+  have deterministic fail-closed diagnostics;
 - source-file declaration checks are distinct from strict retained-byte loading;
-- 27 independent B3 tests import the runtime verifier;
+- 27 independent B3 tests import the strict public runtime verifier;
 - primary diagnostics follow an explicit root-cause priority policy.
 
 ## Gate
