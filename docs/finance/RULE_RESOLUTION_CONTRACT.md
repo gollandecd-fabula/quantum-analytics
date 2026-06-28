@@ -17,7 +17,7 @@ The resolver receives an explicit context containing:
 
 - `organization_id`;
 - calculation mode: `ACTUAL` or `SCENARIO`;
-- calculation instant;
+- calculation instant as `calculation_instant`;
 - optional marketplace account;
 - optional marketplace;
 - optional product;
@@ -25,7 +25,8 @@ The resolver receives an explicit context containing:
 - Calculation Profile identifier;
 - Scenario identifier when mode is Scenario.
 
-Wall-clock time and ambient tenant state are forbidden inputs.
+`calculation_instant` is an explicit RFC 3339 instant. Wall-clock time and
+ambient tenant state are forbidden inputs.
 
 ## Candidate filtering
 
@@ -33,7 +34,7 @@ A rule is eligible only when all conditions hold:
 
 1. organization matches exactly;
 2. lifecycle status is allowed by the profile and publication class;
-3. calculation instant is inside `[valid_from, valid_to)`;
+3. `calculation_instant` is inside `[valid_from, valid_to)`;
 4. every scoped dimension matches the context;
 5. Actual/Scenario isolation holds;
 6. dependencies are available and valid;
@@ -172,10 +173,12 @@ Machine-readable vectors cover:
 - Actual ignoring Scenario rules;
 - Scenario override beating inherited Actual rule;
 - cross-organization exclusion;
+- future and expired rule exclusion at `calculation_instant`;
 - overlap, cycle, and unit-mismatch diagnostics.
 
-Each resolution context declares `ACTUAL` or `SCENARIO` explicitly. Omitting mode
-is invalid rather than defaulting to Actual.
+Each resolution context declares `ACTUAL` or `SCENARIO` and
+`calculation_instant` explicitly. Omitting either field is invalid rather than
+defaulting to Actual mode or wall-clock time.
 
 ## Gate
 
