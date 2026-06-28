@@ -3,7 +3,7 @@
   "valid_graph": {
     "evidence_chain_id": "evidence-chain-synthetic-1",
     "version": 1,
-    "content_hash": "d2327a16a3a4a87b84e05741634d32b3e5430c29f4742ad64d7dcaba9d5c3ddd",
+    "content_hash": "95ed8d27135bf971e0dc4d85823a0e5c7ae6516b680df1bb19b64de793c37a02",
     "organization_id": "org-synthetic",
     "mode": "ACTUAL",
     "scenario_id": null,
@@ -162,7 +162,7 @@
         "artifact_ref": {
           "id": "file",
           "version": 1,
-          "content_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          "content_hash": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
         },
         "organization_id": "org-synthetic",
         "mode": "ACTUAL",
@@ -408,6 +408,13 @@
         }
       },
       "expected_diagnostic": "EVIDENCE_TRANSFORMATION_ORDER_AMBIGUOUS"
+    },
+    {
+      "id": "source_file_retained_hash_mismatch",
+      "mutation": {
+        "source_file_retained_hash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+      },
+      "expected_diagnostic": "EVIDENCE_HASH_MISMATCH"
     }
   ]
 }
