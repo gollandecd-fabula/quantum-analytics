@@ -1,8 +1,8 @@
 {
-  "overlay_version": 8,
+  "overlay_version": 9,
   "base_runtime_overlay_git_blob_sha": "07dcf6840e9b9ed3890cb2dcdeff92e009812f73",
   "hash_encoding": "sha256-base64",
-  "reason": "B3 fail-closed convergence: type-safe malformed-container handling, canonical base/public verifier delegation, deep-path coverage, and synchronized evidence.",
+  "reason": "B3 strict timestamp convergence: RFC 3339 date-time separators, type-safe malformed-container handling, canonical verifier delegation, and synchronized evidence.",
   "entries": [
     [
       "docs/evidence/EVIDENCE_CHAIN_CONTRACT.md",
@@ -11,8 +11,8 @@
     ],
     [
       "docs/evidence/STAGE_B_B3_CONTRACT_EVIDENCE.yaml",
-      "GU/fiYjjmmSpCS05/mrnYT+MfCERGFe+qZL1eyoeO+k=",
-      3043
+      "8j8EoauomX39PWcbTCFfRyWw3pl/iOeEaG9VsXTq42E=",
+      3184
     ],
     [
       "docs/evidence/STAGE_B_B3_EXECUTION_STATE.yaml",
@@ -46,8 +46,8 @@
     ],
     [
       "src/quantum/evidence/verification.py",
-      "qPi4fnrTaXKJ/Kl14XSVJaKgfHjrPMdGSdsJhwXs8o4=",
-      25800
+      "DuTCtfd5wbtiEB3zKJyht3zcSoXRFM3GxfWCDZqJzj4=",
+      26090
     ],
     [
       "tests/test_a0_manifest_diagnostic.py",
@@ -61,13 +61,13 @@
     ],
     [
       "tests/test_b3_evidence_contracts.py",
-      "dvAv/hP/o5NFywR4MCBusNRwGguytNDrstn5EpePvBI=",
-      5837
+      "g+2HxopkHBCkgKdLZ0/y0QcYXZ4Ts5iQ2HAL/by2SFM=",
+      6175
     ],
     [
       "tests/test_b3_metric_snapshot.py",
-      "3hUzKp40rX92gfWZXtjmdBlQ5QXfzfxUILS7YeCQzaY=",
-      7875
+      "UscyxK2jTxb2U0TtHzpFgFSwJGLopKjDH/Zf8/rrzFc=",
+      8293
     ],
     [
       "tests/test_b3_runtime_boundaries.py",
