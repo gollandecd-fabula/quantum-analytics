@@ -1,8 +1,8 @@
-evidence_id: STAGE-B-B3-CONTRACT-EVIDENCE-v9
+evidence_id: STAGE-B-B3-CONTRACT-EVIDENCE-v10
 unit: B3
 status: REMEDIATED_REVIEW_GATED
 tracking_issue: 9
-branch: build-b3-metric-evidence-contracts-v3
+branch: build-b3-metric-evidence-contracts-v4
 risk_class: R2
 updated_on: 2026-06-28
 
