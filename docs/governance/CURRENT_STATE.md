@@ -25,17 +25,19 @@ marketplace, deploy production services, or authorize release.
 
 ## B3 verification
 
-- 15 B3 contract tests pass locally.
+- 16 B3 contract tests pass locally.
 - Evidence Chain graph SHA-256 is recalculated from canonical bytes.
 - Transformation replay sequence is zero-based, unique, and contiguous.
 - VALID MONEY payloads require a money unit and ISO currency.
 - INTEGER, DECIMAL, and RATE payload representations are type-bound and cannot
   carry money units or currency.
+- Snapshot-to-Evidence reference uses an unhashed stable locator; the Evidence
+  Chain retains the hashed root snapshot reference, breaking the hash cycle.
 - The valid Evidence Chain fixture uses the published schema field names.
 - Required evidence is checked as exact typed paths, not generic node reachability.
 - Rule evidence uses `RULE_RESOLUTION -> RESOLUTION_SELECTS_RULE -> CONFIGURATION_RULE`.
 - Source evidence uses `CANONICAL_EVENT -> SOURCE_RECORD -> SOURCE_FILE`.
-- Five prior review findings are remediated in the branch and await exact-head
+- Six review findings are remediated in the branch and await exact-head
   CI plus independent re-review.
 - GitHub CI and independent review are pending for the recovery head.
 
