@@ -1,7 +1,7 @@
 {
-  "overlay_version": 7,
+  "overlay_version": 8,
   "base_manifest_git_blob_sha": "498f5cd7440b1bc2c361dd940dead8fc06cd2c1d",
-  "reason": "Cumulative manifest overlay for B1a cleanup and B3 recovery, including canonical evidence hashing, typed metric values, retained source-file hash equality, and deterministic package-qualified unittest discovery.",
+  "reason": "Cumulative manifest overlay for B1a cleanup and B3 recovery, including canonical evidence hashing, typed metric values, retained source-file hash equality, deterministic package-qualified unittest discovery, and synchronized 17-test governance evidence.",
   "control_paths_excluded_from_payload": [
     "docs/evidence/ARTIFACT_MANIFEST.json",
     "docs/evidence/ARTIFACT_MANIFEST_OVERLAY.json"
@@ -10,12 +10,12 @@
     ["docs/evidence/EVIDENCE_CHAIN_CONTRACT.md", "39de4bc709a8d7f1a2b80373c4792d3f70161470a790c507935174e85b903f20", 6849],
     ["docs/evidence/METRIC_SNAPSHOT_CONTRACT.md", "bd5a0996da66f88111142eb70b4adb3a2b8d24a220adaae4c4773a5b03433dc6", 6184],
     ["docs/evidence/STAGE_B_B1A_CONTRACT_EVIDENCE.yaml", "0b01bbaa05fcfcb043539bba11d98e1286848112e7f6e00fceadaf5c7735a983", 1253],
-    ["docs/evidence/STAGE_B_B3_CONTRACT_EVIDENCE.yaml", "7a6dd3596ee7851fc6505c9c4e935f60b933693e6c64d400449483f1105548af", 3952],
+    ["docs/evidence/STAGE_B_B3_CONTRACT_EVIDENCE.yaml", "b71e7c554ebc3a1bd7bfd55bbd8cc27b348027b6752b024ee3931aba3e7dcf16", 2119],
     ["docs/evidence/STAGE_B_B3_EXECUTION_STATE.yaml", "b17713cbeba633c562628f5eab115d89b004d20d93fb0caa869c76b3beedc093", 1710],
     ["docs/evidence/STAGE_B_EXECUTION_STATE.yaml", "7725bbc481a6efab05bf058e9a37c2ad6c245c95feade6c7c80e6e20d34bd4df", 1251],
     ["docs/finance/SAFE_EXPRESSION_CONTRACT.md", "c8c3a6f8152b90e6e71393ade7923e8f5224bcea9252697167553df50b062be8", 7744],
-    ["docs/governance/CURRENT_STATE.md", "1325a0c472b5dc9b3d4c8d194885560a38721d84123faf0b1625a60f9d6654e9", 2197],
-    ["docs/governance/CURRENT_STATE_B3.md", "227d68633a01fb8abb4d6b3caabc2db7c2b7b108bad2db79920a7a7e7665274c", 3130],
+    ["docs/governance/CURRENT_STATE.md", "fa2cc43dc8845596b2ff680938e92853c7397054803232c5a7e6e636d8af88db", 2008],
+    ["docs/governance/CURRENT_STATE_B3.md", "ffbb6f4d93ea61d6d841ad4c491e3740d93bf790cc4d16711d47c79c824e32ac", 1800],
     ["schemas/evidence-chain.schema.json", "4087797703b6a1187f58b346f3b985eab4dee35bb4f9bd85d2055049d37545c7", 6266],
     ["schemas/metric-result.schema.json", "68082566e09482ee15e5b39444ee81a160166e4759636f32848e29bf540dc62a", 12640],
     ["src/quantum/scripts/ci.py", "3f397f02bdddb60d63874b778c16966a13ea67e64dbd0a84c5cbc67208ae7ff3", 1745],
