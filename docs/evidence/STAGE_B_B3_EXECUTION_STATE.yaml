@@ -1,16 +1,17 @@
-execution_state_id: STAGE-B-B3-EXECUTION-STATE-v1
+execution_state_id: STAGE-B-B3-EXECUTION-STATE-v2
 stage_contract_id: STAGE-B-BUILD-v1
-updated_on: 2026-06-27
+updated_on: 2026-06-28
 immutable_snapshot: true
 
 macro_stage: B
 status: ACTIVE
 current_unit: B3
 tracking_issue: 9
-working_branch: build-b3-metric-evidence-contracts
+working_branch: build-b3-metric-evidence-contracts-v2
 
 predecessor:
   unit: B1a
+  merge_commit: ff6bc6e23d3df7d877230578c4de0f02f20fce0d
   required_artifacts:
     - docs/finance/CONFIGURATION_RULE_CONTRACT.md
     - docs/finance/RULE_RESOLUTION_CONTRACT.md
@@ -20,14 +21,16 @@ predecessor:
     - tests/test_b1a_financial_contracts.py
     - docs/evidence/STAGE_B_B1A_CONTRACT_EVIDENCE.yaml
   verification_test: tests/test_b3_evidence_contracts.py
-  status: PENDING_CI
+  status: PASS_LOCAL
 
 units:
   B0:
     state: COMPLETE
+    merged_commit: d34394c56037132e4d9de95283beb9ca3871fb0e
     issue: 5
   B1a:
-    state: COMPLETE_PENDING_DEPENDENCY_CI_CONFIRMATION
+    state: COMPLETE
+    merged_commit: ff6bc6e23d3df7d877230578c4de0f02f20fce0d
     issue: 7
     risk: R2
   B1b:

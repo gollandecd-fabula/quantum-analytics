@@ -1,9 +1,10 @@
-evidence_id: STAGE-B-B3-CONTRACT-EVIDENCE-v1
+evidence_id: STAGE-B-B3-CONTRACT-EVIDENCE-v2
 unit: B3
-status: READY_FOR_DEPENDENCY_CI
+status: READY_FOR_CI_AND_REVIEW
 tracking_issue: 9
-branch: build-b3-metric-evidence-contracts
+branch: build-b3-metric-evidence-contracts-v2
 risk_class: R2
+updated_on: 2026-06-28
 
 scope:
   contracts_schemas_tests_only: true
@@ -17,8 +18,9 @@ scope:
 
 predecessor_gate:
   b1a_artifacts_required_in_main: true
+  b1a_merge_commit: ff6bc6e23d3df7d877230578c4de0f02f20fce0d
   verification: tests/test_b3_evidence_contracts.py
-  status: PENDING_CI
+  status: PASS_LOCAL
 
 artifacts:
   contracts:
@@ -31,12 +33,27 @@ artifacts:
     - tests/contracts/fixtures/b3-evidence-chain-vectors.json
   tests:
     - tests/test_b3_evidence_contracts.py
+  state:
+    - docs/evidence/STAGE_B_B3_EXECUTION_STATE.yaml
+    - docs/evidence/STAGE_B_EXECUTION_STATE.yaml
+    - docs/governance/CURRENT_STATE.md
+    - docs/governance/CURRENT_STATE_B3.md
 
 checks:
-  b3_new_test_count: 9
-  ci: PENDING
+  b3_test_method_count: 11
+  local_b3_tests: PASS
+  github_ci: PENDING
   independent_review: PENDING
   unresolved_findings: UNKNOWN
+
+review_remediations:
+  - schema-valid evidence fixture using canonical schema field names
+  - exact typed path verification rather than node-type reachability
+  - RULE_RESOLUTION to CONFIGURATION_RULE path via RESOLUTION_SELECTS_RULE
+  - CANONICAL_EVENT to SOURCE_RECORD to SOURCE_FILE path verification
+  - edge source and target type compatibility
+  - B1a MONEY_PER_ITEM unit alignment
+  - brittle phrase assertion replaced by semantic contract assertions
 
 invariants:
   - canonical Stage A4 typed states only
@@ -44,20 +61,24 @@ invariants:
   - positive immutable versions and SHA-256 references
   - exact organization boundary on every node
   - Actual and Scenario evidence isolation
-  - complete path from metric to source file SHA-256
+  - complete typed path from metric to source-file retained bytes and SHA-256
+  - selected rules are reached through Rule Resolution nodes
   - acyclic calculation graph
-  - missing or mismatched evidence fails closed
+  - missing mismatched or type-incompatible evidence fails closed
   - immutable recalculation and restatement history
   - freshness confidence limitations accounting view and expense boundary are explicit
 
 invalid_vectors:
-  - missing required source-file path
+  - missing source-file node
+  - missing record-to-file edge
+  - missing resolution-to-rule edge
   - unknown edge target
   - cross-tenant node
   - Scenario node in Actual graph
   - calculation cycle
   - non-positive version
   - hash mismatch
+  - node-type-incompatible edge
 
 limitations:
   - B1b financial calculation remains R3 and not approved
@@ -65,4 +86,4 @@ limitations:
   - no production object storage or real source contracts
   - no metric is calculated or published in B3
 
-next_gate: B3_DEPENDENCY_AND_CONTRACT_CI
+next_gate: B3_GITHUB_CI_AND_INDEPENDENT_REVIEW

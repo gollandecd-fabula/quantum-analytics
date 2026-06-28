@@ -1,19 +1,20 @@
 # CURRENT STATE — B3 SNAPSHOT
 
-Date: 2026-06-27
-Status: `BUILD_B3_DEPENDENCY_CI_PENDING`
+Date: 2026-06-28
+Status: `BUILD_B3_CI_AND_REVIEW_PENDING`
 Active contract: `STAGE-B-BUILD-v1`
 Current unit: `B3 — METRIC_SNAPSHOTS_AND_EVIDENCE_CHAIN`
 Tracking issue: `#9`
-Working branch: `build-b3-metric-evidence-contracts`
+Working branch: `build-b3-metric-evidence-contracts-v2`
 Execution snapshot: `docs/evidence/STAGE_B_B3_EXECUTION_STATE.yaml`
+Predecessor merge: `ff6bc6e23d3df7d877230578c4de0f02f20fce0d`
 
 ## Authority and dependency gate
 
 - Macro-stage B remains explicitly approved.
 - B3 is R2 contracts, schemas, fixtures, and tests only.
-- B3 requires B1a artifacts in protected `main`.
-- `tests/test_b3_evidence_contracts.py` fails closed if the required B1a baseline is absent.
+- B1a artifacts are inherited from protected `main`.
+- `tests/test_b3_evidence_contracts.py` fails closed if the B1a baseline is absent.
 - B1b financial calculation implementation remains R3 and is not approved.
 
 ## B3 artifacts
@@ -32,31 +33,25 @@ Execution snapshot: `docs/evidence/STAGE_B_B3_EXECUTION_STATE.yaml`
 - metric snapshots are immutable and versioned;
 - typed states exactly match Stage A4;
 - numeric zero is a VALID value;
+- B1a metric units, including `MONEY_PER_ITEM`, remain representable;
 - every reference has a positive version and SHA-256;
-- evidence paths reach immutable source-file bytes and SHA-256;
+- evidence uses exact typed paths to retained source-file bytes;
+- selected rules are linked through Rule Resolution nodes;
 - tenant and Actual/Scenario boundaries are enforced;
 - calculation evidence is acyclic;
-- missing links, version/hash mismatches, cross-tenant references, mode contamination, and cycles fail closed;
-- freshness, confidence, limitations, accounting view, expense boundary, rounding, actor, reason, and trace are explicit;
+- missing links, wrong edge types, version/hash mismatches, cross-tenant
+  references, mode contamination, and cycles fail closed;
+- freshness, confidence, limitations, accounting view, expense boundary,
+  rounding, actor, reason, and trace are explicit;
 - recalculation and restatement create history links rather than overwriting results.
 
-## Pending verification
+## Verification state
 
-- execute Foundation, B1a, and nine B3 tests;
-- confirm B1a dependency files exist in the branch baseline;
-- inspect and repair any CI failures;
-- open a protected Pull Request;
-- obtain independent Codex review;
-- resolve all findings and re-run CI;
-- merge only after required checks pass.
-
-## Connector limitation
-
-The existing canonical `docs/governance/CURRENT_STATE.md` is not modified in
-this commit because the current Connector session is not exposing the blob SHA
-required by the contents API. This versioned snapshot preserves the exact B3
-state without an unsafe blind overwrite. The canonical pointer must be updated
-before B3 closure when a verified SHA becomes available.
+- local B3 contract tests: 11 passed;
+- GitHub Actions exact-head CI: pending;
+- independent review: pending;
+- unresolved findings: unknown until review;
+- merge: blocked until all gates pass.
 
 ## Approval gates
 

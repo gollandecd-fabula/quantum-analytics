@@ -1,16 +1,66 @@
 {
-  "overlay_version": 1,
+  "overlay_version": 2,
   "base_manifest_git_blob_sha": "498f5cd7440b1bc2c361dd940dead8fc06cd2c1d",
-  "reason": "Append-only manifest correction for exact B1a head after semantic-validation review remediation.",
+  "reason": "Cumulative manifest overlay for verified B1a payload and B3 v2 contracts, schemas, fixtures, tests, and state artifacts.",
   "control_paths_excluded_from_payload": [
     "docs/evidence/ARTIFACT_MANIFEST.json",
     "docs/evidence/ARTIFACT_MANIFEST_OVERLAY.json"
   ],
   "entries": [
     [
+      "docs/evidence/EVIDENCE_CHAIN_CONTRACT.md",
+      "b9150c6c215324ad87d5460d24986458ae379dd6527e77776aff7fa74d2c89ab",
+      5600
+    ],
+    [
+      "docs/evidence/METRIC_SNAPSHOT_CONTRACT.md",
+      "7e3190b0766030ba5cdb68c7f25b49be9e8b5be2c66e3181ef38d04046238771",
+      4756
+    ],
+    [
+      "docs/evidence/STAGE_B_B3_CONTRACT_EVIDENCE.yaml",
+      "3a867d1f2bee3bfaa9b69a8fb73ede48d5acb6095d01c6df579c361afb41e5a1",
+      2989
+    ],
+    [
+      "docs/evidence/STAGE_B_B3_EXECUTION_STATE.yaml",
+      "cc455971fab782fec207e760006cc5946372237e39e47d6ab9143de95ccca1bd",
+      1651
+    ],
+    [
+      "docs/evidence/STAGE_B_EXECUTION_STATE.yaml",
+      "71be21a7d7c2cddf4a69b5335f82a29a9a1fa5393630cfde5b20928e9cc2b35a",
+      1251
+    ],
+    [
       "docs/finance/SAFE_EXPRESSION_CONTRACT.md",
       "c8c3a6f8152b90e6e71393ade7923e8f5224bcea9252697167553df50b062be8",
       7744
+    ],
+    [
+      "docs/governance/CURRENT_STATE.md",
+      "1478b34d3e2e1f5567fcd5fb01ef23a92a19eecb4686a079da6176662b5b09cf",
+      1669
+    ],
+    [
+      "docs/governance/CURRENT_STATE_B3.md",
+      "98acaf7b86455b20fb78ed9806ce6222ad83f46d98c4e82621d47f9caf5aaed5",
+      2521
+    ],
+    [
+      "schemas/evidence-chain.schema.json",
+      "4087797703b6a1187f58b346f3b985eab4dee35bb4f9bd85d2055049d37545c7",
+      6266
+    ],
+    [
+      "schemas/metric-result.schema.json",
+      "bc691818f90b560ef4a5ac431c10e50a02b8b0a6ec9ec2667f445690290af35f",
+      8619
+    ],
+    [
+      "tests/contracts/fixtures/b3-evidence-chain-vectors.json",
+      "d88fa435b2c3a3f3e31c4b2eca8a5e5297b88a842ac85dbe5a414b3ae6ab37ed",
+      10610
     ],
     [
       "tests/test_000_b1a_manifest_payload.py",
@@ -31,6 +81,11 @@
       "tests/test_b1a_safe_expression_semantics.py",
       "ebdd579ca0444e5b02483532fcc00170d88ae59d7743dd6e47d34be7d583f27c",
       3662
+    ],
+    [
+      "tests/test_b3_evidence_contracts.py",
+      "5463b1e51659043d35014ed8367df2947cb1ec3c0f03383e694a1afdc23ed94b",
+      8831
     ]
   ],
   "remove_paths": []

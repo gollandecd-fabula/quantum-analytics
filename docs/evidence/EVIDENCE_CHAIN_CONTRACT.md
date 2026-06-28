@@ -2,13 +2,13 @@
 
 Status: `DRAFT_FOR_B3_REVIEW`
 Risk class: `R2`
-Tracking: `[BUILD][B3] Define metric snapshots and Evidence Chain contracts`
+Tracking issue: `#9`
 
 ## Purpose
 
 The Evidence Chain is an immutable directed acyclic graph that explains and
 reproduces a Metric Snapshot from versioned contracts, transformations,
-canonical events, source records, and source files.
+canonical events, source records, and retained source-file bytes.
 
 A human-readable explanation without machine-verifiable node references is not
 sufficient evidence.
@@ -46,17 +46,19 @@ The graph hash excludes only its own hash field.
 - `RECONCILIATION_RESULT`;
 - `APPROVAL`.
 
-Every node has a stable ID, positive immutable version where the node is
-versioned, content hash, organization ID, mode, and node-type-specific metadata.
+Every node has a stable ID, a positive immutable artifact version, a content
+hash, organization ID, mode, scenario boundary, and node-type-specific
+metadata.
 
 ## Edge types
 
 - `RESULT_DEFINED_BY`;
 - `RESULT_CALCULATED_WITH`;
+- `RESULT_USES_RESOLUTION`;
+- `RESOLUTION_SELECTS_RULE`;
 - `PROFILE_SELECTS_RULE`;
 - `PROFILE_USES_ROUNDING`;
 - `PROFILE_USES_SOURCE_AUTHORITY`;
-- `RESULT_USES_RESOLUTION`;
 - `RESULT_DERIVED_FROM_EVENT`;
 - `EVENT_NORMALIZED_FROM_RECORD`;
 - `RECORD_READ_FROM_FILE`;
@@ -69,53 +71,56 @@ versioned, content hash, organization ID, mode, and node-type-specific metadata.
 - `SNAPSHOT_SUPERSEDES`;
 - `SNAPSHOT_RESTATES`.
 
-Unknown edge types are rejected.
+Unknown edge types or node-type-incompatible edges are rejected.
 
-## Required paths
+## Required typed paths
 
-For a publishable Metric Snapshot, the graph must provide paths from the root to:
+For a publishable Metric Snapshot, the graph must provide these exact typed
+paths from the root Metric Snapshot node:
 
-- its Metric Definition;
-- its Calculation Profile;
-- the exact Rounding Policy;
-- required Source Authority;
-- every selected Configuration Rule through a Rule Resolution node;
-- every contributing Canonical Event;
-- each event's Source Record;
-- each record's Source File and SHA-256;
-- every applied Transformation;
-- actor/reason/trace audit metadata.
+- `RESULT_DEFINED_BY` to its Metric Definition;
+- `RESULT_CALCULATED_WITH` to its Calculation Profile;
+- `RESULT_USES_RESOLUTION` to every Rule Resolution used;
+- `RULE_RESOLUTION -> RESOLUTION_SELECTS_RULE -> CONFIGURATION_RULE` for every
+  selected Configuration Rule;
+- `CALCULATION_PROFILE -> PROFILE_USES_ROUNDING -> ROUNDING_POLICY`;
+- `CALCULATION_PROFILE -> PROFILE_USES_SOURCE_AUTHORITY -> SOURCE_AUTHORITY`;
+- `RESULT_USES_TRANSFORMATION` to every applied Transformation;
+- `RESULT_DERIVED_FROM_EVENT` to every contributing Canonical Event;
+- `CANONICAL_EVENT -> EVENT_NORMALIZED_FROM_RECORD -> SOURCE_RECORD`;
+- `SOURCE_RECORD -> RECORD_READ_FROM_FILE -> SOURCE_FILE`, including retained
+  byte-level SHA-256 and storage locator metadata;
+- `RESULT_HAS_FRESHNESS` to the freshness assessment;
+- `RESULT_HAS_CONFIDENCE` to the confidence assessment.
 
-When a required path is absent, the result is `BLOCKED` with
-`METRIC_EVIDENCE_INCOMPLETE`.
+Merely making each required node type reachable through arbitrary edges is not
+sufficient. When a required typed path is absent, the result is `BLOCKED` with
+`EVIDENCE_REQUIRED_PATH_MISSING`.
 
 ## Tenant and mode isolation
 
-- Every node must have the same `organization_id` as the root unless a later
-  approved cross-organization contract explicitly permits a reference.
+- Every node must have the same `organization_id` as the root.
 - Actual graphs cannot contain Scenario nodes.
-- Scenario graphs require one scenario ID; Scenario nodes from another scenario
-  are forbidden.
-- Cross-tenant or cross-mode edges are rejected before graph publication.
+- Scenario graphs require one scenario ID and cannot contain another scenario.
+- Cross-tenant or cross-mode edges are rejected before publication.
 
 ## Acyclicity and history edges
 
 The calculation subgraph must be acyclic. Historical edges
-`SNAPSHOT_SUPERSEDES` and `SNAPSHOT_RESTATES` form separate chains and cannot
-point forward to a descendant or create a cycle.
+`SNAPSHOT_SUPERSEDES` and `SNAPSHOT_RESTATES` form separate immutable chains and
+must not create a cycle.
 
 A graph cycle produces `EVIDENCE_GRAPH_CYCLE` and blocks publication.
 
 ## Hash and version verification
 
-For every node:
+For every graph and node reference:
 
-- content is canonicalized according to its own contract;
-- SHA-256 must match the node reference;
-- version must be a positive immutable integer when applicable;
+- version is a positive immutable integer;
+- content SHA-256 is a lowercase 64-character hexadecimal value;
 - aliases such as `latest` are forbidden;
-- source-file nodes contain byte-level SHA-256 and storage locator metadata;
-- a locator is not evidence without a matching content hash.
+- source-file nodes contain retained-byte SHA-256 and storage locator metadata;
+- a storage locator without a matching content hash is not evidence.
 
 ## Reproducibility
 
@@ -123,32 +128,29 @@ A verifier receives the root Metric Snapshot and Evidence Chain and must be able
 to:
 
 1. verify graph and node hashes;
-2. verify tenant/mode boundaries;
+2. verify tenant and mode boundaries;
 3. load all immutable referenced contracts and records;
 4. reconstruct selected rule-resolution results;
 5. replay transformations in declared order;
-6. verify the result state, value, unit, currency, rounding, expense boundary,
+6. verify result state, value, unit, currency, rounding, expense boundary,
    freshness, confidence, and limitations;
 7. reproduce the root snapshot hash.
 
-B3 defines the replay contract but does not implement the B1b financial
-calculation kernel.
+B3 defines the replay contract and verifier fixtures. It does not implement the
+B1b financial calculation kernel.
 
 ## Broken-link behavior
 
 The graph fails closed on:
 
-- missing node;
-- missing required path;
-- unknown node or edge type;
-- version alias or non-positive version;
-- hash mismatch;
-- tenant mismatch;
-- Actual/Scenario contamination;
-- transformation order ambiguity;
-- dependency or history cycle;
+- missing node or required typed path;
+- unknown or type-incompatible edge;
+- invalid version or hash;
+- tenant or mode contamination;
+- transformation-order ambiguity;
+- graph or history cycle;
 - unapproved Source Authority or Rounding Policy;
-- source file unavailable without retained immutable bytes.
+- unavailable retained source bytes.
 
 Independent metrics with complete evidence remain available.
 
