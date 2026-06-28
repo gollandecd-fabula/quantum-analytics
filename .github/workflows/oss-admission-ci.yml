@@ -1,0 +1,54 @@
+name: OSS Admission CI
+
+on:
+  pull_request:
+    branches:
+      - main
+      - build-b3-metric-evidence-contracts-v4
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: oss-admission-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  oss-admission:
+    name: oss-admission
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    steps:
+      - name: Fetch exact commit without third-party actions
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          git init .
+          git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git fetch --depth=1 origin "${GITHUB_SHA}"
+          git checkout --detach FETCH_HEAD
+          git remote set-url origin "https://github.com/${GITHUB_REPOSITORY}.git"
+
+      - name: Verify runtime
+        run: |
+          set -euo pipefail
+          python3 --version
+          python3 - <<'PY'
+          import sys
+          if sys.version_info < (3, 12):
+              raise SystemExit(f"Python 3.12+ required, got {sys.version}")
+          PY
+
+      - name: Run Foundation checks
+        run: |
+          set -euo pipefail
+          PYTHONPATH=src python3 -m quantum.scripts.ci
+
+      - name: Verify official registries and OSV
+        run: |
+          set -euo pipefail
+          PYTHONPATH=src python3 -m quantum.scripts.oss_admission_scan --output /tmp/oss-admission-scan.json
+          cat /tmp/oss-admission-scan.json

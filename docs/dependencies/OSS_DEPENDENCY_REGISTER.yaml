@@ -1,0 +1,226 @@
+{
+  "base_head": "208dc3132959c506dfb1850f1512cedda6e48ce5",
+  "components": [
+    {
+      "allowed_use": [
+        "read-only analytics",
+        "reconciliation",
+        "snapshot queries"
+      ],
+      "ecosystem": "PyPI",
+      "installation_authorized": false,
+      "license": "MIT",
+      "name": "duckdb",
+      "prohibited_use": [
+        "financial rule source of truth",
+        "automatic extension installation"
+      ],
+      "role": "in-process analytical SQL engine",
+      "scope": "B2_RECONCILIATION",
+      "source_url": "https://pypi.org/project/duckdb/",
+      "status": "APPROVED_FOR_FUTURE_INTEGRATION",
+      "transitive_dependency_review_required": true,
+      "version": "1.5.4",
+      "version_source": "official_registry"
+    },
+    {
+      "allowed_use": [
+        "file parsing",
+        "normalization",
+        "canonical record production"
+      ],
+      "ecosystem": "PyPI",
+      "installation_authorized": false,
+      "license": "MIT",
+      "name": "polars",
+      "prohibited_use": [
+        "financial rounding authority",
+        "hidden default injection"
+      ],
+      "role": "lazy and streaming dataframe normalization",
+      "scope": "DATA_INGESTION_FOUNDATION",
+      "source_url": "https://pypi.org/project/polars/",
+      "status": "APPROVED_FOR_FUTURE_INTEGRATION",
+      "transitive_dependency_review_required": true,
+      "version": "1.42.0",
+      "version_source": "official_registry"
+    },
+    {
+      "allowed_use": [
+        "input schema validation",
+        "quarantine classification",
+        "data contracts"
+      ],
+      "ecosystem": "PyPI",
+      "installation_authorized": false,
+      "license": "MIT",
+      "name": "pandera",
+      "prohibited_use": [
+        "silent coercion of financial values",
+        "automatic assumption creation"
+      ],
+      "role": "dataframe schema and invariant validation",
+      "scope": "DATA_INGESTION_FOUNDATION",
+      "source_url": "https://pypi.org/project/pandera/",
+      "status": "APPROVED_FOR_FUTURE_INTEGRATION",
+      "transitive_dependency_review_required": true,
+      "version": "0.32.0",
+      "version_source": "official_registry"
+    },
+    {
+      "allowed_use": [
+        "development tests",
+        "CI tests",
+        "regression minimization"
+      ],
+      "ecosystem": "PyPI",
+      "installation_authorized": false,
+      "license": "MPL-2.0",
+      "name": "hypothesis",
+      "prohibited_use": [
+        "production runtime",
+        "vendoring modified source without review"
+      ],
+      "role": "property-based and adversarial test generation",
+      "scope": "B1B_B2_B6_B7_TESTING",
+      "source_url": "https://pypi.org/project/hypothesis/",
+      "status": "APPROVED_DEV_TEST_ONLY",
+      "transitive_dependency_review_required": true,
+      "version": "6.155.7",
+      "version_source": "official_registry"
+    },
+    {
+      "allowed_use": [
+        "API routing",
+        "OpenAPI generation",
+        "request boundary"
+      ],
+      "ecosystem": "PyPI",
+      "installation_authorized": false,
+      "license": "MIT",
+      "name": "fastapi",
+      "prohibited_use": [
+        "financial calculation execution",
+        "tenant authorization source of truth"
+      ],
+      "role": "typed HTTP API transport",
+      "scope": "B4_APPLICATION_API",
+      "source_url": "https://pypi.org/project/fastapi/",
+      "status": "APPROVED_FOR_FUTURE_INTEGRATION",
+      "transitive_dependency_review_required": true,
+      "version": "0.138.1",
+      "version_source": "official_registry"
+    },
+    {
+      "allowed_use": [
+        "request validation",
+        "response validation",
+        "configuration DTOs"
+      ],
+      "ecosystem": "PyPI",
+      "installation_authorized": false,
+      "license": "MIT",
+      "name": "pydantic",
+      "prohibited_use": [
+        "financial calculation engine",
+        "implicit business default authority"
+      ],
+      "role": "typed boundary and DTO validation",
+      "scope": "B1B_B4_BOUNDARY_VALIDATION",
+      "source_url": "https://pypi.org/project/pydantic/",
+      "status": "APPROVED_FOR_FUTURE_INTEGRATION",
+      "transitive_dependency_review_required": true,
+      "version": "2.13.4",
+      "version_source": "official_registry"
+    },
+    {
+      "allowed_use": [
+        "configuration UI",
+        "exception inbox",
+        "audit tables"
+      ],
+      "ecosystem": "npm",
+      "installation_authorized": false,
+      "license": "MIT",
+      "name": "react-admin",
+      "prohibited_use": [
+        "financial formula execution",
+        "direct marketplace calls"
+      ],
+      "registry_verification_required": true,
+      "role": "administrative and exception-management UI framework",
+      "scope": "B5_OPERATIONAL_UI",
+      "source_url": "https://github.com/marmelab/react-admin",
+      "status": "APPROVED_PENDING_REGISTRY_CONFIRMATION",
+      "transitive_dependency_review_required": true,
+      "version": "5.15.1",
+      "version_source": "official_repository_package_metadata"
+    },
+    {
+      "allowed_use": [
+        "rendering backend-prepared series",
+        "scenario visualization"
+      ],
+      "ecosystem": "npm",
+      "installation_authorized": false,
+      "license": "Apache-2.0",
+      "name": "echarts",
+      "prohibited_use": [
+        "client-side financial calculation",
+        "actual/scenario state mutation"
+      ],
+      "registry_verification_required": true,
+      "role": "interactive analytics visualization",
+      "scope": "B6_ANALYTICS_AND_SCENARIOS",
+      "source_url": "https://github.com/apache/echarts",
+      "status": "APPROVED_PENDING_REGISTRY_CONFIRMATION",
+      "transitive_dependency_review_required": true,
+      "version": "6.1.0",
+      "version_source": "official_repository_package_metadata"
+    },
+    {
+      "allowed_use": [
+        "source audit",
+        "sandbox contract tests",
+        "read-only facade evaluation"
+      ],
+      "development_status": "Alpha",
+      "ecosystem": "PyPI",
+      "installation_authorized": false,
+      "license": "MIT",
+      "name": "wbsdk",
+      "prohibited_use": [
+        "price writes",
+        "stock writes",
+        "card writes",
+        "promotion writes",
+        "order cancellation",
+        "supply writes",
+        "media writes",
+        "direct use by domain services"
+      ],
+      "read_only_facade_required": true,
+      "role": "Wildberries API transport reference and possible isolated adapter dependency",
+      "scope": "WB_READ_ONLY_ADAPTER_CANDIDATE",
+      "source_url": "https://pypi.org/project/wbsdk/",
+      "status": "AUDIT_REQUIRED",
+      "transitive_dependency_review_required": true,
+      "version": "1.2.8",
+      "version_source": "official_registry",
+      "write_methods_exposed": true
+    }
+  ],
+  "generated_on": "2026-06-29",
+  "marketplace_write_enabled": false,
+  "policy": {
+    "automatic_upgrades_allowed": false,
+    "exact_version_pins_required": true,
+    "known_vulnerabilities_allowed": false,
+    "lock_and_integrity_required_before_installation": true,
+    "registry_verification_required": true,
+    "transitive_dependency_review_required": true
+  },
+  "runtime_installation_authorized": false,
+  "schema_version": "1.0",
+  "stage": "OSS_DEPENDENCY_ADMISSION"
+}

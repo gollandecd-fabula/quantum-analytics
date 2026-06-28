@@ -1,0 +1,33 @@
+{
+  "base_head": "208dc3132959c506dfb1850f1512cedda6e48ce5",
+  "branch": "build-oss-dependency-admission-v1",
+  "component_counts": {
+    "approved_dev_test_only": 1,
+    "approved_future": 6,
+    "audit_required": 1,
+    "pending_registry_confirmation": 2
+  },
+  "gates": {
+    "exact_candidate_versions": "PASS",
+    "license_policy": "PASS",
+    "official_registry_verification": "CURRENT_HEAD_CI_REQUIRED",
+    "offline_policy_validation": "PASS_BY_TEST",
+    "osv_vulnerability_scan": "CURRENT_HEAD_CI_REQUIRED",
+    "prospective_sbom": "PASS",
+    "transitive_lock_and_hash_review": "DEFERRED_TO_FIRST_INSTALLATION",
+    "wbsdk_source_audit": "NOT_STARTED_SEPARATE_STAGE"
+  },
+  "generated_on": "2026-06-29",
+  "marketplace_write_enabled": false,
+  "restrictions": [
+    "no_runtime_dependency_installation",
+    "no_marketplace_writes",
+    "no_financial_kernel_implementation",
+    "no_merge_authorization",
+    "release_blocked"
+  ],
+  "runtime_installation_authorized": false,
+  "stage": "OSS_DEPENDENCY_ADMISSION",
+  "state_version": 1,
+  "status": "R2_IMPLEMENTED_CI_REQUIRED"
+}
