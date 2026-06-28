@@ -116,7 +116,27 @@
             "properties": {"operator": {"enum": ["NEGATE", "ABS"]}},
             "required": ["operator"]
           },
-          "then": {"properties": {"arguments": {"minItems": 1, "maxItems": 1}}}
+          "then": {
+            "properties": {
+              "value_type": {"enum": ["MONEY", "DECIMAL", "RATE", "INTEGER"]},
+              "arguments": {
+                "minItems": 1,
+                "maxItems": 1,
+                "items": {
+                  "allOf": [
+                    {"$ref": "#/$defs/expression"},
+                    {
+                      "type": "object",
+                      "properties": {
+                        "value_type": {"enum": ["MONEY", "DECIMAL", "RATE", "INTEGER"]}
+                      },
+                      "required": ["value_type"]
+                    }
+                  ]
+                }
+              }
+            }
+          }
         },
         {
           "if": {
