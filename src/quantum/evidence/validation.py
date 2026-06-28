@@ -108,6 +108,8 @@ def validate_metric_evidence(result: Mapping[str, Any], chain: Mapping[str, Any]
         errors.append("RECALC_AUDIT_INVALID")
     if audit.get("replay_key") != chain.get("replay_key"):
         errors.append("REPLAY_KEY_MISMATCH")
+    if audit.get("actor") != chain.get("actor"):
+        errors.append("RECALC_ACTOR_MISMATCH")
     if not audit.get("actor") or not audit.get("reason"):
         errors.append("RECALC_AUDIT_INCOMPLETE")
     requested = _parse_time(audit.get("requested_at"), "RECALC_REQUESTED_AT_INVALID", errors)
@@ -224,6 +226,7 @@ def validate_metric_evidence(result: Mapping[str, Any], chain: Mapping[str, Any]
         if edge[3] not in identities.get(edge[2], set()):
             errors.append(f"LINK_TO_MISSING:{edge[2]}:{edge[3]}")
 
+    result_id = str(result.get("metric_result_id"))
     required = {
         ("METRIC_DEFINITION", str(chain.get("metric_definition_ref", {}).get("id")), "DEFINED_BY"),
         ("CALCULATION_PROFILE", str(chain.get("calculation_profile_ref", {}).get("id")), "CALCULATED_WITH"),
@@ -233,9 +236,43 @@ def validate_metric_evidence(result: Mapping[str, Any], chain: Mapping[str, Any]
     actual = {
         (to_kind, to_id, relation)
         for from_kind, from_id, to_kind, to_id, relation in observed
-        if from_kind == "METRIC_RESULT" and from_id == str(result.get("metric_result_id"))
+        if from_kind == "METRIC_RESULT" and from_id == result_id
     }
     for missing in sorted(required - actual):
         errors.append("REQUIRED_RESULT_LINK_MISSING:" + "|".join(missing))
+
+    linked_transformations: set[str] = set()
+    for event_id, event in events.items():
+        record_id = str(event.get("source_record_id"))
+        result_event_edge = ("METRIC_RESULT", result_id, "EVENT", event_id, "DERIVED_FROM")
+        if result_event_edge not in observed:
+            errors.append(f"REQUIRED_RESULT_EVENT_LINK_MISSING:{event_id}")
+
+        event_record_edge = ("EVENT", event_id, "SOURCE_RECORD", record_id, "NORMALIZED_FROM")
+        if event_record_edge not in observed:
+            errors.append(f"REQUIRED_EVENT_RECORD_LINK_MISSING:{event_id}:{record_id}")
+
+        event_transforms = {
+            to_id
+            for from_kind, from_id, to_kind, to_id, relation in observed
+            if from_kind == "EVENT"
+            and from_id == event_id
+            and to_kind == "TRANSFORMATION"
+            and relation == "TRANSFORMED_BY"
+        }
+        if not event_transforms:
+            errors.append(f"REQUIRED_EVENT_TRANSFORMATION_LINK_MISSING:{event_id}")
+        linked_transformations.update(event_transforms)
+
+    for record_id, record in records.items():
+        file_id = files_by_hash.get(str(record.get("source_file_sha256")))
+        if file_id is not None:
+            edge = ("SOURCE_RECORD", record_id, "SOURCE_FILE", file_id, "INGESTED_FROM")
+            if edge not in observed:
+                errors.append(f"REQUIRED_RECORD_FILE_LINK_MISSING:{record_id}:{file_id}")
+
+    for transformation_id in transformations:
+        if transformation_id not in linked_transformations:
+            errors.append(f"ORPHAN_TRANSFORMATION:{transformation_id}")
 
     return tuple(sorted(set(errors)))
