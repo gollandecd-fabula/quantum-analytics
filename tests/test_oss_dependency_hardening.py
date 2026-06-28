@@ -68,6 +68,57 @@ def _verify_hardening_cases() -> None:
             "license_classifiers": [],
         },
     )
+    assert license_metadata_matches(
+        "MIT",
+        {
+            "license_expression": None,
+            "license_text": "",
+            "license_classifiers": [
+                "License :: OSI Approved",
+                "License :: OSI Approved :: MIT License",
+            ],
+        },
+    )
+    assert not license_metadata_matches(
+        "MIT",
+        {
+            "license_expression": None,
+            "license_text": "",
+            "license_classifiers": [
+                "License :: OSI Approved :: MIT License",
+                "License :: OSI Approved :: GNU General Public License (GPL)",
+            ],
+        },
+    )
+    assert not license_metadata_matches(
+        "MIT",
+        {
+            "license_expression": None,
+            "license_text": "",
+            "license_classifiers": [
+                "License :: OSI Approved :: MIT License",
+                "License :: Other/Proprietary License",
+            ],
+        },
+    )
+    assert not license_metadata_matches(
+        "MIT",
+        {
+            "license_expression": "MIT",
+            "license_text": "",
+            "license_classifiers": [
+                "License :: OSI Approved :: GNU General Public License (GPL)",
+            ],
+        },
+    )
+    assert not license_metadata_matches(
+        "MIT",
+        {
+            "license_expression": None,
+            "license_text": "",
+            "license_classifiers": "License :: OSI Approved :: MIT License",
+        },
+    )
 
     state = load_json_document(
         ROOT / "docs/evidence/OSS_DEPENDENCY_ADMISSION_STATE.yaml"

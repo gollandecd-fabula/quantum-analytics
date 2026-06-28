@@ -174,16 +174,59 @@ def license_matches(expected: str, observed: str) -> bool:
     return _contains_license_token(normalized, expected)
 
 
+GENERIC_LICENSE_CLASSIFIERS = {
+    "license :: osi approved",
+}
+
+
+def _license_classifiers_match(
+    expected: str,
+    classifiers: Any,
+) -> bool | None:
+    if classifiers is None:
+        return None
+    if not isinstance(classifiers, list):
+        return False
+
+    saw_expected = False
+    for classifier in classifiers:
+        if not isinstance(classifier, str) or not classifier.strip():
+            return False
+        normalized = " ".join(classifier.casefold().split())
+        if normalized in GENERIC_LICENSE_CLASSIFIERS:
+            continue
+        if not license_matches(expected, classifier):
+            return False
+        saw_expected = True
+    return True if saw_expected else None
+
+
 def license_metadata_matches(expected: str, metadata: dict[str, Any]) -> bool:
+    classifier_result = _license_classifiers_match(
+        expected,
+        metadata.get("license_classifiers"),
+    )
+    if classifier_result is False:
+        return False
+
     expression = metadata.get("license_expression")
     if isinstance(expression, str) and expression.strip():
         return expression.strip().casefold() == expected.casefold()
 
-    candidates = [metadata.get("license_text", "")]
-    classifiers = metadata.get("license_classifiers", [])
-    if isinstance(classifiers, list):
-        candidates.extend(item for item in classifiers if isinstance(item, str))
-    return license_matches(expected, " ".join(str(item) for item in candidates if item))
+    license_text = metadata.get("license_text", "")
+    if license_text is None:
+        license_text = ""
+    if not isinstance(license_text, str):
+        return False
+
+    text_result = (
+        license_matches(expected, license_text)
+        if license_text.strip()
+        else None
+    )
+    if classifier_result is True:
+        return text_result is not False
+    return text_result is True
 
 
 def run_scan() -> dict[str, Any]:
