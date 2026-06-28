@@ -1,4 +1,4 @@
-evidence_id: STAGE-B-B3-CONTRACT-EVIDENCE-v9
+evidence_id: STAGE-B-B3-CONTRACT-EVIDENCE-v10
 unit: B3
 status: REMEDIATED_REVIEW_GATED
 tracking_issue: 9
@@ -45,6 +45,8 @@ checks:
   primary_diagnostic_policy: src/quantum/evidence/__init__.py
   malformed_input_fail_closed_tests: PASS_LOCAL_STATIC
   source_byte_loader_gate_tests: PASS_LOCAL_STATIC
+  deep_acyclic_path_tests: PASS_LOCAL_TARGETED
+  base_public_invariant_alignment_tests: PASS_LOCAL_TARGETED
   github_ci_policy: REQUIRED_ON_CURRENT_PR_MERGE_RESULT
   independent_review: REQUIRED_ON_CURRENT_PR_HEAD_AND_DIFF
   transient_ci_result_source: GITHUB_CHECKS
@@ -61,7 +63,8 @@ verified_invariants:
   - primary diagnostics use explicit root-cause priority
   - optional snapshot locators are null or non-empty strings
   - decimal and rate values cannot use money units
-  - long evidence paths fail closed without recursive validator crashes
+  - base and public verifiers enforce the same snapshot invariants
+  - long acyclic evidence paths validate without recursion failure
 
 limitations:
   - JSON Schemas are declarative; runtime verifier enforces B3 invariants
