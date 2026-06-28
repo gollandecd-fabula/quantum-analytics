@@ -48,7 +48,19 @@ def main() -> None:
     env = dict(os.environ)
     env["PYTHONPATH"] = str(src)
     result = subprocess.run(
-        [sys.executable, "-m", "unittest", "discover", "-s", str(root / "tests"), "-p", "test_*.py", "-v"],
+        [
+            sys.executable,
+            "-m",
+            "unittest",
+            "discover",
+            "-s",
+            str(root / "tests"),
+            "-t",
+            str(root),
+            "-p",
+            "test_*.py",
+            "-v",
+        ],
         cwd=root,
         env=env,
         check=False,
