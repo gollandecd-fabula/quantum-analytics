@@ -28,9 +28,12 @@ units:
     risk: R3
     approval: NOT_GRANTED
   B3:
-    state: IN_PROGRESS
+    state: REMEDIATED_AWAITING_CURRENT_HEAD_CI_AND_REVIEW
     issue: 9
     risk: R2
+    runtime_verifier: src/quantum/evidence/verification.py
+    test_method_count: 27
+    temporary_patch_tests: 0
   B4:
     state: PLANNED
     risk: R2
