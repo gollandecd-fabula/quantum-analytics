@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import time
 import urllib.error
 import urllib.parse
@@ -90,15 +91,39 @@ def registry_metadata(component: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _contains_license_token(observed: str, token: str) -> bool:
+    pattern = rf"(?<![A-Z0-9]){re.escape(token.upper())}(?![A-Z0-9])"
+    return re.search(pattern, observed.upper()) is not None
+
+
 def license_matches(expected: str, observed: str) -> bool:
-    normalized = observed.upper().replace(" ", "")
+    normalized = " ".join(observed.upper().split())
     if expected == "MIT":
-        return "MIT" in normalized
+        return (
+            _contains_license_token(normalized, "MIT")
+            or (
+                "PERMISSION IS HEREBY GRANTED, FREE OF CHARGE" in normalized
+                and "THE SOFTWARE IS PROVIDED" in normalized
+                and '"AS IS"' in normalized
+            )
+        )
     if expected == "Apache-2.0":
-        return "APACHE" in normalized and "2" in normalized
+        return (
+            _contains_license_token(normalized, "APACHE-2.0")
+            or (
+                "APACHE LICENSE" in normalized
+                and _contains_license_token(normalized, "2.0")
+            )
+        )
     if expected == "MPL-2.0":
-        return "MPL-2.0" in normalized or "MOZILLAPUBLICLICENSE" in normalized
-    return expected.upper().replace(" ", "") in normalized
+        return (
+            _contains_license_token(normalized, "MPL-2.0")
+            or (
+                "MOZILLA PUBLIC LICENSE" in normalized
+                and _contains_license_token(normalized, "2.0")
+            )
+        )
+    return _contains_license_token(normalized, expected)
 
 
 def run_scan() -> dict[str, Any]:
@@ -108,7 +133,7 @@ def run_scan() -> dict[str, Any]:
     errors = list(validate_register(register, license_policy))
     errors.extend(validate_sbom(register, sbom))
     if errors:
-        raise RuntimeError("offline admission validation failed: " + ", ".join(errors))
+        raise RuntimeError(foffline admission validation failed: " + ", ".join(errors))
 
     registry_results = []
     queries = []

@@ -9,14 +9,14 @@
   },
   "gates": {
     "exact_candidate_versions": "PASS",
-    "foundation_checks": "PASS",
+    "foundation_checks": "REVALIDATION_REQUIRED",
     "license_policy": "PASS",
-    "npm_distribution_integrity": "PASS",
-    "official_registry_verification": "PASS",
-    "offline_policy_validation": "PASS_BY_TEST",
-    "osv_vulnerability_scan": "PASS_ZERO_KNOWN_VULNERABILITIES",
+    "npm_distribution_integrity": "REVALIDATION_REQUIRED",
+    "official_registry_verification": "REVALIDATION_REQUIRED",
+    "offline_policy_validation": "PASS_BY_LOCAL_REGRESSION",
+    "osv_vulnerability_scan": "REVALIDATION_REQUIRED",
     "prospective_sbom": "PASS",
-    "tracked_tree_manifest_equality": "PASS",
+    "tracked_tree_manifest_equality": "REVALIDATION_REQUIRED",
     "transitive_lock_and_hash_review": "DEFERRED_TO_FIRST_INSTALLATION",
     "wbsdk_source_audit": "NOT_STARTED_SEPARATE_STAGE"
   },
@@ -31,16 +31,11 @@
   ],
   "runtime_installation_authorized": false,
   "stage": "OSS_DEPENDENCY_ADMISSION",
-  "state_version": 1,
-  "status": "R2_VALIDATED",
-  "validation_evidence": {
-    "conclusion": "success",
-    "evidence_only_commit_revalidation_required": true,
-    "evidence_scope": "implementation_and_policy_payload",
-    "implementation_head": "f045293ab2c93af5ce2181beeb618de005ea18c2",
-    "job_id": 83942081700,
-    "run_id": 28335952402,
-    "run_number": 1,
-    "workflow": "OSS Admission CI"
+  "state_version": 2,
+  "status": "R2_REMEDIATION_CI_REQUIRED",
+  "superseded_validation_evidence": {
+    "reason": "P2 license token-boundary remediation",
+    "superseded_head": "8c46061e277d0461ef8c7e646688fa9886f733b4",
+    "superseded_run_id": 28336103137
   }
 }

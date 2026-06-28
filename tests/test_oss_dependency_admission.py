@@ -9,6 +9,7 @@ from quantum.dependencies.admission import (
     validate_register,
     validate_sbom,
 )
+from quantum.scripts.oss_admission_scan import license_matches
 
 ROOT = Path(__file__).resolve().parents[1]
 REGISTER = ROOT / "docs/dependencies/OSS_DEPENDENCY_REGISTER.yaml"
@@ -78,13 +79,13 @@ class OssDependencyAdmissionTests(unittest.TestCase):
 
     def test_06_state_preserves_all_release_and_scope_gates(self) -> None:
         state = load_json_document(STATE)
-        self.assertEqual(state["status"], "R2_VALIDATED")
+        self.assertEqual(state["status"], "R2_REMEDIATION_CI_REQUIRED")
         self.assertIs(state["runtime_installation_authorized"], False)
         self.assertIs(state["marketplace_write_enabled"], False)
         self.assertIn("release_blocked", state["restrictions"])
         self.assertEqual(state["gates"]["wbsdk_source_audit"], "NOT_STARTED_SEPARATE_STAGE")
-        self.assertEqual(state["gates"]["official_registry_verification"], "PASS")
-        self.assertEqual(state["gates"]["osv_vulnerability_scan"], "PASS_ZERO_KNOWN_VULNERABILITIES")
+        self.assertEqual(state["gates"]["official_registry_verification"], "REVALIDATION_REQUIRED")
+        self.assertEqual(state["gates"]["osv_vulnerability_scan"], "REVALIDATION_REQUIRED")
         self.assertEqual(state["component_counts"]["pending_registry_confirmation"], 0)
 
     def test_07_notices_and_policy_cover_admitted_components(self) -> None:
@@ -103,6 +104,23 @@ class OssDependencyAdmissionTests(unittest.TestCase):
         self.assertIn("https://api.osv.dev/v1/querybatch", source)
         self.assertIn("known vulnerabilities found", source)
         self.assertNotIn("requests", source)
+
+        cases = (
+            ("MIT", "MIT", True),
+            ("MIT", "License :: OSI Approved :: MIT License", True),
+            ("MIT", "Permission is hereby granted, free of charge; THE SOFTWARE IS PROVIDD \"AS IS\"", True),
+            ("MIT", "limitation", False),
+            ("MIT", "permit", False),
+            ("Apache-2.0", "Apache-2.0", True),
+            ("Apache-2.0", "Apache License Version 2.0", True),
+            ("Apache-2.0", "Apache License Version 1.1", False),
+            ("MPL-2.0", "MPL-2.0", True),
+            ("MPL-2.0", "Mozilla Public License Version 2.0", True),
+            ("MPL-2.0", "Mozilla Public License Version 1.1", False),
+        )
+        for expected, observed, result in cases:
+            with self.subTest(expected=expected, observed=observed):
+                self.assertIs(license_matches(expected, observed), result)
 
 
 if __name__ == "__main__":
