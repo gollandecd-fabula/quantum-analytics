@@ -1,6 +1,6 @@
 # CURRENT STATE
 
-Date: 2026-06-27
+Date: 2026-06-28
 Status: `BUILD_B1A_READY_FOR_MERGE`
 Active contract: `STAGE-B-BUILD-v1`
 Live execution state: `docs/evidence/STAGE_B_EXECUTION_STATE.yaml`
@@ -18,22 +18,23 @@ B1a is R2 contract/schema/fixture/test/evidence work only. No calculation kernel
 - 34 Foundation tests.
 - 34 B1a tests.
 - 68 total tests passed.
-- Technical CI `28304873043`: success.
-- 28 Codex threads; 0 unresolved.
+- Technical CI `28307956212`: success.
+- 31 Codex threads; 0 unresolved.
 - Manifest v6 verifies 158 tracked artifacts.
 
 ## Invariants
 
 - deterministic tenant-safe and mode-isolated resolution;
-- complete ordering evidence for eligible candidates;
-- VALID traces contain an eligible candidate;
+- explicit `calculation_instant` with `[valid_from, valid_to)` filtering;
+- complete ordering evidence and exactly one selected eligible candidate;
 - typed unit/currency-safe expressions and rules;
+- `NEGATE` and `ABS` require numeric results and operands;
 - immutable Calculation Profiles;
 - explicit purchase and per-item money metrics;
 - reproducible tracked-tree evidence.
 
 ## Gate
 
-Current head requires CI success, clean Codex review, and protected squash merge of PR #8. B1b remains R3 and is not approved.
+Current metadata-synchronized head requires CI success, clean Codex review, and protected squash merge of PR #8. B1b remains R3 and is not approved.
 
 `RELEASE_BLOCKED`
