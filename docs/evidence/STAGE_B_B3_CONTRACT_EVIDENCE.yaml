@@ -1,6 +1,6 @@
-evidence_id: STAGE-B-B3-CONTRACT-EVIDENCE-v7
+evidence_id: STAGE-B-B3-CONTRACT-EVIDENCE-v8
 unit: B3
-status: REMEDIATED_AWAITING_CURRENT_HEAD_CI_AND_REVIEW
+status: REMEDIATED_REVIEW_GATED
 tracking_issue: 9
 branch: build-b3-metric-evidence-contracts-v3
 risk_class: R2
@@ -15,9 +15,9 @@ scope:
   release_state: RELEASE_BLOCKED
 
 predecessor:
-  b1a_merge_commit: ff6bc6e23d3df7d877230578c4de0f02f20fce0d
-  b1a_cleanup_commit: 40c8ef94b4826257c2935d3ac499009734be758f
+  unit: B1a
   status: PASS
+  source: docs/evidence/STAGE_B_B3_EXECUTION_STATE.yaml
 
 artifacts:
   contracts:
@@ -31,43 +31,38 @@ artifacts:
     - src/quantum/evidence/verification.py
   fixture:
     - tests/contracts/fixtures/b3-evidence-chain-vectors.json
-  test_support:
-    - tests/b3_helpers.py
   tests:
     - tests/test_b3_evidence_contracts.py
     - tests/test_b3_metric_snapshot.py
     - tests/test_b3_runtime_boundaries.py
-  ci:
-    - src/quantum/scripts/ci.py
-    - tests/__init__.py
 
 checks:
   b3_test_method_count: 27
   temporary_monkey_patch_tests: 0
   runtime_verifier_location: src/quantum/evidence/verification.py
+  primary_diagnostic_policy: src/quantum/evidence/__init__.py
   malformed_input_fail_closed_tests: PASS_LOCAL_STATIC
   source_byte_loader_gate_tests: PASS_LOCAL_STATIC
-  github_ci: REQUIRED_ON_CURRENT_HEAD
-  independent_review: REQUIRED_ON_CURRENT_HEAD
+  github_ci_policy: REQUIRED_ON_CURRENT_PR_MERGE_RESULT
+  independent_review: REQUIRED_ON_CURRENT_PR_HEAD_AND_DIFF
+  transient_ci_result_source: GITHUB_CHECKS
 
 verified_invariants:
-  - graph and Metric Snapshot hashes are recalculated and tamper evident
+  - hashes are recalculated and tamper evident
   - malformed objects return diagnostics instead of raising
-  - duplicate nodes duplicate edges orphan nodes and graph cycles fail closed
-  - transformation sequence is zero-based unique and contiguous
-  - typed Metric Snapshot states preserve numeric zero distinct from non-valid states
-  - Actual and Scenario data are isolated
-  - selected ROUNDING_POLICY and SOURCE_AUTHORITY require approved immutable evidence
-  - SOURCE_FILE declared hash equals retained-byte hash
-  - strict verification can load retained bytes and compare their SHA-256
-  - runtime verifier is production package code and tests import it
+  - duplicate nodes edges orphan nodes and cycles fail closed
+  - transformation sequence is unique contiguous and zero based
+  - typed states preserve numeric zero distinct from non-valid states
+  - Actual and Scenario data remain isolated
+  - selected policies and authorities require approved evidence
+  - strict verification can load retained bytes and compare their hash
+  - primary diagnostics use explicit root-cause priority
 
 limitations:
-  - JSON Schemas remain declarative contracts; runtime verifier enforces B3 invariants directly
-  - source bytes are verified only when a source_loader is supplied and strict mode is used
-  - B1b B2 B6 and B7 remain gated R3 units without approval
-  - no financial rule or Source Authority activation
-  - no real data marketplace writes deployment or production release
+  - JSON Schemas are declarative; runtime verifier enforces B3 invariants
+  - source bytes require a strict source loader
+  - B1b B2 B6 and B7 remain gated R3 units
+  - no financial activation real data writes deployment or release
   - no metric is calculated or published in B3
 
-next_gate: CURRENT_HEAD_CI_SUCCESS_AND_INDEPENDENT_REVIEW
+next_gate: CURRENT_PR_MERGE_RESULT_CI_AND_INDEPENDENT_REVIEW
