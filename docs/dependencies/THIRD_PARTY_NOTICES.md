@@ -16,8 +16,8 @@ stage that first introduces each component.
 | Hypothesis | 6.155.7 | MPL-2.0 | Approved for development/testing only | property-based tests |
 | FastAPI | 0.138.1 | MIT | Approved for future integration | B4 API transport |
 | Pydantic | 2.13.4 | MIT | Approved for future integration | typed boundaries and DTO validation |
-| React-admin | 5.15.1 | MIT | Registry confirmation required | B5 operational UI |
-| Apache ECharts | 6.1.0 | Apache-2.0 | Registry confirmation required | B6 visualization |
+| React-admin | 5.15.1 | MIT | Approved for future integration | B5 operational UI |
+| Apache ECharts | 6.1.0 | Apache-2.0 | Approved for future integration | B6 visualization |
 | wbsdk | 1.2.8 | MIT | Audit required; not approved for runtime | isolated WB read-only adapter candidate |
 
 ## Mandatory restrictions

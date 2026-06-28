@@ -147,14 +147,20 @@
         "financial formula execution",
         "direct marketplace calls"
       ],
+      "registry_verification_evidence": {
+        "conclusion": "success",
+        "implementation_head": "f045293ab2c93af5ce2181beeb618de005ea18c2",
+        "run_id": 28335952402,
+        "workflow": "OSS Admission CI"
+      },
       "registry_verification_required": true,
       "role": "administrative and exception-management UI framework",
       "scope": "B5_OPERATIONAL_UI",
       "source_url": "https://github.com/marmelab/react-admin",
-      "status": "APPROVED_PENDING_REGISTRY_CONFIRMATION",
+      "status": "APPROVED_FOR_FUTURE_INTEGRATION",
       "transitive_dependency_review_required": true,
       "version": "5.15.1",
-      "version_source": "official_repository_package_metadata"
+      "version_source": "official_registry_and_repository_metadata"
     },
     {
       "allowed_use": [
@@ -169,14 +175,20 @@
         "client-side financial calculation",
         "actual/scenario state mutation"
       ],
+      "registry_verification_evidence": {
+        "conclusion": "success",
+        "implementation_head": "f045293ab2c93af5ce2181beeb618de005ea18c2",
+        "run_id": 28335952402,
+        "workflow": "OSS Admission CI"
+      },
       "registry_verification_required": true,
       "role": "interactive analytics visualization",
       "scope": "B6_ANALYTICS_AND_SCENARIOS",
       "source_url": "https://github.com/apache/echarts",
-      "status": "APPROVED_PENDING_REGISTRY_CONFIRMATION",
+      "status": "APPROVED_FOR_FUTURE_INTEGRATION",
       "transitive_dependency_review_required": true,
       "version": "6.1.0",
-      "version_source": "official_repository_package_metadata"
+      "version_source": "official_registry_and_repository_metadata"
     },
     {
       "allowed_use": [
@@ -222,5 +234,16 @@
   },
   "runtime_installation_authorized": false,
   "schema_version": "1.0",
-  "stage": "OSS_DEPENDENCY_ADMISSION"
+  "stage": "OSS_DEPENDENCY_ADMISSION",
+  "validation_evidence": {
+    "foundation_checks": "PASS",
+    "implementation_head": "f045293ab2c93af5ce2181beeb618de005ea18c2",
+    "job_id": 83942081700,
+    "npm_distribution_integrity": "PASS",
+    "official_registry_verification": "PASS",
+    "osv_known_vulnerabilities": 0,
+    "run_id": 28335952402,
+    "run_number": 1,
+    "workflow": "OSS Admission CI"
+  }
 }

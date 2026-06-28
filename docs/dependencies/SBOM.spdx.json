@@ -132,7 +132,7 @@
     },
     {
       "SPDXID": "SPDXRef-Package-react-admin",
-      "comment": "Prospective admission only. Status: APPROVED_PENDING_REGISTRY_CONFIRMATION. Not installed by this stage.",
+      "comment": "Prospective admission only. Status: APPROVED_FOR_FUTURE_INTEGRATION. Not installed by this stage.",
       "copyrightText": "NOASSERTION",
       "downloadLocation": "https://github.com/marmelab/react-admin",
       "externalRefs": [
@@ -150,7 +150,7 @@
     },
     {
       "SPDXID": "SPDXRef-Package-echarts",
-      "comment": "Prospective admission only. Status: APPROVED_PENDING_REGISTRY_CONFIRMATION. Not installed by this stage.",
+      "comment": "Prospective admission only. Status: APPROVED_FOR_FUTURE_INTEGRATION. Not installed by this stage.",
       "copyrightText": "NOASSERTION",
       "downloadLocation": "https://github.com/apache/echarts",
       "externalRefs": [
