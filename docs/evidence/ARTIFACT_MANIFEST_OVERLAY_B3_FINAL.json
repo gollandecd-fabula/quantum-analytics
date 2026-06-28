@@ -1,8 +1,8 @@
 {
-  "overlay_version": 5,
+  "overlay_version": 6,
   "base_runtime_overlay_git_blob_sha": "07dcf6840e9b9ed3890cb2dcdeff92e009812f73",
   "hash_encoding": "sha256-base64",
-  "reason": "Final B3 reconciliation.",
+  "reason": "Final B3 runtime hardening reconciliation.",
   "entries": [
     [
       "docs/evidence/EVIDENCE_CHAIN_CONTRACT.md",
@@ -11,8 +11,8 @@
     ],
     [
       "docs/evidence/STAGE_B_B3_CONTRACT_EVIDENCE.yaml",
-      "HooHQMnNRmmwLRXqusIpI6QHgoYxO+1SRlHGS3CriQU=",
-      2429
+      "5q/3Yz09LcskYKSCeU5U+yJJWaaNyJtQugajyhsP7KQ=",
+      2742
     ],
     [
       "docs/evidence/STAGE_B_B3_EXECUTION_STATE.yaml",
@@ -41,8 +41,8 @@
     ],
     [
       "src/quantum/evidence/runtime_validation.py",
-      "WjDBKRn5rjubUmrc4Ve4tchfzTLfXskyfD1EvhhqNCA=",
-      3122
+      "ytZUeAwUauMkmw2I8CgTJNWFYXtceWQY3ppdGReRByk=",
+      5623
     ],
     [
       "tests/test_a0_manifest_diagnostic.py",
@@ -56,18 +56,18 @@
     ],
     [
       "tests/test_b3_evidence_contracts.py",
-      "Q5MSIVZV5eXGphIytsg7G0wP/Jo7JNXGffdrf3KZhkU=",
-      3794
+      "sbB/hIRxbnVBSLmJeWCHFpffLjr+h6tWHUNXc8RC0+w=",
+      4774
     ],
     [
       "tests/test_b3_metric_snapshot.py",
-      "MJEBXxvJflx+5l718OkChClioYA6L571rx5o3Dk4b20=",
-      3853
+      "Do7f1avnbccjxNDI6P84toBvUfbRo+Kr4gaZnmbq7ag=",
+      5263
     ],
     [
       "tests/test_b3_runtime_boundaries.py",
-      "Vd2iTthOA+p5JevKwiw+xyYkDVdqZCKMjCRxAP+G6lg=",
-      3775
+      "yHfUiEXfZHYdYnCN964Qqt0/FnFADX8ydM5UOZu8sL0=",
+      4107
     ]
   ],
   "remove_paths": []
