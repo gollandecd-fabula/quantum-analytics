@@ -62,21 +62,19 @@ def registry_metadata(component: dict[str, Any]) -> dict[str, Any]:
         info = payload.get("info")
         if not isinstance(info, dict):
             raise RuntimeError(f"{component['name']}: PyPI info missing")
-        license_text = " ".join(
+        classifiers = [
             str(value)
-            for value in (
-                info.get("license_expression"),
-                info.get("license"),
-                " ".join(info.get("classifiers", [])),
-            )
-            if value
-        )
+            for value in info.get("classifiers", [])
+            if isinstance(value, str) and value.startswith("License ::")
+        ]
         return {
             "registry": "PyPI",
             "registry_url": url,
             "name": info.get("name"),
             "version": info.get("version"),
-            "license_text": license_text,
+            "license_expression": info.get("license_expression"),
+            "license_text": str(info.get("license") or ""),
+            "license_classifiers": classifiers,
         }
 
     url = f"https://registry.npmjs.org/{name}/{version}"
@@ -86,27 +84,77 @@ def registry_metadata(component: dict[str, Any]) -> dict[str, Any]:
         "registry_url": url,
         "name": payload.get("name"),
         "version": payload.get("version"),
-        "license_text": str(payload.get("license", "")),
+        "license_expression": payload.get("license"),
+        "license_text": "",
+        "license_classifiers": [],
         "integrity": (payload.get("dist") or {}).get("integrity"),
     }
 
 
+SPDX_IDENTIFIER_CHARS = "A-Z0-9.+-"
+KNOWN_LICENSE_IDENTIFIERS = {
+    "MIT",
+    "MIT-0",
+    "Apache-2.0",
+    "MPL-2.0",
+    "BSD-3-Clause",
+    "GPL-2.0-only",
+    "GPL-3.0-only",
+    "AGPL-3.0-only",
+    "SSPL-1.0",
+    "BUSL-1.1",
+}
+
+
 def _contains_license_token(observed: str, token: str) -> bool:
-    pattern = rf"(?<![A-Z0-9]){re.escape(token.upper())}(?![A-Z0-9])"
+    pattern = (
+        rf"(?<![{SPDX_IDENTIFIER_CHARS}])"
+        rf"{re.escape(token.upper())}"
+        rf"(?![{SPDX_IDENTIFIER_CHARS}])"
+    )
     return re.search(pattern, observed.upper()) is not None
+
+
+def _recognized_full_license_text(expected: str, normalized: str) -> bool:
+    if expected == "MIT":
+        return (
+            "PERMISSION IS HEREBY GRANTED, FREE OF CHARGE" in normalized
+            and "THE SOFTWARE IS PROVIDED" in normalized
+            and '"AS IS"' in normalized
+        )
+    if expected == "Apache-2.0":
+        return (
+            "APACHE LICENSE" in normalized
+            and "VERSION 2.0" in normalized
+            and "TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION"
+            in normalized
+        )
+    if expected == "MPL-2.0":
+        return (
+            "MOZILLA PUBLIC LICENSE" in normalized
+            and "VERSION 2.0" in normalized
+            and "SOURCE CODE FORM" in normalized
+        )
+    return False
 
 
 def license_matches(expected: str, observed: str) -> bool:
     normalized = " ".join(observed.upper().split())
+    if not normalized:
+        return False
+
+    for identifier in KNOWN_LICENSE_IDENTIFIERS - {expected}:
+        if _contains_license_token(normalized, identifier):
+            return False
+
+    if _recognized_full_license_text(expected, normalized):
+        return True
+
+    if re.search(r"(?<![A-Z0-9])(?:AND|OR|WITH)(?![A-Z0-9])", normalized):
+        return False
+
     if expected == "MIT":
-        return (
-            _contains_license_token(normalized, "MIT")
-            or (
-                "PERMISSION IS HEREBY GRANTED, FREE OF CHARGE" in normalized
-                and "THE SOFTWARE IS PROVIDED" in normalized
-                and '"AS IS"' in normalized
-            )
-        )
+        return _contains_license_token(normalized, "MIT")
     if expected == "Apache-2.0":
         return (
             _contains_license_token(normalized, "APACHE-2.0")
@@ -126,6 +174,18 @@ def license_matches(expected: str, observed: str) -> bool:
     return _contains_license_token(normalized, expected)
 
 
+def license_metadata_matches(expected: str, metadata: dict[str, Any]) -> bool:
+    expression = metadata.get("license_expression")
+    if isinstance(expression, str) and expression.strip():
+        return expression.strip().casefold() == expected.casefold()
+
+    candidates = [metadata.get("license_text", "")]
+    classifiers = metadata.get("license_classifiers", [])
+    if isinstance(classifiers, list):
+        candidates.extend(item for item in classifiers if isinstance(item, str))
+    return license_matches(expected, " ".join(str(item) for item in candidates if item))
+
+
 def run_scan() -> dict[str, Any]:
     register = load_json_document(REGISTER_PATH)
     license_policy = load_json_document(LICENSE_PATH)
@@ -143,7 +203,7 @@ def run_scan() -> dict[str, Any]:
             raise RuntimeError(f"{component['name']}: registry name mismatch")
         if metadata["version"] != component["version"]:
             raise RuntimeError(f"{component['name']}: registry version mismatch")
-        if not license_matches(component["license"], metadata["license_text"]):
+        if not license_metadata_matches(component["license"], metadata):
             raise RuntimeError(f"{component['name']}: registry license mismatch")
         if component["ecosystem"] == "npm" and not metadata.get("integrity"):
             raise RuntimeError(f"{component['name']}: npm integrity missing")
