@@ -6,8 +6,8 @@ Active contract: `STAGE-B-BUILD-v1`
 Live execution state: `docs/evidence/STAGE_B_EXECUTION_STATE.yaml`
 Current unit: `B1a — FINANCIAL_RULE_CONTRACTS_AND_RESOLUTION`
 Tracking issue: `#7`
-Working branch: `build-b1a-financial-contracts`
-Pull Request: `#8`
+Working branch: `b1a-cleanup`
+Pull Request: `#13`
 
 ## Scope
 
@@ -20,7 +20,8 @@ B1a is R2 contract/schema/fixture/test/evidence work only. No calculation kernel
 - 68 total tests passed.
 - Technical CI `28307956212`: success.
 - 31 Codex threads; 0 unresolved.
-- Manifest v6 verifies 158 tracked artifacts.
+- Effective Manifest v6 verifies 159 permanent tracked artifacts.
+- Temporary manifest diagnostics removed.
 
 ## Invariants
 
@@ -35,6 +36,6 @@ B1a is R2 contract/schema/fixture/test/evidence work only. No calculation kernel
 
 ## Gate
 
-Current metadata-synchronized head requires CI success, clean Codex review, and protected squash merge of PR #8. B1b remains R3 and is not approved.
+Current cleanup head requires CI success, clean Codex review, and protected squash merge of PR #13. B1b remains R3 and is not approved.
 
 `RELEASE_BLOCKED`
