@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://quantum.local/schemas/metric-definition.schema.json",
+  "title": "Quantum Metric Definition v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "metric_id", "version", "content_hash", "status", "name", "description",
+    "accounting_view", "value_type", "unit", "currency_behavior",
+    "calculation_kind", "required_inputs", "optional_inputs",
+    "required_rule_outputs", "additive_components", "expense_boundary",
+    "allowed_rounding_points", "typed_states", "evidence_requirements",
+    "publishability", "actor", "created_at", "approval_reference"
+  ],
+  "properties": {
+    "metric_id": {"type": "string", "pattern": "^[a-z][a-z0-9_.-]{0,127}$"},
+    "version": {"type": "integer", "minimum": 1},
+    "content_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "status": {"type": "string", "enum": ["DRAFT", "SHADOW", "PILOT", "ACTIVE", "SUSPENDED", "RETIRED"]},
+    "name": {"type": "string", "minLength": 1},
+    "description": {"type": "string", "minLength": 1},
+    "accounting_view": {"type": "string", "enum": ["OPERATIONAL", "SETTLEMENT", "TAX_RECOGNITION"]},
+    "value_type": {"type": "string", "enum": ["MONEY", "INTEGER", "DECIMAL", "RATE"]},
+    "unit": {"type": "string", "enum": ["MONEY", "MONEY_PER_ITEM", "ITEM", "ORDER", "EVENT", "PERCENT", "RATIO", "COUNT"]},
+    "currency_behavior": {"type": "string", "enum": ["REQUIRED_SINGLE", "NONE", "MULTI_CURRENCY_BLOCKED"]},
+    "calculation_kind": {"type": "string", "enum": ["EVENT_AGGREGATE", "RULE_COMPONENT", "DERIVED", "EXTERNAL_SOURCE"]},
+    "required_inputs": {"$ref": "#/$defs/idList"},
+    "optional_inputs": {"$ref": "#/$defs/idList"},
+    "required_rule_outputs": {"$ref": "#/$defs/idList"},
+    "additive_components": {"$ref": "#/$defs/idList"},
+    "expense_boundary": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "enum": ["MARKETPLACE_COMMISSION", "FORWARD_LOGISTICS", "REVERSE_LOGISTICS", "STORAGE", "ADVERTISING", "FINES_WITHHOLDINGS", "PRODUCT_COST", "OTHER_EXPENSE", "TAX"]}
+    },
+    "allowed_rounding_points": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "enum": ["RULE_INPUT_NORMALIZATION", "RULE_COMPONENT_RESULT", "METRIC_FINAL_ACCOUNTING", "REPORT_PRESENTATION", "EXPORT_PRESENTATION"]}
+    },
+    "typed_states": {
+      "type": "array",
+      "minItems": 7,
+      "maxItems": 7,
+      "uniqueItems": true,
+      "items": {"type": "string", "enum": ["VALID", "EMPTY", "BLOCKED", "UNAVAILABLE", "CONFLICT", "INVALID", "NOT_APPLICABLE"]}
+    },
+    "evidence_requirements": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"type": "string", "enum": ["CALCULATION_PROFILE", "NORMALIZED_EVENTS", "TRANSFORMATIONS", "SOURCE_RECORDS", "SOURCE_FILE_SHA256", "ROUNDING_POLICY", "SOURCE_AUTHORITY", "ACTOR_REASON_TRACE"]}
+    },
+    "publishability": {"type": "string", "enum": ["DRAFT_ONLY", "SHADOW_ONLY", "ACTUAL_ALLOWED_AFTER_APPROVAL"]},
+    "actor": {"type": "string", "minLength": 1},
+    "created_at": {"type": "string", "format": "date-time"},
+    "approval_reference": {"type": ["string", "null"], "minLength": 1}
+  },
+  "$defs": {
+    "idList": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "pattern": "^[a-z][a-z0-9_.:-]{0,127}$"}
+    }
+  }
+}

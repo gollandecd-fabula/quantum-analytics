@@ -1,0 +1,130 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://quantum.local/schemas/rule-resolution-result.schema.json",
+  "title": "Quantum Rule Resolution Result v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "resolver_contract_version", "context_hash", "state", "diagnostic_code",
+    "candidates", "actor", "resolved_at", "trace_id"
+  ],
+  "properties": {
+    "resolver_contract_version": {"type": "string", "minLength": 1},
+    "context_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "state": {"type": "string", "enum": ["VALID", "BLOCKED", "CONFLICT", "UNAVAILABLE"]},
+    "diagnostic_code": {
+      "type": ["string", "null"],
+      "enum": [
+        null, "RULE_REQUIRED_MISSING", "RULE_RESOLUTION_TIE",
+        "RULE_EXCLUSIVITY_OVERLAP", "RULE_DEPENDENCY_UNKNOWN",
+        "RULE_DEPENDENCY_CYCLE", "RULE_UNIT_MISMATCH",
+        "RULE_CURRENCY_MISMATCH", "RULE_NOT_APPROVED"
+      ]
+    },
+    "candidates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["rule", "eligible", "selected", "exclusion_reasons", "ordering_tuple"],
+        "properties": {
+          "rule": {"$ref": "#/$defs/ruleRef"},
+          "eligible": {"type": "boolean"},
+          "selected": {"type": "boolean"},
+          "exclusion_reasons": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {"type": "string", "minLength": 1}
+          },
+          "ordering_tuple": {
+            "type": ["array", "null"],
+            "minItems": 4,
+            "maxItems": 4,
+            "prefixItems": [
+              {"type": "array", "minItems": 6, "maxItems": 6, "items": {"type": "integer", "minimum": 0, "maximum": 1}},
+              {"type": "integer"},
+              {"type": "string", "format": "date-time"},
+              {"type": "integer", "minimum": 1}
+            ],
+            "items": false
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {"eligible": {"const": true}},
+              "required": ["eligible"]
+            },
+            "then": {
+              "properties": {
+                "ordering_tuple": {"type": "array", "minItems": 4, "maxItems": 4},
+                "exclusion_reasons": {"maxItems": 0}
+              }
+            },
+            "else": {
+              "properties": {
+                "selected": {"const": false},
+                "ordering_tuple": {"type": "null"},
+                "exclusion_reasons": {"minItems": 1}
+              }
+            }
+          }
+        ]
+      }
+    },
+    "actor": {"type": "string", "minLength": 1},
+    "resolved_at": {"type": "string", "format": "date-time"},
+    "trace_id": {"type": "string", "minLength": 1}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"state": {"const": "VALID"}}, "required": ["state"]},
+      "then": {
+        "properties": {
+          "diagnostic_code": {"type": "null"},
+          "candidates": {
+            "type": "array",
+            "minItems": 1,
+            "contains": {
+              "type": "object",
+              "properties": {
+                "eligible": {"const": true},
+                "selected": {"const": true}
+              },
+              "required": ["eligible", "selected"]
+            },
+            "minContains": 1,
+            "maxContains": 1
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "diagnostic_code": {"type": "string"},
+          "candidates": {
+            "type": "array",
+            "contains": {
+              "type": "object",
+              "properties": {"selected": {"const": true}},
+              "required": ["selected"]
+            },
+            "minContains": 0,
+            "maxContains": 0
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "ruleRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rule_id", "version", "content_hash"],
+      "properties": {
+        "rule_id": {"type": "string", "minLength": 1},
+        "version": {"type": "integer", "minimum": 1},
+        "content_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+      }
+    }
+  }
+}
