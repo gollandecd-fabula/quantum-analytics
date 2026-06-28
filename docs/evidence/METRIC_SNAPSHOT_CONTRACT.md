@@ -53,7 +53,7 @@ Where applicable, the snapshot declares:
 - accounting view and confirmed expense boundary;
 - rounding-policy reference, application point, mode, and resolved scale;
 - approved Source Authority reference;
-- Evidence Chain reference.
+- Evidence Chain identity locator with stable `id` and positive `version`.
 
 For a `VALID` snapshot:
 
@@ -67,10 +67,30 @@ For a `VALID` snapshot:
 Cross-currency aggregation is `BLOCKED` unless a separately approved conversion
 contract is referenced.
 
+## Snapshot and Evidence Chain hash ordering
+
+The mandatory `evidence_chain_ref` is a cycle-breaking identity locator with
+only stable `id` and positive `version`; it does not contain the Evidence Chain
+content hash. The snapshot content hash excludes only the snapshot's own
+`content_hash` field and includes that locator.
+
+Artifacts are materialized in this order:
+
+1. reserve the Evidence Chain identifier and version;
+2. create and hash the Metric Snapshot with the unhashed Evidence Chain locator;
+3. create the Evidence Chain with a `root_metric_snapshot_ref` that includes the
+   resulting Metric Snapshot content hash;
+4. hash the Evidence Chain without mutating the already-hashed snapshot.
+
+This one-way hash direction prevents a Snapshot/Evidence circular dependency.
+The Evidence Chain proves the exact root snapshot hash, while the snapshot
+locates its chain by immutable identity and version.
+
 ## Immutable references
 
-Every reference uses a stable identifier, positive immutable version, and
-SHA-256 content hash. Required evidence includes:
+Every immutable input reference uses a stable identifier, positive immutable
+version, and SHA-256 content hash. The cycle-breaking `evidence_chain_ref` is
+the sole exception and is defined above. Required evidence includes:
 
 - Calculation Profile;
 - Metric Definition;
