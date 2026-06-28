@@ -133,7 +133,7 @@ def run_scan() -> dict[str, Any]:
     errors = list(validate_register(register, license_policy))
     errors.extend(validate_sbom(register, sbom))
     if errors:
-        raise RuntimeError(foffline admission validation failed: " + ", ".join(errors))
+        raise RuntimeError("offline admission validation failed: " + ", ".join(errors))
 
     registry_results = []
     queries = []
