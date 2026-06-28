@@ -104,8 +104,7 @@
     "value": {
       "oneOf": [
         {
-          "type": "string",
-          "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+          "$ref": "#/$defs/decimalString"
         },
         {
           "type": "integer"
@@ -371,8 +370,7 @@
           "value": {
             "oneOf": [
               {
-                "type": "string",
-                "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                "$ref": "#/$defs/decimalString"
               },
               {
                 "type": "integer"
@@ -409,9 +407,192 @@
           }
         }
       }
+    },
+    {
+      "$comment": "VALID MONEY payload, unit, and currency binding",
+      "if": {
+        "allOf": [
+          {
+            "properties": {
+              "state": {
+                "const": "VALID"
+              }
+            },
+            "required": [
+              "state"
+            ]
+          },
+          {
+            "properties": {
+              "value_type": {
+                "const": "MONEY"
+              }
+            },
+            "required": [
+              "value_type"
+            ]
+          }
+        ]
+      },
+      "then": {
+        "properties": {
+          "value": {
+            "$ref": "#/$defs/decimalString"
+          },
+          "unit": {
+            "enum": [
+              "MONEY",
+              "MONEY_PER_ITEM"
+            ]
+          },
+          "currency": {
+            "type": "string",
+            "pattern": "^[A-Z]{3}$"
+          }
+        }
+      }
+    },
+    {
+      "$comment": "VALID INTEGER payload, unit, and currency binding",
+      "if": {
+        "allOf": [
+          {
+            "properties": {
+              "state": {
+                "const": "VALID"
+              }
+            },
+            "required": [
+              "state"
+            ]
+          },
+          {
+            "properties": {
+              "value_type": {
+                "const": "INTEGER"
+              }
+            },
+            "required": [
+              "value_type"
+            ]
+          }
+        ]
+      },
+      "then": {
+        "properties": {
+          "value": {
+            "type": "integer"
+          },
+          "unit": {
+            "not": {
+              "enum": [
+                "MONEY",
+                "MONEY_PER_ITEM"
+              ]
+            }
+          },
+          "currency": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "$comment": "VALID DECIMAL payload, unit, and currency binding",
+      "if": {
+        "allOf": [
+          {
+            "properties": {
+              "state": {
+                "const": "VALID"
+              }
+            },
+            "required": [
+              "state"
+            ]
+          },
+          {
+            "properties": {
+              "value_type": {
+                "const": "DECIMAL"
+              }
+            },
+            "required": [
+              "value_type"
+            ]
+          }
+        ]
+      },
+      "then": {
+        "properties": {
+          "value": {
+            "$ref": "#/$defs/decimalString"
+          },
+          "unit": {
+            "not": {
+              "enum": [
+                "MONEY",
+                "MONEY_PER_ITEM"
+              ]
+            }
+          },
+          "currency": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "$comment": "VALID RATE payload, unit, and currency binding",
+      "if": {
+        "allOf": [
+          {
+            "properties": {
+              "state": {
+                "const": "VALID"
+              }
+            },
+            "required": [
+              "state"
+            ]
+          },
+          {
+            "properties": {
+              "value_type": {
+                "const": "RATE"
+              }
+            },
+            "required": [
+              "value_type"
+            ]
+          }
+        ]
+      },
+      "then": {
+        "properties": {
+          "value": {
+            "$ref": "#/$defs/decimalString"
+          },
+          "unit": {
+            "not": {
+              "enum": [
+                "MONEY",
+                "MONEY_PER_ITEM"
+              ]
+            }
+          },
+          "currency": {
+            "type": "null"
+          }
+        }
+      }
     }
   ],
   "$defs": {
+    "decimalString": {
+      "type": "string",
+      "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+    },
     "typedState": {
       "type": "string",
       "enum": [
