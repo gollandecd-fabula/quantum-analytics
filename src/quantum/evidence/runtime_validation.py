@@ -70,17 +70,42 @@ def verify_evidence_chain(graph: object, **kwargs: Any) -> tuple[str, ...]:
         and nodes.get(str(edge.get("to_node_id")), {}).get("node_type")
         == "CALCULATION_PROFILE"
     }
+    resolution_ids = {
+        edge.get("to_node_id")
+        for edge in raw_edges
+        if isinstance(edge, Mapping)
+        and edge.get("from_node_id") == root_id
+        and edge.get("edge_type") == "RESULT_USES_RESOLUTION"
+        and isinstance(edge.get("to_node_id"), str)
+        and nodes.get(str(edge.get("to_node_id")), {}).get("node_type")
+        == "RULE_RESOLUTION"
+    }
+    resolved_rule_ids = {
+        edge.get("to_node_id")
+        for edge in raw_edges
+        if isinstance(edge, Mapping)
+        and edge.get("from_node_id") in resolution_ids
+        and edge.get("edge_type") == "RESOLUTION_SELECTS_RULE"
+        and isinstance(edge.get("to_node_id"), str)
+        and nodes.get(str(edge.get("to_node_id")), {}).get("node_type")
+        == "CONFIGURATION_RULE"
+    }
     for profile_id in profile_ids:
-        has_rule = any(
-            isinstance(edge, Mapping)
+        profile_rule_ids = {
+            edge.get("to_node_id")
+            for edge in raw_edges
+            if isinstance(edge, Mapping)
             and edge.get("from_node_id") == profile_id
             and edge.get("edge_type") == "PROFILE_SELECTS_RULE"
             and isinstance(edge.get("to_node_id"), str)
             and nodes.get(str(edge.get("to_node_id")), {}).get("node_type")
             == "CONFIGURATION_RULE"
-            for edge in raw_edges
-        )
-        if not has_rule:
+        }
+        if (
+            not profile_rule_ids
+            or not resolved_rule_ids
+            or not profile_rule_ids.issubset(resolved_rule_ids)
+        ):
             _append(errors, "EVIDENCE_REQUIRED_PATH_MISSING")
 
     return tuple(errors)
