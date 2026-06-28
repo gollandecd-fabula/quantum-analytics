@@ -1,7 +1,7 @@
 # CURRENT STATE — B3 SNAPSHOT
 
 Date: 2026-06-28
-Status: `BUILD_B3_CI_AND_REVIEW_PENDING`
+Status: `BUILD_B3_RECOVERY_CI_AND_REVIEW_PENDING`
 Active contract: `STAGE-B-BUILD-v1`
 Current unit: `B3 — METRIC_SNAPSHOTS_AND_EVIDENCE_CHAIN`
 Tracking issue: `#9`
@@ -35,7 +35,13 @@ Permanent B1a cleanup baseline: `40c8ef94b4826257c2935d3ac499009734be758f`
 - typed states exactly match Stage A4;
 - numeric zero is a VALID value;
 - B1a metric units, including `MONEY_PER_ITEM`, remain representable;
+- MONEY payloads require decimal strings, money units, and ISO currency;
+- INTEGER payloads are JSON integers;
+- DECIMAL and RATE payloads are decimal strings;
+- non-money payloads cannot carry money units or currency;
 - every reference has a positive version and SHA-256;
+- graph SHA-256 is recalculated from canonical UTF-8 JSON bytes;
+- transformation sequence is zero-based, unique, and contiguous;
 - evidence uses exact typed paths to retained source-file bytes;
 - selected rules are linked through Rule Resolution nodes;
 - tenant and Actual/Scenario boundaries are enforced;
@@ -48,10 +54,10 @@ Permanent B1a cleanup baseline: `40c8ef94b4826257c2935d3ac499009734be758f`
 
 ## Verification state
 
-- local B3 contract tests: 11 passed;
-- GitHub Actions exact-head CI: pending;
-- independent review: pending;
-- unresolved findings: unknown until review;
+- local B3 contract tests: 15 passed;
+- five prior review findings: remediated pending re-review;
+- GitHub Actions exact-head CI: pending after recovery;
+- independent review: pending after recovery;
 - merge: blocked until all gates pass.
 
 ## Approval gates
