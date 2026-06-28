@@ -7,7 +7,7 @@ Live execution state: `docs/evidence/STAGE_B_EXECUTION_STATE.yaml`
 Current unit: `B1a — FINANCIAL_RULE_CONTRACTS_AND_RESOLUTION`
 Tracking issue: `#7`
 Working branch: `b1a-cleanup`
-Pull Request: pending
+Pull Request: `#13`
 
 ## Scope
 
@@ -36,6 +36,6 @@ B1a is R2 contract/schema/fixture/test/evidence work only. No calculation kernel
 
 ## Gate
 
-Current cleanup head requires CI success, clean Codex review, and protected squash merge. B1b remains R3 and is not approved.
+Current cleanup head requires CI success, clean Codex review, and protected squash merge of PR #13. B1b remains R3 and is not approved.
 
 `RELEASE_BLOCKED`
