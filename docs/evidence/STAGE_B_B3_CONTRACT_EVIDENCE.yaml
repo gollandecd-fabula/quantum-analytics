@@ -1,4 +1,4 @@
-evidence_id: STAGE-B-B3-CONTRACT-EVIDENCE-v3
+evidence_id: STAGE-B-B3-CONTRACT-EVIDENCE-v4
 unit: B3
 status: READY_FOR_EXACT_HEAD_CI_AND_REVIEW
 tracking_issue: 9
@@ -41,11 +41,11 @@ artifacts:
     - docs/governance/CURRENT_STATE_B3.md
 
 checks:
-  b3_test_method_count: 15
+  b3_test_method_count: 16
   local_b3_tests: PASS
   github_ci: PENDING_AFTER_RECOVERY
   independent_review: PENDING_AFTER_RECOVERY
-  unresolved_findings: 5_REMEDIATED_PENDING_REVIEW_RESOLUTION
+  unresolved_findings: 6_REMEDIATED_PENDING_REVIEW_RESOLUTION
 
 review_remediations:
   - schema-valid evidence fixture using canonical schema field names
@@ -60,6 +60,7 @@ review_remediations:
   - transformation sequence is zero-based unique and contiguous
   - VALID money snapshots require decimal payload money unit and ISO currency
   - VALID payload representation is bound to MONEY INTEGER DECIMAL or RATE
+  - Snapshot to Evidence Chain reference is an unhashed identity locator to break the content-hash cycle
 
 invariants:
   - canonical Stage A4 typed states only
@@ -76,6 +77,7 @@ invariants:
   - immutable recalculation and restatement history
   - freshness confidence limitations accounting view and expense boundary are explicit
   - money currency and typed payload constraints fail closed
+  - Evidence Chain retains the hashed root snapshot while the snapshot uses an unhashed chain locator
 
 invalid_vectors:
   - missing source-file node
