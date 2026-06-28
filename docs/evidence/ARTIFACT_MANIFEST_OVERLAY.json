@@ -1,16 +1,31 @@
 {
   "overlay_version": 1,
   "base_manifest_git_blob_sha": "498f5cd7440b1bc2c361dd940dead8fc06cd2c1d",
-  "reason": "Effective manifest correction for the final permanent B1a tree after semantic-validation remediation and diagnostic cleanup.",
+  "reason": "Effective manifest correction for the B3 metric-result and Evidence Chain working tree.",
   "control_paths_excluded_from_payload": [
     "docs/evidence/ARTIFACT_MANIFEST.json",
     "docs/evidence/ARTIFACT_MANIFEST_OVERLAY.json"
   ],
   "entries": [
     [
+      "docs/data/METRIC_RESULT_EVIDENCE_CHAIN_CONTRACT.md",
+      "0273360b64b67f088ea04a0e1c832a01a578f827b172e2fccf4df4c86047b277",
+      7124
+    ],
+    [
       "docs/evidence/STAGE_B_B1A_CONTRACT_EVIDENCE.yaml",
       "0b01bbaa05fcfcb043539bba11d98e1286848112e7f6e00fceadaf5c7735a983",
       1253
+    ],
+    [
+      "docs/evidence/STAGE_B_B3_CONTRACT_EVIDENCE.yaml",
+      "8cfbcd2685c7b813ce998168fe42bed10711e6e22f63edb9ba5f5d83a604638d",
+      1801
+    ],
+    [
+      "docs/evidence/STAGE_B_EXECUTION_STATE.yaml",
+      "40f0916bf1c0b3c0091dbbdfe585be572d1ffdb3399136a5af506df0b1acfcc7",
+      1332
     ],
     [
       "docs/finance/SAFE_EXPRESSION_CONTRACT.md",
@@ -19,8 +34,68 @@
     ],
     [
       "docs/governance/CURRENT_STATE.md",
-      "0cb3b8cab00d98f4b4f8f946309bbc27c4cf2ff83e7e45a4461a78772c6d8b15",
-      1397
+      "ae47d5d31c836b2ea933a6f91ac8dcd4b3bb8da791f56b7d0d8b6f3b22c8f03e",
+      2211
+    ],
+    [
+      "schemas/metric-result-common.schema.json",
+      "11449b556d51f01a27517559aa9a4c19efb9a4cc7b3ad0c400e2e7d9a81e453d",
+      4558
+    ],
+    [
+      "schemas/metric-result-evidence.schema.json",
+      "96a12c35ada64141218f68b17192288e6a3704bd73e1ed11c0137bd2e64fd796",
+      5115
+    ],
+    [
+      "schemas/metric-result.schema.json",
+      "8f1edefc62865ee7994590b017583b9fd5687263cbabedadeb08740b881b1f72",
+      2444
+    ],
+    [
+      "src/quantum/evidence/__init__.py",
+      "f19231403b9a0c872b7ced5d6dbaa6f7592a4893f17221e7d8466938f69953e3",
+      1102
+    ],
+    [
+      "src/quantum/evidence/canonical.py",
+      "491aa85c5049a76d4a1b22134f0ba89151faa1c9220aab7e266d576a6f22094e",
+      3634
+    ],
+    [
+      "src/quantum/evidence/evidence_chain.py",
+      "4557f577d362557bcfa61530189430f34d2b966044cc9af390a6681a8a34d329",
+      7597
+    ],
+    [
+      "src/quantum/evidence/metric_result.py",
+      "8e0c04daafd8890c8124fb6aba07f919f9b1552852c36e7ff3db31fd3ea0aec7",
+      1158
+    ],
+    [
+      "src/quantum/evidence/references.py",
+      "52c93625eec789b5676f0490717ef4487b45b2b50943712dc0c2767cf953a1c9",
+      8329
+    ],
+    [
+      "src/quantum/evidence/snapshot.py",
+      "b5a1706fe96f1292bbf5a9bc03f071b359f8cab11618f349113dfe834623d444",
+      8801
+    ],
+    [
+      "tests/b3_helpers.py",
+      "0b590d9caa6e5f83342f439e51730e2e12c32740a93a63de408dd4a48b047618",
+      5464
+    ],
+    [
+      "tests/contracts/fixtures/b3-blocked-broken-link-result.json",
+      "503452ab9a745c1ae1294c91a87aceae1b4068944076da0e00f554e67f7dc4da",
+      4375
+    ],
+    [
+      "tests/contracts/fixtures/b3-valid-metric-result.json",
+      "d5c89854e5ddcfe9050b2755869978cbd93308ab54b72168d20b0b6fed1e5e3f",
+      4326
     ],
     [
       "tests/test_b1a_artifact_manifest.py",
@@ -36,6 +111,31 @@
       "tests/test_b1a_safe_expression_semantics.py",
       "ebdd579ca0444e5b02483532fcc00170d88ae59d7743dd6e47d34be7d583f27c",
       3662
+    ],
+    [
+      "tests/test_b3_metric_result_contracts.py",
+      "e584748856a09a1bd62bac4a40075c45da0912c4368847243ccfb769862cb660",
+      5448
+    ],
+    [
+      "tests/test_b3_metric_result_evidence_paths.py",
+      "4416845bdf22bfa6258d9d3961622d07d917dce3a170111bed3ed4e778e191d7",
+      3296
+    ],
+    [
+      "tests/test_b3_metric_result_fail_closed.py",
+      "715c4dfdf3c4b39e8caa0c3a74dd9676f736b69e6b956b7b0e32dbabe0547649",
+      4355
+    ],
+    [
+      "tests/test_b3_metric_result_hashing.py",
+      "6546ec0caf884d2c284893a27cd2d206109621f411a175a5ecf30bb1c4a3e190",
+      4548
+    ],
+    [
+      "tests/test_b3_metric_result_system_evidence.py",
+      "13c0bf386518f5370dc998a2097653932c0e6e5c1554745eacbbbef9673b43e4",
+      3937
     ]
   ],
   "remove_paths": []
