@@ -37,7 +37,8 @@ and tests. It does not calculate or activate any financial rule.
 - Draft 2020-12 schema validation accepted two positive fixtures.
 - Three negative schema mutations failed closed.
 - Defensive nested-value immutability is regression-tested.
-- Full current-head CI and independent Codex review remain pending.
+- Full-tree technical CI `28319078665` passed on the implementation head.
+- Final metadata-synchronized head CI and independent Codex review remain pending.
 
 ## Invariants
 
