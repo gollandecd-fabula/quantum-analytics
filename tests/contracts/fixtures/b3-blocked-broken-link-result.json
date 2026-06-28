@@ -7,31 +7,133 @@
   "mode": "ACTUAL",
   "scenario_id": null,
   "calculation_instant": "2026-06-01T00:00:00Z",
-  "scope_dimensions": {"product_id": "SKU-1", "period_start": "2026-05-01", "period_end": "2026-06-01"},
-  "calculation_profile_ref": {"id": "profile.actual.default", "version": 1, "content_hash": "1111111111111111111111111111111111111111111111111111111111111111"},
-  "metric_definition_ref": {"id": "metric.net_revenue", "version": 1, "content_hash": "2222222222222222222222222222222222222222222222222222222222222222"},
-  "value": {"state": "BLOCKED", "value": null, "value_type": null, "unit": null, "reason_code": "EVIDENCE_LINK_BROKEN", "source_record_id": null, "observed_at": null, "metadata": {}},
+  "scope_dimensions": {
+    "product_id": "SKU-1",
+    "period_start": "2026-05-01",
+    "period_end": "2026-06-01"
+  },
+  "calculation_profile_ref": {
+    "id": "profile.actual.default",
+    "version": 1,
+    "content_hash": "1111111111111111111111111111111111111111111111111111111111111111"
+  },
+  "metric_definition_ref": {
+    "id": "metric.net_revenue",
+    "version": 1,
+    "content_hash": "2222222222222222222222222222222222222222222222222222222222222222"
+  },
+  "value": {
+    "state": "BLOCKED",
+    "value": null,
+    "value_type": null,
+    "unit": null,
+    "reason_code": "EVIDENCE_LINK_BROKEN",
+    "source_record_id": null,
+    "observed_at": null,
+    "metadata": {}
+  },
   "evidence_chain": {
     "organization_id": "org-demo",
     "marketplace_account_id": "acct-demo",
     "origin": "SOURCE_DERIVED",
-    "calculation_profile_ref": {"id": "profile.actual.default", "version": 1, "content_hash": "1111111111111111111111111111111111111111111111111111111111111111"},
-    "metric_definition_ref": {"id": "metric.net_revenue", "version": 1, "content_hash": "2222222222222222222222222222222222222222222222222222222222222222"},
-    "rounding_policy_ref": {"id": "rounding.standard", "version": 1, "content_hash": "3333333333333333333333333333333333333333333333333333333333333333"},
-    "source_files": [{"import_batch_id": "batch-1", "organization_id": "org-demo", "marketplace_account_id": "acct-demo", "source_file_sha256": "4444444444444444444444444444444444444444444444444444444444444444", "adapter_id": "adapter.synthetic", "adapter_version": "1.0.0", "source_schema_id": "schema.synthetic.v1"}],
-    "source_records": [{"source_record_id": "record-1", "import_batch_id": "batch-1", "organization_id": "org-demo", "marketplace_account_id": "acct-demo", "source_row_key": "row-1", "raw_row_hash": "5555555555555555555555555555555555555555555555555555555555555555", "validation_status": "VALID", "disposition": "INCLUDED", "reason_code": null}],
-    "canonical_events": [{"event_id": "event-1", "organization_id": "org-demo", "marketplace_account_id": "acct-demo", "source_record_id": "missing-record", "revision": 1, "event_hash": "6666666666666666666666666666666666666666666666666666666666666666", "normalization_rule_ref": {"id": "normalization.synthetic", "version": 1, "content_hash": "7777777777777777777777777777777777777777777777777777777777777777"}}],
+    "calculation_profile_ref": {
+      "id": "profile.actual.default",
+      "version": 1,
+      "content_hash": "1111111111111111111111111111111111111111111111111111111111111111"
+    },
+    "metric_definition_ref": {
+      "id": "metric.net_revenue",
+      "version": 1,
+      "content_hash": "2222222222222222222222222222222222222222222222222222222222222222"
+    },
+    "rounding_policy_ref": {
+      "id": "rounding.standard",
+      "version": 1,
+      "content_hash": "3333333333333333333333333333333333333333333333333333333333333333"
+    },
+    "source_files": [
+      {
+        "import_batch_id": "batch-1",
+        "organization_id": "org-demo",
+        "marketplace_account_id": "acct-demo",
+        "source_file_sha256": "4444444444444444444444444444444444444444444444444444444444444444",
+        "adapter_id": "adapter.synthetic",
+        "adapter_version": "1.0.0",
+        "source_schema_id": "schema.synthetic.v1"
+      }
+    ],
+    "source_records": [
+      {
+        "source_record_id": "record-1",
+        "import_batch_id": "batch-1",
+        "organization_id": "org-demo",
+        "marketplace_account_id": "acct-demo",
+        "source_row_key": "row-1",
+        "raw_row_hash": "5555555555555555555555555555555555555555555555555555555555555555",
+        "validation_status": "VALID",
+        "disposition": "INCLUDED",
+        "reason_code": null
+      }
+    ],
+    "canonical_events": [
+      {
+        "event_id": "event-1",
+        "organization_id": "org-demo",
+        "marketplace_account_id": "acct-demo",
+        "source_record_id": "missing-record",
+        "revision": 1,
+        "event_hash": "6666666666666666666666666666666666666666666666666666666666666666",
+        "normalization_rule_ref": {
+          "id": "normalization.synthetic",
+          "version": 1,
+          "content_hash": "7777777777777777777777777777777777777777777777777777777777777777"
+        }
+      }
+    ],
     "included_record_count": 1,
     "excluded_record_count": 0,
-    "typed_state_counts": {"VALID": 1, "EMPTY": 0, "BLOCKED": 0, "UNAVAILABLE": 0, "CONFLICT": 0, "INVALID": 0, "NOT_APPLICABLE": 0},
+    "typed_state_counts": {
+      "VALID": 1,
+      "EMPTY": 0,
+      "BLOCKED": 0,
+      "UNAVAILABLE": 0,
+      "CONFLICT": 0,
+      "INVALID": 0,
+      "NOT_APPLICABLE": 0
+    },
     "input_set_hash": "e8163da0b912a4cac80dbf8c1a3e615d64ed9f386e5901cd2087a44760f04af4",
-    "freshness": {"state": "CURRENT", "evaluated_at": "2026-06-01T00:00:00Z", "data_through": "2026-05-31T23:00:00Z", "max_age_seconds": 7200},
-    "confidence": {"level": "HIGH", "score": "0.95", "basis": ["complete synthetic source set"]},
-    "validity": {"status": "BROKEN_LINK", "checked_at": "2026-06-01T00:00:00Z", "diagnostics": ["EVENT_SOURCE_RECORD_LINK_MISSING"]},
-    "limitations": ["synthetic fixture only"],
+    "freshness": {
+      "state": "CURRENT",
+      "evaluated_at": "2026-06-01T00:00:00Z",
+      "data_through": "2026-05-31T23:00:00Z",
+      "max_age_seconds": 7200
+    },
+    "confidence": {
+      "level": "HIGH",
+      "score": "0.95",
+      "basis": [
+        "complete synthetic source set"
+      ]
+    },
+    "validity": {
+      "status": "BROKEN_LINK",
+      "checked_at": "2026-06-01T00:00:00Z",
+      "diagnostics": [
+        "EVENT_SOURCE_RECORD_LINK_MISSING"
+      ]
+    },
+    "limitations": [
+      "synthetic fixture only"
+    ],
     "system_generated_reason": null
   },
-  "audit": {"actor": "test-harness", "reason": "INITIAL", "calculated_at": "2026-06-01T00:01:00Z", "trace_id": "trace-b3-blocked", "predecessor_result_id": null},
+  "audit": {
+    "actor": "test-harness",
+    "reason": "INITIAL",
+    "calculated_at": "2026-06-01T00:01:00Z",
+    "trace_id": "trace-b3-blocked",
+    "predecessor_result_id": null
+  },
   "reproduction_hash": "7db1befcd3b22b3328f8a7db356547f2e2030518aa52b7fe3dfeb880e1529b35",
   "content_hash": "5e389e38ef87e8253c7c0e88ae048238d8a680c54e97b9614dfd73ea672d62d8"
 }
