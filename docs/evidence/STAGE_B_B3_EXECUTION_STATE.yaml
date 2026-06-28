@@ -1,4 +1,4 @@
-execution_state_id: STAGE-B-B3-EXECUTION-STATE-v3
+execution_state_id: STAGE-B-B3-EXECUTION-STATE-v4
 stage_contract_id: STAGE-B-BUILD-v1
 updated_on: 2026-06-28
 immutable_snapshot: true
@@ -34,12 +34,14 @@ units:
     risk: R3
     approval: NOT_GRANTED
   B3:
-    state: REMEDIATED_AWAITING_CURRENT_HEAD_CI_AND_REVIEW
+    state: REMEDIATED_REVIEW_GATED
     issue: 9
     risk: R2
     runtime_verifier: src/quantum/evidence/verification.py
     test_method_count: 27
     temporary_patch_tests: 0
+    ci_policy: REQUIRED_ON_CURRENT_PR_MERGE_RESULT
+    independent_review: REQUIRED_ON_CURRENT_PR_HEAD_AND_DIFF
   B4:
     state: PLANNED
     risk: R2
