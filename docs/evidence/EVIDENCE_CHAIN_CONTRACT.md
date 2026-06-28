@@ -32,6 +32,16 @@ lexicographically, removing insignificant whitespace with separators `,` and
 SHA-256 of those exact bytes must equal `content_hash`; validating only the hash
 shape is insufficient.
 
+## Snapshot/Evidence hash direction
+
+The root `Metric Snapshot` contains an `evidence_chain_ref` made only of the
+stable Evidence Chain identifier and positive version. It deliberately omits
+the Evidence Chain content hash. The Evidence Chain is created after the
+snapshot and its `root_metric_snapshot_ref` includes the already-computed
+Metric Snapshot content hash. The graph hash then covers that hashed root
+reference. This one-way direction breaks the otherwise circular Snapshot/Chain
+hash dependency without weakening root-snapshot integrity.
+
 ## Node types
 
 - `METRIC_SNAPSHOT`;
