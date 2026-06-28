@@ -1,7 +1,7 @@
 {
-  "overlay_version": 8,
+  "overlay_version": 9,
   "base_manifest_git_blob_sha": "498f5cd7440b1bc2c361dd940dead8fc06cd2c1d",
-  "reason": "Cumulative manifest overlay for B1a cleanup and B3 recovery, including canonical evidence hashing, typed metric values, retained source-file hash equality, deterministic package-qualified unittest discovery, and synchronized 17-test governance evidence.",
+  "reason": "Cumulative manifest overlay for B1a cleanup and B3 recovery, including canonical evidence hashing, typed metric values, retained source-file hash equality, deterministic package-qualified unittest discovery, and synchronized 27-test governance evidence.",
   "control_paths_excluded_from_payload": [
     "docs/evidence/ARTIFACT_MANIFEST.json",
     "docs/evidence/ARTIFACT_MANIFEST_OVERLAY.json"
