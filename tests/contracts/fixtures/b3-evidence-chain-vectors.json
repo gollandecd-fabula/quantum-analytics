@@ -3,7 +3,7 @@
   "valid_graph": {
     "evidence_chain_id": "evidence-chain-synthetic-1",
     "version": 1,
-    "content_hash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    "content_hash": "d2327a16a3a4a87b84e05741634d32b3e5430c29f4742ad64d7dcaba9d5c3ddd",
     "organization_id": "org-synthetic",
     "mode": "ACTUAL",
     "scenario_id": null,
@@ -105,12 +105,25 @@
         "metadata": {}
       },
       {
-        "node_id": "transformation",
+        "node_id": "transformation-1",
         "node_type": "TRANSFORMATION",
         "artifact_ref": {
-          "id": "transformation",
+          "id": "transformation-1",
           "version": 1,
           "content_hash": "8888888888888888888888888888888888888888888888888888888888888888"
+        },
+        "organization_id": "org-synthetic",
+        "mode": "ACTUAL",
+        "scenario_id": null,
+        "metadata": {}
+      },
+      {
+        "node_id": "transformation-2",
+        "node_type": "TRANSFORMATION",
+        "artifact_ref": {
+          "id": "transformation-2",
+          "version": 1,
+          "content_hash": "0000000000000000000000000000000000000000000000000000000000000000"
         },
         "organization_id": "org-synthetic",
         "mode": "ACTUAL",
@@ -231,9 +244,15 @@
       },
       {
         "from_node_id": "metric-result",
-        "to_node_id": "transformation",
+        "to_node_id": "transformation-1",
         "edge_type": "RESULT_USES_TRANSFORMATION",
         "sequence": 0
+      },
+      {
+        "from_node_id": "metric-result",
+        "to_node_id": "transformation-2",
+        "edge_type": "RESULT_USES_TRANSFORMATION",
+        "sequence": 1
       },
       {
         "from_node_id": "metric-result",
@@ -367,6 +386,28 @@
         }
       },
       "expected_diagnostic": "EVIDENCE_EDGE_INVALID"
+    },
+    {
+      "id": "tampered_actor_with_preserved_hash",
+      "mutation": {
+        "set_graph_field": {
+          "actor": "tampered-actor"
+        },
+        "preserve_graph_hash": true
+      },
+      "expected_diagnostic": "EVIDENCE_HASH_MISMATCH"
+    },
+    {
+      "id": "ambiguous_transformation_sequence",
+      "mutation": {
+        "set_edge_sequence": {
+          "from_node_id": "metric-result",
+          "to_node_id": "transformation-2",
+          "edge_type": "RESULT_USES_TRANSFORMATION",
+          "sequence": 0
+        }
+      },
+      "expected_diagnostic": "EVIDENCE_TRANSFORMATION_ORDER_AMBIGUOUS"
     }
   ]
 }
