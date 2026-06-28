@@ -107,6 +107,29 @@ class B3RuntimeBoundaries(unittest.TestCase):
             ("RULE_RESOLUTION", "CONFIGURATION_RULE"),
         )
 
+        graph = copy.deepcopy(graph_data()["valid_graph"])
+        unrelated_rule = copy.deepcopy(
+            next(node for node in graph["nodes"] if node["node_id"] == "rule")
+        )
+        unrelated_rule["node_id"] = "rule-unrelated"
+        unrelated_rule["artifact_ref"] = {
+            "id": "rule-unrelated",
+            "version": 1,
+            "content_hash": "f" * 64,
+        }
+        graph["nodes"].append(unrelated_rule)
+        profile_edge = next(
+            edge for edge in graph["edges"]
+            if edge["from_node_id"] == "profile"
+            and edge["edge_type"] == "PROFILE_SELECTS_RULE"
+        )
+        profile_edge["to_node_id"] = "rule-unrelated"
+        graph["content_hash"] = canonical_graph_hash(graph)
+        self.assertIn(
+            "EVIDENCE_REQUIRED_PATH_MISSING",
+            verify_evidence_chain(graph),
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
