@@ -20,6 +20,21 @@ class B3EvidenceContracts(unittest.TestCase):
                 vector["id"],
             )
 
+        missing_profile_rule = mutate(
+            data["valid_graph"],
+            {
+                "remove_edge": {
+                    "from_node_id": "profile",
+                    "to_node_id": "rule",
+                    "edge_type": "PROFILE_SELECTS_RULE",
+                }
+            },
+        )
+        self.assertEqual(
+            diagnose_evidence_chain(missing_profile_rule),
+            "EVIDENCE_REQUIRED_PATH_MISSING",
+        )
+
     def test_03_required_source_bytes(self):
         data = graph_data()
         graph = data["valid_graph"]
