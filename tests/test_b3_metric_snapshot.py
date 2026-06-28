@@ -139,6 +139,52 @@ class B3MetricSnapshot(unittest.TestCase):
                     base_verification.verify_metric_snapshot(snapshot),
                 )
 
+        for field, expected in (
+            ("state", "METRIC_SNAPSHOT_STATE_INVALID"),
+            ("value_type", "METRIC_SNAPSHOT_VALUE_INVALID"),
+            ("unit", "METRIC_SNAPSHOT_VALUE_INVALID"),
+            ("accounting_view", "METRIC_SNAPSHOT_ACCOUNTING_VIEW_INVALID"),
+            ("data_freshness_state", "METRIC_SNAPSHOT_FRESHNESS_INVALID"),
+            ("confidence_state", "METRIC_SNAPSHOT_CONFIDENCE_INVALID"),
+        ):
+            with self.subTest(malformed_container_field=field):
+                snapshot = valid_snapshot()
+                snapshot[field] = []
+                snapshot["content_hash"] = canonical_snapshot_hash(snapshot)
+                for verifier in (
+                    base_verification.verify_metric_snapshot,
+                    verify_metric_snapshot,
+                ):
+                    self.assertIn(expected, verifier(snapshot))
+
+        malformed_expense = valid_snapshot()
+        malformed_expense["expense_boundary"] = [{}]
+        malformed_expense["content_hash"] = canonical_snapshot_hash(
+            malformed_expense
+        )
+        for verifier in (
+            base_verification.verify_metric_snapshot,
+            verify_metric_snapshot,
+        ):
+            self.assertIn(
+                "METRIC_SNAPSHOT_EXPENSE_BOUNDARY_INVALID",
+                verifier(malformed_expense),
+            )
+
+        malformed_rounding = valid_snapshot()
+        malformed_rounding["rounding"]["application_point"] = []
+        malformed_rounding["content_hash"] = canonical_snapshot_hash(
+            malformed_rounding
+        )
+        for verifier in (
+            base_verification.verify_metric_snapshot,
+            verify_metric_snapshot,
+        ):
+            self.assertIn(
+                "METRIC_SNAPSHOT_ROUNDING_INVALID",
+                verifier(malformed_rounding),
+            )
+
 
 if __name__ == "__main__":
     unittest.main()
