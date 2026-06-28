@@ -25,6 +25,7 @@ artifacts:
   - src/quantum/evidence/validation.py
   - tests/contracts/fixtures/b3-valid-metric-evidence.json
   - tests/test_b3_metric_evidence.py
+  - tests/test_b3_manifest_overlay.py
 
 invariants:
   - immutable_metric_result_versions
@@ -36,9 +37,10 @@ invariants:
   - actual_and_scenario_isolation
   - recalculation_actor_reason_timestamp_and_predecessor_audit
   - broken_links_and_hash_mismatches_fail_closed
+  - manifest_overlay_is_unique_sorted_and_temporary_diagnostic_free
 
 qa:
-  b3_tests: 12
+  b3_tests: 14
   latest_exact_head_ci: PENDING
   independent_review: PENDING
   unresolved_findings: PENDING
