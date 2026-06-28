@@ -55,6 +55,15 @@ Where applicable, the snapshot declares:
 - approved Source Authority reference;
 - Evidence Chain reference.
 
+For a `VALID` snapshot:
+
+- `MONEY` uses a normalized decimal-string payload, unit `MONEY` or
+  `MONEY_PER_ITEM`, and a non-null three-letter ISO 4217 currency;
+- `INTEGER` uses a JSON integer payload;
+- `DECIMAL` and `RATE` use normalized decimal-string payloads;
+- `INTEGER`, `DECIMAL`, and `RATE` use `currency: null` and cannot use
+  `MONEY` or `MONEY_PER_ITEM` units.
+
 Cross-currency aggregation is `BLOCKED` unless a separately approved conversion
 contract is referenced.
 
