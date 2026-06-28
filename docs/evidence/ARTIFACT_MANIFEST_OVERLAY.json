@@ -13,6 +13,11 @@
       3828
     ],
     [
+      "docs/evidence/STAGE_B_B3_CONTRACT_EVIDENCE.yaml",
+      "24adc9227158478bb82014f97a3066527ad753e0ca8dcf986d72dff76388a8b5",
+      1443
+    ],
+    [
       "docs/evidence/STAGE_B_EXECUTION_STATE.yaml",
       "ba96c8a6353848ce73552bf502ee8172c0c56bb35e1d363b12c461c771263a20",
       1260
@@ -71,6 +76,11 @@
       "tests/test_b1a_safe_expression_semantics.py",
       "ebdd579ca0444e5b02483532fcc00170d88ae59d7743dd6e47d34be7d583f27c",
       3662
+    ],
+    [
+      "tests/test_b3_manifest_overlay.py",
+      "25bfcba2579182c0b573a4bd0ef5dc06d727548a8638fd96c592597bab3d7a11",
+      1930
     ],
     [
       "tests/test_b3_metric_evidence.py",
