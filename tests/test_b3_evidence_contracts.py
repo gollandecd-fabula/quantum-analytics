@@ -104,6 +104,62 @@ class B3EvidenceContracts(unittest.TestCase):
         graph["content_hash"] = canonical_graph_hash(graph)
         self.assertIn("EVIDENCE_EDGE_DUPLICATE", verify_evidence_chain(graph))
 
+        def duplicate_target(
+            edge_type: str,
+            node_type: str,
+            *,
+            copy_outgoing: bool = False,
+        ):
+            candidate = copy.deepcopy(graph_data()["valid_graph"])
+            edge = next(
+                item for item in candidate["edges"]
+                if item["edge_type"] == edge_type
+            )
+            old_id = edge["to_node_id"]
+            old_node = next(
+                node for node in candidate["nodes"]
+                if node["node_id"] == old_id and node["node_type"] == node_type
+            )
+            new_node = copy.deepcopy(old_node)
+            new_id = f"{old_id}-duplicate"
+            new_node["node_id"] = new_id
+            new_node["artifact_ref"]["id"] = (
+                f'{new_node["artifact_ref"]["id"]}-duplicate'
+            )
+            new_node["artifact_ref"]["content_hash"] = "d" * 64
+            candidate["nodes"].append(new_node)
+            new_edge = copy.deepcopy(edge)
+            new_edge["to_node_id"] = new_id
+            candidate["edges"].append(new_edge)
+            if copy_outgoing:
+                for outgoing in list(candidate["edges"]):
+                    if outgoing["from_node_id"] == old_id:
+                        duplicate = copy.deepcopy(outgoing)
+                        duplicate["from_node_id"] = new_id
+                        candidate["edges"].append(duplicate)
+            candidate["content_hash"] = canonical_graph_hash(candidate)
+            return candidate
+
+        singleton_cases = (
+            ("RESULT_DEFINED_BY", "METRIC_DEFINITION", False),
+            ("RESULT_CALCULATED_WITH", "CALCULATION_PROFILE", True),
+            ("RESULT_HAS_FRESHNESS", "FRESHNESS_ASSESSMENT", False),
+            ("RESULT_HAS_CONFIDENCE", "CONFIDENCE_ASSESSMENT", False),
+            ("PROFILE_USES_ROUNDING", "ROUNDING_POLICY", True),
+            ("PROFILE_USES_SOURCE_AUTHORITY", "SOURCE_AUTHORITY", True),
+            ("RESOLUTION_SELECTS_RULE", "CONFIGURATION_RULE", False),
+        )
+        for edge_type, node_type, copy_outgoing in singleton_cases:
+            with self.subTest(singleton_edge=edge_type):
+                candidate = duplicate_target(
+                    edge_type, node_type, copy_outgoing=copy_outgoing
+                )
+                for verifier in (
+                    base_verification.verify_evidence_chain,
+                    verify_evidence_chain,
+                ):
+                    self.assertIn("EVIDENCE_EDGE_INVALID", verifier(candidate))
+
     def test_09_orphan_node_and_deep_path(self):
         graph = copy.deepcopy(graph_data()["valid_graph"])
         orphan = copy.deepcopy(graph["nodes"][1])
