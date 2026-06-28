@@ -32,8 +32,10 @@ checks:
   schema_positive_fixtures: 2
   schema_negative_mutations: 3
   schema_validation_status: SUCCESS
-  current_head_ci: PENDING
-  current_head_review: PENDING
+  technical_ci_run: 28319078665
+  technical_ci_status: SUCCESS
+  current_head_ci: PENDING_AFTER_METADATA_SYNC
+  current_head_review: PENDING_AFTER_METADATA_SYNC
 
 confirmed:
   - immutable result_id derived from content_hash
