@@ -221,7 +221,7 @@
       "$ref": "#/$defs/versionedRef"
     },
     "evidence_chain_ref": {
-      "$ref": "#/$defs/versionedRef"
+      "$ref": "#/$defs/evidenceChainRef"
     },
     "data_freshness_state": {
       "type": "string",
@@ -625,6 +625,24 @@
         "content_hash": {
           "type": "string",
           "pattern": "^[a-f0-9]{64}$"
+        }
+      }
+    },
+    "evidenceChainRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "version"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
         }
       }
     }
