@@ -1,0 +1,51 @@
+stage_contract_id: STAGE-B-BUILD-v1
+unit: B3
+risk_class: R2
+status: IN_PROGRESS
+tracking_issue: 11
+pull_request: 14
+
+scope:
+  metric_result_contract: true
+  evidence_chain_contract: true
+  reversible_semantic_validator: true
+  synthetic_fixtures_only: true
+  calculation_kernel: false
+  financial_rule_activation: false
+  real_commercial_data: false
+  marketplace_writes: false
+  deployment: false
+  production_release: false
+
+artifacts:
+  - docs/metrics/METRIC_RESULT_CONTRACT.md
+  - docs/evidence/EVIDENCE_CHAIN_CONTRACT.md
+  - schemas/metric-result.schema.json
+  - schemas/evidence-chain.schema.json
+  - src/quantum/evidence/validation.py
+  - tests/contracts/fixtures/b3-valid-metric-evidence.json
+  - tests/test_b3_metric_evidence.py
+
+invariants:
+  - immutable_metric_result_versions
+  - exact_version_and_content_hash_references
+  - acyclic_metric_result_and_evidence_chain_hashes
+  - deterministic_input_fingerprint
+  - metric_to_source_file_sha256_traceability
+  - typed_non_valid_states_never_become_zero
+  - actual_and_scenario_isolation
+  - recalculation_actor_reason_timestamp_and_predecessor_audit
+  - broken_links_and_hash_mismatches_fail_closed
+
+qa:
+  b3_tests: 12
+  latest_exact_head_ci: PENDING
+  independent_review: PENDING
+  unresolved_findings: PENDING
+
+release_state: RELEASE_BLOCKED
+remaining_gates:
+  - EXACT_HEAD_CI_SUCCESS
+  - ARTIFACT_OVERLAY_SYNCHRONIZED
+  - INDEPENDENT_CODEX_REVIEW_CLEAN
+  - PROTECTED_SQUASH_MERGE
