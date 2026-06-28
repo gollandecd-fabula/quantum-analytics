@@ -16,8 +16,8 @@ scope:
 artifacts:
   contracts: 7
   schemas: 6
-  tracked_artifacts: 158
-  permanent_b1a_test_files: 12
+  tracked_artifacts: 159
+  permanent_b1a_test_files: 13
 
 checks:
   foundation_tests: 34
@@ -27,8 +27,8 @@ checks:
   last_technical_ci_status: SUCCESS
   review_threads_total: 31
   review_threads_unresolved: 0
-  current_head_ci: PENDING_AFTER_METADATA_SYNC
-  current_head_review: PENDING_AFTER_METADATA_SYNC
+  current_head_ci: PENDING_AFTER_DIAGNOSTIC_REMOVAL
+  current_head_review: PENDING_AFTER_DIAGNOSTIC_REMOVAL
 
 confirmed:
   - deterministic tenant-safe mode-isolated resolution
