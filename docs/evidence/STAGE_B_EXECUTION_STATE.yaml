@@ -8,6 +8,7 @@ status: ACTIVE
 current_unit: B3
 tracking_issue: 16
 working_branch: build-b3-metric-evidence-chain
+pull_request: 17
 
 units:
   B0:
@@ -30,6 +31,7 @@ units:
   B3:
     state: IN_PROGRESS
     issue: 16
+    pull_request: 17
     risk: R2
     approval: EXPLICIT_USER_APPROVAL_2026-06-28
   B4:
