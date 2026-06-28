@@ -1,8 +1,8 @@
 {
-  "overlay_version": 6,
+  "overlay_version": 7,
   "base_runtime_overlay_git_blob_sha": "07dcf6840e9b9ed3890cb2dcdeff92e009812f73",
   "hash_encoding": "sha256-base64",
-  "reason": "Final B3 runtime hardening reconciliation.",
+  "reason": "B3 verifier convergence: iterative graph traversal, base/public invariant alignment, valid deep-path regression coverage, and synchronized evidence.",
   "entries": [
     [
       "docs/evidence/EVIDENCE_CHAIN_CONTRACT.md",
@@ -11,8 +11,8 @@
     ],
     [
       "docs/evidence/STAGE_B_B3_CONTRACT_EVIDENCE.yaml",
-      "5q/3Yz09LcskYKSCeU5U+yJJWaaNyJtQugajyhsP7KQ=",
-      2742
+      "auGOZM5POzBkU/wWUDcWbzYpnZ8idDLwAQPnkEqRSTI=",
+      2913
     ],
     [
       "docs/evidence/STAGE_B_B3_EXECUTION_STATE.yaml",
@@ -45,6 +45,11 @@
       5623
     ],
     [
+      "src/quantum/evidence/verification.py",
+      "749swQGIPdgUAoY/ZqytvjDB1/gsYOEMhyw+VT4IJdA=",
+      25125
+    ],
+    [
       "tests/test_a0_manifest_diagnostic.py",
       "iKjzzbBAtezftrLoDRZpdzrTesNxvcCcmFhEGIcznMs=",
       1582
@@ -56,13 +61,13 @@
     ],
     [
       "tests/test_b3_evidence_contracts.py",
-      "sbB/hIRxbnVBSLmJeWCHFpffLjr+h6tWHUNXc8RC0+w=",
-      4774
+      "dpQlxfir/qDzEJn566VM0vooDpxZWyUGXizK5QPSp2k=",
+      4898
     ],
     [
       "tests/test_b3_metric_snapshot.py",
-      "Do7f1avnbccjxNDI6P84toBvUfbRo+Kr4gaZnmbq7ag=",
-      5263
+      "MbNNY69neV/YP9V7UG4joCiLgQyn6bcmb0VXrMoXQfs=",
+      6020
     ],
     [
       "tests/test_b3_runtime_boundaries.py",
