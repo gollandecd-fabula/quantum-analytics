@@ -1,0 +1,57 @@
+evidence_id: STAGE-B-B3-CONTRACT-EVIDENCE-v1
+unit: B3
+status: READY_FOR_REVIEW_SUBJECT_TO_CURRENT_HEAD_GATES
+tracking_issue: 16
+pull_request: 17
+risk_class: R2
+
+scope:
+  immutable_metric_snapshots: IMPLEMENTED
+  evidence_chain_contract: IMPLEMENTED
+  deterministic_hash_utility: IMPLEMENTED
+  calculation_kernel: NOT_IMPLEMENTED
+  active_financial_rules: NONE
+  source_authority_activation: NONE
+  real_commercial_data: NOT_ADMITTED
+  marketplace_write_capability: DISABLED
+  production_release: BLOCKED
+
+artifacts:
+  contracts: 1
+  schemas: 3
+  implementation_modules: 6
+  synthetic_fixtures: 2
+  permanent_b3_test_files: 6
+  effective_tracked_artifacts: 178
+
+checks:
+  baseline_tests_expected: 68
+  b3_targeted_tests: 31
+  full_suite_expected: 99
+  local_targeted_status: SUCCESS
+  schema_positive_fixtures: 2
+  schema_negative_mutations: 3
+  schema_validation_status: SUCCESS
+  current_head_ci: PENDING
+  current_head_review: PENDING
+
+confirmed:
+  - immutable result_id derived from content_hash
+  - separate reproduction_hash and content_hash
+  - immutable Calculation Profile and metric-definition linkage
+  - source-file, source-record and canonical-event traceability
+  - deterministic input_set_hash
+  - explicit freshness, confidence and evidence-validity metadata
+  - actor, reason, timestamp and predecessor recalculation audit
+  - Actual and Scenario isolation
+  - VALID zero remains distinct from missing states
+  - broken-link, missing-version, hash-mismatch and cross-tenant fail-closed behavior
+  - defensive deep-freeze of nested result values and metadata
+
+limitations:
+  - Source Authority remains DRAFT
+  - fixtures are synthetic only
+  - no B1b financial calculations
+  - no durable database publication or production release
+
+next_gate: B3_CURRENT_HEAD_CI_AND_INDEPENDENT_REVIEW
