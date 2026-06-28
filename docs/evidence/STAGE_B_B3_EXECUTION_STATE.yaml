@@ -1,4 +1,4 @@
-execution_state_id: STAGE-B-B3-EXECUTION-STATE-v2
+execution_state_id: STAGE-B-B3-EXECUTION-STATE-v3
 stage_contract_id: STAGE-B-BUILD-v1
 updated_on: 2026-06-28
 immutable_snapshot: true
@@ -13,16 +13,7 @@ predecessor:
   unit: B1a
   merge_commit: ff6bc6e23d3df7d877230578c4de0f02f20fce0d
   cleanup_commit: 40c8ef94b4826257c2935d3ac499009734be758f
-  required_artifacts:
-    - docs/finance/CONFIGURATION_RULE_CONTRACT.md
-    - docs/finance/RULE_RESOLUTION_CONTRACT.md
-    - docs/finance/CALCULATION_PROFILE_CONTRACT.md
-    - schemas/metric-definition.schema.json
-    - schemas/calculation-profile.schema.json
-    - tests/test_b1a_financial_contracts.py
-    - docs/evidence/STAGE_B_B1A_CONTRACT_EVIDENCE.yaml
-  verification_test: tests/test_b3_evidence_contracts.py
-  status: PASS_LOCAL
+  status: PASS
 
 units:
   B0:
@@ -43,9 +34,12 @@ units:
     risk: R3
     approval: NOT_GRANTED
   B3:
-    state: IN_PROGRESS
+    state: REMEDIATED_AWAITING_CURRENT_HEAD_CI_AND_REVIEW
     issue: 9
     risk: R2
+    runtime_verifier: src/quantum/evidence/verification.py
+    test_method_count: 27
+    temporary_patch_tests: 0
   B4:
     state: PLANNED
     risk: R2
@@ -65,7 +59,7 @@ units:
     risk: R2
 
 scope:
-  contracts_schemas_tests_only: true
+  contracts_schemas_runtime_verifier_tests: true
   financial_calculation_kernel: NOT_IMPLEMENTED
   metric_publication: NOT_IMPLEMENTED
   real_commercial_data: NOT_ADMITTED
