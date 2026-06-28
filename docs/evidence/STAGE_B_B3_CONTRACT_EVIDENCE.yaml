@@ -1,4 +1,4 @@
-evidence_id: STAGE-B-B3-CONTRACT-EVIDENCE-v10
+evidence_id: STAGE-B-B3-CONTRACT-EVIDENCE-v11
 unit: B3
 status: REMEDIATED_REVIEW_GATED
 tracking_issue: 9
@@ -47,6 +47,7 @@ checks:
   source_byte_loader_gate_tests: PASS_LOCAL_STATIC
   deep_acyclic_path_tests: PASS_LOCAL_TARGETED
   base_public_invariant_alignment_tests: PASS_LOCAL_TARGETED
+  malformed_container_value_tests: PASS_LOCAL_TARGETED
   github_ci_policy: REQUIRED_ON_CURRENT_PR_MERGE_RESULT
   independent_review: REQUIRED_ON_CURRENT_PR_HEAD_AND_DIFF
   transient_ci_result_source: GITHUB_CHECKS
@@ -65,6 +66,7 @@ verified_invariants:
   - decimal and rate values cannot use money units
   - base and public verifiers enforce the same snapshot invariants
   - long acyclic evidence paths validate without recursion failure
+  - malformed JSON container values fail closed without runtime exceptions
 
 limitations:
   - JSON Schemas are declarative; runtime verifier enforces B3 invariants
