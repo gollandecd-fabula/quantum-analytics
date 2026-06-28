@@ -3,6 +3,7 @@ from __future__ import annotations
 import unittest
 
 from quantum.evidence import canonical_snapshot_hash, diagnose_metric_snapshot, verify_metric_snapshot
+from quantum.evidence import verification as base_verification
 from tests.b3_helpers import valid_snapshot
 
 
@@ -67,6 +68,10 @@ class B3MetricSnapshot(unittest.TestCase):
         })
         integer["content_hash"] = canonical_snapshot_hash(integer)
         self.assertIn("METRIC_SNAPSHOT_VALUE_INVALID", verify_metric_snapshot(integer))
+        self.assertIn(
+            "METRIC_SNAPSHOT_VALUE_INVALID",
+            base_verification.verify_metric_snapshot(integer),
+        )
 
         for value_type in ("DECIMAL", "RATE"):
             for unit in ("MONEY", "MONEY_PER_ITEM"):
@@ -83,6 +88,10 @@ class B3MetricSnapshot(unittest.TestCase):
                         "METRIC_SNAPSHOT_VALUE_INVALID",
                         verify_metric_snapshot(snapshot),
                     )
+                    self.assertIn(
+                        "METRIC_SNAPSHOT_VALUE_INVALID",
+                        base_verification.verify_metric_snapshot(snapshot),
+                    )
 
         invalid_locator_values = ("", [], {}, 7, False)
         for field in (
@@ -98,6 +107,10 @@ class B3MetricSnapshot(unittest.TestCase):
                     self.assertIn(
                         "METRIC_SNAPSHOT_MALFORMED",
                         verify_metric_snapshot(snapshot),
+                    )
+                    self.assertIn(
+                        "METRIC_SNAPSHOT_MALFORMED",
+                        base_verification.verify_metric_snapshot(snapshot),
                     )
 
     def test_10_unknown_expense_and_rounding_settings(self):
@@ -120,6 +133,10 @@ class B3MetricSnapshot(unittest.TestCase):
                 self.assertIn(
                     "METRIC_SNAPSHOT_ROUNDING_INVALID",
                     verify_metric_snapshot(snapshot),
+                )
+                self.assertIn(
+                    "METRIC_SNAPSHOT_ROUNDING_INVALID",
+                    base_verification.verify_metric_snapshot(snapshot),
                 )
 
 
