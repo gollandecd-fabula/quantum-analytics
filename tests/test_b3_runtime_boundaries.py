@@ -45,8 +45,12 @@ class B3RuntimeBoundaries(unittest.TestCase):
         self.assertIn("create the Evidence Chain", contract)
 
     def test_03_runtime_location(self):
-        import quantum.evidence.verification as runtime
+        import quantum.evidence as public
+        import quantum.evidence.runtime_validation as runtime
+
         self.assertTrue(callable(runtime.verify_evidence_chain))
+        self.assertIs(public.verify_evidence_chain, runtime.verify_evidence_chain)
+        self.assertIs(public.verify_metric_snapshot, runtime.verify_metric_snapshot)
         self.assertIn("src/quantum/evidence", Path(runtime.__file__).as_posix())
 
     def test_04_non_mapping_reference(self):
