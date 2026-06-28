@@ -1,0 +1,45 @@
+{
+  "recorded_on": "2026-06-29",
+  "remaining_closure_gates": [
+    "independent_exact_head_review_zero_findings",
+    "unresolved_review_threads_zero",
+    "mergeable_true"
+  ],
+  "restrictions": {
+    "marketplace_write_enabled": false,
+    "merge_authorized": false,
+    "release_authorized": false,
+    "runtime_installation_authorized": false
+  },
+  "schema_version": 1,
+  "stage": "OSS_DEPENDENCY_ADMISSION",
+  "status": "R2_VALIDATED_REVIEW_REQUIRED",
+  "supersedes_state_snapshot": {
+    "path": "docs/evidence/OSS_DEPENDENCY_ADMISSION_STATE.yaml",
+    "reason": "The state file is the pre-revalidation snapshot; this immutable record captures the successful post-remediation CI verdict.",
+    "state_version": 2,
+    "status": "R2_REMEDIATION_CI_REQUIRED"
+  },
+  "validated_gates": {
+    "foundation_checks": "PASS",
+    "npm_distribution_integrity": "PASS",
+    "official_registry_verification": "PASS",
+    "osv_vulnerability_scan": "PASS_ZERO_KNOWN_VULNERABILITIES",
+    "tracked_tree_manifest_equality": "PASS"
+  },
+  "validated_head": "b07b51c92375a47b823d93fcac446c822d7b546c",
+  "workflow_evidence": {
+    "conclusion": "success",
+    "job_id": 83944568461,
+    "run_id": 28336888800,
+    "run_number": 6,
+    "status": "completed",
+    "successful_steps": [
+      "Fetch exact commit without third-party actions",
+      "Verify runtime",
+      "Run Foundation checks",
+      "Verify official registries and OSV"
+    ],
+    "workflow": "OSS Admission CI"
+  }
+}
