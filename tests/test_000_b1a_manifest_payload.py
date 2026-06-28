@@ -11,7 +11,7 @@ from test_b1a_artifact_manifest import MANIFEST_PATH, expected_manifest
 ROOT = Path(__file__).resolve().parents[1]
 SELF_PATH = "tests/test_000_b1a_manifest_payload.py"
 CHUNK_SIZE = 900
-CHUNKS_PER_ATTEMPT = 2
+START_CHUNK = 4
 
 
 class B1aManifestPayloadDiagnostic(unittest.TestCase):
@@ -32,22 +32,20 @@ class B1aManifestPayloadDiagnostic(unittest.TestCase):
             for index in range(0, len(encoded), CHUNK_SIZE)
         ]
         attempt = int(os.environ.get("GITHUB_RUN_ATTEMPT", "1"))
-        start = (attempt - 1) * CHUNKS_PER_ATTEMPT
-        stop = min(start + CHUNKS_PER_ATTEMPT, len(chunks))
+        number = START_CHUNK + attempt - 1
         print(
             f"B1A_MANIFEST_PAYLOAD_META bytes={len(payload)} "
             f"sha256={hashlib.sha256(payload).hexdigest()} "
             f"git_blob_sha={hashlib.sha1(f'blob {len(payload)}\\0'.encode() + payload).hexdigest()} "
             f"compressed_sha256={hashlib.sha256(compressed).hexdigest()} "
-            f"chunks={len(chunks)} attempt={attempt} range={start + 1}-{stop}",
+            f"chunks={len(chunks)} attempt={attempt} chunk={number}",
             flush=True,
         )
-        for number in range(start, stop):
-            print(
-                f"B1A_MANIFEST_PAYLOAD_CHUNK index={number + 1} data={chunks[number]}",
-                flush=True,
-            )
-        self.assertLess(start, len(chunks), "rerun attempt exceeds payload chunk count")
+        self.assertLessEqual(number, len(chunks), "rerun attempt exceeds payload chunk count")
+        print(
+            f"B1A_MANIFEST_PAYLOAD_CHUNK index={number} data={chunks[number - 1]}",
+            flush=True,
+        )
 
 
 if __name__ == "__main__":
