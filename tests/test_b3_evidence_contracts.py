@@ -55,15 +55,35 @@ class B3EvidenceContracts(unittest.TestCase):
             ),
         )
 
-    def test_05_malformed_top_level(self):
+    def test_05_malformed_top_level_and_mode(self):
         self.assertEqual(verify_evidence_chain(None), ("EVIDENCE_MALFORMED",))
         self.assertIn("EVIDENCE_MALFORMED", verify_evidence_chain({"nodes": []}))
 
-    def test_06_missing_node_id(self):
+        for value in ([], {}):
+            with self.subTest(mode=repr(value)):
+                graph = copy.deepcopy(graph_data()["valid_graph"])
+                graph["mode"] = value
+                graph["content_hash"] = canonical_graph_hash(graph)
+                self.assertIn(
+                    "EVIDENCE_MODE_CONTAMINATION",
+                    verify_evidence_chain(graph),
+                )
+
+    def test_06_missing_node_id_and_unhashable_node_type(self):
         graph = copy.deepcopy(graph_data()["valid_graph"])
         graph["nodes"][0].pop("node_id")
         graph["content_hash"] = canonical_graph_hash(graph)
         self.assertIn("EVIDENCE_MALFORMED", verify_evidence_chain(graph))
+
+        for value in ([], {}):
+            with self.subTest(node_type=repr(value)):
+                malformed = copy.deepcopy(graph_data()["valid_graph"])
+                malformed["nodes"][0]["node_type"] = value
+                malformed["content_hash"] = canonical_graph_hash(malformed)
+                self.assertIn(
+                    "EVIDENCE_NODE_TYPE_INVALID",
+                    verify_evidence_chain(malformed),
+                )
 
     def test_07_duplicate_node(self):
         graph = copy.deepcopy(graph_data()["valid_graph"])
@@ -110,7 +130,7 @@ class B3EvidenceContracts(unittest.TestCase):
             })
             previous = node_id
         deep["content_hash"] = canonical_graph_hash(deep)
-        self.assertIn("EVIDENCE_MALFORMED", verify_evidence_chain(deep))
+        self.assertEqual(verify_evidence_chain(deep), ())
 
     def test_10_naive_created_at(self):
         graph = copy.deepcopy(graph_data()["valid_graph"])

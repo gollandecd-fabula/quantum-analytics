@@ -67,6 +67,7 @@ _STATES = frozenset({
     "VALID", "EMPTY", "BLOCKED", "UNAVAILABLE", "CONFLICT", "INVALID",
     "NOT_APPLICABLE",
 })
+_VALUE_TYPES = frozenset({"MONEY", "INTEGER", "DECIMAL", "RATE"})
 _EXPENSES = frozenset({
     "MARKETPLACE_COMMISSION", "FORWARD_LOGISTICS", "REVERSE_LOGISTICS",
     "STORAGE", "ADVERTISING", "FINES_WITHHOLDINGS", "PRODUCT_COST",
@@ -76,11 +77,18 @@ _UNITS = frozenset({
     "MONEY", "MONEY_PER_ITEM", "ITEM", "ORDER", "EVENT", "PERCENT", "RATIO",
     "COUNT",
 })
+_ACCOUNTING_VIEWS = frozenset({"OPERATIONAL", "SETTLEMENT", "TAX_RECOGNITION"})
+_FRESHNESS_STATES = frozenset({"CURRENT", "STALE", "UNKNOWN", "NOT_APPLICABLE"})
+_CONFIDENCE_STATES = frozenset({"HIGH", "MEDIUM", "LOW", "UNKNOWN", "NOT_APPLICABLE"})
 
 
 def _append(errors: list[str], code: str) -> None:
     if code not in errors:
         errors.append(code)
+
+
+def _is_allowed_string(value: object, allowed: frozenset[str] | set[str]) -> bool:
+    return isinstance(value, str) and value in allowed
 
 
 def _canonical_hash(document: Mapping[str, Any], excluded: frozenset[str]) -> str:
@@ -143,6 +151,32 @@ def _valid_ref(value: object, *, chain_locator: bool = False) -> bool:
     return chain_locator or _is_hash(value.get("content_hash"))
 
 
+def _has_cycle(adjacency: Mapping[str, list[str]]) -> bool:
+    """Return True on a directed cycle without using Python recursion."""
+    state: dict[str, int] = {}
+    for start in adjacency:
+        if state.get(start, 0) != 0:
+            continue
+        state[start] = 1
+        stack: list[tuple[str, int]] = [(start, 0)]
+        while stack:
+            node_id, index = stack[-1]
+            targets = adjacency.get(node_id, [])
+            if index >= len(targets):
+                state[node_id] = 2
+                stack.pop()
+                continue
+            target = targets[index]
+            stack[-1] = (node_id, index + 1)
+            target_state = state.get(target, 0)
+            if target_state == 1:
+                return True
+            if target_state == 0:
+                state[target] = 1
+                stack.append((target, 0))
+    return False
+
+
 def verify_evidence_chain(
     graph: object,
     *,
@@ -164,7 +198,7 @@ def verify_evidence_chain(
         _append(errors, "EVIDENCE_TENANT_MISMATCH")
     mode = graph.get("mode")
     scenario_id = graph.get("scenario_id")
-    if mode not in {"ACTUAL", "SCENARIO"}:
+    if not _is_allowed_string(mode, {"ACTUAL", "SCENARIO"}):
         _append(errors, "EVIDENCE_MODE_CONTAMINATION")
     elif mode == "ACTUAL" and scenario_id is not None:
         _append(errors, "EVIDENCE_MODE_CONTAMINATION")
@@ -209,7 +243,7 @@ def verify_evidence_chain(
             _append(errors, "EVIDENCE_NODE_DUPLICATE")
             continue
         nodes[node_id] = raw_node
-        if raw_node.get("node_type") not in NODE_TYPES:
+        if not _is_allowed_string(raw_node.get("node_type"), NODE_TYPES):
             _append(errors, "EVIDENCE_NODE_TYPE_INVALID")
         ref = raw_node.get("artifact_ref")
         if not _valid_ref(ref):
@@ -286,23 +320,7 @@ def verify_evidence_chain(
         typed_targets.setdefault((source, edge_type), []).append(target)
         valid_edges.append((source, target, edge_type, int(sequence)))
 
-    seen: set[str] = set()
-    active: set[str] = set()
-
-    def cyclic(node_id: str) -> bool:
-        if node_id in active:
-            return True
-        if node_id in seen:
-            return False
-        active.add(node_id)
-        for target in adjacency.get(node_id, ()):
-            if cyclic(target):
-                return True
-        active.remove(node_id)
-        seen.add(node_id)
-        return False
-
-    if any(cyclic(node_id) for node_id in nodes):
+    if _has_cycle(adjacency):
         _append(errors, "EVIDENCE_GRAPH_CYCLE")
 
     def targets(source: str, edge_type: str, node_type: str) -> list[str]:
@@ -482,27 +500,29 @@ def verify_metric_snapshot(snapshot: object) -> tuple[str, ...]:
     unit = snapshot.get("unit")
     currency = snapshot.get("currency")
     reason_code = snapshot.get("reason_code")
-    if state not in _STATES:
+    if not _is_allowed_string(state, _STATES):
         _append(errors, "METRIC_SNAPSHOT_STATE_INVALID")
     elif state == "VALID":
-        if value is None or value_type not in {"MONEY", "INTEGER", "DECIMAL", "RATE"}:
+        if value is None or not _is_allowed_string(value_type, _VALUE_TYPES):
             _append(errors, "METRIC_SNAPSHOT_VALUE_INVALID")
-        if unit not in _UNITS or reason_code is not None:
+        if not _is_allowed_string(unit, _UNITS) or reason_code is not None:
             _append(errors, "METRIC_SNAPSHOT_VALUE_INVALID")
         if value_type == "MONEY":
             if not isinstance(value, str) or not _DECIMAL_RE.fullmatch(value):
                 _append(errors, "METRIC_SNAPSHOT_VALUE_INVALID")
-            if unit not in {"MONEY", "MONEY_PER_ITEM"} or not (
+            if not _is_allowed_string(unit, {"MONEY", "MONEY_PER_ITEM"}) or not (
                 isinstance(currency, str) and re.fullmatch(r"[A-Z]{3}", currency)
             ):
                 _append(errors, "METRIC_SNAPSHOT_VALUE_INVALID")
         elif value_type == "INTEGER":
             if not isinstance(value, int) or isinstance(value, bool) or currency is not None:
                 _append(errors, "METRIC_SNAPSHOT_VALUE_INVALID")
-            if unit in {"MONEY", "MONEY_PER_ITEM"}:
+            if _is_allowed_string(unit, {"MONEY", "MONEY_PER_ITEM"}):
                 _append(errors, "METRIC_SNAPSHOT_VALUE_INVALID")
-        elif value_type in {"DECIMAL", "RATE"}:
+        elif _is_allowed_string(value_type, {"DECIMAL", "RATE"}):
             if not isinstance(value, str) or not _DECIMAL_RE.fullmatch(value) or currency is not None:
+                _append(errors, "METRIC_SNAPSHOT_VALUE_INVALID")
+            if _is_allowed_string(unit, {"MONEY", "MONEY_PER_ITEM"}):
                 _append(errors, "METRIC_SNAPSHOT_VALUE_INVALID")
     else:
         if any(item is not None for item in (value, value_type, unit, currency)):
@@ -513,23 +533,23 @@ def verify_metric_snapshot(snapshot: object) -> tuple[str, ...]:
     expenses = snapshot.get("expense_boundary")
     if (
         not isinstance(expenses, list)
-        or any(item not in _EXPENSES for item in expenses)
-        or len(set(map(str, expenses))) != len(expenses)
+        or any(not _is_allowed_string(item, _EXPENSES) for item in expenses)
+        or len(set(item for item in expenses if isinstance(item, str))) != len(expenses)
     ):
         _append(errors, "METRIC_SNAPSHOT_EXPENSE_BOUNDARY_INVALID")
 
-    if snapshot.get("accounting_view") not in {"OPERATIONAL", "SETTLEMENT", "TAX_RECOGNITION"}:
+    if not _is_allowed_string(snapshot.get("accounting_view"), _ACCOUNTING_VIEWS):
         _append(errors, "METRIC_SNAPSHOT_ACCOUNTING_VIEW_INVALID")
-    if snapshot.get("data_freshness_state") not in {"CURRENT", "STALE", "UNKNOWN", "NOT_APPLICABLE"}:
+    if not _is_allowed_string(snapshot.get("data_freshness_state"), _FRESHNESS_STATES):
         _append(errors, "METRIC_SNAPSHOT_FRESHNESS_INVALID")
-    if snapshot.get("confidence_state") not in {"HIGH", "MEDIUM", "LOW", "UNKNOWN", "NOT_APPLICABLE"}:
+    if not _is_allowed_string(snapshot.get("confidence_state"), _CONFIDENCE_STATES):
         _append(errors, "METRIC_SNAPSHOT_CONFIDENCE_INVALID")
     for field in ("confidence_reasons", "limitations"):
         value_list = snapshot.get(field)
         if (
             not isinstance(value_list, list)
             or any(not _is_nonempty_string(item) for item in value_list)
-            or len(set(map(str, value_list))) != len(value_list)
+            or len(set(item for item in value_list if isinstance(item, str))) != len(value_list)
         ):
             _append(errors, "METRIC_SNAPSHOT_MALFORMED")
 

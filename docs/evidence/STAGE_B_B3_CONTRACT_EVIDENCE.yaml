@@ -1,4 +1,4 @@
-evidence_id: STAGE-B-B3-CONTRACT-EVIDENCE-v10
+evidence_id: STAGE-B-B3-CONTRACT-EVIDENCE-v11
 unit: B3
 status: REMEDIATED_REVIEW_GATED
 tracking_issue: 9
@@ -44,6 +44,8 @@ checks:
   base_verification_engine_location: src/quantum/evidence/verification.py
   primary_diagnostic_policy: src/quantum/evidence/__init__.py
   malformed_input_fail_closed_tests: PASS_LOCAL_STATIC
+  unhashable_enum_fail_closed_tests: PASS_LOCAL_STATIC
+  iterative_cycle_validation_tests: PASS_LOCAL_STATIC
   source_byte_loader_gate_tests: PASS_LOCAL_STATIC
   github_ci_policy: REQUIRED_ON_CURRENT_PR_MERGE_RESULT
   independent_review: REQUIRED_ON_CURRENT_PR_HEAD_AND_DIFF
@@ -52,7 +54,10 @@ checks:
 verified_invariants:
   - hashes are recalculated and tamper evident
   - malformed objects return diagnostics instead of raising
+  - unhashable external enum-like values return deterministic diagnostics
   - duplicate nodes edges orphan nodes and cycles fail closed
+  - cycle validation uses deterministic iterative traversal
+  - long acyclic evidence paths validate without recursion failures
   - transformation sequence is unique contiguous and zero based
   - typed states preserve numeric zero distinct from non-valid states
   - Actual and Scenario data remain isolated
@@ -61,7 +66,6 @@ verified_invariants:
   - primary diagnostics use explicit root-cause priority
   - optional snapshot locators are null or non-empty strings
   - decimal and rate values cannot use money units
-  - long evidence paths fail closed without recursive validator crashes
 
 limitations:
   - JSON Schemas are declarative; runtime verifier enforces B3 invariants

@@ -53,12 +53,27 @@ class B3RuntimeBoundaries(unittest.TestCase):
         self.assertIs(public.verify_metric_snapshot, runtime.verify_metric_snapshot)
         self.assertIn("src/quantum/evidence", Path(runtime.__file__).as_posix())
 
+        runtime_path = "src/quantum/evidence/runtime_validation.py"
         evidence = (
             ROOT / "docs/evidence/STAGE_B_B3_CONTRACT_EVIDENCE.yaml"
         ).read_text(encoding="utf-8")
-        runtime_path = "src/quantum/evidence/runtime_validation.py"
         self.assertIn(f"runtime_verifier_location: {runtime_path}", evidence)
         self.assertIn(f"    - {runtime_path}", evidence)
+        self.assertIn(
+            "branch: build-b3-metric-evidence-contracts-v4",
+            evidence,
+        )
+
+        for relative_path in (
+            "docs/evidence/STAGE_B_B3_EXECUTION_STATE.yaml",
+            "docs/evidence/STAGE_B_EXECUTION_STATE.yaml",
+        ):
+            state = (ROOT / relative_path).read_text(encoding="utf-8")
+            self.assertIn(f"runtime_verifier: {runtime_path}", state)
+            self.assertIn(
+                "working_branch: build-b3-metric-evidence-contracts-v4",
+                state,
+            )
 
     def test_04_non_mapping_reference(self):
         graph = copy.deepcopy(graph_data()["valid_graph"])
