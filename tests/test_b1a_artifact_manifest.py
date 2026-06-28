@@ -8,7 +8,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST_PATH = ROOT / "docs/evidence/ARTIFACT_MANIFEST.json"
+OVERLAY_PATH = ROOT / "docs/evidence/ARTIFACT_MANIFEST_OVERLAY.json"
 MANIFEST_REPO_PATH = "docs/evidence/ARTIFACT_MANIFEST.json"
+OVERLAY_REPO_PATH = "docs/evidence/ARTIFACT_MANIFEST_OVERLAY.json"
+CONTROL_PATHS = {MANIFEST_REPO_PATH, OVERLAY_REPO_PATH}
 ARTIFACT_FIELDS = ["path", "sha256", "size_bytes"]
 B1A_SCHEMAS = {
     "schemas/calculation-profile.schema.json",
@@ -20,14 +23,39 @@ B1A_SCHEMAS = {
 }
 
 
+def git_blob_sha(data: bytes) -> str:
+    header = f"blob {len(data)}\0".encode("ascii")
+    return hashlib.sha1(header + data).hexdigest()
+
+
 def tracked_paths() -> list[str]:
     output = subprocess.check_output(
         ["git", "ls-files", "-z"], cwd=ROOT
     ).decode("utf-8")
     return sorted(
         path for path in output.split("\0")
-        if path and path != MANIFEST_REPO_PATH
+        if path and path not in CONTROL_PATHS
     )
+
+
+def load_effective_manifest() -> dict:
+    base_bytes = MANIFEST_PATH.read_bytes()
+    current = json.loads(base_bytes.decode("utf-8"))
+    overlay = json.loads(OVERLAY_PATH.read_text(encoding="utf-8"))
+
+    if overlay["base_manifest_git_blob_sha"] != git_blob_sha(base_bytes):
+        raise AssertionError("ARTIFACT_MANIFEST_OVERLAY_BASE_MISMATCH")
+
+    artifacts = {row[0]: row for row in current["artifacts"]}
+    for row in overlay["entries"]:
+        artifacts[row[0]] = row
+    for path in overlay.get("remove_paths", []):
+        artifacts.pop(path, None)
+
+    effective = dict(current)
+    effective["artifacts"] = [artifacts[path] for path in sorted(artifacts)]
+    effective["artifact_count"] = len(effective["artifacts"])
+    return effective
 
 
 def expected_manifest(current: dict) -> dict:
@@ -52,11 +80,11 @@ def expected_manifest(current: dict) -> dict:
 
 class B1aArtifactManifestTests(unittest.TestCase):
     def test_manifest_matches_current_tracked_tree(self) -> None:
-        current = json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
+        current = load_effective_manifest()
         self.assertEqual(current, expected_manifest(current))
 
     def test_manifest_contains_all_b1a_schemas(self) -> None:
-        current = json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
+        current = load_effective_manifest()
         self.assertEqual(current["artifact_fields"], ARTIFACT_FIELDS)
         paths = {entry[0] for entry in current["artifacts"]}
         self.assertTrue(B1A_SCHEMAS.issubset(paths), B1A_SCHEMAS - paths)
