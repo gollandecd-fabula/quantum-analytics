@@ -376,6 +376,18 @@ def verify_evidence_chain(
         if any(not targets(root_id, edge_type, node_type) for edge_type, node_type in required):
             _append(errors, "EVIDENCE_REQUIRED_PATH_MISSING")
 
+        root_singletons = (
+            ("RESULT_DEFINED_BY", "METRIC_DEFINITION"),
+            ("RESULT_CALCULATED_WITH", "CALCULATION_PROFILE"),
+            ("RESULT_HAS_FRESHNESS", "FRESHNESS_ASSESSMENT"),
+            ("RESULT_HAS_CONFIDENCE", "CONFIDENCE_ASSESSMENT"),
+        )
+        if any(
+            len(targets(root_id, edge_type, node_type)) > 1
+            for edge_type, node_type in root_singletons
+        ):
+            _append(errors, "EVIDENCE_EDGE_INVALID")
+
         transformation_edges = [
             edge for edge in valid_edges
             if edge[0] == root_id and edge[2] == "RESULT_USES_TRANSFORMATION"
@@ -403,12 +415,19 @@ def verify_evidence_chain(
             authorities = targets(profile, "PROFILE_USES_SOURCE_AUTHORITY", "SOURCE_AUTHORITY")
             if not rules or not rounding or not authorities:
                 _append(errors, "EVIDENCE_REQUIRED_PATH_MISSING")
+            if len(rounding) > 1 or len(authorities) > 1:
+                _append(errors, "EVIDENCE_EDGE_INVALID")
             if any(not approved(node_id) for node_id in rounding + authorities):
                 _append(errors, "EVIDENCE_APPROVAL_MISSING")
 
         for resolution in targets(root_id, "RESULT_USES_RESOLUTION", "RULE_RESOLUTION"):
-            if not targets(resolution, "RESOLUTION_SELECTS_RULE", "CONFIGURATION_RULE"):
+            selected_rules = targets(
+                resolution, "RESOLUTION_SELECTS_RULE", "CONFIGURATION_RULE"
+            )
+            if not selected_rules:
                 _append(errors, "EVIDENCE_REQUIRED_PATH_MISSING")
+            elif len(selected_rules) > 1:
+                _append(errors, "EVIDENCE_EDGE_INVALID")
 
         for event in targets(root_id, "RESULT_DERIVED_FROM_EVENT", "CANONICAL_EVENT"):
             records = targets(event, "EVENT_NORMALIZED_FROM_RECORD", "SOURCE_RECORD")
