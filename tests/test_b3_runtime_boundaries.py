@@ -4,8 +4,14 @@ import copy
 import unittest
 from pathlib import Path
 
-from quantum.evidence import EDGE_SIGNATURES, canonical_graph_hash, verify_evidence_chain
-from tests.b3_helpers import ROOT, SCHEMAS, graph_data, load_json
+from quantum.evidence import (
+    EDGE_SIGNATURES,
+    canonical_graph_hash,
+    canonical_snapshot_hash,
+    verify_evidence_chain,
+    verify_metric_snapshot,
+)
+from tests.b3_helpers import ROOT, SCHEMAS, graph_data, load_json, valid_snapshot
 
 
 class B3RuntimeBoundaries(unittest.TestCase):
@@ -88,14 +94,37 @@ class B3RuntimeBoundaries(unittest.TestCase):
         self.assertIn("EVIDENCE_VERSION_INVALID", verify_evidence_chain(graph))
 
     def test_06_approval_timezone(self):
+        for approved_at in (
+            "2026-06-28T08:00:00",
+            "2026-06-28 08:00:00+00:00",
+        ):
+            graph = copy.deepcopy(graph_data()["valid_graph"])
+            approval = next(
+                node for node in graph["nodes"]
+                if node["node_id"] == "approval-rounding"
+            )
+            approval["metadata"]["approved_at"] = approved_at
+            graph["content_hash"] = canonical_graph_hash(graph)
+            self.assertIn(
+                "EVIDENCE_APPROVAL_MISSING",
+                verify_evidence_chain(graph),
+            )
+
         graph = copy.deepcopy(graph_data()["valid_graph"])
-        approval = next(
-            node for node in graph["nodes"]
-            if node["node_id"] == "approval-rounding"
-        )
-        approval["metadata"]["approved_at"] = "2026-06-28T08:00:00"
+        graph["created_at"] = "2026-06-28 09:00:00+00:00"
         graph["content_hash"] = canonical_graph_hash(graph)
-        self.assertIn("EVIDENCE_APPROVAL_MISSING", verify_evidence_chain(graph))
+        self.assertIn(
+            "EVIDENCE_TIMESTAMP_INVALID",
+            verify_evidence_chain(graph),
+        )
+
+        snapshot = valid_snapshot()
+        snapshot["period_start"] = "2026-06-01 00:00:00+00:00"
+        snapshot["content_hash"] = canonical_snapshot_hash(snapshot)
+        self.assertIn(
+            "METRIC_SNAPSHOT_TIMESTAMP_INVALID",
+            verify_metric_snapshot(snapshot),
+        )
 
     def test_07_edge_signatures_are_typed(self):
         self.assertEqual(
@@ -198,6 +227,25 @@ class B3RuntimeBoundaries(unittest.TestCase):
                 "to_node_id": "rule-extra",
                 "edge_type": "PROFILE_SELECTS_RULE",
                 "sequence": 1,
+            },
+        ])
+        assert_required_path_rejected(graph)
+
+        graph = copy.deepcopy(graph_data()["valid_graph"])
+        clone_node(graph, "resolution", "resolution-extra", "e")
+        clone_node(graph, "rule", "rule-unprofiled", "f")
+        graph["edges"].extend([
+            {
+                "from_node_id": "metric-result",
+                "to_node_id": "resolution-extra",
+                "edge_type": "RESULT_USES_RESOLUTION",
+                "sequence": 1,
+            },
+            {
+                "from_node_id": "resolution-extra",
+                "to_node_id": "rule-unprofiled",
+                "edge_type": "RESOLUTION_SELECTS_RULE",
+                "sequence": 0,
             },
         ])
         assert_required_path_rejected(graph)
