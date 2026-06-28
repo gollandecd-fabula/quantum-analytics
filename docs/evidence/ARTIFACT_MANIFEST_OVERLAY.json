@@ -1,21 +1,26 @@
 {
   "overlay_version": 1,
   "base_manifest_git_blob_sha": "498f5cd7440b1bc2c361dd940dead8fc06cd2c1d",
-  "reason": "Append-only manifest correction for exact B1a head after semantic-validation review remediation.",
+  "reason": "Effective manifest correction for the final permanent B1a tree after semantic-validation remediation and diagnostic cleanup.",
   "control_paths_excluded_from_payload": [
     "docs/evidence/ARTIFACT_MANIFEST.json",
     "docs/evidence/ARTIFACT_MANIFEST_OVERLAY.json"
   ],
   "entries": [
     [
+      "docs/evidence/STAGE_B_B1A_CONTRACT_EVIDENCE.yaml",
+      "0b01bbaa05fcfcb043539bba11d98e1286848112e7f6e00fceadaf5c7735a983",
+      1253
+    ],
+    [
       "docs/finance/SAFE_EXPRESSION_CONTRACT.md",
       "c8c3a6f8152b90e6e71393ade7923e8f5224bcea9252697167553df50b062be8",
       7744
     ],
     [
-      "tests/test_000_b1a_manifest_payload.py",
-      "58bc7a38716ea0fb994ce0caf48307c7c82f44048421bc942d8fd964b320a7c7",
-      1450
+      "docs/governance/CURRENT_STATE.md",
+      "0cb3b8cab00d98f4b4f8f946309bbc27c4cf2ff83e7e45a4461a78772c6d8b15",
+      1397
     ],
     [
       "tests/test_b1a_artifact_manifest.py",
