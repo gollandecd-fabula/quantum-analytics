@@ -1,13 +1,13 @@
-evidence_id: STAGE-B-B3-CONTRACT-EVIDENCE-v6
+evidence_id: STAGE-B-B3-CONTRACT-EVIDENCE-v7
 unit: B3
-status: READY_FOR_EXACT_HEAD_CI_AND_REVIEW
+status: REMEDIATED_AWAITING_CURRENT_HEAD_CI_AND_REVIEW
 tracking_issue: 9
 branch: build-b3-metric-evidence-contracts-v3
 risk_class: R2
 updated_on: 2026-06-28
 
 scope:
-  contracts_schemas_tests_only: true
+  contracts_schemas_runtime_verifier_tests: true
   financial_calculation_kernel: NOT_IMPLEMENTED
   metric_publication: NOT_IMPLEMENTED
   real_commercial_data: NOT_ADMITTED
@@ -26,44 +26,48 @@ artifacts:
   schemas:
     - schemas/metric-result.schema.json
     - schemas/evidence-chain.schema.json
-  fixture: tests/contracts/fixtures/b3-evidence-chain-vectors.json
+  runtime:
+    - src/quantum/evidence/__init__.py
+    - src/quantum/evidence/verification.py
+  fixture:
+    - tests/contracts/fixtures/b3-evidence-chain-vectors.json
+  test_support:
+    - tests/b3_helpers.py
   tests:
     - tests/test_b3_evidence_contracts.py
-    - tests/test_000_b3_source_hash_patch.py
+    - tests/test_b3_metric_snapshot.py
+    - tests/test_b3_runtime_boundaries.py
   ci:
     - src/quantum/scripts/ci.py
     - tests/__init__.py
 
 checks:
-  b3_test_method_count: 19
-  selected_approval_tests: PASS
-  github_ci: PENDING_AFTER_APPROVAL_REMEDIATION
-  independent_review: PENDING_AFTER_APPROVAL_REMEDIATION
-  review_findings: 8_REMEDIATED_2_THREADS_PENDING_RESOLUTION
+  b3_test_method_count: 27
+  temporary_monkey_patch_tests: 0
+  runtime_verifier_location: src/quantum/evidence/verification.py
+  malformed_input_fail_closed_tests: PASS_LOCAL_STATIC
+  source_byte_loader_gate_tests: PASS_LOCAL_STATIC
+  github_ci: REQUIRED_ON_CURRENT_HEAD
+  independent_review: REQUIRED_ON_CURRENT_HEAD
 
 verified_invariants:
-  - canonical graph SHA-256 is recalculated and tamper evident
+  - graph and Metric Snapshot hashes are recalculated and tamper evident
+  - malformed objects return diagnostics instead of raising
+  - duplicate nodes duplicate edges orphan nodes and graph cycles fail closed
   - transformation sequence is zero-based unique and contiguous
-  - MONEY currency/unit and value-type payload bindings fail closed
-  - Snapshot uses an unhashed Evidence Chain id/version locator
-  - Evidence Chain retains the hashed root Metric Snapshot reference
-  - SOURCE_FILE artifact hash equals retained-byte SHA-256
-  - selected ROUNDING_POLICY and SOURCE_AUTHORITY have approved immutable evidence
-  - approval metadata requires APPROVED status approved_at and approver
-  - evidence paths are typed tenant-safe mode-isolated and acyclic
-
-invalid_vectors:
-  - missing rounding approval edge
-  - missing source-authority approval edge
-  - rejected approval metadata
-  - source-file artifact and retained-byte hash mismatch
-  - graph tampering and ambiguous transformation sequence
-  - missing typed paths tenant mismatch mode contamination and cycles
+  - typed Metric Snapshot states preserve numeric zero distinct from non-valid states
+  - Actual and Scenario data are isolated
+  - selected ROUNDING_POLICY and SOURCE_AUTHORITY require approved immutable evidence
+  - SOURCE_FILE declared hash equals retained-byte hash
+  - strict verification can load retained bytes and compare their SHA-256
+  - runtime verifier is production package code and tests import it
 
 limitations:
+  - JSON Schemas remain declarative contracts; runtime verifier enforces B3 invariants directly
+  - source bytes are verified only when a source_loader is supplied and strict mode is used
   - B1b B2 B6 and B7 remain gated R3 units without approval
   - no financial rule or Source Authority activation
   - no real data marketplace writes deployment or production release
   - no metric is calculated or published in B3
 
-next_gate: B3_APPROVAL_REMEDIATION_EXACT_HEAD_CI_AND_REVIEW
+next_gate: CURRENT_HEAD_CI_SUCCESS_AND_INDEPENDENT_REVIEW
