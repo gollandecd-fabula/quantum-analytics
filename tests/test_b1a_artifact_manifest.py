@@ -9,9 +9,12 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST_PATH = ROOT / "docs/evidence/ARTIFACT_MANIFEST.json"
 OVERLAY_PATH = ROOT / "docs/evidence/ARTIFACT_MANIFEST_OVERLAY.json"
-MANIFEST_REPO_PATH = "docs/evidence/ARTIFACT_MANIFEST.json"
-OVERLAY_REPO_PATH = "docs/evidence/ARTIFACT_MANIFEST_OVERLAY.json"
-CONTROL_PATHS = {MANIFEST_REPO_PATH, OVERLAY_REPO_PATH}
+RUNTIME_OVERLAY_PATH = ROOT / "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_B3_RUNTIME.json"
+CONTROL_PATHS = {
+    "docs/evidence/ARTIFACT_MANIFEST.json",
+    "docs/evidence/ARTIFACT_MANIFEST_OVERLAY.json",
+    "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_B3_RUNTIME.json",
+}
 ARTIFACT_FIELDS = ["path", "sha256", "size_bytes"]
 B1A_SCHEMAS = {
     "schemas/calculation-profile.schema.json",
@@ -38,19 +41,28 @@ def tracked_paths() -> list[str]:
     )
 
 
-def load_effective_manifest() -> dict:
-    base_bytes = MANIFEST_PATH.read_bytes()
-    current = json.loads(base_bytes.decode("utf-8"))
-    overlay = json.loads(OVERLAY_PATH.read_text(encoding="utf-8"))
-
-    if overlay["base_manifest_git_blob_sha"] != git_blob_sha(base_bytes):
-        raise AssertionError("ARTIFACT_MANIFEST_OVERLAY_BASE_MISMATCH")
-
-    artifacts = {row[0]: row for row in current["artifacts"]}
+def apply_entries(artifacts: dict[str, list], overlay: dict) -> None:
     for row in overlay["entries"]:
         artifacts[row[0]] = row
     for path in overlay.get("remove_paths", []):
         artifacts.pop(path, None)
+
+
+def load_effective_manifest() -> dict:
+    base_bytes = MANIFEST_PATH.read_bytes()
+    current = json.loads(base_bytes.decode("utf-8"))
+    overlay_bytes = OVERLAY_PATH.read_bytes()
+    overlay = json.loads(overlay_bytes.decode("utf-8"))
+    runtime_overlay = json.loads(RUNTIME_OVERLAY_PATH.read_text(encoding="utf-8"))
+
+    if overlay["base_manifest_git_blob_sha"] != git_blob_sha(base_bytes):
+        raise AssertionError("ARTIFACT_MANIFEST_OVERLAY_BASE_MISMATCH")
+    if runtime_overlay["base_overlay_git_blob_sha"] != git_blob_sha(overlay_bytes):
+        raise AssertionError("ARTIFACT_MANIFEST_RUNTIME_OVERLAY_BASE_MISMATCH")
+
+    artifacts = {row[0]: row for row in current["artifacts"]}
+    apply_entries(artifacts, overlay)
+    apply_entries(artifacts, runtime_overlay)
 
     effective = dict(current)
     effective["artifacts"] = [artifacts[path] for path in sorted(artifacts)]
