@@ -1,7 +1,7 @@
 {
-  "overlay_version": 6,
+  "overlay_version": 7,
   "base_manifest_git_blob_sha": "498f5cd7440b1bc2c361dd940dead8fc06cd2c1d",
-  "reason": "Cumulative manifest overlay for the permanent B1a cleanup baseline and B3 recovery, including canonical graph hashing, deterministic transformation order, typed metric values, one-way Snapshot-to-Evidence hash ordering, and retained source-file hash equality.",
+  "reason": "Cumulative manifest overlay for B1a cleanup and B3 recovery, including canonical evidence hashing, typed metric values, retained source-file hash equality, and deterministic package-qualified unittest discovery.",
   "control_paths_excluded_from_payload": [
     "docs/evidence/ARTIFACT_MANIFEST.json",
     "docs/evidence/ARTIFACT_MANIFEST_OVERLAY.json"
@@ -18,6 +18,8 @@
     ["docs/governance/CURRENT_STATE_B3.md", "227d68633a01fb8abb4d6b3caabc2db7c2b7b108bad2db79920a7a7e7665274c", 3130],
     ["schemas/evidence-chain.schema.json", "4087797703b6a1187f58b346f3b985eab4dee35bb4f9bd85d2055049d37545c7", 6266],
     ["schemas/metric-result.schema.json", "68082566e09482ee15e5b39444ee81a160166e4759636f32848e29bf540dc62a", 12640],
+    ["src/quantum/scripts/ci.py", "3f397f02bdddb60d63874b778c16966a13ea67e64dbd0a84c5cbc67208ae7ff3", 1745],
+    ["tests/__init__.py", "2e8c5f3594f8f3c6dfb4cb06409efb5ede8b89dfba46696511b6cbe9ac8cc858", 48],
     ["tests/contracts/fixtures/b3-evidence-chain-vectors.json", "4de6a5b823e1d5f6d8a24e28108f1c24761ea2174dfc7f44ae9c718d5b2d2de7", 12071],
     ["tests/test_000_b3_source_hash_patch.py", "a2d35b29e58a2dbea34eb9f2fb665f72eb7077218d14e1f8be1b41ab02e187e9", 1867],
     ["tests/test_b1a_artifact_manifest.py", "acef8b5094c1309e560f3f6da617d96202e20c8e05a73de415ac63761bbc741b", 3201],
