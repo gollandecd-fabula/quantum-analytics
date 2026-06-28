@@ -107,28 +107,134 @@ class B3RuntimeBoundaries(unittest.TestCase):
             ("RULE_RESOLUTION", "CONFIGURATION_RULE"),
         )
 
+        def clone_node(graph, source_id, new_id, hash_char):
+            source = next(
+                node for node in graph["nodes"] if node["node_id"] == source_id
+            )
+            cloned = copy.deepcopy(source)
+            cloned["node_id"] = new_id
+            cloned["artifact_ref"] = {
+                "id": new_id,
+                "version": 1,
+                "content_hash": hash_char * 64,
+            }
+            graph["nodes"].append(cloned)
+
+        def assert_required_path_rejected(graph):
+            graph["content_hash"] = canonical_graph_hash(graph)
+            self.assertIn(
+                "EVIDENCE_REQUIRED_PATH_MISSING",
+                verify_evidence_chain(graph),
+            )
+
         graph = copy.deepcopy(graph_data()["valid_graph"])
-        unrelated_rule = copy.deepcopy(
-            next(node for node in graph["nodes"] if node["node_id"] == "rule")
-        )
-        unrelated_rule["node_id"] = "rule-unrelated"
-        unrelated_rule["artifact_ref"] = {
-            "id": "rule-unrelated",
-            "version": 1,
-            "content_hash": "f" * 64,
-        }
-        graph["nodes"].append(unrelated_rule)
+        clone_node(graph, "rule", "rule-unrelated", "f")
         profile_edge = next(
             edge for edge in graph["edges"]
             if edge["from_node_id"] == "profile"
             and edge["edge_type"] == "PROFILE_SELECTS_RULE"
         )
         profile_edge["to_node_id"] = "rule-unrelated"
-        graph["content_hash"] = canonical_graph_hash(graph)
-        self.assertIn(
-            "EVIDENCE_REQUIRED_PATH_MISSING",
-            verify_evidence_chain(graph),
+        assert_required_path_rejected(graph)
+
+        singular_root_cases = (
+            ("metric-definition", "metric-definition-extra", "RESULT_DEFINED_BY"),
+            ("freshness", "freshness-extra", "RESULT_HAS_FRESHNESS"),
+            ("confidence", "confidence-extra", "RESULT_HAS_CONFIDENCE"),
         )
+        for source_id, new_id, edge_type in singular_root_cases:
+            with self.subTest(edge_type=edge_type):
+                graph = copy.deepcopy(graph_data()["valid_graph"])
+                clone_node(graph, source_id, new_id, "e")
+                graph["edges"].append({
+                    "from_node_id": "metric-result",
+                    "to_node_id": new_id,
+                    "edge_type": edge_type,
+                    "sequence": 1,
+                })
+                assert_required_path_rejected(graph)
+
+        graph = copy.deepcopy(graph_data()["valid_graph"])
+        clone_node(graph, "profile", "profile-extra", "e")
+        graph["edges"].extend([
+            {
+                "from_node_id": "metric-result",
+                "to_node_id": "profile-extra",
+                "edge_type": "RESULT_CALCULATED_WITH",
+                "sequence": 1,
+            },
+            {
+                "from_node_id": "profile-extra",
+                "to_node_id": "rule",
+                "edge_type": "PROFILE_SELECTS_RULE",
+                "sequence": 0,
+            },
+            {
+                "from_node_id": "profile-extra",
+                "to_node_id": "rounding",
+                "edge_type": "PROFILE_USES_ROUNDING",
+                "sequence": 0,
+            },
+            {
+                "from_node_id": "profile-extra",
+                "to_node_id": "authority",
+                "edge_type": "PROFILE_USES_SOURCE_AUTHORITY",
+                "sequence": 0,
+            },
+        ])
+        assert_required_path_rejected(graph)
+
+        graph = copy.deepcopy(graph_data()["valid_graph"])
+        clone_node(graph, "rule", "rule-extra", "e")
+        graph["edges"].extend([
+            {
+                "from_node_id": "resolution",
+                "to_node_id": "rule-extra",
+                "edge_type": "RESOLUTION_SELECTS_RULE",
+                "sequence": 1,
+            },
+            {
+                "from_node_id": "profile",
+                "to_node_id": "rule-extra",
+                "edge_type": "PROFILE_SELECTS_RULE",
+                "sequence": 1,
+            },
+        ])
+        assert_required_path_rejected(graph)
+
+        profile_singleton_cases = (
+            (
+                "rounding",
+                "rounding-extra",
+                "PROFILE_USES_ROUNDING",
+                "approval-rounding",
+            ),
+            (
+                "authority",
+                "authority-extra",
+                "PROFILE_USES_SOURCE_AUTHORITY",
+                "approval-authority",
+            ),
+        )
+        for source_id, new_id, edge_type, approval_id in profile_singleton_cases:
+            with self.subTest(edge_type=edge_type):
+                graph = copy.deepcopy(graph_data()["valid_graph"])
+                clone_node(graph, source_id, new_id, "e")
+                graph["edges"].extend([
+                    {
+                        "from_node_id": "profile",
+                        "to_node_id": new_id,
+                        "edge_type": edge_type,
+                        "sequence": 1,
+                    },
+                    {
+                        "from_node_id": new_id,
+                        "to_node_id": approval_id,
+                        "edge_type": "ARTIFACT_APPROVED_BY",
+                        "sequence": 0,
+                    },
+                ])
+                assert_required_path_rejected(graph)
 
 
 if __name__ == "__main__":
