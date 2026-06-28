@@ -16,36 +16,30 @@ scope:
 artifacts:
   contracts: 7
   schemas: 6
-  artifact_manifest_version: 6
   tracked_artifacts: 158
-  manifest_self_excluded: true
   permanent_b1a_test_files: 12
 
 checks:
   foundation_tests: 34
   b1a_tests: 34
   total_tests: 68
-  last_technical_ci_run: 28304873043
+  last_technical_ci_run: 28307956212
   last_technical_ci_status: SUCCESS
-  python: 3.12.3
-  review_threads_total: 28
+  review_threads_total: 31
   review_threads_unresolved: 0
   current_head_ci: PENDING_AFTER_METADATA_SYNC
   current_head_review: PENDING_AFTER_METADATA_SYNC
 
 confirmed:
-  - deterministic fail-closed rule resolution
-  - Actual and Scenario isolation
-  - complete eligible-candidate ordering tuples
-  - VALID traces require at least one eligible candidate
-  - typed safe expressions and currency/unit constraints
-  - immutable Calculation Profile references
-  - explicit purchase metrics and MONEY_PER_ITEM
-  - rounding policy owned by Calculation Profile
-  - full tracked-tree manifest verification
+  - deterministic tenant-safe mode-isolated resolution
+  - explicit calculation_instant and half-open validity intervals
+  - exactly one selected eligible candidate in VALID traces
+  - typed currency and unit constraints
+  - numeric-only NEGATE and ABS
+  - immutable Calculation Profiles
+  - reproducible tracked-tree evidence
 
 limitations:
-  - metric catalogue remains DRAFT_ONLY
   - Source Authority remains DRAFT
   - B1b requires explicit R3 approval
 
