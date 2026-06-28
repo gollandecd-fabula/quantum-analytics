@@ -19,8 +19,8 @@
     ],
     [
       "docs/evidence/STAGE_B_B3_CONTRACT_EVIDENCE.yaml",
-      "cb1f58991a3bb60c0063ce06fea3c407bfadbfbd05e8514160a5fc947cd67a28",
-      1549
+      "6593018e010ca5544c140531190f124cc1f8518f12b3aa1ba6f68d55bd77d337",
+      1438
     ],
     [
       "docs/evidence/STAGE_B_EXECUTION_STATE.yaml",
@@ -59,8 +59,8 @@
     ],
     [
       "src/quantum/evidence/validation.py",
-      "40b5b08b99547920865862cd740616aca993c4a0354e279d55a48da5d1d710cc",
-      11642
+      "fbc537c1508dba3bd0b6e813ca13b58e3031e5b8cec066bc53bb8275acf5e1a1",
+      13366
     ],
     [
       "tests/contracts/fixtures/b3-valid-metric-evidence.json",
@@ -89,8 +89,8 @@
     ],
     [
       "tests/test_b3_metric_evidence.py",
-      "37f2ecc3868fc2bf99ff10c4813181b604e80310be4ae8e8a080fdf611274731",
-      6763
+      "2e56a2a661ab60ad9996334186b2909c83fd273debcb221619c23119dc6570c7",
+      7857
     ]
   ],
   "remove_paths": []
