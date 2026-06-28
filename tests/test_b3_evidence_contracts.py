@@ -4,6 +4,7 @@ import copy
 import unittest
 
 from quantum.evidence import canonical_graph_hash, diagnose_evidence_chain, verify_evidence_chain
+from quantum.evidence import verification as base_verification
 from tests.b3_helpers import graph_data, mutate
 
 
@@ -110,7 +111,8 @@ class B3EvidenceContracts(unittest.TestCase):
             })
             previous = node_id
         deep["content_hash"] = canonical_graph_hash(deep)
-        self.assertIn("EVIDENCE_MALFORMED", verify_evidence_chain(deep))
+        self.assertEqual(base_verification.verify_evidence_chain(deep), ())
+        self.assertEqual(verify_evidence_chain(deep), ())
 
     def test_10_naive_created_at(self):
         graph = copy.deepcopy(graph_data()["valid_graph"])
