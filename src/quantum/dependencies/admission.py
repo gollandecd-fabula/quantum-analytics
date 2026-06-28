@@ -49,15 +49,16 @@ def validate_register(register: dict[str, Any], license_policy: dict[str, Any]) 
             continue
         name = component.get("name")
         ecosystem = component.get("ecosystem")
-        key = (ecosystem, name)
         if not isinstance(name, str) or not name:
             errors.append("COMPONENT_NAME_INVALID")
             continue
-        if ecosystem not in {"PyPI", "npm"}:
+        if not isinstance(ecosystem, str) or ecosystem not in ("PyPI", "npm"):
             errors.append(f"{name}:ECOSYSTEM_INVALID")
-        if key in seen:
-            errors.append(f"{name}:DUPLICATE_COMPONENT")
-        seen.add(key)
+        else:
+            key = (ecosystem, name)
+            if key in seen:
+                errors.append(f"{name}:DUPLICATE_COMPONENT")
+            seen.add(key)
 
         version = component.get("version")
         if not isinstance(version, str) or not EXACT_VERSION.fullmatch(version):
@@ -81,7 +82,11 @@ def validate_register(register: dict[str, Any], license_policy: dict[str, Any]) 
         if not isinstance(source_url, str) or not source_url.startswith("https://"):
             errors.append(f"{name}:HTTPS_SOURCE_REQUIRED")
 
-    by_name = {item.get("name"): item for item in components if isinstance(item, dict)}
+    by_name = {
+        item.get("name"): item
+        for item in components
+        if isinstance(item, dict) and isinstance(item.get("name"), str)
+    }
     hypothesis = by_name.get("hypothesis", {})
     if hypothesis.get("status") != "APPROVED_DEV_TEST_ONLY":
         errors.append("HYPOTHESIS_MUST_BE_DEV_TEST_ONLY")
@@ -120,16 +125,32 @@ def validate_sbom(register: dict[str, Any], sbom: dict[str, Any]) -> tuple[str, 
     if not isinstance(packages, list):
         return tuple(errors + ["SBOM_PACKAGES_REQUIRED"])
 
-    actual = {}
+    actual: dict[str, tuple[Any, Any, Any]] = {}
+    package_ids: set[str] = set()
     for package in packages:
         if not isinstance(package, dict):
             errors.append("SBOM_PACKAGE_OBJECT_REQUIRED")
             continue
-        actual[package.get("name")] = (
-            package.get("versionInfo"),
-            package.get("licenseDeclared"),
-            package.get("filesAnalyzed"),
-        )
+
+        name = package.get("name")
+        if not isinstance(name, str) or not name:
+            errors.append("SBOM_PACKAGE_NAME_INVALID")
+        elif name in actual:
+            errors.append(f"{name}:SBOM_DUPLICATE_PACKAGE")
+        else:
+            actual[name] = (
+                package.get("versionInfo"),
+                package.get("licenseDeclared"),
+                package.get("filesAnalyzed"),
+            )
+
+        spdx_id = package.get("SPDXID")
+        if not isinstance(spdx_id, str) or not spdx_id:
+            errors.append("SBOM_SPDXID_INVALID")
+        elif spdx_id in package_ids:
+            errors.append(f"{spdx_id}:SBOM_DUPLICATE_SPDXID")
+        else:
+            package_ids.add(spdx_id)
     expected = {
         item["name"]: (item["version"], item["license"], False)
         for item in register["components"]
@@ -137,8 +158,18 @@ def validate_sbom(register: dict[str, Any], sbom: dict[str, Any]) -> tuple[str, 
     if actual != expected:
         errors.append("SBOM_REGISTER_MISMATCH")
 
-    described = set(sbom.get("documentDescribes", []))
-    package_ids = {item.get("SPDXID") for item in packages if isinstance(item, dict)}
-    if described != package_ids:
-        errors.append("SBOM_DOCUMENT_DESCRIBES_MISMATCH")
+    document_describes = sbom.get("documentDescribes")
+    if not isinstance(document_describes, list):
+        errors.append("SBOM_DOCUMENT_DESCRIBES_REQUIRED")
+    else:
+        valid_described = [
+            item for item in document_describes
+            if isinstance(item, str) and item
+        ]
+        if len(valid_described) != len(document_describes):
+            errors.append("SBOM_DOCUMENT_DESCRIBES_INVALID")
+        if len(set(valid_described)) != len(valid_described):
+            errors.append("SBOM_DOCUMENT_DESCRIBES_DUPLICATE")
+        if set(valid_described) != package_ids:
+            errors.append("SBOM_DOCUMENT_DESCRIBES_MISMATCH")
     return tuple(errors)
