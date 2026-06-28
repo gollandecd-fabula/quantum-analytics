@@ -1,4 +1,4 @@
-evidence_id: STAGE-B-B3-CONTRACT-EVIDENCE-v5
+evidence_id: STAGE-B-B3-CONTRACT-EVIDENCE-v6
 unit: B3
 status: READY_FOR_EXACT_HEAD_CI_AND_REVIEW
 tracking_issue: 9
@@ -28,18 +28,18 @@ artifacts:
     - schemas/evidence-chain.schema.json
   fixture: tests/contracts/fixtures/b3-evidence-chain-vectors.json
   tests:
-    - tests/__init__.py
-    - tests/test_000_b3_source_hash_patch.py
     - tests/test_b3_evidence_contracts.py
-  ci: src/quantum/scripts/ci.py
+    - tests/test_000_b3_source_hash_patch.py
+  ci:
+    - src/quantum/scripts/ci.py
+    - tests/__init__.py
 
 checks:
-  b3_test_method_count: 17
-  functional_exact_head_ci_run: 28321933966
-  functional_exact_head_ci_status: SUCCESS
-  metadata_sync_ci: PENDING
-  independent_review: PENDING
-  review_findings: 7_REMEDIATED_1_THREAD_PENDING_RESOLUTION
+  b3_test_method_count: 19
+  selected_approval_tests: PASS
+  github_ci: PENDING_AFTER_APPROVAL_REMEDIATION
+  independent_review: PENDING_AFTER_APPROVAL_REMEDIATION
+  review_findings: 8_REMEDIATED_2_THREADS_PENDING_RESOLUTION
 
 verified_invariants:
   - canonical graph SHA-256 is recalculated and tamper evident
@@ -48,13 +48,22 @@ verified_invariants:
   - Snapshot uses an unhashed Evidence Chain id/version locator
   - Evidence Chain retains the hashed root Metric Snapshot reference
   - SOURCE_FILE artifact hash equals retained-byte SHA-256
-  - evidence paths are typed, tenant-safe, mode-isolated, and acyclic
-  - package-qualified unittest discovery patches the canonical B3 module
+  - selected ROUNDING_POLICY and SOURCE_AUTHORITY have approved immutable evidence
+  - approval metadata requires APPROVED status approved_at and approver
+  - evidence paths are typed tenant-safe mode-isolated and acyclic
+
+invalid_vectors:
+  - missing rounding approval edge
+  - missing source-authority approval edge
+  - rejected approval metadata
+  - source-file artifact and retained-byte hash mismatch
+  - graph tampering and ambiguous transformation sequence
+  - missing typed paths tenant mismatch mode contamination and cycles
 
 limitations:
   - B1b B2 B6 and B7 remain gated R3 units without approval
   - no financial rule or Source Authority activation
-  - no real data, marketplace writes, deployment, or production release
+  - no real data marketplace writes deployment or production release
   - no metric is calculated or published in B3
 
-next_gate: B3_METADATA_SYNC_CI_AND_INDEPENDENT_REVIEW
+next_gate: B3_APPROVAL_REMEDIATION_EXACT_HEAD_CI_AND_REVIEW
