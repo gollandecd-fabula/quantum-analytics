@@ -1,5 +1,5 @@
 {
-  "overlay_version": 3,
+  "overlay_version": 4,
   "base_runtime_overlay_git_blob_sha": "07dcf6840e9b9ed3890cb2dcdeff92e009812f73",
   "hash_encoding": "sha256-base64",
   "reason": "Final B3 reconciliation.",
@@ -48,6 +48,11 @@
       "tests/test_b1a_artifact_manifest.py",
       "AuijiYJM/eY/9okS+/eXEQ4MYxB0pAHL8pyETmdDU9g=",
       4540
+    ],
+    [
+      "tests/test_b3_runtime_boundaries.py",
+      "2tOXO1tNE/RLOxqpVq39a02KhX8s4y2eXMNe0g6DYt8=",
+      3558
     ]
   ],
   "remove_paths": []
