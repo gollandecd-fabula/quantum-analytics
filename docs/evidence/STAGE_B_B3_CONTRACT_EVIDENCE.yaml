@@ -1,7 +1,7 @@
 stage_contract_id: STAGE-B-BUILD-v1
 unit: B3
 risk_class: R2
-status: IN_PROGRESS
+status: READY_FOR_MERGE_SUBJECT_TO_CURRENT_HEAD_GATES
 issue: 11
 pull_request: 14
 
@@ -29,7 +29,7 @@ confirmed:
   - immutable_versioned_results
   - acyclic_content_hashes
   - deterministic_input_fingerprint
-  - explicit_metric_to_source_file_links
+  - explicit_metric_to_event_to_transformation_and_source_links
   - matching_recalculation_and_evidence_actor
   - typed_non_valid_states
   - actual_scenario_isolation
@@ -40,16 +40,16 @@ qa:
   inherited_tests: 68
   b3_tests: 16
   total_tests: 84
-  last_successful_ci_before_remediation: 28318375544
-  current_head_ci: PENDING
+  remediation_ci_run: 28318737935
+  remediation_ci_status: SUCCESS
   review_threads_total: 2
-  review_threads_unresolved: 2
-  rereview: PENDING
+  review_threads_unresolved: 0
+  current_metadata_head_ci: REQUIRED
+  current_metadata_head_rereview: REQUIRED
 
 release_state: RELEASE_BLOCKED
 remaining_gates:
-  - EXACT_HEAD_CI_SUCCESS
+  - CURRENT_METADATA_HEAD_CI_SUCCESS
   - ARTIFACT_OVERLAY_SYNCHRONIZED
-  - REVIEW_THREADS_RESOLVED
   - INDEPENDENT_CODEX_REREVIEW_CLEAN
   - PROTECTED_SQUASH_MERGE
