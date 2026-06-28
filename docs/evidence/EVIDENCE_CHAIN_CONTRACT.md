@@ -25,7 +25,12 @@ Every graph contains:
 - creation actor, timestamp, reason, and trace identifier;
 - ordered node and edge collections.
 
-The graph hash excludes only its own hash field.
+The graph hash excludes only its own hash field. Canonical graph bytes are UTF-8
+JSON after removing the top-level `content_hash`, sorting every object key
+lexicographically, removing insignificant whitespace with separators `,` and
+`:`, preserving array order, and emitting non-ASCII characters as UTF-8. The
+SHA-256 of those exact bytes must equal `content_hash`; validating only the hash
+shape is insufficient.
 
 ## Node types
 
@@ -93,6 +98,11 @@ paths from the root Metric Snapshot node:
 - `RESULT_HAS_FRESHNESS` to the freshness assessment;
 - `RESULT_HAS_CONFIDENCE` to the confidence assessment.
 
+For the root Metric Snapshot, all `RESULT_USES_TRANSFORMATION` edges use a
+zero-based, unique, contiguous `sequence` set `0..n-1`. Duplicate, missing,
+negative, non-integer, or gapped sequence values produce
+`EVIDENCE_TRANSFORMATION_ORDER_AMBIGUOUS`.
+
 Merely making each required node type reachable through arbitrary edges is not
 sufficient. When a required typed path is absent, the result is `BLOCKED` with
 `EVIDENCE_REQUIRED_PATH_MISSING`.
@@ -118,6 +128,7 @@ For every graph and node reference:
 
 - version is a positive immutable integer;
 - content SHA-256 is a lowercase 64-character hexadecimal value;
+- the graph hash is recalculated from canonical bytes and compared for equality;
 - aliases such as `latest` are forbidden;
 - source-file nodes contain retained-byte SHA-256 and storage locator metadata;
 - a storage locator without a matching content hash is not evidence.
