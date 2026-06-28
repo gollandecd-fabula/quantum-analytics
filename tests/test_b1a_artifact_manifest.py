@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import base64
 import hashlib
 import json
 import subprocess
@@ -42,8 +43,14 @@ def tracked_paths() -> list[str]:
 
 
 def apply_entries(artifacts: dict[str, list], overlay: dict) -> None:
+    encoding = overlay.get("hash_encoding", "sha256-hex")
     for row in overlay["entries"]:
-        artifacts[row[0]] = row
+        path, digest, size = row
+        if encoding == "sha256-base64":
+            digest = base64.b64decode(digest, validate=True).hex()
+        elif encoding != "sha256-hex":
+            raise AssertionError("ARTIFACT_MANIFEST_HASH_ENCODING_UNSUPPORTED")
+        artifacts[path] = [path, digest, size]
     for path in overlay.get("remove_paths", []):
         artifacts.pop(path, None)
 
