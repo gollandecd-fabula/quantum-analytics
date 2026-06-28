@@ -53,6 +53,7 @@ class B1aReviewRegressionTests(unittest.TestCase):
         self.assertEqual(len(tuple_schema["prefixItems"]), 4)
         self.assertEqual(tuple_schema["prefixItems"][0]["minItems"], 6)
         self.assertEqual(tuple_schema["prefixItems"][0]["maxItems"], 6)
+        self.assertIn("selected", candidate["required"])
         self.assertEqual(
             condition["if"],
             {
@@ -64,10 +65,12 @@ class B1aReviewRegressionTests(unittest.TestCase):
         self.assertEqual(condition["then"]["properties"]["ordering_tuple"]["minItems"], 4)
         self.assertEqual(condition["then"]["properties"]["ordering_tuple"]["maxItems"], 4)
         self.assertEqual(condition["then"]["properties"]["exclusion_reasons"]["maxItems"], 0)
+        self.assertEqual(condition["else"]["properties"]["selected"], {"const": False})
         self.assertEqual(condition["else"]["properties"]["ordering_tuple"]["type"], "null")
         self.assertEqual(condition["else"]["properties"]["exclusion_reasons"]["minItems"], 1)
-        self.assertIn("eligible candidate always records its complete ordering tuple", contract)
-        self.assertIn("ineligible candidate records at least one exclusion reason", contract)
+        self.assertIn("Every eligible candidate records this complete tuple", contract)
+        self.assertIn("An ineligible candidate records", contract)
+        self.assertIn("Candidate trace is the sole machine-readable authority", contract)
 
 
 if __name__ == "__main__":
