@@ -1,0 +1,137 @@
+{
+  "result_id": "mr_31abd64ec26fede0145a69c437ed663f2e7466c8c83373c72c14d3b3075ca3bb",
+  "result_contract_version": "METRIC-RESULT-v1",
+  "evidence_contract_version": "EVIDENCE-CHAIN-v1",
+  "organization_id": "org-demo",
+  "marketplace_account_id": "acct-demo",
+  "mode": "ACTUAL",
+  "scenario_id": null,
+  "calculation_instant": "2026-06-01T00:00:00Z",
+  "scope_dimensions": {
+    "product_id": "SKU-1",
+    "period_start": "2026-05-01",
+    "period_end": "2026-06-01"
+  },
+  "calculation_profile_ref": {
+    "id": "profile.actual.default",
+    "version": 1,
+    "content_hash": "1111111111111111111111111111111111111111111111111111111111111111"
+  },
+  "metric_definition_ref": {
+    "id": "metric.net_revenue",
+    "version": 1,
+    "content_hash": "2222222222222222222222222222222222222222222222222222222222222222"
+  },
+  "value": {
+    "state": "VALID",
+    "value": "0.00",
+    "value_type": "decimal",
+    "unit": "RUB",
+    "reason_code": null,
+    "source_record_id": "record-1",
+    "observed_at": "2026-05-31T23:00:00Z",
+    "metadata": {}
+  },
+  "evidence_chain": {
+    "organization_id": "org-demo",
+    "marketplace_account_id": "acct-demo",
+    "origin": "SOURCE_DERIVED",
+    "calculation_profile_ref": {
+      "id": "profile.actual.default",
+      "version": 1,
+      "content_hash": "1111111111111111111111111111111111111111111111111111111111111111"
+    },
+    "metric_definition_ref": {
+      "id": "metric.net_revenue",
+      "version": 1,
+      "content_hash": "2222222222222222222222222222222222222222222222222222222222222222"
+    },
+    "rounding_policy_ref": {
+      "id": "rounding.standard",
+      "version": 1,
+      "content_hash": "3333333333333333333333333333333333333333333333333333333333333333"
+    },
+    "source_files": [
+      {
+        "import_batch_id": "batch-1",
+        "organization_id": "org-demo",
+        "marketplace_account_id": "acct-demo",
+        "source_file_sha256": "4444444444444444444444444444444444444444444444444444444444444444",
+        "adapter_id": "adapter.synthetic",
+        "adapter_version": "1.0.0",
+        "source_schema_id": "schema.synthetic.v1"
+      }
+    ],
+    "source_records": [
+      {
+        "source_record_id": "record-1",
+        "import_batch_id": "batch-1",
+        "organization_id": "org-demo",
+        "marketplace_account_id": "acct-demo",
+        "source_row_key": "row-1",
+        "raw_row_hash": "5555555555555555555555555555555555555555555555555555555555555555",
+        "validation_status": "VALID",
+        "disposition": "INCLUDED",
+        "reason_code": null
+      }
+    ],
+    "canonical_events": [
+      {
+        "event_id": "event-1",
+        "organization_id": "org-demo",
+        "marketplace_account_id": "acct-demo",
+        "source_record_id": "record-1",
+        "revision": 1,
+        "event_hash": "6666666666666666666666666666666666666666666666666666666666666666",
+        "normalization_rule_ref": {
+          "id": "normalization.synthetic",
+          "version": 1,
+          "content_hash": "7777777777777777777777777777777777777777777777777777777777777777"
+        }
+      }
+    ],
+    "included_record_count": 1,
+    "excluded_record_count": 0,
+    "typed_state_counts": {
+      "VALID": 1,
+      "EMPTY": 0,
+      "BLOCKED": 0,
+      "UNAVAILABLE": 0,
+      "CONFLICT": 0,
+      "INVALID": 0,
+      "NOT_APPLICABLE": 0
+    },
+    "input_set_hash": "56c80be52b8b9eb5731415d9005a45db1bb10584c03f114a9d63b877e756e7fa",
+    "freshness": {
+      "state": "CURRENT",
+      "evaluated_at": "2026-06-01T00:00:00Z",
+      "data_through": "2026-05-31T23:00:00Z",
+      "max_age_seconds": 7200
+    },
+    "confidence": {
+      "level": "HIGH",
+      "score": "0.95",
+      "basis": [
+        "complete synthetic source set"
+      ]
+    },
+    "validity": {
+      "status": "VERIFIED",
+      "checked_at": "2026-06-01T00:00:00Z",
+      "diagnostics": []
+    },
+    "limitations": [
+      "synthetic fixture only"
+    ],
+    "system_generated_reason": null
+  },
+  "audit": {
+    "actor": "test-harness",
+    "reason": "INITIAL",
+    "calculated_at": "2026-06-01T00:01:00Z",
+    "trace_id": "trace-b3-valid",
+    "predecessor_result_id": null
+  },
+  "reproduction_hash": "4eaff346328a9969572196f24e694fa672e9b9951e51a662ae27c5a9036cba96",
+  "content_hash": "31abd64ec26fede0145a69c437ed663f2e7466c8c83373c72c14d3b3075ca3bb"
+}
