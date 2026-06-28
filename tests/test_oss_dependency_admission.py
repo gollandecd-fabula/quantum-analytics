@@ -108,7 +108,7 @@ class OssDependencyAdmissionTests(unittest.TestCase):
         cases = (
             ("MIT", "MIT", True),
             ("MIT", "License :: OSI Approved :: MIT License", True),
-            ("MIT", "Permission is hereby granted, free of charge; THE SOFTWARE IS PROVIDD \"AS IS\"", True),
+            ("MIT", "Permission is hereby granted, free of charge; THE SOFTWARE IS PROVIDED \"AS IS\"", True),
             ("MIT", "limitation", False),
             ("MIT", "permit", False),
             ("Apache-2.0", "Apache-2.0", True),
