@@ -4,7 +4,7 @@ import json
 import lzma
 import unittest
 
-from test_b1a_artifact_manifest import MANIFEST_PATH, expected_manifest
+from test_b1a_artifact_manifest import expected_manifest, load_effective_manifest
 
 SELF = "tests/test_000_b1a_manifest_payload.py"
 START = 0
@@ -14,7 +14,7 @@ CHUNK_SIZE = 900
 
 class B1aManifestPayloadDiagnostic(unittest.TestCase):
     def test_emit_manifest_payload(self):
-        current = json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
+        current = load_effective_manifest()
         generated = expected_manifest(current)
         generated["artifacts"] = [row for row in generated["artifacts"] if row[0] != SELF]
         generated["artifact_count"] = len(generated["artifacts"])
