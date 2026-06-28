@@ -41,6 +41,8 @@ Permanent B1a cleanup baseline: `40c8ef94b4826257c2935d3ac499009734be758f`
 - non-money payloads cannot carry money units or currency;
 - every reference has a positive version and SHA-256;
 - graph SHA-256 is recalculated from canonical UTF-8 JSON bytes;
+- snapshot Evidence Chain locator contains only stable id/version, while the
+  Evidence Chain retains the hashed root snapshot reference;
 - transformation sequence is zero-based, unique, and contiguous;
 - evidence uses exact typed paths to retained source-file bytes;
 - selected rules are linked through Rule Resolution nodes;
@@ -54,8 +56,8 @@ Permanent B1a cleanup baseline: `40c8ef94b4826257c2935d3ac499009734be758f`
 
 ## Verification state
 
-- local B3 contract tests: 15 passed;
-- five prior review findings: remediated pending re-review;
+- local B3 contract tests: 16 passed;
+- six review findings: remediated pending re-review;
 - GitHub Actions exact-head CI: pending after recovery;
 - independent review: pending after recovery;
 - merge: blocked until all gates pass.
