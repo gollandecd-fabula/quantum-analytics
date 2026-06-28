@@ -14,8 +14,8 @@
     ],
     [
       "tests/test_000_b1a_manifest_payload.py",
-      "fe13d3e61f78ef7c716ba2bdf1847f4696cba51b9d8fabaeb5528e51ac6fd188",
-      1018
+      "58bc7a38716ea0fb994ce0caf48307c7c82f44048421bc942d8fd964b320a7c7",
+      1450
     ],
     [
       "tests/test_b1a_artifact_manifest.py",
