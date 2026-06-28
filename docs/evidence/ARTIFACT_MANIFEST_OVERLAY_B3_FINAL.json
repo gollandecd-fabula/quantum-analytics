@@ -1,8 +1,8 @@
 {
-  "overlay_version": 7,
+  "overlay_version": 8,
   "base_runtime_overlay_git_blob_sha": "07dcf6840e9b9ed3890cb2dcdeff92e009812f73",
   "hash_encoding": "sha256-base64",
-  "reason": "B3 verifier convergence: iterative graph traversal, base/public invariant alignment, valid deep-path regression coverage, and synchronized evidence.",
+  "reason": "B3 fail-closed convergence: type-safe malformed-container handling, canonical base/public verifier delegation, deep-path coverage, and synchronized evidence.",
   "entries": [
     [
       "docs/evidence/EVIDENCE_CHAIN_CONTRACT.md",
@@ -11,8 +11,8 @@
     ],
     [
       "docs/evidence/STAGE_B_B3_CONTRACT_EVIDENCE.yaml",
-      "auGOZM5POzBkU/wWUDcWbzYpnZ8idDLwAQPnkEqRSTI=",
-      2913
+      "GU/fiYjjmmSpCS05/mrnYT+MfCERGFe+qZL1eyoeO+k=",
+      3043
     ],
     [
       "docs/evidence/STAGE_B_B3_EXECUTION_STATE.yaml",
@@ -41,13 +41,13 @@
     ],
     [
       "src/quantum/evidence/runtime_validation.py",
-      "ytZUeAwUauMkmw2I8CgTJNWFYXtceWQY3ppdGReRByk=",
-      5623
+      "SpI6s2PhueW2tR2aXJf/vr9b7ziIyTBoQNZa1ehMS4c=",
+      662
     ],
     [
       "src/quantum/evidence/verification.py",
-      "749swQGIPdgUAoY/ZqytvjDB1/gsYOEMhyw+VT4IJdA=",
-      25125
+      "qPi4fnrTaXKJ/Kl14XSVJaKgfHjrPMdGSdsJhwXs8o4=",
+      25800
     ],
     [
       "tests/test_a0_manifest_diagnostic.py",
@@ -61,13 +61,13 @@
     ],
     [
       "tests/test_b3_evidence_contracts.py",
-      "dpQlxfir/qDzEJn566VM0vooDpxZWyUGXizK5QPSp2k=",
-      4898
+      "dvAv/hP/o5NFywR4MCBusNRwGguytNDrstn5EpePvBI=",
+      5837
     ],
     [
       "tests/test_b3_metric_snapshot.py",
-      "MbNNY69neV/YP9V7UG4joCiLgQyn6bcmb0VXrMoXQfs=",
-      6020
+      "3hUzKp40rX92gfWZXtjmdBlQ5QXfzfxUILS7YeCQzaY=",
+      7875
     ],
     [
       "tests/test_b3_runtime_boundaries.py",
