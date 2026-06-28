@@ -461,5 +461,31 @@ class B3(unittest.TestCase):
         )
         self.assertEqual(branches["RATE"]["currency"], {"type": "null"})
 
+    def test_16_snapshot_evidence_hash_cycle_is_broken(self):
+        metric = j(S / "metric-result.schema.json")
+        evidence = j(S / "evidence-chain.schema.json")
+        self.assertEqual(
+            metric["properties"]["evidence_chain_ref"],
+            {"$ref": "#/$defs/evidenceChainRef"},
+        )
+        locator = metric["$defs"]["evidenceChainRef"]
+        self.assertEqual(set(locator["required"]), {"id", "version"})
+        self.assertNotIn("content_hash", locator["properties"])
+        self.assertEqual(
+            evidence["properties"]["root_metric_snapshot_ref"],
+            {"$ref": "#/$defs/versionedRef"},
+        )
+        self.assertIn(
+            "content_hash", evidence["$defs"]["versionedRef"]["required"]
+        )
+        metric_contract = (
+            R / "docs/evidence/METRIC_SNAPSHOT_CONTRACT.md"
+        ).read_text(encoding="utf-8")
+        evidence_contract = (
+            R / "docs/evidence/EVIDENCE_CHAIN_CONTRACT.md"
+        ).read_text(encoding="utf-8")
+        self.assertIn("cycle-breaking identity locator", metric_contract)
+        self.assertIn("Snapshot/Evidence hash direction", evidence_contract)
+
 if __name__ == "__main__":
     unittest.main()
