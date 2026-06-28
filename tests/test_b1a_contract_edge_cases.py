@@ -47,17 +47,35 @@ class B1aContractEdgeCaseTests(unittest.TestCase):
             "GREATER_THAN",
             "GREATER_OR_EQUAL",
         }
-        matches = []
+        comparison_matches = []
+        unary_matches = []
         for branch in operation["allOf"]:
             operator_rule = branch["if"].get("properties", {}).get("operator", {})
-            if set(operator_rule.get("enum", [])) == comparisons:
-                matches.append(branch)
+            operators = set(operator_rule.get("enum", []))
+            if operators == comparisons:
+                comparison_matches.append(branch)
+            if operators == {"NEGATE", "ABS"}:
+                unary_matches.append(branch)
 
-        self.assertEqual(len(matches), 1)
-        result = matches[0]["then"]["properties"]
-        self.assertEqual(result["value_type"], {"const": "BOOLEAN"})
-        self.assertEqual(result["currency"], {"type": "null"})
-        self.assertEqual(result["unit"], {"const": "BOOLEAN"})
+        self.assertEqual(len(comparison_matches), 1)
+        comparison_result = comparison_matches[0]["then"]["properties"]
+        self.assertEqual(comparison_result["value_type"], {"const": "BOOLEAN"})
+        self.assertEqual(comparison_result["currency"], {"type": "null"})
+        self.assertEqual(comparison_result["unit"], {"const": "BOOLEAN"})
+
+        numeric_types = ["MONEY", "DECIMAL", "RATE", "INTEGER"]
+        self.assertEqual(len(unary_matches), 1)
+        unary_result = unary_matches[0]["then"]["properties"]
+        self.assertEqual(unary_result["value_type"], {"enum": numeric_types})
+        unary_arguments = unary_result["arguments"]
+        self.assertEqual(unary_arguments["minItems"], 1)
+        self.assertEqual(unary_arguments["maxItems"], 1)
+        operand_type = unary_arguments["items"]["allOf"][1]
+        self.assertEqual(
+            operand_type["properties"]["value_type"],
+            {"enum": numeric_types},
+        )
+        self.assertEqual(operand_type["required"], ["value_type"])
 
 
 if __name__ == "__main__":
