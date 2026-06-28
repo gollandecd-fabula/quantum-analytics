@@ -63,14 +63,27 @@ class B3MetricSnapshot(unittest.TestCase):
         snapshot["content_hash"] = canonical_snapshot_hash(snapshot)
         self.assertIn("METRIC_SNAPSHOT_VALUE_INVALID", verify_metric_snapshot(snapshot))
 
-    def test_10_unknown_expense(self):
-        snapshot = valid_snapshot()
-        snapshot["expense_boundary"].append("FIXED_COST_MAGIC")
-        snapshot["content_hash"] = canonical_snapshot_hash(snapshot)
+    def test_10_unknown_expense_and_rounding_settings(self):
+        expense = valid_snapshot()
+        expense["expense_boundary"].append("FIXED_COST_MAGIC")
+        expense["content_hash"] = canonical_snapshot_hash(expense)
         self.assertIn(
             "METRIC_SNAPSHOT_EXPENSE_BOUNDARY_INVALID",
-            verify_metric_snapshot(snapshot),
+            verify_metric_snapshot(expense),
         )
+
+        for field, value in (
+            ("application_point", "UNKNOWN_STAGE"),
+            ("resolved_mode", "BANKERSISH"),
+        ):
+            with self.subTest(field=field):
+                snapshot = valid_snapshot()
+                snapshot["rounding"][field] = value
+                snapshot["content_hash"] = canonical_snapshot_hash(snapshot)
+                self.assertIn(
+                    "METRIC_SNAPSHOT_ROUNDING_INVALID",
+                    verify_metric_snapshot(snapshot),
+                )
 
 
 if __name__ == "__main__":
