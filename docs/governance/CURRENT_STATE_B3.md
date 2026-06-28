@@ -1,7 +1,7 @@
 # CURRENT STATE — B3 SNAPSHOT
 
 Date: 2026-06-28  
-Status: `BUILD_B3_REMEDIATED_CURRENT_HEAD_CI_AND_REVIEW_REQUIRED`  
+Status: `BUILD_B3_REMEDIATED_REVIEW_GATED`  
 Current unit: `B3 — METRIC_SNAPSHOTS_AND_EVIDENCE_CHAIN`  
 Tracking issue: `#9`  
 Working branch: `build-b3-metric-evidence-contracts-v3`  
@@ -18,13 +18,14 @@ B1a cleanup: `40c8ef94b4826257c2935d3ac499009734be758f`
   orphan nodes, cycles, invalid timestamps and typed-value contradictions;
 - separated declared source-hash equality from strict retained-byte loading and
   SHA-256 verification;
-- consolidated B3 coverage into 27 independent tests.
+- consolidated B3 coverage into 27 independent tests;
+- made primary diagnostic selection explicit and independent of verifier check order.
 
-## Verification state
+## Verification policy
 
-- local static syntax/import check: pass;
-- exact current-head GitHub CI: required;
-- independent exact-head review: required;
+- CI is mandatory for the current PR merge-result;
+- independent review is mandatory for the current PR head and complete diff;
+- transient CI observations remain in GitHub Checks rather than immutable state;
 - merge remains blocked until all gates pass.
 
 ## Approval gates
