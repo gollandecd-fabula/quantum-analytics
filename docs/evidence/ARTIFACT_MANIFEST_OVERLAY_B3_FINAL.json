@@ -1,5 +1,5 @@
 {
-  "overlay_version": 4,
+  "overlay_version": 5,
   "base_runtime_overlay_git_blob_sha": "07dcf6840e9b9ed3890cb2dcdeff92e009812f73",
   "hash_encoding": "sha256-base64",
   "reason": "Final B3 reconciliation.",
@@ -36,8 +36,13 @@
     ],
     [
       "src/quantum/evidence/__init__.py",
-      "8zHp9Kb8yiniGWChP8XqLh19m8T2oKu1np1FROShfjg=",
-      1530
+      "yuOTbJ2CXCYRndTJ8U/yDj4XcHIjBm/jkiKe+VNrzy0=",
+      1566
+    ],
+    [
+      "src/quantum/evidence/runtime_validation.py",
+      "WjDBKRn5rjubUmrc4Ve4tchfzTLfXskyfD1EvhhqNCA=",
+      3122
     ],
     [
       "tests/test_a0_manifest_diagnostic.py",
@@ -50,9 +55,19 @@
       4540
     ],
     [
+      "tests/test_b3_evidence_contracts.py",
+      "Q5MSIVZV5eXGphIytsg7G0wP/Jo7JNXGffdrf3KZhkU=",
+      3794
+    ],
+    [
+      "tests/test_b3_metric_snapshot.py",
+      "MJEBXxvJflx+5l718OkChClioYA6L571rx5o3Dk4b20=",
+      3853
+    ],
+    [
       "tests/test_b3_runtime_boundaries.py",
-      "2tOXO1tNE/RLOxqpVq39a02KhX8s4y2eXMNe0g6DYt8=",
-      3558
+      "Vd2iTthOA+p5JevKwiw+xyYkDVdqZCKMjCRxAP+G6lg=",
+      3775
     ]
   ],
   "remove_paths": []
