@@ -1,0 +1,187 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://quantum.local/schemas/metric-result.schema.json",
+  "title": "Quantum Metric Result v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "metric_result_id", "result_version", "result_hash", "organization_id",
+    "marketplace_account_id", "metric_definition_ref", "calculation_profile_ref",
+    "rounding_policy_ref", "source_authority_ref", "evidence_chain_ref", "mode",
+    "scenario_id", "accounting_view", "period", "dimensions", "result", "unit",
+    "currency", "freshness", "confidence", "validity", "recalculation",
+    "input_fingerprint", "generated_at"
+  ],
+  "properties": {
+    "metric_result_id": {"type": "string", "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,127}$"},
+    "result_version": {"type": "integer", "minimum": 1},
+    "result_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "organization_id": {"type": "string", "minLength": 1},
+    "marketplace_account_id": {"type": ["string", "null"], "minLength": 1},
+    "metric_definition_ref": {"$ref": "#/$defs/versionedRef"},
+    "calculation_profile_ref": {"$ref": "#/$defs/versionedRef"},
+    "rounding_policy_ref": {"$ref": "#/$defs/versionedRef"},
+    "source_authority_ref": {"$ref": "#/$defs/versionedRef"},
+    "evidence_chain_ref": {"$ref": "#/$defs/versionedRef"},
+    "mode": {"type": "string", "enum": ["ACTUAL", "SCENARIO"]},
+    "scenario_id": {"type": ["string", "null"], "minLength": 1},
+    "accounting_view": {"type": "string", "enum": ["OPERATIONAL", "SETTLEMENT", "TAX_RECOGNITION"]},
+    "period": {"$ref": "#/$defs/period"},
+    "dimensions": {
+      "type": "object",
+      "propertyNames": {"pattern": "^[a-z][a-z0-9_.:-]{0,127}$"},
+      "additionalProperties": {"type": "string", "minLength": 1}
+    },
+    "result": {"$ref": "typed-value.schema.json"},
+    "unit": {"type": ["string", "null"], "minLength": 1},
+    "currency": {"type": ["string", "null"], "pattern": "^[A-Z]{3}$"},
+    "freshness": {"$ref": "#/$defs/freshness"},
+    "confidence": {"$ref": "#/$defs/confidence"},
+    "validity": {"$ref": "#/$defs/validity"},
+    "recalculation": {"$ref": "#/$defs/recalculation"},
+    "input_fingerprint": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "generated_at": {"type": "string", "format": "date-time"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"mode": {"const": "ACTUAL"}}},
+      "then": {"properties": {"scenario_id": {"type": "null"}}}
+    },
+    {
+      "if": {"properties": {"mode": {"const": "SCENARIO"}}},
+      "then": {"properties": {"scenario_id": {"type": "string", "minLength": 1}}}
+    }
+  ],
+  "$defs": {
+    "versionedRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "version", "content_hash"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "version": {"type": "integer", "minimum": 1},
+        "content_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+      }
+    },
+    "period": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["start", "end", "timezone", "status"],
+      "properties": {
+        "start": {"type": "string", "format": "date-time"},
+        "end": {"type": "string", "format": "date-time"},
+        "timezone": {"type": "string", "minLength": 1},
+        "status": {"type": "string", "enum": ["OPEN", "PROVISIONAL", "CLOSED", "RESTATED"]}
+      }
+    },
+    "freshness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["as_of", "evaluated_at", "status", "max_age_seconds", "age_seconds"],
+      "properties": {
+        "as_of": {"type": "string", "format": "date-time"},
+        "evaluated_at": {"type": "string", "format": "date-time"},
+        "status": {"type": "string", "enum": ["FRESH", "STALE", "UNKNOWN"]},
+        "max_age_seconds": {"type": ["integer", "null"], "minimum": 0},
+        "age_seconds": {"type": ["integer", "null"], "minimum": 0}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"status": {"enum": ["FRESH", "STALE"]}}},
+          "then": {
+            "properties": {
+              "max_age_seconds": {"type": "integer", "minimum": 0},
+              "age_seconds": {"type": "integer", "minimum": 0}
+            }
+          }
+        },
+        {
+          "if": {"properties": {"status": {"const": "UNKNOWN"}}},
+          "then": {
+            "properties": {
+              "max_age_seconds": {"type": "null"},
+              "age_seconds": {"type": "null"}
+            }
+          }
+        }
+      ]
+    },
+    "confidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["level", "score", "basis"],
+      "properties": {
+        "level": {"type": "string", "enum": ["HIGH", "MEDIUM", "LOW", "UNDETERMINED"]},
+        "score": {"type": ["string", "null"], "pattern": "^(0(\\.[0-9]+)?|1(\\.0+)?)$"},
+        "basis": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"level": {"const": "UNDETERMINED"}}},
+          "then": {"properties": {"score": {"type": "null"}}}
+        },
+        {
+          "if": {"properties": {"level": {"enum": ["HIGH", "MEDIUM", "LOW"]}}},
+          "then": {
+            "properties": {"score": {"type": "string"}, "basis": {"minItems": 1}}
+          }
+        }
+      ]
+    },
+    "validity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state", "diagnostic_codes", "publishable"],
+      "properties": {
+        "state": {"type": "string", "enum": ["VALID", "EMPTY", "BLOCKED", "UNAVAILABLE", "CONFLICT", "INVALID", "NOT_APPLICABLE"]},
+        "diagnostic_codes": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+        "publishable": {"type": "boolean"}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"state": {"const": "VALID"}}},
+          "then": {"properties": {"diagnostic_codes": {"maxItems": 0}}}
+        },
+        {
+          "if": {"properties": {"state": {"not": {"const": "VALID"}}}},
+          "then": {"properties": {"diagnostic_codes": {"minItems": 1}, "publishable": {"const": false}}}
+        }
+      ]
+    },
+    "recalculation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "actor", "reason", "requested_at", "completed_at", "predecessor_result_id", "predecessor_result_hash", "replay_key"],
+      "properties": {
+        "kind": {"type": "string", "enum": ["INITIAL", "RECALCULATION", "RESTATEMENT"]},
+        "actor": {"type": "string", "minLength": 1},
+        "reason": {"type": "string", "minLength": 1},
+        "requested_at": {"type": "string", "format": "date-time"},
+        "completed_at": {"type": "string", "format": "date-time"},
+        "predecessor_result_id": {"type": ["string", "null"], "minLength": 1},
+        "predecessor_result_hash": {"type": ["string", "null"], "pattern": "^[a-f0-9]{64}$"},
+        "replay_key": {"type": "string", "minLength": 1}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"kind": {"const": "INITIAL"}}},
+          "then": {
+            "properties": {
+              "predecessor_result_id": {"type": "null"},
+              "predecessor_result_hash": {"type": "null"}
+            }
+          }
+        },
+        {
+          "if": {"properties": {"kind": {"enum": ["RECALCULATION", "RESTATEMENT"]}}},
+          "then": {
+            "properties": {
+              "predecessor_result_id": {"type": "string", "minLength": 1},
+              "predecessor_result_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+            }
+          }
+        }
+      ]
+    }
+  }
+}
