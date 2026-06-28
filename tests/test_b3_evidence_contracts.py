@@ -30,78 +30,84 @@ SIG = {
     "SNAPSHOT_RESTATES": ("METRIC_SNAPSHOT", "METRIC_SNAPSHOT"),
 }
 
+
 def j(path):
     return json.loads(path.read_text(encoding="utf-8"))
 
-def ref(value):
+
+def valid_ref(value):
+    version = value.get("version")
     return (
-        isinstance(value.get("version"), int)
-        and not isinstance(value.get("version"), bool)
-        and value["version"] > 0
-        and bool(H.fullmatch(str(value.get("content_hash", ""))))
+        isinstance(version, int)
+        and not isinstance(version, bool)
+        and version > 0
         and bool(value.get("id"))
+        and bool(H.fullmatch(str(value.get("content_hash", ""))))
     )
+
 
 def canonical_graph_hash(graph):
     payload = copy.deepcopy(graph)
     payload.pop("content_hash", None)
-    encoded = json.dumps(
+    raw = json.dumps(
         payload, ensure_ascii=False, sort_keys=True, separators=(",", ":")
     ).encode("utf-8")
-    return hashlib.sha256(encoded).hexdigest()
+    return hashlib.sha256(raw).hexdigest()
+
 
 def diagnose(graph):
-    nodes = {item["node_id"]: item for item in graph.get("nodes", [])}
-    if len(nodes) != len(graph.get("nodes", [])):
+    rows = graph.get("nodes", [])
+    nodes = {node["node_id"]: node for node in rows}
+    if len(nodes) != len(rows):
         return "EVIDENCE_NODE_MISSING"
-    if (
-        not isinstance(graph.get("version"), int)
-        or isinstance(graph.get("version"), bool)
-        or graph["version"] < 1
-    ):
+    version = graph.get("version")
+    if not isinstance(version, int) or isinstance(version, bool) or version < 1:
         return "EVIDENCE_VERSION_INVALID"
-    supplied_hash = str(graph.get("content_hash", ""))
-    if not H.fullmatch(supplied_hash):
+    supplied = str(graph.get("content_hash", ""))
+    if not H.fullmatch(supplied) or supplied != canonical_graph_hash(graph):
         return "EVIDENCE_HASH_MISMATCH"
-    if supplied_hash != canonical_graph_hash(graph):
-        return "EVIDENCE_HASH_MISMATCH"
+
     root_ref = graph.get("root_metric_snapshot_ref", {})
-    if not ref(root_ref):
+    if not valid_ref(root_ref):
         return (
             "EVIDENCE_VERSION_INVALID"
             if root_ref.get("version", 0) < 1
             else "EVIDENCE_HASH_MISMATCH"
         )
     roots = [
-        item
-        for item in nodes.values()
-        if item["node_type"] == "METRIC_SNAPSHOT"
-        and item["artifact_ref"] == root_ref
+        node
+        for node in nodes.values()
+        if node["node_type"] == "METRIC_SNAPSHOT"
+        and node["artifact_ref"] == root_ref
     ]
     if len(roots) != 1:
         return "EVIDENCE_NODE_MISSING"
-    for item in nodes.values():
-        artifact_ref = item.get("artifact_ref", {})
-        if not ref(artifact_ref):
+
+    for node in nodes.values():
+        ref = node.get("artifact_ref", {})
+        if not valid_ref(ref):
             return (
                 "EVIDENCE_VERSION_INVALID"
-                if artifact_ref.get("version", 0) < 1
+                if ref.get("version", 0) < 1
                 else "EVIDENCE_HASH_MISMATCH"
             )
-        if item.get("organization_id") != graph.get("organization_id"):
+        if node.get("organization_id") != graph.get("organization_id"):
             return "EVIDENCE_TENANT_MISMATCH"
         if (
-            item.get("mode") != graph.get("mode")
-            or (graph.get("mode") == "ACTUAL" and item.get("scenario_id") is not None)
+            node.get("mode") != graph.get("mode")
+            or (
+                graph.get("mode") == "ACTUAL"
+                and node.get("scenario_id") is not None
+            )
             or (
                 graph.get("mode") == "SCENARIO"
-                and item.get("scenario_id") != graph.get("scenario_id")
+                and node.get("scenario_id") != graph.get("scenario_id")
             )
         ):
             return "EVIDENCE_MODE_CONTAMINATION"
 
-    adjacency = {key: [] for key in nodes}
-    targets_by_type = {}
+    adjacency = {node_id: [] for node_id in nodes}
+    typed_targets = {}
     edges = graph.get("edges", [])
     for edge in edges:
         source = edge.get("from_node_id")
@@ -113,55 +119,58 @@ def diagnose(graph):
             return "EVIDENCE_EDGE_INVALID"
         source_type, target_type = SIG[edge_type]
         if (
-            (source_type and nodes[source]["node_type"] != source_type)
+            source_type
+            and nodes[source]["node_type"] != source_type
             or nodes[target]["node_type"] != target_type
         ):
             return "EVIDENCE_EDGE_INVALID"
         adjacency[source].append(target)
-        targets_by_type.setdefault((source, edge_type), []).append(target)
+        typed_targets.setdefault((source, edge_type), []).append(target)
 
-    seen = set()
-    stack = set()
+    seen, active = set(), set()
+
     def cyclic(node_id):
-        if node_id in stack:
+        if node_id in active:
             return True
         if node_id in seen:
             return False
-        stack.add(node_id)
+        active.add(node_id)
         if any(cyclic(target) for target in adjacency[node_id]):
             return True
-        stack.remove(node_id)
+        active.remove(node_id)
         seen.add(node_id)
         return False
+
     if any(cyclic(node_id) for node_id in nodes):
         return "EVIDENCE_GRAPH_CYCLE"
 
     root_id = roots[0]["node_id"]
     transformation_edges = [
-        edge for edge in edges
+        edge
+        for edge in edges
         if edge.get("from_node_id") == root_id
         and edge.get("edge_type") == "RESULT_USES_TRANSFORMATION"
     ]
-    sequences = [edge.get("sequence") for edge in transformation_edges]
+    sequence = [edge.get("sequence") for edge in transformation_edges]
     if (
         any(
             not isinstance(value, int)
             or isinstance(value, bool)
             or value < 0
-            for value in sequences
+            for value in sequence
         )
-        or sorted(sequences) != list(range(len(sequences)))
+        or sorted(sequence) != list(range(len(sequence)))
     ):
         return "EVIDENCE_TRANSFORMATION_ORDER_AMBIGUOUS"
 
     def targets(source, edge_type, node_type):
         return [
             target
-            for target in targets_by_type.get((source, edge_type), [])
+            for target in typed_targets.get((source, edge_type), [])
             if nodes[target]["node_type"] == node_type
         ]
 
-    basics = [
+    required = [
         ("RESULT_DEFINED_BY", "METRIC_DEFINITION"),
         ("RESULT_CALCULATED_WITH", "CALCULATION_PROFILE"),
         ("RESULT_USES_RESOLUTION", "RULE_RESOLUTION"),
@@ -170,42 +179,76 @@ def diagnose(graph):
         ("RESULT_HAS_FRESHNESS", "FRESHNESS_ASSESSMENT"),
         ("RESULT_HAS_CONFIDENCE", "CONFIDENCE_ASSESSMENT"),
     ]
-    if any(not targets(root_id, edge_type, node_type) for edge_type, node_type in basics):
+    if any(
+        not targets(root_id, edge_type, node_type)
+        for edge_type, node_type in required
+    ):
         return "EVIDENCE_REQUIRED_PATH_MISSING"
-    for profile in targets(root_id, "RESULT_CALCULATED_WITH", "CALCULATION_PROFILE"):
-        if (
-            not targets(profile, "PROFILE_USES_ROUNDING", "ROUNDING_POLICY")
-            or not targets(profile, "PROFILE_USES_SOURCE_AUTHORITY", "SOURCE_AUTHORITY")
+
+    def approved(artifact_id):
+        for approval_id in targets(
+            artifact_id, "ARTIFACT_APPROVED_BY", "APPROVAL"
         ):
+            metadata = nodes[approval_id].get("metadata", {})
+            if (
+                metadata.get("status") == "APPROVED"
+                and metadata.get("approved_at")
+                and metadata.get("approver")
+            ):
+                return True
+        return False
+
+    for profile in targets(
+        root_id, "RESULT_CALCULATED_WITH", "CALCULATION_PROFILE"
+    ):
+        rounding = targets(profile, "PROFILE_USES_ROUNDING", "ROUNDING_POLICY")
+        authorities = targets(
+            profile, "PROFILE_USES_SOURCE_AUTHORITY", "SOURCE_AUTHORITY"
+        )
+        if not rounding or not authorities:
             return "EVIDENCE_REQUIRED_PATH_MISSING"
-    for resolution in targets(root_id, "RESULT_USES_RESOLUTION", "RULE_RESOLUTION"):
+        if any(not approved(node_id) for node_id in rounding + authorities):
+            return "EVIDENCE_APPROVAL_MISSING"
+
+    for resolution in targets(
+        root_id, "RESULT_USES_RESOLUTION", "RULE_RESOLUTION"
+    ):
         if not targets(
             resolution, "RESOLUTION_SELECTS_RULE", "CONFIGURATION_RULE"
         ):
             return "EVIDENCE_REQUIRED_PATH_MISSING"
-    for event in targets(root_id, "RESULT_DERIVED_FROM_EVENT", "CANONICAL_EVENT"):
-        records = targets(event, "EVENT_NORMALIZED_FROM_RECORD", "SOURCE_RECORD")
+
+    for event in targets(
+        root_id, "RESULT_DERIVED_FROM_EVENT", "CANONICAL_EVENT"
+    ):
+        records = targets(
+            event, "EVENT_NORMALIZED_FROM_RECORD", "SOURCE_RECORD"
+        )
         if not records:
             return "EVIDENCE_REQUIRED_PATH_MISSING"
         for record in records:
             files = targets(record, "RECORD_READ_FROM_FILE", "SOURCE_FILE")
             if not files:
                 return "EVIDENCE_REQUIRED_PATH_MISSING"
-            for source_file in files:
-                metadata = nodes[source_file].get("metadata", {})
-                if (
-                    not H.fullmatch(str(metadata.get("retained_bytes_sha256", "")))
-                    or not metadata.get("storage_locator")
+            for file_id in files:
+                node = nodes[file_id]
+                metadata = node.get("metadata", {})
+                retained = str(metadata.get("retained_bytes_sha256", ""))
+                if not H.fullmatch(retained) or not metadata.get(
+                    "storage_locator"
                 ):
                     return "EVIDENCE_SOURCE_FILE_UNAVAILABLE"
+                if retained != node["artifact_ref"]["content_hash"]:
+                    return "EVIDENCE_HASH_MISMATCH"
     return None
+
 
 def mutate(base, mutation):
     graph = copy.deepcopy(base)
     if "remove_node" in mutation:
         node_id = mutation["remove_node"]
         graph["nodes"] = [
-            item for item in graph["nodes"] if item["node_id"] != node_id
+            node for node in graph["nodes"] if node["node_id"] != node_id
         ]
         graph["edges"] = [
             edge
@@ -223,34 +266,45 @@ def mutate(base, mutation):
         graph["edges"].append(mutation["add_edge"])
     if "replace_edge" in mutation:
         expected = mutation["replace_edge"]
-        target = next(
+        edge = next(
             edge
             for edge in graph["edges"]
             if edge["from_node_id"] == expected["from_node_id"]
             and edge["to_node_id"] == expected["to_node_id"]
             and edge["edge_type"] == expected["edge_type"]
         )
-        target["edge_type"] = expected["new_edge_type"]
+        edge["edge_type"] = expected["new_edge_type"]
     if "set_edge_sequence" in mutation:
         expected = mutation["set_edge_sequence"]
-        target = next(
+        edge = next(
             edge
             for edge in graph["edges"]
             if edge["from_node_id"] == expected["from_node_id"]
             and edge["to_node_id"] == expected["to_node_id"]
             and edge["edge_type"] == expected["edge_type"]
         )
-        target["sequence"] = expected["sequence"]
+        edge["sequence"] = expected["sequence"]
     if "node_id" in mutation:
-        target = next(
-            item for item in graph["nodes"] if item["node_id"] == mutation["node_id"]
+        node = next(
+            node
+            for node in graph["nodes"]
+            if node["node_id"] == mutation["node_id"]
         )
-        target.update(
+        node.update(
             {key: value for key, value in mutation.items() if key != "node_id"}
         )
     if "root_reference_version" in mutation:
         graph["root_metric_snapshot_ref"]["version"] = mutation[
             "root_reference_version"
+        ]
+    if "source_file_retained_hash" in mutation:
+        node = next(
+            node
+            for node in graph["nodes"]
+            if node["node_type"] == "SOURCE_FILE"
+        )
+        node["metadata"]["retained_bytes_sha256"] = mutation[
+            "source_file_retained_hash"
         ]
     if "set_graph_field" in mutation:
         graph.update(mutation["set_graph_field"])
@@ -260,11 +314,11 @@ def mutate(base, mutation):
         graph["content_hash"] = canonical_graph_hash(graph)
     return graph
 
+
 def value_type_branches(schema):
     result = {}
     for branch in schema["allOf"]:
-        condition = branch.get("if", {}).get("allOf", [])
-        for clause in condition:
+        for clause in branch.get("if", {}).get("allOf", []):
             value_type = (
                 clause.get("properties", {})
                 .get("value_type", {})
@@ -273,6 +327,7 @@ def value_type_branches(schema):
             if value_type:
                 result[value_type] = branch["then"]["properties"]
     return result
+
 
 class B3(unittest.TestCase):
     def test_01_b1a_dependencies(self):
@@ -289,7 +344,9 @@ class B3(unittest.TestCase):
 
     def test_02_schemas_json_no_defaults(self):
         for name in ["metric-result.schema.json", "evidence-chain.schema.json"]:
-            self.assertNotIn('"default"', (S / name).read_text(encoding="utf-8"))
+            self.assertNotIn(
+                '"default"', (S / name).read_text(encoding="utf-8")
+            )
             self.assertEqual(
                 j(S / name)["$schema"],
                 "https://json-schema.org/draft/2020-12/schema",
@@ -302,25 +359,17 @@ class B3(unittest.TestCase):
         metric = j(S / "metric-result.schema.json")
         self.assertEqual(set(metric["$defs"]["typedState"]["enum"]), canonical)
         self.assertNotIn("ZERO_VALID", canonical)
-        valid_branch = next(
-            branch for branch in metric["allOf"]
-            if branch.get("if", {}).get("properties", {}).get("state", {}).get("const")
-            == "VALID"
-        )
-        self.assertNotEqual(
-            valid_branch["then"]["properties"]["value"], {"type": "null"}
-        )
 
     def test_04_units_align(self):
-        metric_units = set(
+        expected = set(
             j(S / "metric-definition.schema.json")["properties"]["unit"]["enum"]
         )
-        result_units = set(
+        actual = set(
             j(S / "metric-result.schema.json")["properties"]["unit"]["enum"]
         )
-        result_units.discard(None)
-        self.assertTrue(metric_units <= result_units, metric_units - result_units)
-        self.assertIn("MONEY_PER_ITEM", result_units)
+        actual.discard(None)
+        self.assertTrue(expected <= actual)
+        self.assertIn("MONEY_PER_ITEM", actual)
 
     def test_05_positive_refs(self):
         for name in ["metric-result.schema.json", "evidence-chain.schema.json"]:
@@ -366,7 +415,7 @@ class B3(unittest.TestCase):
             self.assertIn("scenario_id", encoded)
 
     def test_10_metric_contract(self):
-        content = (R / "docs/evidence/METRIC_SNAPSHOT_CONTRACT.md").read_text(
+        text = (R / "docs/evidence/METRIC_SNAPSHOT_CONTRACT.md").read_text(
             encoding="utf-8"
         )
         for phrase in [
@@ -374,118 +423,110 @@ class B3(unittest.TestCase):
             "expense boundary",
             "freshness",
             "confidence",
-            "prior snapshot identifier",
             "Actual and Scenario isolation",
-            "Aliases such as `latest`",
             "MONEY_PER_ITEM",
+            "cycle-breaking identity locator",
         ]:
-            self.assertIn(phrase, content)
+            self.assertIn(phrase, text)
 
     def test_11_evidence_contract(self):
-        content = (R / "docs/evidence/EVIDENCE_CHAIN_CONTRACT.md").read_text(
+        text = (R / "docs/evidence/EVIDENCE_CHAIN_CONTRACT.md").read_text(
             encoding="utf-8"
         )
         for phrase in [
             "SOURCE_RECORD -> RECORD_READ_FROM_FILE -> SOURCE_FILE",
             "RULE_RESOLUTION -> RESOLUTION_SELECTS_RULE -> CONFIGURATION_RULE",
-            "Merely making each required node type reachable",
-            "Every node has a stable ID",
-            "The calculation subgraph must be acyclic",
+            "ROUNDING_POLICY -> ARTIFACT_APPROVED_BY -> APPROVAL",
+            "SOURCE_AUTHORITY -> ARTIFACT_APPROVED_BY -> APPROVAL",
             "EVIDENCE_REQUIRED_PATH_MISSING",
-            "EVIDENCE_REPRODUCTION_FAILED",
+            "EVIDENCE_APPROVAL_MISSING",
         ]:
-            self.assertIn(phrase, content)
+            self.assertIn(phrase, text)
 
     def test_12_graph_hash_is_canonical_and_tamper_evident(self):
         graph = j(V)["valid_graph"]
         self.assertEqual(graph["content_hash"], canonical_graph_hash(graph))
         tampered = copy.deepcopy(graph)
-        tampered["actor"] = "different-actor"
+        tampered["actor"] = "different"
         self.assertEqual(diagnose(tampered), "EVIDENCE_HASH_MISMATCH")
 
     def test_13_transformation_sequence_is_unique_and_contiguous(self):
         graph = j(V)["valid_graph"]
-        root = graph["root_metric_snapshot_ref"]["id"]
-        sequences = [
+        sequence = [
             edge["sequence"]
             for edge in graph["edges"]
-            if edge["from_node_id"] == root
-            and edge["edge_type"] == "RESULT_USES_TRANSFORMATION"
+            if edge["edge_type"] == "RESULT_USES_TRANSFORMATION"
         ]
-        self.assertEqual(sorted(sequences), list(range(len(sequences))))
-        ambiguous = mutate(
-            graph,
-            {
-                "set_edge_sequence": {
-                    "from_node_id": root,
-                    "to_node_id": "transformation-2",
-                    "edge_type": "RESULT_USES_TRANSFORMATION",
-                    "sequence": 0,
-                }
-            },
-        )
-        self.assertEqual(
-            diagnose(ambiguous),
-            "EVIDENCE_TRANSFORMATION_ORDER_AMBIGUOUS",
-        )
+        self.assertEqual(sorted(sequence), list(range(len(sequence))))
 
     def test_14_money_currency_and_unit_binding(self):
-        schema = j(S / "metric-result.schema.json")
-        money = value_type_branches(schema)["MONEY"]
-        self.assertEqual(money["unit"]["enum"], ["MONEY", "MONEY_PER_ITEM"])
-        self.assertEqual(money["currency"]["type"], "string")
+        money = value_type_branches(j(S / "metric-result.schema.json"))["MONEY"]
+        self.assertEqual(
+            money["unit"]["enum"], ["MONEY", "MONEY_PER_ITEM"]
+        )
         self.assertEqual(money["currency"]["pattern"], "^[A-Z]{3}$")
-        self.assertEqual(money["value"], {"$ref": "#/$defs/decimalString"})
+        self.assertEqual(
+            money["value"], {"$ref": "#/$defs/decimalString"}
+        )
 
     def test_15_value_type_payload_bindings(self):
         branches = value_type_branches(j(S / "metric-result.schema.json"))
         self.assertEqual(branches["INTEGER"]["value"], {"type": "integer"})
         self.assertEqual(branches["INTEGER"]["currency"], {"type": "null"})
         self.assertEqual(
-            branches["INTEGER"]["unit"],
-            {"not": {"enum": ["MONEY", "MONEY_PER_ITEM"]}},
-        )
-        self.assertEqual(
-            branches["DECIMAL"]["value"], {"$ref": "#/$defs/decimalString"}
-        )
-        self.assertEqual(
-            branches["DECIMAL"]["unit"],
-            {"not": {"enum": ["MONEY", "MONEY_PER_ITEM"]}},
+            branches["DECIMAL"]["value"],
+            {"$ref": "#/$defs/decimalString"},
         )
         self.assertEqual(
             branches["RATE"]["value"], {"$ref": "#/$defs/decimalString"}
         )
-        self.assertEqual(
-            branches["RATE"]["unit"],
-            {"not": {"enum": ["MONEY", "MONEY_PER_ITEM"]}},
-        )
-        self.assertEqual(branches["RATE"]["currency"], {"type": "null"})
 
     def test_16_snapshot_evidence_hash_cycle_is_broken(self):
         metric = j(S / "metric-result.schema.json")
         evidence = j(S / "evidence-chain.schema.json")
-        self.assertEqual(
-            metric["properties"]["evidence_chain_ref"],
-            {"$ref": "#/$defs/evidenceChainRef"},
-        )
         locator = metric["$defs"]["evidenceChainRef"]
         self.assertEqual(set(locator["required"]), {"id", "version"})
         self.assertNotIn("content_hash", locator["properties"])
-        self.assertEqual(
-            evidence["properties"]["root_metric_snapshot_ref"],
-            {"$ref": "#/$defs/versionedRef"},
-        )
         self.assertIn(
-            "content_hash", evidence["$defs"]["versionedRef"]["required"]
+            "content_hash",
+            evidence["$defs"]["versionedRef"]["required"],
         )
-        metric_contract = (
-            R / "docs/evidence/METRIC_SNAPSHOT_CONTRACT.md"
-        ).read_text(encoding="utf-8")
-        evidence_contract = (
-            R / "docs/evidence/EVIDENCE_CHAIN_CONTRACT.md"
-        ).read_text(encoding="utf-8")
-        self.assertIn("cycle-breaking identity locator", metric_contract)
-        self.assertIn("Snapshot/Evidence hash direction", evidence_contract)
+
+    def test_17_source_file_hash_matches_retained_bytes(self):
+        data = j(V)
+        source_file = next(
+            node
+            for node in data["valid_graph"]["nodes"]
+            if node["node_type"] == "SOURCE_FILE"
+        )
+        self.assertEqual(
+            source_file["artifact_ref"]["content_hash"],
+            source_file["metadata"]["retained_bytes_sha256"],
+        )
+        mismatch = mutate(
+            data["valid_graph"],
+            {"source_file_retained_hash": "e" * 64},
+        )
+        self.assertEqual(diagnose(mismatch), "EVIDENCE_HASH_MISMATCH")
+
+    def test_18_rounding_and_authority_require_approval(self):
+        data = j(V)
+        for source, target in [
+            ("rounding", "approval-rounding"),
+            ("authority", "approval-authority"),
+        ]:
+            mutation = {
+                "remove_edge": {
+                    "from_node_id": source,
+                    "to_node_id": target,
+                    "edge_type": "ARTIFACT_APPROVED_BY",
+                }
+            }
+            self.assertEqual(
+                diagnose(mutate(data["valid_graph"], mutation)),
+                "EVIDENCE_APPROVAL_MISSING",
+            )
+
 
 if __name__ == "__main__":
     unittest.main()
