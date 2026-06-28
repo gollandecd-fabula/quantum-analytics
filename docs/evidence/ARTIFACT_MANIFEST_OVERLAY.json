@@ -1,0 +1,37 @@
+{
+  "overlay_version": 1,
+  "base_manifest_git_blob_sha": "498f5cd7440b1bc2c361dd940dead8fc06cd2c1d",
+  "reason": "Append-only manifest correction for exact B1a head after semantic-validation review remediation.",
+  "control_paths_excluded_from_payload": [
+    "docs/evidence/ARTIFACT_MANIFEST.json",
+    "docs/evidence/ARTIFACT_MANIFEST_OVERLAY.json"
+  ],
+  "entries": [
+    [
+      "docs/finance/SAFE_EXPRESSION_CONTRACT.md",
+      "c8c3a6f8152b90e6e71393ade7923e8f5224bcea9252697167553df50b062be8",
+      7744
+    ],
+    [
+      "tests/test_000_b1a_manifest_payload.py",
+      "fe13d3e61f78ef7c716ba2bdf1847f4696cba51b9d8fabaeb5528e51ac6fd188",
+      1018
+    ],
+    [
+      "tests/test_b1a_artifact_manifest.py",
+      "acef8b5094c1309e560f3f6da617d96202e20c8e05a73de415ac63761bbc741b",
+      3201
+    ],
+    [
+      "tests/test_b1a_contract_alignment.py",
+      "79259645d2cb17aa1935e760d134389241d5f4c85d96b072a2bd1f6b45aa1362",
+      7436
+    ],
+    [
+      "tests/test_b1a_safe_expression_semantics.py",
+      "ebdd579ca0444e5b02483532fcc00170d88ae59d7743dd6e47d34be7d583f27c",
+      3662
+    ]
+  ],
+  "remove_paths": []
+}
