@@ -1,7 +1,7 @@
 {
   "overlay_version": 1,
   "base_manifest_git_blob_sha": "498f5cd7440b1bc2c361dd940dead8fc06cd2c1d",
-  "reason": "Append-only artifact corrections for merged B1a and active B3 metric-result and Evidence Chain work.",
+  "reason": "Effective artifact corrections for final permanent B1a cleanup and active B3 metric-result and Evidence Chain work.",
   "control_paths_excluded_from_payload": [
     "docs/evidence/ARTIFACT_MANIFEST.json",
     "docs/evidence/ARTIFACT_MANIFEST_OVERLAY.json"
@@ -11,6 +11,11 @@
       "docs/evidence/EVIDENCE_CHAIN_CONTRACT.md",
       "ae322841c59ec0f4ed5f30e609ef7fcfb088d9b98fb4dc8ab42f62d061c64a49",
       3828
+    ],
+    [
+      "docs/evidence/STAGE_B_B1A_CONTRACT_EVIDENCE.yaml",
+      "0b01bbaa05fcfcb043539bba11d98e1286848112e7f6e00fceadaf5c7735a983",
+      1253
     ],
     [
       "docs/evidence/STAGE_B_B3_CONTRACT_EVIDENCE.yaml",
