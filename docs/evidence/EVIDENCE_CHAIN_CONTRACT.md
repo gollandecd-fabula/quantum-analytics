@@ -88,6 +88,13 @@ Every required `APPROVAL` node has metadata `status: APPROVED`, a non-empty
 `approved_at`, and a non-empty `approver`. A missing approval path, wrong target
 node type, or non-approved metadata produces `EVIDENCE_APPROVAL_MISSING`.
 
+Singleton typed relations are cardinality-constrained. The root has exactly one
+`RESULT_DEFINED_BY`, `RESULT_CALCULATED_WITH`, `RESULT_HAS_FRESHNESS`, and
+`RESULT_HAS_CONFIDENCE` target. Each Calculation Profile has exactly one
+`PROFILE_USES_ROUNDING` and one `PROFILE_USES_SOURCE_AUTHORITY` target. Each
+Rule Resolution has exactly one `RESOLUTION_SELECTS_RULE` target. More than one
+well-typed target on any singleton relation produces `EVIDENCE_EDGE_INVALID`.
+
 For the root Metric Snapshot, all `RESULT_USES_TRANSFORMATION` edges use a
 zero-based, unique, contiguous `sequence` set `0..n-1`. Duplicate, missing,
 negative, non-integer, or gapped values produce
