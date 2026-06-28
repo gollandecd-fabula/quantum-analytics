@@ -2,28 +2,27 @@
 
 Status: `DRAFT_FOR_B3_REVIEW`
 Risk class: `R2`
-Tracking: `[BUILD][B3] Define metric snapshots and Evidence Chain contracts`
+Tracking issue: `#9`
 
 ## Purpose
 
 A Metric Snapshot is an immutable, reproducible statement of one metric result
-for one explicit tenant, scope, accounting view, period, mode, calculation
-profile, and evidence set. A snapshot is never edited in place. Recalculation
+for one explicit tenant, scope, accounting view, period, mode, Calculation
+Profile, and evidence set. A snapshot is never edited in place. Recalculation
 creates a new snapshot linked to the prior result.
 
 ## Identity
 
 Every snapshot contains:
 
-- `metric_snapshot_id` — globally unique immutable identifier;
-- `metric_id`, positive `metric_version`, and metric-definition content hash;
-- `organization_id` — mandatory tenant boundary;
-- optional `marketplace_account_id`, product, group, and profile scopes;
+- `metric_snapshot_id`, positive `snapshot_revision`, and content SHA-256;
+- `metric_definition_ref` with positive immutable version and hash;
+- `calculation_profile_ref` with positive immutable version and hash;
+- mandatory `organization_id` and optional marketplace-account scope;
 - `mode` — `ACTUAL` or `SCENARIO`;
 - `scenario_id` — null for Actual and required for Scenario;
 - explicit period start/end and accounting view;
-- `calculated_at`, actor, reason, and trace identifier;
-- positive snapshot revision;
+- calculation timestamp, actor, reason, and trace identifier;
 - optional prior-snapshot and restatement references.
 
 ## Result state
@@ -41,21 +40,20 @@ The state vocabulary is exactly the canonical Stage A4 set:
 Numeric zero is a valid payload of `VALID`; it is not a separate state.
 
 A `VALID` snapshot contains a typed value. Every non-VALID snapshot contains
-`value: null`, a machine-readable reason code, limitations, and the evidence
-needed to explain the state.
+`value: null`, a machine-readable reason code, limitations, and evidence needed
+to explain the state.
 
 ## Value metadata
 
 Where applicable, the snapshot declares:
 
-- decimal-string value or integer value;
-- value type and unit;
+- normalized decimal-string or integer value;
+- value type and unit, including `MONEY_PER_ITEM` where defined by B1a;
 - ISO 4217 currency;
-- accounting view;
-- confirmed expense boundary;
-- rounding-policy ID, positive version, content hash, application point, mode,
-  and resolved scale;
-- source-authority ID, positive version, content hash, and approval status.
+- accounting view and confirmed expense boundary;
+- rounding-policy reference, application point, mode, and resolved scale;
+- approved Source Authority reference;
+- Evidence Chain reference.
 
 Cross-currency aggregation is `BLOCKED` unless a separately approved conversion
 contract is referenced.
@@ -63,16 +61,16 @@ contract is referenced.
 ## Immutable references
 
 Every reference uses a stable identifier, positive immutable version, and
-SHA-256 content hash. Required references include:
+SHA-256 content hash. Required evidence includes:
 
 - Calculation Profile;
-- metric definition;
-- rule-resolution results used by the metric;
-- normalized canonical events;
-- transformations;
-- source records;
+- Metric Definition;
+- Rule Resolution results and selected Configuration Rules;
+- normalized Canonical Events;
+- Transformations;
+- Source Records;
 - source files and their SHA-256;
-- rounding policy;
+- Rounding Policy;
 - Source Authority;
 - Product Master version when relevant.
 
@@ -83,25 +81,25 @@ Aliases such as `latest`, mutable URLs, or unversioned names are forbidden.
 A snapshot records:
 
 - `data_freshness_state`: `CURRENT`, `STALE`, `UNKNOWN`, or `NOT_APPLICABLE`;
-- `freshness_observed_at` and optional `freshness_deadline`;
+- freshness observation and optional deadline;
 - `confidence_state`: `HIGH`, `MEDIUM`, `LOW`, `UNKNOWN`, or `NOT_APPLICABLE`;
 - machine-readable confidence reasons;
-- `valid_from` and optional `valid_to` for result applicability;
+- applicability interval;
 - limitations and unresolved conflicts.
 
-Freshness and confidence never change the numeric value silently. A new
-assessment produces a new snapshot or a separately versioned assessment record.
+Freshness and confidence never change a numeric value silently. A changed
+assessment creates a new snapshot or separately versioned assessment.
 
 ## Recalculation and restatement
 
 Recalculation records:
 
 - prior snapshot identifier;
-- recalculation reason code;
+- recalculation reason;
 - initiating actor;
-- trigger timestamp and completion timestamp;
+- trigger and completion timestamps;
 - changed event, rule, metric, rounding, Source Authority, Product Master, or
-  transformation references;
+  Transformation references;
 - whether the prior period is OPEN, PROVISIONAL, CLOSED, or RESTATED.
 
 Closed-period corrections create a restatement chain. History is never
@@ -114,18 +112,18 @@ rewritten.
 - Scenario snapshots require `scenario_id`; inherited Actual references are
   explicit and immutable.
 - Scenario snapshots cannot supersede, restate, or publish as Actual snapshots.
-- Identifiers and evidence graphs are namespaced by mode.
+- Identifiers and Evidence Chains are namespaced by mode.
 
 ## Publishability
 
 A snapshot is publishable only when:
 
-- its metric definition permits the requested publication class;
+- its Metric Definition permits the requested publication class;
 - Calculation Profile references are complete and hash-valid;
 - required Source Authority is approved;
 - no unresolved evidence-link, tenant, mode, version, or hash conflict exists;
 - required inputs are not BLOCKED, UNAVAILABLE, CONFLICT, or INVALID;
-- an approved rounding policy is referenced;
+- an approved Rounding Policy is referenced;
 - the Evidence Chain is complete and reproducible.
 
 B3 defines the contract only. No financial snapshot is calculated or published.
