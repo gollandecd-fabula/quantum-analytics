@@ -1,16 +1,41 @@
 {
-  "overlay_version": 1,
+  "overlay_version": 3,
   "base_manifest_git_blob_sha": "498f5cd7440b1bc2c361dd940dead8fc06cd2c1d",
-  "reason": "Effective manifest correction for the final permanent B1a tree after semantic-validation remediation and diagnostic cleanup.",
+  "reason": "Cumulative manifest overlay for the permanent B1a cleanup baseline and B3 v3 contracts, schemas, fixtures, tests, and state artifacts.",
   "control_paths_excluded_from_payload": [
     "docs/evidence/ARTIFACT_MANIFEST.json",
     "docs/evidence/ARTIFACT_MANIFEST_OVERLAY.json"
   ],
   "entries": [
     [
+      "docs/evidence/EVIDENCE_CHAIN_CONTRACT.md",
+      "b9150c6c215324ad87d5460d24986458ae379dd6527e77776aff7fa74d2c89ab",
+      5600
+    ],
+    [
+      "docs/evidence/METRIC_SNAPSHOT_CONTRACT.md",
+      "7e3190b0766030ba5cdb68c7f25b49be9e8b5be2c66e3181ef38d04046238771",
+      4756
+    ],
+    [
       "docs/evidence/STAGE_B_B1A_CONTRACT_EVIDENCE.yaml",
       "0b01bbaa05fcfcb043539bba11d98e1286848112e7f6e00fceadaf5c7735a983",
       1253
+    ],
+    [
+      "docs/evidence/STAGE_B_B3_CONTRACT_EVIDENCE.yaml",
+      "d91d940d1ca86b3631b1e68bfbd0aef71927077b4851808409ae19e7e8648e0b",
+      3052
+    ],
+    [
+      "docs/evidence/STAGE_B_B3_EXECUTION_STATE.yaml",
+      "b17713cbeba633c562628f5eab115d89b004d20d93fb0caa869c76b3beedc093",
+      1710
+    ],
+    [
+      "docs/evidence/STAGE_B_EXECUTION_STATE.yaml",
+      "7725bbc481a6efab05bf058e9a37c2ad6c245c95feade6c7c80e6e20d34bd4df",
+      1251
     ],
     [
       "docs/finance/SAFE_EXPRESSION_CONTRACT.md",
@@ -19,8 +44,28 @@
     ],
     [
       "docs/governance/CURRENT_STATE.md",
-      "0cb3b8cab00d98f4b4f8f946309bbc27c4cf2ff83e7e45a4461a78772c6d8b15",
-      1397
+      "8d137d0f24cc84bdb6e255c841efd7e1ac7f9f30fe389e26aa62ee5209606603",
+      1763
+    ],
+    [
+      "docs/governance/CURRENT_STATE_B3.md",
+      "8c236f8e2cbb40df3ae481eff13816dcfdac7bfb0828b11c4ec38f44d5d2cb16",
+      2596
+    ],
+    [
+      "schemas/evidence-chain.schema.json",
+      "4087797703b6a1187f58b346f3b985eab4dee35bb4f9bd85d2055049d37545c7",
+      6266
+    ],
+    [
+      "schemas/metric-result.schema.json",
+      "bc691818f90b560ef4a5ac431c10e50a02b8b0a6ec9ec2667f445690290af35f",
+      8619
+    ],
+    [
+      "tests/contracts/fixtures/b3-evidence-chain-vectors.json",
+      "d88fa435b2c3a3f3e31c4b2eca8a5e5297b88a842ac85dbe5a414b3ae6ab37ed",
+      10610
     ],
     [
       "tests/test_b1a_artifact_manifest.py",
@@ -36,6 +81,11 @@
       "tests/test_b1a_safe_expression_semantics.py",
       "ebdd579ca0444e5b02483532fcc00170d88ae59d7743dd6e47d34be7d583f27c",
       3662
+    ],
+    [
+      "tests/test_b3_evidence_contracts.py",
+      "5463b1e51659043d35014ed8367df2947cb1ec3c0f03383e694a1afdc23ed94b",
+      8831
     ]
   ],
   "remove_paths": []

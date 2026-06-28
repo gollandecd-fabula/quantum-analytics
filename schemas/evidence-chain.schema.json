@@ -1,0 +1,144 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://quantum.local/schemas/evidence-chain.schema.json",
+  "title": "Quantum Evidence Chain v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "evidence_chain_id",
+    "version",
+    "content_hash",
+    "organization_id",
+    "mode",
+    "scenario_id",
+    "root_metric_snapshot_ref",
+    "nodes",
+    "edges",
+    "actor",
+    "reason",
+    "trace_id",
+    "created_at"
+  ],
+  "properties": {
+    "evidence_chain_id": {"type": "string", "minLength": 1},
+    "version": {"type": "integer", "minimum": 1},
+    "content_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "organization_id": {"type": "string", "minLength": 1},
+    "mode": {"type": "string", "enum": ["ACTUAL", "SCENARIO"]},
+    "scenario_id": {"type": ["string", "null"], "minLength": 1},
+    "root_metric_snapshot_ref": {"$ref": "#/$defs/versionedRef"},
+    "nodes": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/node"}},
+    "edges": {"type": "array", "items": {"$ref": "#/$defs/edge"}},
+    "actor": {"type": "string", "minLength": 1},
+    "reason": {"type": "string", "minLength": 1},
+    "trace_id": {"type": "string", "minLength": 1},
+    "created_at": {"type": "string", "format": "date-time"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"mode": {"const": "ACTUAL"}}, "required": ["mode"]},
+      "then": {"properties": {"scenario_id": {"type": "null"}}}
+    },
+    {
+      "if": {"properties": {"mode": {"const": "SCENARIO"}}, "required": ["mode"]},
+      "then": {"properties": {"scenario_id": {"type": "string"}}}
+    }
+  ],
+  "$defs": {
+    "versionedRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "version", "content_hash"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "version": {"type": "integer", "minimum": 1},
+        "content_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+      }
+    },
+    "node": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "node_id",
+        "node_type",
+        "artifact_ref",
+        "organization_id",
+        "mode",
+        "scenario_id",
+        "metadata"
+      ],
+      "properties": {
+        "node_id": {"type": "string", "minLength": 1},
+        "node_type": {
+          "type": "string",
+          "enum": [
+            "METRIC_SNAPSHOT",
+            "METRIC_DEFINITION",
+            "CALCULATION_PROFILE",
+            "RULE_RESOLUTION",
+            "CONFIGURATION_RULE",
+            "ROUNDING_POLICY",
+            "SOURCE_AUTHORITY",
+            "PRODUCT_MASTER",
+            "TRANSFORMATION",
+            "CANONICAL_EVENT",
+            "SOURCE_RECORD",
+            "SOURCE_FILE",
+            "FRESHNESS_ASSESSMENT",
+            "CONFIDENCE_ASSESSMENT",
+            "RECONCILIATION_RESULT",
+            "APPROVAL"
+          ]
+        },
+        "artifact_ref": {"$ref": "#/$defs/versionedRef"},
+        "organization_id": {"type": "string", "minLength": 1},
+        "mode": {"type": "string", "enum": ["ACTUAL", "SCENARIO"]},
+        "scenario_id": {"type": ["string", "null"], "minLength": 1},
+        "metadata": {"type": "object"}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"mode": {"const": "ACTUAL"}}, "required": ["mode"]},
+          "then": {"properties": {"scenario_id": {"type": "null"}}}
+        },
+        {
+          "if": {"properties": {"mode": {"const": "SCENARIO"}}, "required": ["mode"]},
+          "then": {"properties": {"scenario_id": {"type": "string"}}}
+        }
+      ]
+    },
+    "edge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["from_node_id", "to_node_id", "edge_type", "sequence"],
+      "properties": {
+        "from_node_id": {"type": "string", "minLength": 1},
+        "to_node_id": {"type": "string", "minLength": 1},
+        "edge_type": {
+          "type": "string",
+          "enum": [
+            "RESULT_DEFINED_BY",
+            "RESULT_CALCULATED_WITH",
+            "RESULT_USES_RESOLUTION",
+            "RESOLUTION_SELECTS_RULE",
+            "PROFILE_SELECTS_RULE",
+            "PROFILE_USES_ROUNDING",
+            "PROFILE_USES_SOURCE_AUTHORITY",
+            "RESULT_DERIVED_FROM_EVENT",
+            "EVENT_NORMALIZED_FROM_RECORD",
+            "RECORD_READ_FROM_FILE",
+            "RESULT_USES_TRANSFORMATION",
+            "RESULT_USES_PRODUCT_MASTER",
+            "RESULT_HAS_FRESHNESS",
+            "RESULT_HAS_CONFIDENCE",
+            "RESULT_RECONCILED_BY",
+            "ARTIFACT_APPROVED_BY",
+            "SNAPSHOT_SUPERSEDES",
+            "SNAPSHOT_RESTATES"
+          ]
+        },
+        "sequence": {"type": "integer", "minimum": 0}
+      }
+    }
+  }
+}
