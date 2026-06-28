@@ -31,6 +31,19 @@ class B3RuntimeBoundaries(unittest.TestCase):
                 "https://json-schema.org/draft/2020-12/schema",
             )
 
+        metric_schema = load_json(SCHEMAS / "metric-result.schema.json")
+        chain_ref = metric_schema["$defs"]["evidenceChainRef"]
+        self.assertEqual(chain_ref["required"], ["id", "version"])
+        self.assertNotIn("content_hash", chain_ref["properties"])
+        self.assertFalse(chain_ref["additionalProperties"])
+
+        contract = (
+            ROOT / "docs/evidence/METRIC_SNAPSHOT_CONTRACT.md"
+        ).read_text(encoding="utf-8")
+        self.assertIn("cycle-breaking identity locator", contract)
+        self.assertIn("create and hash the Metric Snapshot", contract)
+        self.assertIn("create the Evidence Chain", contract)
+
     def test_03_runtime_location(self):
         import quantum.evidence.verification as runtime
         self.assertTrue(callable(runtime.verify_evidence_chain))
