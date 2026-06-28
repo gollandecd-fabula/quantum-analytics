@@ -11,7 +11,7 @@ from test_b1a_artifact_manifest import MANIFEST_PATH, expected_manifest
 ROOT = Path(__file__).resolve().parents[1]
 SELF_PATH = "tests/test_000_b1a_manifest_payload.py"
 CHUNK_SIZE = 900
-CHUNKS_PER_ATTEMPT = 3
+CHUNKS_PER_ATTEMPT = 2
 
 
 class B1aManifestPayloadDiagnostic(unittest.TestCase):
