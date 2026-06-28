@@ -6,32 +6,37 @@
     "release_authorized": false,
     "runtime_installation_authorized": false
   },
-  "schema_version": 2,
+  "schema_version": 3,
   "stage": "OSS_DEPENDENCY_ADMISSION",
-  "status": "R2_HARDENING_CI_REQUIRED",
-  "hardening_change": {
-    "base_validated_head": "1a43f00736a6ef67905076a6ac29a49d7461a96e",
-    "reason": "Reject duplicate SBOM package names and SPDX identifiers, and return structured errors for malformed register identity fields.",
-    "required_revalidation": [
-      "foundation_checks",
-      "tracked_tree_manifest_equality",
-      "official_registry_verification",
-      "npm_distribution_integrity",
-      "osv_vulnerability_scan",
-      "independent_exact_head_review"
+  "status": "R2_VALIDATED_REVIEW_REQUIRED",
+  "validated_hardening": {
+    "head": "4577e141065834f095a8f7f8490330e078c80142",
+    "controls": [
+      "structured_malformed_register_identity_errors",
+      "duplicate_sbom_package_name_rejection",
+      "duplicate_spdx_identifier_rejection",
+      "document_describes_type_and_duplicate_validation"
     ],
-    "test_method_count": 8
+    "test_method_count": 8,
+    "function_based_hardening_regression_cases": 1
   },
-  "previous_validation_evidence": {
+  "validated_gates": {
+    "foundation_checks": "PASS",
+    "npm_distribution_integrity": "PASS",
+    "official_registry_verification": "PASS",
+    "osv_vulnerability_scan": "PASS_ZERO_KNOWN_VULNERABILITIES",
+    "tracked_tree_manifest_equality": "PASS"
+  },
+  "workflow_evidence": {
     "conclusion": "success",
-    "head": "1a43f00736a6ef67905076a6ac29a49d7461a96e",
-    "job_id": 83946671385,
-    "run_id": 28337704134,
-    "run_number": 7,
+    "job_id": 83948968369,
+    "run_id": 28338575472,
+    "run_number": 8,
+    "status": "completed",
     "workflow": "OSS Admission CI"
   },
   "remaining_closure_gates": [
-    "current_head_ci_success",
+    "evidence_head_ci_success",
     "independent_exact_head_review_zero_findings",
     "unresolved_review_threads_zero",
     "mergeable_true"
