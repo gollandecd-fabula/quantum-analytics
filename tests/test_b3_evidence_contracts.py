@@ -77,7 +77,7 @@ class B3EvidenceContracts(unittest.TestCase):
         graph["content_hash"] = canonical_graph_hash(graph)
         self.assertIn("EVIDENCE_EDGE_DUPLICATE", verify_evidence_chain(graph))
 
-    def test_09_orphan_node(self):
+    def test_09_orphan_node_and_deep_path(self):
         graph = copy.deepcopy(graph_data()["valid_graph"])
         orphan = copy.deepcopy(graph["nodes"][1])
         orphan["node_id"] = "orphan-definition"
@@ -85,6 +85,32 @@ class B3EvidenceContracts(unittest.TestCase):
         graph["nodes"].append(orphan)
         graph["content_hash"] = canonical_graph_hash(graph)
         self.assertIn("EVIDENCE_ORPHAN_NODE", verify_evidence_chain(graph))
+
+        deep = copy.deepcopy(graph_data()["valid_graph"])
+        template = next(
+            node for node in deep["nodes"]
+            if node["node_type"] == "METRIC_SNAPSHOT"
+        )
+        previous = template["node_id"]
+        for index in range(1100):
+            node = copy.deepcopy(template)
+            node_id = f"history-{index}"
+            node["node_id"] = node_id
+            node["artifact_ref"] = {
+                "id": node_id,
+                "version": 1,
+                "content_hash": f"{index + 1:064x}",
+            }
+            deep["nodes"].append(node)
+            deep["edges"].append({
+                "from_node_id": previous,
+                "to_node_id": node_id,
+                "edge_type": "SNAPSHOT_SUPERSEDES",
+                "sequence": 0,
+            })
+            previous = node_id
+        deep["content_hash"] = canonical_graph_hash(deep)
+        self.assertIn("EVIDENCE_MALFORMED", verify_evidence_chain(deep))
 
     def test_10_naive_created_at(self):
         graph = copy.deepcopy(graph_data()["valid_graph"])

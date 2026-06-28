@@ -57,11 +57,48 @@ class B3MetricSnapshot(unittest.TestCase):
         snapshot["content_hash"] = canonical_snapshot_hash(snapshot)
         self.assertIn("METRIC_SNAPSHOT_VALUE_INVALID", verify_metric_snapshot(snapshot))
 
-    def test_09_integer_rejects_bool_and_money_unit(self):
-        snapshot = valid_snapshot()
-        snapshot.update({"value_type": "INTEGER", "value": True, "unit": "MONEY", "currency": None})
-        snapshot["content_hash"] = canonical_snapshot_hash(snapshot)
-        self.assertIn("METRIC_SNAPSHOT_VALUE_INVALID", verify_metric_snapshot(snapshot))
+    def test_09_typed_values_and_optional_locators(self):
+        integer = valid_snapshot()
+        integer.update({
+            "value_type": "INTEGER",
+            "value": True,
+            "unit": "MONEY",
+            "currency": None,
+        })
+        integer["content_hash"] = canonical_snapshot_hash(integer)
+        self.assertIn("METRIC_SNAPSHOT_VALUE_INVALID", verify_metric_snapshot(integer))
+
+        for value_type in ("DECIMAL", "RATE"):
+            for unit in ("MONEY", "MONEY_PER_ITEM"):
+                with self.subTest(value_type=value_type, unit=unit):
+                    snapshot = valid_snapshot()
+                    snapshot.update({
+                        "value_type": value_type,
+                        "value": "1.5",
+                        "unit": unit,
+                        "currency": None,
+                    })
+                    snapshot["content_hash"] = canonical_snapshot_hash(snapshot)
+                    self.assertIn(
+                        "METRIC_SNAPSHOT_VALUE_INVALID",
+                        verify_metric_snapshot(snapshot),
+                    )
+
+        invalid_locator_values = ("", [], {}, 7, False)
+        for field in (
+            "marketplace_account_id",
+            "prior_snapshot_id",
+            "restates_snapshot_id",
+        ):
+            for value in invalid_locator_values:
+                with self.subTest(field=field, value=repr(value)):
+                    snapshot = valid_snapshot()
+                    snapshot[field] = value
+                    snapshot["content_hash"] = canonical_snapshot_hash(snapshot)
+                    self.assertIn(
+                        "METRIC_SNAPSHOT_MALFORMED",
+                        verify_metric_snapshot(snapshot),
+                    )
 
     def test_10_unknown_expense_and_rounding_settings(self):
         expense = valid_snapshot()
