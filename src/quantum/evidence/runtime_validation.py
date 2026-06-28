@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import re
 from collections.abc import Mapping
+from datetime import datetime
 from typing import Any
 
 from . import verification as _base
@@ -20,6 +22,10 @@ ROUNDING_MODES = frozenset({
     "FLOOR",
     "CEILING",
 })
+_RFC3339_RE = re.compile(
+    r"^\d{4}-\d{2}-\d{2}[Tt]\d{2}:\d{2}:\d{2}"
+    r"(?:\.\d+)?(?:[Zz]|[+-]\d{2}:\d{2})$"
+)
 
 
 def _append(errors: list[str], code: str) -> None:
@@ -29,6 +35,21 @@ def _append(errors: list[str], code: str) -> None:
 
 def _is_allowed_string(value: object, allowed: frozenset[str] | set[str]) -> bool:
     return isinstance(value, str) and value in allowed
+
+
+def _is_nonempty_string(value: object) -> bool:
+    return isinstance(value, str) and bool(value)
+
+
+def _is_rfc3339_datetime(value: object) -> bool:
+    if not isinstance(value, str) or _RFC3339_RE.fullmatch(value) is None:
+        return False
+    normalized = value[:-1] + "+00:00" if value[-1] in "Zz" else value
+    try:
+        parsed = datetime.fromisoformat(normalized)
+    except ValueError:
+        return False
+    return parsed.tzinfo is not None and parsed.utcoffset() is not None
 
 
 def _typed_target_ids(
@@ -49,10 +70,37 @@ def _typed_target_ids(
     }
 
 
+def _has_strict_approval(
+    raw_edges: list[object],
+    nodes: Mapping[str, Mapping[str, Any]],
+    artifact_id: str,
+) -> bool:
+    for approval_id in _typed_target_ids(
+        raw_edges,
+        nodes,
+        artifact_id,
+        "ARTIFACT_APPROVED_BY",
+        "APPROVAL",
+    ):
+        metadata = nodes[approval_id].get("metadata")
+        if not isinstance(metadata, Mapping):
+            continue
+        if (
+            metadata.get("status") == "APPROVED"
+            and _is_rfc3339_datetime(metadata.get("approved_at"))
+            and _is_nonempty_string(metadata.get("approver"))
+        ):
+            return True
+    return False
+
+
 def verify_evidence_chain(graph: object, **kwargs: Any) -> tuple[str, ...]:
     errors = list(_base.verify_evidence_chain(graph, **kwargs))
     if not isinstance(graph, Mapping):
         return tuple(errors)
+
+    if not _is_rfc3339_datetime(graph.get("created_at")):
+        _append(errors, "EVIDENCE_TIMESTAMP_INVALID")
 
     raw_nodes = graph.get("nodes")
     raw_edges = graph.get("edges")
@@ -119,26 +167,27 @@ def verify_evidence_chain(graph: object, **kwargs: Any) -> tuple[str, ...]:
         resolved_rule_ids.update(resolution_rule_ids)
 
     for profile_id in profile_ids:
-        if len(
-            _typed_target_ids(
-                raw_edges,
-                nodes,
-                profile_id,
-                "PROFILE_USES_ROUNDING",
-                "ROUNDING_POLICY",
-            )
-        ) != 1:
+        rounding_ids = _typed_target_ids(
+            raw_edges,
+            nodes,
+            profile_id,
+            "PROFILE_USES_ROUNDING",
+            "ROUNDING_POLICY",
+        )
+        authority_ids = _typed_target_ids(
+            raw_edges,
+            nodes,
+            profile_id,
+            "PROFILE_USES_SOURCE_AUTHORITY",
+            "SOURCE_AUTHORITY",
+        )
+        if len(rounding_ids) != 1 or len(authority_ids) != 1:
             _append(errors, "EVIDENCE_REQUIRED_PATH_MISSING")
-        if len(
-            _typed_target_ids(
-                raw_edges,
-                nodes,
-                profile_id,
-                "PROFILE_USES_SOURCE_AUTHORITY",
-                "SOURCE_AUTHORITY",
-            )
-        ) != 1:
-            _append(errors, "EVIDENCE_REQUIRED_PATH_MISSING")
+        if any(
+            not _has_strict_approval(raw_edges, nodes, artifact_id)
+            for artifact_id in rounding_ids | authority_ids
+        ):
+            _append(errors, "EVIDENCE_APPROVAL_MISSING")
 
         profile_rule_ids = _typed_target_ids(
             raw_edges,
@@ -150,7 +199,7 @@ def verify_evidence_chain(graph: object, **kwargs: Any) -> tuple[str, ...]:
         if (
             not profile_rule_ids
             or not resolved_rule_ids
-            or not profile_rule_ids.issubset(resolved_rule_ids)
+            or profile_rule_ids != resolved_rule_ids
         ):
             _append(errors, "EVIDENCE_REQUIRED_PATH_MISSING")
 
@@ -172,6 +221,20 @@ def verify_metric_snapshot(snapshot: object) -> tuple[str, ...]:
             isinstance(value, str) and bool(value)
         ):
             _append(errors, "METRIC_SNAPSHOT_MALFORMED")
+
+    for field in (
+        "period_start",
+        "period_end",
+        "freshness_observed_at",
+        "valid_from",
+        "calculated_at",
+    ):
+        if not _is_rfc3339_datetime(snapshot.get(field)):
+            _append(errors, "METRIC_SNAPSHOT_TIMESTAMP_INVALID")
+    for field in ("freshness_deadline", "valid_to"):
+        value = snapshot.get(field)
+        if value is not None and not _is_rfc3339_datetime(value):
+            _append(errors, "METRIC_SNAPSHOT_TIMESTAMP_INVALID")
 
     if (
         snapshot.get("state") == "VALID"
