@@ -8,6 +8,7 @@ status: ACTIVE
 current_unit: B3
 tracking_issue: 11
 working_branch: build-b3-metric-evidence
+pull_request: 14
 
 units:
   B0:
@@ -17,6 +18,7 @@ units:
   B1a:
     state: COMPLETE
     merged_commit: ff6bc6e23d3df7d877230578c4de0f02f20fce0d
+    cleanup_commit: 40c8ef94b4826257c2935d3ac499009734be758f
     issue: 7
     pull_request: 8
     risk: R2
@@ -29,9 +31,21 @@ units:
     risk: R3
     approval: NOT_GRANTED
   B3:
-    state: IN_PROGRESS
+    state: READY_FOR_MERGE_SUBJECT_TO_CURRENT_HEAD_GATES
     issue: 11
+    pull_request: 14
     risk: R2
+    permanent_tests: 16
+    inherited_tests: 68
+    remediation_ci_run: 28318737935
+    remediation_ci_status: SUCCESS
+    review_threads_total: 2
+    review_threads_unresolved: 0
+    remaining_gates:
+      - CURRENT_METADATA_HEAD_CI_SUCCESS
+      - ARTIFACT_OVERLAY_SYNCHRONIZED
+      - INDEPENDENT_CODEX_REREVIEW_CLEAN
+      - PROTECTED_SQUASH_MERGE
   B4:
     state: PLANNED
     risk: R2
