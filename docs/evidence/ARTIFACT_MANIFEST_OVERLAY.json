@@ -1,21 +1,61 @@
 {
   "overlay_version": 1,
   "base_manifest_git_blob_sha": "498f5cd7440b1bc2c361dd940dead8fc06cd2c1d",
-  "reason": "Append-only manifest correction for exact B1a head after semantic-validation review remediation.",
+  "reason": "Append-only artifact corrections for merged B1a and active B3 metric-result and Evidence Chain work.",
   "control_paths_excluded_from_payload": [
     "docs/evidence/ARTIFACT_MANIFEST.json",
     "docs/evidence/ARTIFACT_MANIFEST_OVERLAY.json"
   ],
   "entries": [
     [
+      "docs/evidence/EVIDENCE_CHAIN_CONTRACT.md",
+      "ae322841c59ec0f4ed5f30e609ef7fcfb088d9b98fb4dc8ab42f62d061c64a49",
+      3828
+    ],
+    [
+      "docs/evidence/STAGE_B_EXECUTION_STATE.yaml",
+      "ba96c8a6353848ce73552bf502ee8172c0c56bb35e1d363b12c461c771263a20",
+      1260
+    ],
+    [
       "docs/finance/SAFE_EXPRESSION_CONTRACT.md",
       "c8c3a6f8152b90e6e71393ade7923e8f5224bcea9252697167553df50b062be8",
       7744
     ],
     [
-      "tests/test_000_b1a_manifest_payload.py",
-      "58bc7a38716ea0fb994ce0caf48307c7c82f44048421bc942d8fd964b320a7c7",
-      1450
+      "docs/governance/CURRENT_STATE.md",
+      "a9029078a756df1d3d632d794ecd046781388fd43012466e9f05d45aae779b42",
+      1593
+    ],
+    [
+      "docs/metrics/METRIC_RESULT_CONTRACT.md",
+      "38ff792bc6133b83baded68eea27f34697a7bd349c07805f15dd6b727519f8a3",
+      3600
+    ],
+    [
+      "schemas/evidence-chain.schema.json",
+      "1f2ac57521ccc4d00eb2167b66b111f682dfe9d4f66a01da955f694c1d773df9",
+      5658
+    ],
+    [
+      "schemas/metric-result.schema.json",
+      "e5ab7b0c0b67b0f9e74143ca3cb53e01b9f57e2d88c5f7ee6b4bf2e728cb143f",
+      7732
+    ],
+    [
+      "src/quantum/evidence/__init__.py",
+      "8d83978a2fb69e797dba9dcb02e2792f0596b9c4afc820ad68c96bd2e9c741fc",
+      276
+    ],
+    [
+      "src/quantum/evidence/validation.py",
+      "40b5b08b99547920865862cd740616aca993c4a0354e279d55a48da5d1d710cc",
+      11642
+    ],
+    [
+      "tests/contracts/fixtures/b3-valid-metric-evidence.json",
+      "0fb0c3c8d643da6f9e358ac3a44faf51a91377e484829ff6ad232c0e6f19abd9",
+      5718
     ],
     [
       "tests/test_b1a_artifact_manifest.py",
@@ -31,6 +71,11 @@
       "tests/test_b1a_safe_expression_semantics.py",
       "ebdd579ca0444e5b02483532fcc00170d88ae59d7743dd6e47d34be7d583f27c",
       3662
+    ],
+    [
+      "tests/test_b3_metric_evidence.py",
+      "37f2ecc3868fc2bf99ff10c4813181b604e80310be4ae8e8a080fdf611274731",
+      6763
     ]
   ],
   "remove_paths": []
