@@ -9,6 +9,10 @@ from typing import Any
 
 _HASH_RE = re.compile(r"^[a-f0-9]{64}$")
 _DECIMAL_RE = re.compile(r"^-?(0|[1-9][0-9]*)(\.[0-9]+)?$")
+_RFC3339_RE = re.compile(
+    r"^\d{4}-\d{2}-\d{2}[Tt]\d{2}:\d{2}:\d{2}"
+    r"(?:\.\d+)?(?:[Zz]|[+-]\d{2}:\d{2})$"
+)
 
 NODE_TYPES = frozenset({
     "METRIC_SNAPSHOT", "METRIC_DEFINITION", "CALCULATION_PROFILE",
@@ -142,10 +146,11 @@ def _is_allowed_string(value: object, allowed: frozenset[str]) -> bool:
 
 
 def _valid_datetime(value: object) -> bool:
-    if not isinstance(value, str):
+    if not isinstance(value, str) or _RFC3339_RE.fullmatch(value) is None:
         return False
+    normalized = value[:-1] + "+00:00" if value[-1] in {"Z", "z"} else value
     try:
-        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+        parsed = datetime.fromisoformat(normalized)
     except ValueError:
         return False
     return parsed.tzinfo is not None and parsed.utcoffset() is not None
@@ -154,7 +159,9 @@ def _valid_datetime(value: object) -> bool:
 def _parse_datetime(value: object) -> datetime | None:
     if not _valid_datetime(value):
         return None
-    return datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+    text = str(value)
+    normalized = text[:-1] + "+00:00" if text[-1] in {"Z", "z"} else text
+    return datetime.fromisoformat(normalized)
 
 
 def _valid_ref(value: object, *, chain_locator: bool = False) -> bool:
