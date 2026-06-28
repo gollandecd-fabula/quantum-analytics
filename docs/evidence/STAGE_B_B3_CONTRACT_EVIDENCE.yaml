@@ -2,14 +2,12 @@ stage_contract_id: STAGE-B-BUILD-v1
 unit: B3
 risk_class: R2
 status: IN_PROGRESS
-tracking_issue: 11
+issue: 11
 pull_request: 14
 
 scope:
-  metric_result_contract: true
-  evidence_chain_contract: true
-  reversible_semantic_validator: true
-  synthetic_fixtures_only: true
+  metric_result_and_evidence_contracts: true
+  synthetic_data_only: true
   calculation_kernel: false
   financial_rule_activation: false
   real_commercial_data: false
@@ -27,27 +25,31 @@ artifacts:
   - tests/test_b3_metric_evidence.py
   - tests/test_b3_manifest_overlay.py
 
-invariants:
-  - immutable_metric_result_versions
-  - exact_version_and_content_hash_references
-  - acyclic_metric_result_and_evidence_chain_hashes
+confirmed:
+  - immutable_versioned_results
+  - acyclic_content_hashes
   - deterministic_input_fingerprint
-  - metric_to_source_file_sha256_traceability
-  - typed_non_valid_states_never_become_zero
-  - actual_and_scenario_isolation
-  - recalculation_actor_reason_timestamp_and_predecessor_audit
-  - broken_links_and_hash_mismatches_fail_closed
-  - manifest_overlay_is_unique_sorted_and_temporary_diagnostic_free
+  - explicit_metric_to_source_file_links
+  - matching_recalculation_and_evidence_actor
+  - typed_non_valid_states
+  - actual_scenario_isolation
+  - broken_links_fail_closed
+  - temporary_diagnostics_absent
 
 qa:
-  b3_tests: 14
-  latest_exact_head_ci: PENDING
-  independent_review: PENDING
-  unresolved_findings: PENDING
+  inherited_tests: 68
+  b3_tests: 16
+  total_tests: 84
+  last_successful_ci_before_remediation: 28318375544
+  current_head_ci: PENDING
+  review_threads_total: 2
+  review_threads_unresolved: 2
+  rereview: PENDING
 
 release_state: RELEASE_BLOCKED
 remaining_gates:
   - EXACT_HEAD_CI_SUCCESS
   - ARTIFACT_OVERLAY_SYNCHRONIZED
-  - INDEPENDENT_CODEX_REVIEW_CLEAN
+  - REVIEW_THREADS_RESOLVED
+  - INDEPENDENT_CODEX_REREVIEW_CLEAN
   - PROTECTED_SQUASH_MERGE
