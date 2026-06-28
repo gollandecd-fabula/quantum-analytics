@@ -1,6 +1,6 @@
 {
-  "overlay_version": 1,
-  "base_overlay_git_blob_sha": "cb082673b9d45759df7589e143c0878f4c5fb1d3",
+  "overlay_version": 2,
+  "base_overlay_git_blob_sha": "8096ceffbb549e774fef8f59ab4f61f564208595",
   "hash_encoding": "sha256-base64",
   "reason": "B3 runtime remediation layer. Adds production verification, modular tests and synchronized state; removes the order-dependent compatibility patch.",
   "entries": [
