@@ -11,10 +11,12 @@ ROOT = Path(__file__).resolve().parents[1]
 MANIFEST_PATH = ROOT / "docs/evidence/ARTIFACT_MANIFEST.json"
 OVERLAY_PATH = ROOT / "docs/evidence/ARTIFACT_MANIFEST_OVERLAY.json"
 RUNTIME_OVERLAY_PATH = ROOT / "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_B3_RUNTIME.json"
+FINAL_OVERLAY_PATH = ROOT / "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_B3_FINAL.json"
 CONTROL_PATHS = {
     "docs/evidence/ARTIFACT_MANIFEST.json",
     "docs/evidence/ARTIFACT_MANIFEST_OVERLAY.json",
     "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_B3_RUNTIME.json",
+    "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_B3_FINAL.json",
 }
 ARTIFACT_FIELDS = ["path", "sha256", "size_bytes"]
 B1A_SCHEMAS = {
@@ -60,16 +62,21 @@ def load_effective_manifest() -> dict:
     current = json.loads(base_bytes.decode("utf-8"))
     overlay_bytes = OVERLAY_PATH.read_bytes()
     overlay = json.loads(overlay_bytes.decode("utf-8"))
-    runtime_overlay = json.loads(RUNTIME_OVERLAY_PATH.read_text(encoding="utf-8"))
+    runtime_bytes = RUNTIME_OVERLAY_PATH.read_bytes()
+    runtime_overlay = json.loads(runtime_bytes.decode("utf-8"))
+    final_overlay = json.loads(FINAL_OVERLAY_PATH.read_text(encoding="utf-8"))
 
     if overlay["base_manifest_git_blob_sha"] != git_blob_sha(base_bytes):
         raise AssertionError("ARTIFACT_MANIFEST_OVERLAY_BASE_MISMATCH")
     if runtime_overlay["base_overlay_git_blob_sha"] != git_blob_sha(overlay_bytes):
         raise AssertionError("ARTIFACT_MANIFEST_RUNTIME_OVERLAY_BASE_MISMATCH")
+    if final_overlay["base_runtime_overlay_git_blob_sha"] != git_blob_sha(runtime_bytes):
+        raise AssertionError("ARTIFACT_MANIFEST_FINAL_OVERLAY_BASE_MISMATCH")
 
     artifacts = {row[0]: row for row in current["artifacts"]}
     apply_entries(artifacts, overlay)
     apply_entries(artifacts, runtime_overlay)
+    apply_entries(artifacts, final_overlay)
 
     effective = dict(current)
     effective["artifacts"] = [artifacts[path] for path in sorted(artifacts)]
