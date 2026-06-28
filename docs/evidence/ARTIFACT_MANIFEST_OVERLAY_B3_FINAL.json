@@ -1,13 +1,18 @@
 {
-  "overlay_version": 1,
+  "overlay_version": 2,
   "base_runtime_overlay_git_blob_sha": "07dcf6840e9b9ed3890cb2dcdeff92e009812f73",
   "hash_encoding": "sha256-base64",
-  "reason": "Final B3 manifest reconciliation after CI diagnostics.",
+  "reason": "Final B3 manifest reconciliation.",
   "entries": [
     [
       "docs/evidence/EVIDENCE_CHAIN_CONTRACT.md",
       "eBQm23Yrq5DzqUX6uBaGoWMC+QUKFsdCg1ijK+hcHuc=",
       6989
+    ],
+    [
+      "src/quantum/evidence/__init__.py",
+      "8zHp9Kb8yiniGWChP8XqLh19m8T2oKu1np1FROShfjg=",
+      1530
     ],
     [
       "tests/test_a0_manifest_diagnostic.py",
