@@ -1,5 +1,6 @@
 from __future__ import annotations
 import hashlib,json,re,unittest
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -14,10 +15,25 @@ def load_json(path:Path)->dict[str,Any]: return json.loads(path.read_text(encodi
 def scope_has_explicit_null(scope:dict[str,Any])->bool:
     return any(value is None for value in scope.values())
 
+def parse_instant(value:Any)->datetime|None:
+    if not isinstance(value,str) or not value:return None
+    try:
+        parsed=datetime.fromisoformat(value.replace("Z","+00:00"))
+    except ValueError:
+        return None
+    return parsed if parsed.tzinfo is not None else None
+
 def candidate_matches(context:dict[str,Any],candidate:dict[str,Any])->bool:
     scope=candidate["scope"]
     mode=context.get("mode")
+    instant=parse_instant(context.get("calculation_instant"))
+    valid_from=parse_instant(candidate.get("valid_from"))
+    valid_to_raw=candidate.get("valid_to")
+    valid_to=parse_instant(valid_to_raw) if valid_to_raw is not None else None
     if mode not in {"ACTUAL","SCENARIO"}:return False
+    if instant is None or valid_from is None:return False
+    if valid_to_raw is not None and valid_to is None:return False
+    if instant<valid_from or (valid_to is not None and instant>=valid_to):return False
     if scope_has_explicit_null(scope):return False
     if not context.get("organization_id") or scope.get("organization_id")!=context["organization_id"]:return False
     if mode=="ACTUAL" and "scenario_id" in scope:return False
@@ -87,28 +103,38 @@ class B1aFinancialContractTests(unittest.TestCase):
         for bad in ("EVAL","EXEC","IMPORT","SHELL","SQL","ROUND","RANDOM"):self.assertNotIn(bad,ops)
 
     def test_resolution_vectors_enforce_order_tenant_boundary_and_fail_closed(self):
-        vectors=load_json(VECTORS)["vectors"];self.assertGreaterEqual(len(vectors),9)
+        vectors=load_json(VECTORS)["vectors"];self.assertGreaterEqual(len(vectors),11)
         for v in vectors:
             with self.subTest(vector=v["id"]):
                 self.assertTrue(v["context"].get("organization_id"))
                 self.assertIn(v["context"].get("mode"),{"ACTUAL","SCENARIO"})
+                self.assertIsNotNone(parse_instant(v["context"].get("calculation_instant")))
                 self.assertFalse(scope_has_explicit_null(v["context"]))
                 self.assertTrue(all(x["scope"].get("organization_id") for x in v["candidates"]))
                 self.assertTrue(all(not scope_has_explicit_null(x["scope"]) for x in v["candidates"]))
                 self.assertEqual(resolve_vector(v),(v["expected_state"],v["expected_rule_id"]))
 
     def test_resolution_matcher_rejects_explicit_null_scope_wildcards(self):
-        context={"organization_id":"org-a","mode":"ACTUAL","product_id":"p1"}
+        context={"organization_id":"org-a","mode":"ACTUAL","calculation_instant":"2026-06-15T00:00:00Z","product_id":"p1"}
         invalid={"rule_id":"invalid-null","version":1,"scope":{"organization_id":"org-a","product_id":None},"priority":0,"valid_from":"2026-01-01T00:00:00Z"}
         valid={"rule_id":"omitted-wildcard","version":1,"scope":{"organization_id":"org-a"},"priority":0,"valid_from":"2026-01-01T00:00:00Z"}
         self.assertFalse(candidate_matches(context,invalid))
         self.assertTrue(candidate_matches(context,valid))
 
     def test_resolution_matcher_enforces_mode_isolation(self):
+        instant="2026-06-15T00:00:00Z"
         candidate={"rule_id":"scenario","version":1,"scope":{"organization_id":"org-a","scenario_id":"s1"},"priority":0,"valid_from":"2026-01-01T00:00:00Z"}
-        self.assertFalse(candidate_matches({"organization_id":"org-a","mode":"ACTUAL","scenario_id":"s1"},candidate))
-        self.assertTrue(candidate_matches({"organization_id":"org-a","mode":"SCENARIO","scenario_id":"s1"},candidate))
-        self.assertFalse(candidate_matches({"organization_id":"org-a","mode":"SCENARIO"},candidate))
+        self.assertFalse(candidate_matches({"organization_id":"org-a","mode":"ACTUAL","calculation_instant":instant,"scenario_id":"s1"},candidate))
+        self.assertTrue(candidate_matches({"organization_id":"org-a","mode":"SCENARIO","calculation_instant":instant,"scenario_id":"s1"},candidate))
+        self.assertFalse(candidate_matches({"organization_id":"org-a","mode":"SCENARIO","calculation_instant":instant},candidate))
+        active={"rule_id":"active","version":1,"scope":{"organization_id":"org-a"},"priority":0,"valid_from":"2026-01-01T00:00:00Z","valid_to":"2026-07-01T00:00:00Z"}
+        future={"rule_id":"future","version":1,"scope":{"organization_id":"org-a"},"priority":0,"valid_from":"2026-07-01T00:00:00Z"}
+        expired={"rule_id":"expired","version":1,"scope":{"organization_id":"org-a"},"priority":0,"valid_from":"2026-01-01T00:00:00Z","valid_to":"2026-06-15T00:00:00Z"}
+        actual={"organization_id":"org-a","mode":"ACTUAL","calculation_instant":instant}
+        self.assertTrue(candidate_matches(actual,active))
+        self.assertFalse(candidate_matches(actual,future))
+        self.assertFalse(candidate_matches(actual,expired))
+        self.assertFalse(candidate_matches({"organization_id":"org-a","mode":"ACTUAL"},active))
 
     def test_validation_vectors_cover_claimed_fail_closed_blockers(self):
         vectors=load_json(VECTORS)["validation_vectors"]
