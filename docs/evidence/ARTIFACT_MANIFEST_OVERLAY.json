@@ -19,13 +19,13 @@
     ],
     [
       "docs/evidence/STAGE_B_B3_CONTRACT_EVIDENCE.yaml",
-      "6593018e010ca5544c140531190f124cc1f8518f12b3aa1ba6f68d55bd77d337",
-      1438
+      "0f279bdd0ede470d53e1708f91b6087c56e8ccb493553906123ae0a707aaa0c0",
+      1525
     ],
     [
       "docs/evidence/STAGE_B_EXECUTION_STATE.yaml",
-      "ba96c8a6353848ce73552bf502ee8172c0c56bb35e1d363b12c461c771263a20",
-      1260
+      "c9773caa03d5727bd0d5ff0b2524ac1fd7a620d744c0db8c2040609d900450a6",
+      1745
     ],
     [
       "docs/finance/SAFE_EXPRESSION_CONTRACT.md",
@@ -34,8 +34,8 @@
     ],
     [
       "docs/governance/CURRENT_STATE.md",
-      "a9029078a756df1d3d632d794ecd046781388fd43012466e9f05d45aae779b42",
-      1593
+      "eb4d68dd45c4d8cf2364f61e9b382b73f4474be555a3a904f45c1880bb8327c6",
+      1562
     ],
     [
       "docs/metrics/METRIC_RESULT_CONTRACT.md",
