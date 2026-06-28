@@ -27,8 +27,67 @@ def _append(errors: list[str], code: str) -> None:
         errors.append(code)
 
 
+def _graph_has_cycle(graph: object) -> bool | None:
+    if not isinstance(graph, Mapping):
+        return None
+    raw_nodes = graph.get("nodes")
+    raw_edges = graph.get("edges")
+    if not isinstance(raw_nodes, list) or not isinstance(raw_edges, list):
+        return None
+
+    node_ids = {
+        node.get("node_id")
+        for node in raw_nodes
+        if isinstance(node, Mapping)
+        and isinstance(node.get("node_id"), str)
+        and node.get("node_id")
+    }
+    adjacency: dict[str, list[str]] = {str(node_id): [] for node_id in node_ids}
+    for edge in raw_edges:
+        if not isinstance(edge, Mapping):
+            continue
+        source = edge.get("from_node_id")
+        target = edge.get("to_node_id")
+        if isinstance(source, str) and isinstance(target, str):
+            if source in adjacency and target in adjacency:
+                adjacency[source].append(target)
+
+    state: dict[str, int] = {}
+    for start in adjacency:
+        if state.get(start, 0) != 0:
+            continue
+        state[start] = 1
+        stack: list[tuple[str, int]] = [(start, 0)]
+        while stack:
+            node_id, index = stack[-1]
+            targets = adjacency.get(node_id, ())
+            if index >= len(targets):
+                state[node_id] = 2
+                stack.pop()
+                continue
+            target = targets[index]
+            stack[-1] = (node_id, index + 1)
+            target_state = state.get(target, 0)
+            if target_state == 1:
+                return True
+            if target_state == 0:
+                state[target] = 1
+                stack.append((target, 0))
+    return False
+
+
 def verify_evidence_chain(graph: object, **kwargs: Any) -> tuple[str, ...]:
-    errors = list(_base.verify_evidence_chain(graph, **kwargs))
+    cycle = _graph_has_cycle(graph)
+    try:
+        errors = list(_base.verify_evidence_chain(graph, **kwargs))
+    except RecursionError:
+        errors = []
+        _append(
+            errors,
+            "EVIDENCE_GRAPH_CYCLE" if cycle is True else "EVIDENCE_MALFORMED",
+        )
+    if cycle is True:
+        _append(errors, "EVIDENCE_GRAPH_CYCLE")
     if not isinstance(graph, Mapping):
         return tuple(errors)
 
@@ -86,6 +145,24 @@ def verify_metric_snapshot(snapshot: object) -> tuple[str, ...]:
     errors = list(_base.verify_metric_snapshot(snapshot))
     if not isinstance(snapshot, Mapping):
         return tuple(errors)
+
+    for field in (
+        "marketplace_account_id",
+        "prior_snapshot_id",
+        "restates_snapshot_id",
+    ):
+        value = snapshot.get(field)
+        if value is not None and not (
+            isinstance(value, str) and bool(value)
+        ):
+            _append(errors, "METRIC_SNAPSHOT_MALFORMED")
+
+    if (
+        snapshot.get("state") == "VALID"
+        and snapshot.get("value_type") in {"DECIMAL", "RATE"}
+        and snapshot.get("unit") in {"MONEY", "MONEY_PER_ITEM"}
+    ):
+        _append(errors, "METRIC_SNAPSHOT_VALUE_INVALID")
 
     rounding = snapshot.get("rounding")
     if isinstance(rounding, Mapping) and (
