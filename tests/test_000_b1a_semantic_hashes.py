@@ -6,6 +6,7 @@ ROOT = Path(__file__).resolve().parents[1]
 TARGETS = (
     "docs/finance/SAFE_EXPRESSION_CONTRACT.md",
     "tests/test_b1a_safe_expression_semantics.py",
+    "tests/test_b1a_contract_alignment.py",
 )
 
 
