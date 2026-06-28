@@ -41,10 +41,22 @@ class B3MetricSnapshot(unittest.TestCase):
         self.assertIn("METRIC_SNAPSHOT_MODE_CONTAMINATION", verify_metric_snapshot(snapshot))
 
     def test_06_naive_timestamp(self):
-        snapshot = valid_snapshot()
-        snapshot["period_start"] = "2026-06-01T00:00:00"
-        snapshot["content_hash"] = canonical_snapshot_hash(snapshot)
-        self.assertIn("METRIC_SNAPSHOT_TIMESTAMP_INVALID", verify_metric_snapshot(snapshot))
+        for period_start in (
+            "2026-06-01T00:00:00",
+            "2026-06-01 00:00:00+00:00",
+        ):
+            with self.subTest(period_start=period_start):
+                snapshot = valid_snapshot()
+                snapshot["period_start"] = period_start
+                snapshot["content_hash"] = canonical_snapshot_hash(snapshot)
+                for verifier in (
+                    base_verification.verify_metric_snapshot,
+                    verify_metric_snapshot,
+                ):
+                    self.assertIn(
+                        "METRIC_SNAPSHOT_TIMESTAMP_INVALID",
+                        verifier(snapshot),
+                    )
 
     def test_07_period_order(self):
         snapshot = valid_snapshot()
