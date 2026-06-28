@@ -76,6 +76,21 @@ _UNITS = frozenset({
     "MONEY", "MONEY_PER_ITEM", "ITEM", "ORDER", "EVENT", "PERCENT", "RATIO",
     "COUNT",
 })
+_ROUNDING_APPLICATION_POINTS = frozenset({
+    "RULE_INPUT_NORMALIZATION",
+    "RULE_COMPONENT_RESULT",
+    "METRIC_FINAL_ACCOUNTING",
+    "REPORT_PRESENTATION",
+    "EXPORT_PRESENTATION",
+})
+_ROUNDING_MODES = frozenset({
+    "HALF_EVEN",
+    "HALF_UP",
+    "DOWN",
+    "UP",
+    "FLOOR",
+    "CEILING",
+})
 
 
 def _append(errors: list[str], code: str) -> None:
@@ -286,23 +301,32 @@ def verify_evidence_chain(
         typed_targets.setdefault((source, edge_type), []).append(target)
         valid_edges.append((source, target, edge_type, int(sequence)))
 
-    seen: set[str] = set()
-    active: set[str] = set()
-
-    def cyclic(node_id: str) -> bool:
-        if node_id in active:
-            return True
-        if node_id in seen:
-            return False
-        active.add(node_id)
-        for target in adjacency.get(node_id, ()):
-            if cyclic(target):
-                return True
-        active.remove(node_id)
-        seen.add(node_id)
-        return False
-
-    if any(cyclic(node_id) for node_id in nodes):
+    state: dict[str, int] = {}
+    has_cycle = False
+    for start in nodes:
+        if state.get(start, 0) != 0:
+            continue
+        state[start] = 1
+        stack: list[tuple[str, int]] = [(start, 0)]
+        while stack:
+            node_id, index = stack[-1]
+            next_nodes = adjacency.get(node_id, ())
+            if index >= len(next_nodes):
+                state[node_id] = 2
+                stack.pop()
+                continue
+            target = next_nodes[index]
+            stack[-1] = (node_id, index + 1)
+            target_state = state.get(target, 0)
+            if target_state == 1:
+                has_cycle = True
+                break
+            if target_state == 0:
+                state[target] = 1
+                stack.append((target, 0))
+        if has_cycle:
+            break
+    if has_cycle:
         _append(errors, "EVIDENCE_GRAPH_CYCLE")
 
     def targets(source: str, edge_type: str, node_type: str) -> list[str]:
@@ -357,9 +381,10 @@ def verify_evidence_chain(
             return False
 
         for profile in targets(root_id, "RESULT_CALCULATED_WITH", "CALCULATION_PROFILE"):
+            rules = targets(profile, "PROFILE_SELECTS_RULE", "CONFIGURATION_RULE")
             rounding = targets(profile, "PROFILE_USES_ROUNDING", "ROUNDING_POLICY")
             authorities = targets(profile, "PROFILE_USES_SOURCE_AUTHORITY", "SOURCE_AUTHORITY")
-            if not rounding or not authorities:
+            if not rules or not rounding or not authorities:
                 _append(errors, "EVIDENCE_REQUIRED_PATH_MISSING")
             if any(not approved(node_id) for node_id in rounding + authorities):
                 _append(errors, "EVIDENCE_APPROVAL_MISSING")
@@ -422,6 +447,14 @@ def verify_metric_snapshot(snapshot: object) -> tuple[str, ...]:
     for field in ("metric_snapshot_id", "organization_id", "actor", "reason", "trace_id"):
         if not _is_nonempty_string(snapshot.get(field)):
             _append(errors, "METRIC_SNAPSHOT_MALFORMED")
+    for field in (
+        "marketplace_account_id",
+        "prior_snapshot_id",
+        "restates_snapshot_id",
+    ):
+        value = snapshot.get(field)
+        if value is not None and not _is_nonempty_string(value):
+            _append(errors, "METRIC_SNAPSHOT_MALFORMED")
     if not _is_positive_int(snapshot.get("snapshot_revision")):
         _append(errors, "METRIC_SNAPSHOT_VERSION_INVALID")
 
@@ -446,6 +479,8 @@ def verify_metric_snapshot(snapshot: object) -> tuple[str, ...]:
         not isinstance(rounding, Mapping)
         or set(rounding) != {"policy_ref", "application_point", "resolved_mode", "resolved_scale"}
         or not _valid_ref(rounding.get("policy_ref"))
+        or rounding.get("application_point") not in _ROUNDING_APPLICATION_POINTS
+        or rounding.get("resolved_mode") not in _ROUNDING_MODES
         or not _is_non_negative_int(rounding.get("resolved_scale"))
         or int(rounding.get("resolved_scale", 29)) > 28
     ):
@@ -503,6 +538,8 @@ def verify_metric_snapshot(snapshot: object) -> tuple[str, ...]:
                 _append(errors, "METRIC_SNAPSHOT_VALUE_INVALID")
         elif value_type in {"DECIMAL", "RATE"}:
             if not isinstance(value, str) or not _DECIMAL_RE.fullmatch(value) or currency is not None:
+                _append(errors, "METRIC_SNAPSHOT_VALUE_INVALID")
+            if unit in {"MONEY", "MONEY_PER_ITEM"}:
                 _append(errors, "METRIC_SNAPSHOT_VALUE_INVALID")
     else:
         if any(item is not None for item in (value, value_type, unit, currency)):
