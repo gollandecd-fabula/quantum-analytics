@@ -141,10 +141,19 @@ class B3EvidenceContracts(unittest.TestCase):
         self.assertEqual(verify_evidence_chain(deep), ())
 
     def test_10_naive_created_at(self):
-        graph = copy.deepcopy(graph_data()["valid_graph"])
-        graph["created_at"] = "2026-06-28T09:00:00"
-        graph["content_hash"] = canonical_graph_hash(graph)
-        self.assertIn("EVIDENCE_TIMESTAMP_INVALID", verify_evidence_chain(graph))
+        for created_at in (
+            "2026-06-28T09:00:00",
+            "2026-06-28 09:00:00+00:00",
+        ):
+            with self.subTest(created_at=created_at):
+                graph = copy.deepcopy(graph_data()["valid_graph"])
+                graph["created_at"] = created_at
+                graph["content_hash"] = canonical_graph_hash(graph)
+                for verifier in (
+                    base_verification.verify_evidence_chain,
+                    verify_evidence_chain,
+                ):
+                    self.assertIn("EVIDENCE_TIMESTAMP_INVALID", verifier(graph))
 
 
 if __name__ == "__main__":
