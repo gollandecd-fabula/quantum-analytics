@@ -146,7 +146,18 @@ class B1aContractAlignmentTests(unittest.TestCase):
         self.assertIn('"unit": "DIMENSIONLESS"', expression)
         self.assertIn('"value": true', expression)
         self.assertIn('"value_type": "INTEGER"', expression)
-        self.assertIn("machine-readable schema enforces these arities", expression)
+        self.assertIn(
+            "JSON Schema enforces node shape, allowlisted operators,",
+            expression,
+        )
+        self.assertIn(
+            "operator arity, literal representation, and local result metadata constraints",
+            expression,
+        )
+        self.assertIn(
+            "JSON Schema success is necessary but is not sufficient approval or activation",
+            expression,
+        )
 
 
 if __name__ == "__main__":
