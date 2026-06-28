@@ -60,6 +60,32 @@ class B3EvidenceContracts(unittest.TestCase):
         self.assertEqual(verify_evidence_chain(None), ("EVIDENCE_MALFORMED",))
         self.assertIn("EVIDENCE_MALFORMED", verify_evidence_chain({"nodes": []}))
 
+        malformed_mode = copy.deepcopy(graph_data()["valid_graph"])
+        malformed_mode["mode"] = []
+        malformed_mode["content_hash"] = canonical_graph_hash(malformed_mode)
+        for verifier in (
+            base_verification.verify_evidence_chain,
+            verify_evidence_chain,
+        ):
+            self.assertIn(
+                "EVIDENCE_MODE_CONTAMINATION",
+                verifier(malformed_mode),
+            )
+
+        malformed_node_type = copy.deepcopy(graph_data()["valid_graph"])
+        malformed_node_type["nodes"][0]["node_type"] = []
+        malformed_node_type["content_hash"] = canonical_graph_hash(
+            malformed_node_type
+        )
+        for verifier in (
+            base_verification.verify_evidence_chain,
+            verify_evidence_chain,
+        ):
+            self.assertIn(
+                "EVIDENCE_NODE_TYPE_INVALID",
+                verifier(malformed_node_type),
+            )
+
     def test_06_missing_node_id(self):
         graph = copy.deepcopy(graph_data()["valid_graph"])
         graph["nodes"][0].pop("node_id")
