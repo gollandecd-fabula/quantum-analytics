@@ -116,6 +116,13 @@ class B3MetricEvidenceTests(unittest.TestCase):
         self.assertIn("RECALC_PREDECESSOR_MISSING", errors)
         self.assertIn("RECALC_TIMESTAMP_INVERSION", errors)
 
+    def test_recalculation_actor_must_match_evidence_actor(self) -> None:
+        result, chain = load_bundle()
+        chain["actor"] = "different-agent"
+        errors = validate_metric_evidence(result, chain)
+        self.assertIn("RECALC_ACTOR_MISMATCH", errors)
+        self.assertIn("EVIDENCE_CONTENT_HASH_MISMATCH", errors)
+
     def test_missing_required_result_link_fails_closed(self) -> None:
         result, chain = load_bundle()
         chain["links"] = [
@@ -127,6 +134,19 @@ class B3MetricEvidenceTests(unittest.TestCase):
             "REQUIRED_RESULT_LINK_MISSING:ROUNDING_POLICY|rounding-v1|ROUNDED_WITH",
             errors,
         )
+
+    def test_complete_explicit_source_chain_is_required(self) -> None:
+        result, chain = load_bundle()
+        chain["links"] = [
+            link for link in chain["links"]
+            if link["to_kind"] not in {"EVENT", "TRANSFORMATION", "SOURCE_RECORD", "SOURCE_FILE"}
+        ]
+        errors = validate_metric_evidence(result, chain)
+        self.assertIn("REQUIRED_RESULT_EVENT_LINK_MISSING:event-demo", errors)
+        self.assertIn("REQUIRED_EVENT_RECORD_LINK_MISSING:event-demo:record-demo", errors)
+        self.assertIn("REQUIRED_EVENT_TRANSFORMATION_LINK_MISSING:event-demo", errors)
+        self.assertIn("REQUIRED_RECORD_FILE_LINK_MISSING:record-demo:file-demo", errors)
+        self.assertIn("ORPHAN_TRANSFORMATION:normalize-demo", errors)
 
     def test_contract_documents_define_immutable_and_non_write_boundaries(self) -> None:
         metric_contract = (ROOT / "docs/metrics/METRIC_RESULT_CONTRACT.md").read_text(encoding="utf-8")
