@@ -9,6 +9,7 @@ from typing import Any
 
 from quantum.access import TenantContext
 from quantum.domain.events import CanonicalEvent, EventStatus
+from quantum.domain.idempotency import canonical_json_hash
 from quantum.domain.source_rows import ImmutableSourceRow, SourceRowStatus
 
 
@@ -33,6 +34,16 @@ class EventTrace:
     source_row: ImmutableSourceRow
     raw_file_id: str
     source_file_sha256: str
+
+
+def _plain(value: Any) -> Any:
+    if isinstance(value, Mapping):
+        return {str(key): _plain(item) for key, item in value.items()}
+    if isinstance(value, tuple):
+        return [_plain(item) for item in value]
+    if isinstance(value, frozenset):
+        return sorted((_plain(item) for item in value), key=repr)
+    return value
 
 
 def _typed(payload: Mapping[str, Any], field: str) -> Mapping[str, Any]:
@@ -136,6 +147,8 @@ class InMemoryCanonicalLedger:
             or _HEX.fullmatch(event.idempotency_key) is None
         ):
             raise CanonicalLedgerError("EVENT_IDEMPOTENCY_KEY_INVALID")
+        if canonical_json_hash(_plain(event.payload)) != event.semantic_payload_hash:
+            raise CanonicalLedgerError("EVENT_SEMANTIC_HASH_MISMATCH")
         if event.organization_id != source_row.tenant_id:
             raise CanonicalLedgerError("EVENT_TENANT_MISMATCH")
         if event.source_record_id != source_row.source_record_id:
