@@ -20,6 +20,11 @@ _PRODUCTION_USE_TOKEN = re.compile(
     r"(?<![A-Za-z0-9])(?:production|runtime|prod|live|operational|operations?|deploy(?:ment|ments|ed|ing)?|customer-facing|user-facing)(?![A-Za-z0-9])",
     re.IGNORECASE,
 )
+_PRERELEASE_VERSION = re.compile(
+    r"(?:-|(?:^|[0-9.])(?:a|alpha|b|beta|rc|pre|preview|dev)\d*(?:$|[.]))",
+    re.IGNORECASE,
+)
+_ISO_DATE = re.compile(r"^[0-9]{4}-[0-9]{2}-[0-9]{2}$")
 _MPL_MANDATORY_CONDITIONS = {
     "development_or_test_scope_only",
     "no_vendored_modified_source_without_legal_review",
@@ -47,11 +52,43 @@ def _validate_dev_test_allowed_uses(
             _DEV_TEST_USE_PREFIX.search(value.strip()) is None
             or _PRODUCTION_USE_TOKEN.search(value) is not None
         ):
-            _append_unique(
-                errors,
-                f"{name}:DEV_TEST_ALLOWED_USE_NOT_EXCLUSIVE",
-            )
+            _append_unique(errors, f"{name}:DEV_TEST_ALLOWED_USE_NOT_EXCLUSIVE")
             return
+
+
+def _has_bounded_prerelease_approval(component: dict[str, Any]) -> bool:
+    approval = component.get("prerelease_bounded_experiment")
+    if not isinstance(approval, dict) or approval.get("approved") is not True:
+        return False
+    approval_id = approval.get("approval_id")
+    expires_on = approval.get("expires_on")
+    scope = approval.get("scope")
+    return (
+        isinstance(approval_id, str)
+        and bool(approval_id.strip())
+        and isinstance(expires_on, str)
+        and _ISO_DATE.fullmatch(expires_on) is not None
+        and isinstance(scope, list)
+        and bool(scope)
+        and all(isinstance(value, str) and bool(value.strip()) for value in scope)
+    )
+
+
+def _validate_prerelease(
+    component: dict[str, Any],
+    name: str,
+    errors: list[str],
+) -> None:
+    version = component.get("version")
+    if (
+        isinstance(version, str)
+        and _PRERELEASE_VERSION.search(version) is not None
+        and not _has_bounded_prerelease_approval(component)
+    ):
+        _append_unique(
+            errors,
+            f"{name}:PRERELEASE_BOUNDED_EXPERIMENT_APPROVAL_REQUIRED",
+        )
 
 
 def _validate_mpl_policy(
@@ -87,10 +124,11 @@ def validate_register(
         for component in components:
             if not isinstance(component, dict):
                 continue
-            if component.get("status") != "APPROVED_DEV_TEST_ONLY":
-                continue
             name = component.get("name")
             if not isinstance(name, str) or not name:
+                continue
+            _validate_prerelease(component, name, errors)
+            if component.get("status") != "APPROVED_DEV_TEST_ONLY":
                 continue
             status_errors: list[str] = []
             _admission._validate_dev_test_scope(component, name, status_errors)
