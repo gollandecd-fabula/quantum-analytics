@@ -56,7 +56,31 @@ def _verify_hardening_cases() -> None:
         "MIT",
         {
             "license_expression": "MIT",
-            "license_text": "ignored",
+            "license_text": "MIT",
+            "license_classifiers": [],
+        },
+    )
+    assert not license_metadata_matches(
+        "MIT",
+        {
+            "license_expression": "MIT",
+            "license_text": "GPL-3.0-only",
+            "license_classifiers": [],
+        },
+    )
+    assert not license_metadata_matches(
+        "MIT",
+        {
+            "license_expression": "MIT",
+            "license_text": "License :: Other/Proprietary License",
+            "license_classifiers": [],
+        },
+    )
+    assert not license_metadata_matches(
+        "MIT",
+        {
+            "license_expression": ["MIT"],
+            "license_text": "MIT",
             "license_classifiers": [],
         },
     )
