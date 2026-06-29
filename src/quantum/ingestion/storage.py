@@ -20,6 +20,7 @@ from quantum.ingestion.fingerprints import semantic_fingerprint
 
 
 _HEX_SHA256: Final = re.compile(r"^[0-9a-f]{64}$")
+_SAFE_FILENAME: Final = re.compile(r"^[A-Za-z0-9_-][A-Za-z0-9._-]{0,119}$")
 
 
 class RawStorageError(ValueError):
@@ -76,7 +77,7 @@ _TERMINAL_STATES: Final = {
 
 
 class LocalRawStorage:
-    """Tenant-scoped content-addressed storage for synthetic P1.2 fixtures."""
+    """Thread-safe single-process storage for synthetic P1.2 fixtures."""
 
     def __init__(self, root: Path) -> None:
         if not isinstance(root, Path):
@@ -84,6 +85,7 @@ class LocalRawStorage:
         self._root = root.resolve()
         self._root.mkdir(mode=0o700, parents=True, exist_ok=True)
         self._lock = RLock()
+        self._validation_locks: dict[tuple[str, str], RLock] = {}
 
     @staticmethod
     def _tenant_token(tenant: TenantContext) -> str:
@@ -105,6 +107,16 @@ class LocalRawStorage:
         if not isinstance(value, str) or _HEX_SHA256.fullmatch(value) is None:
             raise RawStorageError("STORAGE_DIGEST_INVALID")
         return value
+
+    @staticmethod
+    def _filename(value: str) -> str:
+        if not isinstance(value, str) or _SAFE_FILENAME.fullmatch(value) is None:
+            raise RawStorageError("UPLOAD_FILENAME_INVALID")
+        return value
+
+    @staticmethod
+    def _canonical_storage_key(tenant_id: str, digest: str) -> str:
+        return f"tenants/{tenant_id}/raw/{digest}"
 
     def _tenant_root(self, tenant: TenantContext) -> Path:
         path = self._root / "tenants" / self._tenant_token(tenant)
@@ -173,19 +185,26 @@ class LocalRawStorage:
             digest = cls._digest(data["sha256"])
             tenant_id = data["tenant_id"]
             size_bytes = int(data["size_bytes"])
-            filename = data["sanitized_filename"]
+            filename = cls._filename(data["sanitized_filename"])
             storage_key = data["storage_key"]
+            state = RawFileState(data["state"])
+            schema_id = data.get("schema_id")
+            structural = data.get("structural_fingerprint")
+            semantic = data.get("semantic_fingerprint")
             diagnostics = tuple(data.get("diagnostics", []))
             if (
                 not isinstance(tenant_id, str)
                 or not tenant_id
                 or size_bytes < 0
-                or not isinstance(filename, str)
-                or not filename
                 or not isinstance(storage_key, str)
+                or (schema_id is not None and not isinstance(schema_id, str))
+                or (structural is not None and not isinstance(structural, dict))
+                or (semantic is not None and not isinstance(semantic, dict))
                 or not all(isinstance(item, str) for item in diagnostics)
             ):
                 raise ValueError("invalid metadata fields")
+            if storage_key != cls._canonical_storage_key(tenant_id, digest):
+                raise ValueError("non-canonical storage key")
             return RawFileRecord(
                 raw_file_id=raw_file_id,
                 tenant_id=tenant_id,
@@ -193,10 +212,10 @@ class LocalRawStorage:
                 size_bytes=size_bytes,
                 sanitized_filename=filename,
                 storage_key=storage_key,
-                state=RawFileState(data["state"]),
-                schema_id=data.get("schema_id"),
-                structural_fingerprint=data.get("structural_fingerprint"),
-                semantic_fingerprint=data.get("semantic_fingerprint"),
+                state=state,
+                schema_id=schema_id,
+                structural_fingerprint=structural,
+                semantic_fingerprint=semantic,
                 diagnostics=diagnostics,
             )
         except (
@@ -223,23 +242,15 @@ class LocalRawStorage:
             raise RawStorageError("RAW_FILE_NOT_FOUND")
         if not isinstance(payload, bytes) or not payload:
             raise RawStorageError("UPLOAD_BYTES_REQUIRED")
+        filename = self._filename(receipt.sanitized_filename)
+        raw_file_id = self._raw_id(receipt.raw_file_id)
         digest = sha256(payload).hexdigest()
         if digest != receipt.sha256 or len(payload) != receipt.size_bytes:
             raise RawStorageError("UPLOAD_RECEIPT_MISMATCH")
 
         with self._lock:
             content_path = self._content_path(tenant, digest)
-            metadata_path = self._metadata_path(tenant, receipt.raw_file_id)
-
-            if content_path.exists():
-                existing = content_path.read_bytes()
-                if (
-                    sha256(existing).hexdigest() != digest
-                    or len(existing) != receipt.size_bytes
-                ):
-                    raise RawStorageError("STORAGE_INTEGRITY_FAILED")
-            else:
-                self._atomic_write(content_path, payload)
+            metadata_path = self._metadata_path(tenant, raw_file_id)
 
             if metadata_path.exists():
                 existing_record = self._record_from_payload(
@@ -248,17 +259,41 @@ class LocalRawStorage:
                 if (
                     existing_record.sha256 != digest
                     or existing_record.tenant_id != tenant.tenant_id
+                    or existing_record.size_bytes != len(payload)
+                    or existing_record.sanitized_filename != filename
                 ):
                     raise RawStorageError("STORAGE_METADATA_CONFLICT")
+                if content_path.exists():
+                    existing = content_path.read_bytes()
+                    if (
+                        sha256(existing).hexdigest() != digest
+                        or len(existing) != len(payload)
+                    ):
+                        raise RawStorageError("STORAGE_INTEGRITY_FAILED")
+                else:
+                    self._atomic_write(content_path, payload)
                 return existing_record
 
+            if content_path.exists():
+                existing = content_path.read_bytes()
+                if (
+                    sha256(existing).hexdigest() != digest
+                    or len(existing) != len(payload)
+                ):
+                    raise RawStorageError("STORAGE_INTEGRITY_FAILED")
+            else:
+                self._atomic_write(content_path, payload)
+
             record = RawFileRecord(
-                raw_file_id=self._raw_id(receipt.raw_file_id),
+                raw_file_id=raw_file_id,
                 tenant_id=tenant.tenant_id,
                 sha256=digest,
                 size_bytes=len(payload),
-                sanitized_filename=receipt.sanitized_filename,
-                storage_key=f"tenants/{tenant.tenant_id}/raw/{digest}",
+                sanitized_filename=filename,
+                storage_key=self._canonical_storage_key(
+                    tenant.tenant_id,
+                    digest,
+                ),
                 state=RawFileState.RECEIVED,
             )
             self._atomic_write(metadata_path, self._record_payload(record))
@@ -297,6 +332,66 @@ class LocalRawStorage:
         self.read(tenant=tenant, raw_file_id=raw_file_id)
         return self._content_path(tenant, record.sha256)
 
+    def _validation_lock(
+        self,
+        *,
+        tenant: TenantContext,
+        raw_file_id: str,
+    ) -> RLock:
+        tenant_id = self._tenant_token(tenant)
+        normalized_id = self._raw_id(raw_file_id)
+        key = (tenant_id, normalized_id)
+        with self._lock:
+            return self._validation_locks.setdefault(key, RLock())
+
+    @staticmethod
+    def _validate_transition_payload(
+        state: RawFileState,
+        *,
+        schema_id: str | None,
+        structural_fingerprint: dict[str, object] | None,
+        semantic_fingerprint_value: dict[str, object] | None,
+        diagnostics: tuple[str, ...],
+    ) -> None:
+        if not all(isinstance(item, str) for item in diagnostics):
+            raise RawStorageError("RAW_FILE_DIAGNOSTICS_INVALID")
+        if state is RawFileState.VALIDATING:
+            if (
+                schema_id is not None
+                or structural_fingerprint is not None
+                or semantic_fingerprint_value is not None
+                or diagnostics
+            ):
+                raise RawStorageError("RAW_FILE_STATE_PAYLOAD_INVALID")
+            return
+        if state is RawFileState.VALID:
+            if (
+                not isinstance(schema_id, str)
+                or not schema_id
+                or not isinstance(structural_fingerprint, dict)
+                or not isinstance(semantic_fingerprint_value, dict)
+                or diagnostics
+            ):
+                raise RawStorageError("RAW_FILE_STATE_PAYLOAD_INVALID")
+            return
+        if state is RawFileState.QUARANTINED:
+            if (
+                schema_id is not None
+                or not isinstance(structural_fingerprint, dict)
+                or semantic_fingerprint_value is not None
+                or not diagnostics
+            ):
+                raise RawStorageError("RAW_FILE_STATE_PAYLOAD_INVALID")
+            return
+        if state is RawFileState.REJECTED:
+            if (
+                schema_id is not None
+                or structural_fingerprint is not None
+                or semantic_fingerprint_value is not None
+                or not diagnostics
+            ):
+                raise RawStorageError("RAW_FILE_STATE_PAYLOAD_INVALID")
+
     def transition(
         self,
         *,
@@ -310,12 +405,17 @@ class LocalRawStorage:
     ) -> RawFileRecord:
         if not isinstance(state, RawFileState):
             raise RawStorageError("RAW_FILE_STATE_INVALID")
-        if not all(isinstance(item, str) for item in diagnostics):
-            raise RawStorageError("RAW_FILE_DIAGNOSTICS_INVALID")
         with self._lock:
             current = self.get_record(tenant=tenant, raw_file_id=raw_file_id)
             if state not in _ALLOWED_TRANSITIONS[current.state]:
                 raise RawStorageError("RAW_FILE_STATE_TRANSITION_INVALID")
+            self._validate_transition_payload(
+                state,
+                schema_id=schema_id,
+                structural_fingerprint=structural_fingerprint,
+                semantic_fingerprint_value=semantic_fingerprint_value,
+                diagnostics=diagnostics,
+            )
             updated = replace(
                 current,
                 state=state,
@@ -340,61 +440,80 @@ class CsvSchemaGate:
     def inspect(
         self, *, tenant: TenantContext, raw_file_id: str
     ) -> SchemaGateResult:
-        current = self._storage.get_record(
-            tenant=tenant, raw_file_id=raw_file_id
-        )
-        if current.state in _TERMINAL_STATES:
-            return SchemaGateResult(record=current, detection=None)
-        self._storage.transition(
+        with self._storage._validation_lock(
             tenant=tenant,
             raw_file_id=raw_file_id,
-            state=RawFileState.VALIDATING,
-        )
-        try:
-            path = self._storage.content_path(
-                tenant=tenant, raw_file_id=raw_file_id
+        ):
+            current = self._storage.get_record(
+                tenant=tenant,
+                raw_file_id=raw_file_id,
             )
-            detection = detect_csv_schema(path)
-            if detection.status != "MATCHED":
+            if current.state in _TERMINAL_STATES:
+                return SchemaGateResult(record=current, detection=None)
+            if current.state is RawFileState.RECEIVED:
+                self._storage.transition(
+                    tenant=tenant,
+                    raw_file_id=raw_file_id,
+                    state=RawFileState.VALIDATING,
+                )
+            elif current.state is not RawFileState.VALIDATING:
+                raise RawStorageError("RAW_FILE_STATE_TRANSITION_INVALID")
+
+            try:
+                path = self._storage.content_path(
+                    tenant=tenant,
+                    raw_file_id=raw_file_id,
+                )
+                detection = detect_csv_schema(path)
+                if detection.status != "MATCHED":
+                    record = self._storage.transition(
+                        tenant=tenant,
+                        raw_file_id=raw_file_id,
+                        state=RawFileState.QUARANTINED,
+                        structural_fingerprint=detection.structural_fingerprint,
+                        diagnostics=(
+                            detection.diagnostics or ("SCHEMA_UNKNOWN",)
+                        ),
+                    )
+                    return SchemaGateResult(
+                        record=record,
+                        detection=detection,
+                    )
+
+                with path.open(
+                    "r",
+                    encoding="utf-8-sig",
+                    newline="",
+                ) as handle:
+                    semantic = semantic_fingerprint(csv.DictReader(handle))
                 record = self._storage.transition(
                     tenant=tenant,
                     raw_file_id=raw_file_id,
-                    state=RawFileState.QUARANTINED,
+                    state=RawFileState.VALID,
+                    schema_id=detection.schema_id,
                     structural_fingerprint=detection.structural_fingerprint,
-                    diagnostics=detection.diagnostics or ("SCHEMA_UNKNOWN",),
+                    semantic_fingerprint_value=semantic,
                 )
                 return SchemaGateResult(record=record, detection=detection)
-
-            with path.open("r", encoding="utf-8-sig", newline="") as handle:
-                semantic = semantic_fingerprint(csv.DictReader(handle))
-            record = self._storage.transition(
-                tenant=tenant,
-                raw_file_id=raw_file_id,
-                state=RawFileState.VALID,
-                schema_id=detection.schema_id,
-                structural_fingerprint=detection.structural_fingerprint,
-                semantic_fingerprint_value=semantic,
-            )
-            return SchemaGateResult(record=record, detection=detection)
-        except RawStorageError as exc:
-            record = self._storage.transition(
-                tenant=tenant,
-                raw_file_id=raw_file_id,
-                state=RawFileState.REJECTED,
-                diagnostics=(exc.code,),
-            )
-            return SchemaGateResult(record=record, detection=None)
-        except (
-            UnicodeDecodeError,
-            csv.Error,
-            StopIteration,
-            OSError,
-            ValueError,
-        ):
-            record = self._storage.transition(
-                tenant=tenant,
-                raw_file_id=raw_file_id,
-                state=RawFileState.REJECTED,
-                diagnostics=("CSV_SCHEMA_READ_FAILED",),
-            )
-            return SchemaGateResult(record=record, detection=None)
+            except RawStorageError as exc:
+                record = self._storage.transition(
+                    tenant=tenant,
+                    raw_file_id=raw_file_id,
+                    state=RawFileState.REJECTED,
+                    diagnostics=(exc.code,),
+                )
+                return SchemaGateResult(record=record, detection=None)
+            except (
+                UnicodeDecodeError,
+                csv.Error,
+                StopIteration,
+                OSError,
+                ValueError,
+            ):
+                record = self._storage.transition(
+                    tenant=tenant,
+                    raw_file_id=raw_file_id,
+                    state=RawFileState.REJECTED,
+                    diagnostics=("CSV_SCHEMA_READ_FAILED",),
+                )
+                return SchemaGateResult(record=record, detection=None)
