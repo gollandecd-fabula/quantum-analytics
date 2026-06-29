@@ -17,8 +17,10 @@ implemented:
   - canonical storage keys and metadata validation
   - fail-closed raw-file state transitions with evidence invariants
   - persisted state-evidence validation on read
+  - persisted raw-file id binding to lookup path
   - existing A6 structural schema detection integration
   - semantic fingerprint integration
+  - strict CSV row-shape validation
   - unknown-schema quarantine
   - malformed-file rejection
   - idempotent terminal inspection
@@ -30,12 +32,11 @@ tests:
   files:
     - tests/test_p12_raw_storage.py
     - tests/test_p12_storage_hardening.py
-  methods: 17
+  methods: 19
   local_targeted_result: PASS
 review:
   status: REMEDIATED_CI_PENDING
-  blocking_findings_fixed: 5
-  non_blocking_findings_fixed: 4
+  resolved_findings: 11
 limitations:
   - local adapter is single-process only
   - cross-process writer coordination is not implemented
