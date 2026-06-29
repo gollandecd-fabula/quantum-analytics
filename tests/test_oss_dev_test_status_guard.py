@@ -83,6 +83,8 @@ def _verify_dev_test_status_guard() -> None:
         "PRODUCTION_TEST",
         "B4_RUNTIME_TEST",
         "OPERATIONAL_TEST",
+        "CUSTOMER_FACING_TEST",
+        "USER_FACING_TEST",
     ):
         mixed_scope = copy.deepcopy(register)
         _hypothesis(mixed_scope)["scope"] = prohibited_scope

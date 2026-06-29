@@ -24,7 +24,7 @@ _DEV_TEST_USE_PREFIX = re.compile(
     re.IGNORECASE,
 )
 _PRODUCTION_USE_TOKEN = re.compile(
-    r"(?<![A-Za-z0-9])(?:production|runtime|prod|live|operational|operations?|deploy(?:ment|ments|ed|ing)?|customer-facing|user-facing)(?![A-Za-z0-9])",
+    r"(?<![A-Za-z0-9])(?:production|runtime|prod|live|operational|operations?|deploy(?:ment|ments|ed|ing)?|customer[-_]facing|user[-_]facing)(?![A-Za-z0-9])",
     re.IGNORECASE,
 )
 _PRERELEASE_VERSION = re.compile(
