@@ -1,6 +1,7 @@
 """OSS dependency admission contracts and validators."""
 
 import re
+from datetime import date
 from typing import Any
 
 from . import admission as _admission
@@ -24,7 +25,6 @@ _PRERELEASE_VERSION = re.compile(
     r"(?:-|(?:^|[0-9.])(?:a|alpha|b|beta|rc|pre|preview|dev)\d*(?:$|[.]))",
     re.IGNORECASE,
 )
-_ISO_DATE = re.compile(r"^[0-9]{4}-[0-9]{2}-[0-9]{2}$")
 _MPL_MANDATORY_CONDITIONS = {
     "development_or_test_scope_only",
     "no_vendored_modified_source_without_legal_review",
@@ -63,11 +63,15 @@ def _has_bounded_prerelease_approval(component: dict[str, Any]) -> bool:
     approval_id = approval.get("approval_id")
     expires_on = approval.get("expires_on")
     scope = approval.get("scope")
+    try:
+        expiry = date.fromisoformat(expires_on) if isinstance(expires_on, str) else None
+    except ValueError:
+        expiry = None
     return (
         isinstance(approval_id, str)
         and bool(approval_id.strip())
-        and isinstance(expires_on, str)
-        and _ISO_DATE.fullmatch(expires_on) is not None
+        and expiry is not None
+        and expiry >= date.today()
         and isinstance(scope, list)
         and bool(scope)
         and all(isinstance(value, str) and bool(value.strip()) for value in scope)
