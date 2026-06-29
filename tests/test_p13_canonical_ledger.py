@@ -9,6 +9,7 @@ import unittest
 from uuid import uuid4
 
 from quantum.access import TenantContext
+from quantum.domain.idempotency import canonical_json_hash
 from quantum.domain.source_rows import ImmutableSourceRow, SourceRowStatus
 from quantum.infrastructure.in_memory_canonical_ledger import (
     CanonicalLedgerError,
@@ -71,11 +72,7 @@ class P13CanonicalLedgerTests(unittest.TestCase):
 
     def prepare(self, payload: bytes) -> str:
         item = receipt(self.tenant, payload)
-        self.storage.store(
-            tenant=self.tenant,
-            receipt=item,
-            payload=payload,
-        )
+        self.storage.store(tenant=self.tenant, receipt=item, payload=payload)
         gate = CsvSchemaGate(self.storage).inspect(
             tenant=self.tenant,
             raw_file_id=item.raw_file_id,
@@ -94,12 +91,10 @@ class P13CanonicalLedgerTests(unittest.TestCase):
     def test_valid_file_creates_source_rows_events_and_lineage(self) -> None:
         raw_file_id = self.prepare(self.valid_payload())
         result = self.ingest(raw_file_id)
-
         self.assertEqual(result.total_rows, 4)
         self.assertEqual(result.inserted_source_rows, 4)
         self.assertEqual(result.inserted_events, 4)
         self.assertEqual(result.quarantined_rows, 0)
-
         trace = self.ledger.trace_event(
             tenant=self.tenant,
             event_id="evt-sale-002-r2",
@@ -116,7 +111,6 @@ class P13CanonicalLedgerTests(unittest.TestCase):
         raw_file_id = self.prepare(self.valid_payload())
         first = self.ingest(raw_file_id)
         second = self.ingest(raw_file_id)
-
         self.assertEqual(first.inserted_events, 4)
         self.assertEqual(second.inserted_source_rows, 0)
         self.assertEqual(second.inserted_events, 0)
@@ -130,17 +124,15 @@ class P13CanonicalLedgerTests(unittest.TestCase):
             + "\n1,sale-001,SALE,2026-06-01T10:00:00Z,"
             "2026-06-01T10:05:00Z,product-a,one,1000.00,RUB,1,,\n"
         ).encode()
-        raw_file_id = self.prepare(payload)
-        result = self.ingest(raw_file_id)
-
+        result = self.ingest(self.prepare(payload))
         self.assertEqual(result.inserted_events, 0)
         self.assertEqual(result.quarantined_rows, 1)
-        rows = self.ledger.list_source_rows(tenant=self.tenant)
-        self.assertEqual(len(rows), 1)
-        self.assertEqual(rows[0].validation_status, SourceRowStatus.QUARANTINED)
-        self.assertIn("quantity: invalid integer", rows[0].diagnostics[0])
+        self.assertEqual(result.inserted_quarantined_rows, 1)
+        row = self.ledger.list_source_rows(tenant=self.tenant)[0]
+        self.assertEqual(row.validation_status, SourceRowStatus.QUARANTINED)
+        self.assertIn("quantity: invalid integer", row.diagnostics[0])
 
-    def test_missing_revision_target_is_quarantined(self) -> None:
+    def test_missing_dependency_blocks_batch_atomically(self) -> None:
         payload = (
             HEADERS
             + "\n3,sale-002,SALE,2026-06-02T11:00:00Z,"
@@ -148,15 +140,13 @@ class P13CanonicalLedgerTests(unittest.TestCase):
             "evt-sale-002-r1,\n"
         ).encode()
         raw_file_id = self.prepare(payload)
-        result = self.ingest(raw_file_id)
-
-        self.assertEqual(result.inserted_events, 0)
-        self.assertEqual(result.quarantined_rows, 1)
-        row = self.ledger.list_source_rows(tenant=self.tenant)[0]
-        self.assertEqual(
-            row.diagnostics,
-            ("EVENT_SUPERSEDED_TARGET_MISSING",),
-        )
+        with self.assertRaisesRegex(
+            CanonicalLedgerError,
+            "BATCH_DEPENDENCY_UNRESOLVED",
+        ):
+            self.ingest(raw_file_id)
+        self.assertEqual(self.ledger.list_events(tenant=self.tenant), ())
+        self.assertEqual(self.ledger.list_source_rows(tenant=self.tenant), ())
 
     def test_cumulative_reversal_cannot_exceed_original(self) -> None:
         rows = (
@@ -169,11 +159,9 @@ class P13CanonicalLedgerTests(unittest.TestCase):
             "2026-06-03T10:05:00Z,product-a,2,600.00,RUB,1,,"
             "evt-sale-001-r1",
         )
-        raw_file_id = self.prepare(
-            (HEADERS + "\n" + "\n".join(rows) + "\n").encode()
+        result = self.ingest(
+            self.prepare((HEADERS + "\n" + "\n".join(rows) + "\n").encode())
         )
-        result = self.ingest(raw_file_id)
-
         self.assertEqual(result.inserted_events, 2)
         self.assertEqual(result.quarantined_rows, 1)
         quarantined = [
@@ -187,63 +175,38 @@ class P13CanonicalLedgerTests(unittest.TestCase):
         )
 
     def test_cross_tenant_trace_does_not_reveal_event(self) -> None:
-        raw_file_id = self.prepare(self.valid_payload())
-        self.ingest(raw_file_id)
+        self.ingest(self.prepare(self.valid_payload()))
         other = TenantContext(str(uuid4()), str(uuid4()))
-
-        with self.assertRaisesRegex(
-            CanonicalLedgerError,
-            "EVENT_NOT_FOUND",
-        ):
+        with self.assertRaisesRegex(CanonicalLedgerError, "EVENT_NOT_FOUND"):
             self.ledger.trace_event(
                 tenant=other,
                 event_id="evt-sale-001-r1",
             )
 
     def test_source_row_payload_is_immutable(self) -> None:
-        raw_file_id = self.prepare(self.valid_payload())
-        self.ingest(raw_file_id)
+        self.ingest(self.prepare(self.valid_payload()))
         row = self.ledger.list_source_rows(tenant=self.tenant)[0]
-
         with self.assertRaises(TypeError):
             row.raw_payload["quantity"] = "99"
 
     def test_concurrent_reimport_produces_one_ledger_copy(self) -> None:
         raw_file_id = self.prepare(self.valid_payload())
-
-        def run(_: int):
-            return self.ingest(raw_file_id)
-
         with ThreadPoolExecutor(max_workers=8) as executor:
-            results = list(executor.map(run, range(16)))
-
-        self.assertEqual(
-            sum(item.inserted_events for item in results),
-            4,
-        )
+            results = list(executor.map(lambda _: self.ingest(raw_file_id), range(16)))
+        self.assertEqual(sum(item.inserted_events for item in results), 4)
         self.assertEqual(len(self.ledger.list_events(tenant=self.tenant)), 4)
-        self.assertEqual(
-            len(self.ledger.list_source_rows(tenant=self.tenant)),
-            4,
-        )
+        self.assertEqual(len(self.ledger.list_source_rows(tenant=self.tenant)), 4)
 
     def test_raw_file_must_pass_schema_gate(self) -> None:
         payload = self.valid_payload()
         item = receipt(self.tenant, payload)
-        self.storage.store(
-            tenant=self.tenant,
-            receipt=item,
-            payload=payload,
-        )
-
-        with self.assertRaisesRegex(
-            CanonicalLedgerError,
-            "RAW_FILE_NOT_VALID",
-        ):
+        self.storage.store(tenant=self.tenant, receipt=item, payload=payload)
+        with self.assertRaisesRegex(CanonicalLedgerError, "RAW_FILE_NOT_VALID"):
             self.ingest(item.raw_file_id)
 
     def test_source_row_locator_conflict_is_rejected(self) -> None:
         raw_file_id = str(uuid4())
+        raw_payload = {"row_id": "1"}
         common = dict(
             tenant_id=self.tenant.tenant_id,
             raw_file_id=raw_file_id,
@@ -251,8 +214,8 @@ class P13CanonicalLedgerTests(unittest.TestCase):
             import_batch_id="batch",
             row_number=2,
             source_row_key="csv:row:1",
-            raw_row_hash="b" * 64,
-            raw_payload={"row_id": "1"},
+            raw_row_hash=canonical_json_hash(raw_payload),
+            raw_payload=raw_payload,
             structural_fingerprint={"sha256": "c" * 64},
             semantic_fingerprint={"sha256": "d" * 64},
             validation_status=SourceRowStatus.QUARANTINED,
@@ -264,21 +227,12 @@ class P13CanonicalLedgerTests(unittest.TestCase):
         )
         first = ImmutableSourceRow(source_record_id="src-1", **common)
         second = ImmutableSourceRow(source_record_id="src-2", **common)
-        self.ledger.append(
-            tenant=self.tenant,
-            source_row=first,
-            event=None,
-        )
-
+        self.ledger.append(tenant=self.tenant, source_row=first, event=None)
         with self.assertRaisesRegex(
             CanonicalLedgerError,
             "SOURCE_ROW_LOCATOR_CONFLICT",
         ):
-            self.ledger.append(
-                tenant=self.tenant,
-                source_row=second,
-                event=None,
-            )
+            self.ledger.append(tenant=self.tenant, source_row=second, event=None)
 
 
 if __name__ == "__main__":
