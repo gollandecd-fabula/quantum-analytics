@@ -4,11 +4,16 @@ import copy
 import unittest
 from pathlib import Path
 
-from quantum.dependencies.admission import load_json_document, validate_register
+from quantum.dependencies.admission import (
+    load_json_document,
+    validate_register,
+    validate_sbom,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 REGISTER = ROOT / "docs/dependencies/OSS_DEPENDENCY_REGISTER.yaml"
 LICENSES = ROOT / "docs/dependencies/LICENSE_ALLOWLIST.yaml"
+SBOM = ROOT / "docs/dependencies/SBOM.spdx.json"
 WORKFLOW = ROOT / ".github/workflows/oss-admission-ci.yml"
 
 
@@ -36,7 +41,23 @@ def _mpl_rule(licenses: dict) -> dict:
 def _verify_dev_test_status_guard() -> None:
     register = load_json_document(REGISTER)
     licenses = load_json_document(LICENSES)
+    sbom = load_json_document(SBOM)
     assert validate_register(register, licenses) == ()
+    assert validate_sbom(register, sbom) == ()
+
+    conflicting_conclusion = copy.deepcopy(sbom)
+    conflicting_conclusion["packages"][0]["licenseConcluded"] = "GPL-3.0-only"
+    assert (
+        "duckdb:SBOM_LICENSE_CONCLUDED_MISMATCH"
+        in validate_sbom(register, conflicting_conclusion)
+    )
+
+    missing_conclusion = copy.deepcopy(sbom)
+    missing_conclusion["packages"][0].pop("licenseConcluded")
+    assert (
+        "duckdb:SBOM_LICENSE_CONCLUDED_MISMATCH"
+        in validate_sbom(register, missing_conclusion)
+    )
 
     workflow = WORKFLOW.read_text(encoding="utf-8")
     assert "TARGET_SHA: ${{ github.event.pull_request.head.sha || github.sha }}" in workflow
