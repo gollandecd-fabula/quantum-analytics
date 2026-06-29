@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal, InvalidOperation
+import re
 from typing import Mapping
 
 from quantum.domain.events import CanonicalEvent, EventStatus
@@ -13,6 +14,7 @@ _OPERATION_TO_EVENT = {
     "SALE": "SALE_RECOGNIZED",
     "RETURN": "RETURN_ACCEPTED",
 }
+_CURRENCY = re.compile(r"^[A-Z]{3}$")
 
 
 @dataclass(frozen=True, slots=True)
@@ -51,6 +53,8 @@ def validate_row(row: Mapping[str, str]) -> None:
 
     if row["operation_type"] not in _OPERATION_TO_EVENT:
         raise ValueError("operation_type: unsupported")
+    if _CURRENCY.fullmatch(row["currency"]) is None:
+        raise ValueError("currency: expected uppercase three-letter code")
 
     try:
         quantity = int(row["quantity"])
