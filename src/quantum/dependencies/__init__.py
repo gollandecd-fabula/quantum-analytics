@@ -37,6 +37,16 @@ def _append_unique(errors: list[str], error: str) -> None:
         errors.append(error)
 
 
+def _validate_dev_test_scope_exclusive(
+    component: dict[str, Any],
+    name: str,
+    errors: list[str],
+) -> None:
+    scope = component.get("scope")
+    if isinstance(scope, str) and _PRODUCTION_USE_TOKEN.search(scope) is not None:
+        _append_unique(errors, f"{name}:DEV_TEST_SCOPE_NOT_EXCLUSIVE")
+
+
 def _validate_dev_test_allowed_uses(
     component: dict[str, Any],
     name: str,
@@ -138,6 +148,7 @@ def validate_register(
             _admission._validate_dev_test_scope(component, name, status_errors)
             for error in status_errors:
                 _append_unique(errors, error)
+            _validate_dev_test_scope_exclusive(component, name, errors)
             _validate_dev_test_allowed_uses(component, name, errors)
     return tuple(errors)
 
