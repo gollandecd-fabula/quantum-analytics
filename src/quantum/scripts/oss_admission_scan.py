@@ -202,31 +202,35 @@ def _license_classifiers_match(
 
 
 def license_metadata_matches(expected: str, metadata: dict[str, Any]) -> bool:
+    source_results: list[bool] = []
+
     classifier_result = _license_classifiers_match(
         expected,
         metadata.get("license_classifiers"),
     )
     if classifier_result is False:
         return False
+    if classifier_result is True:
+        source_results.append(True)
 
     expression = metadata.get("license_expression")
-    if isinstance(expression, str) and expression.strip():
-        return expression.strip().casefold() == expected.casefold()
+    if expression is not None:
+        if not isinstance(expression, str):
+            return False
+        if expression.strip():
+            source_results.append(
+                expression.strip().casefold() == expected.casefold()
+            )
 
     license_text = metadata.get("license_text", "")
     if license_text is None:
         license_text = ""
     if not isinstance(license_text, str):
         return False
+    if license_text.strip():
+        source_results.append(license_matches(expected, license_text))
 
-    text_result = (
-        license_matches(expected, license_text)
-        if license_text.strip()
-        else None
-    )
-    if classifier_result is True:
-        return text_result is not False
-    return text_result is True
+    return bool(source_results) and all(source_results)
 
 
 def run_scan() -> dict[str, Any]:
