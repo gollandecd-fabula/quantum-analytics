@@ -1,0 +1,236 @@
+{
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "creationInfo": {
+    "created": "2026-06-29T00:00:00Z",
+    "creators": [
+      "Tool: Quantum OSS Admission Generator 1.0"
+    ],
+    "licenseListVersion": "3.26"
+  },
+  "dataLicense": "CC0-1.0",
+  "documentDescribes": [
+    "SPDXRef-Package-duckdb",
+    "SPDXRef-Package-polars",
+    "SPDXRef-Package-pandera",
+    "SPDXRef-Package-hypothesis",
+    "SPDXRef-Package-fastapi",
+    "SPDXRef-Package-pydantic",
+    "SPDXRef-Package-react-admin",
+    "SPDXRef-Package-echarts",
+    "SPDXRef-Package-wbsdk"
+  ],
+  "documentNamespace": "https://quantum-analytics.invalid/spdx/oss-admission/2026-06-29/v1",
+  "name": "Quantum Analytics OSS Admission Prospective SBOM",
+  "packages": [
+    {
+      "SPDXID": "SPDXRef-Package-duckdb",
+      "comment": "Prospective admission only. Status: APPROVED_FOR_FUTURE_INTEGRATION. Not installed by this stage.",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://pypi.org/project/duckdb/",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:pypi/duckdb@1.5.4",
+          "referenceType": "purl"
+        }
+      ],
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "duckdb",
+      "versionInfo": "1.5.4"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-polars",
+      "comment": "Prospective admission only. Status: APPROVED_FOR_FUTURE_INTEGRATION. Not installed by this stage.",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://pypi.org/project/polars/",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:pypi/polars@1.42.0",
+          "referenceType": "purl"
+        }
+      ],
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "polars",
+      "versionInfo": "1.42.0"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-pandera",
+      "comment": "Prospective admission only. Status: APPROVED_FOR_FUTURE_INTEGRATION. Not installed by this stage.",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://pypi.org/project/pandera/",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:pypi/pandera@0.32.0",
+          "referenceType": "purl"
+        }
+      ],
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "pandera",
+      "versionInfo": "0.32.0"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-hypothesis",
+      "comment": "Prospective admission only. Status: APPROVED_DEV_TEST_ONLY. Not installed by this stage.",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://pypi.org/project/hypothesis/",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:pypi/hypothesis@6.155.7",
+          "referenceType": "purl"
+        }
+      ],
+      "filesAnalyzed": false,
+      "licenseConcluded": "MPL-2.0",
+      "licenseDeclared": "MPL-2.0",
+      "name": "hypothesis",
+      "versionInfo": "6.155.7"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-fastapi",
+      "comment": "Prospective admission only. Status: APPROVED_FOR_FUTURE_INTEGRATION. Not installed by this stage.",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://pypi.org/project/fastapi/",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:pypi/fastapi@0.138.1",
+          "referenceType": "purl"
+        }
+      ],
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "fastapi",
+      "versionInfo": "0.138.1"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-pydantic",
+      "comment": "Prospective admission only. Status: APPROVED_FOR_FUTURE_INTEGRATION. Not installed by this stage.",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://pypi.org/project/pydantic/",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:pypi/pydantic@2.13.4",
+          "referenceType": "purl"
+        }
+      ],
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "pydantic",
+      "versionInfo": "2.13.4"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-react-admin",
+      "comment": "Prospective admission only. Status: APPROVED_FOR_FUTURE_INTEGRATION. Not installed by this stage.",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://github.com/marmelab/react-admin",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:npm/react-admin@5.15.1",
+          "referenceType": "purl"
+        }
+      ],
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "react-admin",
+      "versionInfo": "5.15.1"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-echarts",
+      "comment": "Prospective admission only. Status: APPROVED_FOR_FUTURE_INTEGRATION. Not installed by this stage.",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://github.com/apache/echarts",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:npm/echarts@6.1.0",
+          "referenceType": "purl"
+        }
+      ],
+      "filesAnalyzed": false,
+      "licenseConcluded": "Apache-2.0",
+      "licenseDeclared": "Apache-2.0",
+      "name": "echarts",
+      "versionInfo": "6.1.0"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-wbsdk",
+      "comment": "Prospective admission only. Status: AUDIT_REQUIRED. Not installed by this stage.",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://pypi.org/project/wbsdk/",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:pypi/wbsdk@1.2.8",
+          "referenceType": "purl"
+        }
+      ],
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "wbsdk",
+      "versionInfo": "1.2.8"
+    }
+  ],
+  "relationships": [
+    {
+      "relatedSpdxElement": "SPDXRef-Package-duckdb",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-polars",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-pandera",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-hypothesis",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-fastapi",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-pydantic",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-react-admin",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-echarts",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-wbsdk",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    }
+  ],
+  "spdxVersion": "SPDX-2.3"
+}
