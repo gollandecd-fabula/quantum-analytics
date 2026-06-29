@@ -6,6 +6,14 @@ from pathlib import Path
 from typing import Any
 
 EXACT_VERSION = re.compile(r"^[0-9]+(?:\.[0-9A-Za-z-]+)+$")
+DEV_TEST_SCOPE = re.compile(
+    r"(?:^|_)(?:DEV|DEVELOPMENT|TEST|TESTING|CI)(?:_|$)",
+    re.IGNORECASE,
+)
+DEV_TEST_ALLOWED_USE = re.compile(
+    r"(?<![A-Za-z0-9])(?:development|dev|test|tests|testing|ci|regression)(?![A-Za-z0-9])",
+    re.IGNORECASE,
+)
 ALLOWED_STATUSES = {
     "APPROVED_FOR_FUTURE_INTEGRATION",
     "APPROVED_DEV_TEST_ONLY",
@@ -92,6 +100,25 @@ def _conditional_license_rules(
     return result
 
 
+def _validate_dev_test_scope(component: dict[str, Any], name: str, errors: list[str]) -> None:
+    scope = component.get("scope")
+    if not isinstance(scope, str) or not DEV_TEST_SCOPE.search(scope):
+        errors.append(f"{name}:CONDITIONAL_LICENSE_SCOPE_DESCRIPTOR_VIOLATION")
+
+    allowed_use = component.get("allowed_use")
+    if (
+        not isinstance(allowed_use, list)
+        or not allowed_use
+        or any(
+            not isinstance(value, str)
+            or not value.strip()
+            or DEV_TEST_ALLOWED_USE.search(value) is None
+            for value in allowed_use
+        )
+    ):
+        errors.append(f"{name}:CONDITIONAL_LICENSE_ALLOWED_USE_VIOLATION")
+
+
 def validate_register(register: dict[str, Any], license_policy: dict[str, Any]) -> tuple[str, ...]:
     errors: list[str] = []
     if register.get("stage") != "OSS_DEPENDENCY_ADMISSION":
@@ -163,11 +190,10 @@ def validate_register(register: dict[str, Any], license_policy: dict[str, Any]) 
             errors.append(f"{name}:STATUS_INVALID")
 
         if conditions is not None:
-            if (
-                "development_or_test_scope_only" in conditions
-                and status != "APPROVED_DEV_TEST_ONLY"
-            ):
-                errors.append(f"{name}:CONDITIONAL_LICENSE_SCOPE_VIOLATION")
+            if "development_or_test_scope_only" in conditions:
+                if status != "APPROVED_DEV_TEST_ONLY":
+                    errors.append(f"{name}:CONDITIONAL_LICENSE_SCOPE_VIOLATION")
+                _validate_dev_test_scope(component, name, errors)
             if "no_vendored_modified_source_without_legal_review" in conditions:
                 prohibited_use = component.get("prohibited_use")
                 if (
