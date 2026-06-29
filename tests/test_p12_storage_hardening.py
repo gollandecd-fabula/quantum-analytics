@@ -120,6 +120,53 @@ class P12StorageHardeningTests(unittest.TestCase):
         )
         self.assertEqual(call_count, 1)
 
+    def test_metadata_raw_file_id_must_match_lookup_id(self) -> None:
+        payload = b"metadata-id"
+        receipt = self.receipt(payload)
+        self.storage.store(
+            tenant=self.tenant,
+            receipt=receipt,
+            payload=payload,
+        )
+        tenant_dir = next((self.root / "tenants").iterdir())
+        metadata = tenant_dir / "metadata" / f"{receipt.raw_file_id}.json"
+        data = json.loads(metadata.read_text(encoding="utf-8"))
+        data["raw_file_id"] = str(uuid4())
+        metadata.write_text(json.dumps(data), encoding="utf-8")
+
+        with self.assertRaisesRegex(
+            RawStorageError,
+            "STORAGE_METADATA_INVALID",
+        ):
+            self.storage.get_record(
+                tenant=self.tenant,
+                raw_file_id=receipt.raw_file_id,
+            )
+
+    def test_extra_csv_fields_are_rejected(self) -> None:
+        row = (
+            "1,op1,sale,2026-01-01T00:00:00Z,2026-01-01T00:00:00Z,"
+            "p1,1,100,RUB,1,,,unexpected"
+        )
+        payload = f"{HEADERS}\n{row}\n".encode()
+        receipt = self.receipt(payload)
+        self.storage.store(
+            tenant=self.tenant,
+            receipt=receipt,
+            payload=payload,
+        )
+
+        result = CsvSchemaGate(self.storage).inspect(
+            tenant=self.tenant,
+            raw_file_id=receipt.raw_file_id,
+        )
+
+        self.assertEqual(result.record.state, RawFileState.REJECTED)
+        self.assertEqual(
+            result.record.diagnostics,
+            ("CSV_SCHEMA_READ_FAILED",),
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
