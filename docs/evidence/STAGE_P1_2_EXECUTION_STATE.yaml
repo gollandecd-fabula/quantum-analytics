@@ -1,0 +1,52 @@
+schema_version: "1.0"
+date: "2026-06-30"
+stage: P1_TECHNICAL_FOUNDATION_BUILD
+unit: P1_2_RAW_STORAGE_AND_SCHEMA_QUARANTINE_FOUNDATION
+status: REMEDIATED_CI_PENDING
+working_branch: build-p1-2-raw-storage-schema-quarantine-v1
+base_commit: e1586bd0079c891f7303bae7ba779c2c7357feb2
+pull_request: 22
+runtime_dependency_installation_authorized: false
+marketplace_write_enabled: false
+commercial_data_authorized: false
+implemented:
+  - tenant-scoped content-addressed raw-byte storage
+  - atomic temporary-write, fsync and replace
+  - persisted metadata records
+  - SHA-256 integrity verification on read
+  - canonical storage keys and metadata validation
+  - fail-closed raw-file state transitions with evidence invariants
+  - persisted state-evidence validation on read
+  - persisted raw-file id binding to lookup path
+  - existing A6 structural schema detection integration
+  - semantic fingerprint integration
+  - strict CSV row-shape validation
+  - unknown-schema quarantine
+  - malformed-file rejection
+  - idempotent terminal inspection
+  - stale VALIDATING recovery
+  - serialized concurrent schema inspection
+  - shared in-process coordination across storage instances
+  - orphan-content prevention on metadata conflict
+tests:
+  files:
+    - tests/test_p12_raw_storage.py
+    - tests/test_p12_storage_hardening.py
+  methods: 19
+  local_targeted_result: PASS
+review:
+  status: REMEDIATED_CI_PENDING
+  resolved_findings: 11
+limitations:
+  - local adapter is single-process only
+  - cross-process writer coordination is not implemented
+exclusions:
+  - real commercial reports
+  - production WB XLSX support
+  - PostgreSQL persistence
+  - password authentication runtime
+  - financial calculation runtime
+  - marketplace API calls
+  - global learning
+  - deployment
+release_status: RELEASE_BLOCKED

@@ -5,9 +5,9 @@ source_of_truth_for_live_unit_state: true
 
 macro_stage: B
 status: ACTIVE
-current_unit: P11
-tracking_issue: 21
-working_branch: build-p1-technical-foundation-v1
+current_unit: P12
+tracking_issue: 22
+working_branch: build-p1-2-raw-storage-schema-quarantine-v1
 
 units:
   B0:
@@ -38,10 +38,16 @@ units:
     test_method_count: 27
     temporary_patch_tests: 0
   P11:
-    state: IMPLEMENTED_CI_PENDING
+    state: COMPLETE
+    merged_commit: e1586bd0079c891f7303bae7ba779c2c7357feb2
     pull_request: 21
     risk: R2
     evidence: docs/evidence/STAGE_P1_EXECUTION_STATE.yaml
+  P12:
+    state: IMPLEMENTED_CI_PENDING
+    pull_request: 22
+    risk: R2
+    evidence: docs/evidence/STAGE_P1_2_EXECUTION_STATE.yaml
   B4:
     state: PLANNED
     risk: R2
