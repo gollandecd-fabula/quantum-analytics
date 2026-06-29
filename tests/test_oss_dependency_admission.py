@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import json
 import unittest
 from pathlib import Path
@@ -42,6 +43,80 @@ class OssDependencyAdmissionTests(unittest.TestCase):
     def test_01_register_and_sbom_validate(self) -> None:
         self.assertEqual(validate_register(self.register, self.licenses), ())
         self.assertEqual(validate_sbom(self.register, self.sbom), ())
+
+        first_name = self.register["components"][0]["name"]
+
+        malformed_license = copy.deepcopy(self.register)
+        malformed_license["components"][0]["license"] = []
+        self.assertIn(
+            f"{first_name}:LICENSE_ID_INVALID",
+            validate_register(malformed_license, self.licenses),
+        )
+
+        malformed_status = copy.deepcopy(self.register)
+        malformed_status["components"][0]["status"] = []
+        self.assertIn(
+            f"{first_name}:STATUS_INVALID",
+            validate_register(malformed_status, self.licenses),
+        )
+
+        malformed_approved = copy.deepcopy(self.licenses)
+        malformed_approved["approved_direct_licenses"] = [["MIT"]]
+        self.assertIn(
+            "APPROVED_DIRECT_LICENSES_INVALID",
+            validate_register(self.register, malformed_approved),
+        )
+
+        malformed_prohibited = copy.deepcopy(self.licenses)
+        malformed_prohibited["prohibited_direct_integration"] = [["GPL"]]
+        self.assertIn(
+            "PROHIBITED_DIRECT_LICENSES_INVALID",
+            validate_register(self.register, malformed_prohibited),
+        )
+
+        duplicate_approved = copy.deepcopy(self.licenses)
+        duplicate_approved["approved_direct_licenses"].append(
+            duplicate_approved["approved_direct_licenses"][0]
+        )
+        duplicate_id = duplicate_approved["approved_direct_licenses"][0]
+        self.assertIn(
+            f"{duplicate_id}:APPROVED_DIRECT_LICENSE_DUPLICATE",
+            validate_register(self.register, duplicate_approved),
+        )
+
+        conflicting_policy = copy.deepcopy(self.licenses)
+        conflicting_policy["prohibited_direct_integration"].append("MIT")
+        self.assertIn(
+            "MIT:LICENSE_POLICY_CONFLICT",
+            validate_register(self.register, conflicting_policy),
+        )
+
+        duplicate_condition = copy.deepcopy(self.licenses)
+        duplicate_condition["conditional_licenses"][0]["conditions"].append(
+            duplicate_condition["conditional_licenses"][0]["conditions"][0]
+        )
+        self.assertIn(
+            "MPL-2.0:LICENSE_CONDITION_DUPLICATE",
+            validate_register(self.register, duplicate_condition),
+        )
+
+        malformed_wbsdk_denylist = copy.deepcopy(self.register)
+        wbsdk = next(
+            item for item in malformed_wbsdk_denylist["components"]
+            if item["name"] == "wbsdk"
+        )
+        wbsdk["prohibited_use"].append([])
+        self.assertIn(
+            "WBSDK_WRITE_DENYLIST_INCOMPLETE",
+            validate_register(malformed_wbsdk_denylist, self.licenses),
+        )
+
+        malformed_sbom_register = copy.deepcopy(self.register)
+        malformed_sbom_register["components"] = "invalid"
+        self.assertIn(
+            "SBOM_REGISTER_COMPONENTS_INVALID",
+            validate_sbom(malformed_sbom_register, self.sbom),
+        )
 
     def test_02_exact_candidate_set_and_versions(self) -> None:
         actual = {
