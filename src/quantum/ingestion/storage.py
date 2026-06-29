@@ -10,7 +10,7 @@ from pathlib import Path
 import re
 import tempfile
 from threading import RLock
-from typing import Final
+from typing import ClassVar, Final
 from uuid import UUID
 
 from quantum.access import TenantContext
@@ -79,13 +79,20 @@ _TERMINAL_STATES: Final = {
 class LocalRawStorage:
     """Thread-safe single-process storage for synthetic P1.2 fixtures."""
 
+    _registry_lock: ClassVar[RLock] = RLock()
+    _root_locks: ClassVar[dict[str, RLock]] = {}
+    _validation_lock_registry: ClassVar[
+        dict[tuple[str, str, str], RLock]
+    ] = {}
+
     def __init__(self, root: Path) -> None:
         if not isinstance(root, Path):
             raise RawStorageError("STORAGE_ROOT_INVALID")
         self._root = root.resolve()
         self._root.mkdir(mode=0o700, parents=True, exist_ok=True)
-        self._lock = RLock()
-        self._validation_locks: dict[tuple[str, str], RLock] = {}
+        root_key = os.fspath(self._root)
+        with self._registry_lock:
+            self._lock = self._root_locks.setdefault(root_key, RLock())
 
     @staticmethod
     def _tenant_token(tenant: TenantContext) -> str:
@@ -205,6 +212,13 @@ class LocalRawStorage:
                 raise ValueError("invalid metadata fields")
             if storage_key != cls._canonical_storage_key(tenant_id, digest):
                 raise ValueError("non-canonical storage key")
+            cls._validate_transition_payload(
+                state,
+                schema_id=schema_id,
+                structural_fingerprint=structural,
+                semantic_fingerprint_value=semantic,
+                diagnostics=diagnostics,
+            )
             return RawFileRecord(
                 raw_file_id=raw_file_id,
                 tenant_id=tenant_id,
@@ -338,11 +352,12 @@ class LocalRawStorage:
         tenant: TenantContext,
         raw_file_id: str,
     ) -> RLock:
+        root_key = os.fspath(self._root)
         tenant_id = self._tenant_token(tenant)
         normalized_id = self._raw_id(raw_file_id)
-        key = (tenant_id, normalized_id)
-        with self._lock:
-            return self._validation_locks.setdefault(key, RLock())
+        key = (root_key, tenant_id, normalized_id)
+        with self._registry_lock:
+            return self._validation_lock_registry.setdefault(key, RLock())
 
     @staticmethod
     def _validate_transition_payload(
@@ -355,6 +370,15 @@ class LocalRawStorage:
     ) -> None:
         if not all(isinstance(item, str) for item in diagnostics):
             raise RawStorageError("RAW_FILE_DIAGNOSTICS_INVALID")
+        if state is RawFileState.RECEIVED:
+            if (
+                schema_id is not None
+                or structural_fingerprint is not None
+                or semantic_fingerprint_value is not None
+                or diagnostics
+            ):
+                raise RawStorageError("RAW_FILE_STATE_PAYLOAD_INVALID")
+            return
         if state is RawFileState.VALIDATING:
             if (
                 schema_id is not None
