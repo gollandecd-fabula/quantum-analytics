@@ -2,7 +2,7 @@ schema_version: "1.0"
 date: "2026-06-30"
 stage: P1_TECHNICAL_FOUNDATION_BUILD
 unit: P1_2_RAW_STORAGE_AND_SCHEMA_QUARANTINE_FOUNDATION
-status: IMPLEMENTED_CI_PENDING
+status: REMEDIATED_CI_PENDING
 working_branch: build-p1-2-raw-storage-schema-quarantine-v1
 base_commit: e1586bd0079c891f7303bae7ba779c2c7357feb2
 pull_request: 22
@@ -14,17 +14,27 @@ implemented:
   - atomic temporary-write, fsync and replace
   - persisted metadata records
   - SHA-256 integrity verification on read
-  - canonical storage keys
-  - fail-closed raw-file state transitions
+  - canonical storage keys and metadata validation
+  - fail-closed raw-file state transitions with evidence invariants
   - existing A6 structural schema detection integration
   - semantic fingerprint integration
   - unknown-schema quarantine
   - malformed-file rejection
   - idempotent terminal inspection
+  - stale VALIDATING recovery
+  - serialized concurrent schema inspection
+  - orphan-content prevention on metadata conflict
 tests:
   file: tests/test_p12_raw_storage.py
-  methods: 9
+  methods: 15
   local_targeted_result: PASS
+review:
+  status: REMEDIATED_CI_PENDING
+  blocking_findings_fixed: 4
+  non_blocking_findings_fixed: 3
+limitations:
+  - local adapter is single-process only
+  - cross-process writer coordination is not implemented
 exclusions:
   - real commercial reports
   - production WB XLSX support
