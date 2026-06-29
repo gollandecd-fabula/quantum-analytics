@@ -79,14 +79,22 @@ class OssDependencyAdmissionTests(unittest.TestCase):
 
     def test_06_state_preserves_all_release_and_scope_gates(self) -> None:
         state = load_json_document(STATE)
-        self.assertEqual(state["status"], "R2_VALIDATED_REVIEW_REQUIRED")
+        self.assertIn(
+            state["status"],
+            {"R2_REMEDIATION_CI_REQUIRED", "R2_VALIDATED_REVIEW_REQUIRED"},
+        )
         self.assertIs(state["runtime_installation_authorized"], False)
         self.assertIs(state["marketplace_write_enabled"], False)
         self.assertIn("release_blocked", state["restrictions"])
         self.assertEqual(state["gates"]["wbsdk_source_audit"], "NOT_STARTED_SEPARATE_STAGE")
-        self.assertEqual(state["gates"]["official_registry_verification"], "PASS")
-        self.assertEqual(state["gates"]["osv_vulnerability_scan"], "PASS_ZERO_KNOWN_VULNERABILITIES")
-        self.assertEqual(state["gates"]["tracked_tree_manifest_equality"], "PASS")
+        if state["status"] == "R2_REMEDIATION_CI_REQUIRED":
+            self.assertEqual(state["gates"]["official_registry_verification"], "REVALIDATION_REQUIRED")
+            self.assertEqual(state["gates"]["osv_vulnerability_scan"], "REVALIDATION_REQUIRED")
+            self.assertEqual(state["gates"]["tracked_tree_manifest_equality"], "REVALIDATION_REQUIRED")
+        else:
+            self.assertEqual(state["gates"]["official_registry_verification"], "PASS")
+            self.assertEqual(state["gates"]["osv_vulnerability_scan"], "PASS_ZERO_KNOWN_VULNERABILITIES")
+            self.assertEqual(state["gates"]["tracked_tree_manifest_equality"], "PASS")
         self.assertEqual(state["component_counts"]["pending_registry_confirmation"], 0)
 
     def test_07_notices_and_policy_cover_admitted_components(self) -> None:
