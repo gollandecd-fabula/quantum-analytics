@@ -97,7 +97,7 @@ class ImmutableSourceRow:
             )
         ):
             raise ValueError("raw_payload: non-empty string mapping required")
-        if canonical_json_hash(self.raw_payload) != self.raw_row_hash:
+        if canonical_json_hash(_plain(self.raw_payload)) != self.raw_row_hash:
             raise ValueError("raw_row_hash: does not match raw_payload")
         structural = _check_fingerprint(
             self.structural_fingerprint,
