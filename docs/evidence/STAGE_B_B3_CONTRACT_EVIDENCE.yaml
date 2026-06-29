@@ -1,0 +1,77 @@
+evidence_id: STAGE-B-B3-CONTRACT-EVIDENCE-v11
+unit: B3
+status: REMEDIATED_REVIEW_GATED
+tracking_issue: 9
+branch: build-b3-metric-evidence-contracts-v4
+risk_class: R2
+updated_on: 2026-06-28
+
+scope:
+  contracts_schemas_runtime_verifier_tests: true
+  financial_calculation_kernel: NOT_IMPLEMENTED
+  metric_publication: NOT_IMPLEMENTED
+  real_commercial_data: NOT_ADMITTED
+  marketplace_write_capability: DISABLED
+  release_state: RELEASE_BLOCKED
+
+predecessor:
+  unit: B1a
+  status: PASS
+  source: docs/evidence/STAGE_B_B3_EXECUTION_STATE.yaml
+
+artifacts:
+  contracts:
+    - docs/evidence/METRIC_SNAPSHOT_CONTRACT.md
+    - docs/evidence/EVIDENCE_CHAIN_CONTRACT.md
+  schemas:
+    - schemas/metric-result.schema.json
+    - schemas/evidence-chain.schema.json
+  runtime:
+    - src/quantum/evidence/__init__.py
+    - src/quantum/evidence/runtime_validation.py
+    - src/quantum/evidence/verification.py
+  fixture:
+    - tests/contracts/fixtures/b3-evidence-chain-vectors.json
+  tests:
+    - tests/test_b3_evidence_contracts.py
+    - tests/test_b3_metric_snapshot.py
+    - tests/test_b3_runtime_boundaries.py
+
+checks:
+  b3_test_method_count: 27
+  temporary_monkey_patch_tests: 0
+  runtime_verifier_location: src/quantum/evidence/runtime_validation.py
+  base_verification_engine_location: src/quantum/evidence/verification.py
+  primary_diagnostic_policy: src/quantum/evidence/__init__.py
+  malformed_input_fail_closed_tests: PASS_LOCAL_STATIC
+  unhashable_enum_fail_closed_tests: PASS_LOCAL_STATIC
+  iterative_cycle_validation_tests: PASS_LOCAL_STATIC
+  source_byte_loader_gate_tests: PASS_LOCAL_STATIC
+  github_ci_policy: REQUIRED_ON_CURRENT_PR_MERGE_RESULT
+  independent_review: REQUIRED_ON_CURRENT_PR_HEAD_AND_DIFF
+  transient_ci_result_source: GITHUB_CHECKS
+
+verified_invariants:
+  - hashes are recalculated and tamper evident
+  - malformed objects return diagnostics instead of raising
+  - unhashable external enum-like values return deterministic diagnostics
+  - duplicate nodes edges orphan nodes and cycles fail closed
+  - cycle validation uses deterministic iterative traversal
+  - long acyclic evidence paths validate without recursion failures
+  - transformation sequence is unique contiguous and zero based
+  - typed states preserve numeric zero distinct from non-valid states
+  - Actual and Scenario data remain isolated
+  - selected policies and authorities require approved evidence
+  - strict verification can load retained bytes and compare their hash
+  - primary diagnostics use explicit root-cause priority
+  - optional snapshot locators are null or non-empty strings
+  - decimal and rate values cannot use money units
+
+limitations:
+  - JSON Schemas are declarative; runtime verifier enforces B3 invariants
+  - source bytes require a strict source loader
+  - B1b B2 B6 and B7 remain gated R3 units
+  - no financial activation real data writes deployment or release
+  - no metric is calculated or published in B3
+
+next_gate: CURRENT_PR_MERGE_RESULT_CI_AND_INDEPENDENT_REVIEW

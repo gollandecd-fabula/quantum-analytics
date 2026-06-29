@@ -1,42 +1,31 @@
 {
-  "overlay_version": 1,
+  "overlay_version": 9,
   "base_manifest_git_blob_sha": "498f5cd7440b1bc2c361dd940dead8fc06cd2c1d",
-  "reason": "Effective manifest correction for the final permanent B1a tree after semantic-validation remediation and diagnostic cleanup.",
+  "reason": "Cumulative manifest overlay for B1a cleanup and B3 recovery, including canonical evidence hashing, typed metric values, retained source-file hash equality, deterministic package-qualified unittest discovery, and synchronized 27-test governance evidence.",
   "control_paths_excluded_from_payload": [
     "docs/evidence/ARTIFACT_MANIFEST.json",
     "docs/evidence/ARTIFACT_MANIFEST_OVERLAY.json"
   ],
   "entries": [
-    [
-      "docs/evidence/STAGE_B_B1A_CONTRACT_EVIDENCE.yaml",
-      "0b01bbaa05fcfcb043539bba11d98e1286848112e7f6e00fceadaf5c7735a983",
-      1253
-    ],
-    [
-      "docs/finance/SAFE_EXPRESSION_CONTRACT.md",
-      "c8c3a6f8152b90e6e71393ade7923e8f5224bcea9252697167553df50b062be8",
-      7744
-    ],
-    [
-      "docs/governance/CURRENT_STATE.md",
-      "0cb3b8cab00d98f4b4f8f946309bbc27c4cf2ff83e7e45a4461a78772c6d8b15",
-      1397
-    ],
-    [
-      "tests/test_b1a_artifact_manifest.py",
-      "acef8b5094c1309e560f3f6da617d96202e20c8e05a73de415ac63761bbc741b",
-      3201
-    ],
-    [
-      "tests/test_b1a_contract_alignment.py",
-      "79259645d2cb17aa1935e760d134389241d5f4c85d96b072a2bd1f6b45aa1362",
-      7436
-    ],
-    [
-      "tests/test_b1a_safe_expression_semantics.py",
-      "ebdd579ca0444e5b02483532fcc00170d88ae59d7743dd6e47d34be7d583f27c",
-      3662
-    ]
+    ["docs/evidence/EVIDENCE_CHAIN_CONTRACT.md", "39de4bc709a8d7f1a2b80373c4792d3f70161470a790c507935174e85b903f20", 6849],
+    ["docs/evidence/METRIC_SNAPSHOT_CONTRACT.md", "bd5a0996da66f88111142eb70b4adb3a2b8d24a220adaae4c4773a5b03433dc6", 6184],
+    ["docs/evidence/STAGE_B_B1A_CONTRACT_EVIDENCE.yaml", "0b01bbaa05fcfcb043539bba11d98e1286848112e7f6e00fceadaf5c7735a983", 1253],
+    ["docs/evidence/STAGE_B_B3_CONTRACT_EVIDENCE.yaml", "b71e7c554ebc3a1bd7bfd55bbd8cc27b348027b6752b024ee3931aba3e7dcf16", 2119],
+    ["docs/evidence/STAGE_B_B3_EXECUTION_STATE.yaml", "b17713cbeba633c562628f5eab115d89b004d20d93fb0caa869c76b3beedc093", 1710],
+    ["docs/evidence/STAGE_B_EXECUTION_STATE.yaml", "7725bbc481a6efab05bf058e9a37c2ad6c245c95feade6c7c80e6e20d34bd4df", 1251],
+    ["docs/finance/SAFE_EXPRESSION_CONTRACT.md", "c8c3a6f8152b90e6e71393ade7923e8f5224bcea9252697167553df50b062be8", 7744],
+    ["docs/governance/CURRENT_STATE.md", "fa2cc43dc8845596b2ff680938e92853c7397054803232c5a7e6e636d8af88db", 2008],
+    ["docs/governance/CURRENT_STATE_B3.md", "ffbb6f4d93ea61d6d841ad4c491e3740d93bf790cc4d16711d47c79c824e32ac", 1800],
+    ["schemas/evidence-chain.schema.json", "4087797703b6a1187f58b346f3b985eab4dee35bb4f9bd85d2055049d37545c7", 6266],
+    ["schemas/metric-result.schema.json", "68082566e09482ee15e5b39444ee81a160166e4759636f32848e29bf540dc62a", 12640],
+    ["src/quantum/scripts/ci.py", "3f397f02bdddb60d63874b778c16966a13ea67e64dbd0a84c5cbc67208ae7ff3", 1745],
+    ["tests/__init__.py", "2e8c5f3594f8f3c6dfb4cb06409efb5ede8b89dfba46696511b6cbe9ac8cc858", 48],
+    ["tests/contracts/fixtures/b3-evidence-chain-vectors.json", "4de6a5b823e1d5f6d8a24e28108f1c24761ea2174dfc7f44ae9c718d5b2d2de7", 12071],
+    ["tests/test_000_b3_source_hash_patch.py", "a2d35b29e58a2dbea34eb9f2fb665f72eb7077218d14e1f8be1b41ab02e187e9", 1867],
+    ["tests/test_b1a_artifact_manifest.py", "acef8b5094c1309e560f3f6da617d96202e20c8e05a73de415ac63761bbc741b", 3201],
+    ["tests/test_b1a_contract_alignment.py", "79259645d2cb17aa1935e760d134389241d5f4c85d96b072a2bd1f6b45aa1362", 7436],
+    ["tests/test_b1a_safe_expression_semantics.py", "ebdd579ca0444e5b02483532fcc00170d88ae59d7743dd6e47d34be7d583f27c", 3662],
+    ["tests/test_b3_evidence_contracts.py", "94af636d21ebe8b258dff8c91beda46e8f297eca2884605ee2676f3a2eb9843f", 19308]
   ],
   "remove_paths": []
 }

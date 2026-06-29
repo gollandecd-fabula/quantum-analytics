@@ -1,0 +1,76 @@
+{
+  "overlay_version": 2,
+  "base_overlay_git_blob_sha": "8096ceffbb549e774fef8f59ab4f61f564208595",
+  "hash_encoding": "sha256-base64",
+  "reason": "B3 runtime remediation layer. Adds production verification, modular tests and synchronized state; removes the order-dependent compatibility patch.",
+  "entries": [
+    [
+      "docs/evidence/STAGE_B_B3_CONTRACT_EVIDENCE.yaml",
+      "TDQ8xsQCOcW2vnsot1AMsF8Seb8cY4pPXbGmqWc19VI=",
+      2758
+    ],
+    [
+      "docs/evidence/STAGE_B_B3_EXECUTION_STATE.yaml",
+      "7VuC/jMzoiCkccYc0UjsrSQFltb3bhBRSWMCbItOieA=",
+      1449
+    ],
+    [
+      "docs/evidence/STAGE_B_EXECUTION_STATE.yaml",
+      "0DDZO8Y73pxUB36/zT8WvEtHGgn/5V7PR9gQTCZw9XY=",
+      1400
+    ],
+    [
+      "docs/governance/CURRENT_STATE.md",
+      "GE3eu3IxIPxFiEPU4IsPpfN7P5iDuNloCgUMhFd6zUE=",
+      1251
+    ],
+    [
+      "docs/governance/CURRENT_STATE_B3.md",
+      "k0LBmUzdGLg9YOTbNwE1HHDB6wJ8pZndJiTD2Xnp9Lk=",
+      1347
+    ],
+    [
+      "src/quantum/evidence/__init__.py",
+      "jH/ljBgSSxNYEzHYarjgzABP8lIPdutN1HZSOpLUNQ4=",
+      439
+    ],
+    [
+      "src/quantum/evidence/verification.py",
+      "WKhJu0gNaKd34sE5KdWJ2g3gvXpSV9aCf+EgJrS7CIc=",
+      23807
+    ],
+    [
+      "tests/b3_helpers.py",
+      "Pyn7cNKX1dGFWWtFUS0HCigRykPWB2rTrgOvHepnDdI=",
+      4857
+    ],
+    [
+      "tests/contracts/fixtures/b3-evidence-chain-vectors.json",
+      "LnWj9GfiIW1VzEW2OfHHMXAkHTl1G4H2hdx3ZzlYZ3Q=",
+      9943
+    ],
+    [
+      "tests/test_b1a_artifact_manifest.py",
+      "GSifRJTVskF1WaK5xwJ41GQEjWkHKVGX0gNQRYq+R4I=",
+      4069
+    ],
+    [
+      "tests/test_b3_evidence_contracts.py",
+      "NRBKv0RWESJnt6D5Imedp18OeyXRgcLlR/t1qisfwM4=",
+      3344
+    ],
+    [
+      "tests/test_b3_metric_snapshot.py",
+      "BVaZppKkxJDTfhP+agItOsgfLdIVfpVmUVluYbjSZ8k=",
+      3321
+    ],
+    [
+      "tests/test_b3_runtime_boundaries.py",
+      "zfGmf02hOIG1mktgF1saLromFpgieJmEkQ4z8wQEe/k=",
+      2906
+    ]
+  ],
+  "remove_paths": [
+    "tests/test_000_b3_source_hash_patch.py"
+  ]
+}

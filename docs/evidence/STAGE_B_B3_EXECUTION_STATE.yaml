@@ -1,13 +1,19 @@
-execution_state_id: STAGE-B-EXECUTION-STATE-v1
+execution_state_id: STAGE-B-B3-EXECUTION-STATE-v5
 stage_contract_id: STAGE-B-BUILD-v1
 updated_on: 2026-06-28
-source_of_truth_for_live_unit_state: true
+immutable_snapshot: true
 
 macro_stage: B
 status: ACTIVE
 current_unit: B3
 tracking_issue: 9
 working_branch: build-b3-metric-evidence-contracts-v4
+
+predecessor:
+  unit: B1a
+  merge_commit: ff6bc6e23d3df7d877230578c4de0f02f20fce0d
+  cleanup_commit: 40c8ef94b4826257c2935d3ac499009734be758f
+  status: PASS
 
 units:
   B0:
@@ -55,12 +61,10 @@ units:
     state: PLANNED
     risk: R2
 
-rules:
-  immutable_stage_contract: docs/stage-contracts/STAGE-B-BUILD-v1.md
-  live_state_artifact: docs/evidence/STAGE_B_EXECUTION_STATE.yaml
-  contract_machine_summary_role: INITIAL_PLAN_SNAPSHOT
-  current_state_role: LIVE_EXECUTION_SOURCE
-
-real_commercial_data: NOT_ADMITTED
-marketplace_write_capability: DISABLED
-production_release: BLOCKED
+scope:
+  contracts_schemas_runtime_verifier_tests: true
+  financial_calculation_kernel: NOT_IMPLEMENTED
+  metric_publication: NOT_IMPLEMENTED
+  real_commercial_data: NOT_ADMITTED
+  marketplace_write_capability: DISABLED
+  production_release: BLOCKED

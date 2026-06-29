@@ -1,0 +1,650 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://quantum.local/schemas/metric-result.schema.json",
+  "title": "Quantum Metric Result Snapshot v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "metric_snapshot_id",
+    "snapshot_revision",
+    "organization_id",
+    "marketplace_account_id",
+    "mode",
+    "scenario_id",
+    "metric_definition_ref",
+    "calculation_profile_ref",
+    "accounting_view",
+    "period_start",
+    "period_end",
+    "state",
+    "value",
+    "value_type",
+    "unit",
+    "currency",
+    "reason_code",
+    "expense_boundary",
+    "rounding",
+    "source_authority_ref",
+    "evidence_chain_ref",
+    "data_freshness_state",
+    "freshness_observed_at",
+    "freshness_deadline",
+    "confidence_state",
+    "confidence_reasons",
+    "limitations",
+    "valid_from",
+    "valid_to",
+    "prior_snapshot_id",
+    "restates_snapshot_id",
+    "actor",
+    "reason",
+    "trace_id",
+    "calculated_at",
+    "content_hash"
+  ],
+  "properties": {
+    "metric_snapshot_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "snapshot_revision": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "organization_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "marketplace_account_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "ACTUAL",
+        "SCENARIO"
+      ]
+    },
+    "scenario_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "metric_definition_ref": {
+      "$ref": "#/$defs/versionedRef"
+    },
+    "calculation_profile_ref": {
+      "$ref": "#/$defs/versionedRef"
+    },
+    "accounting_view": {
+      "type": "string",
+      "enum": [
+        "OPERATIONAL",
+        "SETTLEMENT",
+        "TAX_RECOGNITION"
+      ]
+    },
+    "period_start": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "period_end": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "state": {
+      "$ref": "#/$defs/typedState"
+    },
+    "value": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/decimalString"
+        },
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "value_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        null,
+        "MONEY",
+        "INTEGER",
+        "DECIMAL",
+        "RATE"
+      ]
+    },
+    "unit": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        null,
+        "MONEY",
+        "MONEY_PER_ITEM",
+        "ITEM",
+        "ORDER",
+        "EVENT",
+        "PERCENT",
+        "RATIO",
+        "COUNT"
+      ]
+    },
+    "currency": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[A-Z]{3}$"
+    },
+    "reason_code": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "expense_boundary": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "MARKETPLACE_COMMISSION",
+          "FORWARD_LOGISTICS",
+          "REVERSE_LOGISTICS",
+          "STORAGE",
+          "ADVERTISING",
+          "FINES_WITHHOLDINGS",
+          "PRODUCT_COST",
+          "OTHER_EXPENSE",
+          "TAX"
+        ]
+      }
+    },
+    "rounding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "policy_ref",
+        "application_point",
+        "resolved_mode",
+        "resolved_scale"
+      ],
+      "properties": {
+        "policy_ref": {
+          "$ref": "#/$defs/versionedRef"
+        },
+        "application_point": {
+          "type": "string",
+          "enum": [
+            "RULE_INPUT_NORMALIZATION",
+            "RULE_COMPONENT_RESULT",
+            "METRIC_FINAL_ACCOUNTING",
+            "REPORT_PRESENTATION",
+            "EXPORT_PRESENTATION"
+          ]
+        },
+        "resolved_mode": {
+          "type": "string",
+          "enum": [
+            "HALF_EVEN",
+            "HALF_UP",
+            "DOWN",
+            "UP",
+            "FLOOR",
+            "CEILING"
+          ]
+        },
+        "resolved_scale": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 28
+        }
+      }
+    },
+    "source_authority_ref": {
+      "$ref": "#/$defs/versionedRef"
+    },
+    "evidence_chain_ref": {
+      "$ref": "#/$defs/evidenceChainRef"
+    },
+    "data_freshness_state": {
+      "type": "string",
+      "enum": [
+        "CURRENT",
+        "STALE",
+        "UNKNOWN",
+        "NOT_APPLICABLE"
+      ]
+    },
+    "freshness_observed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "freshness_deadline": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "confidence_state": {
+      "type": "string",
+      "enum": [
+        "HIGH",
+        "MEDIUM",
+        "LOW",
+        "UNKNOWN",
+        "NOT_APPLICABLE"
+      ]
+    },
+    "confidence_reasons": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "valid_from": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "valid_to": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "prior_snapshot_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "restates_snapshot_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "actor": {
+      "type": "string",
+      "minLength": 1
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 1
+    },
+    "trace_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "calculated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "content_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "mode": {
+            "const": "ACTUAL"
+          }
+        },
+        "required": [
+          "mode"
+        ]
+      },
+      "then": {
+        "properties": {
+          "scenario_id": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "mode": {
+            "const": "SCENARIO"
+          }
+        },
+        "required": [
+          "mode"
+        ]
+      },
+      "then": {
+        "properties": {
+          "scenario_id": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "state": {
+            "const": "VALID"
+          }
+        },
+        "required": [
+          "state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "value": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/decimalString"
+              },
+              {
+                "type": "integer"
+              }
+            ]
+          },
+          "value_type": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "reason_code": {
+            "type": "null"
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "value": {
+            "type": "null"
+          },
+          "value_type": {
+            "type": "null"
+          },
+          "unit": {
+            "type": "null"
+          },
+          "currency": {
+            "type": "null"
+          },
+          "reason_code": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "$comment": "VALID MONEY payload, unit, and currency binding",
+      "if": {
+        "allOf": [
+          {
+            "properties": {
+              "state": {
+                "const": "VALID"
+              }
+            },
+            "required": [
+              "state"
+            ]
+          },
+          {
+            "properties": {
+              "value_type": {
+                "const": "MONEY"
+              }
+            },
+            "required": [
+              "value_type"
+            ]
+          }
+        ]
+      },
+      "then": {
+        "properties": {
+          "value": {
+            "$ref": "#/$defs/decimalString"
+          },
+          "unit": {
+            "enum": [
+              "MONEY",
+              "MONEY_PER_ITEM"
+            ]
+          },
+          "currency": {
+            "type": "string",
+            "pattern": "^[A-Z]{3}$"
+          }
+        }
+      }
+    },
+    {
+      "$comment": "VALID INTEGER payload, unit, and currency binding",
+      "if": {
+        "allOf": [
+          {
+            "properties": {
+              "state": {
+                "const": "VALID"
+              }
+            },
+            "required": [
+              "state"
+            ]
+          },
+          {
+            "properties": {
+              "value_type": {
+                "const": "INTEGER"
+              }
+            },
+            "required": [
+              "value_type"
+            ]
+          }
+        ]
+      },
+      "then": {
+        "properties": {
+          "value": {
+            "type": "integer"
+          },
+          "unit": {
+            "not": {
+              "enum": [
+                "MONEY",
+                "MONEY_PER_ITEM"
+              ]
+            }
+          },
+          "currency": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "$comment": "VALID DECIMAL payload, unit, and currency binding",
+      "if": {
+        "allOf": [
+          {
+            "properties": {
+              "state": {
+                "const": "VALID"
+              }
+            },
+            "required": [
+              "state"
+            ]
+          },
+          {
+            "properties": {
+              "value_type": {
+                "const": "DECIMAL"
+              }
+            },
+            "required": [
+              "value_type"
+            ]
+          }
+        ]
+      },
+      "then": {
+        "properties": {
+          "value": {
+            "$ref": "#/$defs/decimalString"
+          },
+          "unit": {
+            "not": {
+              "enum": [
+                "MONEY",
+                "MONEY_PER_ITEM"
+              ]
+            }
+          },
+          "currency": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "$comment": "VALID RATE payload, unit, and currency binding",
+      "if": {
+        "allOf": [
+          {
+            "properties": {
+              "state": {
+                "const": "VALID"
+              }
+            },
+            "required": [
+              "state"
+            ]
+          },
+          {
+            "properties": {
+              "value_type": {
+                "const": "RATE"
+              }
+            },
+            "required": [
+              "value_type"
+            ]
+          }
+        ]
+      },
+      "then": {
+        "properties": {
+          "value": {
+            "$ref": "#/$defs/decimalString"
+          },
+          "unit": {
+            "not": {
+              "enum": [
+                "MONEY",
+                "MONEY_PER_ITEM"
+              ]
+            }
+          },
+          "currency": {
+            "type": "null"
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "decimalString": {
+      "type": "string",
+      "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+    },
+    "typedState": {
+      "type": "string",
+      "enum": [
+        "VALID",
+        "EMPTY",
+        "BLOCKED",
+        "UNAVAILABLE",
+        "CONFLICT",
+        "INVALID",
+        "NOT_APPLICABLE"
+      ]
+    },
+    "versionedRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "version",
+        "content_hash"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "content_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      }
+    },
+    "evidenceChainRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "version"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    }
+  }
+}

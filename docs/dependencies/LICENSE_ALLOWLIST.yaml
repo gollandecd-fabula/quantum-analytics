@@ -1,0 +1,33 @@
+{
+  "approved_direct_licenses": [
+    "MIT",
+    "Apache-2.0",
+    "BSD-3-Clause"
+  ],
+  "conditional_licenses": [
+    {
+      "conditions": [
+        "development_or_test_scope_only",
+        "no_vendored_modified_source_without_legal_review",
+        "license_and_notice_retained"
+      ],
+      "license": "MPL-2.0"
+    }
+  ],
+  "generated_on": "2026-06-29",
+  "prohibited_direct_integration": [
+    "AGPL-3.0-only",
+    "GPL-2.0-only",
+    "GPL-3.0-only",
+    "SSPL-1.0",
+    "BUSL-1.1",
+    "UNKNOWN"
+  ],
+  "rules": {
+    "copyleft_runtime_dependency_requires_manual_approval": true,
+    "license_notice_required": true,
+    "transitive_licenses_must_be_scanned": true,
+    "unrecognized_license_requires_manual_approval": true
+  },
+  "schema_version": "1.0"
+}

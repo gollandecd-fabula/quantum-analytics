@@ -1,41 +1,37 @@
 # CURRENT STATE
 
 Date: 2026-06-28
-Status: `BUILD_B1A_READY_FOR_MERGE`
+Status: `BUILD_B3_REMEDIATED_REVIEW_GATED`
 Active contract: `STAGE-B-BUILD-v1`
 Live execution state: `docs/evidence/STAGE_B_EXECUTION_STATE.yaml`
-Current unit: `B1a — FINANCIAL_RULE_CONTRACTS_AND_RESOLUTION`
-Tracking issue: `#7`
-Working branch: `b1a-cleanup`
-Pull Request: `#13`
+Current unit: `B3 — METRIC_SNAPSHOTS_AND_EVIDENCE_CHAIN`
+Tracking issue: `#9`
+Working branch: `build-b3-metric-evidence-contracts-v4`
 
 ## Scope
 
-B1a is R2 contract/schema/fixture/test/evidence work only. No calculation kernel, active rules, real commercial data, marketplace writes, or production authorization. Source Authority remains DRAFT.
+B3 remains R2 contract and verification infrastructure. It does not calculate or
+publish metrics, activate financial rules, admit real commercial data, write to
+marketplaces, deploy services, or authorize release.
 
-## Verification
+## B3 remediation
 
-- 34 Foundation tests.
-- 34 B1a tests.
-- 68 total tests passed.
-- Technical CI `28307956212`: success.
-- 31 Codex threads; 0 unresolved.
-- Effective Manifest v6 verifies 159 permanent tracked artifacts.
-- Temporary manifest diagnostics removed.
-
-## Invariants
-
-- deterministic tenant-safe and mode-isolated resolution;
-- explicit `calculation_instant` with `[valid_from, valid_to)` filtering;
-- complete ordering evidence and exactly one selected eligible candidate;
-- typed unit/currency-safe expressions and rules;
-- `NEGATE` and `ABS` require numeric results and operands;
-- immutable Calculation Profiles;
-- explicit purchase and per-item money metrics;
-- reproducible tracked-tree evidence.
+- the base verification engine is in `src/quantum/evidence/verification.py`;
+- strict public runtime validation is in
+  `src/quantum/evidence/runtime_validation.py` and exported by
+  `src/quantum/evidence/__init__.py`;
+- order-dependent `test_000_*` monkey patch removed;
+- malformed inputs, duplicate nodes/edges, orphan nodes, cycles, timestamps,
+  typed states, optional locators, value/unit bindings and source-byte checks
+  have deterministic fail-closed diagnostics;
+- source-file declaration checks are distinct from strict retained-byte loading;
+- 27 independent B3 tests import the strict public runtime verifier;
+- primary diagnostics follow an explicit root-cause priority policy.
 
 ## Gate
 
-Current cleanup head requires CI success, clean Codex review, and protected squash merge of PR #13. B1b remains R3 and is not approved.
+Merge B3 only when CI succeeds for the current PR merge-result, independent
+review creates no unresolved findings, and every review thread is resolved.
+B1b, B2, B6, and B7 remain `GATED / R3 / NOT_GRANTED`.
 
 `RELEASE_BLOCKED`

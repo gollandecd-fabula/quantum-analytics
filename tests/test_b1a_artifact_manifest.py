@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import base64
 import hashlib
 import json
 import subprocess
@@ -9,9 +10,16 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST_PATH = ROOT / "docs/evidence/ARTIFACT_MANIFEST.json"
 OVERLAY_PATH = ROOT / "docs/evidence/ARTIFACT_MANIFEST_OVERLAY.json"
-MANIFEST_REPO_PATH = "docs/evidence/ARTIFACT_MANIFEST.json"
-OVERLAY_REPO_PATH = "docs/evidence/ARTIFACT_MANIFEST_OVERLAY.json"
-CONTROL_PATHS = {MANIFEST_REPO_PATH, OVERLAY_REPO_PATH}
+RUNTIME_OVERLAY_PATH = ROOT / "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_B3_RUNTIME.json"
+FINAL_OVERLAY_PATH = ROOT / "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_B3_FINAL.json"
+OSS_ADMISSION_OVERLAY_PATH = ROOT / "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_OSS_ADMISSION.json"
+CONTROL_PATHS = {
+    "docs/evidence/ARTIFACT_MANIFEST.json",
+    "docs/evidence/ARTIFACT_MANIFEST_OVERLAY.json",
+    "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_B3_RUNTIME.json",
+    "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_B3_FINAL.json",
+    "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_OSS_ADMISSION.json",
+}
 ARTIFACT_FIELDS = ["path", "sha256", "size_bytes"]
 B1A_SCHEMAS = {
     "schemas/calculation-profile.schema.json",
@@ -38,19 +46,46 @@ def tracked_paths() -> list[str]:
     )
 
 
+def apply_entries(artifacts: dict[str, list], overlay: dict) -> None:
+    encoding = overlay.get("hash_encoding", "sha256-hex")
+    for row in overlay["entries"]:
+        path, digest, size = row
+        if encoding == "sha256-base64":
+            digest = base64.b64decode(digest, validate=True).hex()
+        elif encoding != "sha256-hex":
+            raise AssertionError("ARTIFACT_MANIFEST_HASH_ENCODING_UNSUPPORTED")
+        artifacts[path] = [path, digest, size]
+    for path in overlay.get("remove_paths", []):
+        artifacts.pop(path, None)
+
+
 def load_effective_manifest() -> dict:
     base_bytes = MANIFEST_PATH.read_bytes()
     current = json.loads(base_bytes.decode("utf-8"))
-    overlay = json.loads(OVERLAY_PATH.read_text(encoding="utf-8"))
+    overlay_bytes = OVERLAY_PATH.read_bytes()
+    overlay = json.loads(overlay_bytes.decode("utf-8"))
+    runtime_bytes = RUNTIME_OVERLAY_PATH.read_bytes()
+    runtime_overlay = json.loads(runtime_bytes.decode("utf-8"))
+    final_bytes = FINAL_OVERLAY_PATH.read_bytes()
+    final_overlay = json.loads(final_bytes.decode("utf-8"))
+    oss_admission_overlay = json.loads(
+        OSS_ADMISSION_OVERLAY_PATH.read_text(encoding="utf-8")
+    )
 
     if overlay["base_manifest_git_blob_sha"] != git_blob_sha(base_bytes):
         raise AssertionError("ARTIFACT_MANIFEST_OVERLAY_BASE_MISMATCH")
+    if runtime_overlay["base_overlay_git_blob_sha"] != git_blob_sha(overlay_bytes):
+        raise AssertionError("ARTIFACT_MANIFEST_RUNTIME_OVERLAY_BASE_MISMATCH")
+    if final_overlay["base_runtime_overlay_git_blob_sha"] != git_blob_sha(runtime_bytes):
+        raise AssertionError("ARTIFACT_MANIFEST_FINAL_OVERLAY_BASE_MISMATCH")
+    if oss_admission_overlay["base_final_overlay_git_blob_sha"] != git_blob_sha(final_bytes):
+        raise AssertionError("ARTIFACT_MANIFEST_OSS_ADMISSION_OVERLAY_BASE_MISMATCH")
 
     artifacts = {row[0]: row for row in current["artifacts"]}
-    for row in overlay["entries"]:
-        artifacts[row[0]] = row
-    for path in overlay.get("remove_paths", []):
-        artifacts.pop(path, None)
+    apply_entries(artifacts, overlay)
+    apply_entries(artifacts, runtime_overlay)
+    apply_entries(artifacts, final_overlay)
+    apply_entries(artifacts, oss_admission_overlay)
 
     effective = dict(current)
     effective["artifacts"] = [artifacts[path] for path in sorted(artifacts)]
