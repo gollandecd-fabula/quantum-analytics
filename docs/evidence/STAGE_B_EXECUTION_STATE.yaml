@@ -32,6 +32,7 @@ units:
     merged_commit: b260968a8fcaea7d0802d402d062a5de0c3d3f46
     issue: 9
     risk: R2
+    working_branch: build-b3-metric-evidence-contracts-v4
     runtime_verifier: src/quantum/evidence/runtime_validation.py
     base_verification_engine: src/quantum/evidence/verification.py
     test_method_count: 27
