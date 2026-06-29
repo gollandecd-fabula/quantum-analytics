@@ -14,6 +14,7 @@ RUNTIME_OVERLAY_PATH = ROOT / "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_B3_RUNTIM
 FINAL_OVERLAY_PATH = ROOT / "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_B3_FINAL.json"
 OSS_ADMISSION_OVERLAY_PATH = ROOT / "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_OSS_ADMISSION.json"
 P1_OVERLAY_PATH = ROOT / "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_P1.json"
+P1_CLOSURE_OVERLAY_PATH = ROOT / "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_P1_CLOSURE.json"
 CONTROL_PATHS = {
     "docs/evidence/ARTIFACT_MANIFEST.json",
     "docs/evidence/ARTIFACT_MANIFEST_OVERLAY.json",
@@ -21,6 +22,7 @@ CONTROL_PATHS = {
     "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_B3_FINAL.json",
     "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_OSS_ADMISSION.json",
     "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_P1.json",
+    "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_P1_CLOSURE.json",
 }
 ARTIFACT_FIELDS = ["path", "sha256", "size_bytes"]
 B1A_SCHEMAS = {
@@ -72,7 +74,11 @@ def load_effective_manifest() -> dict:
     final_overlay = json.loads(final_bytes.decode("utf-8"))
     oss_admission_bytes = OSS_ADMISSION_OVERLAY_PATH.read_bytes()
     oss_admission_overlay = json.loads(oss_admission_bytes.decode("utf-8"))
-    p1_overlay = json.loads(P1_OVERLAY_PATH.read_text(encoding="utf-8"))
+    p1_bytes = P1_OVERLAY_PATH.read_bytes()
+    p1_overlay = json.loads(p1_bytes.decode("utf-8"))
+    p1_closure_overlay = json.loads(
+        P1_CLOSURE_OVERLAY_PATH.read_text(encoding="utf-8")
+    )
 
     if overlay["base_manifest_git_blob_sha"] != git_blob_sha(base_bytes):
         raise AssertionError("ARTIFACT_MANIFEST_OVERLAY_BASE_MISMATCH")
@@ -86,6 +92,10 @@ def load_effective_manifest() -> dict:
         oss_admission_bytes
     ):
         raise AssertionError("ARTIFACT_MANIFEST_P1_OVERLAY_BASE_MISMATCH")
+    if p1_closure_overlay["base_p1_overlay_git_blob_sha"] != git_blob_sha(
+        p1_bytes
+    ):
+        raise AssertionError("ARTIFACT_MANIFEST_P1_CLOSURE_OVERLAY_BASE_MISMATCH")
 
     artifacts = {row[0]: row for row in current["artifacts"]}
     apply_entries(artifacts, overlay)
@@ -93,6 +103,7 @@ def load_effective_manifest() -> dict:
     apply_entries(artifacts, final_overlay)
     apply_entries(artifacts, oss_admission_overlay)
     apply_entries(artifacts, p1_overlay)
+    apply_entries(artifacts, p1_closure_overlay)
 
     effective = dict(current)
     effective["artifacts"] = [artifacts[path] for path in sorted(artifacts)]

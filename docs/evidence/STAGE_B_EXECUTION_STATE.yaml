@@ -7,7 +7,7 @@ macro_stage: B
 status: ACTIVE
 current_unit: P12
 tracking_issue: 22
-working_branch: build-p1-2-raw-storage-schema-quarantine-v1
+working_branch: close-p1-2-post-merge-v1
 
 units:
   B0:
@@ -44,10 +44,13 @@ units:
     risk: R2
     evidence: docs/evidence/STAGE_P1_EXECUTION_STATE.yaml
   P12:
-    state: IMPLEMENTED_CI_PENDING
+    state: COMPLETE
+    merged_commit: 568ecbee57dc122170892dacb624be8f6fd5a865
     pull_request: 22
     risk: R2
     evidence: docs/evidence/STAGE_P1_2_EXECUTION_STATE.yaml
+    test_method_count: 19
+    resolved_findings: 11
   B4:
     state: PLANNED
     risk: R2
