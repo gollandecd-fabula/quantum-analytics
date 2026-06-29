@@ -154,17 +154,58 @@ def _verify_hardening_cases() -> None:
         in validate_register(conditional_scope, licenses)
     )
 
-    conditional_dev = copy.deepcopy(conditional_scope)
-    conditional_dev["components"][0]["status"] = "APPROVED_DEV_TEST_ONLY"
-    conditional_errors = validate_register(conditional_dev, licenses)
-    assert not any(error.startswith("duckdb:CONDITIONAL_LICENSE_") for error in conditional_errors)
+    relabeled_operational = copy.deepcopy(conditional_scope)
+    relabeled_operational["components"][0]["status"] = "APPROVED_DEV_TEST_ONLY"
+    relabeled_errors = validate_register(relabeled_operational, licenses)
+    assert (
+        "duckdb:CONDITIONAL_LICENSE_SCOPE_DESCRIPTOR_VIOLATION"
+        in relabeled_errors
+    )
+    assert (
+        "duckdb:CONDITIONAL_LICENSE_ALLOWED_USE_VIOLATION"
+        in relabeled_errors
+    )
 
-    missing_vendor_guard = copy.deepcopy(conditional_dev)
-    missing_vendor_guard["components"][0]["prohibited_use"].remove(
+    assert not any(
+        error.startswith("hypothesis:CONDITIONAL_LICENSE_")
+        for error in validate_register(register, licenses)
+    )
+
+    invalid_hypothesis_scope = copy.deepcopy(register)
+    invalid_hypothesis = next(
+        item
+        for item in invalid_hypothesis_scope["components"]
+        if item.get("name") == "hypothesis"
+    )
+    invalid_hypothesis["scope"] = "B2_RECONCILIATION"
+    assert (
+        "hypothesis:CONDITIONAL_LICENSE_SCOPE_DESCRIPTOR_VIOLATION"
+        in validate_register(invalid_hypothesis_scope, licenses)
+    )
+
+    invalid_hypothesis_use = copy.deepcopy(register)
+    invalid_hypothesis = next(
+        item
+        for item in invalid_hypothesis_use["components"]
+        if item.get("name") == "hypothesis"
+    )
+    invalid_hypothesis["allowed_use"] = ["read-only analytics"]
+    assert (
+        "hypothesis:CONDITIONAL_LICENSE_ALLOWED_USE_VIOLATION"
+        in validate_register(invalid_hypothesis_use, licenses)
+    )
+
+    missing_vendor_guard = copy.deepcopy(register)
+    missing_vendor_hypothesis = next(
+        item
+        for item in missing_vendor_guard["components"]
+        if item.get("name") == "hypothesis"
+    )
+    missing_vendor_hypothesis["prohibited_use"].remove(
         "vendoring modified source without review"
     )
     assert (
-        "duckdb:CONDITIONAL_LICENSE_VENDORING_GUARD_REQUIRED"
+        "hypothesis:CONDITIONAL_LICENSE_VENDORING_GUARD_REQUIRED"
         in validate_register(missing_vendor_guard, licenses)
     )
 
