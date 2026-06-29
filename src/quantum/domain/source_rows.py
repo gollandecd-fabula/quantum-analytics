@@ -12,24 +12,31 @@ from uuid import UUID
 from quantum.domain.idempotency import canonical_json_hash
 
 
-_HEX_SHA256 = re.compile(r"^[0-9a-f]{64}$")
+_HEX = re.compile(r"^[0-9a-f]{64}$")
 
 
-def _deep_freeze(value: Any) -> Any:
+def _freeze(value: Any) -> Any:
     if isinstance(value, MappingABC):
-        return MappingProxyType(
-            {str(key): _deep_freeze(item) for key, item in value.items()}
-        )
+        return MappingProxyType({str(k): _freeze(v) for k, v in value.items()})
     if isinstance(value, (list, tuple)):
-        return tuple(_deep_freeze(item) for item in value)
+        return tuple(_freeze(item) for item in value)
     return value
 
 
-def _jsonable(value: Any) -> Any:
+def _plain(value: Any) -> Any:
     if isinstance(value, MappingABC):
-        return {str(key): _jsonable(item) for key, item in value.items()}
+        return {str(k): _plain(v) for k, v in value.items()}
     if isinstance(value, tuple):
-        return [_jsonable(item) for item in value]
+        return [_plain(item) for item in value]
+    return value
+
+
+def _check_fingerprint(value: Any, field: str) -> Mapping[str, object]:
+    if not isinstance(value, MappingABC) or not value:
+        raise ValueError(f"{field}: required")
+    digest = value.get("sha256")
+    if not isinstance(digest, str) or _HEX.fullmatch(digest) is None:
+        raise ValueError(f"{field}.sha256: invalid")
     return value
 
 
@@ -59,7 +66,7 @@ class ImmutableSourceRow:
     ingested_at: datetime
 
     def __post_init__(self) -> None:
-        for field_name in (
+        for name in (
             "source_record_id",
             "tenant_id",
             "import_batch_id",
@@ -68,17 +75,17 @@ class ImmutableSourceRow:
             "adapter_version",
             "schema_version",
         ):
-            value = getattr(self, field_name)
+            value = getattr(self, name)
             if not isinstance(value, str) or not value:
-                raise ValueError(f"{field_name}: required")
+                raise ValueError(f"{name}: required")
         try:
             UUID(self.raw_file_id)
         except (TypeError, ValueError, AttributeError) as exc:
             raise ValueError("raw_file_id: invalid UUID") from exc
-        for field_name in ("source_file_sha256", "raw_row_hash"):
-            value = getattr(self, field_name)
-            if not isinstance(value, str) or _HEX_SHA256.fullmatch(value) is None:
-                raise ValueError(f"{field_name}: invalid SHA-256")
+        for name in ("source_file_sha256", "raw_row_hash"):
+            value = getattr(self, name)
+            if not isinstance(value, str) or _HEX.fullmatch(value) is None:
+                raise ValueError(f"{name}: invalid SHA-256")
         if not isinstance(self.row_number, int) or self.row_number < 2:
             raise ValueError("row_number: must be >= 2")
         if (
@@ -90,22 +97,24 @@ class ImmutableSourceRow:
             )
         ):
             raise ValueError("raw_payload: non-empty string mapping required")
-        if (
-            not isinstance(self.structural_fingerprint, MappingABC)
-            or not self.structural_fingerprint
-        ):
-            raise ValueError("structural_fingerprint: required")
-        if (
-            self.semantic_fingerprint is not None
-            and not isinstance(self.semantic_fingerprint, MappingABC)
-        ):
-            raise ValueError("semantic_fingerprint: invalid")
+        if canonical_json_hash(self.raw_payload) != self.raw_row_hash:
+            raise ValueError("raw_row_hash: does not match raw_payload")
+        structural = _check_fingerprint(
+            self.structural_fingerprint,
+            "structural_fingerprint",
+        )
+        semantic = self.semantic_fingerprint
+        if semantic is not None:
+            semantic = _check_fingerprint(semantic, "semantic_fingerprint")
         if not isinstance(self.validation_status, SourceRowStatus):
             raise ValueError("validation_status: invalid")
         if not all(isinstance(item, str) and item for item in self.diagnostics):
             raise ValueError("diagnostics: invalid")
-        if self.validation_status is SourceRowStatus.VALID and self.diagnostics:
-            raise ValueError("diagnostics: forbidden for VALID row")
+        if self.validation_status is SourceRowStatus.VALID:
+            if self.diagnostics:
+                raise ValueError("diagnostics: forbidden for VALID row")
+            if semantic is None:
+                raise ValueError("semantic_fingerprint: required for VALID row")
         if (
             self.validation_status is SourceRowStatus.QUARANTINED
             and not self.diagnostics
@@ -117,19 +126,10 @@ class ImmutableSourceRow:
             or self.ingested_at.utcoffset() is None
         ):
             raise ValueError("ingested_at: timezone-aware datetime required")
-
-        object.__setattr__(self, "raw_payload", _deep_freeze(self.raw_payload))
-        object.__setattr__(
-            self,
-            "structural_fingerprint",
-            _deep_freeze(self.structural_fingerprint),
-        )
-        if self.semantic_fingerprint is not None:
-            object.__setattr__(
-                self,
-                "semantic_fingerprint",
-                _deep_freeze(self.semantic_fingerprint),
-            )
+        object.__setattr__(self, "raw_payload", _freeze(self.raw_payload))
+        object.__setattr__(self, "structural_fingerprint", _freeze(structural))
+        if semantic is not None:
+            object.__setattr__(self, "semantic_fingerprint", _freeze(semantic))
         object.__setattr__(self, "diagnostics", tuple(self.diagnostics))
 
     def content_fingerprint(self) -> str:
@@ -143,13 +143,9 @@ class ImmutableSourceRow:
                 "row_number": self.row_number,
                 "source_row_key": self.source_row_key,
                 "raw_row_hash": self.raw_row_hash,
-                "raw_payload": _jsonable(self.raw_payload),
-                "structural_fingerprint": _jsonable(
-                    self.structural_fingerprint
-                ),
-                "semantic_fingerprint": _jsonable(
-                    self.semantic_fingerprint
-                ),
+                "raw_payload": _plain(self.raw_payload),
+                "structural_fingerprint": _plain(self.structural_fingerprint),
+                "semantic_fingerprint": _plain(self.semantic_fingerprint),
                 "validation_status": self.validation_status.value,
                 "diagnostics": list(self.diagnostics),
                 "adapter_id": self.adapter_id,
