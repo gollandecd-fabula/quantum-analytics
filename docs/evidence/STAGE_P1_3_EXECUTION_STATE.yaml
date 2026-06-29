@@ -1,0 +1,42 @@
+schema_version: "1.0"
+date: "2026-06-30"
+stage: P1_TECHNICAL_FOUNDATION_BUILD
+unit: P1_3_CANONICAL_SOURCE_ROWS_AND_OPERATION_LEDGER_FOUNDATION
+status: IMPLEMENTED_CI_PENDING
+working_branch: p13-canonical-ledger
+base_commit: 05d004bc734cde4f6e3703cf06e969d37399cbea
+pull_request: 24
+runtime_dependency_installation_authorized: false
+marketplace_write_enabled: false
+commercial_data_authorized: false
+implemented:
+  - immutable tenant-scoped source-row runtime contract
+  - deterministic source-record and import-batch identifiers
+  - append-only in-memory source-row and canonical-event ledger
+  - tenant-scoped event and source-row lookup
+  - event-to-source-row-to-raw-file lineage tracing
+  - idempotent replay and conflict detection
+  - monotonic revision and supersession validation
+  - cumulative reversal quantity and amount bounds
+  - row-level semantic quarantine without source-row loss
+  - concurrent replay serialization
+  - normalization actor and provenance timestamp
+  - synthetic validated-CSV ingestion from P1.2 raw storage
+tests:
+  file: tests/test_p13_canonical_ledger.py
+  methods: 10
+  status: CI_PENDING
+limitations:
+  - in-memory ledger only
+  - single-process coordination only
+  - synthetic CSV schema only
+  - direct module imports are used until public export review is admitted
+exclusions:
+  - financial metrics and profit calculation
+  - calculation profiles
+  - real marketplace reports
+  - PostgreSQL persistence
+  - marketplace API calls and writes
+  - UI and deployment
+  - global learning
+release_status: RELEASE_BLOCKED
