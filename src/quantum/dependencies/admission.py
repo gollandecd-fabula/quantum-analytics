@@ -26,6 +26,31 @@ def load_json_document(path: Path) -> dict[str, Any]:
     return value
 
 
+def _policy_string_set(
+    license_policy: dict[str, Any],
+    field: str,
+    errors: list[str],
+    *,
+    invalid_code: str,
+    duplicate_code: str,
+) -> set[str]:
+    raw_values = license_policy.get(field, [])
+    if not isinstance(raw_values, list):
+        errors.append(invalid_code)
+        return set()
+
+    result: set[str] = set()
+    for value in raw_values:
+        if not isinstance(value, str) or not value:
+            errors.append(invalid_code)
+            continue
+        if value in result:
+            errors.append(f"{value}:{duplicate_code}")
+            continue
+        result.add(value)
+    return result
+
+
 def _conditional_license_rules(
     license_policy: dict[str, Any],
     errors: list[str],
@@ -56,6 +81,9 @@ def _conditional_license_rules(
             errors.append(f"{license_id}:LICENSE_CONDITIONS_INVALID")
             continue
         condition_set = frozenset(conditions)
+        if len(condition_set) != len(conditions):
+            errors.append(f"{license_id}:LICENSE_CONDITION_DUPLICATE")
+            continue
         unsupported = condition_set - SUPPORTED_CONDITIONAL_LICENSE_CONDITIONS
         if unsupported:
             errors.append(f"{license_id}:LICENSE_CONDITION_UNSUPPORTED")
@@ -73,9 +101,27 @@ def validate_register(register: dict[str, Any], license_policy: dict[str, Any]) 
     if register.get("marketplace_write_enabled") is not False:
         errors.append("MARKETPLACE_WRITES_MUST_REMAIN_BLOCKED")
 
-    approved = set(license_policy.get("approved_direct_licenses", []))
+    approved = _policy_string_set(
+        license_policy,
+        "approved_direct_licenses",
+        errors,
+        invalid_code="APPROVED_DIRECT_LICENSES_INVALID",
+        duplicate_code="APPROVED_DIRECT_LICENSE_DUPLICATE",
+    )
     conditional = _conditional_license_rules(license_policy, errors)
-    prohibited = set(license_policy.get("prohibited_direct_integration", []))
+    prohibited = _policy_string_set(
+        license_policy,
+        "prohibited_direct_integration",
+        errors,
+        invalid_code="PROHIBITED_DIRECT_LICENSES_INVALID",
+        duplicate_code="PROHIBITED_DIRECT_LICENSE_DUPLICATE",
+    )
+    for license_id in (
+        (approved & prohibited)
+        | (set(conditional) & prohibited)
+        | (approved & set(conditional))
+    ):
+        errors.append(f"{license_id}:LICENSE_POLICY_CONFLICT")
     seen: set[tuple[str, str]] = set()
 
     components = register.get("components")
@@ -104,14 +150,18 @@ def validate_register(register: dict[str, Any], license_policy: dict[str, Any]) 
             errors.append(f"{name}:EXACT_VERSION_REQUIRED")
 
         license_id = component.get("license")
-        if license_id in prohibited or license_id not in approved | set(conditional):
-            errors.append(f"{name}:LICENSE_NOT_ADMITTED")
+        conditions: frozenset[str] | None = None
+        if not isinstance(license_id, str) or not license_id:
+            errors.append(f"{name}:LICENSE_ID_INVALID")
+        else:
+            if license_id in prohibited or license_id not in approved | set(conditional):
+                errors.append(f"{name}:LICENSE_NOT_ADMITTED")
+            conditions = conditional.get(license_id)
 
         status = component.get("status")
-        if status not in ALLOWED_STATUSES:
+        if not isinstance(status, str) or status not in ALLOWED_STATUSES:
             errors.append(f"{name}:STATUS_INVALID")
 
-        conditions = conditional.get(license_id)
         if conditions is not None:
             if (
                 "development_or_test_scope_only" in conditions
@@ -172,7 +222,11 @@ def validate_register(register: dict[str, Any], license_policy: dict[str, Any]) 
         "media writes",
         "direct use by domain services",
     }
-    if not isinstance(prohibited_use, list) or not required_blocks.issubset(set(prohibited_use)):
+    if (
+        not isinstance(prohibited_use, list)
+        or any(not isinstance(value, str) or not value for value in prohibited_use)
+        or not required_blocks.issubset(set(prohibited_use))
+    ):
         errors.append("WBSDK_WRITE_DENYLIST_INCOMPLETE")
 
     return tuple(errors)
@@ -212,10 +266,21 @@ def validate_sbom(register: dict[str, Any], sbom: dict[str, Any]) -> tuple[str, 
             errors.append(f"{spdx_id}:SBOM_DUPLICATE_SPDXID")
         else:
             package_ids.add(spdx_id)
-    expected = {
-        item["name"]: (item["version"], item["license"], False)
-        for item in register["components"]
-    }
+
+    expected: dict[str, tuple[Any, Any, bool]] = {}
+    register_components = register.get("components")
+    if not isinstance(register_components, list):
+        errors.append("SBOM_REGISTER_COMPONENTS_INVALID")
+        register_components = []
+    for item in register_components:
+        if not isinstance(item, dict):
+            errors.append("SBOM_REGISTER_COMPONENT_INVALID")
+            continue
+        item_name = item.get("name")
+        if not isinstance(item_name, str) or not item_name:
+            errors.append("SBOM_REGISTER_COMPONENT_NAME_INVALID")
+            continue
+        expected[item_name] = (item.get("version"), item.get("license"), False)
     if actual != expected:
         errors.append("SBOM_REGISTER_MISMATCH")
 
