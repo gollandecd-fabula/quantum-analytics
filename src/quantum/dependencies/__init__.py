@@ -12,6 +12,12 @@ _ORIGINAL_VALIDATE_REGISTER = getattr(
     _admission.validate_register,
 )
 _admission._quantum_original_validate_register = _ORIGINAL_VALIDATE_REGISTER
+_ORIGINAL_VALIDATE_SBOM = getattr(
+    _admission,
+    "_quantum_original_validate_sbom",
+    _admission.validate_sbom,
+)
+_admission._quantum_original_validate_sbom = _ORIGINAL_VALIDATE_SBOM
 
 _DEV_TEST_USE_PREFIX = re.compile(
     r"^(?:development|dev|test|tests|testing|ci|regression)(?:\b|_)",
@@ -153,8 +159,40 @@ def validate_register(
     return tuple(errors)
 
 
+def validate_sbom(
+    register: dict[str, Any],
+    sbom: dict[str, Any],
+) -> tuple[str, ...]:
+    """Apply core SBOM validation plus concluded-license equality."""
+    errors = list(_ORIGINAL_VALIDATE_SBOM(register, sbom))
+    expected_licenses: dict[str, Any] = {}
+    components = register.get("components")
+    if isinstance(components, list):
+        for component in components:
+            if not isinstance(component, dict):
+                continue
+            name = component.get("name")
+            if isinstance(name, str) and name:
+                expected_licenses[name] = component.get("license")
+
+    packages = sbom.get("packages")
+    if isinstance(packages, list):
+        for package in packages:
+            if not isinstance(package, dict):
+                continue
+            name = package.get("name")
+            if not isinstance(name, str) or name not in expected_licenses:
+                continue
+            if package.get("licenseConcluded") != expected_licenses[name]:
+                _append_unique(
+                    errors,
+                    f"{name}:SBOM_LICENSE_CONCLUDED_MISMATCH",
+                )
+    return tuple(errors)
+
+
 _admission.validate_register = validate_register
+_admission.validate_sbom = validate_sbom
 load_json_document = _admission.load_json_document
-validate_sbom = _admission.validate_sbom
 
 __all__ = ["load_json_document", "validate_register", "validate_sbom"]
