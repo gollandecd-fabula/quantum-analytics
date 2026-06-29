@@ -54,6 +54,37 @@ def _verify_dev_test_status_guard() -> None:
         policy_errors = validate_register(register, incomplete_policy)
         assert "MPL-2.0:MANDATORY_CONDITIONS_MISSING" in policy_errors
 
+    for prerelease_version in ("1.2.0-beta.1", "1.2rc1"):
+        prerelease = copy.deepcopy(register)
+        prerelease_duckdb = _duckdb(prerelease)
+        prerelease_duckdb["version"] = prerelease_version
+        prerelease_errors = validate_register(prerelease, licenses)
+        assert (
+            "duckdb:PRERELEASE_BOUNDED_EXPERIMENT_APPROVAL_REQUIRED"
+            in prerelease_errors
+        )
+
+        prerelease_duckdb["prerelease_bounded_experiment"] = {
+            "approved": True,
+            "approval_id": "EXP-OSS-001",
+            "expires_on": "2026-07-31",
+            "scope": ["isolated sandbox contract tests"],
+        }
+        approved_errors = validate_register(prerelease, licenses)
+        assert (
+            "duckdb:PRERELEASE_BOUNDED_EXPERIMENT_APPROVAL_REQUIRED"
+            not in approved_errors
+        )
+
+    incomplete_approval = copy.deepcopy(register)
+    incomplete_duckdb = _duckdb(incomplete_approval)
+    incomplete_duckdb["version"] = "1.2.0-beta.1"
+    incomplete_duckdb["prerelease_bounded_experiment"] = {"approved": True}
+    assert (
+        "duckdb:PRERELEASE_BOUNDED_EXPERIMENT_APPROVAL_REQUIRED"
+        in validate_register(incomplete_approval, licenses)
+    )
+
 
 def load_tests(
     loader: unittest.TestLoader,
