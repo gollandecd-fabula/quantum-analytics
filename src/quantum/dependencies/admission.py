@@ -12,6 +12,11 @@ ALLOWED_STATUSES = {
     "APPROVED_PENDING_REGISTRY_CONFIRMATION",
     "AUDIT_REQUIRED",
 }
+SUPPORTED_CONDITIONAL_LICENSE_CONDITIONS = {
+    "development_or_test_scope_only",
+    "no_vendored_modified_source_without_legal_review",
+    "license_and_notice_retained",
+}
 
 
 def load_json_document(path: Path) -> dict[str, Any]:
@@ -19,6 +24,44 @@ def load_json_document(path: Path) -> dict[str, Any]:
     if not isinstance(value, dict):
         raise ValueError(f"{path}: top-level object required")
     return value
+
+
+def _conditional_license_rules(
+    license_policy: dict[str, Any],
+    errors: list[str],
+) -> dict[str, frozenset[str]]:
+    raw_rules = license_policy.get("conditional_licenses", [])
+    if not isinstance(raw_rules, list):
+        errors.append("CONDITIONAL_LICENSES_INVALID")
+        return {}
+
+    result: dict[str, frozenset[str]] = {}
+    for item in raw_rules:
+        if not isinstance(item, dict):
+            errors.append("CONDITIONAL_LICENSE_OBJECT_REQUIRED")
+            continue
+        license_id = item.get("license")
+        if not isinstance(license_id, str) or not license_id:
+            errors.append("CONDITIONAL_LICENSE_ID_INVALID")
+            continue
+        if license_id in result:
+            errors.append(f"{license_id}:CONDITIONAL_LICENSE_DUPLICATE")
+            continue
+        conditions = item.get("conditions")
+        if (
+            not isinstance(conditions, list)
+            or not conditions
+            or any(not isinstance(value, str) or not value for value in conditions)
+        ):
+            errors.append(f"{license_id}:LICENSE_CONDITIONS_INVALID")
+            continue
+        condition_set = frozenset(conditions)
+        unsupported = condition_set - SUPPORTED_CONDITIONAL_LICENSE_CONDITIONS
+        if unsupported:
+            errors.append(f"{license_id}:LICENSE_CONDITION_UNSUPPORTED")
+            continue
+        result[license_id] = condition_set
+    return result
 
 
 def validate_register(register: dict[str, Any], license_policy: dict[str, Any]) -> tuple[str, ...]:
@@ -31,11 +74,7 @@ def validate_register(register: dict[str, Any], license_policy: dict[str, Any]) 
         errors.append("MARKETPLACE_WRITES_MUST_REMAIN_BLOCKED")
 
     approved = set(license_policy.get("approved_direct_licenses", []))
-    conditional = {
-        item.get("license")
-        for item in license_policy.get("conditional_licenses", [])
-        if isinstance(item, dict)
-    }
+    conditional = _conditional_license_rules(license_policy, errors)
     prohibited = set(license_policy.get("prohibited_direct_integration", []))
     seen: set[tuple[str, str]] = set()
 
@@ -65,12 +104,34 @@ def validate_register(register: dict[str, Any], license_policy: dict[str, Any]) 
             errors.append(f"{name}:EXACT_VERSION_REQUIRED")
 
         license_id = component.get("license")
-        if license_id in prohibited or license_id not in approved | conditional:
+        if license_id in prohibited or license_id not in approved | set(conditional):
             errors.append(f"{name}:LICENSE_NOT_ADMITTED")
 
         status = component.get("status")
         if status not in ALLOWED_STATUSES:
             errors.append(f"{name}:STATUS_INVALID")
+
+        conditions = conditional.get(license_id)
+        if conditions is not None:
+            if (
+                "development_or_test_scope_only" in conditions
+                and status != "APPROVED_DEV_TEST_ONLY"
+            ):
+                errors.append(f"{name}:CONDITIONAL_LICENSE_SCOPE_VIOLATION")
+            if "no_vendored_modified_source_without_legal_review" in conditions:
+                prohibited_use = component.get("prohibited_use")
+                if (
+                    not isinstance(prohibited_use, list)
+                    or "vendoring modified source without review" not in prohibited_use
+                ):
+                    errors.append(f"{name}:CONDITIONAL_LICENSE_VENDORING_GUARD_REQUIRED")
+            if "license_and_notice_retained" in conditions:
+                policy_rules = license_policy.get("rules")
+                if (
+                    not isinstance(policy_rules, dict)
+                    or policy_rules.get("license_notice_required") is not True
+                ):
+                    errors.append(f"{name}:CONDITIONAL_LICENSE_NOTICE_POLICY_REQUIRED")
 
         if component.get("installation_authorized") is not False:
             errors.append(f"{name}:INSTALLATION_NOT_AUTHORIZED")
