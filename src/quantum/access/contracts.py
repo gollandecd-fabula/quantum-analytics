@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 from hashlib import sha256
 import hmac
 import secrets
+from threading import RLock
 from typing import Final
 from uuid import uuid4
 
@@ -21,13 +22,45 @@ class AccessError(ValueError):
         self.code = code
 
 
+def _aware_utc(value: datetime, code: str) -> datetime:
+    if (
+        not isinstance(value, datetime)
+        or value.tzinfo is None
+        or value.utcoffset() is None
+    ):
+        raise AccessError(code)
+    return value.astimezone(timezone.utc)
+
+
+def _feature_profile(value: str) -> str:
+    if not isinstance(value, str):
+        raise AccessError("FEATURE_PROFILE_INVALID")
+    normalized = value.strip()
+    if not normalized or len(normalized) > 64:
+        raise AccessError("FEATURE_PROFILE_INVALID")
+    return normalized
+
+
 @dataclass(frozen=True, slots=True)
 class TenantContext:
     tenant_id: str
     account_id: str
+    feature_profile: str = "PILOT_TESTER"
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.tenant_id, str) or not self.tenant_id:
+            raise AccessError("TENANT_ID_INVALID")
+        if not isinstance(self.account_id, str) or not self.account_id:
+            raise AccessError("ACCOUNT_ID_INVALID")
+        _feature_profile(self.feature_profile)
 
     def require_tenant(self, tenant_id: str) -> None:
-        if not hmac.compare_digest(self.tenant_id, tenant_id):
+        if not isinstance(tenant_id, str) or not tenant_id:
+            raise AccessError("TENANT_ID_INVALID")
+        if not hmac.compare_digest(
+            self.tenant_id.encode("utf-8"),
+            tenant_id.encode("utf-8"),
+        ):
             raise AccessError("TENANT_SCOPE_MISMATCH")
 
 
@@ -50,6 +83,7 @@ class AccountRecord:
     account_id: str
     account_alias: str
     tenant_id: str
+    feature_profile: str
     recovery_key_hash: str
     created_at: datetime
 
@@ -62,16 +96,17 @@ class ActivationResult:
 
 
 class AccessRegistry:
-    """Dependency-free P1 registry.
+    """Dependency-free, thread-safe P1 access registry.
 
-    This is deliberately in-memory. Durable persistence and approved password
-    hashing are separate gated units. Raw invite and recovery secrets are never
-    retained.
+    This registry is deliberately in-memory. Durable persistence and approved
+    password hashing are separate gated units. Raw invite and recovery secrets
+    are never retained.
     """
 
     def __init__(self) -> None:
         self._invites_by_hash: dict[str, InviteRecord] = {}
         self._accounts: dict[str, AccountRecord] = {}
+        self._lock = RLock()
 
     @staticmethod
     def _hash_secret(value: str) -> str:
@@ -84,24 +119,27 @@ class AccessRegistry:
         feature_profile: str = "PILOT_TESTER",
         now: datetime | None = None,
     ) -> str:
-        current = now or datetime.now(timezone.utc)
-        if current.tzinfo is None or current.utcoffset() is None:
-            raise AccessError("ISSUE_TIME_TIMEZONE_REQUIRED")
-        if expires_at.tzinfo is None or expires_at.utcoffset() is None:
-            raise AccessError("INVITE_EXPIRY_TIMEZONE_REQUIRED")
-        if expires_at <= current:
-            raise AccessError("INVITE_EXPIRY_NOT_FUTURE")
-        if not feature_profile.strip():
-            raise AccessError("FEATURE_PROFILE_REQUIRED")
-
-        code = INVITE_PREFIX + secrets.token_urlsafe(24)
-        code_hash = self._hash_secret(code)
-        self._invites_by_hash[code_hash] = InviteRecord(
-            invite_id=str(uuid4()),
-            code_hash=code_hash,
-            expires_at=expires_at.astimezone(timezone.utc),
-            feature_profile=feature_profile.strip(),
+        current = _aware_utc(
+            now or datetime.now(timezone.utc),
+            "ISSUE_TIME_TIMEZONE_REQUIRED",
         )
+        expiry = _aware_utc(expires_at, "INVITE_EXPIRY_TIMEZONE_REQUIRED")
+        profile = _feature_profile(feature_profile)
+        if expiry <= current:
+            raise AccessError("INVITE_EXPIRY_NOT_FUTURE")
+
+        with self._lock:
+            while True:
+                code = INVITE_PREFIX + secrets.token_urlsafe(24)
+                code_hash = self._hash_secret(code)
+                if code_hash not in self._invites_by_hash:
+                    break
+            self._invites_by_hash[code_hash] = InviteRecord(
+                invite_id=str(uuid4()),
+                code_hash=code_hash,
+                expires_at=expiry,
+                feature_profile=profile,
+            )
         return code
 
     def activate_invite(
@@ -110,46 +148,66 @@ class AccessRegistry:
         *,
         now: datetime | None = None,
     ) -> ActivationResult:
-        current = now or datetime.now(timezone.utc)
-        if current.tzinfo is None or current.utcoffset() is None:
-            raise AccessError("ACTIVATION_TIMEZONE_REQUIRED")
-
-        code_hash = self._hash_secret(code)
-        invite = self._invites_by_hash.get(code_hash)
-        if invite is None:
+        current = _aware_utc(
+            now or datetime.now(timezone.utc),
+            "ACTIVATION_TIMEZONE_REQUIRED",
+        )
+        if not isinstance(code, str) or not code.startswith(INVITE_PREFIX):
             raise AccessError("INVITE_INVALID")
-        if invite.activated_at is not None:
-            raise AccessError("INVITE_ALREADY_USED")
-        if current.astimezone(timezone.utc) >= invite.expires_at:
-            raise AccessError("INVITE_EXPIRED")
+        code_hash = self._hash_secret(code)
 
-        account_id = str(uuid4())
-        tenant_id = str(uuid4())
-        alias = ACCOUNT_PREFIX + secrets.token_hex(8).upper()
-        recovery_key = secrets.token_urlsafe(48)
-        account = AccountRecord(
-            account_id=account_id,
-            account_alias=alias,
-            tenant_id=tenant_id,
-            recovery_key_hash=self._hash_secret(recovery_key),
-            created_at=current.astimezone(timezone.utc),
-        )
-        self._accounts[account_id] = account
-        self._invites_by_hash[code_hash] = InviteRecord(
-            invite_id=invite.invite_id,
-            code_hash=invite.code_hash,
-            expires_at=invite.expires_at,
-            feature_profile=invite.feature_profile,
-            activated_at=current.astimezone(timezone.utc),
-        )
+        with self._lock:
+            invite = self._invites_by_hash.get(code_hash)
+            if invite is None:
+                raise AccessError("INVITE_INVALID")
+            if invite.activated_at is not None:
+                raise AccessError("INVITE_ALREADY_USED")
+            if current >= invite.expires_at:
+                raise AccessError("INVITE_EXPIRED")
+
+            account_id = str(uuid4())
+            while account_id in self._accounts:
+                account_id = str(uuid4())
+            tenant_id = str(uuid4())
+            alias = ACCOUNT_PREFIX + secrets.token_hex(8).upper()
+            recovery_key = secrets.token_urlsafe(48)
+            account = AccountRecord(
+                account_id=account_id,
+                account_alias=alias,
+                tenant_id=tenant_id,
+                feature_profile=invite.feature_profile,
+                recovery_key_hash=self._hash_secret(recovery_key),
+                created_at=current,
+            )
+            self._accounts[account_id] = account
+            self._invites_by_hash[code_hash] = InviteRecord(
+                invite_id=invite.invite_id,
+                code_hash=invite.code_hash,
+                expires_at=invite.expires_at,
+                feature_profile=invite.feature_profile,
+                activated_at=current,
+            )
+
         return ActivationResult(
             account=account,
-            tenant=TenantContext(tenant_id=tenant_id, account_id=account_id),
+            tenant=TenantContext(
+                tenant_id=tenant_id,
+                account_id=account_id,
+                feature_profile=invite.feature_profile,
+            ),
             recovery_key=recovery_key,
         )
 
     def verify_recovery_key(self, account_id: str, recovery_key: str) -> bool:
-        account = self._accounts.get(account_id)
+        if (
+            not isinstance(account_id, str)
+            or not account_id
+            or not isinstance(recovery_key, str)
+            or not recovery_key
+        ):
+            return False
+        with self._lock:
+            account = self._accounts.get(account_id)
         if account is None:
             return False
         return hmac.compare_digest(
@@ -158,7 +216,10 @@ class AccessRegistry:
         )
 
     def account(self, account_id: str) -> AccountRecord:
-        try:
-            return self._accounts[account_id]
-        except KeyError as exc:
-            raise AccessError("ACCOUNT_NOT_FOUND") from exc
+        if not isinstance(account_id, str) or not account_id:
+            raise AccessError("ACCOUNT_ID_INVALID")
+        with self._lock:
+            account = self._accounts.get(account_id)
+        if account is None:
+            raise AccessError("ACCOUNT_NOT_FOUND")
+        return account
