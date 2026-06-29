@@ -19,6 +19,13 @@ def _duckdb(register: dict) -> dict:
     )
 
 
+def _hypothesis(register: dict) -> dict:
+    return next(
+        item for item in register["components"]
+        if item.get("name") == "hypothesis"
+    )
+
+
 def _mpl_rule(licenses: dict) -> dict:
     return next(
         item for item in licenses["conditional_licenses"]
@@ -50,6 +57,16 @@ def _verify_dev_test_status_guard() -> None:
     mixed_duckdb["allowed_use"] = ["development tests in production runtime"]
     mixed_errors = validate_register(mixed_use, licenses)
     assert "duckdb:DEV_TEST_ALLOWED_USE_NOT_EXCLUSIVE" in mixed_errors
+
+    for prohibited_scope in (
+        "PRODUCTION_TEST",
+        "B4_RUNTIME_TEST",
+        "OPERATIONAL_TEST",
+    ):
+        mixed_scope = copy.deepcopy(register)
+        _hypothesis(mixed_scope)["scope"] = prohibited_scope
+        scope_errors = validate_register(mixed_scope, licenses)
+        assert "hypothesis:DEV_TEST_SCOPE_NOT_EXCLUSIVE" in scope_errors
 
     for mandatory_condition in (
         "development_or_test_scope_only",
