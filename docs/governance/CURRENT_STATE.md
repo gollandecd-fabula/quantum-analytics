@@ -1,37 +1,44 @@
 # CURRENT STATE
 
-Date: 2026-06-28
-Status: `BUILD_B3_REMEDIATED_REVIEW_GATED`
+Date: 2026-06-30
+Status: `BUILD_P1_1_IMPLEMENTED_CI_PENDING`
 Active contract: `STAGE-B-BUILD-v1`
 Live execution state: `docs/evidence/STAGE_B_EXECUTION_STATE.yaml`
-Current unit: `B3 — METRIC_SNAPSHOTS_AND_EVIDENCE_CHAIN`
-Tracking issue: `#9`
-Working branch: `build-b3-metric-evidence-contracts-v4`
+Current unit: `P11 — ACCESS_AND_INGESTION_FOUNDATION`
+Tracking pull request: `#21`
+Working branch: `build-p1-technical-foundation-v1`
+Base commit: `b260968a8fcaea7d0802d402d062a5de0c3d3f46`
 
-## Scope
+## Baseline
 
-B3 remains R2 contract and verification infrastructure. It does not calculate or
-publish metrics, activate financial rules, admit real commercial data, write to
-marketplaces, deploy services, or authorize release.
+B3 — Metric Snapshots and Evidence Chain was merged into protected `main` at
+`b260968a8fcaea7d0802d402d062a5de0c3d3f46` after exact-head Foundation and
+OSS Admission CI passed and all review threads were resolved.
 
-## B3 remediation
+## P1.1 scope
 
-- the base verification engine is in `src/quantum/evidence/verification.py`;
-- strict public runtime validation is in
-  `src/quantum/evidence/runtime_validation.py` and exported by
-  `src/quantum/evidence/__init__.py`;
-- order-dependent `test_000_*` monkey patch removed;
-- malformed inputs, duplicate nodes/edges, orphan nodes, cycles, timestamps,
-  typed states, optional locators, value/unit bindings and source-byte checks
-  have deterministic fail-closed diagnostics;
-- source-file declaration checks are distinct from strict retained-byte loading;
-- 27 independent B3 tests import the strict public runtime verifier;
-- primary diagnostics follow an explicit root-cause priority policy.
+P1.1 introduces the first dependency-free runtime foundation for:
+
+- one-time pseudonymous invites;
+- pseudonymous account and tenant contexts;
+- recovery-secret hash retention only;
+- fail-closed tenant-scope enforcement;
+- immutable upload receipts;
+- per-tenant SHA-256 idempotency;
+- filename sanitization and stable diagnostics.
+
+The implementation is intentionally in-memory. Durable identity persistence,
+approved password hashing, file persistence, schema parsing changes, financial
+calculation runtime, marketplace calls, deployment, and global learning remain
+separate gated units.
 
 ## Gate
 
-Merge B3 only when CI succeeds for the current PR merge-result, independent
-review creates no unresolved findings, and every review thread is resolved.
-B1b, B2, B6, and B7 remain `GATED / R3 / NOT_GRANTED`.
+P1.1 may advance only when full repository CI succeeds for the exact PR head,
+independent review has no unresolved findings, and all review threads are
+resolved.
+
+Real commercial data, runtime dependency installation, marketplace writes, and
+production release remain prohibited.
 
 `RELEASE_BLOCKED`

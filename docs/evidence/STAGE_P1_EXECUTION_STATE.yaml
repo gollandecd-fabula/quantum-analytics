@@ -1,0 +1,42 @@
+schema_version: "1.0"
+date: "2026-06-30"
+stage: P1_TECHNICAL_FOUNDATION_BUILD
+unit: P1_1_ACCESS_AND_INGESTION_FOUNDATION
+status: IMPLEMENTED_CI_PENDING
+working_branch: build-p1-technical-foundation-v1
+base_commit: b260968a8fcaea7d0802d402d062a5de0c3d3f46
+runtime_dependency_installation_authorized: false
+marketplace_write_enabled: false
+commercial_data_authorized: false
+implemented:
+  - pseudonymous one-time invite issuance
+  - pseudonymous account and tenant context creation
+  - recovery secret hash retention only
+  - tenant-scope enforcement
+  - immutable upload receipt contract
+  - per-tenant SHA-256 idempotency
+  - filename sanitization
+  - fail-closed diagnostic codes
+  - atomic concurrent invite activation
+  - atomic concurrent upload receipt creation
+  - tenant-scoped receipt lookup without existence disclosure
+tests:
+  files:
+    - tests/test_p1_access_ingestion.py
+    - tests/test_p1_concurrency.py
+  methods: 7
+  local_targeted_result: PASS
+review:
+  status: REMEDIATED_CI_PENDING
+  blocking_findings_fixed: 4
+  non_blocking_findings_fixed: 3
+exclusions:
+  - durable identity persistence
+  - approved password hashing runtime
+  - real file storage
+  - schema parsing changes
+  - financial calculation runtime
+  - marketplace API calls
+  - global learning
+  - deployment
+release_status: RELEASE_BLOCKED
