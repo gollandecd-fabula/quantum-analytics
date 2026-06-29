@@ -9,6 +9,7 @@ from quantum.dependencies.admission import load_json_document, validate_register
 ROOT = Path(__file__).resolve().parents[1]
 REGISTER = ROOT / "docs/dependencies/OSS_DEPENDENCY_REGISTER.yaml"
 LICENSES = ROOT / "docs/dependencies/LICENSE_ALLOWLIST.yaml"
+WORKFLOW = ROOT / ".github/workflows/oss-admission-ci.yml"
 
 
 def _duckdb(register: dict) -> dict:
@@ -29,6 +30,12 @@ def _verify_dev_test_status_guard() -> None:
     register = load_json_document(REGISTER)
     licenses = load_json_document(LICENSES)
     assert validate_register(register, licenses) == ()
+
+    workflow = WORKFLOW.read_text(encoding="utf-8")
+    assert "TARGET_SHA: ${{ github.event.pull_request.head.sha || github.sha }}" in workflow
+    assert 'git fetch --depth=1 origin "${TARGET_SHA}"' in workflow
+    assert 'test "$(git rev-parse HEAD)" = "${TARGET_SHA}"' in workflow
+    assert 'git fetch --depth=1 origin "${GITHUB_SHA}"' not in workflow
 
     relabeled = copy.deepcopy(register)
     _duckdb(relabeled)["status"] = "APPROVED_DEV_TEST_ONLY"
