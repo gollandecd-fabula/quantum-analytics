@@ -16,6 +16,7 @@ implemented:
   - SHA-256 integrity verification on read
   - canonical storage keys and metadata validation
   - fail-closed raw-file state transitions with evidence invariants
+  - persisted state-evidence validation on read
   - existing A6 structural schema detection integration
   - semantic fingerprint integration
   - unknown-schema quarantine
@@ -23,15 +24,18 @@ implemented:
   - idempotent terminal inspection
   - stale VALIDATING recovery
   - serialized concurrent schema inspection
+  - shared in-process coordination across storage instances
   - orphan-content prevention on metadata conflict
 tests:
-  file: tests/test_p12_raw_storage.py
-  methods: 15
+  files:
+    - tests/test_p12_raw_storage.py
+    - tests/test_p12_storage_hardening.py
+  methods: 17
   local_targeted_result: PASS
 review:
   status: REMEDIATED_CI_PENDING
-  blocking_findings_fixed: 4
-  non_blocking_findings_fixed: 3
+  blocking_findings_fixed: 5
+  non_blocking_findings_fixed: 4
 limitations:
   - local adapter is single-process only
   - cross-process writer coordination is not implemented
