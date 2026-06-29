@@ -67,13 +67,27 @@ def _verify_dev_test_status_guard() -> None:
         prerelease_duckdb["prerelease_bounded_experiment"] = {
             "approved": True,
             "approval_id": "EXP-OSS-001",
-            "expires_on": "2026-07-31",
+            "expires_on": "2999-12-31",
             "scope": ["isolated sandbox contract tests"],
         }
         approved_errors = validate_register(prerelease, licenses)
         assert (
             "duckdb:PRERELEASE_BOUNDED_EXPERIMENT_APPROVAL_REQUIRED"
             not in approved_errors
+        )
+
+        prerelease_duckdb["prerelease_bounded_experiment"]["expires_on"] = "2000-01-01"
+        expired_errors = validate_register(prerelease, licenses)
+        assert (
+            "duckdb:PRERELEASE_BOUNDED_EXPERIMENT_APPROVAL_REQUIRED"
+            in expired_errors
+        )
+
+        prerelease_duckdb["prerelease_bounded_experiment"]["expires_on"] = "2999-02-30"
+        invalid_date_errors = validate_register(prerelease, licenses)
+        assert (
+            "duckdb:PRERELEASE_BOUNDED_EXPERIMENT_APPROVAL_REQUIRED"
+            in invalid_date_errors
         )
 
     incomplete_approval = copy.deepcopy(register)
