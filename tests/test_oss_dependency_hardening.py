@@ -144,6 +144,46 @@ def _verify_hardening_cases() -> None:
         },
     )
 
+    conditional_scope = copy.deepcopy(register)
+    conditional_scope["components"][0]["license"] = "MPL-2.0"
+    conditional_scope["components"][0]["prohibited_use"].append(
+        "vendoring modified source without review"
+    )
+    assert (
+        "duckdb:CONDITIONAL_LICENSE_SCOPE_VIOLATION"
+        in validate_register(conditional_scope, licenses)
+    )
+
+    conditional_dev = copy.deepcopy(conditional_scope)
+    conditional_dev["components"][0]["status"] = "APPROVED_DEV_TEST_ONLY"
+    conditional_errors = validate_register(conditional_dev, licenses)
+    assert not any(error.startswith("duckdb:CONDITIONAL_LICENSE_") for error in conditional_errors)
+
+    missing_vendor_guard = copy.deepcopy(conditional_dev)
+    missing_vendor_guard["components"][0]["prohibited_use"].remove(
+        "vendoring modified source without review"
+    )
+    assert (
+        "duckdb:CONDITIONAL_LICENSE_VENDORING_GUARD_REQUIRED"
+        in validate_register(missing_vendor_guard, licenses)
+    )
+
+    missing_notice_policy = copy.deepcopy(licenses)
+    missing_notice_policy["rules"]["license_notice_required"] = False
+    assert (
+        "hypothesis:CONDITIONAL_LICENSE_NOTICE_POLICY_REQUIRED"
+        in validate_register(register, missing_notice_policy)
+    )
+
+    unsupported_condition = copy.deepcopy(licenses)
+    unsupported_condition["conditional_licenses"][0]["conditions"].append(
+        "unrecognized_condition"
+    )
+    assert (
+        "MPL-2.0:LICENSE_CONDITION_UNSUPPORTED"
+        in validate_register(register, unsupported_condition)
+    )
+
     state = load_json_document(
         ROOT / "docs/evidence/OSS_DEPENDENCY_ADMISSION_STATE.yaml"
     )
