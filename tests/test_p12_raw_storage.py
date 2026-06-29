@@ -242,6 +242,155 @@ class P12RawStorageTests(unittest.TestCase):
                 state=RawFileState.VALID,
             )
 
+    def test_valid_state_requires_schema_evidence(self) -> None:
+        payload = b"evidence"
+        receipt = make_receipt(self.tenant, payload)
+        self.storage.store(
+            tenant=self.tenant,
+            receipt=receipt,
+            payload=payload,
+        )
+        self.storage.transition(
+            tenant=self.tenant,
+            raw_file_id=receipt.raw_file_id,
+            state=RawFileState.VALIDATING,
+        )
+        with self.assertRaisesRegex(
+            RawStorageError,
+            "RAW_FILE_STATE_PAYLOAD_INVALID",
+        ):
+            self.storage.transition(
+                tenant=self.tenant,
+                raw_file_id=receipt.raw_file_id,
+                state=RawFileState.VALID,
+            )
+
+    def test_stale_validating_state_is_recovered(self) -> None:
+        row = (
+            "1,op1,sale,2026-01-01T00:00:00Z,2026-01-01T00:00:00Z,"
+            "p1,1,100,RUB,1,,"
+        )
+        payload = ((",".join(HEADERS)) + "\n" + row + "\n").encode()
+        receipt = make_receipt(self.tenant, payload)
+        self.storage.store(
+            tenant=self.tenant,
+            receipt=receipt,
+            payload=payload,
+        )
+        self.storage.transition(
+            tenant=self.tenant,
+            raw_file_id=receipt.raw_file_id,
+            state=RawFileState.VALIDATING,
+        )
+        result = CsvSchemaGate(self.storage).inspect(
+            tenant=self.tenant,
+            raw_file_id=receipt.raw_file_id,
+        )
+        self.assertEqual(result.record.state, RawFileState.VALID)
+
+    def test_conflicting_raw_id_does_not_leave_orphan_content(self) -> None:
+        first_payload = b"first"
+        first = make_receipt(self.tenant, first_payload)
+        self.storage.store(
+            tenant=self.tenant,
+            receipt=first,
+            payload=first_payload,
+        )
+        second_payload = b"second"
+        second = ImmutableUploadReceipt(
+            raw_file_id=first.raw_file_id,
+            tenant_id=self.tenant.tenant_id,
+            sha256=sha256(second_payload).hexdigest(),
+            size_bytes=len(second_payload),
+            sanitized_filename="report.csv",
+            storage_key="ignored",
+            duplicate=False,
+        )
+        with self.assertRaisesRegex(
+            RawStorageError,
+            "STORAGE_METADATA_CONFLICT",
+        ):
+            self.storage.store(
+                tenant=self.tenant,
+                receipt=second,
+                payload=second_payload,
+            )
+        raw_dir = next((Path(self.temp.name) / "tenants").iterdir()) / "raw"
+        self.assertEqual(
+            {item.name for item in raw_dir.iterdir()},
+            {first.sha256},
+        )
+
+    def test_invalid_receipt_filename_is_rejected(self) -> None:
+        payload = b"filename"
+        receipt = ImmutableUploadReceipt(
+            raw_file_id=str(uuid4()),
+            tenant_id=self.tenant.tenant_id,
+            sha256=sha256(payload).hexdigest(),
+            size_bytes=len(payload),
+            sanitized_filename="../bad.csv",
+            storage_key="ignored",
+            duplicate=False,
+        )
+        with self.assertRaisesRegex(
+            RawStorageError,
+            "UPLOAD_FILENAME_INVALID",
+        ):
+            self.storage.store(
+                tenant=self.tenant,
+                receipt=receipt,
+                payload=payload,
+            )
+
+    def test_concurrent_schema_inspection_is_serialized(self) -> None:
+        row = (
+            "1,op1,sale,2026-01-01T00:00:00Z,2026-01-01T00:00:00Z,"
+            "p1,1,100,RUB,1,,"
+        )
+        payload = ((",".join(HEADERS)) + "\n" + row + "\n").encode()
+        receipt = make_receipt(self.tenant, payload)
+        self.storage.store(
+            tenant=self.tenant,
+            receipt=receipt,
+            payload=payload,
+        )
+        gate = CsvSchemaGate(self.storage)
+
+        def inspect(_: int):
+            return gate.inspect(
+                tenant=self.tenant,
+                raw_file_id=receipt.raw_file_id,
+            )
+
+        with ThreadPoolExecutor(max_workers=8) as executor:
+            results = list(executor.map(inspect, range(16)))
+        self.assertEqual(
+            {result.record.state for result in results},
+            {RawFileState.VALID},
+        )
+
+    def test_noncanonical_metadata_storage_key_is_rejected(self) -> None:
+        payload = b"storage-key"
+        receipt = make_receipt(self.tenant, payload)
+        self.storage.store(
+            tenant=self.tenant,
+            receipt=receipt,
+            payload=payload,
+        )
+        tenant_dir = next((Path(self.temp.name) / "tenants").iterdir())
+        metadata = tenant_dir / "metadata" / f"{receipt.raw_file_id}.json"
+        data = json.loads(metadata.read_text(encoding="utf-8"))
+        data["storage_key"] = "noncanonical"
+        metadata.write_text(json.dumps(data), encoding="utf-8")
+        with self.assertRaisesRegex(
+            RawStorageError,
+            "STORAGE_METADATA_INVALID",
+        ):
+            self.storage.get_record(
+                tenant=self.tenant,
+                raw_file_id=receipt.raw_file_id,
+            )
+
 
 if __name__ == "__main__":
     unittest.main()
