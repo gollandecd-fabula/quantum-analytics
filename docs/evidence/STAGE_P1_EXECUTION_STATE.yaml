@@ -17,10 +17,19 @@ implemented:
   - per-tenant SHA-256 idempotency
   - filename sanitization
   - fail-closed diagnostic codes
+  - atomic concurrent invite activation
+  - atomic concurrent upload receipt creation
+  - tenant-scoped receipt lookup without existence disclosure
 tests:
-  file: tests/test_p1_access_ingestion.py
-  methods: 5
+  files:
+    - tests/test_p1_access_ingestion.py
+    - tests/test_p1_concurrency.py
+  methods: 7
   local_targeted_result: PASS
+review:
+  status: REMEDIATED_CI_PENDING
+  blocking_findings_fixed: 4
+  non_blocking_findings_fixed: 3
 exclusions:
   - durable identity persistence
   - approved password hashing runtime
