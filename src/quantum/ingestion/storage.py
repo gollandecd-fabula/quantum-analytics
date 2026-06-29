@@ -271,7 +271,8 @@ class LocalRawStorage:
                     metadata_path.read_bytes()
                 )
                 if (
-                    existing_record.sha256 != digest
+                    existing_record.raw_file_id != raw_file_id
+                    or existing_record.sha256 != digest
                     or existing_record.tenant_id != tenant.tenant_id
                     or existing_record.size_bytes != len(payload)
                     or existing_record.sanitized_filename != filename
@@ -316,13 +317,16 @@ class LocalRawStorage:
     def get_record(
         self, *, tenant: TenantContext, raw_file_id: str
     ) -> RawFileRecord:
-        metadata_path = self._metadata_path(tenant, raw_file_id)
+        normalized_id = self._raw_id(raw_file_id)
+        metadata_path = self._metadata_path(tenant, normalized_id)
         with self._lock:
             if not metadata_path.exists():
                 raise RawStorageError("RAW_FILE_NOT_FOUND")
             record = self._record_from_payload(metadata_path.read_bytes())
         if record.tenant_id != tenant.tenant_id:
             raise RawStorageError("RAW_FILE_NOT_FOUND")
+        if record.raw_file_id != normalized_id:
+            raise RawStorageError("STORAGE_METADATA_INVALID")
         return record
 
     def read(self, *, tenant: TenantContext, raw_file_id: str) -> bytes:
@@ -461,6 +465,16 @@ class CsvSchemaGate:
             raise RawStorageError("RAW_STORAGE_REQUIRED")
         self._storage = storage
 
+    @staticmethod
+    def _validated_rows(handle):
+        for row in csv.DictReader(handle):
+            if None in row or any(
+                not isinstance(key, str) or not isinstance(value, str)
+                for key, value in row.items()
+            ):
+                raise ValueError("CSV_ROW_SHAPE_INVALID")
+            yield row
+
     def inspect(
         self, *, tenant: TenantContext, raw_file_id: str
     ) -> SchemaGateResult:
@@ -509,7 +523,9 @@ class CsvSchemaGate:
                     encoding="utf-8-sig",
                     newline="",
                 ) as handle:
-                    semantic = semantic_fingerprint(csv.DictReader(handle))
+                    semantic = semantic_fingerprint(
+                        self._validated_rows(handle)
+                    )
                 record = self._storage.transition(
                     tenant=tenant,
                     raw_file_id=raw_file_id,
