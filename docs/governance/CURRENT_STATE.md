@@ -3,8 +3,9 @@
 Date: 2026-06-30
 Status: `BUILD_P1_1_IMPLEMENTED_CI_PENDING`
 Active contract: `STAGE-B-BUILD-v1`
-Live execution state: `docs/evidence/STAGE_P1_EXECUTION_STATE.yaml`
-Current unit: `P1.1 — ACCESS_AND_INGESTION_FOUNDATION`
+Live execution state: `docs/evidence/STAGE_B_EXECUTION_STATE.yaml`
+Current unit: `P11 — ACCESS_AND_INGESTION_FOUNDATION`
+Tracking pull request: `#21`
 Working branch: `build-p1-technical-foundation-v1`
 Base commit: `b260968a8fcaea7d0802d402d062a5de0c3d3f46`
 
