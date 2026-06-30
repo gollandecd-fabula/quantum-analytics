@@ -4,9 +4,9 @@ updated_on: 2026-06-30
 source_of_truth_for_live_unit_state: true
 macro_stage: B
 status: ACTIVE
-current_unit: P15
-tracking_issue: 29
-working_branch: close-p1-5-post-merge-v1
+current_unit: B1b
+tracking_issue: 32
+working_branch: build-b1b-financial-kernel-v1
 
 units:
   B0:
@@ -19,10 +19,19 @@ units:
     issue: 7
     risk: R2
   B1b:
-    state: GATED
+    state: REVIEW_PENDING_OWNER_SIGNOFF
     risk: R3
-    approval: STANDING_QUANTUM_AUTHORIZATION_RECORDED
-    blocker: INDEPENDENT_GOLDEN_ORACLE_NOT_ASSIGNED
+    approval: EXPLICIT_USER_R3_AUTHORIZATION_RECORDED_2026_06_30
+    issue: 32
+    working_branch: build-b1b-financial-kernel-v1
+    oracle_owner: PROJECT_OWNER_USER
+    oracle_owner_role: BUSINESS_GOLDEN_ORACLE_OWNER
+    baseline_source: SYNTHETIC_TEST_SCENARIOS_UNDER_APPROVED_METHODOLOGY
+    blocker: GOLDEN_BASELINE_EXACT_VALUES_OWNER_SIGNOFF_PENDING
+    evidence: docs/evidence/STAGE_B_B1B_EXECUTION_STATE.yaml
+    targeted_test_method_count: 67
+    local_targeted_tests: PASS
+    github_ci: PENDING_PR
   B2:
     state: GATED
     risk: R3
