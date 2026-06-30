@@ -3,7 +3,7 @@ stage_contract_id: STAGE-B-BUILD-v1
 unit: B1b
 risk: R3
 updated_on: 2026-06-30
-status: REVIEW_PENDING_CI_AND_INDEPENDENT_REVIEW
+status: REVIEW_PENDING_INDEPENDENT_REVIEW
 tracking_issue: 32
 working_branch: build-b1b-financial-kernel-v1
 explicit_user_r3_authorization: RECORDED_2026-06-30
@@ -39,12 +39,14 @@ implementation:
   marketplace_write_capability: false
 verification:
   targeted_test_methods: 67
-  targeted_tests_status: PENDING_RERUN_AFTER_OWNER_SIGNOFF_PATCH
-  compileall_status: PENDING_RERUN_AFTER_OWNER_SIGNOFF_PATCH
-  differential_oracle_status: PENDING_RERUN_AFTER_OWNER_SIGNOFF_PATCH
-  ast_security_scan: PENDING_RERUN_AFTER_OWNER_SIGNOFF_PATCH
-  fixed_commercial_constant_scan: PENDING_RERUN_AFTER_OWNER_SIGNOFF_PATCH
-  accumulated_repository_suite: PENDING_GITHUB_CI
+  targeted_tests_status: PASS_FOUNDATION_CI
+  compileall_status: PASS
+  differential_oracle_status: PASS
+  ast_security_scan: PASS
+  fixed_commercial_constant_scan: PASS
+  accumulated_repository_suite: PASS_FOUNDATION_CI_RUN_28468100430
+  oss_admission: PASS_OSS_ADMISSION_RUN_28468100427
+  ci_verified_head: e6393a808574da415e8e6caf9d24d9d61127ed8e
   exact_reviewed_head: PENDING_PR_REVIEW
   independent_code_review: PENDING_PR_REVIEW
   unresolved_review_threads: PENDING_PR_REVIEW
@@ -58,7 +60,7 @@ outputs:
   - SYNTHETIC_GOLDEN_FIXTURES
   - INDEPENDENT_DIFFERENTIAL_ORACLE
 limitations:
-  - CI_AND_INDEPENDENT_REVIEW_PENDING
+  - INDEPENDENT_REVIEW_PENDING
   - SOURCE_AUTHORITY_NOT_ACTIVATED
   - REAL_COMMERCIAL_DATA_NOT_ADMITTED
   - B2_RECONCILIATION_NOT_IMPLEMENTED
