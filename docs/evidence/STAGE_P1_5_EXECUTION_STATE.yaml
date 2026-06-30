@@ -17,6 +17,7 @@ implemented:
   - explicit preview-only configuration form for cost, tax rate, tax base and other expense
   - explicit organization, mode, scenario, scope, validity and currency controls
   - no-hidden-default and missing-value preservation
+  - B1a-aligned RATE tax-base vocabulary with NONE rejected
   - distinct accessible rendering for typed states and numeric zero
   - canonical tenant-scoped import status without storage-key disclosure
   - preview-safe Evidence Chain drill-down over validated B4 report records
@@ -39,9 +40,10 @@ tests:
     - tests/test_p15_ux_runtime.py
     - tests/test_p15_schema_alignment.py
     - tests/test_p15_ux_adversarial.py
+    - tests/test_p15_contract_alignment.py
     - tests/test_p15_manifest_payload.py
     - tests/test_a0_p15_manifest_payload.py
-  methods_declared: 56
+  methods_declared: 58
   status: NOT_RUN
 review:
   status: NOT_STARTED
