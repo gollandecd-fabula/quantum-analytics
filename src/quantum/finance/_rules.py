@@ -225,7 +225,7 @@ def resolve_rule(rules: Sequence[Mapping[str, Any]], context: Mapping[str, Any])
         ordering = (
             specificity,
             rule["priority"],
-            valid_from.timestamp(),
+            valid_from,
             rule["version"],
         )
         eligible = not exclusions
