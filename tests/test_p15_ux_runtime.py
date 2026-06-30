@@ -94,6 +94,15 @@ class P15UXRuntimeTests(unittest.TestCase):
         state: RawFileState = RawFileState.VALID,
         diagnostics: tuple[str, ...] = (),
     ) -> RawFileRecord:
+        schema_id = None
+        structural_fingerprint = None
+        semantic_fingerprint = None
+        if state is RawFileState.VALID:
+            schema_id = "wb-synthetic-v1"
+            structural_fingerprint = {"columns": ["synthetic"]}
+            semantic_fingerprint = {"semantic": "synthetic"}
+        elif state is RawFileState.QUARANTINED:
+            structural_fingerprint = {"columns": ["unknown"]}
         return RawFileRecord(
             raw_file_id=raw_file_id,
             tenant_id=tenant_id,
@@ -102,9 +111,9 @@ class P15UXRuntimeTests(unittest.TestCase):
             sanitized_filename="synthetic.csv",
             storage_key=f"tenants/{tenant_id}/raw/{'a' * 64}",
             state=state,
-            schema_id="wb-synthetic-v1" if state is RawFileState.VALID else None,
-            structural_fingerprint={"columns": ["synthetic"]},
-            semantic_fingerprint=None,
+            schema_id=schema_id,
+            structural_fingerprint=structural_fingerprint,
+            semantic_fingerprint=semantic_fingerprint,
             diagnostics=diagnostics,
         )
 
@@ -290,7 +299,7 @@ class P15UXRuntimeTests(unittest.TestCase):
             tenant_id=TENANT_ID,
             generated_at=NOW,
         )
-        self.assertEqual(inbox["organization_id"], None)
+        self.assertIsNone(inbox["organization_id"])
         self.assertEqual(inbox["exception_count"], 1)
         self.assertEqual(inbox["exceptions"][0]["category"], "SCHEMA")
         self.assertEqual(inbox["exceptions"][0]["cause"], "SCHEMA_UNKNOWN")
@@ -299,7 +308,12 @@ class P15UXRuntimeTests(unittest.TestCase):
         with self.assertRaisesRegex(UXError, "UX_INBOX_TENANT_REQUIRED"):
             build_exception_inbox(
                 [],
-                import_records=[self.raw_record(state=RawFileState.REJECTED)],
+                import_records=[
+                    self.raw_record(
+                        state=RawFileState.REJECTED,
+                        diagnostics=("UPLOAD_REJECTED",),
+                    )
+                ],
                 generated_at=NOW,
             )
 
