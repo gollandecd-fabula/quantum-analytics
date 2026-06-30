@@ -1,32 +1,33 @@
 # CURRENT STATE
 
 Date: 2026-06-30
-Status: `BUILD_P1_3_COMPLETE`
+Status: `BUILD_P1_4_REMEDIATED_CI_PENDING`
 Active contract: `STAGE-B-BUILD-v1`
 Live execution state: `docs/evidence/STAGE_B_EXECUTION_STATE.yaml`
-Current unit: `P13 — CANONICAL_SOURCE_ROWS_AND_OPERATION_LEDGER_FOUNDATION`
-Pull request: `#24`
-Merged commit: `603cd55124b6092baa88ea07e6c6daaa8c2a6411`
+Current unit: `P14 — REPORTING_API_EXPORTS_FOUNDATION`
+Mapped unit: `B4 — Reporting, API, and exports`
+Tracking issue: `#26`
+Working branch: `p14-reporting-api-exports`
 
-## Completed result
+## Current result
 
-P1.3 provides immutable source rows, content-derived canonical identities,
-atomic canonical-event batches, dependency and supersession-aware ordering,
-exact lineage, idempotent duplicate-upload replay, revision and active reversal
-validation, and row-level quarantine.
+P1.4 implements validated read-only report records, deterministic exports,
+round-trip formats, isolation controls, and bounded pagination over B3 Metric
+Snapshots.
 
-Verification completed:
+Targeted tests: 37 across three files.
+Resolved review findings: 11.
 
-- 23 targeted tests passed;
-- Foundation CI passed;
-- OSS Admission and OSV checks passed;
-- artifact manifest equality passed;
-- 20 adversarial findings were corrected;
-- unresolved review threads: 0.
+Exact-head CI, manifest synchronization, final review, and closure remain.
+
+## Critical path
+
+B1b remains blocked by its independent validation prerequisites. B4 does not
+activate the financial calculation kernel.
 
 ## Exclusions
 
-No financial calculation, real marketplace report, PostgreSQL persistence,
-marketplace API or write, UI, deployment, or global learning is included.
+No financial calculation, real marketplace data, external service, UI,
+database persistence, production release, or marketplace writes are included.
 
 `RELEASE_BLOCKED`

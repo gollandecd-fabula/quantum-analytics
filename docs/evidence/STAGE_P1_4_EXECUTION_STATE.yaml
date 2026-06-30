@@ -1,0 +1,58 @@
+schema_version: "1.0"
+date: "2026-06-30"
+stage: P1_TECHNICAL_FOUNDATION_BUILD
+unit: P1_4_REPORTING_API_EXPORTS_FOUNDATION
+mapped_stage_unit: B4_REPORTING_API_EXPORTS
+status: REMEDIATED_CI_PENDING
+working_branch: p14-reporting-api-exports
+base_state: P1_3_COMPLETE
+risk: R2
+runtime_dependency_installation_authorized: false
+marketplace_write_enabled: false
+commercial_data_authorized: false
+financial_rule_activation_authorized: false
+implemented:
+  - fail-closed conversion from verified B3 Metric Snapshot to report record
+  - exact Evidence Chain and root Metric Snapshot binding
+  - preview-only and evidence-verified publication states
+  - per-record and export-bundle deterministic SHA-256 integrity
+  - strict accounting view, typed value, currency, unit and expense-boundary validation
+  - strict rounding, freshness, confidence and limitation contracts
+  - JSON, JSONL and CSV round-trip contracts
+  - spreadsheet-formula-safe CSV projections
+  - tenant and Actual/Scenario export isolation
+  - duplicate report-record rejection in runtime and exact-duplicate schema floor
+  - bounded content-bound cursor pagination
+  - record and byte export limits
+schemas:
+  - schemas/report-record.schema.json
+  - schemas/report-export-bundle.schema.json
+runtime:
+  - src/quantum/reporting/runtime.py
+  - src/quantum/reporting/__init__.py
+tests:
+  files:
+    - tests/test_p14_reporting_runtime.py
+    - tests/test_p14_reporting_adversarial.py
+    - tests/test_p14_schema_alignment.py
+  methods: 37
+  status: CI_PENDING
+review:
+  status: REMEDIATED_CI_PENDING
+  resolved_findings: 11
+requirements:
+  - Q-BLD-007
+  - Q-BLD-011
+  - Q-BLD-013
+acceptance_controls:
+  - BLD-027
+  - BLD-028
+limitations:
+  - no financial calculation kernel
+  - no real marketplace data
+  - no HTTP API server
+  - no UI
+  - no database persistence
+  - no production deployment
+  - no marketplace write operations
+release_status: RELEASE_BLOCKED

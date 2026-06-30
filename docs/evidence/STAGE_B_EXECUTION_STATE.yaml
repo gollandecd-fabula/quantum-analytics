@@ -5,9 +5,9 @@ source_of_truth_for_live_unit_state: true
 
 macro_stage: B
 status: ACTIVE
-current_unit: P13
-tracking_issue: 24
-working_branch: close-p1-3-post-merge-v1
+current_unit: P14
+tracking_issue: 26
+working_branch: p14-reporting-api-exports
 
 units:
   B0:
@@ -22,11 +22,13 @@ units:
   B1b:
     state: GATED
     risk: R3
-    approval: NOT_GRANTED
+    approval: STANDING_QUANTUM_AUTHORIZATION_RECORDED
+    blocker: INDEPENDENT_GOLDEN_ORACLE_NOT_ASSIGNED
   B2:
     state: GATED
     risk: R3
-    approval: NOT_GRANTED
+    approval: STANDING_QUANTUM_AUTHORIZATION_RECORDED
+    blocker: B1B_NOT_COMPLETE
   B3:
     state: COMPLETE
     merged_commit: b260968a8fcaea7d0802d402d062a5de0c3d3f46
@@ -60,20 +62,37 @@ units:
     test_method_count: 23
     resolved_findings: 20
     unresolved_threads: 0
-  B4:
-    state: PLANNED
+  P14:
+    state: REMEDIATED_CI_PENDING
+    issue: 26
     risk: R2
+    evidence: docs/evidence/STAGE_P1_4_EXECUTION_STATE.yaml
+    test_method_count: 37
+    resolved_findings: 11
+    requirements:
+      - Q-BLD-007
+      - Q-BLD-011
+      - Q-BLD-013
+    acceptance_controls:
+      - BLD-027
+      - BLD-028
+  B4:
+    state: IN_PROGRESS
+    risk: R2
+    issue: 26
+    working_branch: p14-reporting-api-exports
   B5:
     state: PLANNED
     risk: R2
   B6:
     state: GATED
     risk: R3
-    approval: NOT_GRANTED
+    approval: STANDING_QUANTUM_AUTHORIZATION_RECORDED
+    blocker: B1B_AND_B2_NOT_COMPLETE
   B7:
     state: GATED
     risk: R3
-    approval: NOT_GRANTED
+    approval: NOT_GRANTED_FOR_EXTERNAL_ACCESS
   B8:
     state: PLANNED
     risk: R2
