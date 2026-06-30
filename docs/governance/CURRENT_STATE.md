@@ -22,7 +22,7 @@ B3, B4, and ingestion foundations. The current branch provides:
 - deterministic Exception Inbox entries with cause, evidence, affected metrics,
   required resolution, and independent-result continuity;
 - fail-closed organization, mode, tenant, duplicate, and forged-input controls;
-- machine-readable schemas and 55 declared targeted test methods.
+- machine-readable schemas and 56 declared targeted test methods.
 
 Tests, exact-head CI, artifact-manifest synchronization, independent review, and
 closure remain pending. No test pass is claimed at this state.
