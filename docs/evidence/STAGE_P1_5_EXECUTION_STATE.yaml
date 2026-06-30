@@ -39,7 +39,8 @@ tests:
     - tests/test_p15_ux_runtime.py
     - tests/test_p15_schema_alignment.py
     - tests/test_p15_ux_adversarial.py
-  methods_declared: 53
+    - tests/test_p15_manifest_payload.py
+  methods_declared: 55
   status: NOT_RUN
 review:
   status: NOT_STARTED
