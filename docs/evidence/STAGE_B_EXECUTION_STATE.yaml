@@ -19,19 +19,20 @@ units:
     issue: 7
     risk: R2
   B1b:
-    state: REVIEW_PENDING_OWNER_SIGNOFF
+    state: REVIEW_PENDING_CI_AND_INDEPENDENT_REVIEW
     risk: R3
-    approval: EXPLICIT_USER_R3_AUTHORIZATION_RECORDED_2026_06_30
+    approval: EXPLICIT_USER_R3_AUTHORIZATION_AND_GOLDEN_BASELINE_OWNER_SIGNOFF_RECORDED_2026_06_30
     issue: 32
     working_branch: build-b1b-financial-kernel-v1
     oracle_owner: PROJECT_OWNER_USER
     oracle_owner_role: BUSINESS_GOLDEN_ORACLE_OWNER
     baseline_source: SYNTHETIC_TEST_SCENARIOS_UNDER_APPROVED_METHODOLOGY
-    blocker: GOLDEN_BASELINE_EXACT_VALUES_OWNER_SIGNOFF_PENDING
+    baseline_approval: APPROVED
+    blocker: CI_AND_INDEPENDENT_REVIEW_PENDING
     evidence: docs/evidence/STAGE_B_B1B_EXECUTION_STATE.yaml
     targeted_test_method_count: 67
-    local_targeted_tests: PASS
-    github_ci: PENDING_PR
+    local_targeted_tests: PENDING_RERUN_AFTER_OWNER_SIGNOFF_PATCH
+    github_ci: PENDING_RERUN_AFTER_OWNER_SIGNOFF_PATCH
   B2:
     state: GATED
     risk: R3
