@@ -23,8 +23,9 @@ data, publish verified metric snapshots, reconcile periods, or authorize release
   `net_sold_units < 0`, while preserving `net_profit_amount = -44.00`.
 - Public production facade: `src/quantum/finance/runtime.py`.
 - Internal production modules: `_common.py`, `_rounding.py`, `_expression.py`,
-  `_rules.py`, `_metrics.py`, `_calculation_core.py`, `_calculation_expenses.py`,
-  and `_calculation_profit.py`; these are package-private and CI-scanned.
+  `_rules.py`, `_rules_hardening.py`, `_metrics.py`, `_calculation_core.py`,
+  `_calculation_expenses.py`, and `_calculation_profit.py`; these are package-private
+  and CI-scanned.
 - Independent reference path: `src/quantum/finance/oracle.py`.
 - The reference path must not import or call the production runtime.
 - The Golden Baseline fixture approval state is `APPROVED`.
@@ -57,7 +58,9 @@ Every value has exactly these fields:
 
 Numeric zero is a valid value. Missing configuration, unavailable evidence,
 conflict, and zero remain distinct. Non-valid state precedence for a dependent
-calculation is `CONFLICT > BLOCKED > UNAVAILABLE > EMPTY`.
+calculation is `CONFLICT > BLOCKED > UNAVAILABLE > EMPTY`. Every supplied
+`source_ids` item is validated as a non-empty string before uniqueness processing;
+malformed or unhashable entries fail with `VALUE_SOURCES_INVALID`.
 
 ## Rounding
 
@@ -86,8 +89,22 @@ Resolution is deterministic over the complete ordering tuple:
 
 A complete tie returns `CONFLICT/RULE_RESOLUTION_TIE`. A forbidden exclusivity
 collision returns `CONFLICT/RULE_EXCLUSIVITY_OVERLAP`. Missing required rules or
-publication approval return `BLOCKED`. Candidate trace is the only selection
-authority; a duplicate top-level selected-rule field is rejected.
+publication approval return `BLOCKED`. The deterministic `trace_id` is integrity
+evidence, not authentication and not independent selection authority.
+
+The public resolver registers a deep-copied immutable snapshot of every issued
+resolution together with a canonical fingerprint of the complete normalized
+ruleset. The process-local registry is lock-protected and bounded to 4096 entries;
+eviction fails closed. The evaluator accepts only an exact resolver-issued payload
+with the same complete ruleset. A caller-recomputed trace, changed selection,
+changed candidate payload, or changed ruleset fails with
+`RULE_RESOLUTION_REPLAY_MISMATCH`. Structurally invalid or stale-hash resolutions
+retain their narrower contract diagnostics.
+
+This trusted-trace mechanism is intentionally limited to the current local,
+single-process preview boundary. Rehydrated traces after process restart are not
+trusted and fail closed. Persistent or distributed evaluation requires a separately
+approved authenticated, context-bound proof contract and is not implemented in B1b.
 
 Supported rule methods are `FIXED_VALUE`, `RATE`, and `SAFE_EXPRESSION`.
 `ALLOCATION` is not implemented because allocation recognition and reconciliation
@@ -158,13 +175,15 @@ Required and implemented test classes:
 - all supported decimal rounding modes and tie behavior;
 - typed-state propagation and valid-zero separation;
 - Actual/Scenario isolation;
-- rule precedence, tie, exclusivity, and deterministic candidate order;
+- rule precedence, tie, exclusivity, deterministic candidate order, and trusted-trace replay rejection;
 - Safe Expression type, unit, currency, arity, limit, and capability rejection;
+- malformed typed-source validation;
 - request mutation and replay determinism;
 - fixed-commercial-constant and forbidden-capability scans.
 
 ## Deferred boundaries
 
+- authenticated persistent or distributed resolver proof;
 - Source Authority activation;
 - real or anonymized marketplace data;
 - B2 reconciliation, periods, reversals, restatements, and lifecycle accounting;
