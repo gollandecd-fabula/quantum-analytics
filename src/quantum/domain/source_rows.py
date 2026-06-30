@@ -11,7 +11,6 @@ from uuid import UUID
 
 from quantum.domain.idempotency import canonical_json_hash
 
-
 _HEX = re.compile(r"^[0-9a-f]{64}$")
 
 
@@ -137,7 +136,6 @@ class ImmutableSourceRow:
             {
                 "source_record_id": self.source_record_id,
                 "tenant_id": self.tenant_id,
-                "raw_file_id": self.raw_file_id,
                 "source_file_sha256": self.source_file_sha256,
                 "import_batch_id": self.import_batch_id,
                 "row_number": self.row_number,
