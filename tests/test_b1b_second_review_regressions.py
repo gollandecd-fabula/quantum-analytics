@@ -126,6 +126,30 @@ class B1bSecondReviewRegressionTests(unittest.TestCase):
         with self.assertRaisesRegex(FinanceError, "RULE_NOT_APPROVED"):
             evaluate_resolved_rule(resolution, [rule], {}, policy())
 
+    def test_rehashed_lower_priority_selection_is_not_trusted(self) -> None:
+        low = rule_document(rule_id="cost.low", priority=1, value="10")
+        high = rule_document(rule_id="cost.high", priority=2, value="20")
+        rules = [low, high]
+        resolution = resolve_rule(rules, context())
+        for candidate in resolution["candidates"]:
+            candidate["selected"] = candidate["rule"]["rule_id"] == "cost.low"
+        resolution["trace_id"] = canonical_hash(
+            resolution, exclude=frozenset({"trace_id"})
+        )
+        with self.assertRaisesRegex(
+            FinanceError, "RULE_RESOLUTION_REPLAY_MISMATCH"
+        ):
+            evaluate_resolved_rule(resolution, rules, {}, policy())
+
+    def test_resolver_issued_trace_is_bound_to_complete_ruleset(self) -> None:
+        low = rule_document(rule_id="cost.low", priority=1, value="10")
+        high = rule_document(rule_id="cost.high", priority=2, value="20")
+        resolution = resolve_rule([low], context())
+        with self.assertRaisesRegex(
+            FinanceError, "RULE_RESOLUTION_REPLAY_MISMATCH"
+        ):
+            evaluate_resolved_rule(resolution, [low, high], {}, policy())
+
     def test_safe_expression_result_must_match_rule_signature(self) -> None:
         expression = {
             "kind": "LITERAL",
@@ -194,6 +218,26 @@ class B1bSecondReviewRegressionTests(unittest.TestCase):
         self.assertEqual(
             result["reason_code"], "RULE_DEPENDENCY_UNAVAILABLE:tax_rate"
         )
+
+    def test_unhashable_source_id_is_typed_validation_error(self) -> None:
+        expression = {
+            "kind": "VARIABLE",
+            "name": "gross_sales_amount",
+            "value_type": "MONEY",
+            "currency": "EUR",
+            "unit": "MONEY",
+        }
+        malformed = typed(
+            "100", value_type="MONEY", unit="MONEY", currency="EUR"
+        )
+        malformed["source_ids"] = [[]]
+        with self.assertRaisesRegex(FinanceError, "VALUE_SOURCES_INVALID"):
+            evaluate_expression(
+                expression,
+                {"gross_sales_amount": malformed},
+                ["gross_sales_amount"],
+                policy(),
+            )
 
 
 if __name__ == "__main__":
