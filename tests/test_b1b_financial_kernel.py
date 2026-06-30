@@ -170,6 +170,13 @@ class B1bFinancialKernelTests(unittest.TestCase):
             "PRODUCT_COST",
             result["net_marketplace_income_amount"]["expense_boundary"],
         )
+        self.assertIsNone(result["net_sold_units"]["rounding"])
+        self.assertIsNone(result["profitability_of_costs"]["rounding"])
+        rounding = result["net_profit_amount"]["rounding"]
+        self.assertIsInstance(rounding, dict)
+        self.assertEqual(rounding["application_point"], "METRIC_FINAL_ACCOUNTING")
+        self.assertEqual(rounding["resolved_mode"], "HALF_EVEN")
+        self.assertEqual(rounding["resolved_scale"], 2)
 
     def test_hashes_change_when_input_changes(self) -> None:
         request = request_from_case(self.baseline["cases"][0])
