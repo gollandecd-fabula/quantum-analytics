@@ -83,8 +83,11 @@ def validate_rounding_policy(policy: object, *, preview: bool = True) -> dict[st
         raise FinanceError("ROUNDING_MODE_UNSUPPORTED")
     for field in (
         "calculation_scale", "money_scale", "rate_scale", "presentation_scale",
-        "max_input_precision", "max_input_scale",
     ):
+        value = policy[field]
+        if not _is_non_negative_int(value) or value > 28:
+            raise FinanceError("ROUNDING_SCALE_INVALID")
+    for field in ("max_input_precision", "max_input_scale"):
         value = policy[field]
         if not _is_non_negative_int(value) or value > 1000:
             raise FinanceError("ROUNDING_SCALE_INVALID")
