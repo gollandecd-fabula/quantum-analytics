@@ -204,12 +204,17 @@ def _validate_evidence_binding(
     if errors:
         raise ReportingError(f"REPORT_EVIDENCE_INVALID:{errors[0]}")
     ref = snapshot["evidence_chain_ref"]
+    root_ref = evidence_chain.get("root_metric_snapshot_ref")
     if (
         evidence_chain.get("evidence_chain_id") != ref.get("id")
         or evidence_chain.get("version") != ref.get("version")
         or evidence_chain.get("organization_id") != snapshot.get("organization_id")
         or evidence_chain.get("mode") != snapshot.get("mode")
         or evidence_chain.get("scenario_id") != snapshot.get("scenario_id")
+        or not isinstance(root_ref, Mapping)
+        or root_ref.get("id") != snapshot.get("metric_snapshot_id")
+        or root_ref.get("version") != snapshot.get("snapshot_revision")
+        or root_ref.get("content_hash") != snapshot.get("content_hash")
     ):
         raise ReportingError("REPORT_EVIDENCE_BINDING_MISMATCH")
 
