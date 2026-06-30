@@ -103,6 +103,56 @@ class P13ReviewRegressionTests(unittest.TestCase):
         self.assertEqual(result.inserted_events, 4)
         self.assertEqual(result.quarantined_rows, 0)
 
+    def test_later_supersession_prevents_temporary_reversal_quarantine(self) -> None:
+        rows = (
+            "1,sale-001,SALE,2026-06-01T10:00:00Z,"
+            "2026-06-01T10:05:00Z,product-a,2,1000.00,RUB,1,,",
+            "2,return-a,RETURN,2026-06-02T10:00:00Z,"
+            "2026-06-02T10:05:00Z,product-a,2,1000.00,RUB,1,,"
+            "evt-sale-001-r1",
+            "3,return-b,RETURN,2026-06-03T10:00:00Z,"
+            "2026-06-03T10:05:00Z,product-a,1,500.00,RUB,1,,"
+            "evt-sale-001-r1",
+            "4,return-a,RETURN,2026-06-04T10:00:00Z,"
+            "2026-06-04T10:05:00Z,product-a,1,500.00,RUB,2,"
+            "evt-return-a-r1,evt-sale-001-r1",
+        )
+        result = self.ingest(rows)
+        self.assertEqual(result.inserted_events, 4)
+        self.assertEqual(result.quarantined_rows, 0)
+        self.assertEqual(len(self.ledger.list_events(tenant=self.tenant)), 4)
+
+    def test_duplicate_content_under_new_raw_id_is_idempotent(self) -> None:
+        rows = (
+            "1,sale-001,SALE,2026-06-01T10:00:00Z,"
+            "2026-06-01T10:05:00Z,product-a,1,1000.00,RUB,1,,",
+        )
+        first_raw_id = self.prepare(rows)
+        second_raw_id = self.prepare(rows)
+        self.assertNotEqual(first_raw_id, second_raw_id)
+
+        first = self.ingestor.ingest(
+            tenant=self.tenant,
+            raw_file_id=first_raw_id,
+            marketplace_account_id="wb-account",
+            ingested_at=datetime(2026, 6, 30, 12, 0, tzinfo=UTC),
+        )
+        second = self.ingestor.ingest(
+            tenant=self.tenant,
+            raw_file_id=second_raw_id,
+            marketplace_account_id="wb-account",
+            ingested_at=datetime(2026, 7, 1, 12, 0, tzinfo=UTC),
+        )
+
+        self.assertEqual(first.import_batch_id, second.import_batch_id)
+        self.assertEqual(first.source_record_ids, second.source_record_ids)
+        self.assertEqual(second.inserted_source_rows, 0)
+        self.assertEqual(second.inserted_events, 0)
+        self.assertEqual(second.duplicate_source_rows, 1)
+        self.assertEqual(second.duplicate_events, 1)
+        self.assertEqual(len(self.ledger.list_source_rows(tenant=self.tenant)), 1)
+        self.assertEqual(len(self.ledger.list_events(tenant=self.tenant)), 1)
+
     def test_currency_mismatch_is_quarantined(self) -> None:
         rows = (
             "1,sale-001,SALE,2026-06-01T10:00:00Z,"
