@@ -276,6 +276,30 @@ def _is_pre_evaluation_missing_dependency(result: Mapping[str, Any]) -> bool:
     )
 
 
+def _attach_expression_provenance(
+    result: Mapping[str, Any],
+    resolution: Mapping[str, Any],
+    selected_rule: Mapping[str, Any],
+) -> dict[str, Any]:
+    source_ids = result.get("source_ids")
+    if (
+        not isinstance(source_ids, list)
+        or any(not _is_nonempty_string(source_id) for source_id in source_ids)
+    ):
+        raise FinanceError("TYPED_VALUE_MALFORMED")
+    enriched = deepcopy(dict(result))
+    enriched["source_ids"] = sorted(
+        set(
+            [
+                *source_ids,
+                str(resolution["trace_id"]),
+                str(selected_rule["content_hash"]),
+            ]
+        )
+    )
+    return enriched
+
+
 def evaluate_resolved_rule(
     resolution: Mapping[str, Any],
     rules: Sequence[Mapping[str, Any]],
@@ -302,18 +326,20 @@ def evaluate_resolved_rule(
         policy,
     )
 
-    if (
-        selected_rule is not None
-        and selected_rule["method"] == "SAFE_EXPRESSION"
-        and not _is_pre_evaluation_missing_dependency(result)
-    ):
-        actual_signature = (
-            result.get("value_type"),
-            result.get("unit"),
-            result.get("currency"),
+    if selected_rule is not None and selected_rule["method"] == "SAFE_EXPRESSION":
+        if not _is_pre_evaluation_missing_dependency(result):
+            actual_signature = (
+                result.get("value_type"),
+                result.get("unit"),
+                result.get("currency"),
+            )
+            if actual_signature != _expected_signature(selected_rule):
+                raise FinanceError("RULE_EXPRESSION_SIGNATURE_MISMATCH")
+        result = _attach_expression_provenance(
+            result,
+            resolution,
+            selected_rule,
         )
-        if actual_signature != _expected_signature(selected_rule):
-            raise FinanceError("RULE_EXPRESSION_SIGNATURE_MISMATCH")
 
     return result
 
