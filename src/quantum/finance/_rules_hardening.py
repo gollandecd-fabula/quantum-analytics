@@ -6,7 +6,12 @@ from copy import deepcopy
 from threading import RLock
 from typing import Any
 
-from ._common import FinanceError, canonical_hash
+from ._common import (
+    FinanceError,
+    RESOLVER_CONTRACT_VERSION,
+    _HASH_RE,
+    canonical_hash,
+)
 from ._rules import (
     _validate_rule_document,
     evaluate_resolved_rule as _evaluate_resolved_rule,
@@ -14,6 +19,16 @@ from ._rules import (
 )
 
 _APPROVED_RULE_STATUSES = {"SHADOW", "PILOT", "ACTIVE"}
+_RESOLUTION_FIELDS = {
+    "resolver_contract_version",
+    "context_hash",
+    "state",
+    "diagnostic_code",
+    "candidates",
+    "actor",
+    "resolved_at",
+    "trace_id",
+}
 _TRUSTED_TRACE_CACHE_LIMIT = 4096
 _TRUSTED_TRACE_LOCK = RLock()
 _TRUSTED_TRACES: OrderedDict[
@@ -76,6 +91,55 @@ def _matches_trusted_trace(
     )
 
 
+def _validate_resolution_envelope(resolution: Mapping[str, Any]) -> None:
+    if (
+        not isinstance(resolution, Mapping)
+        or set(resolution) != _RESOLUTION_FIELDS
+        or resolution.get("resolver_contract_version")
+        != RESOLVER_CONTRACT_VERSION
+        or resolution.get("state")
+        not in {"VALID", "BLOCKED", "CONFLICT", "UNAVAILABLE"}
+    ):
+        raise FinanceError("RULE_RESOLUTION_INVALID")
+
+    trace_id = resolution.get("trace_id")
+    if (
+        not isinstance(trace_id, str)
+        or _HASH_RE.fullmatch(trace_id) is None
+        or canonical_hash(resolution, exclude=frozenset({"trace_id"}))
+        != trace_id
+    ):
+        raise FinanceError("RULE_RESOLUTION_TRACE_MISMATCH")
+
+    state = resolution["state"]
+    diagnostic = resolution.get("diagnostic_code")
+    if (state == "VALID") != (diagnostic is None):
+        raise FinanceError("RULE_RESOLUTION_INVALID")
+
+    candidates = resolution.get("candidates")
+    if not isinstance(candidates, list):
+        raise FinanceError("RULE_RESOLUTION_INVALID")
+    selected = [
+        candidate
+        for candidate in candidates
+        if isinstance(candidate, Mapping)
+        and candidate.get("eligible") is True
+        and candidate.get("selected") is True
+    ]
+    if state != "VALID":
+        if selected:
+            raise FinanceError("RULE_RESOLUTION_INVALID")
+        return
+    if len(selected) != 1:
+        raise FinanceError("RULE_RESOLUTION_INVALID")
+    ref = selected[0].get("rule")
+    if (
+        not isinstance(ref, Mapping)
+        or set(ref) != {"rule_id", "version", "content_hash"}
+    ):
+        raise FinanceError("RULE_RESOLUTION_INVALID")
+
+
 def resolve_rule(
     rules: Sequence[Mapping[str, Any]],
     context: Mapping[str, Any],
@@ -90,23 +154,16 @@ def _selected_rule(
     resolution: Mapping[str, Any],
     rules_snapshot: Sequence[Mapping[str, Any]],
 ) -> dict[str, Any] | None:
-    if not isinstance(resolution, Mapping) or resolution.get("state") != "VALID":
-        return None
-    candidates = resolution.get("candidates")
-    if not isinstance(candidates, list):
+    if resolution.get("state") != "VALID":
         return None
     selected = [
         candidate
-        for candidate in candidates
+        for candidate in resolution["candidates"]
         if isinstance(candidate, Mapping)
         and candidate.get("eligible") is True
         and candidate.get("selected") is True
     ]
-    if len(selected) != 1:
-        return None
-    ref = selected[0].get("rule")
-    if not isinstance(ref, Mapping):
-        return None
+    ref = selected[0]["rule"]
     lookup = {
         (rule["rule_id"], rule["version"], rule["content_hash"]): rule
         for rule in rules_snapshot
@@ -140,6 +197,8 @@ def evaluate_resolved_rule(
     policy: Mapping[str, Any],
 ) -> dict[str, Any]:
     rules_snapshot = _snapshot_rules(rules)
+    _validate_resolution_envelope(resolution)
+
     selected_rule = _selected_rule(resolution, rules_snapshot)
     if (
         selected_rule is not None
@@ -147,15 +206,15 @@ def evaluate_resolved_rule(
     ):
         raise FinanceError("RULE_NOT_APPROVED")
 
+    if not _matches_trusted_trace(resolution, rules_snapshot):
+        raise FinanceError("RULE_RESOLUTION_REPLAY_MISMATCH")
+
     result = _evaluate_resolved_rule(
         resolution,
         rules_snapshot,
         variables,
         policy,
     )
-
-    if not _matches_trusted_trace(resolution, rules_snapshot):
-        raise FinanceError("RULE_RESOLUTION_REPLAY_MISMATCH")
 
     if (
         selected_rule is not None
