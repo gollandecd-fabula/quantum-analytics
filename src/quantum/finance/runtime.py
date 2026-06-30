@@ -15,7 +15,8 @@ from ._common import (
 from ._expression import evaluate_expression
 from ._metrics import _metric, _validate_ref
 from ._rounding import _normalize_value, validate_rounding_policy
-from ._rules import evaluate_resolved_rule, resolve_rule
+from ._rules_hardening import evaluate_resolved_rule, resolve_rule
+
 
 def calculate(request: Mapping[str, Any]) -> dict[str, Any]:
     original = deepcopy(request)
