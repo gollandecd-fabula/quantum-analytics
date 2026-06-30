@@ -7,6 +7,7 @@ from collections.abc import Mapping, Sequence
 from datetime import datetime
 from typing import Any
 
+from quantum.ingestion import RawFileRecord, RawFileState
 from quantum.reporting import ReportingError, validate_report_record
 
 UX_SCHEMA_VERSION = "quantum-ux-view-v1"
@@ -36,6 +37,8 @@ _TYPED_STATES = frozenset({
     "NOT_APPLICABLE",
 })
 _MODES = frozenset({"ACTUAL", "SCENARIO"})
+_FORM_STATUSES = frozenset({"BLOCKED", "PARTIAL", "READY_FOR_RULE_DRAFT"})
+_FIELD_STATES = frozenset({"EMPTY", "VALID", "INVALID", "BLOCKED"})
 _HASH_RE = re.compile(r"^[a-f0-9]{64}$")
 _DECIMAL_RE = re.compile(r"^-?(0|[1-9][0-9]*)(\.[0-9]+)?$")
 _CURRENCY_RE = re.compile(r"^[A-Z]{3}$")
@@ -46,6 +49,7 @@ _FIELD_DEFINITIONS: dict[str, dict[str, Any]] = {
         "input_kind": "COST",
         "control": "decimal",
         "requires_currency": True,
+        "contract_unit": "MONEY_PER_ITEM",
         "accessible_name": "Product cost",
         "resolution": "Provide an explicit scoped product-cost value.",
     },
@@ -54,6 +58,7 @@ _FIELD_DEFINITIONS: dict[str, dict[str, Any]] = {
         "input_kind": "TAX_RATE",
         "control": "decimal",
         "requires_currency": False,
+        "contract_unit": "RATE",
         "accessible_name": "Tax rate",
         "resolution": "Provide an explicit tax rate without a hidden default.",
     },
@@ -62,6 +67,7 @@ _FIELD_DEFINITIONS: dict[str, dict[str, Any]] = {
         "input_kind": "TAX_BASE",
         "control": "select",
         "requires_currency": False,
+        "contract_unit": "DIMENSIONLESS",
         "accessible_name": "Tax base",
         "resolution": "Select the explicit tax base used by the tax rule.",
     },
@@ -70,6 +76,7 @@ _FIELD_DEFINITIONS: dict[str, dict[str, Any]] = {
         "input_kind": "OTHER_EXPENSE",
         "control": "decimal",
         "requires_currency": True,
+        "contract_unit": "MONEY_PER_ITEM",
         "accessible_name": "Other expense",
         "resolution": "Provide an explicit scoped other-expense value.",
     },
@@ -81,7 +88,39 @@ _STATE_PRESENTATION: dict[str, tuple[str, str, str]] = {
     "UNAVAILABLE": ("Unavailable", "unavailable", "The source is unavailable."),
     "CONFLICT": ("Conflict", "conflict", "Conflicting evidence prevents publication."),
     "INVALID": ("Invalid", "invalid", "The result is invalid."),
-    "NOT_APPLICABLE": ("Not applicable", "not-applicable", "The metric is not applicable."),
+    "NOT_APPLICABLE": (
+        "Not applicable",
+        "not-applicable",
+        "The metric is not applicable.",
+    ),
+}
+
+_IMPORT_PRESENTATION: dict[RawFileState, tuple[str, str, str]] = {
+    RawFileState.RECEIVED: (
+        "Received",
+        "received",
+        "The file was received and is waiting for validation.",
+    ),
+    RawFileState.VALIDATING: (
+        "Validating",
+        "validating",
+        "The file is being validated.",
+    ),
+    RawFileState.VALID: (
+        "Valid",
+        "valid",
+        "The file passed schema validation.",
+    ),
+    RawFileState.QUARANTINED: (
+        "Quarantined",
+        "quarantined",
+        "The file was quarantined and was not admitted to canonical processing.",
+    ),
+    RawFileState.REJECTED: (
+        "Rejected",
+        "rejected",
+        "The file was rejected and was not admitted to canonical processing.",
+    ),
 }
 
 
@@ -174,6 +213,7 @@ def _base_form_fields() -> list[dict[str, Any]]:
             "control": definition["control"],
             "required": True,
             "requires_currency": definition["requires_currency"],
+            "contract_unit": definition["contract_unit"],
             "accessible_name": definition["accessible_name"],
             "value": None,
             "state": "EMPTY",
@@ -252,13 +292,65 @@ def build_configuration_form(
     return form
 
 
+def _validate_form_field(field: object, expected_field_id: str) -> None:
+    if not isinstance(field, Mapping):
+        raise UXError("UX_FORM_FIELDS_INVALID")
+    expected = {
+        "field_id",
+        "label",
+        "input_kind",
+        "control",
+        "required",
+        "requires_currency",
+        "contract_unit",
+        "accessible_name",
+        "value",
+        "state",
+        "diagnostic",
+    }
+    if set(field) != expected or field.get("field_id") != expected_field_id:
+        raise UXError("UX_FORM_FIELDS_INVALID")
+    definition = _FIELD_DEFINITIONS[expected_field_id]
+    if (
+        field.get("label") != definition["label"]
+        or field.get("input_kind") != definition["input_kind"]
+        or field.get("control") != definition["control"]
+        or field.get("required") is not True
+        or field.get("requires_currency") is not definition["requires_currency"]
+        or field.get("contract_unit") != definition["contract_unit"]
+        or field.get("accessible_name") != definition["accessible_name"]
+        or field.get("state") not in _FIELD_STATES
+    ):
+        raise UXError("UX_FORM_FIELDS_INVALID")
+    if field.get("state") == "VALID" and field.get("value") is None:
+        raise UXError("UX_FORM_FIELDS_INVALID")
+    if field.get("state") != "VALID" and field.get("value") is not None:
+        raise UXError("UX_FORM_FIELDS_INVALID")
+    diagnostic = field.get("diagnostic")
+    if diagnostic is not None and not _is_nonempty_string(diagnostic):
+        raise UXError("UX_FORM_FIELDS_INVALID")
+
+
 def _validate_configuration_form(form: object) -> None:
     if not isinstance(form, Mapping):
         raise UXError("UX_FORM_MALFORMED")
     required = {
-        "schema_version", "form_id", "organization_id", "mode", "scenario_id",
-        "actor", "scope", "valid_from", "valid_to", "currency", "created_at",
-        "publication_state", "fields", "status", "problems", "form_hash",
+        "schema_version",
+        "form_id",
+        "organization_id",
+        "mode",
+        "scenario_id",
+        "actor",
+        "scope",
+        "valid_from",
+        "valid_to",
+        "currency",
+        "created_at",
+        "publication_state",
+        "fields",
+        "status",
+        "problems",
+        "form_hash",
     }
     if set(form) != required:
         raise UXError("UX_FORM_MALFORMED")
@@ -266,8 +358,28 @@ def _validate_configuration_form(form: object) -> None:
         raise UXError("UX_FORM_SCHEMA_INVALID")
     if form.get("publication_state") != "PREVIEW_ONLY":
         raise UXError("UX_FORM_PUBLICATION_STATE_INVALID")
-    if not isinstance(form.get("fields"), list):
+    if not _is_nonempty_string(form.get("form_id")):
+        raise UXError("UX_FORM_ID_INVALID")
+    organization_id = form.get("organization_id")
+    if not _is_nonempty_string(organization_id):
+        raise UXError("UX_ORGANIZATION_ID_INVALID")
+    if form.get("mode") not in _MODES:
+        raise UXError("UX_MODE_INVALID")
+    scenario_id = form.get("scenario_id")
+    if form.get("mode") == "ACTUAL" and scenario_id is not None:
+        raise UXError("UX_SCENARIO_INVALID")
+    if form.get("mode") == "SCENARIO" and not _is_nonempty_string(scenario_id):
+        raise UXError("UX_SCENARIO_INVALID")
+    _validate_scope(form.get("scope"), str(organization_id))
+    if form.get("status") not in _FORM_STATUSES:
+        raise UXError("UX_FORM_STATUS_INVALID")
+    if not isinstance(form.get("problems"), list):
+        raise UXError("UX_FORM_PROBLEMS_INVALID")
+    fields = form.get("fields")
+    if not isinstance(fields, list) or len(fields) != len(_CONFIGURATION_FIELDS):
         raise UXError("UX_FORM_FIELDS_INVALID")
+    for index, expected_field_id in enumerate(_CONFIGURATION_FIELDS):
+        _validate_form_field(fields[index], expected_field_id)
     if form.get("form_hash") != _canonical_hash(form, frozenset({"form_hash"})):
         raise UXError("UX_FORM_HASH_MISMATCH")
 
@@ -369,9 +481,14 @@ def render_report_record(record: Mapping[str, Any]) -> dict[str, Any]:
     if state not in _TYPED_STATES:
         raise UXError("UX_TYPED_STATE_INVALID")
 
-    is_numeric_zero = state == "VALID" and record["value"] == "0"
+    raw_value = record["value"]
+    is_numeric_zero = (
+        state == "VALID"
+        and not isinstance(raw_value, bool)
+        and raw_value in {"0", 0}
+    )
     if state == "VALID":
-        value_text = str(record["value"])
+        value_text = str(raw_value)
         if is_numeric_zero:
             status_label = "Valid numeric zero"
             status_token = "valid-zero"
@@ -403,6 +520,39 @@ def render_report_record(record: Mapping[str, Any]) -> dict[str, Any]:
         "publication_state": record["publication_state"],
         "evidence_available": record["evidence_chain_content_hash"] is not None,
         "limitations": list(record["limitations"]),
+        "view_hash": "",
+    }
+    view["view_hash"] = _canonical_hash(view, frozenset({"view_hash"}))
+    return view
+
+
+def render_import_status(record: RawFileRecord) -> dict[str, Any]:
+    """Render immutable ingestion state without exposing the storage key."""
+    if not isinstance(record, RawFileRecord):
+        raise UXError("UX_IMPORT_RECORD_INVALID")
+    if record.state not in _IMPORT_PRESENTATION:
+        raise UXError("UX_IMPORT_STATE_INVALID")
+    status_label, status_token, accessible_summary = _IMPORT_PRESENTATION[record.state]
+    diagnostics = list(record.diagnostics)
+    view = {
+        "schema_version": UX_SCHEMA_VERSION,
+        "view_type": "IMPORT_STATUS",
+        "view_id": f"ux:import:{record.raw_file_id}",
+        "tenant_id": record.tenant_id,
+        "raw_file_id": record.raw_file_id,
+        "sha256": record.sha256,
+        "size_bytes": record.size_bytes,
+        "filename": record.sanitized_filename,
+        "state": record.state.value,
+        "status_label": status_label,
+        "status_token": status_token,
+        "semantic_role": "status",
+        "accessible_summary": accessible_summary,
+        "schema_id": record.schema_id,
+        "diagnostics": diagnostics,
+        "structural_fingerprint_available": record.structural_fingerprint is not None,
+        "semantic_fingerprint_available": record.semantic_fingerprint is not None,
+        "admitted_to_canonical_processing": record.state is RawFileState.VALID,
         "view_hash": "",
     }
     view["view_hash"] = _canonical_hash(view, frozenset({"view_hash"}))
@@ -441,7 +591,7 @@ def _exception_id(*parts: str) -> str:
     return "exc-" + hashlib.sha256(payload).hexdigest()[:24]
 
 
-def _ensure_same_context(
+def _ensure_same_business_context(
     organization_id: str | None,
     mode: str | None,
     scenario_id: str | None,
@@ -453,7 +603,7 @@ def _ensure_same_context(
     if organization_id is None:
         return candidate_organization_id, candidate_mode, candidate_scenario_id
     if organization_id != candidate_organization_id:
-        raise UXError("UX_INBOX_TENANT_MIXED")
+        raise UXError("UX_INBOX_ORGANIZATION_MIXED")
     if mode != candidate_mode or scenario_id != candidate_scenario_id:
         raise UXError("UX_INBOX_MODE_MIXED")
     return organization_id, mode, scenario_id
@@ -463,6 +613,8 @@ def build_exception_inbox(
     records: Sequence[Mapping[str, Any]],
     *,
     configuration_forms: Sequence[Mapping[str, Any]] = (),
+    import_records: Sequence[RawFileRecord] = (),
+    tenant_id: str | None = None,
     generated_at: datetime | str,
 ) -> dict[str, Any]:
     """Build an immutable exception view while retaining independent valid metrics."""
@@ -472,6 +624,7 @@ def build_exception_inbox(
     exceptions: list[dict[str, Any]] = []
     available_metric_ids: list[str] = []
     seen_records: set[str] = set()
+    seen_imports: set[str] = set()
 
     for record in records:
         try:
@@ -482,7 +635,7 @@ def build_exception_inbox(
         if record_id in seen_records:
             raise UXError("UX_INBOX_RECORD_DUPLICATE")
         seen_records.add(record_id)
-        organization_id, mode, scenario_id = _ensure_same_context(
+        organization_id, mode, scenario_id = _ensure_same_business_context(
             organization_id,
             mode,
             scenario_id,
@@ -504,15 +657,24 @@ def build_exception_inbox(
             "cause": reason,
             "affected_metric_ids": [record["metric_snapshot_id"]],
             "evidence_refs": [_clone_json(evidence_ref)],
-            "required_resolution": "Resolve the recorded cause and recalculate without replacing missing values with zero.",
-            "severity": "ERROR" if record["state"] in {"BLOCKED", "CONFLICT", "INVALID"} else "WARNING",
+            "required_resolution": (
+                "Resolve the recorded cause and recalculate without replacing "
+                "missing values with zero."
+            ),
+            "severity": (
+                "ERROR"
+                if record["state"] in {"BLOCKED", "CONFLICT", "INVALID"}
+                else "WARNING"
+            ),
             "status": "OPEN",
-            "accessible_summary": f"{record['state']} metric {record['metric_snapshot_id']}: {reason}.",
+            "accessible_summary": (
+                f"{record['state']} metric {record['metric_snapshot_id']}: {reason}."
+            ),
         })
 
     for form in configuration_forms:
         _validate_configuration_form(form)
-        organization_id, mode, scenario_id = _ensure_same_context(
+        organization_id, mode, scenario_id = _ensure_same_business_context(
             organization_id,
             mode,
             scenario_id,
@@ -527,7 +689,10 @@ def build_exception_inbox(
             cause = field["diagnostic"] or "CONFIGURATION_REQUIRED"
             exceptions.append({
                 "exception_id": _exception_id(
-                    "configuration", str(form["form_id"]), field["field_id"], cause
+                    "configuration",
+                    str(form["form_id"]),
+                    field["field_id"],
+                    cause,
                 ),
                 "category": "CONFIGURATION",
                 "state": field["state"],
@@ -535,14 +700,21 @@ def build_exception_inbox(
                 "affected_metric_ids": [],
                 "evidence_refs": [],
                 "required_resolution": definition["resolution"],
-                "severity": "ERROR" if field["state"] in {"BLOCKED", "INVALID"} else "WARNING",
+                "severity": (
+                    "ERROR"
+                    if field["state"] in {"BLOCKED", "INVALID"}
+                    else "WARNING"
+                ),
                 "status": "OPEN",
                 "accessible_summary": f"Configuration {field['label']}: {cause}.",
             })
         if form["valid_from"] is None:
             exceptions.append({
                 "exception_id": _exception_id(
-                    "configuration", str(form["form_id"]), "valid_from", "VALID_FROM_REQUIRED"
+                    "configuration",
+                    str(form["form_id"]),
+                    "valid_from",
+                    "VALID_FROM_REQUIRED",
                 ),
                 "category": "CONFIGURATION",
                 "state": "EMPTY",
@@ -555,13 +727,65 @@ def build_exception_inbox(
                 "accessible_summary": "Configuration validity start is required.",
             })
 
-    if organization_id is None or mode is None:
+    if import_records:
+        if not _is_nonempty_string(tenant_id):
+            raise UXError("UX_INBOX_TENANT_REQUIRED")
+        for import_record in import_records:
+            if not isinstance(import_record, RawFileRecord):
+                raise UXError("UX_IMPORT_RECORD_INVALID")
+            if import_record.tenant_id != tenant_id:
+                raise UXError("UX_INBOX_TENANT_MIXED")
+            if import_record.raw_file_id in seen_imports:
+                raise UXError("UX_INBOX_IMPORT_DUPLICATE")
+            seen_imports.add(import_record.raw_file_id)
+            if import_record.state not in {
+                RawFileState.QUARANTINED,
+                RawFileState.REJECTED,
+            }:
+                continue
+            cause = (
+                import_record.diagnostics[0]
+                if import_record.diagnostics
+                else f"IMPORT_{import_record.state.value}"
+            )
+            exceptions.append({
+                "exception_id": _exception_id(
+                    "import",
+                    import_record.raw_file_id,
+                    cause,
+                ),
+                "category": "SCHEMA",
+                "state": (
+                    "CONFLICT"
+                    if import_record.state is RawFileState.QUARANTINED
+                    else "INVALID"
+                ),
+                "cause": cause,
+                "affected_metric_ids": [],
+                "evidence_refs": [{
+                    "raw_file_id": import_record.raw_file_id,
+                    "sha256": import_record.sha256,
+                }],
+                "required_resolution": (
+                    "Review the file diagnostics and submit a corrected file; "
+                    "the quarantined or rejected file remains excluded."
+                ),
+                "severity": "ERROR",
+                "status": "OPEN",
+                "accessible_summary": (
+                    f"{import_record.state.value} import "
+                    f"{import_record.sanitized_filename}: {cause}."
+                ),
+            })
+
+    if organization_id is None and not import_records:
         raise UXError("UX_INBOX_CONTEXT_EMPTY")
 
     exceptions.sort(key=lambda item: item["exception_id"])
     available_metric_ids.sort()
     inbox = {
         "schema_version": EXCEPTION_INBOX_VERSION,
+        "tenant_id": tenant_id,
         "organization_id": organization_id,
         "mode": mode,
         "scenario_id": scenario_id,
