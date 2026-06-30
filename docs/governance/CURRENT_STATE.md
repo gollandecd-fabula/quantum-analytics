@@ -17,20 +17,22 @@ B3, B4, and ingestion foundations. The current branch provides:
 - explicit preview-only inputs for cost, tax rate, tax base, and other expense;
 - B1a-aligned RATE tax-base vocabulary with `NONE` rejected;
 - explicit organization, Actual/Scenario, scope, validity, and currency controls;
+- strict RFC3339 timestamps on public configuration and Inbox builders;
 - no-hidden-default behavior and distinct numeric-zero semantics;
 - all canonical decimal-zero strings rendered as `valid-zero`;
 - text-first accessible views for typed metric and import states;
+- canonical lowercase-hyphenated raw-file UUID enforcement;
 - preview-safe Evidence Chain drill-down;
 - deterministic Exception Inbox entries with cause, evidence, affected metrics,
   required resolution, and independent-result continuity;
 - fail-closed organization, mode, tenant, duplicate, and forged-input controls;
 - duplicate configuration form identifiers rejected;
 - non-empty tenant identifiers enforced for every Inbox mode;
-- machine-readable schemas and 61 declared targeted test methods.
+- machine-readable schemas and 63 declared targeted test methods.
 
-The three Codex Review findings on commit `408ef82a…` have been remediated.
-Exact-head tests, artifact-manifest synchronization, review recheck, thread
-resolution, and closure remain pending. No current-head pass is claimed.
+Five findings across two Codex reviews have been remediated. Exact-head tests,
+artifact-manifest synchronization, review recheck, thread resolution, and
+closure remain pending. No current-head pass is claimed.
 
 ## Completed baseline
 
