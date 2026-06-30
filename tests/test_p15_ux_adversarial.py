@@ -153,10 +153,13 @@ class P15UXAdversarialTests(unittest.TestCase):
         with self.assertRaisesRegex(UXError, "UX_IMPORT_STATE_PAYLOAD_INVALID"):
             render_import_status(forged)
 
-    def test_duplicate_import_diagnostics_are_rejected(self) -> None:
-        forged = raw_record(diagnostics=("SCHEMA_UNKNOWN", "SCHEMA_UNKNOWN"))
-        with self.assertRaisesRegex(UXError, "UX_IMPORT_RECORD_INVALID"):
-            render_import_status(forged)
+    def test_duplicate_and_empty_import_diagnostics_are_preserved(self) -> None:
+        record = raw_record(diagnostics=("SCHEMA_UNKNOWN", "SCHEMA_UNKNOWN", ""))
+        view = render_import_status(record)
+        self.assertEqual(
+            view["diagnostics"],
+            ["SCHEMA_UNKNOWN", "SCHEMA_UNKNOWN", ""],
+        )
 
     def test_duplicate_import_records_are_rejected(self) -> None:
         record = raw_record()
