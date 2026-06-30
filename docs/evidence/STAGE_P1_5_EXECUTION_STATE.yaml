@@ -1,0 +1,66 @@
+schema_version: "1.0"
+date: "2026-06-30"
+stage: P1_TECHNICAL_FOUNDATION_BUILD
+unit: P1_5_UX_ONBOARDING_EXCEPTION_INBOX_FOUNDATION
+mapped_stage_unit: B5_UX_ONBOARDING_EXCEPTION_INBOX
+status: IMPLEMENTED_TESTS_PENDING
+tracking_issue: 29
+working_branch: p15-ux-onboarding-exception-inbox
+base_state: P1_4_COMPLETE
+risk: R2
+runtime_dependency_installation_authorized: false
+marketplace_write_enabled: false
+commercial_data_authorized: false
+financial_rule_activation_authorized: false
+external_access_authorized: false
+implemented:
+  - explicit preview-only configuration form for cost, tax rate, tax base and other expense
+  - explicit organization, mode, scenario, scope, validity and currency controls
+  - no-hidden-default and missing-value preservation
+  - distinct accessible rendering for typed states and numeric zero
+  - canonical tenant-scoped import status without storage-key disclosure
+  - preview-safe Evidence Chain drill-down over validated B4 report records
+  - deterministic Exception Inbox with cause, affected metrics, evidence and resolution
+  - independent valid metric continuity when another result is blocked
+  - fail-closed organization, Actual/Scenario, tenant and duplicate isolation
+  - deterministic SHA-256 integrity for forms, views and inboxes
+schemas:
+  - schemas/ux-configuration-form.schema.json
+  - schemas/ux-view.schema.json
+  - schemas/exception-inbox.schema.json
+contract:
+  - docs/ux/UX_ONBOARDING_EXCEPTION_INBOX_CONTRACT.md
+runtime:
+  - src/quantum/ux/runtime.py
+  - src/quantum/ux/validation.py
+  - src/quantum/ux/__init__.py
+tests:
+  files:
+    - tests/test_p15_ux_runtime.py
+    - tests/test_p15_schema_alignment.py
+    - tests/test_p15_ux_adversarial.py
+  methods_declared: 53
+  status: NOT_RUN
+review:
+  status: NOT_STARTED
+  resolved_findings: 0
+  unresolved_threads: UNKNOWN
+requirements:
+  - Q-BLD-007
+  - Q-BLD-014
+  - Q-BLD-015
+acceptance_controls:
+  - BLD-029
+  - BLD-030
+  - BLD-031
+  - BLD-032
+limitations:
+  - no financial calculation kernel
+  - no financial rule publication or activation
+  - no real marketplace data
+  - no external HTTP service or browser deployment
+  - no external authentication or tenant provisioning
+  - no database persistence
+  - no production deployment
+  - no marketplace write operations
+release_status: RELEASE_BLOCKED
