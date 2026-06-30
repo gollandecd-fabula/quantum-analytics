@@ -38,14 +38,38 @@
       "tax_rate": "0.06",
       "tax_base_metric_id": "gross_sales_amount",
       "expected": {
-        "net_sold_units": {"state": "VALID", "value": "8"},
-        "product_cost_amount": {"state": "VALID", "value": "320.00"},
-        "other_expense_amount": {"state": "VALID", "value": "32.00"},
-        "tax_amount": {"state": "VALID", "value": "60.00"},
-        "net_marketplace_income_amount": {"state": "VALID", "value": "700.00"},
-        "net_profit_amount": {"state": "VALID", "value": "288.00"},
-        "profit_per_sold_unit": {"state": "VALID", "value": "36.00"},
-        "profitability_of_costs": {"state": "BLOCKED", "value": null}
+        "net_sold_units": {
+          "state": "VALID",
+          "value": "8"
+        },
+        "product_cost_amount": {
+          "state": "VALID",
+          "value": "320.00"
+        },
+        "other_expense_amount": {
+          "state": "VALID",
+          "value": "32.00"
+        },
+        "tax_amount": {
+          "state": "VALID",
+          "value": "60.00"
+        },
+        "net_marketplace_income_amount": {
+          "state": "VALID",
+          "value": "700.00"
+        },
+        "net_profit_amount": {
+          "state": "VALID",
+          "value": "288.00"
+        },
+        "profit_per_sold_unit": {
+          "state": "VALID",
+          "value": "36.00"
+        },
+        "profitability_of_costs": {
+          "state": "BLOCKED",
+          "value": null
+        }
       }
     },
     {
@@ -70,19 +94,47 @@
       },
       "cost_per_unit": "20.005",
       "other_expenses": [
-        {"component_id": "period-service", "value": "5.005", "unit": "MONEY"}
+        {
+          "component_id": "period-service",
+          "value": "5.005",
+          "unit": "MONEY"
+        }
       ],
       "tax_rate": "0.075",
       "tax_base_metric_id": "net_marketplace_income_amount",
       "expected": {
-        "net_sold_units": {"state": "VALID", "value": "2"},
-        "product_cost_amount": {"state": "VALID", "value": "40.01"},
-        "other_expense_amount": {"state": "VALID", "value": "5.01"},
-        "tax_amount": {"state": "VALID", "value": "21.25"},
-        "net_marketplace_income_amount": {"state": "VALID", "value": "283.35"},
-        "net_profit_amount": {"state": "VALID", "value": "217.08"},
-        "profit_per_sold_unit": {"state": "VALID", "value": "108.54"},
-        "profitability_of_costs": {"state": "BLOCKED", "value": null}
+        "net_sold_units": {
+          "state": "VALID",
+          "value": "2"
+        },
+        "product_cost_amount": {
+          "state": "VALID",
+          "value": "40.01"
+        },
+        "other_expense_amount": {
+          "state": "VALID",
+          "value": "5.01"
+        },
+        "tax_amount": {
+          "state": "VALID",
+          "value": "21.25"
+        },
+        "net_marketplace_income_amount": {
+          "state": "VALID",
+          "value": "283.35"
+        },
+        "net_profit_amount": {
+          "state": "VALID",
+          "value": "217.08"
+        },
+        "profit_per_sold_unit": {
+          "state": "VALID",
+          "value": "108.54"
+        },
+        "profitability_of_costs": {
+          "state": "BLOCKED",
+          "value": null
+        }
       }
     },
     {
@@ -107,19 +159,47 @@
       },
       "cost_per_unit": "0",
       "other_expenses": [
-        {"component_id": "explicit-zero", "value": "0", "unit": "MONEY"}
+        {
+          "component_id": "explicit-zero",
+          "value": "0",
+          "unit": "MONEY"
+        }
       ],
       "tax_rate": "0",
       "tax_base_metric_id": "gross_sales_amount",
       "expected": {
-        "net_sold_units": {"state": "VALID", "value": "0"},
-        "product_cost_amount": {"state": "VALID", "value": "0.00"},
-        "other_expense_amount": {"state": "VALID", "value": "0.00"},
-        "tax_amount": {"state": "VALID", "value": "0.00"},
-        "net_marketplace_income_amount": {"state": "VALID", "value": "0.00"},
-        "net_profit_amount": {"state": "VALID", "value": "0.00"},
-        "profit_per_sold_unit": {"state": "BLOCKED", "value": null},
-        "profitability_of_costs": {"state": "BLOCKED", "value": null}
+        "net_sold_units": {
+          "state": "VALID",
+          "value": "0"
+        },
+        "product_cost_amount": {
+          "state": "VALID",
+          "value": "0.00"
+        },
+        "other_expense_amount": {
+          "state": "VALID",
+          "value": "0.00"
+        },
+        "tax_amount": {
+          "state": "VALID",
+          "value": "0.00"
+        },
+        "net_marketplace_income_amount": {
+          "state": "VALID",
+          "value": "0.00"
+        },
+        "net_profit_amount": {
+          "state": "VALID",
+          "value": "0.00"
+        },
+        "profit_per_sold_unit": {
+          "state": "BLOCKED",
+          "value": null
+        },
+        "profitability_of_costs": {
+          "state": "BLOCKED",
+          "value": null
+        }
       }
     },
     {
@@ -144,19 +224,47 @@
       },
       "cost_per_unit": "40",
       "other_expenses": [
-        {"component_id": "explicit-zero", "value": "0", "unit": "MONEY"}
+        {
+          "component_id": "explicit-zero",
+          "value": "0",
+          "unit": "MONEY"
+        }
       ],
       "tax_rate": "0.06",
       "tax_base_metric_id": "gross_sales_amount",
       "expected": {
-        "net_sold_units": {"state": "VALID", "value": "-1"},
-        "product_cost_amount": {"state": "VALID", "value": "-40.00"},
-        "other_expense_amount": {"state": "VALID", "value": "0.00"},
-        "tax_amount": {"state": "VALID", "value": "-6.00"},
-        "net_marketplace_income_amount": {"state": "VALID", "value": "-90.00"},
-        "net_profit_amount": {"state": "VALID", "value": "-44.00"},
-        "profit_per_sold_unit": {"state": "VALID", "value": "44.00"},
-        "profitability_of_costs": {"state": "BLOCKED", "value": null}
+        "net_sold_units": {
+          "state": "VALID",
+          "value": "-1"
+        },
+        "product_cost_amount": {
+          "state": "VALID",
+          "value": "-40.00"
+        },
+        "other_expense_amount": {
+          "state": "VALID",
+          "value": "0.00"
+        },
+        "tax_amount": {
+          "state": "VALID",
+          "value": "-6.00"
+        },
+        "net_marketplace_income_amount": {
+          "state": "VALID",
+          "value": "-90.00"
+        },
+        "net_profit_amount": {
+          "state": "VALID",
+          "value": "-44.00"
+        },
+        "profit_per_sold_unit": {
+          "state": "VALID",
+          "value": "44.00"
+        },
+        "profitability_of_costs": {
+          "state": "BLOCKED",
+          "value": null
+        }
       }
     }
   ]
