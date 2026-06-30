@@ -11,10 +11,12 @@ class A0P15ManifestPayloadPreflightTests(unittest.TestCase):
         overlay = json.loads(OVERLAY_PATH.read_text(encoding="utf-8"))
         expected = expected_entries()
         if overlay["entries"] != expected:
-            raise AssertionError(
+            payload = (
                 "P15_MANIFEST_ENTRIES="
                 + json.dumps(expected, ensure_ascii=False, separators=(",", ":"))
             )
+            print(payload, flush=True)
+            raise AssertionError(payload)
 
 
 if __name__ == "__main__":
