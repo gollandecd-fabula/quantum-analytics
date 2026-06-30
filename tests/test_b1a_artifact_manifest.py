@@ -23,6 +23,9 @@ P13_CLOSURE_OVERLAY_PATH = (
     ROOT / "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_P13_CLOSURE.json"
 )
 P14_OVERLAY_PATH = ROOT / "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_P14.json"
+P14_CLOSURE_OVERLAY_PATH = (
+    ROOT / "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_P14_CLOSURE.json"
+)
 CONTROL_PATHS = {
     "docs/evidence/ARTIFACT_MANIFEST.json",
     "docs/evidence/ARTIFACT_MANIFEST_OVERLAY.json",
@@ -35,6 +38,7 @@ CONTROL_PATHS = {
     "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_P13_MERGE_GATE.json",
     "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_P13_CLOSURE.json",
     "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_P14.json",
+    "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_P14_CLOSURE.json",
 }
 ARTIFACT_FIELDS = ["path", "sha256", "size_bytes"]
 B1A_SCHEMAS = {
@@ -96,7 +100,11 @@ def load_effective_manifest() -> dict:
     p13_merge_gate_overlay = json.loads(p13_merge_gate_bytes.decode("utf-8"))
     p13_closure_bytes = P13_CLOSURE_OVERLAY_PATH.read_bytes()
     p13_closure_overlay = json.loads(p13_closure_bytes.decode("utf-8"))
-    p14_overlay = json.loads(P14_OVERLAY_PATH.read_text(encoding="utf-8"))
+    p14_bytes = P14_OVERLAY_PATH.read_bytes()
+    p14_overlay = json.loads(p14_bytes.decode("utf-8"))
+    p14_closure_overlay = json.loads(
+        P14_CLOSURE_OVERLAY_PATH.read_text(encoding="utf-8")
+    )
 
     if overlay["base_manifest_git_blob_sha"] != git_blob_sha(base_bytes):
         raise AssertionError("ARTIFACT_MANIFEST_OVERLAY_BASE_MISMATCH")
@@ -130,6 +138,10 @@ def load_effective_manifest() -> dict:
         p13_closure_bytes
     ):
         raise AssertionError("ARTIFACT_MANIFEST_P14_OVERLAY_BASE_MISMATCH")
+    if p14_closure_overlay["base_p14_overlay_git_blob_sha"] != git_blob_sha(
+        p14_bytes
+    ):
+        raise AssertionError("ARTIFACT_MANIFEST_P14_CLOSURE_OVERLAY_BASE_MISMATCH")
 
     artifacts = {row[0]: row for row in current["artifacts"]}
     apply_entries(artifacts, overlay)
@@ -142,6 +154,7 @@ def load_effective_manifest() -> dict:
     apply_entries(artifacts, p13_merge_gate_overlay)
     apply_entries(artifacts, p13_closure_overlay)
     apply_entries(artifacts, p14_overlay)
+    apply_entries(artifacts, p14_closure_overlay)
 
     effective = dict(current)
     effective["artifacts"] = [artifacts[path] for path in sorted(artifacts)]
