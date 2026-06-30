@@ -15,12 +15,12 @@ from .runtime import (
     EXCEPTION_INBOX_VERSION,
     UX_SCHEMA_VERSION,
     UXError,
-    build_configuration_form,
     build_report_drilldown,
     validate_ux_hash,
 )
 from .validation import (
     UXBoundaryError,
+    is_strict_rfc3339,
     validate_configuration_form_boundary,
     validate_import_collection_boundary,
     validate_raw_file_record_boundary,
@@ -54,6 +54,63 @@ def _rehash_view(view: Mapping[str, Any]) -> str:
         allow_nan=False,
     ).encode("utf-8")
     return hashlib.sha256(encoded).hexdigest()
+
+
+def _validate_timestamp_input(
+    value: datetime | str | None,
+    code: str,
+    *,
+    allow_none: bool,
+) -> None:
+    if value is None:
+        if allow_none:
+            return
+        raise UXError(code)
+    rendered = value.isoformat() if isinstance(value, datetime) else value
+    if not is_strict_rfc3339(rendered):
+        raise UXError(code)
+
+
+def build_configuration_form(
+    *,
+    form_id: str,
+    organization_id: str,
+    mode: str,
+    scenario_id: str | None,
+    actor: str,
+    scope: Mapping[str, str],
+    valid_from: datetime | str | None,
+    valid_to: datetime | str | None,
+    currency: str | None,
+    created_at: datetime | str,
+) -> dict[str, Any]:
+    _validate_timestamp_input(
+        valid_from,
+        "UX_VALID_FROM_INVALID",
+        allow_none=True,
+    )
+    _validate_timestamp_input(
+        valid_to,
+        "UX_VALID_TO_INVALID",
+        allow_none=True,
+    )
+    _validate_timestamp_input(
+        created_at,
+        "UX_CREATED_AT_INVALID",
+        allow_none=False,
+    )
+    return _runtime.build_configuration_form(
+        form_id=form_id,
+        organization_id=organization_id,
+        mode=mode,
+        scenario_id=scenario_id,
+        actor=actor,
+        scope=scope,
+        valid_from=valid_from,
+        valid_to=valid_to,
+        currency=currency,
+        created_at=created_at,
+    )
 
 
 def apply_configuration_values(
@@ -99,6 +156,11 @@ def build_exception_inbox(
         not isinstance(tenant_id, str) or not tenant_id
     ):
         raise UXError("UX_INBOX_TENANT_REQUIRED")
+    _validate_timestamp_input(
+        generated_at,
+        "UX_INBOX_TIMESTAMP_INVALID",
+        allow_none=False,
+    )
 
     seen_form_ids: set[str] = set()
     try:
