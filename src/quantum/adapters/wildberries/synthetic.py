@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal, InvalidOperation
+import re
 from typing import Mapping
 
 from quantum.domain.events import CanonicalEvent, EventStatus
@@ -13,6 +14,7 @@ _OPERATION_TO_EVENT = {
     "SALE": "SALE_RECOGNIZED",
     "RETURN": "RETURN_ACCEPTED",
 }
+_CURRENCY = re.compile(r"^[A-Z]{3}$")
 
 
 @dataclass(frozen=True, slots=True)
@@ -51,6 +53,8 @@ def validate_row(row: Mapping[str, str]) -> None:
 
     if row["operation_type"] not in _OPERATION_TO_EVENT:
         raise ValueError("operation_type: unsupported")
+    if _CURRENCY.fullmatch(row["currency"]) is None:
+        raise ValueError("currency: expected uppercase three-letter code")
 
     try:
         quantity = int(row["quantity"])
@@ -99,8 +103,11 @@ def normalize_row(
     adapter_id: str,
     adapter_version: str,
     trace_id: str,
+    actor: str = "a6-proof-worker",
 ) -> NormalizedRow:
     validate_row(row)
+    if not isinstance(actor, str) or not actor.strip():
+        raise ValueError("actor: required")
 
     quantity = int(row["quantity"])
     gross_amount = Decimal(row["gross_amount"])
@@ -108,6 +115,11 @@ def normalize_row(
     event_type = _OPERATION_TO_EVENT[row["operation_type"]]
     event_id = f"evt-{row['operation_id']}-r{revision}"
     source_row_key = f"csv:row:{row['row_id']}"
+    event_time = _parse_datetime(row["event_time"], "event_time")
+    recognition_time = _parse_datetime(
+        row["recognition_time"],
+        "recognition_time",
+    )
 
     payload = {
         "product_external_id": {
@@ -151,8 +163,8 @@ def normalize_row(
         organization_id=organization_id,
         marketplace_account_id=marketplace_account_id,
         event_type=event_type,
-        event_time=_parse_datetime(row["event_time"], "event_time"),
-        recognition_time=_parse_datetime(row["recognition_time"], "recognition_time"),
+        event_time=event_time,
+        recognition_time=recognition_time,
         stable_business_key=row["operation_id"],
         source_row_key=source_row_key,
         revision=revision,
@@ -171,11 +183,12 @@ def normalize_row(
             "source_schema_id": schema_version,
             "normalization_rule_version": "wb-synthetic-normalization-v1",
             "product_master_version": None,
-            "actor": "a6-proof-worker",
+            "actor": actor.strip(),
+            "created_at": recognition_time.isoformat(),
             "trace_id": trace_id,
         },
         status=EventStatus.VALID,
-        created_at=_parse_datetime(row["recognition_time"], "recognition_time"),
+        created_at=recognition_time,
     )
 
     return NormalizedRow(

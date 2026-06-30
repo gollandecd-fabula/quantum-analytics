@@ -5,9 +5,9 @@ source_of_truth_for_live_unit_state: true
 
 macro_stage: B
 status: ACTIVE
-current_unit: P12
-tracking_issue: 22
-working_branch: close-p1-2-post-merge-v1
+current_unit: P13
+tracking_issue: 24
+working_branch: p13-canonical-ledger
 
 units:
   B0:
@@ -51,6 +51,12 @@ units:
     evidence: docs/evidence/STAGE_P1_2_EXECUTION_STATE.yaml
     test_method_count: 19
     resolved_findings: 11
+  P13:
+    state: REMEDIATED_CI_PENDING
+    pull_request: 24
+    risk: R2
+    evidence: docs/evidence/STAGE_P1_3_EXECUTION_STATE.yaml
+    test_method_count: 21
   B4:
     state: PLANNED
     risk: R2

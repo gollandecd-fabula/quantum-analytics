@@ -1,0 +1,57 @@
+schema_version: "1.0"
+date: "2026-06-30"
+stage: P1_TECHNICAL_FOUNDATION_BUILD
+unit: P1_3_CANONICAL_SOURCE_ROWS_AND_OPERATION_LEDGER_FOUNDATION
+status: REMEDIATED_CI_PENDING
+working_branch: p13-canonical-ledger
+base_commit: 05d004bc734cde4f6e3703cf06e969d37399cbea
+pull_request: 24
+runtime_dependency_installation_authorized: false
+marketplace_write_enabled: false
+commercial_data_authorized: false
+implemented:
+  - immutable tenant-scoped source rows with payload-hash verification
+  - mandatory structural and semantic fingerprint digests
+  - deterministic source-record and import-batch identifiers
+  - append-only in-memory source-row and canonical-event ledger
+  - atomic multi-row batch commit and rollback
+  - dependency ordering independent of CSV row order
+  - tenant-scoped event and source-row lookup
+  - event-to-source-row-to-raw-file lineage tracing
+  - idempotent replay and conflict detection
+  - monotonic revision and supersession validation
+  - active-version reversal accounting
+  - reversal product, quantity-unit and currency validation
+  - cumulative reversal quantity and amount bounds
+  - event payload semantic-hash verification
+  - strict provenance and typed-value boundaries
+  - row-level semantic quarantine without source-row loss
+  - blocked unresolved dependencies without partial writes
+  - duplicate quarantine counters
+  - normalization actor, provenance timestamp and currency validation
+  - synthetic validated-CSV ingestion from P1.2 raw storage
+tests:
+  files:
+    - tests/test_p13_canonical_ledger.py
+    - tests/test_p13_review_regressions.py
+    - tests/test_p13_event_integrity.py
+  methods: 21
+  status: CI_PENDING
+review:
+  status: REMEDIATED_CI_PENDING
+  resolved_findings: 18
+limitations:
+  - in-memory ledger only
+  - single-process coordination only
+  - synthetic CSV schema only
+  - ingestion service uses its stable module path because package-root export is tool-blocked
+  - dedicated source-row JSON Schema publication is pending
+exclusions:
+  - financial metrics and profit calculation
+  - calculation profiles
+  - real marketplace reports
+  - PostgreSQL persistence
+  - marketplace API calls and writes
+  - UI and deployment
+  - global learning
+release_status: RELEASE_BLOCKED
