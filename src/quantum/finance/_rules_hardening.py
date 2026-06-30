@@ -52,6 +52,15 @@ def _expected_signature(rule: Mapping[str, Any]) -> tuple[str, str, str | None]:
     return "DECIMAL", unit, None
 
 
+def _is_pre_evaluation_missing_dependency(result: Mapping[str, Any]) -> bool:
+    reason_code = result.get("reason_code")
+    return (
+        result.get("state") == "UNAVAILABLE"
+        and isinstance(reason_code, str)
+        and reason_code.startswith("RULE_DEPENDENCY_UNAVAILABLE:")
+    )
+
+
 def evaluate_resolved_rule(
     resolution: Mapping[str, Any],
     rules: Sequence[Mapping[str, Any]],
@@ -70,7 +79,7 @@ def evaluate_resolved_rule(
     if (
         selected_rule is not None
         and selected_rule["method"] == "SAFE_EXPRESSION"
-        and result.get("state") == "VALID"
+        and not _is_pre_evaluation_missing_dependency(result)
     ):
         actual_signature = (
             result.get("value_type"),
