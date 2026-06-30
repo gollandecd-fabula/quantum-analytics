@@ -88,6 +88,27 @@
     }
   ],
   "$defs": {
+    "decimalOrNull": {
+      "oneOf": [
+        {"type": "string", "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"},
+        {"type": "null"}
+      ]
+    },
+    "taxBaseOrNull": {
+      "type": ["string", "null"],
+      "enum": [
+        "UNIT",
+        "ORDER",
+        "EVENT",
+        "PERIOD",
+        "GROSS_SALES",
+        "NET_SALES",
+        "PAYOUT",
+        "PRODUCT_COST",
+        "CUSTOM_VARIABLE",
+        null
+      ]
+    },
     "fieldState": {
       "oneOf": [
         {
@@ -147,7 +168,8 @@
           "input_kind": {"const": "COST"},
           "control": {"const": "decimal"},
           "requires_currency": {"const": true},
-          "contract_unit": {"const": "MONEY_PER_ITEM"}
+          "contract_unit": {"const": "MONEY_PER_ITEM"},
+          "value": {"$ref": "#/$defs/decimalOrNull"}
         }}
       ]
     },
@@ -159,7 +181,8 @@
           "input_kind": {"const": "TAX_RATE"},
           "control": {"const": "decimal"},
           "requires_currency": {"const": false},
-          "contract_unit": {"const": "RATE"}
+          "contract_unit": {"const": "RATE"},
+          "value": {"$ref": "#/$defs/decimalOrNull"}
         }}
       ]
     },
@@ -171,7 +194,8 @@
           "input_kind": {"const": "TAX_BASE"},
           "control": {"const": "select"},
           "requires_currency": {"const": false},
-          "contract_unit": {"const": "DIMENSIONLESS"}
+          "contract_unit": {"const": "DIMENSIONLESS"},
+          "value": {"$ref": "#/$defs/taxBaseOrNull"}
         }}
       ]
     },
@@ -183,7 +207,8 @@
           "input_kind": {"const": "OTHER_EXPENSE"},
           "control": {"const": "decimal"},
           "requires_currency": {"const": true},
-          "contract_unit": {"const": "MONEY_PER_ITEM"}
+          "contract_unit": {"const": "MONEY_PER_ITEM"},
+          "value": {"$ref": "#/$defs/decimalOrNull"}
         }}
       ]
     }
