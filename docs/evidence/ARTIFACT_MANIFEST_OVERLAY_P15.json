@@ -15,7 +15,7 @@
     ["tests/test_b1a_artifact_manifest.py", "391a93bc1a0dfaaad178c7cbd1d51fff407378cd929948108ecaab0058a92dea", 9097],
     ["tests/test_p15_contract_alignment.py", "87cd61f396e13fa3ec00452695b3f87ca830b42fa4e99d8ec56f2f059cfc9d3e", 3014],
     ["tests/test_p15_manifest_payload.py", "9098a32d5c60f8a4a52e00ee2f6a0829e71c77c682abb47748836fb20b996a7d", 1956],
-    ["tests/test_p15_review_remediation.py", "d6b2cbc2ac48717734403d38dbe9d3637fe441966c748ae17b3a3405dc5c94ce", 5505],
+    ["tests/test_p15_review_remediation.py", "745e1f4630ef811577ec0e08e0a3e2074bbcbe996111c401be6d5efe1521bfd6", 5505],
     ["tests/test_p15_schema_alignment.py", "cb861fcccfd085aaa24311291c0997be68c00784f91d649adee2587ed35eb244", 5734],
     ["tests/test_p15_ux_adversarial.py", "5503b8f517bf5dc6d4689271ef8a5fdabd14c8b5b313f2b33130bc3b6cd7530b", 9373],
     ["tests/test_p15_ux_runtime.py", "872415f863ff221bd3c84a6a78c0f77d73b0c167acd3662b79f03cf347a83244", 14662]
