@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://quantum.local/schemas/exception-inbox.schema.json",
+  "title": "Quantum Exception Inbox v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "tenant_id",
+    "organization_id",
+    "mode",
+    "scenario_id",
+    "generated_at",
+    "exceptions",
+    "available_metric_ids",
+    "independent_results_preserved",
+    "exception_count",
+    "inbox_hash"
+  ],
+  "properties": {
+    "schema_version": {"const": "quantum-exception-inbox-v1"},
+    "tenant_id": {"type": ["string", "null"], "minLength": 1},
+    "organization_id": {"type": ["string", "null"], "minLength": 1},
+    "mode": {"type": ["string", "null"], "enum": ["ACTUAL", "SCENARIO", null]},
+    "scenario_id": {"type": ["string", "null"], "minLength": 1},
+    "generated_at": {"type": "string", "format": "date-time"},
+    "exceptions": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/exception"}
+    },
+    "available_metric_ids": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1},
+      "uniqueItems": true
+    },
+    "independent_results_preserved": {"type": "boolean"},
+    "exception_count": {"type": "integer", "minimum": 0},
+    "inbox_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"mode": {"const": "ACTUAL"}}, "required": ["mode"]},
+      "then": {"properties": {"scenario_id": {"type": "null"}}}
+    },
+    {
+      "if": {"properties": {"mode": {"const": "SCENARIO"}}, "required": ["mode"]},
+      "then": {"properties": {"scenario_id": {"type": "string", "minLength": 1}}}
+    }
+  ],
+  "$defs": {
+    "versionedEvidenceRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "version"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "version": {"type": "integer", "minimum": 1}
+      }
+    },
+    "rawFileEvidenceRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["raw_file_id", "sha256"],
+      "properties": {
+        "raw_file_id": {"type": "string", "minLength": 1},
+        "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+      }
+    },
+    "exception": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "exception_id",
+        "category",
+        "state",
+        "cause",
+        "affected_metric_ids",
+        "evidence_refs",
+        "required_resolution",
+        "severity",
+        "status",
+        "accessible_summary"
+      ],
+      "properties": {
+        "exception_id": {"type": "string", "pattern": "^exc-[a-f0-9]{24}$"},
+        "category": {"enum": ["METRIC", "CONFIGURATION", "SCHEMA"]},
+        "state": {"enum": ["EMPTY", "BLOCKED", "UNAVAILABLE", "CONFLICT", "INVALID"]},
+        "cause": {"type": "string", "minLength": 1},
+        "affected_metric_ids": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1},
+          "uniqueItems": true
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {"$ref": "#/$defs/versionedEvidenceRef"},
+              {"$ref": "#/$defs/rawFileEvidenceRef"}
+            ]
+          }
+        },
+        "required_resolution": {"type": "string", "minLength": 1},
+        "severity": {"enum": ["WARNING", "ERROR"]},
+        "status": {"const": "OPEN"},
+        "accessible_summary": {"type": "string", "minLength": 1}
+      }
+    }
+  }
+}
