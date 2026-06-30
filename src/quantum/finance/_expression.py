@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from collections.abc import Mapping, Sequence
 from decimal import Decimal, InvalidOperation
 from typing import Any
@@ -15,6 +16,8 @@ from ._rounding import (
     _input_decimal, _normalize_value, _propagate, _quantize,
     validate_rounding_policy,
 )
+
+_VARIABLE_NAME_RE = re.compile(r"^[a-z][a-z0-9_.:-]{0,127}$")
 
 
 def _signature(value: _Value) -> tuple[str, str, str | None]:
@@ -85,6 +88,8 @@ def _validate_operation_signature(
 ) -> None:
     if operator in {"ADD", "SUBTRACT", "MIN", "MAX"}:
         _require_compatible(values)
+        if values[0].value_type not in _NUMERIC_TYPES:
+            raise FinanceError("EXPRESSION_TYPE_MISMATCH")
         if _signature(values[0]) != declared:
             raise FinanceError("EXPRESSION_TYPE_MISMATCH")
         return
@@ -129,7 +134,11 @@ def evaluate_expression(
         or isinstance(dependencies, (str, bytes))
         or len(dependencies) > _MAX_EXPRESSION_DEPENDENCIES
         or len(dependencies) != len(set(dependencies))
-        or any(not _is_nonempty_string(item) for item in dependencies)
+        or any(
+            not isinstance(item, str)
+            or _VARIABLE_NAME_RE.fullmatch(item) is None
+            for item in dependencies
+        )
     ):
         raise FinanceError("EXPRESSION_DEPENDENCY_UNDECLARED")
     dependency_set = set(dependencies)
@@ -173,7 +182,12 @@ def evaluate_expression(
             if set(node) != {"kind", "name", "value_type", "currency", "unit"}:
                 raise FinanceError("EXPRESSION_SCHEMA_INVALID")
             name = node.get("name")
-            if not _is_nonempty_string(name) or name not in dependency_set:
+            if (
+                not isinstance(name, str)
+                or _VARIABLE_NAME_RE.fullmatch(name) is None
+            ):
+                raise FinanceError("EXPRESSION_SCHEMA_INVALID")
+            if name not in dependency_set:
                 raise FinanceError("EXPRESSION_DEPENDENCY_UNDECLARED")
             if name not in typed_variables:
                 raise FinanceError("EXPRESSION_VARIABLE_UNKNOWN")
