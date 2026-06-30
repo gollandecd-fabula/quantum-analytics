@@ -80,11 +80,14 @@ units:
       - BLD-027
       - BLD-028
   P15:
-    state: IMPLEMENTED_TESTS_PENDING
+    state: FINDINGS_REMEDIATED_TESTS_PENDING
     issue: 29
     risk: R2
     evidence: docs/evidence/STAGE_P1_5_EXECUTION_STATE.yaml
-    test_method_count_declared: 58
+    test_method_count_declared: 61
+    review_findings_received: 3
+    review_findings_remediated: 3
+    unresolved_threads: 3
     requirements:
       - Q-BLD-007
       - Q-BLD-014
