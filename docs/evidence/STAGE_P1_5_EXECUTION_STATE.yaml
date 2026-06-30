@@ -51,22 +51,22 @@ tests:
     - tests/test_a0_p15_manifest_payload.py
   methods_declared: 63
   methods_verified: 63
-  status: PASS
+  status: PASS_REQUIRED_ON_CURRENT_PR_HEAD
 verification:
-  exact_head: dd0b5d6029b4a2285c25f80b09b52b52d551946b
-  foundation_ci_run: 28450819777
-  foundation_ci_status: SUCCESS
-  oss_admission_ci_run: 28450819756
-  oss_admission_ci_status: SUCCESS
-  artifact_manifest_equality: PASS
+  implementation_head: dd0b5d6029b4a2285c25f80b09b52b52d551946b
+  verification_target: CURRENT_PR_HEAD
+  foundation_ci: PASS_REQUIRED
+  oss_admission_and_osv: PASS_REQUIRED
+  artifact_manifest_equality: PASS_REQUIRED
+  merge_sha_recording: POST_MERGE_CLOSURE_ONLY
 review:
   status: FINAL_CURRENT_HEAD_REVIEW_PENDING
   last_reviewed_commit: 86c17f3799ead1843ff2fe7184857a37f2b05322
-  requested_commit: dd0b5d6029b4a2285c25f80b09b52b52d551946b
+  review_target: CURRENT_PR_HEAD
   codex_findings_received: 5
   codex_findings_remediated: 5
-  internal_audit_findings_received: 1
-  internal_audit_findings_remediated: 1
+  internal_audit_findings_received: 2
+  internal_audit_findings_remediated: 2
   unresolved_threads: 0
 requirements:
   - Q-BLD-007
