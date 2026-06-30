@@ -20,7 +20,12 @@ _CONFIGURATION_FIELDS = (
     "tax_base",
     "other_expense",
 )
+# B1a RATE rules permit every canonical base except NONE.
 _TAX_BASES = frozenset({
+    "UNIT",
+    "ORDER",
+    "EVENT",
+    "PERIOD",
     "GROSS_SALES",
     "NET_SALES",
     "PAYOUT",
@@ -86,7 +91,11 @@ _STATE_PRESENTATION: dict[str, tuple[str, str, str]] = {
     "EMPTY": ("No value", "empty", "No value is available."),
     "BLOCKED": ("Blocked", "blocked", "The result is blocked."),
     "UNAVAILABLE": ("Unavailable", "unavailable", "The source is unavailable."),
-    "CONFLICT": ("Conflict", "conflict", "Conflicting evidence prevents publication."),
+    "CONFLICT": (
+        "Conflict",
+        "conflict",
+        "Conflicting evidence prevents publication.",
+    ),
     "INVALID": ("Invalid", "invalid", "The result is invalid."),
     "NOT_APPLICABLE": (
         "Not applicable",
@@ -235,7 +244,7 @@ def build_configuration_form(
     currency: str | None,
     created_at: datetime | str,
 ) -> dict[str, Any]:
-    """Build an explicit, preview-only configuration form with no business defaults."""
+    """Build an explicit, preview-only configuration form with no defaults."""
     if not _is_nonempty_string(form_id):
         raise UXError("UX_FORM_ID_INVALID")
     if not _is_nonempty_string(organization_id):
@@ -248,6 +257,7 @@ def build_configuration_form(
         raise UXError("UX_SCENARIO_INVALID")
     if not _is_nonempty_string(actor):
         raise UXError("UX_ACTOR_INVALID")
+
     normalized_scope = _validate_scope(scope, organization_id)
     if mode == "SCENARIO" and normalized_scope.get("scenario_id") != scenario_id:
         raise UXError("UX_SCOPE_SCENARIO_MISMATCH")
@@ -322,13 +332,29 @@ def _validate_form_field(field: object, expected_field_id: str) -> None:
         or field.get("state") not in _FIELD_STATES
     ):
         raise UXError("UX_FORM_FIELDS_INVALID")
-    if field.get("state") == "VALID" and field.get("value") is None:
-        raise UXError("UX_FORM_FIELDS_INVALID")
-    if field.get("state") != "VALID" and field.get("value") is not None:
-        raise UXError("UX_FORM_FIELDS_INVALID")
+
+    state = field.get("state")
+    value = field.get("value")
     diagnostic = field.get("diagnostic")
-    if diagnostic is not None and not _is_nonempty_string(diagnostic):
+    if state == "VALID":
+        if not _is_nonempty_string(value) or diagnostic is not None:
+            raise UXError("UX_FORM_FIELDS_INVALID")
+        if expected_field_id == "tax_base":
+            if value not in _TAX_BASES:
+                raise UXError("UX_FORM_FIELDS_INVALID")
+        elif _DECIMAL_RE.fullmatch(str(value)) is None:
+            raise UXError("UX_FORM_FIELDS_INVALID")
+    elif value is not None or not _is_nonempty_string(diagnostic):
         raise UXError("UX_FORM_FIELDS_INVALID")
+
+
+def _validate_problem(problem: object) -> None:
+    if not isinstance(problem, Mapping):
+        raise UXError("UX_FORM_PROBLEMS_INVALID")
+    if set(problem) != {"code", "field_id", "message"}:
+        raise UXError("UX_FORM_PROBLEMS_INVALID")
+    if any(not _is_nonempty_string(problem.get(key)) for key in problem):
+        raise UXError("UX_FORM_PROBLEMS_INVALID")
 
 
 def _validate_configuration_form(form: object) -> None:
@@ -363,18 +389,50 @@ def _validate_configuration_form(form: object) -> None:
     organization_id = form.get("organization_id")
     if not _is_nonempty_string(organization_id):
         raise UXError("UX_ORGANIZATION_ID_INVALID")
-    if form.get("mode") not in _MODES:
-        raise UXError("UX_MODE_INVALID")
+    if not _is_nonempty_string(form.get("actor")):
+        raise UXError("UX_ACTOR_INVALID")
+
+    mode = form.get("mode")
     scenario_id = form.get("scenario_id")
-    if form.get("mode") == "ACTUAL" and scenario_id is not None:
+    if mode not in _MODES:
+        raise UXError("UX_MODE_INVALID")
+    if mode == "ACTUAL" and scenario_id is not None:
         raise UXError("UX_SCENARIO_INVALID")
-    if form.get("mode") == "SCENARIO" and not _is_nonempty_string(scenario_id):
+    if mode == "SCENARIO" and not _is_nonempty_string(scenario_id):
         raise UXError("UX_SCENARIO_INVALID")
-    _validate_scope(form.get("scope"), str(organization_id))
+    scope = _validate_scope(form.get("scope"), str(organization_id))
+    if mode == "ACTUAL" and "scenario_id" in scope:
+        raise UXError("UX_SCOPE_SCENARIO_MISMATCH")
+    if mode == "SCENARIO" and scope.get("scenario_id") != scenario_id:
+        raise UXError("UX_SCOPE_SCENARIO_MISMATCH")
+
+    currency = form.get("currency")
+    if currency is not None and (
+        not isinstance(currency, str) or _CURRENCY_RE.fullmatch(currency) is None
+    ):
+        raise UXError("UX_CURRENCY_INVALID")
+    created_at = form.get("created_at")
+    valid_from = form.get("valid_from")
+    valid_to = form.get("valid_to")
+    if not _is_rfc3339(created_at):
+        raise UXError("UX_CREATED_AT_INVALID")
+    if valid_from is not None and not _is_rfc3339(valid_from):
+        raise UXError("UX_VALID_FROM_INVALID")
+    if valid_to is not None and not _is_rfc3339(valid_to):
+        raise UXError("UX_VALID_TO_INVALID")
+    if valid_from is not None and valid_to is not None:
+        start = datetime.fromisoformat(str(valid_from).replace("Z", "+00:00"))
+        end = datetime.fromisoformat(str(valid_to).replace("Z", "+00:00"))
+        if end <= start:
+            raise UXError("UX_VALIDITY_INTERVAL_INVALID")
+
     if form.get("status") not in _FORM_STATUSES:
         raise UXError("UX_FORM_STATUS_INVALID")
-    if not isinstance(form.get("problems"), list):
+    problems = form.get("problems")
+    if not isinstance(problems, list):
         raise UXError("UX_FORM_PROBLEMS_INVALID")
+    for problem in problems:
+        _validate_problem(problem)
     fields = form.get("fields")
     if not isinstance(fields, list) or len(fields) != len(_CONFIGURATION_FIELDS):
         raise UXError("UX_FORM_FIELDS_INVALID")
@@ -388,7 +446,7 @@ def apply_configuration_values(
     form: Mapping[str, Any],
     values: Mapping[str, object],
 ) -> dict[str, Any]:
-    """Apply explicit user values without activating rules or substituting defaults."""
+    """Apply explicit values without activating rules or substituting defaults."""
     _validate_configuration_form(form)
     if not isinstance(values, Mapping) or set(values) - set(_CONFIGURATION_FIELDS):
         raise UXError("UX_CONFIGURATION_VALUES_INVALID")
@@ -421,7 +479,7 @@ def apply_configuration_values(
                 problems.append({
                     "code": "TAX_BASE_INVALID",
                     "field_id": field_id,
-                    "message": "Tax base must use the approved closed vocabulary.",
+                    "message": "Tax base must use the approved B1a RATE vocabulary.",
                 })
                 continue
         elif not isinstance(raw, str) or _DECIMAL_RE.fullmatch(raw) is None:
@@ -471,7 +529,7 @@ def apply_configuration_values(
 
 
 def render_report_record(record: Mapping[str, Any]) -> dict[str, Any]:
-    """Return a text-first accessible presentation model for one B4 report record."""
+    """Return a text-first accessible presentation model for one B4 record."""
     try:
         validate_report_record(record)
     except ReportingError as exc:
@@ -480,7 +538,6 @@ def render_report_record(record: Mapping[str, Any]) -> dict[str, Any]:
     state = record["state"]
     if state not in _TYPED_STATES:
         raise UXError("UX_TYPED_STATE_INVALID")
-
     raw_value = record["value"]
     is_numeric_zero = (
         state == "VALID"
@@ -533,7 +590,6 @@ def render_import_status(record: RawFileRecord) -> dict[str, Any]:
     if record.state not in _IMPORT_PRESENTATION:
         raise UXError("UX_IMPORT_STATE_INVALID")
     status_label, status_token, accessible_summary = _IMPORT_PRESENTATION[record.state]
-    diagnostics = list(record.diagnostics)
     view = {
         "schema_version": UX_SCHEMA_VERSION,
         "view_type": "IMPORT_STATUS",
@@ -549,7 +605,7 @@ def render_import_status(record: RawFileRecord) -> dict[str, Any]:
         "semantic_role": "status",
         "accessible_summary": accessible_summary,
         "schema_id": record.schema_id,
-        "diagnostics": diagnostics,
+        "diagnostics": list(record.diagnostics),
         "structural_fingerprint_available": record.structural_fingerprint is not None,
         "semantic_fingerprint_available": record.semantic_fingerprint is not None,
         "admitted_to_canonical_processing": record.state is RawFileState.VALID,
@@ -564,7 +620,6 @@ def build_report_drilldown(record: Mapping[str, Any]) -> dict[str, Any]:
         validate_report_record(record)
     except ReportingError as exc:
         raise UXError(f"UX_REPORT_INVALID:{exc.code}") from exc
-
     verified = record["publication_state"] == "EVIDENCE_VERIFIED"
     drilldown = {
         "schema_version": UX_SCHEMA_VERSION,
@@ -617,12 +672,12 @@ def build_exception_inbox(
     tenant_id: str | None = None,
     generated_at: datetime | str,
 ) -> dict[str, Any]:
-    """Build an immutable exception view while retaining independent valid metrics."""
+    """Build an immutable exception view while retaining independent metrics."""
     organization_id: str | None = None
     mode: str | None = None
     scenario_id: str | None = None
     exceptions: list[dict[str, Any]] = []
-    available_metric_ids: list[str] = []
+    available_metric_ids: set[str] = set()
     seen_records: set[str] = set()
     seen_imports: set[str] = set()
 
@@ -644,19 +699,18 @@ def build_exception_inbox(
             candidate_scenario_id=record["scenario_id"],
         )
         if record["state"] == "VALID":
-            available_metric_ids.append(str(record["metric_snapshot_id"]))
+            available_metric_ids.add(str(record["metric_snapshot_id"]))
             continue
         if record["state"] == "NOT_APPLICABLE":
             continue
         reason = record["reason_code"] or f"STATE_{record['state']}"
-        evidence_ref = record["evidence_chain_ref"]
         exceptions.append({
             "exception_id": _exception_id("metric", record_id, str(reason)),
             "category": "METRIC",
             "state": record["state"],
             "cause": reason,
             "affected_metric_ids": [record["metric_snapshot_id"]],
-            "evidence_refs": [_clone_json(evidence_ref)],
+            "evidence_refs": [_clone_json(record["evidence_chain_ref"])],
             "required_resolution": (
                 "Resolve the recorded cause and recalculate without replacing "
                 "missing values with zero."
@@ -743,10 +797,10 @@ def build_exception_inbox(
                 RawFileState.REJECTED,
             }:
                 continue
-            cause = (
-                import_record.diagnostics[0]
-                if import_record.diagnostics
-                else f"IMPORT_{import_record.state.value}"
+            fallback = f"IMPORT_{import_record.state.value}"
+            cause = next(
+                (item for item in import_record.diagnostics if item),
+                fallback,
             )
             exceptions.append({
                 "exception_id": _exception_id(
@@ -781,8 +835,8 @@ def build_exception_inbox(
     if organization_id is None and not import_records:
         raise UXError("UX_INBOX_CONTEXT_EMPTY")
 
+    sorted_metric_ids = sorted(available_metric_ids)
     exceptions.sort(key=lambda item: item["exception_id"])
-    available_metric_ids.sort()
     inbox = {
         "schema_version": EXCEPTION_INBOX_VERSION,
         "tenant_id": tenant_id,
@@ -791,8 +845,8 @@ def build_exception_inbox(
         "scenario_id": scenario_id,
         "generated_at": _timestamp(generated_at, "UX_INBOX_TIMESTAMP_INVALID"),
         "exceptions": exceptions,
-        "available_metric_ids": available_metric_ids,
-        "independent_results_preserved": bool(available_metric_ids),
+        "available_metric_ids": sorted_metric_ids,
+        "independent_results_preserved": bool(sorted_metric_ids),
         "exception_count": len(exceptions),
         "inbox_hash": "",
     }
@@ -801,6 +855,8 @@ def build_exception_inbox(
 
 
 def validate_ux_hash(document: Mapping[str, Any], hash_field: str) -> None:
+    if not isinstance(document, Mapping):
+        raise UXError("UX_HASH_INVALID")
     value = document.get(hash_field)
     if not isinstance(value, str) or _HASH_RE.fullmatch(value) is None:
         raise UXError("UX_HASH_INVALID")
