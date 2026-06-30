@@ -356,7 +356,7 @@ class InMemoryCanonicalLedger:
         source_inserted = existing_source is None
         if source_inserted:
             self._source_by_id[source_key] = source_row
-            self._source_by_locator[locator_key] = source_row.source_record_id
+        self._source_by_locator[locator_key] = source_row.source_record_id
         if event is not None and event_inserted:
             self._event_by_id[(tenant.tenant_id, event.event_id)] = event
             self._event_by_idempotency[
