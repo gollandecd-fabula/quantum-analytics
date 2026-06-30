@@ -20,6 +20,7 @@ from ._rounding import (
     validate_rounding_policy,
 )
 
+
 def _validate_context(context: object) -> dict[str, Any]:
     if not isinstance(context, Mapping):
         raise FinanceError("RULE_CONTEXT_INVALID")
@@ -307,11 +308,19 @@ def evaluate_resolved_rule(
     if (
         not isinstance(resolution, Mapping)
         or set(resolution) != resolution_fields
+        or resolution.get("resolver_contract_version") != RESOLVER_CONTRACT_VERSION
         or resolution.get("state") not in {
             "VALID", "BLOCKED", "CONFLICT", "UNAVAILABLE",
         }
     ):
         raise FinanceError("RULE_RESOLUTION_INVALID")
+    trace_id = resolution.get("trace_id")
+    if (
+        not isinstance(trace_id, str)
+        or _HASH_RE.fullmatch(trace_id) is None
+        or canonical_hash(resolution, exclude=frozenset({"trace_id"})) != trace_id
+    ):
+        raise FinanceError("RULE_RESOLUTION_TRACE_MISMATCH")
     candidates = resolution.get("candidates")
     if not isinstance(candidates, list):
         raise FinanceError("RULE_RESOLUTION_INVALID")
@@ -333,7 +342,7 @@ def evaluate_resolved_rule(
                 unit="DIMENSIONLESS",
                 currency=None,
                 reason_code=str(reason),
-                source_ids=(str(resolution.get("trace_id", "")),),
+                source_ids=(trace_id,),
             )
         )
     if len(selected) != 1:
@@ -358,7 +367,7 @@ def evaluate_resolved_rule(
                 unit="DIMENSIONLESS",
                 currency=None,
                 reason_code=f"RULE_DEPENDENCY_UNAVAILABLE:{missing[0]}",
-                source_ids=(resolution["trace_id"],),
+                source_ids=(trace_id,),
             )
         )
     typed_variables = {
@@ -386,7 +395,7 @@ def evaluate_resolved_rule(
                 value_type=result_type,
                 unit=rule["unit"],
                 currency=currency,
-                source_ids=(resolution["trace_id"], rule["content_hash"]),
+                source_ids=(trace_id, rule["content_hash"]),
             ),
             scale=scale,
         )
@@ -410,7 +419,7 @@ def evaluate_resolved_rule(
             value_type="RATE",
             unit="RATE",
             currency=None,
-            source_ids=(resolution["trace_id"], rule["content_hash"]),
+            source_ids=(trace_id, rule["content_hash"]),
         ),
         scale=scale,
     )
