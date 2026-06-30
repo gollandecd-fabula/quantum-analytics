@@ -124,7 +124,7 @@ def _validate_rule_ref(ref: object) -> None:
         raise FinanceError("RULE_RESOLUTION_INVALID")
 
 
-def _validate_candidate(candidate: object) -> bool:
+def _validate_candidate_shape(candidate: object) -> Mapping[str, Any]:
     if not isinstance(candidate, Mapping) or set(candidate) != _CANDIDATE_FIELDS:
         raise FinanceError("RULE_RESOLUTION_INVALID")
     _validate_rule_ref(candidate.get("rule"))
@@ -143,12 +143,9 @@ def _validate_candidate(candidate: object) -> bool:
         raise FinanceError("RULE_RESOLUTION_INVALID")
 
     ordering = candidate.get("ordering_tuple")
-    if not eligible:
-        if selected or ordering is not None or not exclusion_reasons:
-            raise FinanceError("RULE_RESOLUTION_INVALID")
-        return False
-
-    if exclusion_reasons or not isinstance(ordering, list) or len(ordering) != 4:
+    if ordering is None:
+        return candidate
+    if not isinstance(ordering, list) or len(ordering) != 4:
         raise FinanceError("RULE_RESOLUTION_INVALID")
     specificity, priority, valid_from, version = ordering
     if (
@@ -166,7 +163,21 @@ def _validate_candidate(candidate: object) -> bool:
     ):
         raise FinanceError("RULE_RESOLUTION_INVALID")
     _parse_rfc3339(valid_from, "RULE_RESOLUTION_INVALID")
-    return selected
+    return candidate
+
+
+def _validate_candidate_semantics(candidate: Mapping[str, Any]) -> bool:
+    eligible = candidate["eligible"]
+    selected = candidate["selected"]
+    exclusion_reasons = candidate["exclusion_reasons"]
+    ordering = candidate["ordering_tuple"]
+    if not eligible:
+        if selected or ordering is not None or not exclusion_reasons:
+            raise FinanceError("RULE_RESOLUTION_INVALID")
+        return False
+    if exclusion_reasons or ordering is None:
+        raise FinanceError("RULE_RESOLUTION_INVALID")
+    return bool(selected)
 
 
 def _validate_resolution_envelope(resolution: Mapping[str, Any]) -> None:
@@ -184,21 +195,16 @@ def _validate_resolution_envelope(resolution: Mapping[str, Any]) -> None:
         raise FinanceError("RULE_RESOLUTION_INVALID")
     _parse_rfc3339(resolution.get("resolved_at"), "RULE_RESOLUTION_INVALID")
 
-    state = resolution["state"]
     diagnostic = resolution.get("diagnostic_code")
     if diagnostic is not None and diagnostic not in _DIAGNOSTIC_CODES:
-        raise FinanceError("RULE_RESOLUTION_INVALID")
-    if (state == "VALID") != (diagnostic is None):
         raise FinanceError("RULE_RESOLUTION_INVALID")
 
     candidates = resolution.get("candidates")
     if not isinstance(candidates, list):
         raise FinanceError("RULE_RESOLUTION_INVALID")
-    selected_count = sum(1 for candidate in candidates if _validate_candidate(candidate))
-    if (state == "VALID" and selected_count != 1) or (
-        state != "VALID" and selected_count != 0
-    ):
-        raise FinanceError("RULE_RESOLUTION_INVALID")
+    validated_candidates = [
+        _validate_candidate_shape(candidate) for candidate in candidates
+    ]
 
     trace_id = resolution.get("trace_id")
     if (
@@ -208,6 +214,18 @@ def _validate_resolution_envelope(resolution: Mapping[str, Any]) -> None:
         != trace_id
     ):
         raise FinanceError("RULE_RESOLUTION_TRACE_MISMATCH")
+
+    state = resolution["state"]
+    if (state == "VALID") != (diagnostic is None):
+        raise FinanceError("RULE_RESOLUTION_INVALID")
+    selected_count = sum(
+        1 for candidate in validated_candidates
+        if _validate_candidate_semantics(candidate)
+    )
+    if (state == "VALID" and selected_count != 1) or (
+        state != "VALID" and selected_count != 0
+    ):
+        raise FinanceError("RULE_RESOLUTION_INVALID")
 
 
 def resolve_rule(
