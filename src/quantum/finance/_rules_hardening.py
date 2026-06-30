@@ -12,7 +12,9 @@ from ._common import (
     _HASH_RE,
     _is_nonempty_string,
     _is_positive_int,
+    _make_nonvalid,
     _parse_rfc3339,
+    _value_to_dict,
     canonical_hash,
 )
 from ._rules import (
@@ -300,6 +302,30 @@ def _attach_expression_provenance(
     return enriched
 
 
+def _missing_dependency_result(
+    resolution: Mapping[str, Any],
+    selected_rule: Mapping[str, Any],
+    variables: Mapping[str, Mapping[str, Any]],
+) -> dict[str, Any] | None:
+    missing = sorted(set(selected_rule["dependencies"]) - set(variables))
+    if not missing:
+        return None
+    value_type, unit, currency = _expected_signature(selected_rule)
+    return _value_to_dict(
+        _make_nonvalid(
+            "UNAVAILABLE",
+            value_type=value_type,
+            unit=unit,
+            currency=currency,
+            reason_code=f"RULE_DEPENDENCY_UNAVAILABLE:{missing[0]}",
+            source_ids=(
+                str(resolution["trace_id"]),
+                str(selected_rule["content_hash"]),
+            ),
+        )
+    )
+
+
 def evaluate_resolved_rule(
     resolution: Mapping[str, Any],
     rules: Sequence[Mapping[str, Any]],
@@ -318,6 +344,15 @@ def evaluate_resolved_rule(
         and selected_rule["status"] not in _APPROVED_RULE_STATUSES
     ):
         raise FinanceError("RULE_NOT_APPROVED")
+
+    if selected_rule is not None:
+        missing_result = _missing_dependency_result(
+            resolution,
+            selected_rule,
+            variables,
+        )
+        if missing_result is not None:
+            return missing_result
 
     result = _evaluate_resolved_rule(
         resolution,
