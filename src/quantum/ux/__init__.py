@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+import hashlib
+import json
 from collections.abc import Mapping, Sequence
 from datetime import datetime
+from decimal import Decimal, InvalidOperation
 from typing import Any
 
 from quantum.ingestion import RawFileRecord
@@ -14,7 +17,6 @@ from .runtime import (
     UXError,
     build_configuration_form,
     build_report_drilldown,
-    render_report_record,
     validate_ux_hash,
 )
 from .validation import (
@@ -29,6 +31,31 @@ def _translate_boundary_error(exc: UXBoundaryError) -> UXError:
     return UXError(exc.code)
 
 
+def _is_numeric_zero(value: object) -> bool:
+    if isinstance(value, bool):
+        return False
+    if isinstance(value, int):
+        return value == 0
+    if isinstance(value, str):
+        try:
+            return Decimal(value).is_zero()
+        except InvalidOperation:
+            return False
+    return False
+
+
+def _rehash_view(view: Mapping[str, Any]) -> str:
+    payload = {key: value for key, value in view.items() if key != "view_hash"}
+    encoded = json.dumps(
+        payload,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+        allow_nan=False,
+    ).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
 def apply_configuration_values(
     form: Mapping[str, Any],
     values: Mapping[str, object],
@@ -38,6 +65,18 @@ def apply_configuration_values(
     except UXBoundaryError as exc:
         raise _translate_boundary_error(exc) from exc
     return _runtime.apply_configuration_values(form, values)
+
+
+def render_report_record(record: Mapping[str, Any]) -> dict[str, Any]:
+    view = _runtime.render_report_record(record)
+    if view["state"] == "VALID" and _is_numeric_zero(record.get("value")):
+        view["status_label"] = "Valid numeric zero"
+        view["status_token"] = "valid-zero"
+        view["accessible_summary"] = "Valid result with numeric value zero."
+        view["value_text"] = str(record["value"])
+        view["is_numeric_zero"] = True
+        view["view_hash"] = _rehash_view(view)
+    return view
 
 
 def render_import_status(record: RawFileRecord) -> dict[str, Any]:
@@ -56,12 +95,23 @@ def build_exception_inbox(
     tenant_id: str | None = None,
     generated_at: datetime | str,
 ) -> dict[str, Any]:
+    if tenant_id is not None and (
+        not isinstance(tenant_id, str) or not tenant_id
+    ):
+        raise UXError("UX_INBOX_TENANT_REQUIRED")
+
+    seen_form_ids: set[str] = set()
     try:
         for form in configuration_forms:
             validate_configuration_form_boundary(form)
+            form_id = str(form["form_id"])
+            if form_id in seen_form_ids:
+                raise UXBoundaryError("UX_INBOX_FORM_DUPLICATE")
+            seen_form_ids.add(form_id)
         validate_import_collection_boundary(import_records, tenant_id)
     except UXBoundaryError as exc:
         raise _translate_boundary_error(exc) from exc
+
     return _runtime.build_exception_inbox(
         records,
         configuration_forms=configuration_forms,
