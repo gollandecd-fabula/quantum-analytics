@@ -99,7 +99,7 @@ class P15ReviewRemediationTests(unittest.TestCase):
             )
 
     def test_noncanonical_raw_file_uuid_is_rejected(self) -> None:
-        canonical = "00000000-0000-4000-8000-000000000041"
+        canonical = "abcdefab-cdef-4abc-8def-abcdefabcdef"
         variants = (
             canonical.upper(),
             canonical.replace("-", "").upper(),
