@@ -11,35 +11,23 @@ Working branch: `p14-reporting-api-exports`
 
 ## Current result
 
-P1.4 implements a read-only reporting and export foundation on top of verified
-B3 Metric Snapshots:
+P1.4 implements validated read-only report records, deterministic exports,
+round-trip formats, isolation controls, and bounded pagination over B3 Metric
+Snapshots.
 
-- strict report records preserving typed states and accounting metadata;
-- numeric zero remains distinct from missing and blocked states;
-- exact Evidence Chain and root Metric Snapshot binding;
-- preview-only delivery unless the supplied Evidence Chain passes B3 verification;
-- deterministic per-record and export-bundle SHA-256 integrity;
-- JSON, JSONL, and spreadsheet-safe CSV round trips;
-- tenant, Actual/Scenario, and duplicate-record isolation;
-- content-bound cursor pagination and export limits;
-- closed vocabularies for value, expense, rounding, freshness, and confidence.
+Targeted tests: 37 across three files.
+Resolved review findings: 11.
 
-The targeted suite contains 32 methods across two files. Ten adversarial
-findings have been remediated. New exact-head CI, manifest synchronization,
-independent re-review, and closure are still required.
+Exact-head CI, manifest synchronization, final review, and closure remain.
 
-## Parallel critical-path status
+## Critical path
 
-B1b remains technically blocked because the Golden/Oracle plan requires an
-independent oracle owner, financial reviewer, and approved initial fixture
-matrix. The standing Quantum authorization satisfies the user-approval gate but
-does not waive financial separation of duties. B4 proceeds because its contract
-and serialization work is independent of calculation-kernel implementation.
+B1b remains blocked by its independent validation prerequisites. B4 does not
+activate the financial calculation kernel.
 
 ## Exclusions
 
-No financial calculation, real marketplace data, Source Authority activation,
-HTTP deployment, UI, database persistence, production release, or marketplace
-write capability is included.
+No financial calculation, real marketplace data, external service, UI,
+database persistence, production release, or marketplace writes are included.
 
 `RELEASE_BLOCKED`
