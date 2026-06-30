@@ -44,16 +44,7 @@ def calculate_units_and_product_cost(
     cost_per_unit = _normalize_value(
         _value_from_dict(cost_per_unit_raw, source_id="cost_per_unit"), policy
     )
-    cost_dependencies = [net_units, cost_per_unit]
-    propagated_cost = _propagate(
-        cost_dependencies,
-        value_type="MONEY",
-        unit="MONEY",
-        currency=currency,
-    )
-    if propagated_cost is not None:
-        product_cost = propagated_cost
-    elif (
+    if (
         cost_per_unit.value_type != "MONEY"
         or cost_per_unit.unit != "MONEY_PER_ITEM"
         or cost_per_unit.currency != currency
@@ -67,13 +58,23 @@ def calculate_units_and_product_cost(
             source_ids=cost_per_unit.source_ids,
         )
     else:
-        assert isinstance(net_units.value, int) and isinstance(cost_per_unit.value, Decimal)
-        product_cost = _make_valid(
-            Decimal(net_units.value) * cost_per_unit.value,
+        cost_dependencies = [net_units, cost_per_unit]
+        propagated_cost = _propagate(
+            cost_dependencies,
             value_type="MONEY",
             unit="MONEY",
             currency=currency,
-            source_ids=tuple((*net_units.source_ids, *cost_per_unit.source_ids)),
         )
+        if propagated_cost is not None:
+            product_cost = propagated_cost
+        else:
+            assert isinstance(net_units.value, int) and isinstance(cost_per_unit.value, Decimal)
+            product_cost = _make_valid(
+                Decimal(net_units.value) * cost_per_unit.value,
+                value_type="MONEY",
+                unit="MONEY",
+                currency=currency,
+                source_ids=tuple((*net_units.source_ids, *cost_per_unit.source_ids)),
+            )
 
     return net_units, product_cost
