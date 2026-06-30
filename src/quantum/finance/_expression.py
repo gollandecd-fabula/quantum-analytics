@@ -34,6 +34,89 @@ def _require_compatible(values: Sequence[_Value], code_prefix: str = "EXPRESSION
             raise FinanceError(f"{code_prefix}_CURRENCY_MISMATCH")
 
 
+def _multiply_result_signature(left: _Value, right: _Value) -> tuple[str, str, str | None]:
+    pair = (left.value_type, right.value_type)
+    if pair == ("MONEY", "RATE"):
+        if right.unit != "RATE":
+            raise FinanceError("EXPRESSION_UNIT_MISMATCH")
+        return "MONEY", left.unit, left.currency
+    if pair == ("RATE", "MONEY"):
+        if left.unit != "RATE":
+            raise FinanceError("EXPRESSION_UNIT_MISMATCH")
+        return "MONEY", right.unit, right.currency
+    if pair == ("MONEY", "DECIMAL"):
+        if right.unit != "DIMENSIONLESS":
+            raise FinanceError("EXPRESSION_UNIT_MISMATCH")
+        return "MONEY", left.unit, left.currency
+    if pair == ("DECIMAL", "MONEY"):
+        if left.unit != "DIMENSIONLESS":
+            raise FinanceError("EXPRESSION_UNIT_MISMATCH")
+        return "MONEY", right.unit, right.currency
+    if pair == ("DECIMAL", "DECIMAL"):
+        if left.unit != "DIMENSIONLESS" or right.unit != "DIMENSIONLESS":
+            raise FinanceError("EXPRESSION_UNIT_MISMATCH")
+        return "DECIMAL", "DIMENSIONLESS", None
+    raise FinanceError("EXPRESSION_TYPE_MISMATCH")
+
+
+def _divide_result_signature(left: _Value, right: _Value) -> tuple[str, str, str | None]:
+    pair = (left.value_type, right.value_type)
+    if pair == ("MONEY", "MONEY"):
+        if left.currency != right.currency:
+            raise FinanceError("EXPRESSION_CURRENCY_MISMATCH")
+        if left.unit != right.unit:
+            raise FinanceError("EXPRESSION_UNIT_MISMATCH")
+        return "DECIMAL", "DIMENSIONLESS", None
+    if pair == ("MONEY", "DECIMAL"):
+        if right.unit != "DIMENSIONLESS":
+            raise FinanceError("EXPRESSION_UNIT_MISMATCH")
+        return "MONEY", left.unit, left.currency
+    if pair == ("DECIMAL", "DECIMAL"):
+        if left.unit != "DIMENSIONLESS" or right.unit != "DIMENSIONLESS":
+            raise FinanceError("EXPRESSION_UNIT_MISMATCH")
+        return "DECIMAL", "DIMENSIONLESS", None
+    raise FinanceError("EXPRESSION_TYPE_MISMATCH")
+
+
+def _validate_operation_signature(
+    operator: str,
+    values: Sequence[_Value],
+    declared: tuple[str, str, str | None],
+) -> None:
+    if operator in {"ADD", "SUBTRACT", "MIN", "MAX"}:
+        _require_compatible(values)
+        if _signature(values[0]) != declared:
+            raise FinanceError("EXPRESSION_TYPE_MISMATCH")
+        return
+    if operator in {"NEGATE", "ABS"}:
+        value = values[0]
+        if value.value_type not in _NUMERIC_TYPES or _signature(value) != declared:
+            raise FinanceError("EXPRESSION_TYPE_MISMATCH")
+        return
+    if operator == "MULTIPLY":
+        if _multiply_result_signature(values[0], values[1]) != declared:
+            raise FinanceError("EXPRESSION_TYPE_MISMATCH")
+        return
+    if operator == "DIVIDE":
+        if _divide_result_signature(values[0], values[1]) != declared:
+            raise FinanceError("EXPRESSION_TYPE_MISMATCH")
+        return
+    if operator == "IF":
+        condition, true_value, false_value = values
+        if condition.value_type != "BOOLEAN":
+            raise FinanceError("EXPRESSION_TYPE_MISMATCH")
+        _require_compatible([true_value, false_value])
+        if _signature(true_value) != declared:
+            raise FinanceError("EXPRESSION_TYPE_MISMATCH")
+        return
+    left, right = values
+    _require_compatible(values)
+    if declared != ("BOOLEAN", "BOOLEAN", None):
+        raise FinanceError("EXPRESSION_TYPE_MISMATCH")
+    if operator != "EQUAL" and left.value_type == "BOOLEAN":
+        raise FinanceError("EXPRESSION_TYPE_MISMATCH")
+
+
 def evaluate_expression(
     expression: object,
     variables: Mapping[str, Mapping[str, Any]],
@@ -142,7 +225,9 @@ def evaluate_expression(
         declared_type, declared_unit, declared_currency = _validate_signature(
             node.get("value_type"), node.get("unit"), node.get("currency")
         )
+        declared_signature = (declared_type, declared_unit, declared_currency)
         values = [walk(argument, depth + 1) for argument in arguments]
+        _validate_operation_signature(str(operator), values, declared_signature)
         propagated = _propagate(
             values,
             value_type=declared_type,
@@ -153,9 +238,6 @@ def evaluate_expression(
             return propagated
 
         if operator in {"ADD", "SUBTRACT", "MIN", "MAX"}:
-            _require_compatible(values)
-            if _signature(values[0]) != (declared_type, declared_unit, declared_currency):
-                raise FinanceError("EXPRESSION_TYPE_MISMATCH")
             raw_values = [value.value for value in values]
             if operator == "ADD":
                 result = raw_values[0]
@@ -177,10 +259,6 @@ def evaluate_expression(
 
         if operator in {"NEGATE", "ABS"}:
             value = values[0]
-            if value.value_type not in _NUMERIC_TYPES or _signature(value) != (
-                declared_type, declared_unit, declared_currency
-            ):
-                raise FinanceError("EXPRESSION_TYPE_MISMATCH")
             assert isinstance(value.value, (Decimal, int))
             result = -value.value if operator == "NEGATE" else abs(value.value)
             return _make_valid(
@@ -193,32 +271,8 @@ def evaluate_expression(
 
         if operator == "MULTIPLY":
             left, right = values
-            pair = (left.value_type, right.value_type)
-            if pair == ("MONEY", "RATE"):
-                if right.unit != "RATE":
-                    raise FinanceError("EXPRESSION_UNIT_MISMATCH")
-                result_signature = ("MONEY", left.unit, left.currency)
-            elif pair == ("RATE", "MONEY"):
-                if left.unit != "RATE":
-                    raise FinanceError("EXPRESSION_UNIT_MISMATCH")
-                result_signature = ("MONEY", right.unit, right.currency)
-            elif pair == ("MONEY", "DECIMAL"):
-                if right.unit != "DIMENSIONLESS":
-                    raise FinanceError("EXPRESSION_UNIT_MISMATCH")
-                result_signature = ("MONEY", left.unit, left.currency)
-            elif pair == ("DECIMAL", "MONEY"):
-                if left.unit != "DIMENSIONLESS":
-                    raise FinanceError("EXPRESSION_UNIT_MISMATCH")
-                result_signature = ("MONEY", right.unit, right.currency)
-            elif pair == ("DECIMAL", "DECIMAL"):
-                if left.unit != "DIMENSIONLESS" or right.unit != "DIMENSIONLESS":
-                    raise FinanceError("EXPRESSION_UNIT_MISMATCH")
-                result_signature = ("DECIMAL", "DIMENSIONLESS", None)
-            else:
+            if not isinstance(left.value, Decimal) or not isinstance(right.value, Decimal):
                 raise FinanceError("EXPRESSION_TYPE_MISMATCH")
-            if result_signature != (declared_type, declared_unit, declared_currency):
-                raise FinanceError("EXPRESSION_TYPE_MISMATCH")
-            assert isinstance(left.value, Decimal) and isinstance(right.value, Decimal)
             return _make_valid(
                 left.value * right.value,
                 value_type=declared_type,
@@ -229,7 +283,8 @@ def evaluate_expression(
 
         if operator == "DIVIDE":
             left, right = values
-            assert isinstance(left.value, Decimal) and isinstance(right.value, Decimal)
+            if not isinstance(left.value, Decimal) or not isinstance(right.value, Decimal):
+                raise FinanceError("EXPRESSION_TYPE_MISMATCH")
             if right.value == 0:
                 return _make_nonvalid(
                     "BLOCKED",
@@ -239,25 +294,6 @@ def evaluate_expression(
                     reason_code="EXPRESSION_DIVISION_BY_ZERO",
                     source_ids=tuple((*left.source_ids, *right.source_ids)),
                 )
-            pair = (left.value_type, right.value_type)
-            if pair == ("MONEY", "MONEY"):
-                if left.currency != right.currency:
-                    raise FinanceError("EXPRESSION_CURRENCY_MISMATCH")
-                if left.unit != right.unit:
-                    raise FinanceError("EXPRESSION_UNIT_MISMATCH")
-                result_signature = ("DECIMAL", "DIMENSIONLESS", None)
-            elif pair == ("MONEY", "DECIMAL"):
-                if right.unit != "DIMENSIONLESS":
-                    raise FinanceError("EXPRESSION_UNIT_MISMATCH")
-                result_signature = ("MONEY", left.unit, left.currency)
-            elif pair == ("DECIMAL", "DECIMAL"):
-                if left.unit != "DIMENSIONLESS" or right.unit != "DIMENSIONLESS":
-                    raise FinanceError("EXPRESSION_UNIT_MISMATCH")
-                result_signature = ("DECIMAL", "DIMENSIONLESS", None)
-            else:
-                raise FinanceError("EXPRESSION_TYPE_MISMATCH")
-            if result_signature != (declared_type, declared_unit, declared_currency):
-                raise FinanceError("EXPRESSION_TYPE_MISMATCH")
             return _make_valid(
                 left.value / right.value,
                 value_type=declared_type,
@@ -268,11 +304,6 @@ def evaluate_expression(
 
         if operator == "IF":
             condition, true_value, false_value = values
-            if condition.value_type != "BOOLEAN":
-                raise FinanceError("EXPRESSION_TYPE_MISMATCH")
-            _require_compatible([true_value, false_value])
-            if _signature(true_value) != (declared_type, declared_unit, declared_currency):
-                raise FinanceError("EXPRESSION_TYPE_MISMATCH")
             assert isinstance(condition.value, bool)
             selected = true_value if condition.value else false_value
             return _make_valid(
@@ -286,11 +317,6 @@ def evaluate_expression(
             )
 
         left, right = values
-        _require_compatible(values)
-        if (declared_type, declared_unit, declared_currency) != ("BOOLEAN", "BOOLEAN", None):
-            raise FinanceError("EXPRESSION_TYPE_MISMATCH")
-        if operator != "EQUAL" and left.value_type == "BOOLEAN":
-            raise FinanceError("EXPRESSION_TYPE_MISMATCH")
         if operator == "EQUAL":
             result = left.value == right.value
         elif operator == "LESS_THAN":
