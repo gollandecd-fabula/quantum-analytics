@@ -40,7 +40,8 @@ tests:
     - tests/test_p15_schema_alignment.py
     - tests/test_p15_ux_adversarial.py
     - tests/test_p15_manifest_payload.py
-  methods_declared: 55
+    - tests/test_a0_p15_manifest_payload.py
+  methods_declared: 56
   status: NOT_RUN
 review:
   status: NOT_STARTED
