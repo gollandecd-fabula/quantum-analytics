@@ -168,6 +168,11 @@ class B1bRuleResolutionTests(unittest.TestCase):
         with self.assertRaisesRegex(FinanceError, "RULE_RESOLUTION_INVALID"):
             evaluate_resolved_rule(resolution, [rule], {}, policy())
 
+        tampered = resolve_rule([rule], context())
+        tampered["candidates"][0]["selected"] = False
+        with self.assertRaisesRegex(FinanceError, "RULE_RESOLUTION_TRACE_MISMATCH"):
+            evaluate_resolved_rule(tampered, [rule], {}, policy())
+
 
 class B1bSafeExpressionTests(unittest.TestCase):
     def setUp(self) -> None:
@@ -211,6 +216,32 @@ class B1bSafeExpressionTests(unittest.TestCase):
         )
         self.assertEqual(result["state"], "VALID")
         self.assertEqual(result["value"], "10.000000")
+
+        percent_expression = self.multiply_expression()
+        percent_expression["arguments"][1]["unit"] = "PERCENT"
+        percent_rate = typed("0.10", value_type="RATE", unit="PERCENT")
+        with self.assertRaisesRegex(FinanceError, "EXPRESSION_UNIT_MISMATCH"):
+            evaluate_expression(
+                percent_expression,
+                {"gross_sales_amount": self.money, "tax_rate": percent_rate},
+                ["gross_sales_amount", "tax_rate"],
+                self.policy,
+            )
+
+        unitful_decimal_expression = self.multiply_expression()
+        unitful_decimal_expression["arguments"][1].update({
+            "name": "item_factor",
+            "value_type": "DECIMAL",
+            "unit": "ITEM",
+        })
+        item_factor = typed("2", value_type="DECIMAL", unit="ITEM")
+        with self.assertRaisesRegex(FinanceError, "EXPRESSION_UNIT_MISMATCH"):
+            evaluate_expression(
+                unitful_decimal_expression,
+                {"gross_sales_amount": self.money, "item_factor": item_factor},
+                ["gross_sales_amount", "item_factor"],
+                self.policy,
+            )
 
     def test_unknown_operator_rejected(self) -> None:
         expression = self.multiply_expression()
@@ -275,6 +306,58 @@ class B1bSafeExpressionTests(unittest.TestCase):
         result = evaluate_expression(expression, {}, [], self.policy)
         self.assertEqual(result["state"], "BLOCKED")
         self.assertEqual(result["reason_code"], "EXPRESSION_DIVISION_BY_ZERO")
+
+        incompatible_money_units = {
+            "kind": "OPERATION",
+            "operator": "DIVIDE",
+            "value_type": "DECIMAL",
+            "currency": None,
+            "unit": "DIMENSIONLESS",
+            "arguments": [
+                {
+                    "kind": "LITERAL",
+                    "value": "100",
+                    "value_type": "MONEY",
+                    "currency": "EUR",
+                    "unit": "MONEY_PER_ITEM",
+                },
+                {
+                    "kind": "LITERAL",
+                    "value": "20",
+                    "value_type": "MONEY",
+                    "currency": "EUR",
+                    "unit": "MONEY",
+                },
+            ],
+        }
+        with self.assertRaisesRegex(FinanceError, "EXPRESSION_UNIT_MISMATCH"):
+            evaluate_expression(incompatible_money_units, {}, [], self.policy)
+
+        unitful_divisor = {
+            "kind": "OPERATION",
+            "operator": "DIVIDE",
+            "value_type": "MONEY",
+            "currency": "EUR",
+            "unit": "MONEY",
+            "arguments": [
+                {
+                    "kind": "LITERAL",
+                    "value": "100",
+                    "value_type": "MONEY",
+                    "currency": "EUR",
+                    "unit": "MONEY",
+                },
+                {
+                    "kind": "LITERAL",
+                    "value": "2",
+                    "value_type": "DECIMAL",
+                    "currency": None,
+                    "unit": "ITEM",
+                },
+            ],
+        }
+        with self.assertRaisesRegex(FinanceError, "EXPRESSION_UNIT_MISMATCH"):
+            evaluate_expression(unitful_divisor, {}, [], self.policy)
 
     def test_typed_state_propagation_does_not_coerce_to_zero(self) -> None:
         variables = {
