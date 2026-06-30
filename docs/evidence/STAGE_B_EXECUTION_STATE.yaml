@@ -84,7 +84,7 @@ units:
     issue: 29
     risk: R2
     evidence: docs/evidence/STAGE_P1_5_EXECUTION_STATE.yaml
-    test_method_count_declared: 56
+    test_method_count_declared: 58
     requirements:
       - Q-BLD-007
       - Q-BLD-014
