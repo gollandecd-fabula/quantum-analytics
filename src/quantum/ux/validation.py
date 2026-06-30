@@ -17,6 +17,10 @@ class UXBoundaryError(ValueError):
 _HASH_RE = re.compile(r"^[a-f0-9]{64}$")
 _CURRENCY_RE = re.compile(r"^[A-Z]{3}$")
 _SAFE_FILENAME_RE = re.compile(r"^[A-Za-z0-9_-][A-Za-z0-9._-]{0,119}$")
+_RFC3339_RE = re.compile(
+    r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}"
+    r"(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$"
+)
 _MODES = frozenset({"ACTUAL", "SCENARIO"})
 _FORM_STATUSES = frozenset({"BLOCKED", "PARTIAL", "READY_FOR_RULE_DRAFT"})
 _EXPECTED_FORM_FIELDS = ("cost", "tax_rate", "tax_base", "other_expense")
@@ -26,8 +30,11 @@ def _nonempty_string(value: object) -> bool:
     return isinstance(value, str) and bool(value)
 
 
-def _rfc3339(value: object) -> bool:
-    if not isinstance(value, str) or not value:
+def is_strict_rfc3339(value: object) -> bool:
+    if (
+        not isinstance(value, str)
+        or _RFC3339_RE.fullmatch(value) is None
+    ):
         return False
     try:
         parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
@@ -74,13 +81,13 @@ def validate_configuration_form_boundary(form: object) -> None:
     ):
         raise UXBoundaryError("UX_CURRENCY_INVALID")
     created_at = form.get("created_at")
-    if not _rfc3339(created_at):
+    if not is_strict_rfc3339(created_at):
         raise UXBoundaryError("UX_CREATED_AT_INVALID")
     valid_from = form.get("valid_from")
     valid_to = form.get("valid_to")
-    if valid_from is not None and not _rfc3339(valid_from):
+    if valid_from is not None and not is_strict_rfc3339(valid_from):
         raise UXBoundaryError("UX_VALID_FROM_INVALID")
-    if valid_to is not None and not _rfc3339(valid_to):
+    if valid_to is not None and not is_strict_rfc3339(valid_to):
         raise UXBoundaryError("UX_VALID_TO_INVALID")
     if valid_from is not None and valid_to is not None:
         start = datetime.fromisoformat(str(valid_from).replace("Z", "+00:00"))
@@ -93,7 +100,11 @@ def validate_configuration_form_boundary(form: object) -> None:
     fields = form.get("fields")
     if not isinstance(fields, list) or len(fields) != len(_EXPECTED_FORM_FIELDS):
         raise UXBoundaryError("UX_FORM_FIELDS_INVALID")
-    if tuple(field.get("field_id") for field in fields if isinstance(field, Mapping)) != _EXPECTED_FORM_FIELDS:
+    if tuple(
+        field.get("field_id")
+        for field in fields
+        if isinstance(field, Mapping)
+    ) != _EXPECTED_FORM_FIELDS:
         raise UXBoundaryError("UX_FORM_FIELDS_INVALID")
 
     problems = form.get("problems")
@@ -113,9 +124,11 @@ def validate_raw_file_record_boundary(record: object) -> None:
     if not isinstance(record, RawFileRecord):
         raise UXBoundaryError("UX_IMPORT_RECORD_INVALID")
     try:
-        UUID(record.raw_file_id)
+        parsed_raw_file_id = UUID(record.raw_file_id)
     except (TypeError, ValueError, AttributeError) as exc:
         raise UXBoundaryError("UX_IMPORT_RECORD_INVALID") from exc
+    if record.raw_file_id != str(parsed_raw_file_id):
+        raise UXBoundaryError("UX_IMPORT_RECORD_INVALID")
     if not _nonempty_string(record.tenant_id):
         raise UXBoundaryError("UX_IMPORT_RECORD_INVALID")
     if not isinstance(record.sha256, str) or _HASH_RE.fullmatch(record.sha256) is None:
