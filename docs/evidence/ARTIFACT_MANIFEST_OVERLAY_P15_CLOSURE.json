@@ -1,0 +1,8 @@
+{
+  "base_p15_overlay_git_blob_sha": "b70f7a97ea0b87172479476872d60818117d3037",
+  "entries": [],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 2,
+  "reason": "P1.5 post-merge closure synchronization",
+  "remove_paths": []
+}
