@@ -3,7 +3,7 @@ stage_contract_id: STAGE-B-BUILD-v1
 unit: B1b
 risk: R3
 updated_on: 2026-06-30
-status: REVIEW_PENDING_OWNER_SIGNOFF
+status: REVIEW_PENDING_CI_AND_INDEPENDENT_REVIEW
 tracking_issue: 32
 working_branch: build-b1b-financial-kernel-v1
 explicit_user_r3_authorization: RECORDED_2026-06-30
@@ -12,7 +12,11 @@ golden_oracle:
   owner_identity: PROJECT_OWNER_USER
   implementation_independent: true
   baseline_source: SYNTHETIC_TEST_SCENARIOS_UNDER_APPROVED_METHODOLOGY
-  exact_value_approval: PENDING_EXPLICIT_OWNER_SIGNOFF
+  exact_value_approval: APPROVED_BY_PROJECT_OWNER_2026-06-30
+  approval_scope:
+    scenarios_1_to_3: APPROVED_WITHOUT_CHANGE
+    scenario_4_profit_per_sold_unit: BLOCKED_WHEN_NET_SOLD_UNITS_NEGATIVE
+    scenario_4_net_profit_amount: PRESERVED_NEGATIVE_44_00
   external_second_line_review_before_real_data: REQUIRED
 implementation:
   production_runtime: src/quantum/finance/runtime.py
@@ -35,15 +39,15 @@ implementation:
   marketplace_write_capability: false
 verification:
   targeted_test_methods: 67
-  targeted_tests_status: PASS_LOCAL_RECONSTRUCTED_ENVIRONMENT
-  compileall_status: PASS
-  differential_oracle_status: PASS
-  ast_security_scan: PASS
-  fixed_commercial_constant_scan: PASS
+  targeted_tests_status: PENDING_RERUN_AFTER_OWNER_SIGNOFF_PATCH
+  compileall_status: PENDING_RERUN_AFTER_OWNER_SIGNOFF_PATCH
+  differential_oracle_status: PENDING_RERUN_AFTER_OWNER_SIGNOFF_PATCH
+  ast_security_scan: PENDING_RERUN_AFTER_OWNER_SIGNOFF_PATCH
+  fixed_commercial_constant_scan: PENDING_RERUN_AFTER_OWNER_SIGNOFF_PATCH
   accumulated_repository_suite: PENDING_GITHUB_CI
-  exact_reviewed_head: PENDING_PR
-  independent_code_review: PENDING_PR
-  unresolved_review_threads: PENDING_PR
+  exact_reviewed_head: PENDING_PR_REVIEW
+  independent_code_review: PENDING_PR_REVIEW
+  unresolved_review_threads: PENDING_PR_REVIEW
 outputs:
   - DECIMAL_CALCULATION_KERNEL
   - VERSIONED_ROUNDING
@@ -54,7 +58,7 @@ outputs:
   - SYNTHETIC_GOLDEN_FIXTURES
   - INDEPENDENT_DIFFERENTIAL_ORACLE
 limitations:
-  - GOLDEN_BASELINE_EXACT_VALUES_NOT_YET_OWNER_APPROVED
+  - CI_AND_INDEPENDENT_REVIEW_PENDING
   - SOURCE_AUTHORITY_NOT_ACTIVATED
   - REAL_COMMERCIAL_DATA_NOT_ADMITTED
   - B2_RECONCILIATION_NOT_IMPLEMENTED
