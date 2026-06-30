@@ -10,6 +10,9 @@ from ._common import (
     FinanceError,
     RESOLVER_CONTRACT_VERSION,
     _HASH_RE,
+    _is_nonempty_string,
+    _is_positive_int,
+    _parse_rfc3339,
     canonical_hash,
 )
 from ._rules import (
@@ -19,6 +22,16 @@ from ._rules import (
 )
 
 _APPROVED_RULE_STATUSES = {"SHADOW", "PILOT", "ACTIVE"}
+_DIAGNOSTIC_CODES = {
+    "RULE_REQUIRED_MISSING",
+    "RULE_RESOLUTION_TIE",
+    "RULE_EXCLUSIVITY_OVERLAP",
+    "RULE_DEPENDENCY_UNKNOWN",
+    "RULE_DEPENDENCY_CYCLE",
+    "RULE_UNIT_MISMATCH",
+    "RULE_CURRENCY_MISMATCH",
+    "RULE_NOT_APPROVED",
+}
 _RESOLUTION_FIELDS = {
     "resolver_contract_version",
     "context_hash",
@@ -29,6 +42,14 @@ _RESOLUTION_FIELDS = {
     "resolved_at",
     "trace_id",
 }
+_CANDIDATE_FIELDS = {
+    "rule",
+    "eligible",
+    "selected",
+    "exclusion_reasons",
+    "ordering_tuple",
+}
+_RULE_REF_FIELDS = {"rule_id", "version", "content_hash"}
 _TRUSTED_TRACE_CACHE_LIMIT = 4096
 _TRUSTED_TRACE_LOCK = RLock()
 _TRUSTED_TRACES: OrderedDict[
@@ -91,6 +112,63 @@ def _matches_trusted_trace(
     )
 
 
+def _validate_rule_ref(ref: object) -> None:
+    if (
+        not isinstance(ref, Mapping)
+        or set(ref) != _RULE_REF_FIELDS
+        or not _is_nonempty_string(ref.get("rule_id"))
+        or not _is_positive_int(ref.get("version"))
+        or not isinstance(ref.get("content_hash"), str)
+        or _HASH_RE.fullmatch(ref["content_hash"]) is None
+    ):
+        raise FinanceError("RULE_RESOLUTION_INVALID")
+
+
+def _validate_candidate(candidate: object) -> bool:
+    if not isinstance(candidate, Mapping) or set(candidate) != _CANDIDATE_FIELDS:
+        raise FinanceError("RULE_RESOLUTION_INVALID")
+    _validate_rule_ref(candidate.get("rule"))
+
+    eligible = candidate.get("eligible")
+    selected = candidate.get("selected")
+    if not isinstance(eligible, bool) or not isinstance(selected, bool):
+        raise FinanceError("RULE_RESOLUTION_INVALID")
+
+    exclusion_reasons = candidate.get("exclusion_reasons")
+    if (
+        not isinstance(exclusion_reasons, list)
+        or any(not _is_nonempty_string(reason) for reason in exclusion_reasons)
+        or len(exclusion_reasons) != len(set(exclusion_reasons))
+    ):
+        raise FinanceError("RULE_RESOLUTION_INVALID")
+
+    ordering = candidate.get("ordering_tuple")
+    if not eligible:
+        if selected or ordering is not None or not exclusion_reasons:
+            raise FinanceError("RULE_RESOLUTION_INVALID")
+        return False
+
+    if exclusion_reasons or not isinstance(ordering, list) or len(ordering) != 4:
+        raise FinanceError("RULE_RESOLUTION_INVALID")
+    specificity, priority, valid_from, version = ordering
+    if (
+        not isinstance(specificity, list)
+        or len(specificity) != 6
+        or any(
+            not isinstance(item, int)
+            or isinstance(item, bool)
+            or item not in {0, 1}
+            for item in specificity
+        )
+        or not isinstance(priority, int)
+        or isinstance(priority, bool)
+        or not _is_positive_int(version)
+    ):
+        raise FinanceError("RULE_RESOLUTION_INVALID")
+    _parse_rfc3339(valid_from, "RULE_RESOLUTION_INVALID")
+    return selected
+
+
 def _validate_resolution_envelope(resolution: Mapping[str, Any]) -> None:
     if (
         not isinstance(resolution, Mapping)
@@ -99,6 +177,26 @@ def _validate_resolution_envelope(resolution: Mapping[str, Any]) -> None:
         != RESOLVER_CONTRACT_VERSION
         or resolution.get("state")
         not in {"VALID", "BLOCKED", "CONFLICT", "UNAVAILABLE"}
+        or not isinstance(resolution.get("context_hash"), str)
+        or _HASH_RE.fullmatch(resolution["context_hash"]) is None
+        or not _is_nonempty_string(resolution.get("actor"))
+    ):
+        raise FinanceError("RULE_RESOLUTION_INVALID")
+    _parse_rfc3339(resolution.get("resolved_at"), "RULE_RESOLUTION_INVALID")
+
+    state = resolution["state"]
+    diagnostic = resolution.get("diagnostic_code")
+    if diagnostic is not None and diagnostic not in _DIAGNOSTIC_CODES:
+        raise FinanceError("RULE_RESOLUTION_INVALID")
+    if (state == "VALID") != (diagnostic is None):
+        raise FinanceError("RULE_RESOLUTION_INVALID")
+
+    candidates = resolution.get("candidates")
+    if not isinstance(candidates, list):
+        raise FinanceError("RULE_RESOLUTION_INVALID")
+    selected_count = sum(1 for candidate in candidates if _validate_candidate(candidate))
+    if (state == "VALID" and selected_count != 1) or (
+        state != "VALID" and selected_count != 0
     ):
         raise FinanceError("RULE_RESOLUTION_INVALID")
 
@@ -110,34 +208,6 @@ def _validate_resolution_envelope(resolution: Mapping[str, Any]) -> None:
         != trace_id
     ):
         raise FinanceError("RULE_RESOLUTION_TRACE_MISMATCH")
-
-    state = resolution["state"]
-    diagnostic = resolution.get("diagnostic_code")
-    if (state == "VALID") != (diagnostic is None):
-        raise FinanceError("RULE_RESOLUTION_INVALID")
-
-    candidates = resolution.get("candidates")
-    if not isinstance(candidates, list):
-        raise FinanceError("RULE_RESOLUTION_INVALID")
-    selected = [
-        candidate
-        for candidate in candidates
-        if isinstance(candidate, Mapping)
-        and candidate.get("eligible") is True
-        and candidate.get("selected") is True
-    ]
-    if state != "VALID":
-        if selected:
-            raise FinanceError("RULE_RESOLUTION_INVALID")
-        return
-    if len(selected) != 1:
-        raise FinanceError("RULE_RESOLUTION_INVALID")
-    ref = selected[0].get("rule")
-    if (
-        not isinstance(ref, Mapping)
-        or set(ref) != {"rule_id", "version", "content_hash"}
-    ):
-        raise FinanceError("RULE_RESOLUTION_INVALID")
 
 
 def resolve_rule(
@@ -159,16 +229,14 @@ def _selected_rule(
     selected = [
         candidate
         for candidate in resolution["candidates"]
-        if isinstance(candidate, Mapping)
-        and candidate.get("eligible") is True
-        and candidate.get("selected") is True
+        if candidate["eligible"] is True and candidate["selected"] is True
     ]
     ref = selected[0]["rule"]
     lookup = {
         (rule["rule_id"], rule["version"], rule["content_hash"]): rule
         for rule in rules_snapshot
     }
-    key = (ref.get("rule_id"), ref.get("version"), ref.get("content_hash"))
+    key = (ref["rule_id"], ref["version"], ref["content_hash"])
     return lookup.get(key)
 
 
@@ -199,15 +267,15 @@ def evaluate_resolved_rule(
     rules_snapshot = _snapshot_rules(rules)
     _validate_resolution_envelope(resolution)
 
+    if not _matches_trusted_trace(resolution, rules_snapshot):
+        raise FinanceError("RULE_RESOLUTION_REPLAY_MISMATCH")
+
     selected_rule = _selected_rule(resolution, rules_snapshot)
     if (
         selected_rule is not None
         and selected_rule["status"] not in _APPROVED_RULE_STATUSES
     ):
         raise FinanceError("RULE_NOT_APPROVED")
-
-    if not _matches_trusted_trace(resolution, rules_snapshot):
-        raise FinanceError("RULE_RESOLUTION_REPLAY_MISMATCH")
 
     result = _evaluate_resolved_rule(
         resolution,
