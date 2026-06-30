@@ -1,7 +1,7 @@
 # CURRENT STATE
 
 Date: 2026-06-30
-Status: `BUILD_P1_4_IMPLEMENTED_CI_PENDING`
+Status: `BUILD_P1_4_REMEDIATED_CI_PENDING`
 Active contract: `STAGE-B-BUILD-v1`
 Live execution state: `docs/evidence/STAGE_B_EXECUTION_STATE.yaml`
 Current unit: `P14 — REPORTING_API_EXPORTS_FOUNDATION`
@@ -14,16 +14,19 @@ Working branch: `p14-reporting-api-exports`
 P1.4 implements a read-only reporting and export foundation on top of verified
 B3 Metric Snapshots:
 
-- explicit report records preserving typed states and Evidence Chain locators;
+- strict report records preserving typed states and accounting metadata;
 - numeric zero remains distinct from missing and blocked states;
-- preview-only delivery unless a supplied Evidence Chain passes B3 verification;
-- deterministic hashed export bundles;
-- JSON, JSONL, and CSV round trips;
-- tenant and Actual/Scenario isolation;
-- bounded cursor pagination and export limits.
+- exact Evidence Chain and root Metric Snapshot binding;
+- preview-only delivery unless the supplied Evidence Chain passes B3 verification;
+- deterministic per-record and export-bundle SHA-256 integrity;
+- JSON, JSONL, and spreadsheet-safe CSV round trips;
+- tenant, Actual/Scenario, and duplicate-record isolation;
+- content-bound cursor pagination and export limits;
+- closed vocabularies for value, expense, rounding, freshness, and confidence.
 
-The targeted suite currently contains 20 methods. Exact-head CI, manifest
-synchronization, independent review, and closure are still required.
+The targeted suite contains 32 methods across two files. Ten adversarial
+findings have been remediated. New exact-head CI, manifest synchronization,
+independent re-review, and closure are still required.
 
 ## Parallel critical-path status
 
