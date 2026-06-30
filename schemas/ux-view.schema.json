@@ -1,0 +1,151 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://quantum.local/schemas/ux-view.schema.json",
+  "title": "Quantum Accessible UX View v1",
+  "oneOf": [
+    {"$ref": "#/$defs/metricResult"},
+    {"$ref": "#/$defs/importStatus"},
+    {"$ref": "#/$defs/evidenceDrilldown"}
+  ],
+  "$defs": {
+    "hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "nullableString": {"type": ["string", "null"]},
+    "versionedEvidenceRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "version"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "version": {"type": "integer", "minimum": 1}
+      }
+    },
+    "metricResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "view_type",
+        "view_id",
+        "organization_id",
+        "mode",
+        "scenario_id",
+        "metric_snapshot_id",
+        "state",
+        "status_label",
+        "status_token",
+        "semantic_role",
+        "accessible_summary",
+        "value_text",
+        "is_numeric_zero",
+        "reason_code",
+        "publication_state",
+        "evidence_available",
+        "limitations",
+        "view_hash"
+      ],
+      "properties": {
+        "schema_version": {"const": "quantum-ux-view-v1"},
+        "view_type": {"const": "METRIC_RESULT"},
+        "view_id": {"type": "string", "minLength": 1},
+        "organization_id": {"type": "string", "minLength": 1},
+        "mode": {"enum": ["ACTUAL", "SCENARIO"]},
+        "scenario_id": {"$ref": "#/$defs/nullableString"},
+        "metric_snapshot_id": {"type": "string", "minLength": 1},
+        "state": {"enum": ["VALID", "EMPTY", "BLOCKED", "UNAVAILABLE", "CONFLICT", "INVALID", "NOT_APPLICABLE"]},
+        "status_label": {"type": "string", "minLength": 1},
+        "status_token": {"enum": ["valid", "valid-zero", "empty", "blocked", "unavailable", "conflict", "invalid", "not-applicable"]},
+        "semantic_role": {"const": "status"},
+        "accessible_summary": {"type": "string", "minLength": 1},
+        "value_text": {"type": "string"},
+        "is_numeric_zero": {"type": "boolean"},
+        "reason_code": {"$ref": "#/$defs/nullableString"},
+        "publication_state": {"enum": ["PREVIEW_ONLY", "EVIDENCE_VERIFIED"]},
+        "evidence_available": {"type": "boolean"},
+        "limitations": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+        "view_hash": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "importStatus": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "view_type",
+        "view_id",
+        "tenant_id",
+        "raw_file_id",
+        "sha256",
+        "size_bytes",
+        "filename",
+        "state",
+        "status_label",
+        "status_token",
+        "semantic_role",
+        "accessible_summary",
+        "schema_id",
+        "diagnostics",
+        "structural_fingerprint_available",
+        "semantic_fingerprint_available",
+        "admitted_to_canonical_processing",
+        "view_hash"
+      ],
+      "properties": {
+        "schema_version": {"const": "quantum-ux-view-v1"},
+        "view_type": {"const": "IMPORT_STATUS"},
+        "view_id": {"type": "string", "minLength": 1},
+        "tenant_id": {"type": "string", "minLength": 1},
+        "raw_file_id": {"type": "string", "minLength": 1},
+        "sha256": {"$ref": "#/$defs/hash"},
+        "size_bytes": {"type": "integer", "minimum": 0},
+        "filename": {"type": "string", "minLength": 1},
+        "state": {"enum": ["RECEIVED", "VALIDATING", "VALID", "QUARANTINED", "REJECTED"]},
+        "status_label": {"type": "string", "minLength": 1},
+        "status_token": {"enum": ["received", "validating", "valid", "quarantined", "rejected"]},
+        "semantic_role": {"const": "status"},
+        "accessible_summary": {"type": "string", "minLength": 1},
+        "schema_id": {"$ref": "#/$defs/nullableString"},
+        "diagnostics": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+        "structural_fingerprint_available": {"type": "boolean"},
+        "semantic_fingerprint_available": {"type": "boolean"},
+        "admitted_to_canonical_processing": {"type": "boolean"},
+        "view_hash": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "evidenceDrilldown": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "view_type",
+        "view_id",
+        "organization_id",
+        "mode",
+        "scenario_id",
+        "metric_snapshot_id",
+        "metric_content_hash",
+        "evidence_chain_ref",
+        "evidence_chain_content_hash",
+        "verification_status",
+        "can_claim_verified_evidence",
+        "limitations",
+        "view_hash"
+      ],
+      "properties": {
+        "schema_version": {"const": "quantum-ux-view-v1"},
+        "view_type": {"const": "EVIDENCE_DRILLDOWN"},
+        "view_id": {"type": "string", "minLength": 1},
+        "organization_id": {"type": "string", "minLength": 1},
+        "mode": {"enum": ["ACTUAL", "SCENARIO"]},
+        "scenario_id": {"$ref": "#/$defs/nullableString"},
+        "metric_snapshot_id": {"type": "string", "minLength": 1},
+        "metric_content_hash": {"$ref": "#/$defs/hash"},
+        "evidence_chain_ref": {"$ref": "#/$defs/versionedEvidenceRef"},
+        "evidence_chain_content_hash": {"oneOf": [{"$ref": "#/$defs/hash"}, {"type": "null"}]},
+        "verification_status": {"enum": ["PREVIEW_ONLY", "VERIFIED"]},
+        "can_claim_verified_evidence": {"type": "boolean"},
+        "limitations": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+        "view_hash": {"$ref": "#/$defs/hash"}
+      }
+    }
+  }
+}
