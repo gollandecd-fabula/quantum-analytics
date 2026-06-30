@@ -93,12 +93,20 @@ class SyntheticCsvCanonicalIngestor:
     def _batch_id(
         *,
         tenant_id: str,
-        raw_file_id: str,
         source_file_sha256: str,
+        schema_version: str,
+        adapter_id: str,
+        adapter_version: str,
     ) -> str:
         digest = sha256(
             "\x1f".join(
-                (tenant_id, raw_file_id, source_file_sha256)
+                (
+                    tenant_id,
+                    source_file_sha256,
+                    schema_version,
+                    adapter_id,
+                    adapter_version,
+                )
             ).encode("utf-8")
         ).hexdigest()
         return f"batch-{digest[:24]}"
@@ -107,13 +115,18 @@ class SyntheticCsvCanonicalIngestor:
     def _source_record_id(
         *,
         tenant_id: str,
-        raw_file_id: str,
+        source_file_sha256: str,
         row_number: int,
         raw_row_hash: str,
     ) -> str:
         digest = sha256(
             "\x1f".join(
-                (tenant_id, raw_file_id, str(row_number), raw_row_hash)
+                (
+                    tenant_id,
+                    source_file_sha256,
+                    str(row_number),
+                    raw_row_hash,
+                )
             ).encode("utf-8")
         ).hexdigest()
         return f"src-{digest[:32]}"
@@ -187,8 +200,18 @@ class SyntheticCsvCanonicalIngestor:
         )
 
     @staticmethod
-    def _candidate_order(candidate: _Candidate) -> tuple[datetime, str]:
-        return candidate.event.recognition_time, candidate.event.event_id
+    def _candidate_order(
+        candidate: _Candidate,
+        superseded_targets: set[str],
+    ) -> tuple[int, datetime, str]:
+        event = candidate.event
+        if event.supersedes_event_id is not None:
+            rank = 0
+        elif event.event_id in superseded_targets:
+            rank = 1
+        else:
+            rank = 2
+        return rank, event.recognition_time, event.event_id
 
     def _resolve_batch(
         self,
@@ -203,11 +226,22 @@ class SyntheticCsvCanonicalIngestor:
             staging.append(tenant=tenant, source_row=source_row, event=None)
             planned.append((source_row, None))
 
-        pending = sorted(candidates, key=self._candidate_order)
+        pending = list(candidates)
         while pending:
-            deferred: list[_Candidate] = []
+            superseded_targets = {
+                candidate.event.supersedes_event_id
+                for candidate in pending
+                if candidate.event.supersedes_event_id is not None
+            }
+            ordered = sorted(
+                pending,
+                key=lambda item: self._candidate_order(
+                    item,
+                    superseded_targets,
+                ),
+            )
             progress = False
-            for candidate in pending:
+            for candidate in ordered:
                 try:
                     staging.append(
                         tenant=tenant,
@@ -216,7 +250,6 @@ class SyntheticCsvCanonicalIngestor:
                     )
                 except CanonicalLedgerError as exc:
                     if exc.code in _MISSING_DEPENDENCY_CODES:
-                        deferred.append(candidate)
                         continue
                     if exc.code not in _ROW_QUARANTINE_CODES:
                         raise
@@ -230,13 +263,13 @@ class SyntheticCsvCanonicalIngestor:
                         event=None,
                     )
                     planned.append((quarantined, None))
-                    progress = True
                 else:
                     planned.append((candidate.source_row, candidate.event))
-                    progress = True
-            if deferred and not progress:
+                pending.remove(candidate)
+                progress = True
+                break
+            if not progress:
                 raise CanonicalLedgerError("BATCH_DEPENDENCY_UNRESOLVED")
-            pending = deferred
         return planned
 
     def ingest(
@@ -281,8 +314,10 @@ class SyntheticCsvCanonicalIngestor:
         )
         import_batch_id = self._batch_id(
             tenant_id=tenant.tenant_id,
-            raw_file_id=raw_file_id,
             source_file_sha256=record.sha256,
+            schema_version=record.schema_id,
+            adapter_id=adapter_id,
+            adapter_version=adapter_version,
         )
         trace_id = f"trace-{import_batch_id.removeprefix('batch-')}"
         immediate: list[ImmutableSourceRow] = []
@@ -293,7 +328,7 @@ class SyntheticCsvCanonicalIngestor:
             raw_row_hash = canonical_json_hash(row)
             source_record_id = self._source_record_id(
                 tenant_id=tenant.tenant_id,
-                raw_file_id=raw_file_id,
+                source_file_sha256=record.sha256,
                 row_number=row_number,
                 raw_row_hash=raw_row_hash,
             )
