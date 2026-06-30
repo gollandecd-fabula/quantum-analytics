@@ -3,7 +3,7 @@ date: "2026-06-30"
 stage: P1_TECHNICAL_FOUNDATION_BUILD
 unit: P1_4_REPORTING_API_EXPORTS_FOUNDATION
 mapped_stage_unit: B4_REPORTING_API_EXPORTS
-status: IMPLEMENTED_CI_PENDING
+status: REMEDIATED_CI_PENDING
 working_branch: p14-reporting-api-exports
 base_state: P1_3_COMPLETE
 risk: R2
@@ -13,13 +13,16 @@ commercial_data_authorized: false
 financial_rule_activation_authorized: false
 implemented:
   - fail-closed conversion from verified B3 Metric Snapshot to report record
-  - explicit preview-only and evidence-verified publication states
-  - preservation of accounting view, typed state, currency, unit and expense boundary
-  - preservation of freshness, confidence, rounding and Evidence Chain identifiers
-  - deterministic hashed export bundles
+  - exact Evidence Chain and root Metric Snapshot binding
+  - preview-only and evidence-verified publication states
+  - per-record and export-bundle deterministic SHA-256 integrity
+  - strict accounting view, typed value, currency, unit and expense-boundary validation
+  - strict rounding, freshness, confidence and limitation contracts
   - JSON, JSONL and CSV round-trip contracts
+  - spreadsheet-formula-safe CSV projections
   - tenant and Actual/Scenario export isolation
-  - bounded cursor pagination
+  - duplicate report-record rejection
+  - bounded content-bound cursor pagination
   - record and byte export limits
 schemas:
   - schemas/report-record.schema.json
@@ -28,9 +31,14 @@ runtime:
   - src/quantum/reporting/runtime.py
   - src/quantum/reporting/__init__.py
 tests:
-  file: tests/test_p14_reporting_runtime.py
-  methods: 20
+  files:
+    - tests/test_p14_reporting_runtime.py
+    - tests/test_p14_reporting_adversarial.py
+  methods: 32
   status: CI_PENDING
+review:
+  status: REMEDIATED_CI_PENDING
+  resolved_findings: 10
 requirements:
   - Q-BLD-007
   - Q-BLD-011
