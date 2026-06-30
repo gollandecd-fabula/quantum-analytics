@@ -104,7 +104,7 @@
         "semantic_role": {"const": "status"},
         "accessible_summary": {"type": "string", "minLength": 1},
         "schema_id": {"$ref": "#/$defs/nullableString"},
-        "diagnostics": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+        "diagnostics": {"type": "array", "items": {"type": "string"}},
         "structural_fingerprint_available": {"type": "boolean"},
         "semantic_fingerprint_available": {"type": "boolean"},
         "admitted_to_canonical_processing": {"type": "boolean"},
