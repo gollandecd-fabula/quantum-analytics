@@ -2,56 +2,55 @@ schema_version: "1.0"
 date: "2026-06-30"
 stage: P1_TECHNICAL_FOUNDATION_BUILD
 unit: P1_3_CANONICAL_SOURCE_ROWS_AND_OPERATION_LEDGER_FOUNDATION
-status: REMEDIATED_CI_PENDING
+status: COMPLETE
 working_branch: p13-canonical-ledger
+closure_branch: close-p1-3-post-merge-v1
 base_commit: 05d004bc734cde4f6e3703cf06e969d37399cbea
+exact_head: c554db649f7d0e273656c0d7298105e3785bfe66
+merged_commit: 603cd55124b6092baa88ea07e6c6daaa8c2a6411
 pull_request: 24
 runtime_dependency_installation_authorized: false
 marketplace_write_enabled: false
 commercial_data_authorized: false
 implemented:
-  - immutable tenant-scoped source rows with payload-hash verification
-  - mandatory structural and semantic fingerprint digests
-  - deterministic source-record and import-batch identifiers
-  - append-only in-memory source-row and canonical-event ledger
-  - atomic multi-row batch commit and rollback
-  - dependency ordering independent of CSV row order
-  - tenant-scoped event and source-row lookup
-  - event-to-source-row-to-raw-file lineage tracing
+  - immutable source rows with payload and fingerprint verification
+  - content-derived batch and source-record identities
+  - duplicate raw-upload locator aliases without duplicate canonical records
+  - atomic append-only source and event batches with rollback
+  - deterministic dependency and supersession-aware ordering
+  - tenant-scoped event-to-source-row-to-raw-file lineage
   - idempotent replay and conflict detection
-  - monotonic revision and supersession validation
-  - active-version reversal accounting
-  - reversal product, quantity-unit and currency validation
-  - cumulative reversal quantity and amount bounds
-  - event payload semantic-hash verification
-  - strict provenance and typed-value boundaries
-  - row-level semantic quarantine without source-row loss
-  - blocked unresolved dependencies without partial writes
-  - duplicate quarantine counters
-  - normalization actor, provenance timestamp and currency validation
+  - revision, supersession and active reversal validation
+  - product, quantity-unit, currency and cumulative reversal checks
+  - semantic event hash, provenance and typed-value validation
+  - row-level quarantine and unresolved-dependency blocking
   - synthetic validated-CSV ingestion from P1.2 raw storage
 tests:
   files:
     - tests/test_p13_canonical_ledger.py
     - tests/test_p13_review_regressions.py
     - tests/test_p13_event_integrity.py
-  methods: 21
-  status: CI_PENDING
+  methods: 23
+  status: PASS
+ci:
+  foundation_run: 28436038476
+  foundation: PASS
+  oss_admission_run: 28436038473
+  oss_admission: PASS
+  osv: PASS
+  artifact_manifest: PASS
 review:
-  status: REMEDIATED_CI_PENDING
-  resolved_findings: 18
+  status: COMPLETE
+  resolved_findings: 20
+  unresolved_threads: 0
 limitations:
-  - in-memory ledger only
-  - single-process coordination only
+  - in-memory and single-process ledger only
   - synthetic CSV schema only
-  - ingestion service uses its stable module path because package-root export is tool-blocked
+  - ingestion service uses its stable module path
   - dedicated source-row JSON Schema publication is pending
 exclusions:
-  - financial metrics and profit calculation
-  - calculation profiles
-  - real marketplace reports
+  - financial calculations and calculation profiles
+  - real marketplace reports and marketplace APIs
   - PostgreSQL persistence
-  - marketplace API calls and writes
-  - UI and deployment
-  - global learning
+  - UI, deployment and global learning
 release_status: RELEASE_BLOCKED

@@ -7,7 +7,7 @@ macro_stage: B
 status: ACTIVE
 current_unit: P13
 tracking_issue: 24
-working_branch: p13-canonical-ledger
+working_branch: close-p1-3-post-merge-v1
 
 units:
   B0:
@@ -52,11 +52,14 @@ units:
     test_method_count: 19
     resolved_findings: 11
   P13:
-    state: REMEDIATED_CI_PENDING
+    state: COMPLETE
+    merged_commit: 603cd55124b6092baa88ea07e6c6daaa8c2a6411
     pull_request: 24
     risk: R2
     evidence: docs/evidence/STAGE_P1_3_EXECUTION_STATE.yaml
-    test_method_count: 21
+    test_method_count: 23
+    resolved_findings: 20
+    unresolved_threads: 0
   B4:
     state: PLANNED
     risk: R2

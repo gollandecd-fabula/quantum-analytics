@@ -1,26 +1,32 @@
 # CURRENT STATE
 
 Date: 2026-06-30
-Status: `BUILD_P1_3_REMEDIATED_CI_PENDING`
+Status: `BUILD_P1_3_COMPLETE`
 Active contract: `STAGE-B-BUILD-v1`
 Live execution state: `docs/evidence/STAGE_B_EXECUTION_STATE.yaml`
 Current unit: `P13 — CANONICAL_SOURCE_ROWS_AND_OPERATION_LEDGER_FOUNDATION`
-Tracking pull request: `#24`
-Working branch: `p13-canonical-ledger`
-Base commit: `05d004bc734cde4f6e3703cf06e969d37399cbea`
+Pull request: `#24`
+Merged commit: `603cd55124b6092baa88ea07e6c6daaa8c2a6411`
 
-## Current result
+## Completed result
 
-P1.3 now provides immutable source rows, atomic canonical-event batches,
-dependency ordering, exact lineage, idempotent replay, revision and active
-reversal validation, row-level quarantine, and strict payload/provenance checks.
+P1.3 provides immutable source rows, content-derived canonical identities,
+atomic canonical-event batches, dependency and supersession-aware ordering,
+exact lineage, idempotent duplicate-upload replay, revision and active reversal
+validation, and row-level quarantine.
 
-The targeted suite contains 21 methods across three files. A new exact-head CI
-run and independent closure review are still required.
+Verification completed:
+
+- 23 targeted tests passed;
+- Foundation CI passed;
+- OSS Admission and OSV checks passed;
+- artifact manifest equality passed;
+- 20 adversarial findings were corrected;
+- unresolved review threads: 0.
 
 ## Exclusions
 
-No financial calculation, real marketplace report, database persistence,
+No financial calculation, real marketplace report, PostgreSQL persistence,
 marketplace API or write, UI, deployment, or global learning is included.
 
 `RELEASE_BLOCKED`
