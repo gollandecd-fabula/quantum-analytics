@@ -1,9 +1,9 @@
 {
   "base_p14_closure_overlay_git_blob_sha": "b5a7134ddbdad6ae720ad22f49792eb063033aaf",
   "entries": [
-    ["docs/evidence/STAGE_B_EXECUTION_STATE.yaml", "ee88f93901c7e8801a783b1d24ad6ef893ebc9ba3df5bca89d7b9d52192f4853", 3421],
-    ["docs/evidence/STAGE_P1_5_EXECUTION_STATE.yaml", "421e4c293b3e9ea9917a8fe2c7707fa463130489736f6234c0737accef534145", 2956],
-    ["docs/governance/CURRENT_STATE.md", "adc9fa506c5c2b5263effb8f859f22be4f8d0ec7c4abbc05a768830cc5ce6c41", 2452],
+    ["docs/evidence/STAGE_B_EXECUTION_STATE.yaml", "9d7cd3ce01dfb80a7fd83c9e93112da53079ce2531c4df92814cb9b13d1ec382", 3717],
+    ["docs/evidence/STAGE_P1_5_EXECUTION_STATE.yaml", "12e53fb220e6433d24c6e30af5d8d71cbbf29c369da81bd538b4f60062e2b57d", 3436],
+    ["docs/governance/CURRENT_STATE.md", "caf05a3e6aa71ef69637a2f975cef69fde0090195104bf49870295658947b7a1", 2937],
     ["docs/ux/UX_ONBOARDING_EXCEPTION_INBOX_CONTRACT.md", "b2a9897c1da628f5b3139becacb01ce3a279361676479790b3c4c962142a762e", 8008],
     ["schemas/exception-inbox.schema.json", "f485040743132595bc0376fb9d5ea19234187bb91664734b94c7d0bc718d0dbd", 3796],
     ["schemas/ux-configuration-form.schema.json", "b71fc1f96ad550b6e9c96ec7bb114a0ae3d57f473f52e3341b87a598153145bc", 7177],
