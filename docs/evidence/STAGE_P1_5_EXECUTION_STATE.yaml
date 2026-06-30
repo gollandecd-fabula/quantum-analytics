@@ -3,10 +3,14 @@ date: "2026-06-30"
 stage: P1_TECHNICAL_FOUNDATION_BUILD
 unit: P1_5_UX_ONBOARDING_EXCEPTION_INBOX_FOUNDATION
 mapped_stage_unit: B5_UX_ONBOARDING_EXCEPTION_INBOX
-status: PENDING_CURRENT_PR_HEAD_VERIFICATION
+status: COMPLETE
 tracking_issue: 29
 working_branch: p15-ux-onboarding-exception-inbox
+closure_branch: close-p1-5-post-merge-v1
 base_state: P1_4_COMPLETE
+exact_head: 5cf1d83a737c8d9fdb5af73803f247e0dd1953a1
+merged_commit: 8a714e5688f3af5872305f8e1fdbdb4f56ee9d9a
+pull_request: 30
 risk: R2
 runtime_dependency_installation_authorized: false
 marketplace_write_enabled: false
@@ -29,6 +33,7 @@ implemented:
   - fail-closed organization, Actual/Scenario, tenant and duplicate isolation
   - duplicate configuration form identifiers rejected at the public boundary
   - non-empty tenant identifiers enforced for every Inbox mode
+  - stable pre-merge verification target without self-referential exact-head evidence
   - deterministic SHA-256 integrity for forms, views and inboxes
 schemas:
   - schemas/ux-configuration-form.schema.json
@@ -49,25 +54,24 @@ tests:
     - tests/test_p15_review_remediation.py
     - tests/test_p15_manifest_payload.py
     - tests/test_a0_p15_manifest_payload.py
-  methods_declared: 64
-  methods_verified: 64
-  status: PASS_REQUIRED_ON_CURRENT_PR_HEAD
-verification:
-  implementation_head: dd0b5d6029b4a2285c25f80b09b52b52d551946b
-  verification_target: CURRENT_PR_HEAD
-  foundation_ci: PASS_REQUIRED
-  oss_admission_and_osv: PASS_REQUIRED
-  artifact_manifest_equality: PASS_REQUIRED
-  merge_sha_recording: POST_MERGE_CLOSURE_ONLY
+  methods: 64
+  status: PASS
+ci:
+  foundation_run: 28454778048
+  foundation: PASS
+  oss_admission_run: 28454777923
+  oss_admission: PASS
+  osv: PASS
+  artifact_manifest: PASS
 review:
-  status: FINDING_REMEDIATED_RECHECK_REQUIRED
-  last_reviewed_commit: 6903d5aaef8d0e27a1ecf7e46b6a08fc18b0c62a
-  review_target: CURRENT_PR_HEAD
+  status: COMPLETE
+  reviewed_head: 5cf1d83a737c8d9fdb5af73803f247e0dd1953a1
+  final_signal: CODEX_PLUS_ONE
   codex_findings_received: 6
   codex_findings_remediated: 6
   internal_audit_findings_received: 2
   internal_audit_findings_remediated: 2
-  unresolved_threads_gate: ZERO_REQUIRED_AT_MERGE
+  unresolved_threads: 0
 requirements:
   - Q-BLD-007
   - Q-BLD-014
