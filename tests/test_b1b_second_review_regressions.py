@@ -128,10 +128,18 @@ class B1bSecondReviewRegressionTests(unittest.TestCase):
         resolution["candidates"][0]["eligible"] = True
         resolution["candidates"][0]["selected"] = True
         resolution["candidates"][0]["exclusion_reasons"] = []
+        resolution["candidates"][0]["ordering_tuple"] = [
+            [0, 0, 0, 0, 0, 0],
+            rule["priority"],
+            rule["valid_from"],
+            rule["version"],
+        ]
         resolution["trace_id"] = canonical_hash(
             resolution, exclude=frozenset({"trace_id"})
         )
-        with self.assertRaisesRegex(FinanceError, "RULE_NOT_APPROVED"):
+        with self.assertRaisesRegex(
+            FinanceError, "RULE_RESOLUTION_REPLAY_MISMATCH"
+        ):
             evaluate_resolved_rule(resolution, [rule], {}, policy())
 
     def test_rehashed_lower_priority_selection_is_not_trusted(self) -> None:
