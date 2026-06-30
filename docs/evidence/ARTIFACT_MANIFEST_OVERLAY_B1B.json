@@ -1,5 +1,5 @@
 {
-  "base_p15_closure_overlay_git_blob_sha": "33c32292050762759aeb89c647bf91f2072b8493",
+  "base_p15_closure_overlay_git_blob_sha": "05132bf0878ea010ead7e96c8f6bc6c4277ec22b",
   "entries": [
     ["docs/evidence/STAGE_B_B1B_EXECUTION_STATE.yaml", "6e4e667ee83bcb57e4c9900a9d6842ca69856a818c48f0d4c77b74e18b8049f3", 2748],
     ["docs/evidence/STAGE_B_EXECUTION_STATE.yaml", "c6f040d97d79fd6ae02f63bb3e75324d8fa6aaf6835a7f645ed073ca880a16ed", 4015],
@@ -27,7 +27,7 @@
     ["tests/test_p15_manifest_payload.py", "19e353ef84da882d0bdb0fe6d23cbb665854ca24f9335ac341e91f94fbaf2b5a", 2961]
   ],
   "hash_encoding": "sha256-hex",
-  "overlay_version": 3,
-  "reason": "B1b owner-approved baseline and payload-control updates.",
+  "overlay_version": 4,
+  "reason": "B1b owner-approved baseline and synchronized cross-stage manifest controls.",
   "remove_paths": []
 }
