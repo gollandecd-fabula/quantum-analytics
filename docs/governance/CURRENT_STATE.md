@@ -15,6 +15,7 @@ P1.5 implements dependency-free, headless UX contracts over the completed B1a,
 B3, B4, and ingestion foundations. The current branch provides:
 
 - explicit preview-only inputs for cost, tax rate, tax base, and other expense;
+- B1a-aligned RATE tax-base vocabulary with `NONE` rejected;
 - explicit organization, Actual/Scenario, scope, validity, and currency controls;
 - no-hidden-default behavior and distinct numeric-zero semantics;
 - text-first accessible views for typed metric and import states;
@@ -22,7 +23,7 @@ B3, B4, and ingestion foundations. The current branch provides:
 - deterministic Exception Inbox entries with cause, evidence, affected metrics,
   required resolution, and independent-result continuity;
 - fail-closed organization, mode, tenant, duplicate, and forged-input controls;
-- machine-readable schemas and 56 declared targeted test methods.
+- machine-readable schemas and 58 declared targeted test methods.
 
 Tests, exact-head CI, artifact-manifest synchronization, independent review, and
 closure remain pending. No test pass is claimed at this state.
