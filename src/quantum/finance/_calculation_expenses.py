@@ -11,6 +11,14 @@ from ._common import (
 from ._metrics import _expect, _money_sum
 from ._rounding import _normalize_value, _propagate
 
+_SUPPORTED_EXPENSE_UNITS = {
+    "MONEY",
+    "MONEY_PER_PERIOD",
+    "MONEY_PER_ITEM",
+    "MONEY_PER_ORDER",
+    "MONEY_PER_EVENT",
+}
+
 
 def calculate_other_expense(
     components_raw: object,
@@ -23,7 +31,6 @@ def calculate_other_expense(
         raise FinanceError("OTHER_EXPENSE_COMPONENTS_INVALID")
     component_ids: set[str] = set()
     expense_terms: list[tuple[int, _Value]] = []
-    expense_dependencies: list[_Value] = []
     for component in components_raw:
         if (
             not isinstance(component, Mapping)
@@ -40,10 +47,6 @@ def calculate_other_expense(
             ),
             policy,
         )
-        expense_dependencies.append(value)
-        if value.state != "VALID":
-            expense_terms.append((1, value))
-            continue
         if value.value_type != "MONEY" or value.currency != currency:
             expense_terms.append((
                 1,
@@ -56,6 +59,22 @@ def calculate_other_expense(
                     source_ids=value.source_ids,
                 ),
             ))
+            continue
+        if value.unit not in _SUPPORTED_EXPENSE_UNITS:
+            expense_terms.append((
+                1,
+                _make_nonvalid(
+                    "BLOCKED",
+                    value_type="MONEY",
+                    unit="MONEY",
+                    currency=currency,
+                    reason_code="OTHER_EXPENSE_UNIT_UNSUPPORTED",
+                    source_ids=value.source_ids,
+                ),
+            ))
+            continue
+        if value.state != "VALID":
+            expense_terms.append((1, value))
             continue
         assert isinstance(value.value, Decimal)
         if value.unit in {"MONEY", "MONEY_PER_PERIOD"}:
@@ -108,7 +127,7 @@ def calculate_other_expense(
                     currency=currency,
                     source_ids=tuple((*orders.source_ids, *value.source_ids)),
                 )
-        elif value.unit == "MONEY_PER_EVENT":
+        else:
             events = _expect(
                 inputs, "event_count",
                 value_type="INTEGER", unit="EVENT", currency=None,
@@ -130,17 +149,8 @@ def calculate_other_expense(
                     currency=currency,
                     source_ids=tuple((*events.source_ids, *value.source_ids)),
                 )
-        else:
-            amount = _make_nonvalid(
-                "BLOCKED",
-                value_type="MONEY",
-                unit="MONEY",
-                currency=currency,
-                reason_code="OTHER_EXPENSE_UNIT_UNSUPPORTED",
-                source_ids=value.source_ids,
-            )
         expense_terms.append((1, amount))
-    other_expense = (
+    return (
         _money_sum(expense_terms, currency=currency)
         if expense_terms
         else _make_nonvalid(
@@ -152,5 +162,3 @@ def calculate_other_expense(
             source_ids=(),
         )
     )
-
-    return other_expense
