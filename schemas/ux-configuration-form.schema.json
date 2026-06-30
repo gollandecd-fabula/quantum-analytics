@@ -1,0 +1,191 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://quantum.local/schemas/ux-configuration-form.schema.json",
+  "title": "Quantum UX Configuration Form v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "form_id",
+    "organization_id",
+    "mode",
+    "scenario_id",
+    "actor",
+    "scope",
+    "valid_from",
+    "valid_to",
+    "currency",
+    "created_at",
+    "publication_state",
+    "fields",
+    "status",
+    "problems",
+    "form_hash"
+  ],
+  "properties": {
+    "schema_version": {"const": "quantum-configuration-form-v1"},
+    "form_id": {"type": "string", "minLength": 1},
+    "organization_id": {"type": "string", "minLength": 1},
+    "mode": {"enum": ["ACTUAL", "SCENARIO"]},
+    "scenario_id": {"type": ["string", "null"], "minLength": 1},
+    "actor": {"type": "string", "minLength": 1},
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["organization_id"],
+      "properties": {
+        "organization_id": {"type": "string", "minLength": 1},
+        "marketplace_account_id": {"type": "string", "minLength": 1},
+        "marketplace": {"type": "string", "minLength": 1},
+        "product_id": {"type": "string", "minLength": 1},
+        "product_group_id": {"type": "string", "minLength": 1},
+        "calculation_profile_id": {"type": "string", "minLength": 1},
+        "scenario_id": {"type": "string", "minLength": 1}
+      },
+      "not": {"required": ["product_id", "product_group_id"]}
+    },
+    "valid_from": {"type": ["string", "null"], "format": "date-time"},
+    "valid_to": {"type": ["string", "null"], "format": "date-time"},
+    "currency": {"type": ["string", "null"], "pattern": "^[A-Z]{3}$"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "publication_state": {"const": "PREVIEW_ONLY"},
+    "fields": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "prefixItems": [
+        {"$ref": "#/$defs/costField"},
+        {"$ref": "#/$defs/taxRateField"},
+        {"$ref": "#/$defs/taxBaseField"},
+        {"$ref": "#/$defs/otherExpenseField"}
+      ],
+      "items": false
+    },
+    "status": {"enum": ["BLOCKED", "PARTIAL", "READY_FOR_RULE_DRAFT"]},
+    "problems": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["code", "field_id", "message"],
+        "properties": {
+          "code": {"type": "string", "minLength": 1},
+          "field_id": {"type": "string", "minLength": 1},
+          "message": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "form_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"mode": {"const": "ACTUAL"}}, "required": ["mode"]},
+      "then": {"properties": {"scenario_id": {"type": "null"}}}
+    },
+    {
+      "if": {"properties": {"mode": {"const": "SCENARIO"}}, "required": ["mode"]},
+      "then": {"properties": {"scenario_id": {"type": "string", "minLength": 1}}}
+    }
+  ],
+  "$defs": {
+    "fieldState": {
+      "oneOf": [
+        {
+          "properties": {
+            "state": {"const": "VALID"},
+            "value": {"type": "string", "minLength": 1},
+            "diagnostic": {"type": "null"}
+          },
+          "required": ["state", "value", "diagnostic"]
+        },
+        {
+          "properties": {
+            "state": {"enum": ["EMPTY", "INVALID", "BLOCKED"]},
+            "value": {"type": "null"},
+            "diagnostic": {"type": "string", "minLength": 1}
+          },
+          "required": ["state", "value", "diagnostic"]
+        }
+      ]
+    },
+    "fieldBase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "field_id",
+        "label",
+        "input_kind",
+        "control",
+        "required",
+        "requires_currency",
+        "contract_unit",
+        "accessible_name",
+        "value",
+        "state",
+        "diagnostic"
+      ],
+      "properties": {
+        "field_id": {"type": "string"},
+        "label": {"type": "string", "minLength": 1},
+        "input_kind": {"type": "string", "minLength": 1},
+        "control": {"enum": ["decimal", "select"]},
+        "required": {"const": true},
+        "requires_currency": {"type": "boolean"},
+        "contract_unit": {"enum": ["MONEY_PER_ITEM", "RATE", "DIMENSIONLESS"]},
+        "accessible_name": {"type": "string", "minLength": 1},
+        "value": {"type": ["string", "null"]},
+        "state": {"enum": ["EMPTY", "VALID", "INVALID", "BLOCKED"]},
+        "diagnostic": {"type": ["string", "null"], "minLength": 1}
+      },
+      "allOf": [{"$ref": "#/$defs/fieldState"}]
+    },
+    "costField": {
+      "allOf": [
+        {"$ref": "#/$defs/fieldBase"},
+        {"properties": {
+          "field_id": {"const": "cost"},
+          "input_kind": {"const": "COST"},
+          "control": {"const": "decimal"},
+          "requires_currency": {"const": true},
+          "contract_unit": {"const": "MONEY_PER_ITEM"}
+        }}
+      ]
+    },
+    "taxRateField": {
+      "allOf": [
+        {"$ref": "#/$defs/fieldBase"},
+        {"properties": {
+          "field_id": {"const": "tax_rate"},
+          "input_kind": {"const": "TAX_RATE"},
+          "control": {"const": "decimal"},
+          "requires_currency": {"const": false},
+          "contract_unit": {"const": "RATE"}
+        }}
+      ]
+    },
+    "taxBaseField": {
+      "allOf": [
+        {"$ref": "#/$defs/fieldBase"},
+        {"properties": {
+          "field_id": {"const": "tax_base"},
+          "input_kind": {"const": "TAX_BASE"},
+          "control": {"const": "select"},
+          "requires_currency": {"const": false},
+          "contract_unit": {"const": "DIMENSIONLESS"}
+        }}
+      ]
+    },
+    "otherExpenseField": {
+      "allOf": [
+        {"$ref": "#/$defs/fieldBase"},
+        {"properties": {
+          "field_id": {"const": "other_expense"},
+          "input_kind": {"const": "OTHER_EXPENSE"},
+          "control": {"const": "decimal"},
+          "requires_currency": {"const": true},
+          "contract_unit": {"const": "MONEY_PER_ITEM"}
+        }}
+      ]
+    }
+  }
+}
