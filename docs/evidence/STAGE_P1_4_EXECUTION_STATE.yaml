@@ -21,7 +21,7 @@ implemented:
   - JSON, JSONL and CSV round-trip contracts
   - spreadsheet-formula-safe CSV projections
   - tenant and Actual/Scenario export isolation
-  - duplicate report-record rejection
+  - duplicate report-record rejection in runtime and exact-duplicate schema floor
   - bounded content-bound cursor pagination
   - record and byte export limits
 schemas:
@@ -34,11 +34,12 @@ tests:
   files:
     - tests/test_p14_reporting_runtime.py
     - tests/test_p14_reporting_adversarial.py
-  methods: 32
+    - tests/test_p14_schema_alignment.py
+  methods: 37
   status: CI_PENDING
 review:
   status: REMEDIATED_CI_PENDING
-  resolved_findings: 10
+  resolved_findings: 11
 requirements:
   - Q-BLD-007
   - Q-BLD-011
