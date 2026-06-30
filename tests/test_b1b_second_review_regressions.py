@@ -147,6 +147,33 @@ class B1bSecondReviewRegressionTests(unittest.TestCase):
         ):
             evaluate_resolved_rule(resolution, [rule], variables, policy())
 
+    def test_nonvalid_safe_expression_result_must_match_rule_signature(self) -> None:
+        expression = {
+            "kind": "VARIABLE",
+            "name": "tax_rate",
+            "value_type": "RATE",
+            "currency": None,
+            "unit": "RATE",
+        }
+        rule = rule_document(method="SAFE_EXPRESSION", expression=expression)
+        resolution = resolve_rule([rule], context())
+        variables = {
+            "gross_sales_amount": typed(
+                "100", value_type="MONEY", unit="MONEY", currency="EUR"
+            ),
+            "tax_rate": typed(
+                None,
+                value_type="RATE",
+                unit="RATE",
+                state="UNAVAILABLE",
+                reason_code="TAX_RATE_SOURCE_MISSING",
+            ),
+        }
+        with self.assertRaisesRegex(
+            FinanceError, "RULE_EXPRESSION_SIGNATURE_MISMATCH"
+        ):
+            evaluate_resolved_rule(resolution, [rule], variables, policy())
+
     def test_safe_expression_missing_dependency_remains_unavailable(self) -> None:
         expression = {
             "kind": "VARIABLE",
