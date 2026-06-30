@@ -9,6 +9,10 @@
   ],
   "$defs": {
     "hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "canonicalUuid": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
     "nullableString": {"type": ["string", "null"]},
     "versionedEvidenceRef": {
       "type": "object",
@@ -94,7 +98,7 @@
         "view_type": {"const": "IMPORT_STATUS"},
         "view_id": {"type": "string", "minLength": 1},
         "tenant_id": {"type": "string", "minLength": 1},
-        "raw_file_id": {"type": "string", "minLength": 1},
+        "raw_file_id": {"$ref": "#/$defs/canonicalUuid"},
         "sha256": {"$ref": "#/$defs/hash"},
         "size_bytes": {"type": "integer", "minimum": 0},
         "filename": {"type": "string", "minLength": 1},
