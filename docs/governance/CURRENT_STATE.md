@@ -1,7 +1,7 @@
 # CURRENT STATE
 
 Date: 2026-06-30
-Status: `BUILD_B1B_REVIEW_PENDING_CI_AND_INDEPENDENT_REVIEW`
+Status: `BUILD_B1B_REVIEW_PENDING_INDEPENDENT_REVIEW`
 Active contract: `STAGE-B-BUILD-v1`
 Live execution state: `docs/evidence/STAGE_B_EXECUTION_STATE.yaml`
 Current unit: `B1b — CALCULATION_KERNEL_IMPLEMENTATION`
@@ -22,7 +22,7 @@ Explicit user R3 authorization was recorded on 2026-06-30.
 - External second-line financial review remains mandatory before admission of real
   or anonymized commercial data or production use.
 
-## Implementation candidate
+## Verified implementation candidate
 
 The B1b branch contains a dependency-free preview financial kernel with:
 
@@ -32,21 +32,21 @@ The B1b branch contains a dependency-free preview financial kernel with:
 - explicit cost, tax rate, tax base, and named other-expense inputs;
 - no hidden commercial defaults or fixed commercial constants;
 - Actual/Scenario isolation;
-- independent reference oracle that does not import the production runtime;
+- independent reference Oracle that does not import the production runtime;
 - four owner-approved synthetic Golden Baseline scenarios;
-- 67 targeted test methods prepared for rerun after the owner-signoff patch;
-- compile, AST security, fixed-commercial-constant, Foundation CI, and OSS Admission
-  controls required on the new exact head.
+- 67 targeted test methods passing in Foundation CI;
+- compile, AST security, fixed-commercial-constant, manifest-chain, and accumulated
+  Foundation controls passing on code head `e6393a808574da415e8e6caf9d24d9d61127ed8e`;
+- OSS Admission/registry/OSV checks passing on the same code head.
 
 ## Pending controls
 
 B1b is not complete until:
 
-1. the full accumulated repository test suite and required GitHub CI pass on the
-   owner-signoff patch exact head;
-2. OSS Admission/registry/OSV checks pass on the same exact head;
-3. independent code review has no unresolved findings;
-4. exact reviewed-head and post-merge evidence are recorded.
+1. independent code review has no unresolved findings;
+2. the exact reviewed head is recorded;
+3. final exact-head CI remains green after evidence synchronization;
+4. post-merge closure evidence is created.
 
 ## Critical path
 
