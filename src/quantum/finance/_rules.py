@@ -321,6 +321,10 @@ def evaluate_resolved_rule(
         or canonical_hash(resolution, exclude=frozenset({"trace_id"})) != trace_id
     ):
         raise FinanceError("RULE_RESOLUTION_TRACE_MISMATCH")
+    state = resolution["state"]
+    diagnostic = resolution.get("diagnostic_code")
+    if (state == "VALID") != (diagnostic is None):
+        raise FinanceError("RULE_RESOLUTION_INVALID")
     candidates = resolution.get("candidates")
     if not isinstance(candidates, list):
         raise FinanceError("RULE_RESOLUTION_INVALID")
@@ -330,18 +334,16 @@ def evaluate_resolved_rule(
         and candidate.get("eligible") is True
         and candidate.get("selected") is True
     ]
-    if resolution["state"] != "VALID":
+    if state != "VALID":
         if selected:
             raise FinanceError("RULE_RESOLUTION_INVALID")
-        state = str(resolution["state"])
-        reason = resolution.get("diagnostic_code") or f"RULE_{state}"
         return _value_to_dict(
             _make_nonvalid(
-                state,
+                str(state),
                 value_type="DECIMAL",
                 unit="DIMENSIONLESS",
                 currency=None,
-                reason_code=str(reason),
+                reason_code=str(diagnostic),
                 source_ids=(trace_id,),
             )
         )
@@ -400,7 +402,6 @@ def evaluate_resolved_rule(
             scale=scale,
         )
 
-    dependency_values = [typed_variables[name] for name in dependencies]
     propagated = _propagate(
         dependency_values,
         value_type="RATE",
