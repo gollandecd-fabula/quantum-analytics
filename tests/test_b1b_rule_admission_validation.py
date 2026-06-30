@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+import json
+import re
 import unittest
+from pathlib import Path
 
 from quantum.finance import (
     FinanceError,
@@ -65,6 +68,36 @@ class B1bRuleAdmissionValidationTests(unittest.TestCase):
         )
         with self.assertRaisesRegex(FinanceError, "EXPRESSION_LIMIT_EXCEEDED"):
             resolve_rule([rule], context())
+
+    def test_safe_expression_schema_matches_runtime_identifier_and_unit_contract(self) -> None:
+        schema_path = (
+            Path(__file__).resolve().parents[1]
+            / "schemas/safe-expression.schema.json"
+        )
+        schema = json.loads(schema_path.read_text(encoding="utf-8"))
+        variable_pattern = schema["$defs"]["variable"]["properties"]["name"]["pattern"]
+        self.assertIsNotNone(re.fullmatch(variable_pattern, "metric:actual"))
+        for node_kind in ("literal", "variable", "operation"):
+            with self.subTest(node_kind=node_kind):
+                self.assertEqual(
+                    schema["$defs"][node_kind]["properties"]["unit"]["type"],
+                    "string",
+                )
+
+        expression = {
+            "kind": "VARIABLE",
+            "name": "metric:actual",
+            "value_type": "MONEY",
+            "currency": "EUR",
+            "unit": "MONEY",
+        }
+        rule = rule_document(
+            method="SAFE_EXPRESSION",
+            expression=expression,
+            dependencies=("metric:actual",),
+        )
+        resolution = resolve_rule([rule], context())
+        self.assertEqual(resolution["state"], "VALID")
 
 
 if __name__ == "__main__":
