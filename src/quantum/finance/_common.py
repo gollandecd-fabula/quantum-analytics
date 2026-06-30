@@ -266,8 +266,8 @@ def _value_from_dict(raw: object, *, source_id: str) -> _Value:
     source_ids_raw = raw.get("source_ids")
     if (
         not isinstance(source_ids_raw, list)
-        or len(source_ids_raw) != len(set(source_ids_raw))
         or any(not _is_nonempty_string(item) for item in source_ids_raw)
+        or len(source_ids_raw) != len(set(source_ids_raw))
     ):
         raise FinanceError("VALUE_SOURCES_INVALID")
     source_ids = tuple(sorted(set([source_id, *source_ids_raw])))
