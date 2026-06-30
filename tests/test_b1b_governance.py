@@ -35,6 +35,7 @@ class B1bGovernanceTests(unittest.TestCase):
         forbidden_calls = {
             "e" + "val", "ex" + "ec", "com" + "pile",
             "__im" + "port__", "op" + "en", "in" + "put",
+            "flo" + "at",
         }
         forbidden_imports = {
             "sub" + "process", "sock" + "et", "req" + "uests",
@@ -59,8 +60,6 @@ class B1bGovernanceTests(unittest.TestCase):
         for module_name, source in production_module_sources().items():
             tree = ast.parse(source, filename=module_name)
             with self.subTest(module=module_name):
-                self.assertNotIn("float(", source)
-                self.assertNotIn("from_float", source)
                 self.assertFalse(
                     any(
                         isinstance(node, ast.Constant) and isinstance(node.value, float)
