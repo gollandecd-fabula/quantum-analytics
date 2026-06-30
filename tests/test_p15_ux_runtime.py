@@ -5,6 +5,7 @@ import unittest
 from datetime import UTC, datetime
 
 from quantum.evidence import canonical_snapshot_hash
+from quantum.ingestion import RawFileRecord, RawFileState
 from quantum.reporting import build_report_record
 from quantum.ux import (
     UXError,
@@ -12,6 +13,7 @@ from quantum.ux import (
     build_configuration_form,
     build_exception_inbox,
     build_report_drilldown,
+    render_import_status,
     render_report_record,
     validate_ux_hash,
 )
@@ -20,6 +22,7 @@ from tests.b3_helpers import valid_snapshot
 
 NOW = datetime(2026, 6, 30, 18, 0, tzinfo=UTC)
 VALID_FROM = datetime(2026, 7, 1, 0, 0, tzinfo=UTC)
+TENANT_ID = "tenant-synthetic"
 
 
 class P15UXRuntimeTests(unittest.TestCase):
@@ -66,6 +69,45 @@ class P15UXRuntimeTests(unittest.TestCase):
             generated_at=NOW,
         )
 
+    @staticmethod
+    def integer_zero_record(record_id: str = "report-integer-zero"):
+        snapshot = valid_snapshot()
+        snapshot.update({
+            "metric_snapshot_id": "metric-integer-zero",
+            "value": 0,
+            "value_type": "INTEGER",
+            "unit": "COUNT",
+            "currency": None,
+        })
+        snapshot["content_hash"] = canonical_snapshot_hash(snapshot)
+        return build_report_record(
+            snapshot,
+            report_record_id=record_id,
+            generated_at=NOW,
+        )
+
+    @staticmethod
+    def raw_record(
+        *,
+        raw_file_id: str = "00000000-0000-4000-8000-000000000001",
+        tenant_id: str = TENANT_ID,
+        state: RawFileState = RawFileState.VALID,
+        diagnostics: tuple[str, ...] = (),
+    ) -> RawFileRecord:
+        return RawFileRecord(
+            raw_file_id=raw_file_id,
+            tenant_id=tenant_id,
+            sha256="a" * 64,
+            size_bytes=128,
+            sanitized_filename="synthetic.csv",
+            storage_key=f"tenants/{tenant_id}/raw/{'a' * 64}",
+            state=state,
+            schema_id="wb-synthetic-v1" if state is RawFileState.VALID else None,
+            structural_fingerprint={"columns": ["synthetic"]},
+            semantic_fingerprint=None,
+            diagnostics=diagnostics,
+        )
+
     def test_new_form_contains_no_business_defaults(self) -> None:
         form = self.form(valid_from=None, currency=None)
         self.assertEqual(form["status"], "BLOCKED")
@@ -91,10 +133,7 @@ class P15UXRuntimeTests(unittest.TestCase):
         validate_ux_hash(configured, "form_hash")
 
     def test_partial_configuration_remains_partial_without_fallbacks(self) -> None:
-        configured = apply_configuration_values(
-            self.form(),
-            {"cost": "400"},
-        )
+        configured = apply_configuration_values(self.form(), {"cost": "400"})
         self.assertEqual(configured["status"], "PARTIAL")
         states = {field["field_id"]: field["state"] for field in configured["fields"]}
         self.assertEqual(states["cost"], "VALID")
@@ -167,6 +206,12 @@ class P15UXRuntimeTests(unittest.TestCase):
                 },
             )
 
+    def test_form_shape_tampering_fails_closed(self) -> None:
+        form = self.form()
+        form["fields"][0]["field_id"] = "hidden_cost"
+        with self.assertRaisesRegex(UXError, "UX_FORM_FIELDS_INVALID"):
+            apply_configuration_values(form, {})
+
     def test_valid_zero_has_distinct_accessible_rendering(self) -> None:
         view = render_report_record(self.valid_record())
         self.assertEqual(view["state"], "VALID")
@@ -174,6 +219,12 @@ class P15UXRuntimeTests(unittest.TestCase):
         self.assertEqual(view["status_label"], "Valid numeric zero")
         self.assertEqual(view["semantic_role"], "status")
         validate_ux_hash(view, "view_hash")
+
+    def test_integer_zero_has_distinct_accessible_rendering(self) -> None:
+        view = render_report_record(self.integer_zero_record())
+        self.assertTrue(view["is_numeric_zero"])
+        self.assertEqual(view["value_text"], "0")
+        self.assertEqual(view["accessible_summary"], "Valid result with numeric value zero.")
 
     def test_blocked_result_never_renders_as_zero(self) -> None:
         view = render_report_record(self.blocked_record())
@@ -187,6 +238,24 @@ class P15UXRuntimeTests(unittest.TestCase):
         self.assertEqual(drilldown["verification_status"], "PREVIEW_ONLY")
         self.assertFalse(drilldown["can_claim_verified_evidence"])
         self.assertIsNone(drilldown["evidence_chain_content_hash"])
+
+    def test_valid_import_status_is_accessible_and_hides_storage_key(self) -> None:
+        view = render_import_status(self.raw_record())
+        self.assertEqual(view["state"], "VALID")
+        self.assertEqual(view["semantic_role"], "status")
+        self.assertTrue(view["admitted_to_canonical_processing"])
+        self.assertNotIn("storage_key", view)
+        validate_ux_hash(view, "view_hash")
+
+    def test_quarantined_import_status_is_not_admitted(self) -> None:
+        record = self.raw_record(
+            state=RawFileState.QUARANTINED,
+            diagnostics=("SCHEMA_UNKNOWN",),
+        )
+        view = render_import_status(record)
+        self.assertEqual(view["status_label"], "Quarantined")
+        self.assertFalse(view["admitted_to_canonical_processing"])
+        self.assertEqual(view["diagnostics"], ["SCHEMA_UNKNOWN"])
 
     def test_exception_inbox_preserves_independent_valid_metric(self) -> None:
         valid = self.valid_record()
@@ -210,7 +279,40 @@ class P15UXRuntimeTests(unittest.TestCase):
         self.assertIn("CONFIGURATION_REQUIRED", causes)
         self.assertTrue(all(item["required_resolution"] for item in inbox["exceptions"]))
 
-    def test_exception_inbox_rejects_mixed_tenants(self) -> None:
+    def test_quarantined_import_appears_as_schema_exception(self) -> None:
+        quarantined = self.raw_record(
+            state=RawFileState.QUARANTINED,
+            diagnostics=("SCHEMA_UNKNOWN",),
+        )
+        inbox = build_exception_inbox(
+            [],
+            import_records=[quarantined],
+            tenant_id=TENANT_ID,
+            generated_at=NOW,
+        )
+        self.assertEqual(inbox["organization_id"], None)
+        self.assertEqual(inbox["exception_count"], 1)
+        self.assertEqual(inbox["exceptions"][0]["category"], "SCHEMA")
+        self.assertEqual(inbox["exceptions"][0]["cause"], "SCHEMA_UNKNOWN")
+
+    def test_import_exception_requires_explicit_tenant(self) -> None:
+        with self.assertRaisesRegex(UXError, "UX_INBOX_TENANT_REQUIRED"):
+            build_exception_inbox(
+                [],
+                import_records=[self.raw_record(state=RawFileState.REJECTED)],
+                generated_at=NOW,
+            )
+
+    def test_import_exception_rejects_cross_tenant_record(self) -> None:
+        with self.assertRaisesRegex(UXError, "UX_INBOX_TENANT_MIXED"):
+            build_exception_inbox(
+                [],
+                import_records=[self.raw_record(tenant_id="other-tenant")],
+                tenant_id=TENANT_ID,
+                generated_at=NOW,
+            )
+
+    def test_exception_inbox_rejects_mixed_organizations(self) -> None:
         other_snapshot = valid_snapshot()
         other_snapshot["organization_id"] = "other-org"
         other_snapshot["metric_snapshot_id"] = "metric-other"
@@ -220,7 +322,7 @@ class P15UXRuntimeTests(unittest.TestCase):
             report_record_id="report-other",
             generated_at=NOW,
         )
-        with self.assertRaisesRegex(UXError, "UX_INBOX_TENANT_MIXED"):
+        with self.assertRaisesRegex(UXError, "UX_INBOX_ORGANIZATION_MIXED"):
             build_exception_inbox([self.valid_record(), other], generated_at=NOW)
 
     def test_exception_inbox_rejects_duplicate_records(self) -> None:
