@@ -112,6 +112,41 @@ class B1bSecondReviewRegressionTests(unittest.TestCase):
         with self.assertRaisesRegex(FinanceError, "RULE_RESOLUTION_INVALID"):
             evaluate_resolved_rule(resolution, [rule], {}, policy())
 
+    def test_forged_valid_resolution_cannot_select_draft_rule(self) -> None:
+        rule = rule_document(status="DRAFT")
+        resolution = resolve_rule([rule], context())
+        resolution["state"] = "VALID"
+        resolution["diagnostic_code"] = None
+        resolution["candidates"][0]["eligible"] = True
+        resolution["candidates"][0]["selected"] = True
+        resolution["candidates"][0]["exclusion_reasons"] = []
+        resolution["trace_id"] = canonical_hash(
+            resolution, exclude=frozenset({"trace_id"})
+        )
+        with self.assertRaisesRegex(FinanceError, "RULE_NOT_APPROVED"):
+            evaluate_resolved_rule(resolution, [rule], {}, policy())
+
+    def test_safe_expression_result_must_match_rule_signature(self) -> None:
+        expression = {
+            "kind": "LITERAL",
+            "value": "0.10",
+            "value_type": "RATE",
+            "currency": None,
+            "unit": "RATE",
+        }
+        rule = rule_document(method="SAFE_EXPRESSION", expression=expression)
+        resolution = resolve_rule([rule], context())
+        variables = {
+            "gross_sales_amount": typed(
+                "100", value_type="MONEY", unit="MONEY", currency="EUR"
+            ),
+            "tax_rate": typed("0.10", value_type="RATE", unit="RATE"),
+        }
+        with self.assertRaisesRegex(
+            FinanceError, "RULE_EXPRESSION_SIGNATURE_MISMATCH"
+        ):
+            evaluate_resolved_rule(resolution, [rule], variables, policy())
+
 
 if __name__ == "__main__":
     unittest.main()
