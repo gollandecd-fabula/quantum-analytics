@@ -80,14 +80,21 @@ units:
       - BLD-027
       - BLD-028
   P15:
-    state: FINDINGS_REMEDIATED_TESTS_PENDING
+    state: VERIFIED_PENDING_FINAL_REVIEW
     issue: 29
     risk: R2
     evidence: docs/evidence/STAGE_P1_5_EXECUTION_STATE.yaml
     test_method_count_declared: 63
-    review_findings_received: 5
-    review_findings_remediated: 5
-    unresolved_threads: 2
+    test_method_count_verified: 63
+    exact_head: dd0b5d6029b4a2285c25f80b09b52b52d551946b
+    foundation_ci_run: 28450819777
+    oss_admission_ci_run: 28450819756
+    artifact_manifest_equality: PASS
+    codex_findings_received: 5
+    codex_findings_remediated: 5
+    internal_audit_findings_received: 1
+    internal_audit_findings_remediated: 1
+    unresolved_threads: 0
     requirements:
       - Q-BLD-007
       - Q-BLD-014
@@ -103,7 +110,7 @@ units:
     risk: R2
     issue: 26
   B5:
-    state: IN_PROGRESS
+    state: VERIFIED_PENDING_FINAL_REVIEW
     risk: R2
     issue: 29
     working_branch: p15-ux-onboarding-exception-inbox
