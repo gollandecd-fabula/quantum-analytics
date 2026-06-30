@@ -1,6 +1,6 @@
 # B1b Calculation Kernel Contract v1
 
-Status: `REVIEW_PENDING_OWNER_SIGNOFF`
+Status: `OWNER_APPROVED_BASELINE_PENDING_CI_AND_INDEPENDENT_REVIEW`
 Risk class: `R3`
 Tracking issue: `#32`
 Implementation branch: `build-b1b-financial-kernel-v1`
@@ -18,14 +18,16 @@ data, publish verified metric snapshots, reconcile periods, or authorize release
 - Explicit user R3 authorization was recorded on 2026-06-30.
 - Business Golden Oracle Owner: `PROJECT_OWNER_USER`.
 - Baseline source: synthetic scenarios independently derived from approved contracts.
+- The Business Golden Oracle Owner explicitly approved scenarios 1–3 without
+  modification and approved scenario 4 with `profit_per_sold_unit` blocked when
+  `net_sold_units < 0`, while preserving `net_profit_amount = -44.00`.
 - Public production facade: `src/quantum/finance/runtime.py`.
 - Internal production modules: `_common.py`, `_rounding.py`, `_expression.py`,
   `_rules.py`, `_metrics.py`, `_calculation_core.py`, `_calculation_expenses.py`,
   and `_calculation_profit.py`; these are package-private and CI-scanned.
 - Independent reference path: `src/quantum/finance/oracle.py`.
 - The reference path must not import or call the production runtime.
-- Exact candidate fixture values require explicit owner signoff before the baseline
-  may change from `CANDIDATE_VALUES_PENDING_EXPLICIT_OWNER_SIGNOFF` to `APPROVED`.
+- The Golden Baseline fixture approval state is `APPROVED`.
 - External second-line financial review remains mandatory before real or anonymized
   commercial data or production use.
 
@@ -122,7 +124,9 @@ it blocks the dependent metrics with `OTHER_EXPENSE_RULE_REQUIRED_MISSING`.
 - `net_marketplace_income_amount = gross_sales_amount - discounts_amount + subsidies_amount - marketplace_commission_amount - forward_logistics_amount - reverse_logistics_amount - storage_amount - advertising_amount - fines_withholdings_amount`;
 - `tax_amount = explicit tax rate × explicit selected money base`;
 - `net_profit_amount = net_marketplace_income_amount - product_cost_amount - other_expense_amount - tax_amount`;
-- `profit_per_sold_unit = net_profit_amount / net_sold_units`, with a zero denominator returning `BLOCKED/ZERO_DENOMINATOR`;
+- `profit_per_sold_unit = net_profit_amount / net_sold_units` only when
+  `net_sold_units > 0`; zero returns `BLOCKED/ZERO_DENOMINATOR`, and a negative
+  value returns `BLOCKED/NON_POSITIVE_DENOMINATOR` without changing net profit;
 - `profitability_of_costs = BLOCKED/COST_DENOMINATOR_NOT_APPROVED` until an independent denominator boundary is approved.
 
 No formula contains a product, brand, marketplace, cost, tax, tax-base, currency,
@@ -144,7 +148,7 @@ boundary is satisfied.
 
 ## Golden baseline and tests
 
-Candidate fixture: `tests/contracts/fixtures/b1b-golden-baseline.json`.
+Approved fixture: `tests/contracts/fixtures/b1b-golden-baseline.json`.
 
 Required and implemented test classes:
 
