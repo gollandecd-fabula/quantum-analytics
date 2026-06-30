@@ -2,7 +2,6 @@ execution_state_id: STAGE-B-EXECUTION-STATE-v1
 stage_contract_id: STAGE-B-BUILD-v1
 updated_on: 2026-06-30
 source_of_truth_for_live_unit_state: true
-
 macro_stage: B
 status: ACTIVE
 current_unit: P15
@@ -72,13 +71,8 @@ units:
     test_method_count: 37
     resolved_findings: 11
     unresolved_threads: 0
-    requirements:
-      - Q-BLD-007
-      - Q-BLD-011
-      - Q-BLD-013
-    acceptance_controls:
-      - BLD-027
-      - BLD-028
+    requirements: [Q-BLD-007, Q-BLD-011, Q-BLD-013]
+    acceptance_controls: [BLD-027, BLD-028]
   P15:
     state: VERIFIED_PENDING_FINAL_REVIEW
     issue: 29
@@ -86,24 +80,18 @@ units:
     evidence: docs/evidence/STAGE_P1_5_EXECUTION_STATE.yaml
     test_method_count_declared: 63
     test_method_count_verified: 63
-    exact_head: dd0b5d6029b4a2285c25f80b09b52b52d551946b
-    foundation_ci_run: 28450819777
-    oss_admission_ci_run: 28450819756
-    artifact_manifest_equality: PASS
+    implementation_head: dd0b5d6029b4a2285c25f80b09b52b52d551946b
+    verification_target: CURRENT_PR_HEAD
+    foundation_ci: PASS_REQUIRED
+    oss_admission_and_osv: PASS_REQUIRED
+    artifact_manifest_equality: PASS_REQUIRED
     codex_findings_received: 5
     codex_findings_remediated: 5
-    internal_audit_findings_received: 1
-    internal_audit_findings_remediated: 1
+    internal_audit_findings_received: 2
+    internal_audit_findings_remediated: 2
     unresolved_threads: 0
-    requirements:
-      - Q-BLD-007
-      - Q-BLD-014
-      - Q-BLD-015
-    acceptance_controls:
-      - BLD-029
-      - BLD-030
-      - BLD-031
-      - BLD-032
+    requirements: [Q-BLD-007, Q-BLD-014, Q-BLD-015]
+    acceptance_controls: [BLD-029, BLD-030, BLD-031, BLD-032]
   B4:
     state: COMPLETE
     merged_commit: f19bfb652fccca9f205e2c83d334bd157d3e257c
@@ -132,7 +120,6 @@ rules:
   live_state_artifact: docs/evidence/STAGE_B_EXECUTION_STATE.yaml
   contract_machine_summary_role: INITIAL_PLAN_SNAPSHOT
   current_state_role: LIVE_EXECUTION_SOURCE
-
 real_commercial_data: NOT_ADMITTED
 marketplace_write_capability: DISABLED
 production_release: BLOCKED
