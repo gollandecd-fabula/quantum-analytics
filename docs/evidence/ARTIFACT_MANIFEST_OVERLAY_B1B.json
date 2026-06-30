@@ -1,10 +1,10 @@
 {
   "base_p15_closure_overlay_git_blob_sha": "05132bf0878ea010ead7e96c8f6bc6c4277ec22b",
   "entries": [
-    ["docs/evidence/STAGE_B_B1B_EXECUTION_STATE.yaml", "6e4e667ee83bcb57e4c9900a9d6842ca69856a818c48f0d4c77b74e18b8049f3", 2748],
-    ["docs/evidence/STAGE_B_EXECUTION_STATE.yaml", "c6f040d97d79fd6ae02f63bb3e75324d8fa6aaf6835a7f645ed073ca880a16ed", 4015],
+    ["docs/evidence/STAGE_B_B1B_EXECUTION_STATE.yaml", "e4b59f5c56872e6f1ce5f6a29e825ebe5fc688a9232e0fb0e51778664e5bedf5", 2703],
+    ["docs/evidence/STAGE_B_EXECUTION_STATE.yaml", "35c1b9904f16123e14c681cc3dcb91a52cc41c46b2f411cbc078781e58c6c05d", 4078],
     ["docs/finance/B1B_CALCULATION_KERNEL_CONTRACT.md", "366b7694611639a5bf77ef848a2371d8d962c4ee38dc4e4129159b6245ec2f66", 7628],
-    ["docs/governance/CURRENT_STATE.md", "560ba7b61761cae1340a16a805c07a4c9dfd8e2e794018d196212cbaec034675", 2568],
+    ["docs/governance/CURRENT_STATE.md", "cef7915df06f11cd955d21d0ea2d5c8a839df20ad22722228d29821fa2d5af65", 2565],
     ["schemas/financial-kernel-result.schema.json", "8e3c216fb5eb0c0030538e700a75b6f121c44b1c4fd1072f8932318c60c9ce40", 4903],
     ["src/quantum/finance/__init__.py", "d8062ae058382f8ba807660527f5c0a2f21274ad6b188668eb4241de96b0fd1a", 362],
     ["src/quantum/finance/_common.py", "29fe5ba856aa0fd07cfaba1f8a9c48d4bbc225053f91e2d2f51a6ea2465f6482", 9908],
@@ -27,7 +27,7 @@
     ["tests/test_p15_manifest_payload.py", "19e353ef84da882d0bdb0fe6d23cbb665854ca24f9335ac341e91f94fbaf2b5a", 2961]
   ],
   "hash_encoding": "sha256-hex",
-  "overlay_version": 4,
-  "reason": "B1b owner-approved baseline and synchronized cross-stage manifest controls.",
+  "overlay_version": 5,
+  "reason": "B1b owner-approved baseline, verified CI evidence, and synchronized cross-stage manifest controls.",
   "remove_paths": []
 }
