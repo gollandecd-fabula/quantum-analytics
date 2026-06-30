@@ -21,6 +21,7 @@ P15_PATHS = (
     "src/quantum/ux/validation.py",
     "tests/test_a0_p15_manifest_payload.py",
     "tests/test_b1a_artifact_manifest.py",
+    "tests/test_p15_contract_alignment.py",
     "tests/test_p15_manifest_payload.py",
     "tests/test_p15_schema_alignment.py",
     "tests/test_p15_ux_adversarial.py",
