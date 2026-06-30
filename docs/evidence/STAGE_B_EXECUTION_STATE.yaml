@@ -19,7 +19,7 @@ units:
     issue: 7
     risk: R2
   B1b:
-    state: REVIEW_PENDING_CI_AND_INDEPENDENT_REVIEW
+    state: REVIEW_PENDING_INDEPENDENT_REVIEW
     risk: R3
     approval: EXPLICIT_USER_R3_AUTHORIZATION_AND_GOLDEN_BASELINE_OWNER_SIGNOFF_RECORDED_2026_06_30
     issue: 32
@@ -28,11 +28,13 @@ units:
     oracle_owner_role: BUSINESS_GOLDEN_ORACLE_OWNER
     baseline_source: SYNTHETIC_TEST_SCENARIOS_UNDER_APPROVED_METHODOLOGY
     baseline_approval: APPROVED
-    blocker: CI_AND_INDEPENDENT_REVIEW_PENDING
+    blocker: INDEPENDENT_REVIEW_PENDING
     evidence: docs/evidence/STAGE_B_B1B_EXECUTION_STATE.yaml
     targeted_test_method_count: 67
-    local_targeted_tests: PENDING_RERUN_AFTER_OWNER_SIGNOFF_PATCH
-    github_ci: PENDING_RERUN_AFTER_OWNER_SIGNOFF_PATCH
+    local_targeted_tests: PASS
+    github_ci: PASS_FOUNDATION_CI_RUN_28468100430
+    oss_admission: PASS_OSS_ADMISSION_RUN_28468100427
+    ci_verified_head: e6393a808574da415e8e6caf9d24d9d61127ed8e
   B2:
     state: GATED
     risk: R3
