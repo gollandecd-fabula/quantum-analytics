@@ -33,7 +33,7 @@ def _normalized_rules(
 
 
 def _rules_fingerprint(rules: Sequence[Mapping[str, Any]]) -> str:
-    return canonical_hash(_normalized_rules(rules))
+    return canonical_hash({"rules": _normalized_rules(rules)})
 
 
 def _register_trusted_trace(
