@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import unittest
 from datetime import UTC, datetime
+from pathlib import Path
 
 from quantum.ingestion import RawFileRecord, RawFileState
 from quantum.ux import (
@@ -13,6 +14,7 @@ from quantum.ux import (
 
 NOW = datetime(2026, 6, 30, 20, 0, tzinfo=UTC)
 TENANT_ID = "tenant-contract-alignment"
+ROOT = Path(__file__).resolve().parents[1]
 
 
 def configuration_form():
@@ -87,6 +89,19 @@ class P15ContractAlignmentTests(unittest.TestCase):
         self.assertEqual(inbox["exception_count"], 1)
         self.assertEqual(inbox["exceptions"][0]["cause"], "IMPORT_QUARANTINED")
         self.assertIn("IMPORT_QUARANTINED", inbox["exceptions"][0]["accessible_summary"])
+
+    def test_premerge_evidence_uses_current_pr_head_target(self) -> None:
+        evidence = (
+            ROOT / "docs/evidence/STAGE_P1_5_EXECUTION_STATE.yaml"
+        ).read_text(encoding="utf-8")
+        self.assertIn("verification_target: CURRENT_PR_HEAD", evidence)
+        self.assertIn("review_target: CURRENT_PR_HEAD", evidence)
+        self.assertIn(
+            "merge_sha_recording: POST_MERGE_CLOSURE_ONLY",
+            evidence,
+        )
+        self.assertNotIn("requested_commit:", evidence)
+        self.assertNotIn("exact_head:", evidence)
 
 
 if __name__ == "__main__":
