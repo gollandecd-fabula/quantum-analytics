@@ -44,10 +44,22 @@
       },
       "not": {"required": ["product_id", "product_group_id"]}
     },
-    "valid_from": {"type": ["string", "null"], "format": "date-time"},
-    "valid_to": {"type": ["string", "null"], "format": "date-time"},
+    "valid_from": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$"
+    },
+    "valid_to": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$"
+    },
     "currency": {"type": ["string", "null"], "pattern": "^[A-Z]{3}$"},
-    "created_at": {"type": "string", "format": "date-time"},
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$"
+    },
     "publication_state": {"const": "PREVIEW_ONLY"},
     "fields": {
       "type": "array",
