@@ -7,7 +7,7 @@ macro_stage: B
 status: ACTIVE
 current_unit: P14
 tracking_issue: 26
-working_branch: p14-reporting-api-exports
+working_branch: close-p1-4-post-merge-v1
 
 units:
   B0:
@@ -63,12 +63,15 @@ units:
     resolved_findings: 20
     unresolved_threads: 0
   P14:
-    state: REMEDIATED_CI_PENDING
+    state: COMPLETE
+    merged_commit: f19bfb652fccca9f205e2c83d334bd157d3e257c
+    pull_request: 27
     issue: 26
     risk: R2
     evidence: docs/evidence/STAGE_P1_4_EXECUTION_STATE.yaml
     test_method_count: 37
     resolved_findings: 11
+    unresolved_threads: 0
     requirements:
       - Q-BLD-007
       - Q-BLD-011
@@ -77,10 +80,10 @@ units:
       - BLD-027
       - BLD-028
   B4:
-    state: IN_PROGRESS
+    state: COMPLETE
+    merged_commit: f19bfb652fccca9f205e2c83d334bd157d3e257c
     risk: R2
     issue: 26
-    working_branch: p14-reporting-api-exports
   B5:
     state: PLANNED
     risk: R2
