@@ -16,6 +16,15 @@ golden_oracle:
   external_second_line_review_before_real_data: REQUIRED
 implementation:
   production_runtime: src/quantum/finance/runtime.py
+  production_modules:
+    - src/quantum/finance/_common.py
+    - src/quantum/finance/_rounding.py
+    - src/quantum/finance/_expression.py
+    - src/quantum/finance/_rules.py
+    - src/quantum/finance/_metrics.py
+    - src/quantum/finance/_calculation_core.py
+    - src/quantum/finance/_calculation_expenses.py
+    - src/quantum/finance/_calculation_profit.py
   independent_oracle: src/quantum/finance/oracle.py
   result_schema: schemas/financial-kernel-result.schema.json
   contract: docs/finance/B1B_CALCULATION_KERNEL_CONTRACT.md
@@ -25,7 +34,7 @@ implementation:
   real_or_anonymized_commercial_data_admitted: false
   marketplace_write_capability: false
 verification:
-  targeted_test_methods: 60
+  targeted_test_methods: 67
   targeted_tests_status: PASS_LOCAL_RECONSTRUCTED_ENVIRONMENT
   compileall_status: PASS
   differential_oracle_status: PASS
