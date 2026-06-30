@@ -61,8 +61,9 @@ accessible status model:
 
 Status is never conveyed by color alone. Every result contains a status label,
 stable status token, semantic role `status`, and accessible summary. A blocked
-or missing value renders as an em dash and never as zero. Both decimal-string
-zero and integer zero receive the distinct `valid-zero` token.
+or missing value renders as an em dash and never as zero. Integer zero and every
+canonical decimal-string representation whose numeric value is zero, including
+`0.0`, `0.00`, `-0`, and `-0.00`, receive the distinct `valid-zero` token.
 
 ## Import status
 
@@ -114,9 +115,11 @@ another metric is blocked. Exceptions are sorted by content-derived identifiers,
 so input order does not change the Inbox or its hash.
 
 Mixed organizations, Actual/Scenario namespaces, tenants, duplicate report
-records, and duplicate import records fail closed. Import exceptions require an
-explicit tenant identifier. No exception resolution mutates source records,
-metric snapshots, configuration rules, or marketplace state.
+records, duplicate import records, and duplicate configuration `form_id` values
+fail closed. A supplied tenant identifier must be a non-empty string even when
+no import records are present. Import exceptions require an explicit tenant
+identifier. No exception resolution mutates source records, metric snapshots,
+configuration rules, or marketplace state.
 
 ## Machine-readable artifacts
 
@@ -160,6 +163,7 @@ metric snapshots, configuration rules, or marketplace state.
 - `UX_INBOX_TENANT_MIXED`
 - `UX_INBOX_RECORD_DUPLICATE`
 - `UX_INBOX_IMPORT_DUPLICATE`
+- `UX_INBOX_FORM_DUPLICATE`
 - `UX_INBOX_TIMESTAMP_INVALID`
 - `UX_HASH_INVALID`
 - `UX_HASH_MISMATCH`
