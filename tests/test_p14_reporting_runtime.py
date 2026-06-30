@@ -59,6 +59,26 @@ class P14ReportingRuntimeTests(unittest.TestCase):
         snapshot["content_hash"] = canonical_snapshot_hash(snapshot)
         return snapshot
 
+    @staticmethod
+    def other_tenant_snapshot():
+        snapshot = valid_snapshot()
+        snapshot["organization_id"] = "other-org"
+        snapshot["metric_snapshot_id"] = "metric-result-other-org"
+        snapshot["content_hash"] = canonical_snapshot_hash(snapshot)
+        return snapshot
+
+    def record_with_id(
+        self,
+        record_id: str,
+        *,
+        generated_at: datetime = GENERATED_AT,
+    ):
+        return build_report_record(
+            self.snapshot,
+            report_record_id=record_id,
+            generated_at=generated_at,
+        )
+
     def test_valid_numeric_zero_is_preserved(self) -> None:
         self.assertEqual(self.record["state"], "VALID")
         self.assertEqual(self.record["value"], "0")
@@ -77,6 +97,7 @@ class P14ReportingRuntimeTests(unittest.TestCase):
 
     def test_preview_record_has_explicit_publication_limitation(self) -> None:
         self.assertEqual(self.record["publication_state"], "PREVIEW_ONLY")
+        self.assertIsNone(self.record["evidence_chain_content_hash"])
         self.assertIn(
             "EVIDENCE_NOT_VERIFIED_FOR_PUBLICATION",
             self.record["limitations"],
@@ -110,6 +131,7 @@ class P14ReportingRuntimeTests(unittest.TestCase):
             self.record["evidence_chain_ref"],
             {"id": "evidence-chain-synthetic-1", "version": 1},
         )
+        self.assertEqual(len(self.record["record_hash"]), 64)
 
     def test_bundle_json_round_trip_is_exact(self) -> None:
         bundle = build_export_bundle(
@@ -131,9 +153,11 @@ class P14ReportingRuntimeTests(unittest.TestCase):
             validate_export_bundle(bundle)
 
     def test_bundle_rejects_mixed_tenants(self) -> None:
-        other = copy.deepcopy(self.record)
-        other["report_record_id"] = "report-2"
-        other["organization_id"] = "other-org"
+        other = build_report_record(
+            self.other_tenant_snapshot(),
+            report_record_id="report-2",
+            generated_at=GENERATED_AT,
+        )
         with self.assertRaisesRegex(ReportingError, "EXPORT_TENANT_MIXED"):
             build_export_bundle(
                 [self.record, other],
@@ -184,11 +208,7 @@ class P14ReportingRuntimeTests(unittest.TestCase):
             import_records_csv(tampered)
 
     def test_pagination_is_stable(self) -> None:
-        records = []
-        for index in range(3):
-            record = copy.deepcopy(self.record)
-            record["report_record_id"] = f"report-{index}"
-            records.append(record)
+        records = [self.record_with_id(f"report-{index}") for index in range(3)]
         first = page_records(records, limit=2)
         second = page_records(records, limit=2, cursor=first.next_cursor)
         self.assertEqual(len(first.records), 2)
@@ -197,11 +217,15 @@ class P14ReportingRuntimeTests(unittest.TestCase):
         self.assertEqual(first.total_records, 3)
 
     def test_cursor_cannot_be_reused_for_changed_result_set(self) -> None:
-        records = [self.record, copy.deepcopy(self.record)]
-        records[1]["report_record_id"] = "report-2"
+        records = [self.record_with_id("report-1"), self.record_with_id("report-2")]
         first = page_records(records, limit=1)
-        changed = copy.deepcopy(records)
-        changed[1]["metric_content_hash"] = "f" * 64
+        changed = [
+            records[0],
+            self.record_with_id(
+                "report-2",
+                generated_at=datetime(2026, 6, 30, 16, 0, tzinfo=UTC),
+            ),
+        ]
         with self.assertRaisesRegex(ReportingError, "REPORT_CURSOR_INVALID"):
             page_records(changed, limit=1, cursor=first.next_cursor)
 
@@ -210,8 +234,7 @@ class P14ReportingRuntimeTests(unittest.TestCase):
             page_records([self.record], limit=101)
 
     def test_record_limit_is_bounded(self) -> None:
-        other = copy.deepcopy(self.record)
-        other["report_record_id"] = "report-2"
+        other = self.record_with_id("report-2")
         with patch.object(runtime, "MAX_EXPORT_RECORDS", 1):
             with self.assertRaisesRegex(
                 ReportingError,
