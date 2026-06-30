@@ -3,7 +3,7 @@ date: "2026-06-30"
 stage: P1_TECHNICAL_FOUNDATION_BUILD
 unit: P1_5_UX_ONBOARDING_EXCEPTION_INBOX_FOUNDATION
 mapped_stage_unit: B5_UX_ONBOARDING_EXCEPTION_INBOX
-status: VERIFIED_PENDING_FINAL_REVIEW
+status: PENDING_CURRENT_PR_HEAD_VERIFICATION
 tracking_issue: 29
 working_branch: p15-ux-onboarding-exception-inbox
 base_state: P1_4_COMPLETE
@@ -49,8 +49,8 @@ tests:
     - tests/test_p15_review_remediation.py
     - tests/test_p15_manifest_payload.py
     - tests/test_a0_p15_manifest_payload.py
-  methods_declared: 63
-  methods_verified: 63
+  methods_declared: 64
+  methods_verified: 64
   status: PASS_REQUIRED_ON_CURRENT_PR_HEAD
 verification:
   implementation_head: dd0b5d6029b4a2285c25f80b09b52b52d551946b
@@ -60,14 +60,14 @@ verification:
   artifact_manifest_equality: PASS_REQUIRED
   merge_sha_recording: POST_MERGE_CLOSURE_ONLY
 review:
-  status: FINAL_CURRENT_HEAD_REVIEW_PENDING
-  last_reviewed_commit: 86c17f3799ead1843ff2fe7184857a37f2b05322
+  status: FINDING_REMEDIATED_RECHECK_REQUIRED
+  last_reviewed_commit: 6903d5aaef8d0e27a1ecf7e46b6a08fc18b0c62a
   review_target: CURRENT_PR_HEAD
-  codex_findings_received: 5
-  codex_findings_remediated: 5
+  codex_findings_received: 6
+  codex_findings_remediated: 6
   internal_audit_findings_received: 2
   internal_audit_findings_remediated: 2
-  unresolved_threads: 0
+  unresolved_threads_gate: ZERO_REQUIRED_AT_MERGE
 requirements:
   - Q-BLD-007
   - Q-BLD-014
