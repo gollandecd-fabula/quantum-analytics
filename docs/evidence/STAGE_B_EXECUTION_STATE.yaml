@@ -2,12 +2,11 @@ execution_state_id: STAGE-B-EXECUTION-STATE-v1
 stage_contract_id: STAGE-B-BUILD-v1
 updated_on: 2026-06-30
 source_of_truth_for_live_unit_state: true
-
 macro_stage: B
 status: ACTIVE
-current_unit: P14
-tracking_issue: 26
-working_branch: close-p1-4-post-merge-v1
+current_unit: P15
+tracking_issue: 29
+working_branch: p15-ux-onboarding-exception-inbox
 
 units:
   B0:
@@ -72,21 +71,37 @@ units:
     test_method_count: 37
     resolved_findings: 11
     unresolved_threads: 0
-    requirements:
-      - Q-BLD-007
-      - Q-BLD-011
-      - Q-BLD-013
-    acceptance_controls:
-      - BLD-027
-      - BLD-028
+    requirements: [Q-BLD-007, Q-BLD-011, Q-BLD-013]
+    acceptance_controls: [BLD-027, BLD-028]
+  P15:
+    state: PENDING_CURRENT_PR_HEAD_VERIFICATION
+    issue: 29
+    risk: R2
+    evidence: docs/evidence/STAGE_P1_5_EXECUTION_STATE.yaml
+    test_method_count_declared: 64
+    test_method_count_verified: 64
+    implementation_head: dd0b5d6029b4a2285c25f80b09b52b52d551946b
+    verification_target: CURRENT_PR_HEAD
+    foundation_ci: PASS_REQUIRED
+    oss_admission_and_osv: PASS_REQUIRED
+    artifact_manifest_equality: PASS_REQUIRED
+    codex_findings_received: 6
+    codex_findings_remediated: 6
+    internal_audit_findings_received: 2
+    internal_audit_findings_remediated: 2
+    unresolved_threads_gate: ZERO_REQUIRED_AT_MERGE
+    requirements: [Q-BLD-007, Q-BLD-014, Q-BLD-015]
+    acceptance_controls: [BLD-029, BLD-030, BLD-031, BLD-032]
   B4:
     state: COMPLETE
     merged_commit: f19bfb652fccca9f205e2c83d334bd157d3e257c
     risk: R2
     issue: 26
   B5:
-    state: PLANNED
+    state: PENDING_CURRENT_PR_HEAD_VERIFICATION
     risk: R2
+    issue: 29
+    working_branch: p15-ux-onboarding-exception-inbox
   B6:
     state: GATED
     risk: R3
@@ -105,7 +120,6 @@ rules:
   live_state_artifact: docs/evidence/STAGE_B_EXECUTION_STATE.yaml
   contract_machine_summary_role: INITIAL_PLAN_SNAPSHOT
   current_state_role: LIVE_EXECUTION_SOURCE
-
 real_commercial_data: NOT_ADMITTED
 marketplace_write_capability: DISABLED
 production_release: BLOCKED

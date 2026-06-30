@@ -1,0 +1,89 @@
+schema_version: "1.0"
+date: "2026-06-30"
+stage: P1_TECHNICAL_FOUNDATION_BUILD
+unit: P1_5_UX_ONBOARDING_EXCEPTION_INBOX_FOUNDATION
+mapped_stage_unit: B5_UX_ONBOARDING_EXCEPTION_INBOX
+status: PENDING_CURRENT_PR_HEAD_VERIFICATION
+tracking_issue: 29
+working_branch: p15-ux-onboarding-exception-inbox
+base_state: P1_4_COMPLETE
+risk: R2
+runtime_dependency_installation_authorized: false
+marketplace_write_enabled: false
+commercial_data_authorized: false
+financial_rule_activation_authorized: false
+external_access_authorized: false
+implemented:
+  - explicit preview-only configuration form for cost, tax rate, tax base and other expense
+  - explicit organization, mode, scenario, scope, validity and currency controls
+  - no-hidden-default and missing-value preservation
+  - B1a-aligned RATE tax-base vocabulary with NONE rejected
+  - distinct accessible rendering for typed states and all canonical numeric-zero forms
+  - canonical tenant-scoped import status without storage-key disclosure
+  - canonical lowercase-hyphenated raw-file UUID enforcement
+  - strict RFC3339 timestamps on public configuration and Inbox builders
+  - machine-readable UUID and timestamp constraints aligned with executable boundaries
+  - preview-safe Evidence Chain drill-down over validated B4 report records
+  - deterministic Exception Inbox with cause, affected metrics, evidence and resolution
+  - independent valid metric continuity when another result is blocked
+  - fail-closed organization, Actual/Scenario, tenant and duplicate isolation
+  - duplicate configuration form identifiers rejected at the public boundary
+  - non-empty tenant identifiers enforced for every Inbox mode
+  - deterministic SHA-256 integrity for forms, views and inboxes
+schemas:
+  - schemas/ux-configuration-form.schema.json
+  - schemas/ux-view.schema.json
+  - schemas/exception-inbox.schema.json
+contract:
+  - docs/ux/UX_ONBOARDING_EXCEPTION_INBOX_CONTRACT.md
+runtime:
+  - src/quantum/ux/runtime.py
+  - src/quantum/ux/validation.py
+  - src/quantum/ux/__init__.py
+tests:
+  files:
+    - tests/test_p15_ux_runtime.py
+    - tests/test_p15_schema_alignment.py
+    - tests/test_p15_ux_adversarial.py
+    - tests/test_p15_contract_alignment.py
+    - tests/test_p15_review_remediation.py
+    - tests/test_p15_manifest_payload.py
+    - tests/test_a0_p15_manifest_payload.py
+  methods_declared: 64
+  methods_verified: 64
+  status: PASS_REQUIRED_ON_CURRENT_PR_HEAD
+verification:
+  implementation_head: dd0b5d6029b4a2285c25f80b09b52b52d551946b
+  verification_target: CURRENT_PR_HEAD
+  foundation_ci: PASS_REQUIRED
+  oss_admission_and_osv: PASS_REQUIRED
+  artifact_manifest_equality: PASS_REQUIRED
+  merge_sha_recording: POST_MERGE_CLOSURE_ONLY
+review:
+  status: FINDING_REMEDIATED_RECHECK_REQUIRED
+  last_reviewed_commit: 6903d5aaef8d0e27a1ecf7e46b6a08fc18b0c62a
+  review_target: CURRENT_PR_HEAD
+  codex_findings_received: 6
+  codex_findings_remediated: 6
+  internal_audit_findings_received: 2
+  internal_audit_findings_remediated: 2
+  unresolved_threads_gate: ZERO_REQUIRED_AT_MERGE
+requirements:
+  - Q-BLD-007
+  - Q-BLD-014
+  - Q-BLD-015
+acceptance_controls:
+  - BLD-029
+  - BLD-030
+  - BLD-031
+  - BLD-032
+limitations:
+  - no financial calculation kernel
+  - no financial rule publication or activation
+  - no real marketplace data
+  - no external HTTP service or browser deployment
+  - no external authentication or tenant provisioning
+  - no database persistence
+  - no production deployment
+  - no marketplace write operations
+release_status: RELEASE_BLOCKED
