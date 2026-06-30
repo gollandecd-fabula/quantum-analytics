@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 import unittest
 from datetime import UTC, datetime
 from pathlib import Path
@@ -90,18 +91,27 @@ class P15ContractAlignmentTests(unittest.TestCase):
         self.assertEqual(inbox["exceptions"][0]["cause"], "IMPORT_QUARANTINED")
         self.assertIn("IMPORT_QUARANTINED", inbox["exceptions"][0]["accessible_summary"])
 
-    def test_premerge_evidence_uses_current_pr_head_target(self) -> None:
+    def test_evidence_uses_stage_appropriate_verification_target(self) -> None:
         evidence = (
             ROOT / "docs/evidence/STAGE_P1_5_EXECUTION_STATE.yaml"
         ).read_text(encoding="utf-8")
-        self.assertIn("verification_target: CURRENT_PR_HEAD", evidence)
-        self.assertIn("review_target: CURRENT_PR_HEAD", evidence)
-        self.assertIn(
-            "merge_sha_recording: POST_MERGE_CLOSURE_ONLY",
-            evidence,
-        )
         self.assertNotIn("requested_commit:", evidence)
-        self.assertNotIn("exact_head:", evidence)
+
+        if "status: COMPLETE" in evidence:
+            self.assertIn("closure_branch: close-p1-5-post-merge-v1", evidence)
+            self.assertRegex(evidence, r"(?m)^exact_head: [0-9a-f]{40}$")
+            self.assertRegex(evidence, r"(?m)^merged_commit: [0-9a-f]{40}$")
+            self.assertRegex(evidence, r"(?m)^pull_request: \d+$")
+            self.assertNotIn("verification_target: CURRENT_PR_HEAD", evidence)
+            self.assertNotIn("review_target: CURRENT_PR_HEAD", evidence)
+        else:
+            self.assertIn("verification_target: CURRENT_PR_HEAD", evidence)
+            self.assertIn("review_target: CURRENT_PR_HEAD", evidence)
+            self.assertIn(
+                "merge_sha_recording: POST_MERGE_CLOSURE_ONLY",
+                evidence,
+            )
+            self.assertNotIn("exact_head:", evidence)
 
 
 if __name__ == "__main__":
