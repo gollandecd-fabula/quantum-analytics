@@ -1,0 +1,118 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://quantum.local/schemas/report-record.schema.json",
+  "title": "Quantum Report Record v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "report_record_id",
+    "schema_version",
+    "organization_id",
+    "marketplace_account_id",
+    "mode",
+    "scenario_id",
+    "accounting_view",
+    "metric_snapshot_id",
+    "snapshot_revision",
+    "metric_content_hash",
+    "evidence_chain_ref",
+    "state",
+    "value",
+    "value_type",
+    "unit",
+    "currency",
+    "reason_code",
+    "expense_boundary",
+    "rounding",
+    "freshness",
+    "confidence",
+    "limitations",
+    "publication_state",
+    "generated_at"
+  ],
+  "properties": {
+    "report_record_id": {"type": "string", "minLength": 1},
+    "schema_version": {"const": "quantum-report-record-v1"},
+    "organization_id": {"type": "string", "minLength": 1},
+    "marketplace_account_id": {"type": ["string", "null"], "minLength": 1},
+    "mode": {"enum": ["ACTUAL", "SCENARIO"]},
+    "scenario_id": {"type": ["string", "null"], "minLength": 1},
+    "accounting_view": {"enum": ["OPERATIONAL", "SETTLEMENT", "TAX_RECOGNITION"]},
+    "metric_snapshot_id": {"type": "string", "minLength": 1},
+    "snapshot_revision": {"type": "integer", "minimum": 1},
+    "metric_content_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "evidence_chain_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "version"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "version": {"type": "integer", "minimum": 1}
+      }
+    },
+    "state": {"enum": ["VALID", "EMPTY", "BLOCKED", "UNAVAILABLE", "CONFLICT", "INVALID", "NOT_APPLICABLE"]},
+    "value": {"type": ["string", "integer", "null"]},
+    "value_type": {"type": ["string", "null"], "enum": [null, "MONEY", "INTEGER", "DECIMAL", "RATE"]},
+    "unit": {"type": ["string", "null"], "enum": [null, "MONEY", "MONEY_PER_ITEM", "ITEM", "ORDER", "EVENT", "PERCENT", "RATIO", "COUNT"]},
+    "currency": {"type": ["string", "null"], "pattern": "^[A-Z]{3}$"},
+    "reason_code": {"type": ["string", "null"], "minLength": 1},
+    "expense_boundary": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"enum": ["MARKETPLACE_COMMISSION", "FORWARD_LOGISTICS", "REVERSE_LOGISTICS", "STORAGE", "ADVERTISING", "FINES_WITHHOLDINGS", "PRODUCT_COST", "OTHER_EXPENSE", "TAX"]}
+    },
+    "rounding": {"type": "object"},
+    "freshness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state", "observed_at", "deadline"],
+      "properties": {
+        "state": {"enum": ["CURRENT", "STALE", "UNKNOWN", "NOT_APPLICABLE"]},
+        "observed_at": {"type": "string", "format": "date-time"},
+        "deadline": {"type": ["string", "null"], "format": "date-time"}
+      }
+    },
+    "confidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state", "reasons"],
+      "properties": {
+        "state": {"enum": ["HIGH", "MEDIUM", "LOW", "UNKNOWN", "NOT_APPLICABLE"]},
+        "reasons": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}}
+      }
+    },
+    "limitations": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "publication_state": {"enum": ["PREVIEW_ONLY", "EVIDENCE_VERIFIED"]},
+    "generated_at": {"type": "string", "format": "date-time"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"mode": {"const": "ACTUAL"}}},
+      "then": {"properties": {"scenario_id": {"type": "null"}}}
+    },
+    {
+      "if": {"properties": {"mode": {"const": "SCENARIO"}}},
+      "then": {"properties": {"scenario_id": {"type": "string", "minLength": 1}}}
+    },
+    {
+      "if": {"properties": {"state": {"const": "VALID"}}},
+      "then": {
+        "properties": {
+          "value": {"type": ["string", "integer"]},
+          "value_type": {"type": "string"},
+          "unit": {"type": "string"},
+          "reason_code": {"type": "null"}
+        }
+      },
+      "else": {
+        "properties": {
+          "value": {"type": "null"},
+          "value_type": {"type": "null"},
+          "unit": {"type": "null"},
+          "currency": {"type": "null"},
+          "reason_code": {"type": "string", "minLength": 1}
+        }
+      }
+    }
+  ]
+}
