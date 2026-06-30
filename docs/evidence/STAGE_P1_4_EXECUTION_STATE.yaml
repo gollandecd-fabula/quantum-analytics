@@ -3,9 +3,13 @@ date: "2026-06-30"
 stage: P1_TECHNICAL_FOUNDATION_BUILD
 unit: P1_4_REPORTING_API_EXPORTS_FOUNDATION
 mapped_stage_unit: B4_REPORTING_API_EXPORTS
-status: REMEDIATED_CI_PENDING
+status: COMPLETE
 working_branch: p14-reporting-api-exports
+closure_branch: close-p1-4-post-merge-v1
 base_state: P1_3_COMPLETE
+exact_head: 19f44d14e10609a83fac3e206c897abd9f1bca0a
+merged_commit: f19bfb652fccca9f205e2c83d334bd157d3e257c
+pull_request: 27
 risk: R2
 runtime_dependency_installation_authorized: false
 marketplace_write_enabled: false
@@ -36,10 +40,18 @@ tests:
     - tests/test_p14_reporting_adversarial.py
     - tests/test_p14_schema_alignment.py
   methods: 37
-  status: CI_PENDING
+  status: PASS
+ci:
+  foundation_run: 28441064352
+  foundation: PASS
+  oss_admission_run: 28441064394
+  oss_admission: PASS
+  osv: PASS
+  artifact_manifest: PASS
 review:
-  status: REMEDIATED_CI_PENDING
+  status: COMPLETE
   resolved_findings: 11
+  unresolved_threads: 0
 requirements:
   - Q-BLD-007
   - Q-BLD-011
