@@ -67,7 +67,11 @@ def evaluate_resolved_rule(
 
     result = _evaluate_resolved_rule(resolution, rules, variables, policy)
 
-    if selected_rule is not None and selected_rule["method"] == "SAFE_EXPRESSION":
+    if (
+        selected_rule is not None
+        and selected_rule["method"] == "SAFE_EXPRESSION"
+        and result.get("state") == "VALID"
+    ):
         actual_signature = (
             result.get("value_type"),
             result.get("unit"),
