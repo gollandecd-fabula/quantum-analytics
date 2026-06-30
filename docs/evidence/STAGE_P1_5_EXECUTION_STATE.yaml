@@ -3,7 +3,7 @@ date: "2026-06-30"
 stage: P1_TECHNICAL_FOUNDATION_BUILD
 unit: P1_5_UX_ONBOARDING_EXCEPTION_INBOX_FOUNDATION
 mapped_stage_unit: B5_UX_ONBOARDING_EXCEPTION_INBOX
-status: IMPLEMENTED_TESTS_PENDING
+status: FINDINGS_REMEDIATED_TESTS_PENDING
 tracking_issue: 29
 working_branch: p15-ux-onboarding-exception-inbox
 base_state: P1_4_COMPLETE
@@ -18,12 +18,14 @@ implemented:
   - explicit organization, mode, scenario, scope, validity and currency controls
   - no-hidden-default and missing-value preservation
   - B1a-aligned RATE tax-base vocabulary with NONE rejected
-  - distinct accessible rendering for typed states and numeric zero
+  - distinct accessible rendering for typed states and all canonical numeric-zero forms
   - canonical tenant-scoped import status without storage-key disclosure
   - preview-safe Evidence Chain drill-down over validated B4 report records
   - deterministic Exception Inbox with cause, affected metrics, evidence and resolution
   - independent valid metric continuity when another result is blocked
   - fail-closed organization, Actual/Scenario, tenant and duplicate isolation
+  - duplicate configuration form identifiers rejected at the public boundary
+  - non-empty tenant identifiers enforced for every Inbox mode
   - deterministic SHA-256 integrity for forms, views and inboxes
 schemas:
   - schemas/ux-configuration-form.schema.json
@@ -41,14 +43,17 @@ tests:
     - tests/test_p15_schema_alignment.py
     - tests/test_p15_ux_adversarial.py
     - tests/test_p15_contract_alignment.py
+    - tests/test_p15_review_remediation.py
     - tests/test_p15_manifest_payload.py
     - tests/test_a0_p15_manifest_payload.py
-  methods_declared: 58
-  status: NOT_RUN
+  methods_declared: 61
+  status: NOT_RUN_FOR_CURRENT_HEAD
 review:
-  status: NOT_STARTED
-  resolved_findings: 0
-  unresolved_threads: UNKNOWN
+  status: FINDINGS_REMEDIATED_RECHECK_PENDING
+  reviewed_commit: 408ef82a8754b8af303591231de0ff16b1568b44
+  findings_received: 3
+  findings_remediated: 3
+  unresolved_threads: 3
 requirements:
   - Q-BLD-007
   - Q-BLD-014
