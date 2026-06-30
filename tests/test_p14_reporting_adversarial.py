@@ -33,6 +33,23 @@ class P14ReportingAdversarialTests(unittest.TestCase):
             generated_at=GENERATED_AT,
         )
 
+    @staticmethod
+    def graph_for_snapshot(snapshot):
+        graph = copy.deepcopy(graph_data()["valid_graph"])
+        reference = {
+            "id": snapshot["metric_snapshot_id"],
+            "version": snapshot["snapshot_revision"],
+            "content_hash": snapshot["content_hash"],
+        }
+        graph["root_metric_snapshot_ref"] = copy.deepcopy(reference)
+        root = next(
+            node for node in graph["nodes"]
+            if node["node_type"] == "METRIC_SNAPSHOT"
+        )
+        root["artifact_ref"] = copy.deepcopy(reference)
+        graph["content_hash"] = canonical_graph_hash(graph)
+        return graph
+
     def test_csv_formula_injection_is_neutralized_and_round_trips(self) -> None:
         record = build_report_record(
             self.snapshot,
@@ -123,7 +140,7 @@ class P14ReportingAdversarialTests(unittest.TestCase):
             validate_report_record(record)
 
     def test_valid_evidence_chain_hash_is_preserved(self) -> None:
-        graph = copy.deepcopy(graph_data()["valid_graph"])
+        graph = self.graph_for_snapshot(self.snapshot)
         record = build_report_record(
             self.snapshot,
             report_record_id="report-verified",
@@ -141,7 +158,7 @@ class P14ReportingAdversarialTests(unittest.TestCase):
         )
 
     def test_evidence_chain_must_reference_exact_snapshot(self) -> None:
-        graph = copy.deepcopy(graph_data()["valid_graph"])
+        graph = self.graph_for_snapshot(self.snapshot)
         graph["root_metric_snapshot_ref"]["content_hash"] = "f" * 64
         root = next(
             node for node in graph["nodes"]
