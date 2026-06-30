@@ -10,6 +10,7 @@ from ._common import (
 )
 from ._rounding import _propagate, _quantize
 
+
 def _validate_ref(value: object, code: str) -> dict[str, Any]:
     if (
         not isinstance(value, Mapping)
@@ -32,6 +33,7 @@ def _metric(
     final_round: bool,
 ) -> dict[str, Any]:
     scale: int | None = None
+    rounding: dict[str, Any] | None = None
     if value.state == "VALID" and final_round and value.value_type in {"MONEY", "DECIMAL", "RATE"}:
         assert isinstance(value.value, Decimal)
         rounded, scale = _quantize(
@@ -44,20 +46,21 @@ def _metric(
             currency=value.currency,
             source_ids=value.source_ids,
         )
-    typed = _value_to_dict(value, scale=scale)
-    typed.update({
-        "accounting_view": accounting_view,
-        "expense_boundary": list(expense_boundary),
-        "rounding": {
+        rounding = {
             "policy_ref": {
                 "id": policy["policy_id"],
                 "version": policy["version"],
                 "content_hash": policy["content_hash"],
             },
-            "application_point": "METRIC_FINAL_ACCOUNTING" if final_round else None,
-            "resolved_mode": policy["calculation_mode"] if final_round else None,
+            "application_point": "METRIC_FINAL_ACCOUNTING",
+            "resolved_mode": policy["calculation_mode"],
             "resolved_scale": scale,
-        },
+        }
+    typed = _value_to_dict(value, scale=scale)
+    typed.update({
+        "accounting_view": accounting_view,
+        "expense_boundary": list(expense_boundary),
+        "rounding": rounding,
     })
     return typed
 
