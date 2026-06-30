@@ -1,6 +1,13 @@
 {
   "base_p15_overlay_git_blob_sha": "b70f7a97ea0b87172479476872d60818117d3037",
-  "entries": [],
+  "entries": [
+    ["docs/evidence/STAGE_B_EXECUTION_STATE.yaml", "b2a85bf6ba856dcb89b59b11e952b27a0e5d5b06ca7fd93bddf3113a5d9a330d", 3460],
+    ["docs/evidence/STAGE_P1_5_EXECUTION_STATE.yaml", "2a895eafa2de97234a66442b0ed6c797119848c2734ba38543dfe2137756b682", 3480],
+    ["docs/governance/CURRENT_STATE.md", "1352060daa8a2bd827815bef760467843023f6d9132c20775792c9df2a5e5c33", 2356],
+    ["tests/test_a0_p15_manifest_payload.py", "945c0acbe97338e898d086b28db6c20dc1d228c0e39762e26a66c046cd54920d", 670],
+    ["tests/test_b1a_artifact_manifest.py", "496fa19a7c1e29215fb7b88be6674393846a1dfcc510cde08a658a942cfb1628", 9630],
+    ["tests/test_p15_manifest_payload.py", "f147b8270c5086531ebab4a76e28d2d1639ab9f42cec4872e30ac902b1cf13ad", 2773]
+  ],
   "hash_encoding": "sha256-hex",
   "overlay_version": 2,
   "reason": "P1.5 post-merge closure synchronization",
