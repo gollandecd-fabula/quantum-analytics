@@ -1,7 +1,7 @@
 # CURRENT STATE
 
 Date: 2026-06-30
-Status: `BUILD_P1_5_IMPLEMENTED_TESTS_PENDING`
+Status: `BUILD_P1_5_FINDINGS_REMEDIATED_TESTS_PENDING`
 Active contract: `STAGE-B-BUILD-v1`
 Live execution state: `docs/evidence/STAGE_B_EXECUTION_STATE.yaml`
 Current unit: `P15 — UX_ONBOARDING_EXCEPTION_INBOX_FOUNDATION`
@@ -18,15 +18,19 @@ B3, B4, and ingestion foundations. The current branch provides:
 - B1a-aligned RATE tax-base vocabulary with `NONE` rejected;
 - explicit organization, Actual/Scenario, scope, validity, and currency controls;
 - no-hidden-default behavior and distinct numeric-zero semantics;
+- all canonical decimal-zero strings rendered as `valid-zero`;
 - text-first accessible views for typed metric and import states;
 - preview-safe Evidence Chain drill-down;
 - deterministic Exception Inbox entries with cause, evidence, affected metrics,
   required resolution, and independent-result continuity;
 - fail-closed organization, mode, tenant, duplicate, and forged-input controls;
-- machine-readable schemas and 58 declared targeted test methods.
+- duplicate configuration form identifiers rejected;
+- non-empty tenant identifiers enforced for every Inbox mode;
+- machine-readable schemas and 61 declared targeted test methods.
 
-Tests, exact-head CI, artifact-manifest synchronization, independent review, and
-closure remain pending. No test pass is claimed at this state.
+The three Codex Review findings on commit `408ef82a…` have been remediated.
+Exact-head tests, artifact-manifest synchronization, review recheck, thread
+resolution, and closure remain pending. No current-head pass is claimed.
 
 ## Completed baseline
 
