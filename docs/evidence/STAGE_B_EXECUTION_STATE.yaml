@@ -63,11 +63,12 @@ units:
     resolved_findings: 20
     unresolved_threads: 0
   P14:
-    state: IMPLEMENTED_CI_PENDING
+    state: REMEDIATED_CI_PENDING
     issue: 26
     risk: R2
     evidence: docs/evidence/STAGE_P1_4_EXECUTION_STATE.yaml
-    test_method_count: 20
+    test_method_count: 32
+    resolved_findings: 10
     requirements:
       - Q-BLD-007
       - Q-BLD-011
