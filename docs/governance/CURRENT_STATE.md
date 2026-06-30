@@ -1,7 +1,7 @@
 # CURRENT STATE
 
 Date: 2026-06-30
-Status: `BUILD_P1_5_VERIFIED_PENDING_FINAL_REVIEW`
+Status: `BUILD_P1_5_PENDING_CURRENT_PR_HEAD_VERIFICATION`
 Active contract: `STAGE-B-BUILD-v1`
 Live execution state: `docs/evidence/STAGE_B_EXECUTION_STATE.yaml`
 Current unit: `P15 — UX_ONBOARDING_EXCEPTION_INBOX_FOUNDATION`
@@ -25,18 +25,19 @@ B3, B4, and ingestion foundations. The branch provides:
 - deterministic Exception Inbox entries with cause, evidence, affected metrics,
   required resolution, and independent-result continuity;
 - fail-closed organization, mode, tenant, duplicate, and forged-input controls;
-- machine-readable schemas and 63 verified targeted test methods.
+- stable pre-merge evidence without self-referential exact-head fields;
+- 64 targeted test methods.
 
 The immutable implementation baseline is
-`dd0b5d6029b4a2285c25f80b09b52b52d551946b`. Pre-merge verification is not
-stored as a self-referential branch SHA: Foundation CI, OSS Admission/OSV,
-artifact-manifest equality, and final independent review must pass on the
-current PR head. The exact merged SHA and final run identifiers are recorded
-only by post-merge closure evidence.
+`dd0b5d6029b4a2285c25f80b09b52b52d551946b`. Foundation CI, OSS
+Admission/OSV, artifact-manifest equality, final independent review, and zero
+unresolved review threads are required on the current PR head. The exact merged
+SHA and final run identifiers are recorded only by post-merge closure evidence.
 
-Five Codex findings and two internal audit findings have been remediated.
-Unresolved review threads: `0`. Final current-head review, merge, and post-merge
-closure remain pending.
+Six Codex findings and two internal audit findings have been remediated. The
+latest P1 finding is covered by a regression that rejects self-referential
+pre-merge verification fields. Current-head CI, thread resolution, re-review,
+merge, and post-merge closure remain pending.
 
 ## Completed baseline
 
