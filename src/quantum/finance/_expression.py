@@ -16,6 +16,7 @@ from ._rounding import (
     validate_rounding_policy,
 )
 
+
 def _signature(value: _Value) -> tuple[str, str, str | None]:
     return value.value_type, value.unit, value.currency
 
@@ -193,12 +194,25 @@ def evaluate_expression(
         if operator == "MULTIPLY":
             left, right = values
             pair = (left.value_type, right.value_type)
-            reverse_pair = (right.value_type, left.value_type)
-            if pair in {("MONEY", "DECIMAL"), ("MONEY", "RATE")}:
+            if pair == ("MONEY", "RATE"):
+                if right.unit != "RATE":
+                    raise FinanceError("EXPRESSION_UNIT_MISMATCH")
                 result_signature = ("MONEY", left.unit, left.currency)
-            elif reverse_pair in {("MONEY", "DECIMAL"), ("MONEY", "RATE")}:
+            elif pair == ("RATE", "MONEY"):
+                if left.unit != "RATE":
+                    raise FinanceError("EXPRESSION_UNIT_MISMATCH")
+                result_signature = ("MONEY", right.unit, right.currency)
+            elif pair == ("MONEY", "DECIMAL"):
+                if right.unit != "DIMENSIONLESS":
+                    raise FinanceError("EXPRESSION_UNIT_MISMATCH")
+                result_signature = ("MONEY", left.unit, left.currency)
+            elif pair == ("DECIMAL", "MONEY"):
+                if left.unit != "DIMENSIONLESS":
+                    raise FinanceError("EXPRESSION_UNIT_MISMATCH")
                 result_signature = ("MONEY", right.unit, right.currency)
             elif pair == ("DECIMAL", "DECIMAL"):
+                if left.unit != "DIMENSIONLESS" or right.unit != "DIMENSIONLESS":
+                    raise FinanceError("EXPRESSION_UNIT_MISMATCH")
                 result_signature = ("DECIMAL", "DIMENSIONLESS", None)
             else:
                 raise FinanceError("EXPRESSION_TYPE_MISMATCH")
@@ -229,10 +243,16 @@ def evaluate_expression(
             if pair == ("MONEY", "MONEY"):
                 if left.currency != right.currency:
                     raise FinanceError("EXPRESSION_CURRENCY_MISMATCH")
+                if left.unit != right.unit:
+                    raise FinanceError("EXPRESSION_UNIT_MISMATCH")
                 result_signature = ("DECIMAL", "DIMENSIONLESS", None)
             elif pair == ("MONEY", "DECIMAL"):
+                if right.unit != "DIMENSIONLESS":
+                    raise FinanceError("EXPRESSION_UNIT_MISMATCH")
                 result_signature = ("MONEY", left.unit, left.currency)
             elif pair == ("DECIMAL", "DECIMAL"):
+                if left.unit != "DIMENSIONLESS" or right.unit != "DIMENSIONLESS":
+                    raise FinanceError("EXPRESSION_UNIT_MISMATCH")
                 result_signature = ("DECIMAL", "DIMENSIONLESS", None)
             else:
                 raise FinanceError("EXPRESSION_TYPE_MISMATCH")
