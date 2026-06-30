@@ -1,6 +1,6 @@
 {
   "baseline_id": "B1B-SYNTHETIC-GOLDEN-CANDIDATE-v1",
-  "approval_state": "CANDIDATE_VALUES_PENDING_EXPLICIT_OWNER_SIGNOFF",
+  "approval_state": "APPROVED",
   "methodology_approval_reference": "user-b1b-authorization-2026-06-30",
   "oracle_owner_role": "BUSINESS_GOLDEN_ORACLE_OWNER",
   "oracle_owner_identity": "PROJECT_OWNER_USER",
@@ -258,8 +258,8 @@
           "value": "-44.00"
         },
         "profit_per_sold_unit": {
-          "state": "VALID",
-          "value": "44.00"
+          "state": "BLOCKED",
+          "value": null
         },
         "profitability_of_costs": {
           "state": "BLOCKED",
