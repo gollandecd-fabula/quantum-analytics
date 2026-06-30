@@ -35,7 +35,16 @@ class A0B1bAdmissionDiagnosticTests(unittest.TestCase):
             },
             dependencies=("metric:actual",),
         )
-        self.assertEqual(resolve_rule([rule], context())["state"], "VALID")
+        try:
+            resolution = resolve_rule([rule], context())
+        except Exception as exc:
+            print(
+                "COLON_DEPENDENCY_EXCEPTION="
+                f"{type(exc).__name__}:{getattr(exc, 'code', repr(exc))}",
+                flush=True,
+            )
+            raise
+        self.assertEqual(resolution["state"], "VALID")
 
     def test_03_malformed_payloads_reject(self) -> None:
         with self.assertRaisesRegex(FinanceError, "RULE_RATE_INVALID"):
