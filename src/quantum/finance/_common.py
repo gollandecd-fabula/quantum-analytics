@@ -53,6 +53,10 @@ _INTEGER_RE = re.compile(r"^-?(0|[1-9][0-9]*)$")
 _CURRENCY_RE = re.compile(r"^[A-Z]{3}$")
 _HASH_RE = re.compile(r"^[a-f0-9]{64}$")
 _ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$")
+_RFC3339_RE = re.compile(
+    r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}"
+    r"(?:\.\d{1,6})?(?:Z|[+-]\d{2}:\d{2})$"
+)
 
 _MAX_EXPRESSION_NODES = 128
 _MAX_EXPRESSION_DEPTH = 24
@@ -112,7 +116,7 @@ def _is_non_negative_int(value: object) -> bool:
 
 
 def _parse_rfc3339(value: object, code: str) -> datetime:
-    if not isinstance(value, str) or not value or "T" not in value:
+    if not isinstance(value, str) or _RFC3339_RE.fullmatch(value) is None:
         raise FinanceError(code)
     normalized = value[:-1] + "+00:00" if value.endswith("Z") else value
     try:
