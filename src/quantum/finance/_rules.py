@@ -15,6 +15,7 @@ from ._common import (
     _value_to_dict,
 )
 from ._expression import evaluate_expression
+from ._expression_validation import validate_expression_ast
 from ._rounding import (
     _input_decimal, _normalize_value, _propagate, _quantize,
     validate_rounding_policy,
@@ -164,12 +165,15 @@ def _validate_rule_document(rule: object) -> dict[str, Any]:
             raise FinanceError("RULE_CURRENCY_UNIT_MISMATCH")
         if len(dependencies) != 1:
             raise FinanceError("RULE_DEPENDENCY_UNKNOWN")
+        if not isinstance(rule["rate"], str) or _DECIMAL_RE.fullmatch(rule["rate"]) is None:
+            raise FinanceError("RULE_RATE_INVALID")
     elif method == "FIXED_VALUE":
         if not isinstance(rule["value"], str) or _DECIMAL_RE.fullmatch(rule["value"]) is None:
             raise FinanceError("RULE_VALUE_INVALID")
     else:
         if not isinstance(rule["expression"], Mapping):
             raise FinanceError("RULE_UNSAFE_EXPRESSION")
+        validate_expression_ast(rule["expression"], dependencies)
     if rule["base"] not in {
         "NONE", "UNIT", "ORDER", "EVENT", "PERIOD", "GROSS_SALES", "NET_SALES",
         "PAYOUT", "PRODUCT_COST", "CUSTOM_VARIABLE",
