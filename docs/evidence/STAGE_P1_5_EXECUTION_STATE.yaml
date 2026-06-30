@@ -20,6 +20,8 @@ implemented:
   - B1a-aligned RATE tax-base vocabulary with NONE rejected
   - distinct accessible rendering for typed states and all canonical numeric-zero forms
   - canonical tenant-scoped import status without storage-key disclosure
+  - canonical lowercase-hyphenated raw-file UUID enforcement
+  - strict RFC3339 timestamps on public configuration and Inbox builders
   - preview-safe Evidence Chain drill-down over validated B4 report records
   - deterministic Exception Inbox with cause, affected metrics, evidence and resolution
   - independent valid metric continuity when another result is blocked
@@ -46,14 +48,14 @@ tests:
     - tests/test_p15_review_remediation.py
     - tests/test_p15_manifest_payload.py
     - tests/test_a0_p15_manifest_payload.py
-  methods_declared: 61
+  methods_declared: 63
   status: NOT_RUN_FOR_CURRENT_HEAD
 review:
   status: FINDINGS_REMEDIATED_RECHECK_PENDING
-  reviewed_commit: 408ef82a8754b8af303591231de0ff16b1568b44
-  findings_received: 3
-  findings_remediated: 3
-  unresolved_threads: 3
+  reviewed_commit: 86c17f3799ead1843ff2fe7184857a37f2b05322
+  findings_received: 5
+  findings_remediated: 5
+  unresolved_threads: 2
 requirements:
   - Q-BLD-007
   - Q-BLD-014
