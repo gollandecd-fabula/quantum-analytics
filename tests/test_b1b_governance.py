@@ -11,24 +11,36 @@ from quantum.finance import FinanceError, canonical_hash, validate_rounding_poli
 
 from tests.b1b_helpers import FIXTURE_PATH, policy
 
+B1B_PRODUCTION_MODULES = (
+    "__init__.py",
+    "_calculation_core.py",
+    "_calculation_expenses.py",
+    "_calculation_profit.py",
+    "_common.py",
+    "_expression.py",
+    "_metrics.py",
+    "_rounding.py",
+    "_rules.py",
+    "runtime.py",
+)
+
 
 def production_module_sources() -> dict[str, str]:
     finance_dir = Path(__file__).resolve().parents[1] / "src/quantum/finance"
-    return {
-        path.name: path.read_text(encoding="utf-8")
-        for path in sorted(finance_dir.glob("*.py"))
-        if path.name != "oracle.py"
-    }
+    sources: dict[str, str] = {}
+    for module_name in B1B_PRODUCTION_MODULES:
+        path = finance_dir / module_name
+        if not path.is_file():
+            raise AssertionError(f"B1B_PRODUCTION_MODULE_MISSING:{module_name}")
+        sources[module_name] = path.read_text(encoding="utf-8")
+    return sources
 
 
 class B1bGovernanceTests(unittest.TestCase):
-    def test_fixture_is_synthetic_and_pending_explicit_value_signoff(self) -> None:
+    def test_fixture_is_synthetic_and_explicitly_owner_approved(self) -> None:
         fixture = json.loads(FIXTURE_PATH.read_text(encoding="utf-8"))
         self.assertFalse(fixture["real_commercial_data"])
-        self.assertEqual(
-            fixture["approval_state"],
-            "CANDIDATE_VALUES_PENDING_EXPLICIT_OWNER_SIGNOFF",
-        )
+        self.assertEqual(fixture["approval_state"], "APPROVED")
         self.assertEqual(fixture["oracle_owner_identity"], "PROJECT_OWNER_USER")
 
     def test_runtime_contains_no_arbitrary_code_execution(self) -> None:
@@ -143,18 +155,18 @@ class B1bGovernanceTests(unittest.TestCase):
         self.assertEqual(set(results["properties"]), expected)
         self.assertFalse(results["additionalProperties"])
 
-    def test_contract_preserves_pending_signoff_and_release_blocker(self) -> None:
+    def test_contract_records_owner_approval_and_release_blocker(self) -> None:
         root = Path(__file__).resolve().parents[1]
         contract = (root / "docs/finance/B1B_CALCULATION_KERNEL_CONTRACT.md").read_text(encoding="utf-8")
-        self.assertIn("REVIEW_PENDING_OWNER_SIGNOFF", contract)
-        self.assertIn("CANDIDATE_VALUES_PENDING_EXPLICIT_OWNER_SIGNOFF", contract)
+        self.assertIn("OWNER_APPROVED_BASELINE", contract)
+        self.assertIn("approval state is `APPROVED`", contract)
         self.assertIn("`RELEASE_BLOCKED`", contract)
 
     def test_live_state_keeps_dependent_units_gated(self) -> None:
         root = Path(__file__).resolve().parents[1]
         state = (root / "docs/evidence/STAGE_B_EXECUTION_STATE.yaml").read_text(encoding="utf-8")
         self.assertIn("current_unit: B1b", state)
-        self.assertIn("state: REVIEW_PENDING_OWNER_SIGNOFF", state)
+        self.assertIn("state: REVIEW_PENDING_CI_AND_INDEPENDENT_REVIEW", state)
         self.assertIn("blocker: B1B_NOT_COMPLETE", state)
         self.assertIn("blocker: B1B_AND_B2_NOT_COMPLETE", state)
         self.assertIn("production_release: BLOCKED", state)
@@ -162,7 +174,7 @@ class B1bGovernanceTests(unittest.TestCase):
     def test_b1b_evidence_forbids_real_data_and_activation(self) -> None:
         root = Path(__file__).resolve().parents[1]
         evidence = (root / "docs/evidence/STAGE_B_B1B_EXECUTION_STATE.yaml").read_text(encoding="utf-8")
-        self.assertIn("exact_value_approval: PENDING_EXPLICIT_OWNER_SIGNOFF", evidence)
+        self.assertIn("exact_value_approval: APPROVED_BY_PROJECT_OWNER_2026-06-30", evidence)
         self.assertIn("active_rules_created: false", evidence)
         self.assertIn("source_authority_activated: false", evidence)
         self.assertIn("real_or_anonymized_commercial_data_admitted: false", evidence)
