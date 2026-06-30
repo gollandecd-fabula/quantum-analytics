@@ -48,31 +48,23 @@ def calculate_other_expense(
             policy,
         )
         if value.value_type != "MONEY" or value.currency != currency:
-            expense_terms.append((
-                1,
-                _make_nonvalid(
-                    "BLOCKED",
-                    value_type="MONEY",
-                    unit="MONEY",
-                    currency=currency,
-                    reason_code="OTHER_EXPENSE_SIGNATURE_MISMATCH",
-                    source_ids=value.source_ids,
-                ),
-            ))
-            continue
+            return _make_nonvalid(
+                "BLOCKED",
+                value_type="MONEY",
+                unit="MONEY",
+                currency=currency,
+                reason_code="OTHER_EXPENSE_SIGNATURE_MISMATCH",
+                source_ids=value.source_ids,
+            )
         if value.unit not in _SUPPORTED_EXPENSE_UNITS:
-            expense_terms.append((
-                1,
-                _make_nonvalid(
-                    "BLOCKED",
-                    value_type="MONEY",
-                    unit="MONEY",
-                    currency=currency,
-                    reason_code="OTHER_EXPENSE_UNIT_UNSUPPORTED",
-                    source_ids=value.source_ids,
-                ),
-            ))
-            continue
+            return _make_nonvalid(
+                "BLOCKED",
+                value_type="MONEY",
+                unit="MONEY",
+                currency=currency,
+                reason_code="OTHER_EXPENSE_UNIT_UNSUPPORTED",
+                source_ids=value.source_ids,
+            )
         if value.state != "VALID":
             expense_terms.append((1, value))
             continue
