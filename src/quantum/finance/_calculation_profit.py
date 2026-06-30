@@ -74,6 +74,22 @@ def calculate_settlement_tax_profit(
             reason_code=f"TAX_BASE_MISSING:{base_id}",
             source_ids=(base_id,),
         )
+    elif (
+        tax_rate.value_type != "RATE"
+        or tax_rate.unit != "RATE"
+        or tax_rate.currency is not None
+        or tax_base.value_type != "MONEY"
+        or tax_base.unit != "MONEY"
+        or tax_base.currency != currency
+    ):
+        tax_amount = _make_nonvalid(
+            "BLOCKED",
+            value_type="MONEY",
+            unit="MONEY",
+            currency=currency,
+            reason_code="TAX_RULE_SIGNATURE_MISMATCH",
+            source_ids=tuple((*tax_rate.source_ids, *tax_base.source_ids)),
+        )
     else:
         propagated_tax = _propagate(
             [tax_rate, tax_base],
@@ -83,22 +99,6 @@ def calculate_settlement_tax_profit(
         )
         if propagated_tax is not None:
             tax_amount = propagated_tax
-        elif (
-            tax_rate.value_type != "RATE"
-            or tax_rate.unit != "RATE"
-            or tax_rate.currency is not None
-            or tax_base.value_type != "MONEY"
-            or tax_base.unit != "MONEY"
-            or tax_base.currency != currency
-        ):
-            tax_amount = _make_nonvalid(
-                "BLOCKED",
-                value_type="MONEY",
-                unit="MONEY",
-                currency=currency,
-                reason_code="TAX_RULE_SIGNATURE_MISMATCH",
-                source_ids=tuple((*tax_rate.source_ids, *tax_base.source_ids)),
-            )
         else:
             assert isinstance(tax_rate.value, Decimal) and isinstance(tax_base.value, Decimal)
             tax_amount = _make_valid(
