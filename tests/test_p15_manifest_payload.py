@@ -15,6 +15,9 @@ MUTABLE_LIVE_PATHS = frozenset({
     "docs/evidence/STAGE_B_EXECUTION_STATE.yaml",
     "docs/governance/CURRENT_STATE.md",
 })
+CONTROL_PATHS = frozenset({
+    "tests/test_p15_manifest_payload.py",
+})
 P15_PATHS = (
     "docs/evidence/STAGE_P1_5_EXECUTION_STATE.yaml",
     "docs/ux/UX_ONBOARDING_EXCEPTION_INBOX_CONTRACT.md",
@@ -27,7 +30,6 @@ P15_PATHS = (
     "tests/test_a0_p15_manifest_payload.py",
     "tests/test_b1a_artifact_manifest.py",
     "tests/test_p15_contract_alignment.py",
-    "tests/test_p15_manifest_payload.py",
     "tests/test_p15_review_remediation.py",
     "tests/test_p15_schema_alignment.py",
     "tests/test_p15_ux_adversarial.py",
@@ -75,6 +77,7 @@ class P15ManifestPayloadTests(unittest.TestCase):
     def test_paths_are_sorted_unique_and_exist(self) -> None:
         self.assertEqual(P15_PATHS, tuple(sorted(set(P15_PATHS))))
         self.assertTrue(MUTABLE_LIVE_PATHS.isdisjoint(P15_PATHS))
+        self.assertTrue(CONTROL_PATHS.isdisjoint(P15_PATHS))
         self.assertTrue(all((ROOT / path).is_file() for path in P15_PATHS))
 
 
