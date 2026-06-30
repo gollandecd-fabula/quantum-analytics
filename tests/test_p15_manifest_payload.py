@@ -23,6 +23,7 @@ P15_PATHS = (
     "tests/test_b1a_artifact_manifest.py",
     "tests/test_p15_contract_alignment.py",
     "tests/test_p15_manifest_payload.py",
+    "tests/test_p15_review_remediation.py",
     "tests/test_p15_schema_alignment.py",
     "tests/test_p15_ux_adversarial.py",
     "tests/test_p15_ux_runtime.py",
