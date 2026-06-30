@@ -34,6 +34,11 @@ string `"0"`. Missing validity start, missing monetary currency, malformed
 decimal input, unknown tax base, scope conflict, and scenario mismatch fail
 closed with machine-readable diagnostics.
 
+Tax-base input follows the B1a `configuration-rule` vocabulary for `RATE`
+rules. The accepted values are `UNIT`, `ORDER`, `EVENT`, `PERIOD`,
+`GROSS_SALES`, `NET_SALES`, `PAYOUT`, `PRODUCT_COST`, and
+`CUSTOM_VARIABLE`. `NONE` is rejected because B1a prohibits it for `RATE`.
+
 A complete valid form reaches `READY_FOR_RULE_DRAFT`. This state means only
 that a draft rule may be constructed by a later bounded workflow. It does not
 create, approve, publish, or activate a B1 financial rule. The form publication
@@ -70,6 +75,12 @@ have distinct text-first accessible views. Only `VALID` is marked admitted to
 canonical processing. The raw storage key is never exposed by the UX view.
 Quarantined and rejected files remain excluded.
 
+Canonical diagnostic strings are preserved in their original order, including
+empty or repeated values allowed by the P1.2 ingestion contract. When an import
+exception needs one non-empty machine-readable cause, the Inbox uses the first
+non-empty diagnostic; if none exists, it uses `IMPORT_<STATE>` without mutating
+the source record.
+
 Tenant scope is independent from organization scope. P1.5 does not infer or
 invent a tenant-to-organization mapping.
 
@@ -98,9 +109,9 @@ hashed exception entries with:
 - severity and open status;
 - accessible summary.
 
-Independent `VALID` metrics remain listed in `available_metric_ids` when another
-metric is blocked. Exceptions are sorted by content-derived identifiers, so
-input order does not change the Inbox or its hash.
+Independent `VALID` metrics remain listed once in `available_metric_ids` when
+another metric is blocked. Exceptions are sorted by content-derived identifiers,
+so input order does not change the Inbox or its hash.
 
 Mixed organizations, Actual/Scenario namespaces, tenants, duplicate report
 records, and duplicate import records fail closed. Import exceptions require an
