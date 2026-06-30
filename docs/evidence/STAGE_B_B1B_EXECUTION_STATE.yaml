@@ -1,0 +1,55 @@
+execution_state_id: STAGE-B-B1B-EXECUTION-STATE-v1
+stage_contract_id: STAGE-B-BUILD-v1
+unit: B1b
+risk: R3
+updated_on: 2026-06-30
+status: REVIEW_PENDING_OWNER_SIGNOFF
+tracking_issue: 32
+working_branch: build-b1b-financial-kernel-v1
+explicit_user_r3_authorization: RECORDED_2026-06-30
+golden_oracle:
+  owner_role: BUSINESS_GOLDEN_ORACLE_OWNER
+  owner_identity: PROJECT_OWNER_USER
+  implementation_independent: true
+  baseline_source: SYNTHETIC_TEST_SCENARIOS_UNDER_APPROVED_METHODOLOGY
+  exact_value_approval: PENDING_EXPLICIT_OWNER_SIGNOFF
+  external_second_line_review_before_real_data: REQUIRED
+implementation:
+  production_runtime: src/quantum/finance/runtime.py
+  independent_oracle: src/quantum/finance/oracle.py
+  result_schema: schemas/financial-kernel-result.schema.json
+  contract: docs/finance/B1B_CALCULATION_KERNEL_CONTRACT.md
+  publication_state: PREVIEW_ONLY
+  active_rules_created: false
+  source_authority_activated: false
+  real_or_anonymized_commercial_data_admitted: false
+  marketplace_write_capability: false
+verification:
+  targeted_test_methods: 60
+  targeted_tests_status: PASS_LOCAL_RECONSTRUCTED_ENVIRONMENT
+  compileall_status: PASS
+  differential_oracle_status: PASS
+  ast_security_scan: PASS
+  fixed_commercial_constant_scan: PASS
+  accumulated_repository_suite: PENDING_GITHUB_CI
+  exact_reviewed_head: PENDING_PR
+  independent_code_review: PENDING_PR
+  unresolved_review_threads: PENDING_PR
+outputs:
+  - DECIMAL_CALCULATION_KERNEL
+  - VERSIONED_ROUNDING
+  - TYPED_STATE_PROPAGATION
+  - ACTUAL_SCENARIO_ISOLATION
+  - SAFE_EXPRESSION_EVALUATION
+  - DETERMINISTIC_RULE_RESOLUTION
+  - SYNTHETIC_GOLDEN_FIXTURES
+  - INDEPENDENT_DIFFERENTIAL_ORACLE
+limitations:
+  - GOLDEN_BASELINE_EXACT_VALUES_NOT_YET_OWNER_APPROVED
+  - SOURCE_AUTHORITY_NOT_ACTIVATED
+  - REAL_COMMERCIAL_DATA_NOT_ADMITTED
+  - B2_RECONCILIATION_NOT_IMPLEMENTED
+  - PROFITABILITY_DENOMINATOR_NOT_APPROVED
+  - EXTERNAL_SECOND_LINE_FINANCIAL_REVIEW_REQUIRED_BEFORE_REAL_DATA
+  - PRODUCTION_RELEASE_BLOCKED
+release_status: RELEASE_BLOCKED
