@@ -13,6 +13,14 @@ from quantum.ux import (
 
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMAS = ROOT / "schemas"
+RFC3339_PATTERN = (
+    r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}"
+    r"(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$"
+)
+CANONICAL_UUID_PATTERN = (
+    r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-"
+    r"[0-9a-f]{4}-[0-9a-f]{12}$"
+)
 
 
 def load_schema(name: str) -> dict:
@@ -65,6 +73,11 @@ class P15SchemaAlignmentTests(unittest.TestCase):
         self.assertIn("valid_from", form["required"])
         self.assertIn("scope", form["required"])
         self.assertIn("currency", form["required"])
+        for field_id in ("valid_from", "valid_to", "created_at"):
+            self.assertEqual(
+                form["properties"][field_id]["pattern"],
+                RFC3339_PATTERN,
+            )
         self.assertNotIn("default", json.dumps(form, sort_keys=True))
 
     def test_form_scope_matches_b1a_exclusivity_floor(self) -> None:
@@ -109,6 +122,14 @@ class P15SchemaAlignmentTests(unittest.TestCase):
         import_view = view["$defs"]["importStatus"]
         self.assertNotIn("storage_key", import_view["properties"])
         self.assertNotIn("storage_key", import_view["required"])
+        self.assertEqual(
+            import_view["properties"]["raw_file_id"]["$ref"],
+            "#/$defs/canonicalUuid",
+        )
+        self.assertEqual(
+            view["$defs"]["canonicalUuid"]["pattern"],
+            CANONICAL_UUID_PATTERN,
+        )
 
     def test_evidence_drilldown_has_explicit_verification_claim(self) -> None:
         view = load_schema("ux-view.schema.json")
@@ -141,6 +162,19 @@ class P15SchemaAlignmentTests(unittest.TestCase):
         self.assertIn("mode", required)
         self.assertIn("available_metric_ids", required)
         self.assertIn("independent_results_preserved", required)
+        self.assertEqual(
+            inbox["properties"]["generated_at"]["pattern"],
+            RFC3339_PATTERN,
+        )
+        self.assertEqual(
+            inbox["$defs"]["rawFileEvidenceRef"]["properties"]
+            ["raw_file_id"]["$ref"],
+            "#/$defs/canonicalUuid",
+        )
+        self.assertEqual(
+            inbox["$defs"]["canonicalUuid"]["pattern"],
+            CANONICAL_UUID_PATTERN,
+        )
 
 
 if __name__ == "__main__":
