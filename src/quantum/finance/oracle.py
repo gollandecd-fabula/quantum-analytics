@@ -79,7 +79,7 @@ def reference_calculate(case: dict[str, Any]) -> dict[str, dict[str, str | None]
 
     ppu = (
         {"state": "BLOCKED", "value": None}
-        if net_units == 0
+        if net_units <= 0
         else valid(profit / Decimal(net_units))
     )
     return {
