@@ -7,6 +7,7 @@ from pathlib import Path
 
 from quantum.finance import (
     FinanceError,
+    canonical_hash,
     evaluate_expression,
     resolve_rule,
 )
@@ -94,7 +95,10 @@ class B1bRuleAdmissionValidationTests(unittest.TestCase):
         rule = rule_document(
             method="SAFE_EXPRESSION",
             expression=expression,
-            dependencies=("metric:actual",),
+        )
+        rule["dependencies"] = ["metric:actual"]
+        rule["content_hash"] = canonical_hash(
+            rule, exclude=frozenset({"content_hash"})
         )
         resolution = resolve_rule([rule], context())
         self.assertEqual(resolution["state"], "VALID")
