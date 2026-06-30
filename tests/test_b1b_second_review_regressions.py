@@ -4,6 +4,7 @@ import unittest
 
 from quantum.finance import (
     FinanceError,
+    calculate,
     canonical_hash,
     evaluate_expression,
     evaluate_resolved_rule,
@@ -11,7 +12,14 @@ from quantum.finance import (
     validate_rounding_policy,
 )
 
-from tests.b1b_helpers import context, policy, rule_document, typed
+from tests.b1b_helpers import (
+    context,
+    load_baseline,
+    policy,
+    request_from_case,
+    rule_document,
+    typed,
+)
 
 
 class B1bSecondReviewRegressionTests(unittest.TestCase):
@@ -149,6 +157,47 @@ class B1bSecondReviewRegressionTests(unittest.TestCase):
             FinanceError, "RULE_RESOLUTION_REPLAY_MISMATCH"
         ):
             evaluate_resolved_rule(resolution, [low, high], {}, policy())
+
+    def test_valid_from_microseconds_are_ordered_without_binary_float(self) -> None:
+        earlier = rule_document(
+            rule_id="cost.earlier",
+            valid_from="9999-01-01T00:00:00.000001Z",
+        )
+        later = rule_document(
+            rule_id="cost.later",
+            valid_from="9999-01-01T00:00:00.000002Z",
+        )
+        resolution = resolve_rule(
+            [earlier, later],
+            context(calculation_instant="9999-01-01T00:00:00.000010Z"),
+        )
+        selected = [
+            candidate["rule"]["rule_id"]
+            for candidate in resolution["candidates"]
+            if candidate["selected"] is True
+        ]
+        self.assertEqual(resolution["state"], "VALID")
+        self.assertEqual(selected, ["cost.later"])
+
+    def test_invalid_cost_signature_precedes_dependency_propagation(self) -> None:
+        request = request_from_case(load_baseline()["cases"][0])
+        request["inputs"]["returned_units"] = typed(
+            None,
+            value_type="INTEGER",
+            unit="ITEM",
+            state="UNAVAILABLE",
+            reason_code="RETURN_SOURCE_UNAVAILABLE",
+        )
+        request["cost_per_unit"] = typed(
+            "0.10", value_type="RATE", unit="RATE"
+        )
+        result = calculate(request)["results"]
+        self.assertEqual(result["net_sold_units"]["state"], "UNAVAILABLE")
+        self.assertEqual(result["product_cost_amount"]["state"], "BLOCKED")
+        self.assertEqual(
+            result["product_cost_amount"]["reason_code"],
+            "COST_RULE_SIGNATURE_MISMATCH",
+        )
 
     def test_safe_expression_result_must_match_rule_signature(self) -> None:
         expression = {
