@@ -6,6 +6,7 @@
     ["docs/governance/CURRENT_STATE.md", "1352060daa8a2bd827815bef760467843023f6d9132c20775792c9df2a5e5c33", 2356],
     ["tests/test_a0_p15_manifest_payload.py", "945c0acbe97338e898d086b28db6c20dc1d228c0e39762e26a66c046cd54920d", 670],
     ["tests/test_b1a_artifact_manifest.py", "496fa19a7c1e29215fb7b88be6674393846a1dfcc510cde08a658a942cfb1628", 9630],
+    ["tests/test_p15_contract_alignment.py", "0fa66d6507266795c38a36681ed074c29fc419022912b5669fd9e3f6436eb3d7", 4194],
     ["tests/test_p15_manifest_payload.py", "f147b8270c5086531ebab4a76e28d2d1639ab9f42cec4872e30ac902b1cf13ad", 2773]
   ],
   "hash_encoding": "sha256-hex",
