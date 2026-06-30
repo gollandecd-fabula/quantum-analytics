@@ -179,11 +179,16 @@ class B1bFinancialKernelTests(unittest.TestCase):
         self.assertNotEqual(first["input_hash"], second["input_hash"])
         self.assertNotEqual(first["result_hash"], second["result_hash"])
 
-    def test_negative_correction_is_decimal_not_special_case(self) -> None:
+    def test_negative_correction_blocks_profit_per_unit(self) -> None:
         result = calculate(request_from_case(self.baseline["cases"][3]))["results"]
         self.assertEqual(result["net_sold_units"]["value"], "-1")
         self.assertEqual(result["net_profit_amount"]["value"], "-44.00")
-        self.assertEqual(result["profit_per_sold_unit"]["value"], "44.00")
+        self.assertEqual(result["profit_per_sold_unit"]["state"], "BLOCKED")
+        self.assertIsNone(result["profit_per_sold_unit"]["value"])
+        self.assertEqual(
+            result["profit_per_sold_unit"]["reason_code"],
+            "NON_POSITIVE_DENOMINATOR",
+        )
 
 
 if __name__ == "__main__":
