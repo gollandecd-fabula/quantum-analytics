@@ -147,6 +147,27 @@ class B1bSecondReviewRegressionTests(unittest.TestCase):
         ):
             evaluate_resolved_rule(resolution, [rule], variables, policy())
 
+    def test_safe_expression_missing_dependency_remains_unavailable(self) -> None:
+        expression = {
+            "kind": "VARIABLE",
+            "name": "gross_sales_amount",
+            "value_type": "MONEY",
+            "currency": "EUR",
+            "unit": "MONEY",
+        }
+        rule = rule_document(method="SAFE_EXPRESSION", expression=expression)
+        resolution = resolve_rule([rule], context())
+        variables = {
+            "gross_sales_amount": typed(
+                "100", value_type="MONEY", unit="MONEY", currency="EUR"
+            )
+        }
+        result = evaluate_resolved_rule(resolution, [rule], variables, policy())
+        self.assertEqual(result["state"], "UNAVAILABLE")
+        self.assertEqual(
+            result["reason_code"], "RULE_DEPENDENCY_UNAVAILABLE:tax_rate"
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
