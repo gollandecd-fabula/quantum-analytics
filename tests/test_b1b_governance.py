@@ -18,6 +18,7 @@ B1B_PRODUCTION_MODULES = (
     "_calculation_profit.py",
     "_common.py",
     "_expression.py",
+    "_expression_validation.py",
     "_metrics.py",
     "_rounding.py",
     "_rules.py",
