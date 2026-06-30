@@ -158,6 +158,28 @@ class B1bSecondReviewRegressionTests(unittest.TestCase):
         ):
             evaluate_resolved_rule(resolution, [low, high], {}, policy())
 
+    def test_resolver_uses_one_snapshot_of_mutable_rule_sequence(self) -> None:
+        low = rule_document(rule_id="cost.low", priority=1, value="10")
+        high = rule_document(rule_id="cost.high", priority=2, value="20")
+
+        class FlippingRules(list[dict[str, object]]):
+            def __init__(self) -> None:
+                super().__init__([low])
+                self.iterations = 0
+
+            def __iter__(self):  # type: ignore[no-untyped-def]
+                self.iterations += 1
+                selected = [low] if self.iterations == 1 else [low, high]
+                return iter(selected)
+
+        rules = FlippingRules()
+        resolution = resolve_rule(rules, context())
+        self.assertEqual(rules.iterations, 1)
+        with self.assertRaisesRegex(
+            FinanceError, "RULE_RESOLUTION_REPLAY_MISMATCH"
+        ):
+            evaluate_resolved_rule(resolution, [low, high], {}, policy())
+
     def test_valid_from_microseconds_are_ordered_without_binary_float(self) -> None:
         earlier = rule_document(
             rule_id="cost.earlier",
