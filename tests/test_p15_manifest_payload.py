@@ -11,10 +11,12 @@ OVERLAY_PATH = ROOT / "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_P15.json"
 CLOSURE_OVERLAY_PATH = (
     ROOT / "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_P15_CLOSURE.json"
 )
-P15_PATHS = (
+MUTABLE_LIVE_PATHS = frozenset({
     "docs/evidence/STAGE_B_EXECUTION_STATE.yaml",
-    "docs/evidence/STAGE_P1_5_EXECUTION_STATE.yaml",
     "docs/governance/CURRENT_STATE.md",
+})
+P15_PATHS = (
+    "docs/evidence/STAGE_P1_5_EXECUTION_STATE.yaml",
     "docs/ux/UX_ONBOARDING_EXCEPTION_INBOX_CONTRACT.md",
     "schemas/exception-inbox.schema.json",
     "schemas/ux-configuration-form.schema.json",
@@ -57,7 +59,7 @@ def effective_entries() -> list[list[object]]:
         entries[row[0]] = row
     for path in closure.get("remove_paths", []):
         entries.pop(path, None)
-    return [entries[path] for path in sorted(entries)]
+    return [entries[path] for path in P15_PATHS]
 
 
 class P15ManifestPayloadTests(unittest.TestCase):
@@ -72,6 +74,7 @@ class P15ManifestPayloadTests(unittest.TestCase):
 
     def test_paths_are_sorted_unique_and_exist(self) -> None:
         self.assertEqual(P15_PATHS, tuple(sorted(set(P15_PATHS))))
+        self.assertTrue(MUTABLE_LIVE_PATHS.isdisjoint(P15_PATHS))
         self.assertTrue(all((ROOT / path).is_file() for path in P15_PATHS))
 
 
