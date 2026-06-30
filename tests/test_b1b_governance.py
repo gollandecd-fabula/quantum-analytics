@@ -21,6 +21,7 @@ B1B_PRODUCTION_MODULES = (
     "_metrics.py",
     "_rounding.py",
     "_rules.py",
+    "_rules_hardening.py",
     "runtime.py",
 )
 
