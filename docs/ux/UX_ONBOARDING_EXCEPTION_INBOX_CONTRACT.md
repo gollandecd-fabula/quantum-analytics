@@ -28,6 +28,11 @@ an immutable form hash. Optional scope dimensions use omission as the only
 wildcard representation. Product and product-group scopes are mutually
 exclusive.
 
+All serialized timestamps use strict RFC3339 form with an uppercase `T`
+separator and an explicit `Z` or numeric timezone offset. Strings accepted only
+by permissive `datetime.fromisoformat`, such as values with a space separator,
+fail closed before a form or Inbox is emitted.
+
 No field contains a commercial default. A new field is `EMPTY` with `value:
 null`. Numeric zero is accepted only when explicitly supplied as the normalized
 string `"0"`. Missing validity start, missing monetary currency, malformed
@@ -70,6 +75,11 @@ canonical decimal-string representation whose numeric value is zero, including
 Import presentation accepts only canonical `RawFileRecord` values. The public
 UX boundary validates UUID, tenant, SHA-256, byte size, safe filename, canonical
 storage key, state, schema/fingerprint payload, and diagnostics before rendering.
+
+`raw_file_id` must equal the canonical lowercase, hyphenated string returned by
+`str(UUID(raw_file_id))`. Uppercase, compact, braced, URN, or other equivalent
+UUID spellings are rejected so one logical raw file cannot evade duplicate
+checks through alternate text representations.
 
 The states `RECEIVED`, `VALIDATING`, `VALID`, `QUARANTINED`, and `REJECTED`
 have distinct text-first accessible views. Only `VALID` is marked admitted to
@@ -118,8 +128,9 @@ Mixed organizations, Actual/Scenario namespaces, tenants, duplicate report
 records, duplicate import records, and duplicate configuration `form_id` values
 fail closed. A supplied tenant identifier must be a non-empty string even when
 no import records are present. Import exceptions require an explicit tenant
-identifier. No exception resolution mutates source records, metric snapshots,
-configuration rules, or marketplace state.
+identifier. Inbox `generated_at` follows the same strict RFC3339 boundary as
+configuration timestamps. No exception resolution mutates source records,
+metric snapshots, configuration rules, or marketplace state.
 
 ## Machine-readable artifacts
 
@@ -171,11 +182,11 @@ configuration rules, or marketplace state.
 ## Acceptance mapping
 
 - `Q-BLD-007` → typed-state and numeric-zero presentation tests;
-- `Q-BLD-014` → explicit input, scope, validity, currency, and no-default tests;
+- `Q-BLD-014` → explicit input, scope, validity, currency, strict timestamp, and no-default tests;
 - `Q-BLD-015` → Exception Inbox cause/evidence/resolution and continuity tests;
 - `BLD-029` → configuration runtime and schema alignment;
 - `BLD-030` → text-first accessible state views;
-- `BLD-031` → deterministic Exception Inbox with independent metrics retained;
+- `BLD-031` → deterministic Exception Inbox with canonical UUID and independent metrics retained;
 - `BLD-032` → configuration, import status, report, and evidence drill-down critical paths.
 
 ## Exclusions
