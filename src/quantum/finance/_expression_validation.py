@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from collections.abc import Mapping, Sequence
 from decimal import Decimal
 
@@ -18,6 +19,8 @@ from ._common import (
     _validate_signature,
 )
 from ._expression import _validate_operation_signature
+
+_VARIABLE_NAME_RE = re.compile(r"^[a-z][a-z0-9_.:-]{0,127}$")
 
 
 def _dummy_value(
@@ -48,7 +51,11 @@ def validate_expression_ast(
         or isinstance(dependencies, (str, bytes))
         or len(dependencies) > _MAX_EXPRESSION_DEPENDENCIES
         or len(dependencies) != len(set(dependencies))
-        or any(not _is_nonempty_string(item) for item in dependencies)
+        or any(
+            not isinstance(item, str)
+            or _VARIABLE_NAME_RE.fullmatch(item) is None
+            for item in dependencies
+        )
     ):
         raise FinanceError("EXPRESSION_DEPENDENCY_UNDECLARED")
     dependency_set = set(dependencies)
@@ -84,7 +91,12 @@ def validate_expression_ast(
             if set(node) != {"kind", "name", "value_type", "currency", "unit"}:
                 raise FinanceError("EXPRESSION_SCHEMA_INVALID")
             name = node.get("name")
-            if not _is_nonempty_string(name) or name not in dependency_set:
+            if (
+                not isinstance(name, str)
+                or _VARIABLE_NAME_RE.fullmatch(name) is None
+            ):
+                raise FinanceError("EXPRESSION_SCHEMA_INVALID")
+            if name not in dependency_set:
                 raise FinanceError("EXPRESSION_DEPENDENCY_UNDECLARED")
             value_type, unit, currency = _validate_signature(
                 node.get("value_type"), node.get("unit"), node.get("currency")
