@@ -135,6 +135,15 @@ def calculate_settlement_tax_profit(
             reason_code="ZERO_DENOMINATOR",
             source_ids=tuple((*net_profit.source_ids, *net_units.source_ids)),
         )
+    elif net_units.value < 0:
+        profit_per_unit = _make_nonvalid(
+            "BLOCKED",
+            value_type="MONEY",
+            unit="MONEY_PER_ITEM",
+            currency=currency,
+            reason_code="NON_POSITIVE_DENOMINATOR",
+            source_ids=tuple((*net_profit.source_ids, *net_units.source_ids)),
+        )
     else:
         assert isinstance(net_profit.value, Decimal)
         profit_per_unit = _make_valid(
