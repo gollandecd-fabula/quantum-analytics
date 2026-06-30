@@ -1,61 +1,58 @@
 # CURRENT STATE
 
 Date: 2026-06-30
-Status: `BUILD_P1_5_PENDING_CURRENT_PR_HEAD_VERIFICATION`
+Status: `BUILD_P1_5_COMPLETE`
 Active contract: `STAGE-B-BUILD-v1`
 Live execution state: `docs/evidence/STAGE_B_EXECUTION_STATE.yaml`
 Current unit: `P15 — UX_ONBOARDING_EXCEPTION_INBOX_FOUNDATION`
 Mapped unit: `B5 — UX, onboarding, and Exception Inbox`
+Pull request: `#30`
+Merged commit: `8a714e5688f3af5872305f8e1fdbdb4f56ee9d9a`
+Closure branch: `close-p1-5-post-merge-v1`
 Tracking issue: `#29`
-Working branch: `p15-ux-onboarding-exception-inbox`
 
-## Current result
+## Completed result
 
-P1.5 implements dependency-free, headless UX contracts over the completed B1a,
-B3, B4, and ingestion foundations. The branch provides:
+P1.5/B5 provides a dependency-free, headless UX foundation over the completed
+B1a, B3, B4, and ingestion contracts:
 
-- explicit preview-only inputs for cost, tax rate, tax base, and other expense;
-- B1a-aligned RATE tax-base vocabulary with `NONE` rejected;
-- explicit organization, Actual/Scenario, scope, validity, and currency controls;
-- strict RFC3339 timestamps in public builders and machine-readable schemas;
-- no-hidden-default behavior and distinct numeric-zero semantics;
-- text-first accessible views for typed metric and import states;
-- canonical lowercase-hyphenated raw-file UUID enforcement in runtime and schemas;
+- explicit preview-only cost, tax-rate, tax-base, and other-expense inputs;
+- no hidden commercial defaults and no missing-to-zero coercion;
+- B1a-aligned RATE tax-base vocabulary;
+- strict RFC3339 timestamps in executable and machine-readable contracts;
+- canonical lowercase-hyphenated raw-file UUID enforcement;
+- text-first accessible typed-state and numeric-zero presentation;
 - preview-safe Evidence Chain drill-down;
-- deterministic Exception Inbox entries with cause, evidence, affected metrics,
+- deterministic Exception Inbox with cause, evidence, affected metrics,
   required resolution, and independent-result continuity;
-- fail-closed organization, mode, tenant, duplicate, and forged-input controls;
-- stable pre-merge evidence without self-referential exact-head fields;
-- 64 targeted test methods.
+- fail-closed organization, Actual/Scenario, tenant, duplicate, and forged-input
+  boundaries;
+- stable pre-merge exact-head verification gates and post-merge evidence.
 
-The immutable implementation baseline is
-`dd0b5d6029b4a2285c25f80b09b52b52d551946b`. Foundation CI, OSS
-Admission/OSV, artifact-manifest equality, final independent review, and zero
-unresolved review threads are required on the current PR head. The exact merged
-SHA and final run identifiers are recorded only by post-merge closure evidence.
+Verification completed:
 
-Six Codex findings and two internal audit findings have been remediated. The
-latest P1 finding is covered by a regression that rejects self-referential
-pre-merge verification fields. Current-head CI, thread resolution, re-review,
-merge, and post-merge closure remain pending.
-
-## Completed baseline
-
-P1.4/B4 remains complete at merge commit
-`f19bfb652fccca9f205e2c83d334bd157d3e257c` with 37 targeted tests, Foundation
-CI, OSS Admission, OSV, artifact-manifest equality, and zero unresolved review
-threads.
+- exact reviewed head: `5cf1d83a737c8d9fdb5af73803f247e0dd1953a1`;
+- merged commit: `8a714e5688f3af5872305f8e1fdbdb4f56ee9d9a`;
+- 64 targeted P1.5 tests passed;
+- full accumulated Foundation regression suite passed;
+- Foundation CI run `28454778048` passed;
+- OSS Admission, official registry checks, and OSV run `28454777923` passed;
+- artifact-manifest equality passed;
+- six Codex findings were remediated;
+- two additional internal audit findings were remediated;
+- final Codex review returned `+1`;
+- unresolved review threads: 0.
 
 ## Critical path
 
-B1b remains blocked because an independent golden oracle owner and approved
-golden baseline are not available. P1.5 does not activate the financial
-calculation kernel and does not unblock B2 or B6.
+B1b remains gated because an independent golden oracle owner and approved
+golden baseline are not available. Consequently B2 and B6 remain gated. B7
+external access is not authorized. No subsequent R3 unit has been started.
 
 ## Exclusions
 
-No financial calculation or rule activation, real marketplace data, external
-HTTP service, browser deployment, external authentication, database
+No financial calculation kernel or rule activation, real marketplace data,
+external HTTP service, browser deployment, external authentication, database
 persistence, production release, or marketplace writes are included.
 
 `RELEASE_BLOCKED`

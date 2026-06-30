@@ -8,6 +8,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 OVERLAY_PATH = ROOT / "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_P15.json"
+CLOSURE_OVERLAY_PATH = (
+    ROOT / "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_P15_CLOSURE.json"
+)
 P15_PATHS = (
     "docs/evidence/STAGE_B_EXECUTION_STATE.yaml",
     "docs/evidence/STAGE_P1_5_EXECUTION_STATE.yaml",
@@ -30,6 +33,11 @@ P15_PATHS = (
 )
 
 
+def git_blob_sha(data: bytes) -> str:
+    header = f"blob {len(data)}\0".encode("ascii")
+    return hashlib.sha1(header + data).hexdigest()
+
+
 def expected_entries() -> list[list[object]]:
     entries: list[list[object]] = []
     for path in P15_PATHS:
@@ -38,13 +46,27 @@ def expected_entries() -> list[list[object]]:
     return entries
 
 
+def effective_entries() -> list[list[object]]:
+    base_bytes = OVERLAY_PATH.read_bytes()
+    base = json.loads(base_bytes.decode("utf-8"))
+    closure = json.loads(CLOSURE_OVERLAY_PATH.read_text(encoding="utf-8"))
+    if closure["base_p15_overlay_git_blob_sha"] != git_blob_sha(base_bytes):
+        raise AssertionError("P15_CLOSURE_OVERLAY_BASE_MISMATCH")
+    entries = {row[0]: row for row in base["entries"]}
+    for row in closure["entries"]:
+        entries[row[0]] = row
+    for path in closure.get("remove_paths", []):
+        entries.pop(path, None)
+    return [entries[path] for path in sorted(entries)]
+
+
 class P15ManifestPayloadTests(unittest.TestCase):
     def test_overlay_payload_matches_p15_artifacts_exactly(self) -> None:
-        overlay = json.loads(OVERLAY_PATH.read_text(encoding="utf-8"))
         expected = expected_entries()
-        if overlay["entries"] != expected:
+        actual = effective_entries()
+        if actual != expected:
             raise AssertionError(
-                "P15_MANIFEST_ENTRIES="
+                "P15_CLOSURE_MANIFEST_ENTRIES="
                 + json.dumps(expected, ensure_ascii=False, separators=(",", ":"))
             )
 
