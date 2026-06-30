@@ -30,6 +30,7 @@ P15_OVERLAY_PATH = ROOT / "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_P15.json"
 P15_CLOSURE_OVERLAY_PATH = (
     ROOT / "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_P15_CLOSURE.json"
 )
+B1B_OVERLAY_PATH = ROOT / "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_B1B.json"
 CONTROL_PATHS = {
     "docs/evidence/ARTIFACT_MANIFEST.json",
     "docs/evidence/ARTIFACT_MANIFEST_OVERLAY.json",
@@ -45,6 +46,7 @@ CONTROL_PATHS = {
     "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_P14_CLOSURE.json",
     "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_P15.json",
     "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_P15_CLOSURE.json",
+    "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_B1B.json",
 }
 ARTIFACT_FIELDS = ["path", "sha256", "size_bytes"]
 B1A_SCHEMAS = {
@@ -112,9 +114,9 @@ def load_effective_manifest() -> dict:
     p14_closure_overlay = json.loads(p14_closure_bytes.decode("utf-8"))
     p15_bytes = P15_OVERLAY_PATH.read_bytes()
     p15_overlay = json.loads(p15_bytes.decode("utf-8"))
-    p15_closure_overlay = json.loads(
-        P15_CLOSURE_OVERLAY_PATH.read_text(encoding="utf-8")
-    )
+    p15_closure_bytes = P15_CLOSURE_OVERLAY_PATH.read_bytes()
+    p15_closure_overlay = json.loads(p15_closure_bytes.decode("utf-8"))
+    b1b_overlay = json.loads(B1B_OVERLAY_PATH.read_text(encoding="utf-8"))
 
     if overlay["base_manifest_git_blob_sha"] != git_blob_sha(base_bytes):
         raise AssertionError("ARTIFACT_MANIFEST_OVERLAY_BASE_MISMATCH")
@@ -160,6 +162,10 @@ def load_effective_manifest() -> dict:
         p15_bytes
     ):
         raise AssertionError("ARTIFACT_MANIFEST_P15_CLOSURE_OVERLAY_BASE_MISMATCH")
+    if b1b_overlay["base_p15_closure_overlay_git_blob_sha"] != git_blob_sha(
+        p15_closure_bytes
+    ):
+        raise AssertionError("ARTIFACT_MANIFEST_B1B_OVERLAY_BASE_MISMATCH")
 
     artifacts = {row[0]: row for row in current["artifacts"]}
     apply_entries(artifacts, overlay)
@@ -175,6 +181,7 @@ def load_effective_manifest() -> dict:
     apply_entries(artifacts, p14_closure_overlay)
     apply_entries(artifacts, p15_overlay)
     apply_entries(artifacts, p15_closure_overlay)
+    apply_entries(artifacts, b1b_overlay)
 
     effective = dict(current)
     effective["artifacts"] = [artifacts[path] for path in sorted(artifacts)]
