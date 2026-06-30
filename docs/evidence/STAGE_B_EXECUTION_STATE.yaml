@@ -6,7 +6,7 @@ macro_stage: B
 status: ACTIVE
 current_unit: P15
 tracking_issue: 29
-working_branch: p15-ux-onboarding-exception-inbox
+working_branch: close-p1-5-post-merge-v1
 
 units:
   B0:
@@ -74,22 +74,18 @@ units:
     requirements: [Q-BLD-007, Q-BLD-011, Q-BLD-013]
     acceptance_controls: [BLD-027, BLD-028]
   P15:
-    state: PENDING_CURRENT_PR_HEAD_VERIFICATION
+    state: COMPLETE
+    merged_commit: 8a714e5688f3af5872305f8e1fdbdb4f56ee9d9a
+    pull_request: 30
     issue: 29
     risk: R2
     evidence: docs/evidence/STAGE_P1_5_EXECUTION_STATE.yaml
-    test_method_count_declared: 64
-    test_method_count_verified: 64
-    implementation_head: dd0b5d6029b4a2285c25f80b09b52b52d551946b
-    verification_target: CURRENT_PR_HEAD
-    foundation_ci: PASS_REQUIRED
-    oss_admission_and_osv: PASS_REQUIRED
-    artifact_manifest_equality: PASS_REQUIRED
+    test_method_count: 64
     codex_findings_received: 6
     codex_findings_remediated: 6
     internal_audit_findings_received: 2
     internal_audit_findings_remediated: 2
-    unresolved_threads_gate: ZERO_REQUIRED_AT_MERGE
+    unresolved_threads: 0
     requirements: [Q-BLD-007, Q-BLD-014, Q-BLD-015]
     acceptance_controls: [BLD-029, BLD-030, BLD-031, BLD-032]
   B4:
@@ -98,10 +94,10 @@ units:
     risk: R2
     issue: 26
   B5:
-    state: PENDING_CURRENT_PR_HEAD_VERIFICATION
+    state: COMPLETE
+    merged_commit: 8a714e5688f3af5872305f8e1fdbdb4f56ee9d9a
     risk: R2
     issue: 29
-    working_branch: p15-ux-onboarding-exception-inbox
   B6:
     state: GATED
     risk: R3
