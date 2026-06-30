@@ -138,8 +138,7 @@ def validate_raw_file_record_boundary(record: object) -> None:
         raise UXBoundaryError("UX_IMPORT_STATE_INVALID")
     if (
         not isinstance(record.diagnostics, tuple)
-        or len(record.diagnostics) != len(set(record.diagnostics))
-        or any(not _nonempty_string(item) for item in record.diagnostics)
+        or any(not isinstance(item, str) for item in record.diagnostics)
     ):
         raise UXBoundaryError("UX_IMPORT_RECORD_INVALID")
 
