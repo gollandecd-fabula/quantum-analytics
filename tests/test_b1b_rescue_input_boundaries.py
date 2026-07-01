@@ -1,6 +1,8 @@
 import unittest
 from copy import deepcopy
-from quantum.finance import FinanceError,calculate,canonical_hash,evaluate_resolved_rule,resolve_rule
+from decimal import Decimal
+from quantum.finance import FinanceError,calculate,canonical_hash,evaluate_resolved_rule,resolve_rule,validate_rounding_policy
+from quantum.finance._rounding import _input_decimal
 from tests.test_b1b_rescue_smoke import context,money_rule,policy,typed
 
 def request():
@@ -20,6 +22,12 @@ class B1bInputBoundaryTests(unittest.TestCase):
  def test_zero_is_valid(self):
   x=calculate(request())["results"]["other_expense_amount"]
   self.assertEqual((x["state"],x["value"]),("VALID","0.00"))
+ def test_high_precision_input_uses_policy_context(self):
+  p=policy();p["max_input_precision"]=40
+  p["content_hash"]=canonical_hash(p,exclude=frozenset({"content_hash"}))
+  validate_rounding_policy(p)
+  value="12345678901234567890123456789"
+  self.assertEqual(_input_decimal(value,p,code="BOUNDARY"),Decimal(value+".000000"))
  def test_mode_isolation(self):
   r=request();r["scenario_id"]="s"
   with self.assertRaises(FinanceError) as e:calculate(r)
