@@ -1,6 +1,6 @@
 import unittest
 
-from tests.b1b_manifest_support import (
+from tests.b1b_manifest_support_v2 import (
     ARTIFACT_FIELDS,
     B1A_SCHEMAS,
     expected_manifest,
