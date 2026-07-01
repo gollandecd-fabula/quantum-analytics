@@ -89,7 +89,9 @@ class _AdmissionAccessMixinV2:
             "tenant_id_sha256": sha256(
                 record.declaration.tenant_id.encode("utf-8")
             ).hexdigest(),
-            "source_internal_id": record.declaration.source_internal_id,
+            "source_internal_id_sha256": sha256(
+                record.declaration.source_internal_id.encode("utf-8")
+            ).hexdigest(),
             "state": record.state.value,
             "original_file_sha256": record.declaration.original_file_sha256,
             "original_size_bytes": record.declaration.original_size_bytes,
