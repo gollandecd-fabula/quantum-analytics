@@ -2,7 +2,7 @@
 
 Status: `ACTIVE`
 Authority: explicit project-owner decision dated 2026-07-01
-Tracking issue: `#39`
+Tracking issues: `#39`, `#41`
 Target date: `2026-07-08`
 Target outcome: `PILOT_READY` or an evidence-based blocking verdict
 Macro-stage boundary: remains inside `B — BUILD`
@@ -17,8 +17,9 @@ It does not amend Constitution v3.0, does not replace `STAGE-B-BUILD-v1`, and do
 authorize Macro-stage C, production deployment, real marketplace writes, or unrestricted
 external access.
 
-The July 8 target is a controlled, invite-only, pseudonymous pilot candidate with immutable
-evidence. It is not an automatic production-release approval.
+The July 8 target is a controlled, invite-only, pseudonymous pilot candidate operating on admitted
+real commercial data with immutable evidence. Synthetic fixtures remain mandatory for testing but
+cannot independently satisfy the pilot gate. This is not an automatic production-release approval.
 
 ## 2. Mandatory execution and assurance roles
 
@@ -30,6 +31,7 @@ Responsibilities:
 - remediate verified findings;
 - add regression tests for every accepted defect;
 - preserve read-only, Actual/Scenario isolation, typed states, Evidence Chain, and recovery boundaries;
+- implement the Real Commercial Data Admission Contract and fail-closed quarantine path;
 - produce exact-head evidence for review.
 
 Restrictions:
@@ -115,7 +117,8 @@ mandatory functions.
 - SAST, secret scanning, dependency and workflow review;
 - tenant-isolation, authentication, authorization, file-abuse, injection, XSS, CSRF, CSP,
   session, and privacy-control validation;
-- SBOM, OSV, license, provenance, and pinned-action checks.
+- SBOM, OSV, license, provenance, and pinned-action checks;
+- real-data access, encryption, leakage, retention, deletion, backup, and tenant-boundary validation.
 
 #### Financial QA
 
@@ -123,6 +126,7 @@ mandatory functions.
 - Decimal and versioned-rounding verification;
 - property-based, differential, mutation, replay, and reconciliation tests;
 - returns, reversals, restatements, taxes, costs, logistics, other expenses, and no-double-count checks;
+- independent row-level and aggregate reconciliation against admitted source reports;
 - confirmation that missing, blocked, unavailable, conflict, valid, and numeric zero remain distinct.
 
 #### Release Audit
@@ -130,8 +134,9 @@ mandatory functions.
 - exact commit and branch verification;
 - CI, artifact-manifest, review-thread, evidence-package, recovery, and rollback verification;
 - open-risk and deferred-scope consistency;
-- confirmation that no production credential, marketplace write capability, or unapproved real data
-  entered the candidate.
+- confirmation that no production credential or marketplace write capability entered the candidate;
+- confirmation that only authorized, classified, admitted real data entered the pilot and that no raw
+  commercial data reached GitHub, CI logs, external model prompts, or the evidence package.
 
 Restrictions:
 
@@ -188,10 +193,10 @@ Rules:
 
 | Date | Primary output | Required independent checks |
 |---|---|---|
-| 2026-07-01 | recover and synchronize B1b; repair CI, manifest, and open review findings | Financial QA and AppSec review of changed head |
-| 2026-07-02 | B1b merge candidate and closure evidence; minimum B2 implementation | golden, differential, property, and reconciliation checks |
-| 2026-07-03 | bounded B2 closure; preview-only B6 scenarios | Actual/Scenario isolation and no-double-count verification |
-| 2026-07-04 | B7-like internal security controls without external-access activation | tenant, session, file-abuse, secret, log, and dependency checks |
+| 2026-07-01 | recover B1b and record R3 real-data decision | Financial QA, AppSec, and data-admission design review |
+| 2026-07-02 | B1b merge candidate; implement quarantine, classification, tenant scope, and immutable raw hashing | golden, differential, property, admission, and leakage checks |
+| 2026-07-03 | bounded B2; admit first authorized real dataset and perform source reconciliation | row and aggregate reconciliation, Actual/Scenario isolation, no-double-count verification |
+| 2026-07-04 | closed-pilot security controls for real data | tenant, session, encryption, file-abuse, secret, log, retention, and deletion checks |
 | 2026-07-05 | Red Team wave 1 | attack evidence, Blue detections, prioritized findings |
 | 2026-07-06 | P0/P1 remediation and full regression | Purple replay and independent closure review |
 | 2026-07-07 | Red Team wave 2; recovery and rollback drills; assurance evidence package | exact-head review, manifest, SBOM, OSV, restore proof |
@@ -224,12 +229,44 @@ The July 8 candidate must remain:
 - minimized with respect to personal data;
 - transparent about consent, withdrawal, deletion, and processing;
 - read-only toward marketplaces;
-- synthetic-only unless a separate real-data gate is explicitly approved;
-- without production credentials;
+- required to process at least one authorized real commercial dataset end to end;
+- permitted to use synthetic data only for testing, adversarial analysis, and regression;
+- without production marketplace credentials;
 - without public registration;
 - without activated marketplace write methods.
 
-## 8. Evidence package
+## 8. Real commercial data admission
+
+The owner decision `DR-2026-07-01-REAL-COMMERCIAL-DATA-PILOT` authorizes real commercial data for
+the closed pilot. Authorization is not automatic admission. Every dataset must comply with
+`docs/security/REAL_COMMERCIAL_DATA_ADMISSION_CONTRACT_2026_07_08.md`.
+
+Required state machine:
+
+```text
+DECLARED → QUARANTINED → VALIDATED → ADMITTED
+     └──────────────→ REJECTED
+ADMITTED → REVOKED
+```
+
+Mandatory controls:
+
+- organization ownership and authorized-upload attestation;
+- inventory, classification, minimization, and direct-identifier stripping;
+- encrypted transport and storage;
+- tenant-scoped, fail-closed access;
+- separate quarantine, raw, admitted, derived, and backup zones;
+- immutable original SHA-256 and row-level Evidence Chain;
+- privacy-safe logs without raw values;
+- retention, withdrawal, deletion, and revocation workflow;
+- independent source-report reconciliation;
+- prohibition on raw commercial data in GitHub, CI, screenshots, issue bodies, evidence packages,
+  or prompts sent to OpenAI, DeepSeek, or another external model.
+
+A material reconciliation conflict, data leak, unencrypted copy, cross-tenant read, or unapproved
+raw-data disclosure is P0/P1 and blocks the pilot.
+
+## 9. Evidence package
 
 The final package must include:
 
@@ -242,13 +279,17 @@ The final package must include:
 - AppSec report and threat-model delta;
 - independent Financial QA oracle report;
 - SBOM, OSV, license, provenance, and secret-scan evidence;
+- real-data inventory and classification represented by safe identifiers and hashes;
+- admission decision, source-authority, row-count, and control-total evidence without raw rows;
+- real-source row-level and aggregate reconciliation report;
+- retention/deletion and revocation evidence;
 - open-risk register with P2/P3 ownership;
-- recovery and rollback proof;
+- recovery and rollback proof preserving tenant and revocation boundaries;
 - unresolved review-thread count;
 - Formal Validator result;
 - Release Gatekeeper verdict.
 
-## 9. Exit criteria for 2026-07-08
+## 10. Exit criteria for 2026-07-08
 
 All of the following are mandatory for `PILOT_READY`:
 
@@ -258,25 +299,29 @@ All of the following are mandatory for `PILOT_READY`:
 4. Foundation and OSS Admission checks green on the exact reviewed head;
 5. artifact-manifest equality passes;
 6. approved financial golden oracle and differential suite pass;
-7. row and aggregate reconciliation checks pass for admitted synthetic fixtures;
-8. Actual and Scenario isolation passes;
-9. tenant-isolation and authorization tests pass for implemented internal surfaces;
-10. no marketplace write capability or production credential exists;
-11. recovery bundle, restore test, and rollback evidence pass;
-12. unresolved review threads equal zero;
-13. all P2/P3 limitations are explicit and owned;
-14. Formal Validator passes;
-15. independent Release Gatekeeper issues `PILOT_READY`.
+7. at least one authorized real commercial dataset completes declaration, quarantine, validation, and admission;
+8. that real dataset completes secure ingestion, calculation, row-level lineage, and aggregate reconciliation;
+9. material source differences are resolved or explicitly blocked, never silently accepted;
+10. Actual and Scenario isolation passes on real-data-derived results;
+11. tenant-isolation and authorization tests pass for all implemented real-data surfaces;
+12. encryption, privacy-safe logging, retention, revocation, and deletion verification pass;
+13. no raw commercial data, direct identifiers, secrets, or credentials appear in GitHub, CI, external model prompts, or evidence;
+14. no marketplace write capability or production marketplace credential exists;
+15. recovery bundle, restore test, and rollback evidence preserve tenant, admission, and revocation states;
+16. unresolved review threads equal zero;
+17. all P2/P3 limitations are explicit and owned;
+18. Formal Validator passes;
+19. independent Release Gatekeeper issues `PILOT_READY`.
 
 Failure of any mandatory criterion produces `REMEDIATION_REQUIRED` or `NOT_READY`.
 Production remains `RELEASE_BLOCKED` until a separately approved Macro-stage C production gate.
 
-## 10. Scope-freeze rule
+## 11. Scope-freeze rule
 
 Through 2026-07-08, new functionality is admitted only when it:
 
 - closes a P0/P1 finding;
-- is required for correctness, security, recovery, or the core pilot flow; or
+- is required for real-data admission, correctness, security, recovery, or the core pilot flow; or
 - replaces work of equal or greater scope.
 
 All other features are deferred.

@@ -1,0 +1,54 @@
+{
+  "base_assurance_plan_overlay_git_blob_sha": "028d398be4d21a2577ca42ff6c0014e91579f11e",
+  "entries": [
+    [
+      "README.md",
+      "d3e630cf18520322ae8d88714be7b48999b39f40424d474cb5a546f2ee5f5e51",
+      2940
+    ],
+    [
+      "docs/decisions/DR-2026-07-01-REAL-COMMERCIAL-DATA-PILOT.md",
+      "70cc4e2f4f46e860a13128d94217aa9c9c241ac584c92c4f70459a9c342cb08e",
+      2216
+    ],
+    [
+      "docs/evidence/STAGE_B_EXECUTION_STATE.yaml",
+      "159d781a97eb4f0a2fcb9c0b28efd0977ff4e4274886bbfdf432fac2fc92725a",
+      3962
+    ],
+    [
+      "docs/governance/ASSURANCE_EXECUTION_PLAN_2026_07_08.md",
+      "92f378242abf9517935a42b80b981a8eccd5cf6bad9026606c4d2bc0e706634a",
+      14521
+    ],
+    [
+      "docs/governance/ASSURANCE_EXECUTION_PLAN_2026_07_08.yaml",
+      "1dcd4665802a8fabc2d9068fffb1ac61a5c1d610cb55da3e33efd46506a241fd",
+      5409
+    ],
+    [
+      "docs/governance/CURRENT_STATE.md",
+      "04a73778721a109a9b55a7d2a804f928465a81b3fd4bbed4a4bb87af2348dda3",
+      3041
+    ],
+    [
+      "docs/security/REAL_COMMERCIAL_DATA_ADMISSION_CONTRACT_2026_07_08.md",
+      "0232099321160f5dc0f84373fa953225a9230c27becb0cede2bd8bd840e5bc62",
+      6537
+    ],
+    [
+      "tests/test_b1a_artifact_manifest.py",
+      "a4d41a0802cb9750b1983800f14c5fb26bd5ad689ce47f3c1fe7f60678846e0d",
+      11472
+    ],
+    [
+      "tests/test_real_commercial_data_pilot_contract.py",
+      "d946467a0abb95568dfcacebe7524ff5526866e2a8b3608f27bcb4c721070ba2",
+      2140
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 1,
+  "reason": "Authorize and govern real commercial data for the closed 2026-07-08 pilot under R3 data-admission controls",
+  "remove_paths": []
+}

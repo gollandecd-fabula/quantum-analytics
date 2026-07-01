@@ -1,8 +1,10 @@
-plan_id: QUANTUM-ASSURANCE-2026-07-08-v1
+plan_id: QUANTUM-ASSURANCE-2026-07-08-v2
 status: ACTIVE
 authority:
   decision_date: 2026-07-01
-  tracking_issue: 39
+  tracking_issues: [39, 41]
+  real_data_decision: DR-2026-07-01-REAL-COMMERCIAL-DATA-PILOT
+  risk_class: R3
 target:
   date: 2026-07-08
   outcome: PILOT_READY
@@ -15,13 +17,34 @@ scope:
   initial_testers_price: FREE
   personal_data: MINIMIZED
   marketplace_mode: READ_ONLY
-  real_commercial_data: NOT_ADMITTED_WITHOUT_SEPARATE_GATE
+  real_commercial_data: REQUIRED_FOR_CLOSED_PILOT
+  synthetic_data_role: TEST_FUZZ_REGRESSION_ONLY
   marketplace_write_capability: DISABLED
+  raw_data_in_external_model_prompts: PROHIBITED
+  raw_data_in_github_ci_evidence: PROHIBITED
+data_admission:
+  contract: docs/security/REAL_COMMERCIAL_DATA_ADMISSION_CONTRACT_2026_07_08.md
+  state_machine: [DECLARED, QUARANTINED, VALIDATED, ADMITTED, REJECTED, REVOKED]
+  calculation_allowed_states: [ADMITTED]
+  fail_closed: true
+  required_controls:
+    - OWNER_AUTHORIZATION
+    - DATA_INVENTORY_CLASSIFICATION
+    - MINIMIZATION_IDENTIFIER_STRIPPING
+    - ENCRYPTION_IN_TRANSIT_AT_REST
+    - TENANT_SCOPED_ACCESS
+    - ISOLATED_QUARANTINE_RAW_ADMITTED_DERIVED_BACKUP_ZONES
+    - IMMUTABLE_SOURCE_SHA256
+    - PRIVACY_SAFE_LOGS
+    - RETENTION_DELETION_REVOCATION
+    - SOURCE_RECONCILIATION
+    - BACKUP_RESTORE_TENANT_BOUNDARIES
 execution_model:
   primary_executor: OpenAI
   independent_auditor: DeepSeek
   formal_validator: SEPARATE_ACTOR_OR_COMPONENT
   release_gatekeeper: INDEPENDENT
+  external_models_receive_raw_commercial_data: false
   interchange:
     formats: [STRICT_TYPED_JSON, STRICT_TYPED_YAML]
     immutable_versions: true
@@ -30,40 +53,27 @@ teams:
   development:
     can_implement: true
     can_approve_own_r2_plus: false
-    duties: [IMPLEMENT, REMEDIATE, REGRESSION_TEST, EXACT_HEAD_EVIDENCE]
+    duties: [IMPLEMENT, REMEDIATE, REGRESSION_TEST, DATA_ADMISSION, EXACT_HEAD_EVIDENCE]
   red:
     can_implement_verified_fix: false
     can_close_own_findings: false
-    duties:
-      - ADVERSARIAL_TESTING
-      - TENANT_ESCAPE
-      - FINANCIAL_TAMPERING
-      - TRACE_REPLAY_AND_FORGERY
-      - FILE_ABUSE
-      - SUPPLY_CHAIN_ATTACKS
-      - WRITE_CAPABILITY_BYPASS
+    duties: [ADVERSARIAL_TESTING, TENANT_ESCAPE, DATA_EXFILTRATION, FINANCIAL_TAMPERING, TRACE_REPLAY_AND_FORGERY, FILE_ABUSE, SUPPLY_CHAIN_ATTACKS, WRITE_CAPABILITY_BYPASS]
   blue:
     can_suppress_confirmed_finding_without_risk_record: false
-    duties:
-      - SECURITY_LOGGING
-      - DETECTION
-      - CONTAINMENT
-      - SESSION_REVOCATION
-      - INCIDENT_RUNBOOK
-      - RECOVERY_SUPPORT
+    duties: [SECURITY_LOGGING, DATA_ACCESS_DETECTION, CONTAINMENT, SESSION_REVOCATION, INCIDENT_RUNBOOK, RECOVERY_SUPPORT]
   purple:
     approval_authority: false
     loop: [RED_REPRODUCE, DEVELOPMENT_REMEDIATE, BLUE_DETECT, ASSURANCE_RETEST, GATEKEEPER_DECIDE]
   independent_assurance:
     functions:
-      ivv: [TRACEABILITY, INDEPENDENT_REPRODUCTION, REGRESSION, EXACT_HEAD_VERIFICATION]
-      appsec: [THREAT_MODEL, SAST, SECRETS, TENANT_ISOLATION, AUTHN_AUTHZ, FILE_ABUSE, SBOM, OSV]
-      financial_qa: [GOLDEN_ORACLE, DECIMAL, ROUNDING, PROPERTY, DIFFERENTIAL, RECONCILIATION, NO_DOUBLE_COUNT]
-      release_audit: [COMMIT, CI, MANIFEST, THREADS, EVIDENCE, RECOVERY, ROLLBACK, BOUNDARIES]
+      ivv: [TRACEABILITY, INDEPENDENT_REPRODUCTION, REAL_DATA_E2E, REGRESSION, EXACT_HEAD_VERIFICATION]
+      appsec: [THREAT_MODEL, SAST, SECRETS, TENANT_ISOLATION, AUTHN_AUTHZ, ENCRYPTION, DATA_LEAKAGE, RETENTION_DELETION, FILE_ABUSE, SBOM, OSV]
+      financial_qa: [GOLDEN_ORACLE, DECIMAL, ROUNDING, PROPERTY, DIFFERENTIAL, REAL_SOURCE_RECONCILIATION, NO_DOUBLE_COUNT]
+      release_audit: [COMMIT, CI, MANIFEST, THREADS, DATA_ADMISSION, EVIDENCE, RECOVERY, ROLLBACK, BOUNDARIES]
     can_approve_own_changes: false
   formal_validator:
     modifies_code: false
-    duties: [SCHEMA_VALIDATION, INVARIANT_VALIDATION, MACHINE_EVIDENCE_VALIDATION]
+    duties: [SCHEMA_VALIDATION, INVARIANT_VALIDATION, DATA_ADMISSION_VALIDATION, MACHINE_EVIDENCE_VALIDATION]
   release_gatekeeper:
     modifies_code: false
     evidence_only: true
@@ -83,10 +93,10 @@ release_rules:
   unresolved_review_threads: 0
   severity_reduction_for_deadline: prohibited
 calendar:
-  "2026-07-01": B1B_RECOVERY_SYNC_CI_MANIFEST_FINDINGS
-  "2026-07-02": B1B_MERGE_CANDIDATE_AND_MINIMUM_B2
-  "2026-07-03": B2_CLOSURE_AND_PREVIEW_B6
-  "2026-07-04": INTERNAL_B7_SECURITY_CONTROLS
+  "2026-07-01": B1B_RECOVERY_AND_R3_REAL_DATA_DECISION
+  "2026-07-02": QUARANTINE_CLASSIFICATION_TENANT_STORAGE_AND_B1B
+  "2026-07-03": FIRST_REAL_DATASET_ADMISSION_B2_RECONCILIATION
+  "2026-07-04": REAL_DATA_SECURITY_RETENTION_DELETION_CONTROLS
   "2026-07-05": RED_TEAM_WAVE_1
   "2026-07-06": P0_P1_REMEDIATION_PURPLE_REPLAY
   "2026-07-07": RED_TEAM_WAVE_2_RECOVERY_ROLLBACK_EVIDENCE
@@ -102,23 +112,27 @@ mandatory_evidence:
   - IVV_TRACEABILITY
   - APPSEC_REPORT
   - INDEPENDENT_FINANCIAL_ORACLE
+  - REAL_DATA_INVENTORY_CLASSIFICATION_AND_ADMISSION
+  - REAL_SOURCE_ROW_AND_AGGREGATE_RECONCILIATION
+  - RETENTION_DELETION_REVOCATION_EVIDENCE
   - RECOVERY_AND_ROLLBACK_PROOF
   - FORMAL_VALIDATOR_RESULT
   - RELEASE_GATEKEEPER_VERDICT
-verdicts:
-  - NOT_READY
-  - REMEDIATION_REQUIRED
-  - PILOT_READY_WITH_LIMITATIONS
-  - PILOT_READY
+verdicts: [NOT_READY, REMEDIATION_REQUIRED, PILOT_READY_WITH_LIMITATIONS, PILOT_READY]
 pilot_ready_exit:
   zero_open_p0_p1: true
   qa_score_at_least_98: true
   financial_oracle_pass: true
-  reconciliation_pass: true
+  authorized_real_dataset_admitted: true
+  real_dataset_end_to_end_pass: true
+  real_source_reconciliation_pass: true
   actual_scenario_isolation_pass: true
   tenant_isolation_pass: true
+  encryption_and_privacy_logging_pass: true
+  retention_deletion_revocation_pass: true
+  raw_data_external_disclosure_absent: true
   write_capability_absent: true
-  production_credentials_absent: true
+  production_marketplace_credentials_absent: true
   restore_and_rollback_pass: true
   formal_validator_pass: true
   gatekeeper_verdict: PILOT_READY
