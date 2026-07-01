@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
-from decimal import Decimal, InvalidOperation
+from decimal import Decimal, InvalidOperation, localcontext
 from typing import Any
 
 from ._common import (
@@ -147,8 +147,14 @@ def _quantize(
         mode = policy["presentation_mode"]
         scale = policy["presentation_scale"]
     quantum = Decimal(1).scaleb(-scale)
+    required_precision = max(
+        len(value.as_tuple().digits),
+        max(value.adjusted() + 1, 1) + scale,
+    ) + 1
     try:
-        rounded = value.quantize(quantum, rounding=_ROUNDING_MODES[mode])
+        with localcontext() as context:
+            context.prec = max(context.prec, required_precision)
+            rounded = value.quantize(quantum, rounding=_ROUNDING_MODES[mode])
     except InvalidOperation as exc:
         raise FinanceError("ROUNDING_OPERATION_INVALID") from exc
     return rounded, scale
