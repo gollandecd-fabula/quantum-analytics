@@ -32,15 +32,97 @@ _SPREADSHEET_NS = "http://schemas.openxmlformats.org/spreadsheetml/2006/main"
 
 
 @dataclass(frozen=True, slots=True)
+class _ParsedWorksheet:
+    rows: dict[int, dict[int, str]]
+    nonempty_rows: frozenset[int]
+    formula_count: int
+    max_used_column: int
+
+
+@dataclass(frozen=True, slots=True)
 class _WorkbookShape:
     sheet_name: str
     sheet_count: int
     header_row_index: int
     header_sha256: str
     column_count: int
+    max_used_column: int
+    unmodeled_worksheet_count: int
     data_row_count: int
     formula_count: int
     prohibited_header_count: int
+
+
+def _parse_worksheet(
+    zf: ZipFile,
+    *,
+    sheet_path: str,
+    limits,
+    shared: tuple[str, ...],
+) -> _ParsedWorksheet:
+    sheet_payload = _read_limited(zf, sheet_path, limits)
+    sheet_root = _xml_root(sheet_payload, "XLSX_WORKSHEET_INVALID")
+    sheet_data_nodes = sheet_root.findall(f"{{{_SPREADSHEET_NS}}}sheetData")
+    if len(sheet_data_nodes) != 1:
+        raise XlsxInspectionError("XLSX_SHEET_DATA_STRUCTURE_INVALID")
+    sheet_data = sheet_data_nodes[0]
+    rows = sheet_data.findall(f"{{{_SPREADSHEET_NS}}}row")
+    if len(sheet_data.findall(f".//{{{_SPREADSHEET_NS}}}row")) != len(rows):
+        raise XlsxInspectionError("XLSX_ROW_STRUCTURE_INVALID")
+    if len(rows) > limits.max_rows:
+        raise XlsxInspectionError("XLSX_ROW_LIMIT_EXCEEDED")
+    direct_cell_count = sum(
+        len(row.findall(f"{{{_SPREADSHEET_NS}}}c")) for row in rows
+    )
+    if len(sheet_data.findall(f".//{{{_SPREADSHEET_NS}}}c")) != direct_cell_count:
+        raise XlsxInspectionError("XLSX_CELL_OUTSIDE_ROW")
+
+    parsed_rows: dict[int, dict[int, str]] = {}
+    nonempty_rows: set[int] = set()
+    formula_count = 0
+    max_used_column = 0
+    prior_row_index = 0
+    for row in rows:
+        raw_index = row.get("r")
+        try:
+            row_index = int(raw_index or "0")
+        except ValueError as exc:
+            raise XlsxInspectionError("XLSX_ROW_INDEX_INVALID") from exc
+        if row_index < 1 or row_index > limits.max_rows:
+            raise XlsxInspectionError("XLSX_ROW_INDEX_INVALID")
+        if row_index <= prior_row_index:
+            raise XlsxInspectionError("XLSX_ROW_ORDER_INVALID")
+        prior_row_index = row_index
+
+        cells: dict[int, str] = {}
+        row_has_content = False
+        for cell in row.findall(f"{{{_SPREADSHEET_NS}}}c"):
+            reference = cell.get("r") or ""
+            column, cell_row_index = _cell_position(reference)
+            if cell_row_index != row_index:
+                raise XlsxInspectionError("XLSX_CELL_ROW_MISMATCH")
+            if column > limits.max_columns:
+                raise XlsxInspectionError("XLSX_COLUMN_LIMIT_EXCEEDED")
+            if column in cells:
+                raise XlsxInspectionError("XLSX_CELL_DUPLICATE")
+            value = _cell_text(cell, shared)
+            cells[column] = value
+            has_formula = cell.find(f"{{{_SPREADSHEET_NS}}}f") is not None
+            if has_formula:
+                formula_count += 1
+            if has_formula or value.strip():
+                row_has_content = True
+                max_used_column = max(max_used_column, column)
+        parsed_rows[row_index] = cells
+        if row_has_content:
+            nonempty_rows.add(row_index)
+
+    return _ParsedWorksheet(
+        rows=parsed_rows,
+        nonempty_rows=frozenset(nonempty_rows),
+        formula_count=formula_count,
+        max_used_column=max_used_column,
+    )
 
 
 def _workbook_shape(
@@ -111,6 +193,31 @@ def _workbook_shape(
             if len(set(normalized_sheet_names)) != len(normalized_sheet_names):
                 raise XlsxInspectionError("XLSX_SHEET_NAME_DUPLICATE")
 
+            sheet_paths: list[str] = []
+            for node in sheet_nodes:
+                relation_id = node.get(f"{{{_OFFICE_RELATIONSHIP_NS}}}id")
+                sheet_path = targets.get(relation_id)
+                if sheet_path is None:
+                    raise XlsxInspectionError("XLSX_SHEET_RELATIONSHIP_MISSING")
+                lower = sheet_path.casefold()
+                if not lower.startswith("xl/worksheets/") or not lower.endswith(".xml"):
+                    raise XlsxInspectionError("XLSX_WORKSHEET_TOPOLOGY_INVALID")
+                sheet_paths.append(sheet_path)
+            normalized_targets = [path.casefold() for path in sheet_paths]
+            if len(set(normalized_targets)) != len(normalized_targets):
+                raise XlsxInspectionError("XLSX_SHEET_TARGET_DUPLICATE")
+            archive_worksheet_paths = {
+                info.filename.replace("\\", "/").casefold()
+                for info in zf.infolist()
+                if not info.is_dir()
+                and info.filename.replace("\\", "/").casefold().startswith(
+                    "xl/worksheets/"
+                )
+                and info.filename.casefold().endswith(".xml")
+            }
+            if archive_worksheet_paths != set(normalized_targets):
+                raise XlsxInspectionError("XLSX_WORKSHEET_TOPOLOGY_INVALID")
+
             expectation_candidates = [
                 schema
                 for schema in policy.schemas
@@ -119,79 +226,36 @@ def _workbook_shape(
             preferred_names = {
                 schema.sheet_name for schema in expectation_candidates
             }
-            selected = next(
+            selected_index = next(
                 (
-                    node
-                    for node in sheet_nodes
+                    index
+                    for index, node in enumerate(sheet_nodes)
                     if node.get("name") in preferred_names
                 ),
-                sheet_nodes[0],
+                0,
             )
+            selected = sheet_nodes[selected_index]
             sheet_name = selected.get("name") or ""
             _safe_text(sheet_name, "XLSX_SHEET_NAME_INVALID")
-            relation_id = selected.get(f"{{{_OFFICE_RELATIONSHIP_NS}}}id")
-            sheet_path = targets.get(relation_id)
-            if sheet_path is None:
-                raise XlsxInspectionError("XLSX_SHEET_RELATIONSHIP_MISSING")
-            sheet_payload = _read_limited(zf, sheet_path, limits)
-            sheet_root = _xml_root(sheet_payload, "XLSX_WORKSHEET_INVALID")
+            selected_path = sheet_paths[selected_index]
+
             shared = _shared_strings(zf, limits)
-            sheet_data_nodes = sheet_root.findall(
-                f"{{{_SPREADSHEET_NS}}}sheetData"
+            parsed_sheets = {
+                path: _parse_worksheet(
+                    zf,
+                    sheet_path=path,
+                    limits=limits,
+                    shared=shared,
+                )
+                for path in sheet_paths
+            }
+            unmodeled_worksheet_count = sum(
+                1
+                for path, candidate in parsed_sheets.items()
+                if path != selected_path
+                and (candidate.nonempty_rows or candidate.formula_count)
             )
-            if len(sheet_data_nodes) != 1:
-                raise XlsxInspectionError("XLSX_SHEET_DATA_STRUCTURE_INVALID")
-            sheet_data = sheet_data_nodes[0]
-            rows = sheet_data.findall(f"{{{_SPREADSHEET_NS}}}row")
-            if len(sheet_data.findall(f".//{{{_SPREADSHEET_NS}}}row")) != len(rows):
-                raise XlsxInspectionError("XLSX_ROW_STRUCTURE_INVALID")
-            if len(rows) > limits.max_rows:
-                raise XlsxInspectionError("XLSX_ROW_LIMIT_EXCEEDED")
-            direct_cell_count = sum(
-                len(row.findall(f"{{{_SPREADSHEET_NS}}}c")) for row in rows
-            )
-            if len(sheet_data.findall(f".//{{{_SPREADSHEET_NS}}}c")) != direct_cell_count:
-                raise XlsxInspectionError("XLSX_CELL_OUTSIDE_ROW")
-
-            parsed_rows: dict[int, dict[int, str]] = {}
-            nonempty_rows: set[int] = set()
-            formula_count = 0
-            prior_row_index = 0
-            for row in rows:
-                raw_index = row.get("r")
-                try:
-                    row_index = int(raw_index or "0")
-                except ValueError as exc:
-                    raise XlsxInspectionError("XLSX_ROW_INDEX_INVALID") from exc
-                if row_index < 1 or row_index > limits.max_rows:
-                    raise XlsxInspectionError("XLSX_ROW_INDEX_INVALID")
-                if row_index <= prior_row_index:
-                    raise XlsxInspectionError("XLSX_ROW_ORDER_INVALID")
-                prior_row_index = row_index
-
-                cells: dict[int, str] = {}
-                row_has_content = False
-                for cell in row.findall(f"{{{_SPREADSHEET_NS}}}c"):
-                    reference = cell.get("r") or ""
-                    column, cell_row_index = _cell_position(reference)
-                    if cell_row_index != row_index:
-                        raise XlsxInspectionError("XLSX_CELL_ROW_MISMATCH")
-                    if column > limits.max_columns:
-                        raise XlsxInspectionError("XLSX_COLUMN_LIMIT_EXCEEDED")
-                    if column in cells:
-                        raise XlsxInspectionError("XLSX_CELL_DUPLICATE")
-                    value = _cell_text(cell, shared)
-                    cells[column] = value
-                    has_formula = (
-                        cell.find(f"{{{_SPREADSHEET_NS}}}f") is not None
-                    )
-                    if has_formula:
-                        formula_count += 1
-                    if has_formula or value.strip():
-                        row_has_content = True
-                parsed_rows[row_index] = cells
-                if row_has_content:
-                    nonempty_rows.add(row_index)
+            parsed = parsed_sheets[selected_path]
 
             header_indexes = {
                 schema.header_row_index
@@ -199,7 +263,7 @@ def _workbook_shape(
                 if schema.sheet_name == sheet_name
             }
             header_row_index = min(header_indexes) if header_indexes else 1
-            header_cells = parsed_rows.get(header_row_index)
+            header_cells = parsed.rows.get(header_row_index)
             if header_cells is None:
                 raise XlsxInspectionError("XLSX_HEADER_ROW_MISSING")
             if not header_cells:
@@ -230,7 +294,7 @@ def _workbook_shape(
             )
             data_rows = sum(
                 1
-                for row_index in nonempty_rows
+                for row_index in parsed.nonempty_rows
                 if row_index > header_row_index
             )
             return _WorkbookShape(
@@ -239,8 +303,10 @@ def _workbook_shape(
                 header_row_index=header_row_index,
                 header_sha256=header_hash,
                 column_count=column_count,
+                max_used_column=parsed.max_used_column,
+                unmodeled_worksheet_count=unmodeled_worksheet_count,
                 data_row_count=data_rows,
-                formula_count=formula_count,
+                formula_count=parsed.formula_count,
                 prohibited_header_count=prohibited,
             )
     except XlsxInspectionError:
