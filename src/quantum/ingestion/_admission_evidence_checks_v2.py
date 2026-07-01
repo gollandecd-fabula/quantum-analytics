@@ -8,6 +8,7 @@ from ._admission_contracts_v2 import (
     DatasetControlEvidence,
     StorageControlEvidence,
     _aware_utc,
+    _uuid,
 )
 
 
@@ -24,7 +25,10 @@ def require_evidence_binding(
         raise AdmissionError("STORAGE_EVIDENCE_NOT_INDEPENDENT")
     if inspection is None or not inspection.matched:
         raise AdmissionError("DATASET_VALIDATION_EVIDENCE_MISSING")
-    if dataset_evidence.dataset_id != declaration.dataset_id:
+    if (
+        _uuid(dataset_evidence.dataset_id, "DATASET_EVIDENCE_DATASET_INVALID")
+        != declaration.dataset_id
+    ):
         raise AdmissionError("DATASET_EVIDENCE_DATASET_MISMATCH")
     if dataset_evidence.original_file_sha256 != declaration.original_file_sha256:
         raise AdmissionError("DATASET_EVIDENCE_FILE_MISMATCH")
@@ -54,7 +58,10 @@ def require_evidence_binding(
         != inspection.matched_schema_authority_reference
     ):
         raise AdmissionError("DATASET_EVIDENCE_SCHEMA_MISMATCH")
-    if storage_evidence.dataset_id != declaration.dataset_id:
+    if (
+        _uuid(storage_evidence.dataset_id, "STORAGE_EVIDENCE_DATASET_INVALID")
+        != declaration.dataset_id
+    ):
         raise AdmissionError("STORAGE_EVIDENCE_DATASET_MISMATCH")
     if storage_evidence.original_file_sha256 != declaration.original_file_sha256:
         raise AdmissionError("STORAGE_EVIDENCE_FILE_MISMATCH")
