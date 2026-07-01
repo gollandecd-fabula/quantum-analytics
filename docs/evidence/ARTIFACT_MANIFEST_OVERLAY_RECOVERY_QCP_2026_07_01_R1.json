@@ -2,6 +2,11 @@
   "base_p15_closure_overlay_git_blob_sha": "33c32292050762759aeb89c647bf91f2072b8493",
   "entries": [
     [
+      ".github/workflows/recovery-bundle-qcp-2026-07-01-r1.yml",
+      "/Q1tCfntJdoFnRQ3z5uOElpZnnMyYBjCPzZ2YfrbpDI=",
+      4191
+    ],
+    [
       "docs/recovery/checkpoints/QCP-2026-07-01-R1/ARTIFACT_MANIFEST.sha256",
       "6Jg8JWiOdNQBIee6dQz3AFaNBdJ1yyILAtywuv0B70c=",
       1333
@@ -93,7 +98,7 @@
     ]
   ],
   "hash_encoding": "sha256-base64",
-  "overlay_version": 3,
-  "reason": "QCP-2026-07-01-R1 post-merge closure evidence",
+  "overlay_version": 4,
+  "reason": "QCP-2026-07-01-R1 export workflow manifest correction",
   "remove_paths": []
 }
