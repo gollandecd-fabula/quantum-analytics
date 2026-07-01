@@ -30,7 +30,7 @@
         },
         "value_type": {"$ref": "#/$defs/valueType"},
         "currency": {"type": ["string", "null"], "pattern": "^[A-Z]{3}$"},
-        "unit": {"type": ["string", "null"], "minLength": 1}
+        "unit": {"type": "string", "minLength": 1}
       },
       "allOf": [
         {
@@ -70,10 +70,10 @@
       "required": ["kind", "name", "value_type", "currency", "unit"],
       "properties": {
         "kind": {"const": "VARIABLE"},
-        "name": {"type": "string", "pattern": "^[a-z][a-z0-9_.-]{0,127}$"},
+        "name": {"type": "string", "pattern": "^[a-z][a-z0-9_.:-]{0,127}$"},
         "value_type": {"$ref": "#/$defs/valueType"},
         "currency": {"type": ["string", "null"], "pattern": "^[A-Z]{3}$"},
-        "unit": {"type": ["string", "null"], "minLength": 1}
+        "unit": {"type": "string", "minLength": 1}
       },
       "allOf": [
         {
@@ -102,7 +102,7 @@
         },
         "value_type": {"$ref": "#/$defs/valueType"},
         "currency": {"type": ["string", "null"], "pattern": "^[A-Z]{3}$"},
-        "unit": {"type": ["string", "null"], "minLength": 1},
+        "unit": {"type": "string", "minLength": 1},
         "arguments": {
           "type": "array",
           "minItems": 1,

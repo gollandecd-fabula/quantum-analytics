@@ -9,7 +9,7 @@
     "candidates", "actor", "resolved_at", "trace_id"
   ],
   "properties": {
-    "resolver_contract_version": {"type": "string", "minLength": 1},
+    "resolver_contract_version": {"const": "quantum-rule-resolver-v1"},
     "context_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
     "state": {"type": "string", "enum": ["VALID", "BLOCKED", "CONFLICT", "UNAVAILABLE"]},
     "diagnostic_code": {
@@ -43,7 +43,7 @@
             "prefixItems": [
               {"type": "array", "minItems": 6, "maxItems": 6, "items": {"type": "integer", "minimum": 0, "maximum": 1}},
               {"type": "integer"},
-              {"type": "string", "format": "date-time"},
+              {"$ref": "#/$defs/rfc3339Microsecond"},
               {"type": "integer", "minimum": 1}
             ],
             "items": false
@@ -73,8 +73,8 @@
       }
     },
     "actor": {"type": "string", "minLength": 1},
-    "resolved_at": {"type": "string", "format": "date-time"},
-    "trace_id": {"type": "string", "minLength": 1}
+    "resolved_at": {"$ref": "#/$defs/rfc3339Microsecond"},
+    "trace_id": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
   },
   "allOf": [
     {
@@ -125,6 +125,11 @@
         "version": {"type": "integer", "minimum": 1},
         "content_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
       }
+    },
+    "rfc3339Microsecond": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,6})?(?:Z|[+-]\\d{2}:\\d{2})$"
     }
   }
 }
