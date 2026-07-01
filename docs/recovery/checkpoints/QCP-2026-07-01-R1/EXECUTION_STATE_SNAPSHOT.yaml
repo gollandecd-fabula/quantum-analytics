@@ -1,0 +1,37 @@
+snapshot_id: QCP-2026-07-01-R1-STABLE
+captured_at: "2026-07-01T07:15:55+02:00"
+repository_ref: main
+exact_commit: d1e8b46c0809476f6faece7b2808e6dd5d1f22c3
+source_current_state: docs/governance/CURRENT_STATE.md
+source_live_state: docs/evidence/STAGE_B_EXECUTION_STATE.yaml
+status: BUILD_P1_5_COMPLETE
+active_contract: STAGE-B-BUILD-v1
+
+last_completed_unit:
+  unit: P15
+  mapped_unit: B5
+  merged_commit: 8a714e5688f3af5872305f8e1fdbdb4f56ee9d9a
+  pull_request: 30
+  targeted_tests: 64
+  foundation_ci_run: 28454778048
+  oss_admission_run: 28454777923
+  final_independent_review: PLUS_ONE
+  unresolved_review_threads: 0
+
+units:
+  B0: COMPLETE
+  B1a: COMPLETE
+  B1b: GATED_IN_STABLE_BASELINE
+  B2: GATED_BY_B1B
+  B3: COMPLETE
+  B4: COMPLETE
+  B5: COMPLETE
+  B6: GATED_BY_B1B_AND_B2
+  B7: EXTERNAL_ACCESS_NOT_AUTHORIZED
+  B8: PLANNED
+
+boundaries:
+  real_commercial_data: NOT_ADMITTED
+  marketplace_write_capability: DISABLED
+  source_authority: NOT_ACTIVATED
+  production_release: BLOCKED

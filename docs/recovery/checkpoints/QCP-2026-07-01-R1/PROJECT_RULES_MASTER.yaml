@@ -1,0 +1,111 @@
+ruleset_id: QUANTUM-PROJECT-RULES-MASTER-v1
+status: ACTIVE
+authority: PROJECT_OWNER_AND_APPROVED_CONTRACTS
+supersession_policy: LATEST_EXPLICIT_PROJECT_OWNER_DECISION_WINS
+
+rules:
+  - id: Q-GOV-001
+    title: GitHub durable source of truth
+    priority: CRITICAL
+    applies_to: ALL
+    requirement: Critical rules and recovery state must be committed to GitHub.
+  - id: Q-GOV-002
+    title: Stable and WIP separation
+    priority: CRITICAL
+    applies_to: RECOVERY
+    requirement: Verified baseline and unverified working state must never be conflated.
+  - id: Q-ARCH-001
+    title: Marketplace-neutral core
+    priority: CRITICAL
+    applies_to: ARCHITECTURE
+    requirement: Marketplace and product-category specifics belong in adapters or configuration.
+  - id: Q-ARCH-002
+    title: Read-only modular monolith
+    priority: CRITICAL
+    applies_to: MVP
+    requirement: Use API and Worker boundaries and provide no marketplace writes.
+  - id: Q-DATA-001
+    title: Untrusted input admission
+    priority: CRITICAL
+    applies_to: INGESTION
+    requirement: Preserve raw originals with SHA-256 and quarantine unknown or changed schemas.
+  - id: Q-DATA-002
+    title: Idempotent event import
+    priority: CRITICAL
+    applies_to: INGESTION
+    requirement: Repeated import must not create duplicate financial events.
+  - id: Q-EVID-001
+    title: Reproducible Evidence Chain
+    priority: CRITICAL
+    applies_to: RESULTS
+    requirement: Results must trace deterministically to rules, inputs, records, and files.
+  - id: Q-FIN-001
+    title: Decimal monetary arithmetic
+    priority: CRITICAL
+    applies_to: FINANCIAL_KERNEL
+    requirement: Binary floating point is prohibited for monetary calculations.
+  - id: Q-FIN-002
+    title: No hidden commercial constants
+    priority: CRITICAL
+    applies_to: FINANCIAL_KERNEL
+    requirement: Cost, tax, tax base, other expense, allocation, and rounding are explicit versioned inputs.
+  - id: Q-FIN-003
+    title: Typed financial states
+    priority: CRITICAL
+    applies_to: FINANCIAL_KERNEL
+    requirement: Missing, blocked, unavailable, and conflict states must not be coerced to zero.
+  - id: Q-FIN-004
+    title: Actual and Scenario isolation
+    priority: CRITICAL
+    applies_to: FINANCIAL_KERNEL
+    requirement: Scenario execution must not mutate Actual state.
+  - id: Q-FIN-005
+    title: Safe expression only
+    priority: CRITICAL
+    applies_to: RULE_ENGINE
+    requirement: Arbitrary user code execution is prohibited.
+  - id: Q-TEST-001
+    title: Financial verification suite
+    priority: CRITICAL
+    applies_to: FINANCIAL_CHANGES
+    requirement: Use golden, property, differential, typed-state, replay, isolation, and reconciliation tests as applicable.
+  - id: Q-CI-001
+    title: Exact-head gates
+    priority: CRITICAL
+    applies_to: MERGE
+    requirement: Exact-head CI, manifest equality, zero-findings review, and zero unresolved threads are required.
+  - id: Q-CI-002
+    title: Separate closure PR
+    priority: HIGH
+    applies_to: MERGE
+    requirement: Post-merge evidence and state closure are recorded separately from implementation.
+  - id: Q-AUTO-001
+    title: Automatic recovery and continuation
+    priority: HIGH
+    applies_to: QUANTUM_WORKFLOW
+    requirement: Recoverable failures trigger diagnosis, remediation, rerun, and continuation without idle stop.
+  - id: Q-SEC-001
+    title: No secrets or real data in GitHub
+    priority: CRITICAL
+    applies_to: REPOSITORY
+    requirement: Secrets, credentials, production keys, personal data, and real commercial datasets are excluded.
+  - id: Q-PILOT-001
+    title: Controlled pseudonymous pilot
+    priority: CRITICAL
+    applies_to: PILOT
+    requirement: Invitation or approval access, personal accounts, pseudonymity, and data minimization are required.
+  - id: Q-PRIV-001
+    title: Personal-data compliance
+    priority: CRITICAL
+    applies_to: IDENTITY_AND_DATA
+    requirement: Localization, consent, minimization, logging, withdrawal, deletion, and secure authentication are required.
+  - id: Q-LEARN-001
+    title: Controlled self-learning loop
+    priority: CRITICAL
+    applies_to: SELF_LEARNING
+    requirement: Learning uses auditable data, hypothesis, experiment, result, approval, versioning, and rollback.
+  - id: Q-RELEASE-001
+    title: Fail-closed release
+    priority: CRITICAL
+    applies_to: RELEASE
+    requirement: Unknown operations, double counting, unconfirmed formulas, stale evidence, or incomplete gates block release.
