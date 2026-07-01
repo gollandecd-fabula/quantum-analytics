@@ -17,6 +17,14 @@ _OFFICE_DOCUMENT_RELATIONSHIP_TYPES = {
     "http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument",
     "http://purl.oclc.org/ooxml/officeDocument/relationships/officeDocument",
 }
+_CORE_PROPERTIES_RELATIONSHIP_TYPES = {
+    "http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties",
+    "http://purl.oclc.org/ooxml/package/relationships/metadata/core-properties",
+}
+_EXTENDED_PROPERTIES_RELATIONSHIP_TYPES = {
+    "http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties",
+    "http://purl.oclc.org/ooxml/officeDocument/relationships/extended-properties",
+}
 _WORKSHEET_RELATIONSHIP_TYPES = {
     "http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet",
     "http://purl.oclc.org/ooxml/officeDocument/relationships/worksheet",
@@ -33,25 +41,52 @@ def _reject_external_target(target: str, target_mode: str | None) -> None:
         raise XlsxInspectionError("XLSX_EXTERNAL_RELATIONSHIP_FORBIDDEN")
 
 
+def _root_target(target: str) -> str:
+    normalized = target.replace("\\", "/")
+    if normalized.startswith("/"):
+        normalized = normalized[1:]
+    return normalized.casefold()
+
+
 def _validate_root_binding(zf: ZipFile, limits: XlsxInspectionLimits) -> None:
     root = _xml_root(
         _read_limited(zf, "_rels/.rels", limits),
         "XLSX_ROOT_RELATIONSHIPS_INVALID",
     )
-    relationships = root.findall(f"{{{_RELATIONSHIP_NS}}}Relationship")
-    if len(relationships) != 1:
-        raise XlsxInspectionError("XLSX_ROOT_RELATIONSHIP_INVALID")
-    relationship = relationships[0]
-    _reject_external_target(
-        relationship.get("Target") or "",
-        relationship.get("TargetMode"),
-    )
-    if relationship.get("Type") not in _OFFICE_DOCUMENT_RELATIONSHIP_TYPES:
-        raise XlsxInspectionError("XLSX_ROOT_RELATIONSHIP_INVALID")
-    target = (relationship.get("Target") or "").replace("\\", "/")
-    if target.startswith("/"):
-        target = target[1:]
-    if target.casefold() != "xl/workbook.xml":
+    names = {
+        info.filename.replace("\\", "/").casefold()
+        for info in zf.infolist()
+        if not info.is_dir()
+    }
+    office_document_count = 0
+    auxiliary_targets: set[str] = set()
+    for relationship in root.findall(f"{{{_RELATIONSHIP_NS}}}Relationship"):
+        target_value = relationship.get("Target") or ""
+        _reject_external_target(
+            target_value,
+            relationship.get("TargetMode"),
+        )
+        relationship_type = relationship.get("Type") or ""
+        target = _root_target(target_value)
+        if relationship_type in _OFFICE_DOCUMENT_RELATIONSHIP_TYPES:
+            if target != "xl/workbook.xml":
+                raise XlsxInspectionError("XLSX_ROOT_RELATIONSHIP_INVALID")
+            office_document_count += 1
+            continue
+        if relationship_type in _CORE_PROPERTIES_RELATIONSHIP_TYPES:
+            expected_target = "docprops/core.xml"
+        elif relationship_type in _EXTENDED_PROPERTIES_RELATIONSHIP_TYPES:
+            expected_target = "docprops/app.xml"
+        else:
+            raise XlsxInspectionError("XLSX_ROOT_RELATIONSHIP_INVALID")
+        if (
+            target != expected_target
+            or target not in names
+            or target in auxiliary_targets
+        ):
+            raise XlsxInspectionError("XLSX_ROOT_RELATIONSHIP_INVALID")
+        auxiliary_targets.add(target)
+    if office_document_count != 1:
         raise XlsxInspectionError("XLSX_ROOT_RELATIONSHIP_INVALID")
 
 
