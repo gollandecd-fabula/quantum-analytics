@@ -1,7 +1,8 @@
 closure_id: QCP-2026-07-01-R1-CLOSURE
 checkpoint_id: QCP-2026-07-01-R1
 created_at: "2026-07-01T08:33:49+02:00"
-status: MERGED_PENDING_EXTERNAL_COMPLETION
+updated_at: "2026-07-01T10:06:37+02:00"
+status: RECOVERY_POINT_COMPLETE
 
 implementation:
   pull_request: 34
@@ -24,19 +25,59 @@ verification:
   review_findings_remediated: 3
   unresolved_review_threads: 0
 
-external_completion:
-  immutable_tag:
-    name: quantum-recovery-2026-07-01-r1
-    status: PENDING
+recovery_export:
+  remediation_pull_request: 37
+  reviewed_head: 5430e7c8d37e539227f1784ea40a74d823355b7e
+  merge_commit: db8580fc41052ad6b0ba9510be6f0d8afa0689c4
+  workflow_run_id: 28502816704
+  workflow_conclusion: SUCCESS
+  artifact:
+    id: 8003735901
+    zip_sha256: 0af90605c2e37fbdae4f6f4f16169046604d23af07290a6c0a22067af8dbe7b2
   git_bundle:
-    status: PENDING_EXTERNAL
-    required_refs:
-      - refs/heads/main
-      - refs/heads/build-b1b-financial-kernel-v1
-      - refs/tags/quantum-recovery-2026-07-01-r1
+    sha256: a3df6b34faccf389f5ab143d1728befe4c8ee8cb456353d3dda46be8fcbc3367
+    complete_history: PASS
+    refs:
+      stable_main: 46ec74c5fd242fd3993bdbd67e36508228dd145d
+      wip: b3b33a11f8da671356c9bc6c8073b59819a9654c
+      annotated_tag_target: eed62fcc22f624b3632d16db3cf00410d3d4d412
+  independent_bundle_verify: PASS
+  independent_fresh_restore: PASS
+  ancestor_check: PASS
+
+external_completion:
+  encrypted_copy:
+    status: PASS
+    format: GPG_SYMMETRIC_AES256
+    sha256: f7148528922968670e515164000836bdf8e397cddbbface35bc60d6fa93629ee
+    contains:
+      - quantum-recovery-2026-07-01-r1.zip
+      - QCP-2026-07-01-R1-INDEPENDENT-VERIFICATION.txt
+  bundle_local_annotated_tag:
+    name: quantum-recovery-2026-07-01-r1
+    target: eed62fcc22f624b3632d16db3cf00410d3d4d412
+    status: PASS
+  remote_annotated_tag:
+    status: NOT_CREATED
+    compensation: VERIFIED_BUNDLE_PLUS_ENCRYPTED_COPY_PLUS_PINNED_RECOVERY_REFS
+  remote_recovery_refs:
+    checkpoint:
+      branch: recovery/qcp-2026-07-01-r1-checkpoint
+      sha: eed62fcc22f624b3632d16db3cf00410d3d4d412
+    stable_main:
+      branch: recovery/qcp-2026-07-01-r1-main
+      sha: 46ec74c5fd242fd3993bdbd67e36508228dd145d
+    wip:
+      branch: recovery/qcp-2026-07-01-r1-wip
+      sha: b3b33a11f8da671356c9bc6c8073b59819a9654c
   fresh_restore_drill:
-    status: PENDING
+    status: PASS
   github_release:
-    status: OPTIONAL_PENDING
+    status: OPTIONAL_NOT_REQUIRED
+
+cleanup:
+  pull_request: 38
+  one_shot_workflow: REMOVED_ON_MERGE
+  artifact_manifest: SYNCHRONIZED_ON_MERGE
 
 release_status: RELEASE_BLOCKED
