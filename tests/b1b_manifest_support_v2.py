@@ -29,6 +29,7 @@ OVERLAYS=(
 ("ARTIFACT_MANIFEST_OVERLAY_B1B_R6.json","base_b1b_final_overlay_git_blob_sha"),
 ("ARTIFACT_MANIFEST_OVERLAY_B1B_R7.json","base_b1b_r6_overlay_git_blob_sha"),
 ("ARTIFACT_MANIFEST_OVERLAY_B1B_R8.json","base_b1b_r7_overlay_git_blob_sha"),
+("ARTIFACT_MANIFEST_OVERLAY_B1B_R9.json","base_b1b_r8_overlay_git_blob_sha"),
 )
 CONTROL_PATHS={"docs/evidence/ARTIFACT_MANIFEST.json",*("docs/evidence/"+n for n,_ in OVERLAYS)}
 ARTIFACT_FIELDS=["path","sha256","size_bytes"]
