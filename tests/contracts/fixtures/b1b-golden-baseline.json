@@ -1,0 +1,271 @@
+{
+  "baseline_id": "B1B-SYNTHETIC-GOLDEN-CANDIDATE-v1",
+  "approval_state": "APPROVED",
+  "methodology_approval_reference": "user-b1b-authorization-2026-06-30",
+  "oracle_owner_role": "BUSINESS_GOLDEN_ORACLE_OWNER",
+  "oracle_owner_identity": "PROJECT_OWNER_USER",
+  "independent_derivation": "src/quantum/finance/oracle.py",
+  "real_commercial_data": false,
+  "cases": [
+    {
+      "case_id": "actual-basic-eur",
+      "mode": "ACTUAL",
+      "scenario_id": null,
+      "currency": "EUR",
+      "rounding_mode": "HALF_EVEN",
+      "money_scale": 2,
+      "gross_sales_units": "10",
+      "returned_units": "2",
+      "inputs": {
+        "gross_sales_amount": "1000",
+        "discounts_amount": "50",
+        "subsidies_amount": "20",
+        "marketplace_commission_amount": "200",
+        "forward_logistics_amount": "30",
+        "reverse_logistics_amount": "10",
+        "storage_amount": "5",
+        "advertising_amount": "25",
+        "fines_withholdings_amount": "0"
+      },
+      "cost_per_unit": "40",
+      "other_expenses": [
+        {
+          "component_id": "packaging",
+          "value": "4",
+          "unit": "MONEY_PER_ITEM"
+        }
+      ],
+      "tax_rate": "0.06",
+      "tax_base_metric_id": "gross_sales_amount",
+      "expected": {
+        "net_sold_units": {
+          "state": "VALID",
+          "value": "8"
+        },
+        "product_cost_amount": {
+          "state": "VALID",
+          "value": "320.00"
+        },
+        "other_expense_amount": {
+          "state": "VALID",
+          "value": "32.00"
+        },
+        "tax_amount": {
+          "state": "VALID",
+          "value": "60.00"
+        },
+        "net_marketplace_income_amount": {
+          "state": "VALID",
+          "value": "700.00"
+        },
+        "net_profit_amount": {
+          "state": "VALID",
+          "value": "288.00"
+        },
+        "profit_per_sold_unit": {
+          "state": "VALID",
+          "value": "36.00"
+        },
+        "profitability_of_costs": {
+          "state": "BLOCKED",
+          "value": null
+        }
+      }
+    },
+    {
+      "case_id": "scenario-tax-on-net-income",
+      "mode": "SCENARIO",
+      "scenario_id": "scenario-1",
+      "currency": "EUR",
+      "rounding_mode": "HALF_UP",
+      "money_scale": 2,
+      "gross_sales_units": "3",
+      "returned_units": "1",
+      "inputs": {
+        "gross_sales_amount": "333.33",
+        "discounts_amount": "3.33",
+        "subsidies_amount": "0",
+        "marketplace_commission_amount": "33.33",
+        "forward_logistics_amount": "6.66",
+        "reverse_logistics_amount": "3.33",
+        "storage_amount": "1.11",
+        "advertising_amount": "2.22",
+        "fines_withholdings_amount": "0"
+      },
+      "cost_per_unit": "20.005",
+      "other_expenses": [
+        {
+          "component_id": "period-service",
+          "value": "5.005",
+          "unit": "MONEY"
+        }
+      ],
+      "tax_rate": "0.075",
+      "tax_base_metric_id": "net_marketplace_income_amount",
+      "expected": {
+        "net_sold_units": {
+          "state": "VALID",
+          "value": "2"
+        },
+        "product_cost_amount": {
+          "state": "VALID",
+          "value": "40.01"
+        },
+        "other_expense_amount": {
+          "state": "VALID",
+          "value": "5.01"
+        },
+        "tax_amount": {
+          "state": "VALID",
+          "value": "21.25"
+        },
+        "net_marketplace_income_amount": {
+          "state": "VALID",
+          "value": "283.35"
+        },
+        "net_profit_amount": {
+          "state": "VALID",
+          "value": "217.08"
+        },
+        "profit_per_sold_unit": {
+          "state": "VALID",
+          "value": "108.54"
+        },
+        "profitability_of_costs": {
+          "state": "BLOCKED",
+          "value": null
+        }
+      }
+    },
+    {
+      "case_id": "actual-valid-zero-and-zero-denominator",
+      "mode": "ACTUAL",
+      "scenario_id": null,
+      "currency": "EUR",
+      "rounding_mode": "HALF_EVEN",
+      "money_scale": 2,
+      "gross_sales_units": "0",
+      "returned_units": "0",
+      "inputs": {
+        "gross_sales_amount": "0",
+        "discounts_amount": "0",
+        "subsidies_amount": "0",
+        "marketplace_commission_amount": "0",
+        "forward_logistics_amount": "0",
+        "reverse_logistics_amount": "0",
+        "storage_amount": "0",
+        "advertising_amount": "0",
+        "fines_withholdings_amount": "0"
+      },
+      "cost_per_unit": "0",
+      "other_expenses": [
+        {
+          "component_id": "explicit-zero",
+          "value": "0",
+          "unit": "MONEY"
+        }
+      ],
+      "tax_rate": "0",
+      "tax_base_metric_id": "gross_sales_amount",
+      "expected": {
+        "net_sold_units": {
+          "state": "VALID",
+          "value": "0"
+        },
+        "product_cost_amount": {
+          "state": "VALID",
+          "value": "0.00"
+        },
+        "other_expense_amount": {
+          "state": "VALID",
+          "value": "0.00"
+        },
+        "tax_amount": {
+          "state": "VALID",
+          "value": "0.00"
+        },
+        "net_marketplace_income_amount": {
+          "state": "VALID",
+          "value": "0.00"
+        },
+        "net_profit_amount": {
+          "state": "VALID",
+          "value": "0.00"
+        },
+        "profit_per_sold_unit": {
+          "state": "BLOCKED",
+          "value": null
+        },
+        "profitability_of_costs": {
+          "state": "BLOCKED",
+          "value": null
+        }
+      }
+    },
+    {
+      "case_id": "actual-negative-correction",
+      "mode": "ACTUAL",
+      "scenario_id": null,
+      "currency": "RUB",
+      "rounding_mode": "HALF_EVEN",
+      "money_scale": 2,
+      "gross_sales_units": "1",
+      "returned_units": "2",
+      "inputs": {
+        "gross_sales_amount": "-100",
+        "discounts_amount": "0",
+        "subsidies_amount": "0",
+        "marketplace_commission_amount": "-20",
+        "forward_logistics_amount": "0",
+        "reverse_logistics_amount": "10",
+        "storage_amount": "0",
+        "advertising_amount": "0",
+        "fines_withholdings_amount": "0"
+      },
+      "cost_per_unit": "40",
+      "other_expenses": [
+        {
+          "component_id": "explicit-zero",
+          "value": "0",
+          "unit": "MONEY"
+        }
+      ],
+      "tax_rate": "0.06",
+      "tax_base_metric_id": "gross_sales_amount",
+      "expected": {
+        "net_sold_units": {
+          "state": "VALID",
+          "value": "-1"
+        },
+        "product_cost_amount": {
+          "state": "VALID",
+          "value": "-40.00"
+        },
+        "other_expense_amount": {
+          "state": "VALID",
+          "value": "0.00"
+        },
+        "tax_amount": {
+          "state": "VALID",
+          "value": "-6.00"
+        },
+        "net_marketplace_income_amount": {
+          "state": "VALID",
+          "value": "-90.00"
+        },
+        "net_profit_amount": {
+          "state": "VALID",
+          "value": "-44.00"
+        },
+        "profit_per_sold_unit": {
+          "state": "BLOCKED",
+          "value": null
+        },
+        "profitability_of_costs": {
+          "state": "BLOCKED",
+          "value": null
+        }
+      }
+    }
+  ]
+}

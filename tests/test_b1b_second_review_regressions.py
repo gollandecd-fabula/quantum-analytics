@@ -1,0 +1,323 @@
+from __future__ import annotations
+
+import unittest
+
+from quantum.finance import (
+    FinanceError,
+    calculate,
+    canonical_hash,
+    evaluate_expression,
+    evaluate_resolved_rule,
+    resolve_rule,
+    validate_rounding_policy,
+)
+
+from tests.b1b_helpers import (
+    context,
+    load_baseline,
+    policy,
+    request_from_case,
+    rule_document,
+    typed,
+)
+
+
+class B1bSecondReviewRegressionTests(unittest.TestCase):
+    def test_schema_bound_rounding_scales_reject_29(self) -> None:
+        for field in (
+            "calculation_scale",
+            "money_scale",
+            "rate_scale",
+            "presentation_scale",
+        ):
+            with self.subTest(field=field):
+                document = policy()
+                document[field] = 29
+                document["content_hash"] = canonical_hash(
+                    document, exclude=frozenset({"content_hash"})
+                )
+                with self.assertRaisesRegex(FinanceError, "ROUNDING_SCALE_INVALID"):
+                    validate_rounding_policy(document)
+
+    def test_nonvalid_dependency_does_not_hide_invalid_multiplier_signature(self) -> None:
+        expression = {
+            "kind": "OPERATION",
+            "operator": "MULTIPLY",
+            "value_type": "MONEY",
+            "currency": "EUR",
+            "unit": "MONEY",
+            "arguments": [
+                {
+                    "kind": "VARIABLE",
+                    "name": "gross_sales_amount",
+                    "value_type": "MONEY",
+                    "currency": "EUR",
+                    "unit": "MONEY",
+                },
+                {
+                    "kind": "VARIABLE",
+                    "name": "item_factor",
+                    "value_type": "DECIMAL",
+                    "currency": None,
+                    "unit": "ITEM",
+                },
+            ],
+        }
+        variables = {
+            "gross_sales_amount": typed(
+                "100", value_type="MONEY", unit="MONEY", currency="EUR"
+            ),
+            "item_factor": typed(
+                None,
+                value_type="DECIMAL",
+                unit="ITEM",
+                state="UNAVAILABLE",
+                reason_code="FACTOR_SOURCE_MISSING",
+            ),
+        }
+        with self.assertRaisesRegex(FinanceError, "EXPRESSION_UNIT_MISMATCH"):
+            evaluate_expression(
+                expression,
+                variables,
+                ["gross_sales_amount", "item_factor"],
+                policy(),
+            )
+
+    def test_integer_division_returns_typed_finance_error(self) -> None:
+        expression = {
+            "kind": "OPERATION",
+            "operator": "DIVIDE",
+            "value_type": "DECIMAL",
+            "currency": None,
+            "unit": "DIMENSIONLESS",
+            "arguments": [
+                {
+                    "kind": "LITERAL",
+                    "value": "8",
+                    "value_type": "INTEGER",
+                    "currency": None,
+                    "unit": "ITEM",
+                },
+                {
+                    "kind": "LITERAL",
+                    "value": "2",
+                    "value_type": "INTEGER",
+                    "currency": None,
+                    "unit": "ITEM",
+                },
+            ],
+        }
+        with self.assertRaisesRegex(FinanceError, "EXPRESSION_TYPE_MISMATCH"):
+            evaluate_expression(expression, {}, [], policy())
+
+    def test_valid_resolution_rejects_non_null_diagnostic(self) -> None:
+        rule = rule_document()
+        resolution = resolve_rule([rule], context())
+        resolution["diagnostic_code"] = "RULE_REQUIRED_MISSING"
+        resolution["trace_id"] = canonical_hash(
+            resolution, exclude=frozenset({"trace_id"})
+        )
+        with self.assertRaisesRegex(FinanceError, "RULE_RESOLUTION_INVALID"):
+            evaluate_resolved_rule(resolution, [rule], {}, policy())
+
+    def test_forged_valid_resolution_cannot_select_draft_rule(self) -> None:
+        rule = rule_document(status="DRAFT")
+        resolution = resolve_rule([rule], context())
+        resolution["state"] = "VALID"
+        resolution["diagnostic_code"] = None
+        resolution["candidates"][0]["eligible"] = True
+        resolution["candidates"][0]["selected"] = True
+        resolution["candidates"][0]["exclusion_reasons"] = []
+        resolution["candidates"][0]["ordering_tuple"] = [
+            [0, 0, 0, 0, 0, 0],
+            rule["priority"],
+            rule["valid_from"],
+            rule["version"],
+        ]
+        resolution["trace_id"] = canonical_hash(
+            resolution, exclude=frozenset({"trace_id"})
+        )
+        with self.assertRaisesRegex(
+            FinanceError, "RULE_RESOLUTION_REPLAY_MISMATCH"
+        ):
+            evaluate_resolved_rule(resolution, [rule], {}, policy())
+
+    def test_rehashed_lower_priority_selection_is_not_trusted(self) -> None:
+        low = rule_document(rule_id="cost.low", priority=1, value="10")
+        high = rule_document(rule_id="cost.high", priority=2, value="20")
+        rules = [low, high]
+        resolution = resolve_rule(rules, context())
+        for candidate in resolution["candidates"]:
+            candidate["selected"] = candidate["rule"]["rule_id"] == "cost.low"
+        resolution["trace_id"] = canonical_hash(
+            resolution, exclude=frozenset({"trace_id"})
+        )
+        with self.assertRaisesRegex(
+            FinanceError, "RULE_RESOLUTION_REPLAY_MISMATCH"
+        ):
+            evaluate_resolved_rule(resolution, rules, {}, policy())
+
+    def test_resolver_issued_trace_is_bound_to_complete_ruleset(self) -> None:
+        low = rule_document(rule_id="cost.low", priority=1, value="10")
+        high = rule_document(rule_id="cost.high", priority=2, value="20")
+        resolution = resolve_rule([low], context())
+        with self.assertRaisesRegex(
+            FinanceError, "RULE_RESOLUTION_REPLAY_MISMATCH"
+        ):
+            evaluate_resolved_rule(resolution, [low, high], {}, policy())
+
+    def test_resolver_uses_one_snapshot_of_mutable_rule_sequence(self) -> None:
+        low = rule_document(rule_id="cost.low", priority=1, value="10")
+        high = rule_document(rule_id="cost.high", priority=2, value="20")
+
+        class FlippingRules(list[dict[str, object]]):
+            def __init__(self) -> None:
+                super().__init__([low])
+                self.iterations = 0
+
+            def __iter__(self):  # type: ignore[no-untyped-def]
+                self.iterations += 1
+                selected = [low] if self.iterations == 1 else [low, high]
+                return iter(selected)
+
+        rules = FlippingRules()
+        resolution = resolve_rule(rules, context())
+        self.assertEqual(rules.iterations, 1)
+        with self.assertRaisesRegex(
+            FinanceError, "RULE_RESOLUTION_REPLAY_MISMATCH"
+        ):
+            evaluate_resolved_rule(resolution, [low, high], {}, policy())
+
+    def test_valid_from_microseconds_are_ordered_without_binary_float(self) -> None:
+        earlier = rule_document(
+            rule_id="cost.earlier",
+            valid_from="9999-01-01T00:00:00.000001Z",
+        )
+        later = rule_document(
+            rule_id="cost.later",
+            valid_from="9999-01-01T00:00:00.000002Z",
+        )
+        resolution = resolve_rule(
+            [earlier, later],
+            context(calculation_instant="9999-01-01T00:00:00.000010Z"),
+        )
+        selected = [
+            candidate["rule"]["rule_id"]
+            for candidate in resolution["candidates"]
+            if candidate["selected"] is True
+        ]
+        self.assertEqual(resolution["state"], "VALID")
+        self.assertEqual(selected, ["cost.later"])
+
+    def test_invalid_cost_signature_precedes_dependency_propagation(self) -> None:
+        request = request_from_case(load_baseline()["cases"][0])
+        request["inputs"]["returned_units"] = typed(
+            None,
+            value_type="INTEGER",
+            unit="ITEM",
+            state="UNAVAILABLE",
+            reason_code="RETURN_SOURCE_UNAVAILABLE",
+        )
+        request["cost_per_unit"] = typed(
+            "0.10", value_type="RATE", unit="RATE"
+        )
+        result = calculate(request)["results"]
+        self.assertEqual(result["net_sold_units"]["state"], "UNAVAILABLE")
+        self.assertEqual(result["product_cost_amount"]["state"], "BLOCKED")
+        self.assertEqual(
+            result["product_cost_amount"]["reason_code"],
+            "COST_RULE_SIGNATURE_MISMATCH",
+        )
+
+    def test_safe_expression_result_must_match_rule_signature(self) -> None:
+        expression = {
+            "kind": "LITERAL",
+            "value": "0.10",
+            "value_type": "RATE",
+            "currency": None,
+            "unit": "RATE",
+        }
+        rule = rule_document(method="SAFE_EXPRESSION", expression=expression)
+        resolution = resolve_rule([rule], context())
+        variables = {
+            "gross_sales_amount": typed(
+                "100", value_type="MONEY", unit="MONEY", currency="EUR"
+            ),
+            "tax_rate": typed("0.10", value_type="RATE", unit="RATE"),
+        }
+        with self.assertRaisesRegex(
+            FinanceError, "RULE_EXPRESSION_SIGNATURE_MISMATCH"
+        ):
+            evaluate_resolved_rule(resolution, [rule], variables, policy())
+
+    def test_nonvalid_safe_expression_result_must_match_rule_signature(self) -> None:
+        expression = {
+            "kind": "VARIABLE",
+            "name": "tax_rate",
+            "value_type": "RATE",
+            "currency": None,
+            "unit": "RATE",
+        }
+        rule = rule_document(method="SAFE_EXPRESSION", expression=expression)
+        resolution = resolve_rule([rule], context())
+        variables = {
+            "gross_sales_amount": typed(
+                "100", value_type="MONEY", unit="MONEY", currency="EUR"
+            ),
+            "tax_rate": typed(
+                None,
+                value_type="RATE",
+                unit="RATE",
+                state="UNAVAILABLE",
+                reason_code="TAX_RATE_SOURCE_MISSING",
+            ),
+        }
+        with self.assertRaisesRegex(
+            FinanceError, "RULE_EXPRESSION_SIGNATURE_MISMATCH"
+        ):
+            evaluate_resolved_rule(resolution, [rule], variables, policy())
+
+    def test_safe_expression_missing_dependency_remains_unavailable(self) -> None:
+        expression = {
+            "kind": "VARIABLE",
+            "name": "gross_sales_amount",
+            "value_type": "MONEY",
+            "currency": "EUR",
+            "unit": "MONEY",
+        }
+        rule = rule_document(method="SAFE_EXPRESSION", expression=expression)
+        resolution = resolve_rule([rule], context())
+        variables = {
+            "gross_sales_amount": typed(
+                "100", value_type="MONEY", unit="MONEY", currency="EUR"
+            )
+        }
+        result = evaluate_resolved_rule(resolution, [rule], variables, policy())
+        self.assertEqual(result["state"], "UNAVAILABLE")
+        self.assertEqual(
+            result["reason_code"], "RULE_DEPENDENCY_UNAVAILABLE:tax_rate"
+        )
+
+    def test_unhashable_source_id_is_typed_validation_error(self) -> None:
+        expression = {
+            "kind": "VARIABLE",
+            "name": "gross_sales_amount",
+            "value_type": "MONEY",
+            "currency": "EUR",
+            "unit": "MONEY",
+        }
+        malformed = typed(
+            "100", value_type="MONEY", unit="MONEY", currency="EUR"
+        )
+        malformed["source_ids"] = [[]]
+        with self.assertRaisesRegex(FinanceError, "VALUE_SOURCES_INVALID"):
+            evaluate_expression(
+                expression,
+                {"gross_sales_amount": malformed},
+                ["gross_sales_amount"],
+                policy(),
+            )
+
+
+if __name__ == "__main__":
+    unittest.main()
