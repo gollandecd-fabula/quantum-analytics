@@ -1,0 +1,89 @@
+{
+  "base_p15_closure_overlay_git_blob_sha": "33c32292050762759aeb89c647bf91f2072b8493",
+  "entries": [
+    [
+      "docs/recovery/checkpoints/QCP-2026-07-01-R1/ARTIFACT_MANIFEST.sha256",
+      "ecfWKZaIP2whhZCzuA0Z/95R63gvYkzyWBo48bs9MSU=",
+      1243
+    ],
+    [
+      "docs/recovery/checkpoints/QCP-2026-07-01-R1/CHECKPOINT.yaml",
+      "uEmAcVG1YQw5o630vBiUpxl+Qr5d4DpqhBagOm0Vl6U=",
+      1681
+    ],
+    [
+      "docs/recovery/checkpoints/QCP-2026-07-01-R1/CI_AND_REVIEW_EVIDENCE.md",
+      "/e00xD3hZqFcp987JOgWxy36yWj9AF9XltMAMTXQkmo=",
+      699
+    ],
+    [
+      "docs/recovery/checkpoints/QCP-2026-07-01-R1/DECISIONS_LOG.md",
+      "iClfRkzY9N2lI2BvSBNojiMs8yaicAHRTs2h5WszzHI=",
+      1583
+    ],
+    [
+      "docs/recovery/checkpoints/QCP-2026-07-01-R1/DEPENDENCY_SNAPSHOT.md",
+      "fnbJFQCG02l8+CFHGDp8ZGgK4sKYTzsXnai60K3pLHU=",
+      795
+    ],
+    [
+      "docs/recovery/checkpoints/QCP-2026-07-01-R1/EXCLUSIONS_AND_SECURITY.md",
+      "xbTQ8wV4KYOxSgAjjHWK8aeTMv6GwGK9XeXwMQPGglA=",
+      690
+    ],
+    [
+      "docs/recovery/checkpoints/QCP-2026-07-01-R1/EXECUTION_STATE_SNAPSHOT.yaml",
+      "gDF+XetIlKQ753bzmy9I9TwZ4og6psMdsrRkhBBdde8=",
+      985
+    ],
+    [
+      "docs/recovery/checkpoints/QCP-2026-07-01-R1/OPEN_WORK_AND_BLOCKERS.md",
+      "zzznPn2btgK2Y3WAiofrxhZrg4v13NG6Sm0jMCgBt+4=",
+      1306
+    ],
+    [
+      "docs/recovery/checkpoints/QCP-2026-07-01-R1/PROJECT_RULES_MASTER.md",
+      "A8VXxD0H69Q9wNd0/RCAZyuuwdwvslH1S+OVGBVRoJU=",
+      6763
+    ],
+    [
+      "docs/recovery/checkpoints/QCP-2026-07-01-R1/PROJECT_RULES_MASTER.yaml",
+      "Zmu0RY1W8Ius0x8oYl+Jp40ROinXfw9DGtW71IoQMjM=",
+      4495
+    ],
+    [
+      "docs/recovery/checkpoints/QCP-2026-07-01-R1/README.md",
+      "nQ+HfJcp3YJz3hheKxNM9UZHKqqsvRzmaNIzGrL2Is8=",
+      1449
+    ],
+    [
+      "docs/recovery/checkpoints/QCP-2026-07-01-R1/RECOVERY_RUNBOOK.md",
+      "Z3u5Yp2u0JJuY993cUzC7O/cZ2mOrVF2gOZUd5UfNvw=",
+      988
+    ],
+    [
+      "docs/recovery/checkpoints/QCP-2026-07-01-R1/RECOVERY_VERIFICATION_REPORT.md",
+      "80jTQ97imsqbEh1D9L+j6tX7iDxiWmNho0qzrYrMD8c=",
+      567
+    ],
+    [
+      "docs/recovery/checkpoints/QCP-2026-07-01-R1/REPOSITORY_MAP.md",
+      "NXk0ynfQPzd81N5aBiwD4x4RpvnmsAhpEoBwUFwJbpo=",
+      1097
+    ],
+    [
+      "docs/recovery/checkpoints/QCP-2026-07-01-R1/WIP_STATE_SNAPSHOT.yaml",
+      "IEPvcZMjW9EJm9z6roPHceB4OmZngz+b8zSDe/fQT7g=",
+      2187
+    ],
+    [
+      "tests/test_b1a_artifact_manifest.py",
+      "bxiHV75qVrBIdmVdN/EiohecJljEyKbnjIXwOUA/T0E=",
+      10248
+    ]
+  ],
+  "hash_encoding": "sha256-base64",
+  "overlay_version": 1,
+  "reason": "QCP-2026-07-01-R1 recovery checkpoint admission",
+  "remove_paths": []
+}
