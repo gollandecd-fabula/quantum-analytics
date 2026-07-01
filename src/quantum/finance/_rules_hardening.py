@@ -10,12 +10,14 @@ from ._common import (
     FinanceError,
     RESOLVER_CONTRACT_VERSION,
     _HASH_RE,
+    _MAX_EXPRESSION_NODES,
     _is_nonempty_string,
     _make_nonvalid,
     _parse_rfc3339,
     _value_to_dict,
     canonical_hash,
 )
+from ._rounding import _decimal_context, validate_rounding_policy
 from ._rules import (
     _validate_rule_document,
     evaluate_resolved_rule as _base_evaluate,
@@ -176,7 +178,9 @@ def evaluate_resolved_rule(
                 reason_code=f"RULE_DEPENDENCY_UNAVAILABLE:{missing[0]}",
                 source_ids=(str(resolution["trace_id"]), str(selected["content_hash"])),
             ))
-    result = _base_evaluate(resolution, snapshot, variables, policy)
+    validated_policy = validate_rounding_policy(policy)
+    with _decimal_context(validated_policy, operation_budget=_MAX_EXPRESSION_NODES):
+        result = _base_evaluate(resolution, snapshot, variables, validated_policy)
     if selected is not None and selected["method"] == "SAFE_EXPRESSION":
         actual = (result.get("value_type"), result.get("unit"), result.get("currency"))
         if actual != _signature(selected):
