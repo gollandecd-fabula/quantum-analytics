@@ -1,13 +1,16 @@
 import unittest
 from copy import deepcopy
+from decimal import getcontext, localcontext
 
 from quantum.finance import (
+    FinanceError,
     calculate,
     canonical_hash,
     evaluate_expression,
     evaluate_resolved_rule,
     resolve_rule,
 )
+from quantum.finance._rounding import _decimal_context
 from tests.test_b1b_rescue_smoke import context, money_rule, policy, typed
 
 
@@ -56,6 +59,34 @@ def operation(operator, value_type, currency, unit, arguments):
 
 
 class B1bDecimalContextTests(unittest.TestCase):
+    def test_decimal_context_clamps_ambient_precision(self):
+        governed = high_precision_policy()
+        operation_budget = 3
+        work_scale = max(
+            governed["max_input_scale"],
+            governed["calculation_scale"],
+            governed["money_scale"],
+            governed["rate_scale"],
+            governed["presentation_scale"],
+        )
+        expected = governed["max_input_precision"] * operation_budget + work_scale + 8
+        with localcontext() as ambient:
+            ambient.prec = expected * 10
+            with _decimal_context(governed, operation_budget=operation_budget):
+                self.assertEqual(getcontext().prec, expected)
+            self.assertEqual(getcontext().prec, expected * 10)
+
+    def test_expression_literal_precision_is_rejected_at_admission(self):
+        rule = money_rule()
+        rule["expression"] = money_literal("1" * 1001)
+        rule["change_reason"] = "oversized expression literal regression"
+        rule["content_hash"] = canonical_hash(
+            rule, exclude=frozenset({"content_hash"})
+        )
+        with self.assertRaises(FinanceError) as error:
+            resolve_rule([rule], context())
+        self.assertEqual(error.exception.code, "ROUNDING_INPUT_PRECISION_EXCEEDED")
+
     def test_kernel_preserves_policy_precision_across_arithmetic(self):
         zero = typed("VALID", "0", "MONEY", "MONEY", "RUB")
         inputs = {
