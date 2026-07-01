@@ -1,250 +1,37 @@
 from __future__ import annotations
-
-import base64
-import hashlib
-import json
-import subprocess
-import unittest
+import base64,hashlib,json,subprocess,unittest
 from pathlib import Path
-
-ROOT = Path(__file__).resolve().parents[1]
-MANIFEST_PATH = ROOT / "docs/evidence/ARTIFACT_MANIFEST.json"
-OVERLAY_PATH = ROOT / "docs/evidence/ARTIFACT_MANIFEST_OVERLAY.json"
-RUNTIME_OVERLAY_PATH = ROOT / "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_B3_RUNTIME.json"
-FINAL_OVERLAY_PATH = ROOT / "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_B3_FINAL.json"
-OSS_ADMISSION_OVERLAY_PATH = ROOT / "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_OSS_ADMISSION.json"
-P1_OVERLAY_PATH = ROOT / "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_P1.json"
-P1_CLOSURE_OVERLAY_PATH = ROOT / "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_P1_CLOSURE.json"
-P13_OVERLAY_PATH = ROOT / "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_P13.json"
-P13_MERGE_GATE_OVERLAY_PATH = (
-    ROOT / "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_P13_MERGE_GATE.json"
-)
-P13_CLOSURE_OVERLAY_PATH = (
-    ROOT / "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_P13_CLOSURE.json"
-)
-P14_OVERLAY_PATH = ROOT / "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_P14.json"
-P14_CLOSURE_OVERLAY_PATH = (
-    ROOT / "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_P14_CLOSURE.json"
-)
-P15_OVERLAY_PATH = ROOT / "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_P15.json"
-P15_CLOSURE_OVERLAY_PATH = (
-    ROOT / "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_P15_CLOSURE.json"
-)
-RECOVERY_QCP_OVERLAY_PATH = (
-    ROOT / "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_RECOVERY_QCP_2026_07_01_R1.json"
-)
-ASSURANCE_PLAN_OVERLAY_PATH = (
-    ROOT / "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_ASSURANCE_PLAN_2026_07_08.json"
-)
-REAL_DATA_PILOT_OVERLAY_PATH = (
-    ROOT / "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_REAL_DATA_PILOT_2026_07_08.json"
-)
-CONTROL_PATHS = {
-    "docs/evidence/ARTIFACT_MANIFEST.json",
-    "docs/evidence/ARTIFACT_MANIFEST_OVERLAY.json",
-    "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_B3_RUNTIME.json",
-    "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_B3_FINAL.json",
-    "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_OSS_ADMISSION.json",
-    "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_P1.json",
-    "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_P1_CLOSURE.json",
-    "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_P13.json",
-    "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_P13_MERGE_GATE.json",
-    "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_P13_CLOSURE.json",
-    "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_P14.json",
-    "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_P14_CLOSURE.json",
-    "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_P15.json",
-    "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_P15_CLOSURE.json",
-    "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_RECOVERY_QCP_2026_07_01_R1.json",
-    "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_ASSURANCE_PLAN_2026_07_08.json",
-    "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_REAL_DATA_PILOT_2026_07_08.json",
-}
-ARTIFACT_FIELDS = ["path", "sha256", "size_bytes"]
-B1A_SCHEMAS = {
-    "schemas/calculation-profile.schema.json",
-    "schemas/configuration-rule.schema.json",
-    "schemas/metric-definition.schema.json",
-    "schemas/rounding-policy.schema.json",
-    "schemas/rule-resolution-result.schema.json",
-    "schemas/safe-expression.schema.json",
-}
-
-
-def git_blob_sha(data: bytes) -> str:
-    header = f"blob {len(data)}\0".encode("ascii")
-    return hashlib.sha1(header + data).hexdigest()
-
-
-def tracked_paths() -> list[str]:
-    output = subprocess.check_output(
-        ["git", "ls-files", "-z"], cwd=ROOT
-    ).decode("utf-8")
-    return sorted(
-        path for path in output.split("\0")
-        if path and path not in CONTROL_PATHS
-    )
-
-
-def apply_entries(artifacts: dict[str, list], overlay: dict) -> None:
-    encoding = overlay.get("hash_encoding", "sha256-hex")
-    for row in overlay["entries"]:
-        path, digest, size = row
-        if encoding == "sha256-base64":
-            digest = base64.b64decode(digest, validate=True).hex()
-        elif encoding != "sha256-hex":
-            raise AssertionError("ARTIFACT_MANIFEST_HASH_ENCODING_UNSUPPORTED")
-        artifacts[path] = [path, digest, size]
-    for path in overlay.get("remove_paths", []):
-        artifacts.pop(path, None)
-
-
-def load_effective_manifest() -> dict:
-    base_bytes = MANIFEST_PATH.read_bytes()
-    current = json.loads(base_bytes.decode("utf-8"))
-    overlay_bytes = OVERLAY_PATH.read_bytes()
-    overlay = json.loads(overlay_bytes.decode("utf-8"))
-    runtime_bytes = RUNTIME_OVERLAY_PATH.read_bytes()
-    runtime_overlay = json.loads(runtime_bytes.decode("utf-8"))
-    final_bytes = FINAL_OVERLAY_PATH.read_bytes()
-    final_overlay = json.loads(final_bytes.decode("utf-8"))
-    oss_admission_bytes = OSS_ADMISSION_OVERLAY_PATH.read_bytes()
-    oss_admission_overlay = json.loads(oss_admission_bytes.decode("utf-8"))
-    p1_bytes = P1_OVERLAY_PATH.read_bytes()
-    p1_overlay = json.loads(p1_bytes.decode("utf-8"))
-    p1_closure_bytes = P1_CLOSURE_OVERLAY_PATH.read_bytes()
-    p1_closure_overlay = json.loads(p1_closure_bytes.decode("utf-8"))
-    p13_bytes = P13_OVERLAY_PATH.read_bytes()
-    p13_overlay = json.loads(p13_bytes.decode("utf-8"))
-    p13_merge_gate_bytes = P13_MERGE_GATE_OVERLAY_PATH.read_bytes()
-    p13_merge_gate_overlay = json.loads(p13_merge_gate_bytes.decode("utf-8"))
-    p13_closure_bytes = P13_CLOSURE_OVERLAY_PATH.read_bytes()
-    p13_closure_overlay = json.loads(p13_closure_bytes.decode("utf-8"))
-    p14_bytes = P14_OVERLAY_PATH.read_bytes()
-    p14_overlay = json.loads(p14_bytes.decode("utf-8"))
-    p14_closure_bytes = P14_CLOSURE_OVERLAY_PATH.read_bytes()
-    p14_closure_overlay = json.loads(p14_closure_bytes.decode("utf-8"))
-    p15_bytes = P15_OVERLAY_PATH.read_bytes()
-    p15_overlay = json.loads(p15_bytes.decode("utf-8"))
-    p15_closure_bytes = P15_CLOSURE_OVERLAY_PATH.read_bytes()
-    p15_closure_overlay = json.loads(p15_closure_bytes.decode("utf-8"))
-    recovery_qcp_bytes = RECOVERY_QCP_OVERLAY_PATH.read_bytes()
-    recovery_qcp_overlay = json.loads(recovery_qcp_bytes.decode("utf-8"))
-    assurance_plan_bytes = ASSURANCE_PLAN_OVERLAY_PATH.read_bytes()
-    assurance_plan_overlay = json.loads(assurance_plan_bytes.decode("utf-8"))
-    real_data_pilot_bytes = REAL_DATA_PILOT_OVERLAY_PATH.read_bytes()
-    real_data_pilot_overlay = json.loads(real_data_pilot_bytes.decode("utf-8"))
-
-    if overlay["base_manifest_git_blob_sha"] != git_blob_sha(base_bytes):
-        raise AssertionError("ARTIFACT_MANIFEST_OVERLAY_BASE_MISMATCH")
-    if runtime_overlay["base_overlay_git_blob_sha"] != git_blob_sha(overlay_bytes):
-        raise AssertionError("ARTIFACT_MANIFEST_RUNTIME_OVERLAY_BASE_MISMATCH")
-    if final_overlay["base_runtime_overlay_git_blob_sha"] != git_blob_sha(runtime_bytes):
-        raise AssertionError("ARTIFACT_MANIFEST_FINAL_OVERLAY_BASE_MISMATCH")
-    if oss_admission_overlay["base_final_overlay_git_blob_sha"] != git_blob_sha(final_bytes):
-        raise AssertionError("ARTIFACT_MANIFEST_OSS_ADMISSION_OVERLAY_BASE_MISMATCH")
-    if p1_overlay["base_oss_admission_overlay_git_blob_sha"] != git_blob_sha(
-        oss_admission_bytes
-    ):
-        raise AssertionError("ARTIFACT_MANIFEST_P1_OVERLAY_BASE_MISMATCH")
-    if p1_closure_overlay["base_p1_overlay_git_blob_sha"] != git_blob_sha(
-        p1_bytes
-    ):
-        raise AssertionError("ARTIFACT_MANIFEST_P1_CLOSURE_OVERLAY_BASE_MISMATCH")
-    if p13_overlay["base_p1_closure_overlay_git_blob_sha"] != git_blob_sha(
-        p1_closure_bytes
-    ):
-        raise AssertionError("ARTIFACT_MANIFEST_P13_OVERLAY_BASE_MISMATCH")
-    if p13_merge_gate_overlay["base_p13_overlay_git_blob_sha"] != git_blob_sha(
-        p13_bytes
-    ):
-        raise AssertionError("ARTIFACT_MANIFEST_P13_MERGE_GATE_OVERLAY_BASE_MISMATCH")
-    if p13_closure_overlay["base_p13_merge_gate_overlay_git_blob_sha"] != git_blob_sha(
-        p13_merge_gate_bytes
-    ):
-        raise AssertionError("ARTIFACT_MANIFEST_P13_CLOSURE_OVERLAY_BASE_MISMATCH")
-    if p14_overlay["base_p13_closure_overlay_git_blob_sha"] != git_blob_sha(
-        p13_closure_bytes
-    ):
-        raise AssertionError("ARTIFACT_MANIFEST_P14_OVERLAY_BASE_MISMATCH")
-    if p14_closure_overlay["base_p14_overlay_git_blob_sha"] != git_blob_sha(
-        p14_bytes
-    ):
-        raise AssertionError("ARTIFACT_MANIFEST_P14_CLOSURE_OVERLAY_BASE_MISMATCH")
-    if p15_overlay["base_p14_closure_overlay_git_blob_sha"] != git_blob_sha(
-        p14_closure_bytes
-    ):
-        raise AssertionError("ARTIFACT_MANIFEST_P15_OVERLAY_BASE_MISMATCH")
-    if p15_closure_overlay["base_p15_overlay_git_blob_sha"] != git_blob_sha(
-        p15_bytes
-    ):
-        raise AssertionError("ARTIFACT_MANIFEST_P15_CLOSURE_OVERLAY_BASE_MISMATCH")
-    if recovery_qcp_overlay["base_p15_closure_overlay_git_blob_sha"] != git_blob_sha(
-        p15_closure_bytes
-    ):
-        raise AssertionError("ARTIFACT_MANIFEST_RECOVERY_QCP_OVERLAY_BASE_MISMATCH")
-    if assurance_plan_overlay["base_recovery_qcp_overlay_git_blob_sha"] != git_blob_sha(
-        recovery_qcp_bytes
-    ):
-        raise AssertionError("ARTIFACT_MANIFEST_ASSURANCE_PLAN_OVERLAY_BASE_MISMATCH")
-    if real_data_pilot_overlay["base_assurance_plan_overlay_git_blob_sha"] != git_blob_sha(
-        assurance_plan_bytes
-    ):
-        raise AssertionError("ARTIFACT_MANIFEST_REAL_DATA_PILOT_OVERLAY_BASE_MISMATCH")
-
-    artifacts = {row[0]: row for row in current["artifacts"]}
-    apply_entries(artifacts, overlay)
-    apply_entries(artifacts, runtime_overlay)
-    apply_entries(artifacts, final_overlay)
-    apply_entries(artifacts, oss_admission_overlay)
-    apply_entries(artifacts, p1_overlay)
-    apply_entries(artifacts, p1_closure_overlay)
-    apply_entries(artifacts, p13_overlay)
-    apply_entries(artifacts, p13_merge_gate_overlay)
-    apply_entries(artifacts, p13_closure_overlay)
-    apply_entries(artifacts, p14_overlay)
-    apply_entries(artifacts, p14_closure_overlay)
-    apply_entries(artifacts, p15_overlay)
-    apply_entries(artifacts, p15_closure_overlay)
-    apply_entries(artifacts, recovery_qcp_overlay)
-    apply_entries(artifacts, assurance_plan_overlay)
-    apply_entries(artifacts, real_data_pilot_overlay)
-
-    effective = dict(current)
-    effective["artifacts"] = [artifacts[path] for path in sorted(artifacts)]
-    effective["artifact_count"] = len(effective["artifacts"])
-    return effective
-
-
-def expected_manifest(current: dict) -> dict:
-    artifacts = []
-    for path in tracked_paths():
-        data = (ROOT / path).read_bytes()
-        artifacts.append(
-            [path, hashlib.sha256(data).hexdigest(), len(data)]
-        )
-
-    return {
-        "project": current["project"],
-        "generated_on": "2026-06-27",
-        "package_version": "6",
-        "source_constitution_file": current["source_constitution_file"],
-        "source_constitution_sha256": current["source_constitution_sha256"],
-        "artifact_count": len(artifacts),
-        "artifact_fields": ARTIFACT_FIELDS,
-        "artifacts": artifacts,
-    }
-
-
+ROOT=Path(__file__).resolve().parents[1]
+M=ROOT/"docs/evidence/ARTIFACT_MANIFEST.json"
+O=(("ARTIFACT_MANIFEST_OVERLAY.json","base_manifest_git_blob_sha"),("ARTIFACT_MANIFEST_OVERLAY_B3_RUNTIME.json","base_overlay_git_blob_sha"),("ARTIFACT_MANIFEST_OVERLAY_B3_FINAL.json","base_runtime_overlay_git_blob_sha"),("ARTIFACT_MANIFEST_OVERLAY_OSS_ADMISSION.json","base_final_overlay_git_blob_sha"),("ARTIFACT_MANIFEST_OVERLAY_P1.json","base_oss_admission_overlay_git_blob_sha"),("ARTIFACT_MANIFEST_OVERLAY_P1_CLOSURE.json","base_p1_overlay_git_blob_sha"),("ARTIFACT_MANIFEST_OVERLAY_P13.json","base_p1_closure_overlay_git_blob_sha"),("ARTIFACT_MANIFEST_OVERLAY_P13_MERGE_GATE.json","base_p13_overlay_git_blob_sha"),("ARTIFACT_MANIFEST_OVERLAY_P13_CLOSURE.json","base_p13_merge_gate_overlay_git_blob_sha"),("ARTIFACT_MANIFEST_OVERLAY_P14.json","base_p13_closure_overlay_git_blob_sha"),("ARTIFACT_MANIFEST_OVERLAY_P14_CLOSURE.json","base_p14_overlay_git_blob_sha"),("ARTIFACT_MANIFEST_OVERLAY_P15.json","base_p14_closure_overlay_git_blob_sha"),("ARTIFACT_MANIFEST_OVERLAY_P15_CLOSURE.json","base_p15_overlay_git_blob_sha"),("ARTIFACT_MANIFEST_OVERLAY_RECOVERY_QCP_2026_07_01_R1.json","base_p15_closure_overlay_git_blob_sha"),("ARTIFACT_MANIFEST_OVERLAY_ASSURANCE_PLAN_2026_07_08.json","base_recovery_qcp_overlay_git_blob_sha"),("ARTIFACT_MANIFEST_OVERLAY_REAL_DATA_PILOT_2026_07_08.json","base_assurance_plan_overlay_git_blob_sha"),("ARTIFACT_MANIFEST_OVERLAY_B1B_RESCUE.json","base_real_data_pilot_overlay_git_blob_sha"))
+C={"docs/evidence/ARTIFACT_MANIFEST.json",*("docs/evidence/"+n for n,_ in O)}
+F=["path","sha256","size_bytes"]
+S={"schemas/calculation-profile.schema.json","schemas/configuration-rule.schema.json","schemas/metric-definition.schema.json","schemas/rounding-policy.schema.json","schemas/rule-resolution-result.schema.json","schemas/safe-expression.schema.json"}
+def git_blob_sha(b:bytes)->str:return hashlib.sha1(f"blob {len(b)}\0".encode()+b).hexdigest()
+def tracked_paths()->list[str]:
+ o=subprocess.check_output(["git","ls-files","-z"],cwd=ROOT).decode();return sorted(p for p in o.split("\0") if p and p not in C)
+def apply_entries(a:dict[str,list],x:dict)->None:
+ e=x.get("hash_encoding","sha256-hex")
+ for p,d,z in x["entries"]:
+  if e=="sha256-base64":d=base64.b64decode(d,validate=True).hex()
+  elif e!="sha256-hex":raise AssertionError("ARTIFACT_MANIFEST_HASH_ENCODING_UNSUPPORTED")
+  a[p]=[p,d,z]
+ for p in x.get("remove_paths",[]):a.pop(p,None)
+def load_effective_manifest()->dict:
+ b=M.read_bytes();c=json.loads(b);a={r[0]:r for r in c["artifacts"]};q=b
+ for n,k in O:
+  p=ROOT/"docs/evidence"/n;t=p.read_bytes();x=json.loads(t)
+  if x[k]!=git_blob_sha(q):raise AssertionError("ARTIFACT_MANIFEST_OVERLAY_BASE_MISMATCH:"+n)
+  apply_entries(a,x);q=t
+ c["artifacts"]=[a[p] for p in sorted(a)];c["artifact_count"]=len(a);return c
+def expected_manifest(c:dict)->dict:
+ a=[]
+ for p in tracked_paths():
+  b=(ROOT/p).read_bytes();a.append([p,hashlib.sha256(b).hexdigest(),len(b)])
+ return {"project":c["project"],"generated_on":"2026-06-27","package_version":"6","source_constitution_file":c["source_constitution_file"],"source_constitution_sha256":c["source_constitution_sha256"],"artifact_count":len(a),"artifact_fields":F,"artifacts":a}
 class B1aArtifactManifestTests(unittest.TestCase):
-    def test_manifest_matches_current_tracked_tree(self) -> None:
-        current = load_effective_manifest()
-        self.assertEqual(current, expected_manifest(current))
-
-    def test_manifest_contains_all_b1a_schemas(self) -> None:
-        current = load_effective_manifest()
-        self.assertEqual(current["artifact_fields"], ARTIFACT_FIELDS)
-        paths = {entry[0] for entry in current["artifacts"]}
-        self.assertTrue(B1A_SCHEMAS.issubset(paths), B1A_SCHEMAS - paths)
-
-
-if __name__ == "__main__":
-    unittest.main()
+ def test_manifest_matches_current_tracked_tree(self):
+  c=load_effective_manifest();self.assertEqual(c,expected_manifest(c))
+ def test_manifest_contains_all_b1a_schemas(self):
+  c=load_effective_manifest();self.assertEqual(c["artifact_fields"],F);p={r[0] for r in c["artifacts"]};self.assertTrue(S.issubset(p),S-p)
+if __name__=="__main__":unittest.main()
