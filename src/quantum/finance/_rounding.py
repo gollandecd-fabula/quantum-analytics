@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Iterator, Mapping, Sequence
+from contextlib import contextmanager
 from decimal import Decimal, InvalidOperation, localcontext
 from typing import Any
 
@@ -127,6 +128,33 @@ def validate_rounding_policy(policy: object, *, preview: bool = True) -> dict[st
         ):
             raise FinanceError("ROUNDING_POLICY_MALFORMED")
     return _clone_json(policy)
+
+
+@contextmanager
+def _decimal_context(
+    policy: Mapping[str, Any],
+    *,
+    operation_budget: int,
+) -> Iterator[None]:
+    if (
+        not isinstance(operation_budget, int)
+        or isinstance(operation_budget, bool)
+        or operation_budget < 1
+    ):
+        raise FinanceError("DECIMAL_CONTEXT_BUDGET_INVALID")
+    work_scale = max(
+        policy["max_input_scale"],
+        policy["calculation_scale"],
+        policy["money_scale"],
+        policy["rate_scale"],
+        policy["presentation_scale"],
+    )
+    required_precision = (
+        policy["max_input_precision"] * operation_budget + work_scale + 8
+    )
+    with localcontext() as context:
+        context.prec = max(context.prec, required_precision)
+        yield
 
 
 def _quantize(
