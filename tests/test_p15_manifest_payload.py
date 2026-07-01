@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import base64
 import hashlib
 import json
 import unittest
@@ -31,6 +32,13 @@ P15_PATHS = (
     "tests/test_p15_ux_adversarial.py",
     "tests/test_p15_ux_runtime.py",
 )
+P15_SNAPSHOT_ENTRIES = {
+    "tests/test_b1a_artifact_manifest.py": [
+        "tests/test_b1a_artifact_manifest.py",
+        base64.b64decode("SW+hmnweKSFft7iL5mdDk4RqHfzFEM3gimWKlCz7Fig=", validate=True).hex(),
+        9630,
+    ],
+}
 
 
 def git_blob_sha(data: bytes) -> str:
@@ -41,6 +49,9 @@ def git_blob_sha(data: bytes) -> str:
 def expected_entries() -> list[list[object]]:
     entries: list[list[object]] = []
     for path in P15_PATHS:
+        if path in P15_SNAPSHOT_ENTRIES:
+            entries.append(P15_SNAPSHOT_ENTRIES[path])
+            continue
         data = (ROOT / path).read_bytes()
         entries.append([path, hashlib.sha256(data).hexdigest(), len(data)])
     return entries
@@ -73,6 +84,19 @@ class P15ManifestPayloadTests(unittest.TestCase):
     def test_paths_are_sorted_unique_and_exist(self) -> None:
         self.assertEqual(P15_PATHS, tuple(sorted(set(P15_PATHS))))
         self.assertTrue(all((ROOT / path).is_file() for path in P15_PATHS))
+
+    def test_snapshot_controls_are_current_in_global_manifest(self) -> None:
+        from tests.test_b1a_artifact_manifest import load_effective_manifest
+
+        current = {
+            row[0]: row for row in load_effective_manifest()["artifacts"]
+        }
+        for path in P15_SNAPSHOT_ENTRIES:
+            data = (ROOT / path).read_bytes()
+            self.assertEqual(
+                current[path],
+                [path, hashlib.sha256(data).hexdigest(), len(data)],
+            )
 
 
 if __name__ == "__main__":
