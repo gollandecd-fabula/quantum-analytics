@@ -1,12 +1,12 @@
-execution_state_id: STAGE-B-EXECUTION-STATE-v1
+execution_state_id: STAGE-B-EXECUTION-STATE-v2
 stage_contract_id: STAGE-B-BUILD-v1
-updated_on: 2026-06-30
+updated_on: 2026-07-01
 source_of_truth_for_live_unit_state: true
 macro_stage: B
 status: ACTIVE
-current_unit: P15
-tracking_issue: 29
-working_branch: close-p1-5-post-merge-v1
+current_unit: R3D1
+tracking_issue: 41
+working_branch: r3-real-commercial-data-pilot-v1
 
 units:
   B0:
@@ -106,16 +106,28 @@ units:
   B7:
     state: GATED
     risk: R3
-    approval: NOT_GRANTED_FOR_EXTERNAL_ACCESS
+    approval: NOT_GRANTED_FOR_UNRESTRICTED_EXTERNAL_ACCESS
   B8:
     state: PLANNED
     risk: R2
+
+cross_cutting_units:
+  R3_REAL_DATA_PILOT_ADMISSION:
+    state: AUTHORIZED_PENDING_CONTROLS
+    risk: R3
+    required_for_pilot: true
+    issue: 41
+    decision: docs/decisions/DR-2026-07-01-REAL-COMMERCIAL-DATA-PILOT.md
+    contract: docs/security/REAL_COMMERCIAL_DATA_ADMISSION_CONTRACT_2026_07_08.md
+    allowed_access: CLOSED_INVITE_ONLY
+    raw_data_external_models: PROHIBITED
+    marketplace_mode: READ_ONLY
 
 rules:
   immutable_stage_contract: docs/stage-contracts/STAGE-B-BUILD-v1.md
   live_state_artifact: docs/evidence/STAGE_B_EXECUTION_STATE.yaml
   contract_machine_summary_role: INITIAL_PLAN_SNAPSHOT
   current_state_role: LIVE_EXECUTION_SOURCE
-real_commercial_data: NOT_ADMITTED
+real_commercial_data: REQUIRED_FOR_CLOSED_PILOT_PENDING_ADMISSION_CONTROLS
 marketplace_write_capability: DISABLED
 production_release: BLOCKED

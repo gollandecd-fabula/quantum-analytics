@@ -10,6 +10,8 @@ Universal read-only marketplace analytics platform.
 - Active stage contract: `docs/stage-contracts/STAGE-B-BUILD-v1.md`
 - Assurance execution plan: `docs/governance/ASSURANCE_EXECUTION_PLAN_2026_07_08.md`
 - Machine-readable assurance plan: `docs/governance/ASSURANCE_EXECUTION_PLAN_2026_07_08.yaml`
+- Real-data decision: `docs/decisions/DR-2026-07-01-REAL-COMMERCIAL-DATA-PILOT.md`
+- Real-data admission contract: `docs/security/REAL_COMMERCIAL_DATA_ADMISSION_CONTRACT_2026_07_08.md`
 - Hard pilot target: `2026-07-08`
 - Tracking issue: `#39`
 - Repository: `gollandecd-fabula/quantum-analytics`
@@ -34,6 +36,10 @@ The July 8 pilot plan uses separated responsibilities:
 - independent Release Gatekeeper.
 
 OpenAI is the `PRIMARY_EXECUTOR`; DeepSeek is the `INDEPENDENT_AUDITOR`.
+The closed pilot must process authorized real commercial data. Every dataset remains quarantined until
+the Real Commercial Data Admission Contract passes. Raw commercial data is prohibited in GitHub, CI,
+evidence packages, and external model prompts.
+
 Production release remains blocked unless the separately governed release gates are satisfied.
 
 ## Architecture baseline

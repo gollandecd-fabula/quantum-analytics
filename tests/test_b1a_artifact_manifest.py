@@ -36,6 +36,9 @@ RECOVERY_QCP_OVERLAY_PATH = (
 ASSURANCE_PLAN_OVERLAY_PATH = (
     ROOT / "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_ASSURANCE_PLAN_2026_07_08.json"
 )
+REAL_DATA_PILOT_OVERLAY_PATH = (
+    ROOT / "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_REAL_DATA_PILOT_2026_07_08.json"
+)
 CONTROL_PATHS = {
     "docs/evidence/ARTIFACT_MANIFEST.json",
     "docs/evidence/ARTIFACT_MANIFEST_OVERLAY.json",
@@ -53,6 +56,7 @@ CONTROL_PATHS = {
     "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_P15_CLOSURE.json",
     "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_RECOVERY_QCP_2026_07_01_R1.json",
     "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_ASSURANCE_PLAN_2026_07_08.json",
+    "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_REAL_DATA_PILOT_2026_07_08.json",
 }
 ARTIFACT_FIELDS = ["path", "sha256", "size_bytes"]
 B1A_SCHEMAS = {
@@ -126,6 +130,8 @@ def load_effective_manifest() -> dict:
     recovery_qcp_overlay = json.loads(recovery_qcp_bytes.decode("utf-8"))
     assurance_plan_bytes = ASSURANCE_PLAN_OVERLAY_PATH.read_bytes()
     assurance_plan_overlay = json.loads(assurance_plan_bytes.decode("utf-8"))
+    real_data_pilot_bytes = REAL_DATA_PILOT_OVERLAY_PATH.read_bytes()
+    real_data_pilot_overlay = json.loads(real_data_pilot_bytes.decode("utf-8"))
 
     if overlay["base_manifest_git_blob_sha"] != git_blob_sha(base_bytes):
         raise AssertionError("ARTIFACT_MANIFEST_OVERLAY_BASE_MISMATCH")
@@ -179,6 +185,10 @@ def load_effective_manifest() -> dict:
         recovery_qcp_bytes
     ):
         raise AssertionError("ARTIFACT_MANIFEST_ASSURANCE_PLAN_OVERLAY_BASE_MISMATCH")
+    if real_data_pilot_overlay["base_assurance_plan_overlay_git_blob_sha"] != git_blob_sha(
+        assurance_plan_bytes
+    ):
+        raise AssertionError("ARTIFACT_MANIFEST_REAL_DATA_PILOT_OVERLAY_BASE_MISMATCH")
 
     artifacts = {row[0]: row for row in current["artifacts"]}
     apply_entries(artifacts, overlay)
@@ -196,6 +206,7 @@ def load_effective_manifest() -> dict:
     apply_entries(artifacts, p15_closure_overlay)
     apply_entries(artifacts, recovery_qcp_overlay)
     apply_entries(artifacts, assurance_plan_overlay)
+    apply_entries(artifacts, real_data_pilot_overlay)
 
     effective = dict(current)
     effective["artifacts"] = [artifacts[path] for path in sorted(artifacts)]
