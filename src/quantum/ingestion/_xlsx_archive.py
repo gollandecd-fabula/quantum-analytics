@@ -96,6 +96,37 @@ def _validate_archive(zf: ZipFile, limits: XlsxInspectionLimits) -> dict[str, Zi
         lower = name.casefold()
         if lower.endswith(_BLOCKED_SUFFIXES) or any(marker in lower for marker in _BLOCKED_PATH_MARKERS):
             raise XlsxInspectionError("XLSX_ACTIVE_CONTENT_FORBIDDEN")
+
+    actual_total = 0
+    for info in infos:
+        if info.is_dir():
+            continue
+        actual_size = 0
+        try:
+            with zf.open(info, "r") as stream:
+                while True:
+                    chunk = stream.read(64 * 1024)
+                    if not chunk:
+                        break
+                    actual_size += len(chunk)
+                    actual_total += len(chunk)
+                    if actual_size > limits.max_entry_uncompressed_bytes:
+                        raise XlsxInspectionError("XLSX_ARCHIVE_ENTRY_SIZE_EXCEEDED")
+                    if actual_total > limits.max_total_uncompressed_bytes:
+                        raise XlsxInspectionError("XLSX_ARCHIVE_TOTAL_SIZE_EXCEEDED")
+        except XlsxInspectionError:
+            raise
+        except (
+            BadZipFile,
+            RuntimeError,
+            NotImplementedError,
+            OSError,
+            EOFError,
+            ZlibError,
+        ) as exc:
+            raise XlsxInspectionError("XLSX_ARCHIVE_READ_FAILED") from exc
+        if actual_size != info.file_size:
+            raise XlsxInspectionError("XLSX_ARCHIVE_READ_MISMATCH")
     return normalized
 
 
