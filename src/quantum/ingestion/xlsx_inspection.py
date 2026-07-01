@@ -13,6 +13,7 @@ from ._xlsx_contracts import (
     _canonical_hash,
     normalized_header_sha256,
 )
+from ._xlsx_package_parts import validate_modeled_package_parts
 from ._xlsx_workbook import _workbook_shape
 
 
@@ -30,6 +31,7 @@ class XlsxPackageInspector:
         package_kind, workbook = _extract_workbook(payload, policy.limits)
         if len(workbook) > policy.limits.max_file_bytes:
             raise XlsxInspectionError("XLSX_WORKBOOK_SIZE_EXCEEDED")
+        validate_modeled_package_parts(workbook)
         validate_cell_structures(workbook, policy.limits)
         shape = _workbook_shape(
             workbook,
