@@ -30,6 +30,9 @@ P15_OVERLAY_PATH = ROOT / "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_P15.json"
 P15_CLOSURE_OVERLAY_PATH = (
     ROOT / "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_P15_CLOSURE.json"
 )
+RECOVERY_QCP_OVERLAY_PATH = (
+    ROOT / "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_RECOVERY_QCP_2026_07_01_R1.json"
+)
 CONTROL_PATHS = {
     "docs/evidence/ARTIFACT_MANIFEST.json",
     "docs/evidence/ARTIFACT_MANIFEST_OVERLAY.json",
@@ -45,6 +48,7 @@ CONTROL_PATHS = {
     "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_P14_CLOSURE.json",
     "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_P15.json",
     "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_P15_CLOSURE.json",
+    "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_RECOVERY_QCP_2026_07_01_R1.json",
 }
 ARTIFACT_FIELDS = ["path", "sha256", "size_bytes"]
 B1A_SCHEMAS = {
@@ -112,9 +116,10 @@ def load_effective_manifest() -> dict:
     p14_closure_overlay = json.loads(p14_closure_bytes.decode("utf-8"))
     p15_bytes = P15_OVERLAY_PATH.read_bytes()
     p15_overlay = json.loads(p15_bytes.decode("utf-8"))
-    p15_closure_overlay = json.loads(
-        P15_CLOSURE_OVERLAY_PATH.read_text(encoding="utf-8")
-    )
+    p15_closure_bytes = P15_CLOSURE_OVERLAY_PATH.read_bytes()
+    p15_closure_overlay = json.loads(p15_closure_bytes.decode("utf-8"))
+    recovery_qcp_bytes = RECOVERY_QCP_OVERLAY_PATH.read_bytes()
+    recovery_qcp_overlay = json.loads(recovery_qcp_bytes.decode("utf-8"))
 
     if overlay["base_manifest_git_blob_sha"] != git_blob_sha(base_bytes):
         raise AssertionError("ARTIFACT_MANIFEST_OVERLAY_BASE_MISMATCH")
@@ -135,7 +140,7 @@ def load_effective_manifest() -> dict:
     if p13_overlay["base_p1_closure_overlay_git_blob_sha"] != git_blob_sha(
         p1_closure_bytes
     ):
-        raise AssertionError("ARTIFACT_MANIFEST_P13_OVERLAY_BASE_MISMATCH")
+        raise AssertionError("ARTIFACT_MANIEST_P13_OVERLAY_BASE_MISMATCH")
     if p13_merge_gate_overlay["base_p13_overlay_git_blob_sha"] != git_blob_sha(
         p13_bytes
     ):
@@ -147,7 +152,7 @@ def load_effective_manifest() -> dict:
     if p14_overlay["base_p13_closure_overlay_git_blob_sha"] != git_blob_sha(
         p13_closure_bytes
     ):
-        raise AssertionError("ARTIFACT_MANIFEST_P14_OVERLAY_BASE_MISMATCH")
+        raise AssertionError("ARTIFACT_MANIFEST_P15_OVERLAY_BASE_MISMATCH")
     if p14_closure_overlay["base_p14_overlay_git_blob_sha"] != git_blob_sha(
         p14_bytes
     ):
@@ -160,6 +165,10 @@ def load_effective_manifest() -> dict:
         p15_bytes
     ):
         raise AssertionError("ARTIFACT_MANIFEST_P15_CLOSURE_OVERLAY_BASE_MISMATCH")
+    if recovery_qcp_overlay["base_p15_closure_overlay_git_blob_sha"] != git_blob_sha(
+        p15_closure_bytes
+    ):
+        raise AssertionError("ARTIFACT_MANIFEST_RECOVERY_QCP_OVERLAY_BASE_MISMATCH")
 
     artifacts = {row[0]: row for row in current["artifacts"]}
     apply_entries(artifacts, overlay)
@@ -175,6 +184,7 @@ def load_effective_manifest() -> dict:
     apply_entries(artifacts, p14_closure_overlay)
     apply_entries(artifacts, p15_overlay)
     apply_entries(artifacts, p15_closure_overlay)
+    apply_entries(artifacts, recovery_qcp_overlay)
 
     effective = dict(current)
     effective["artifacts"] = [artifacts[path] for path in sorted(artifacts)]
