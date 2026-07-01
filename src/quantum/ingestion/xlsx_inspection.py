@@ -3,6 +3,7 @@ from __future__ import annotations
 from hashlib import sha256
 
 from ._xlsx_archive import _extract_workbook
+from ._xlsx_cell_structure import validate_cell_structures
 from ._xlsx_contracts import (
     XlsxInspectionError,
     XlsxInspectionLimits,
@@ -29,6 +30,7 @@ class XlsxPackageInspector:
         package_kind, workbook = _extract_workbook(payload, policy.limits)
         if len(workbook) > policy.limits.max_file_bytes:
             raise XlsxInspectionError("XLSX_WORKBOOK_SIZE_EXCEEDED")
+        validate_cell_structures(workbook, policy.limits)
         shape = _workbook_shape(
             workbook,
             policy=policy,
