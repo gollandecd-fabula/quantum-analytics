@@ -1,0 +1,29 @@
+{
+  "base_recovery_qcp_overlay_git_blob_sha": "fd0a94ab809d399cdb896f5c11fcd386058359f2",
+  "entries": [
+    [
+      "docs/governance/ASSURANCE_EXECUTION_PLAN_2026_07_08.md",
+      "ee4115fcb782dc7757289354d87386744b755b3b64c73ec059385d000fd912f6",
+      11548
+    ],
+    [
+      "docs/governance/ASSURANCE_EXECUTION_PLAN_2026_07_08.yaml",
+      "74c62893bab7ab74cb427a6dc66dfb364a5c1b4275f26529eab52369532e79cc",
+      4001
+    ],
+    [
+      "README.md",
+      "c04b64f455c3ad8713fa35b811d8bce7f8659b5f1406f5d767e4e3722239c42f",
+      2503
+    ],
+    [
+      "tests/test_b1a_artifact_manifest.py",
+      "a325ca7cd0a8dfa546b2174c501f174272d2ca53cdc31ff5345185ccbfb6b88c",
+      10853
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 1,
+  "reason": "Add governed Red, Blue, Purple, IV&V, AppSec, Financial QA and Release Audit execution plan for the 2026-07-08 pilot target",
+  "remove_paths": []
+}

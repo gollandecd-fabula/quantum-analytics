@@ -1,0 +1,124 @@
+plan_id: QUANTUM-ASSURANCE-2026-07-08-v1
+status: ACTIVE
+authority:
+  decision_date: 2026-07-01
+  tracking_issue: 39
+target:
+  date: 2026-07-08
+  outcome: PILOT_READY
+  production_release: RELEASE_BLOCKED
+  macro_stage: B
+  macro_stage_c_authorized: false
+scope:
+  pilot_access: INVITE_OR_APPROVED_REQUEST_ONLY
+  account_identity: PSEUDONYMOUS
+  initial_testers_price: FREE
+  personal_data: MINIMIZED
+  marketplace_mode: READ_ONLY
+  real_commercial_data: NOT_ADMITTED_WITHOUT_SEPARATE_GATE
+  marketplace_write_capability: DISABLED
+execution_model:
+  primary_executor: OpenAI
+  independent_auditor: DeepSeek
+  formal_validator: SEPARATE_ACTOR_OR_COMPONENT
+  release_gatekeeper: INDEPENDENT
+  interchange:
+    formats: [STRICT_TYPED_JSON, STRICT_TYPED_YAML]
+    immutable_versions: true
+    content_hashes: required
+teams:
+  development:
+    can_implement: true
+    can_approve_own_r2_plus: false
+    duties: [IMPLEMENT, REMEDIATE, REGRESSION_TEST, EXACT_HEAD_EVIDENCE]
+  red:
+    can_implement_verified_fix: false
+    can_close_own_findings: false
+    duties:
+      - ADVERSARIAL_TESTING
+      - TENANT_ESCAPE
+      - FINANCIAL_TAMPERING
+      - TRACE_REPLAY_AND_FORGERY
+      - FILE_ABUSE
+      - SUPPLY_CHAIN_ATTACKS
+      - WRITE_CAPABILITY_BYPASS
+  blue:
+    can_suppress_confirmed_finding_without_risk_record: false
+    duties:
+      - SECURITY_LOGGING
+      - DETECTION
+      - CONTAINMENT
+      - SESSION_REVOCATION
+      - INCIDENT_RUNBOOK
+      - RECOVERY_SUPPORT
+  purple:
+    approval_authority: false
+    loop: [RED_REPRODUCE, DEVELOPMENT_REMEDIATE, BLUE_DETECT, ASSURANCE_RETEST, GATEKEEPER_DECIDE]
+  independent_assurance:
+    functions:
+      ivv: [TRACEABILITY, INDEPENDENT_REPRODUCTION, REGRESSION, EXACT_HEAD_VERIFICATION]
+      appsec: [THREAT_MODEL, SAST, SECRETS, TENANT_ISOLATION, AUTHN_AUTHZ, FILE_ABUSE, SBOM, OSV]
+      financial_qa: [GOLDEN_ORACLE, DECIMAL, ROUNDING, PROPERTY, DIFFERENTIAL, RECONCILIATION, NO_DOUBLE_COUNT]
+      release_audit: [COMMIT, CI, MANIFEST, THREADS, EVIDENCE, RECOVERY, ROLLBACK, BOUNDARIES]
+    can_approve_own_changes: false
+  formal_validator:
+    modifies_code: false
+    duties: [SCHEMA_VALIDATION, INVARIANT_VALIDATION, MACHINE_EVIDENCE_VALIDATION]
+  release_gatekeeper:
+    modifies_code: false
+    evidence_only: true
+    independent_from: [PROPOSER, IMPLEMENTER, RED_FINDING_AUTHOR, REMEDIATION_AUTHOR]
+severity:
+  P0: IMMEDIATE_BLOCK
+  P1: FIX_AND_INDEPENDENT_RETEST
+  P2: EXPLICIT_LIMITATION_OWNER_CONTROL_EXPIRY
+  P3: TRACEABLE_DEFERRAL
+release_rules:
+  open_p0_allowed: false
+  open_p1_allowed: false
+  critical_high_findings_closed: required
+  qa_minimum_score: 98
+  exact_head_ci_green: required
+  manifest_equality: required
+  unresolved_review_threads: 0
+  severity_reduction_for_deadline: prohibited
+calendar:
+  "2026-07-01": B1B_RECOVERY_SYNC_CI_MANIFEST_FINDINGS
+  "2026-07-02": B1B_MERGE_CANDIDATE_AND_MINIMUM_B2
+  "2026-07-03": B2_CLOSURE_AND_PREVIEW_B6
+  "2026-07-04": INTERNAL_B7_SECURITY_CONTROLS
+  "2026-07-05": RED_TEAM_WAVE_1
+  "2026-07-06": P0_P1_REMEDIATION_PURPLE_REPLAY
+  "2026-07-07": RED_TEAM_WAVE_2_RECOVERY_ROLLBACK_EVIDENCE
+  "2026-07-08": FINAL_IMMUTABLE_AUDIT_AND_VERDICT
+mandatory_evidence:
+  - EXACT_CANDIDATE_COMMIT
+  - EXACT_REVIEWED_HEAD
+  - FOUNDATION_CI
+  - OSS_ADMISSION_OSV_LICENSE_SBOM_PROVENANCE
+  - RED_TEAM_REPORT
+  - BLUE_TEAM_DETECTION_RESPONSE
+  - PURPLE_TEAM_REPLAY
+  - IVV_TRACEABILITY
+  - APPSEC_REPORT
+  - INDEPENDENT_FINANCIAL_ORACLE
+  - RECOVERY_AND_ROLLBACK_PROOF
+  - FORMAL_VALIDATOR_RESULT
+  - RELEASE_GATEKEEPER_VERDICT
+verdicts:
+  - NOT_READY
+  - REMEDIATION_REQUIRED
+  - PILOT_READY_WITH_LIMITATIONS
+  - PILOT_READY
+pilot_ready_exit:
+  zero_open_p0_p1: true
+  qa_score_at_least_98: true
+  financial_oracle_pass: true
+  reconciliation_pass: true
+  actual_scenario_isolation_pass: true
+  tenant_isolation_pass: true
+  write_capability_absent: true
+  production_credentials_absent: true
+  restore_and_rollback_pass: true
+  formal_validator_pass: true
+  gatekeeper_verdict: PILOT_READY
