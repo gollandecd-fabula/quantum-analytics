@@ -1,0 +1,98 @@
+name: Recovery Bundle QCP-2026-07-01-R1
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/recovery-bundle-qcp-2026-07-01-r1.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: recovery-bundle-qcp-2026-07-01-r1
+  cancel-in-progress: false
+
+jobs:
+  export:
+    name: export-and-verify
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    steps:
+      - name: Fetch required refs without checkout action
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_WIP_SHA: b3b33a11f8da671356c9bc6c8073b59819a9654c
+        run: |
+          set -euo pipefail
+          git init .
+          gh auth setup-git
+          git remote add origin "https://github.com/${GITHUB_REPOSITORY}.git"
+          git fetch origin "refs/heads/main:refs/heads/main"
+          git fetch origin "refs/heads/build-b1b-financial-kernel-v1:refs/heads/build-b1b-financial-kernel-v1"
+          test "$(git rev-parse refs/heads/main)" = "${GITHUB_SHA}"
+          test "$(git rev-parse refs/heads/build-b1b-financial-kernel-v1)" = "${EXPECTED_WIP_SHA}"
+
+      - name: Create or verify immutable recovery tag
+        env:
+          TAG_NAME: quantum-recovery-2026-07-01-r1
+          TAG_TARGET: eed62fcc22f624b3632d16db3cf00410d3d4d412
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git cat-file -e "${TAG_TARGET}^{commit}"
+          remote_target="$(git ls-remote --tags origin "refs/tags/${TAG_NAME}^{}" | awk '{print $1}')"
+          if [ -n "${remote_target}" ]; then
+            test "${remote_target}" = "${TAG_TARGET}"
+            git fetch origin "refs/tags/${TAG_NAME}:refs/tags/${TAG_NAME}"
+          else
+            git tag -a "${TAG_NAME}" "${TAG_TARGET}" -m "Quantum recovery checkpoint QCP-2026-07-01-R1"
+            git push origin "refs/tags/${TAG_NAME}"
+          fi
+          test "$(git rev-parse "refs/tags/${TAG_NAME}^{}")" = "${TAG_TARGET}"
+
+      - name: Build and verify multi-ref bundle
+        env:
+          TAG_NAME: quantum-recovery-2026-07-01-r1
+          EXPECTED_WIP_SHA: b3b33a11f8da671356c9bc6c8073b59819a9654c
+          TAG_TARGET: eed62fcc22f624b3632d16db3cf00410d3d4d412
+        run: |
+          set -euo pipefail
+          bundle="quantum-recovery-2026-07-01-r1.bundle"
+          git bundle create "${bundle}" refs/heads/main refs/heads/build-b1b-financial-kernel-v1 "refs/tags/${TAG_NAME}"
+          git bundle verify "${bundle}"
+          git bundle list-heads "${bundle}" | tee RECOVERY_BUNDLE_HEADS.txt
+          sha256sum "${bundle}" | tee "${bundle}.sha256"
+
+          mkdir restored
+          git -C restored init
+          git -C restored fetch "../${bundle}" refs/heads/main:refs/heads/main refs/heads/build-b1b-financial-kernel-v1:refs/heads/build-b1b-financial-kernel-v1 "refs/tags/${TAG_NAME}:refs/tags/${TAG_NAME}"
+          test "$(git -C restored rev-parse refs/heads/build-b1b-financial-kernel-v1)" = "${EXPECTED_WIP_SHA}"
+          test "$(git -C restored rev-parse "refs/tags/${TAG_NAME}^{}")" = "${TAG_TARGET}"
+          git -C restored merge-base --is-ancestor "${TAG_TARGET}" refs/heads/main
+
+          {
+            echo "checkpoint=QCP-2026-07-01-R1"
+            echo "workflow_commit=${GITHUB_SHA}"
+            echo "main=$(git rev-parse refs/heads/main)"
+            echo "wip=$(git rev-parse refs/heads/build-b1b-financial-kernel-v1)"
+            echo "tag=$(git rev-parse "refs/tags/${TAG_NAME}^{}")"
+            echo "bundle_sha256=$(sha256sum "${bundle}" | awk '{print $1}')"
+            echo "bundle_verify=PASS"
+            echo "fresh_restore=PASS"
+          } | tee RECOVERY_BUNDLE_VERIFICATION.txt
+
+      - name: Upload verified recovery bundle
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: quantum-recovery-2026-07-01-r1
+          path: |
+            quantum-recovery-2026-07-01-r1.bundle
+            quantum-recovery-2026-07-01-r1.bundle.sha256
+            RECOVERY_BUNDLE_HEADS.txt
+            RECOVERY_BUNDLE_VERIFICATION.txt
+          if-no-files-found: error
+          retention-days: 90
