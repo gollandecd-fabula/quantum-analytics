@@ -1,0 +1,51 @@
+checkpoint_id: QCP-2026-07-01-R1
+project: Quantum Analytics
+created_at: "2026-07-01T07:15:55+02:00"
+timezone: Europe/Amsterdam
+repository: gollandecd-fabula/quantum-analytics
+checkpoint_class: DUAL_STATE_RECOVERY
+
+stable_state:
+  branch: main
+  exact_commit: d1e8b46c0809476f6faece7b2808e6dd5d1f22c3
+  last_completed_implementation_commit: 8a714e5688f3af5872305f8e1fdbdb4f56ee9d9a
+  status: VERIFIED_STABLE_BASELINE
+  current_project_status: BUILD_P1_5_COMPLETE
+  active_contract: STAGE-B-BUILD-v1
+
+work_in_progress:
+  pull_request: 33
+  branch: build-b1b-financial-kernel-v1
+  exact_head_commit: b3b33a11f8da671356c9bc6c8073b59819a9654c
+  pull_request_merge_ref_commit: 9858df459c4103ae653aa48b8d5fb978f608b48a
+  status: WIP_RECOVERY_ONLY
+  merge_allowed: false
+  latest_foundation_ci_run: 28480911185
+  latest_foundation_ci_conclusion: FAILURE
+  latest_oss_admission_run: 28480911169
+  latest_oss_admission_conclusion: FAILURE
+  confirmed_blocker: ARTIFACT_MANIFEST_HASH_MISMATCH
+
+release_status: RELEASE_BLOCKED
+real_or_anonymized_commercial_data_admitted: false
+marketplace_write_capability: disabled
+production_deployment_authorized: false
+source_authority_activated: false
+active_financial_rules_created: false
+
+source_of_truth_order:
+  - LATEST_EXPLICIT_PROJECT_OWNER_DECISION
+  - IMMUTABLE_STAGE_CONTRACT
+  - PROJECT_RULES_MASTER_YAML
+  - LIVE_EXECUTION_STATE
+  - CURRENT_STATE
+  - UNIT_EVIDENCE
+  - GITHUB_ISSUES_PULL_REQUESTS_AND_REVIEWS
+  - CHAT_HISTORY_SUMMARY
+
+integrity:
+  hash_algorithm: SHA-256
+  manifest: ARTIFACT_MANIFEST.sha256
+  secrets_included: false
+  external_archive_required: true
+  immutable_git_tag_required_after_merge: quantum-recovery-2026-07-01-r1
