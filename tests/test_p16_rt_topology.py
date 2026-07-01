@@ -36,6 +36,40 @@ class P16RedTeamTopologyTests(unittest.TestCase):
             XlsxPackageInspector().inspect(payload=payload, policy=policy())
         self.assertEqual(error.exception.code, "XLSX_XML_ENCODING_UNSUPPORTED")
 
+    def test_orphan_worksheet_part_is_rejected(self):
+        secret = b'''<?xml version="1.0" encoding="UTF-8"?>
+<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+<sheetData><row r="1"><c r="A1" t="inlineStr"><is><t>customer phone</t></is></c></row></sheetData>
+</worksheet>'''
+        payload = build_xlsx(
+            extra_entries={"xl/worksheets/secret.xml": secret},
+        )
+        with self.assertRaises(XlsxInspectionError) as error:
+            XlsxPackageInspector().inspect(payload=payload, policy=policy())
+        self.assertEqual(error.exception.code, "XLSX_WORKSHEET_TOPOLOGY_INVALID")
+
+    def test_referenced_extra_sheet_content_is_unmatched(self):
+        result = XlsxPackageInspector().inspect(
+            payload=build_xlsx(extra_sheet=True),
+            policy=policy(),
+        )
+        self.assertFalse(result.matched)
+        self.assertIn("XLSX_UNMODELED_WORKSHEET_CONTENT", result.diagnostics)
+
+    def test_populated_cell_beyond_schema_width_is_unmatched(self):
+        payload = rewrite_xlsx_part(
+            build_xlsx(),
+            "xl/worksheets/sheet1.xml",
+            lambda value: value.replace(
+                b"</row></sheetData>",
+                b'<c r="D2" t="inlineStr"><is><t>hidden</t></is></c></row></sheetData>',
+                1,
+            ),
+        )
+        result = XlsxPackageInspector().inspect(payload=payload, policy=policy())
+        self.assertFalse(result.matched)
+        self.assertIn("XLSX_DATA_COLUMN_COUNT_EXCEEDED", result.diagnostics)
+
 
 if __name__ == "__main__":
     unittest.main()
