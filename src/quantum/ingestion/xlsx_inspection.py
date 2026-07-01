@@ -13,6 +13,8 @@ from ._xlsx_contracts import (
     normalized_header_sha256,
 )
 from ._xlsx_workbook import _workbook_shape
+
+
 class XlsxPackageInspector:
     def inspect(
         self,
@@ -27,11 +29,19 @@ class XlsxPackageInspector:
         package_kind, workbook = _extract_workbook(payload, policy.limits)
         if len(workbook) > policy.limits.max_file_bytes:
             raise XlsxInspectionError("XLSX_WORKBOOK_SIZE_EXCEEDED")
-        shape = _workbook_shape(workbook, policy=policy, package_kind=package_kind)
+        shape = _workbook_shape(
+            workbook,
+            policy=policy,
+            package_kind=package_kind,
+        )
 
-        matched: XlsxSchemaExpectation | None = None
+        matches: list[XlsxSchemaExpectation] = []
         mismatch_codes: set[str] = set()
-        candidates = [schema for schema in policy.schemas if schema.package_kind == package_kind]
+        candidates = [
+            schema
+            for schema in policy.schemas
+            if schema.package_kind == package_kind
+        ]
         if not candidates:
             mismatch_codes.add("XLSX_PACKAGE_KIND_UNREGISTERED")
         for schema in candidates:
@@ -46,18 +56,28 @@ class XlsxPackageInspector:
                 local.add("XLSX_HEADER_HASH_MISMATCH")
             if shape.column_count != schema.column_count:
                 local.add("XLSX_COLUMN_COUNT_MISMATCH")
-            if not schema.min_data_rows <= shape.data_row_count <= schema.max_data_rows:
+            if not (
+                schema.min_data_rows
+                <= shape.data_row_count
+                <= schema.max_data_rows
+            ):
                 local.add("XLSX_ROW_COUNT_OUT_OF_RANGE")
             if shape.formula_count > schema.max_formula_count:
                 local.add("XLSX_FORMULA_COUNT_EXCEEDED")
-            if not local:
-                matched = schema
-                break
-            mismatch_codes.update(local)
+            if local:
+                mismatch_codes.update(local)
+            else:
+                matches.append(schema)
+
+        matched: XlsxSchemaExpectation | None = None
+        if len(matches) == 1:
+            matched = matches[0]
+        elif len(matches) > 1:
+            mismatch_codes.add("XLSX_SCHEMA_MATCH_AMBIGUOUS")
         if shape.prohibited_header_count:
             mismatch_codes.add("XLSX_DIRECT_IDENTIFIER_HEADER_PRESENT")
             matched = None
-        if matched is None:
+        if matched is None and not matches:
             mismatch_codes.add("XLSX_SCHEMA_UNKNOWN")
 
         structural = {
