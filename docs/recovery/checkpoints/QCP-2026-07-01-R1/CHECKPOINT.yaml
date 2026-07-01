@@ -48,4 +48,10 @@ integrity:
   manifest: ARTIFACT_MANIFEST.sha256
   secrets_included: false
   external_archive_required: true
+  external_archive_format: git-bundle
+  external_archive_required_refs:
+    - main
+    - build-b1b-financial-kernel-v1
+    - quantum-recovery-2026-07-01-r1
+  release_source_archive_is_supplemental_only: true
   immutable_git_tag_required_after_merge: quantum-recovery-2026-07-01-r1
