@@ -122,7 +122,16 @@ class _AdmissionRegistryBase:
             declaration.uploader_account_id.encode("utf-8"),
         ):
             raise AdmissionError("DATASET_UPLOADER_SCOPE_MISMATCH")
-        key = (tenant.tenant_id, declaration.dataset_id)
+        normalized_dataset_id = _uuid(
+            declaration.dataset_id,
+            "DATASET_ID_INVALID",
+        )
+        if declaration.dataset_id != normalized_dataset_id:
+            declaration = replace(
+                declaration,
+                dataset_id=normalized_dataset_id,
+            )
+        key = (tenant.tenant_id, normalized_dataset_id)
         with self._lock:
             existing = self._records.get(key)
             if existing is not None:
