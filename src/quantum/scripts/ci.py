@@ -42,6 +42,11 @@ def _emit_test_output(result: subprocess.CompletedProcess[str]) -> None:
         print(output, end="")
         return
     lines = output.splitlines()
+    diagnostics = [line for line in lines if line.startswith("MANIFEST_DIFF=")]
+    if diagnostics:
+        print("UNITTEST_DIAGNOSTICS_BEGIN")
+        print("\n".join(diagnostics))
+        print("UNITTEST_DIAGNOSTICS_END")
     print("UNITTEST_FAILURE_TAIL_BEGIN")
     print("\n".join(lines[-24:]))
     print("UNITTEST_FAILURE_TAIL_END")
