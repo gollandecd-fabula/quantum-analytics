@@ -25,13 +25,19 @@ The WIP state is not a release candidate and must never be treated as a verified
 
 A valid restore reproduces the exact Git commits, checkpoint hashes, stage gates, security exclusions, and open blockers recorded here. Chat history alone is not a sufficient recovery source.
 
+A GitHub Release source archive or `git archive` of one commit is supplemental only. It does not preserve the unmerged PR #33 WIP ref and therefore is not a valid dual-state disaster-recovery backup.
+
 ## Required post-merge completion
 
-After this documentation-only checkpoint passes exact-head CI and independent review:
+After this checkpoint passes exact-head CI and independent review:
 
 1. merge it into `main`;
 2. create immutable tag `quantum-recovery-2026-07-01-r1` on the merge commit;
-3. create a GitHub Release with the same name;
-4. export a repository bundle or archive;
-5. store the encrypted archive and separately stored SHA-256 outside GitHub;
-6. perform a fresh-clone recovery drill and update the verification report.
+3. create a Git bundle that explicitly contains:
+   - `refs/heads/main`;
+   - `refs/heads/build-b1b-financial-kernel-v1` at `b3b33a11f8da671356c9bc6c8073b59819a9654c`;
+   - `refs/tags/quantum-recovery-2026-07-01-r1`;
+4. verify the bundle and record its advertised refs;
+5. optionally create a matching GitHub Release, but never use its source archive as the sole backup;
+6. store the encrypted bundle and a separately stored SHA-256 outside GitHub;
+7. perform an isolated clone from the bundle, verify both stable and WIP commits, and update the verification report.
