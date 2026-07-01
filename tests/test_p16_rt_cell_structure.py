@@ -49,6 +49,21 @@ class P16RedTeamCellStructureTests(unittest.TestCase):
         )
         self._assert_structure_rejected(payload)
 
+    def test_cell_outside_sheet_data_is_rejected(self):
+        payload = rewrite_xlsx_part(
+            build_xlsx(),
+            "xl/worksheets/sheet1.xml",
+            lambda value: value.replace(
+                b"</sheetData>",
+                b'</sheetData><c r="D2" t="inlineStr">'
+                b"<is><t>customer phone</t></is></c>",
+                1,
+            ),
+        )
+        with self.assertRaises(XlsxInspectionError) as error:
+            XlsxPackageInspector().inspect(payload=payload, policy=policy())
+        self.assertEqual(error.exception.code, "XLSX_CELL_OUTSIDE_SHEET_DATA")
+
 
 if __name__ == "__main__":
     unittest.main()
