@@ -1,7 +1,7 @@
 import unittest
 from copy import deepcopy
-from quantum.finance import FinanceError,calculate
-from tests.test_b1b_rescue_smoke import policy,typed
+from quantum.finance import FinanceError,calculate,canonical_hash,evaluate_resolved_rule,resolve_rule
+from tests.test_b1b_rescue_smoke import context,money_rule,policy,typed
 
 def request():
  z=typed("VALID","0","MONEY","MONEY","RUB")
@@ -27,3 +27,9 @@ class B1bInputBoundaryTests(unittest.TestCase):
   r=request();r["mode"]="SCENARIO"
   with self.assertRaises(FinanceError) as e:calculate(r)
   self.assertEqual(e.exception.code,"PROFILE_MODE_CONTAMINATION")
+ def test_changed_ruleset_rejects_replay(self):
+  rule=money_rule();resolution=resolve_rule([rule],context());changed=deepcopy(rule)
+  changed["priority"]=2
+  changed["content_hash"]=canonical_hash(changed,exclude=frozenset({"content_hash"}))
+  with self.assertRaises(FinanceError) as e:evaluate_resolved_rule(resolution,[changed],{},policy())
+  self.assertEqual(e.exception.code,"RULE_RESOLUTION_REPLAY_MISMATCH")
