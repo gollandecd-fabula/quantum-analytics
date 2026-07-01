@@ -3,8 +3,8 @@
   "entries": [
     [
       "docs/recovery/checkpoints/QCP-2026-07-01-R1/ARTIFACT_MANIFEST.sha256",
-      "HWMj5rBELjXBNCLzIJLjQbWMPUPrTjfF0Z6NoX2xCrI=",
-      1243
+      "6Jg8JWiOdNQBIee6dQz3AFaNBdJ1yyILAtywuv0B70c=",
+      1333
     ],
     [
       "docs/recovery/checkpoints/QCP-2026-07-01-R1/CHECKPOINT.yaml",
@@ -13,8 +13,8 @@
     ],
     [
       "docs/recovery/checkpoints/QCP-2026-07-01-R1/CI_AND_REVIEW_EVIDENCE.md",
-      "/e00xD3hZqFcp987JOgWxy36yWj9AF9XltMAMTXQkmo=",
-      699
+      "bkCrzU5uWyrW+6+qb/IRK9p07x2euX701MNhO7nFDrE=",
+      1280
     ],
     [
       "docs/recovery/checkpoints/QCP-2026-07-01-R1/DECISIONS_LOG.md",
@@ -42,6 +42,11 @@
       1306
     ],
     [
+      "docs/recovery/checkpoints/QCP-2026-07-01-R1/POST_MERGE_CLOSURE.yaml",
+      "wRnmChqfMxi3sj1LJjgmlj5BtoA3xZ0FL1zib+wvXmI=",
+      1124
+    ],
+    [
       "docs/recovery/checkpoints/QCP-2026-07-01-R1/PROJECT_RULES_MASTER.md",
       "A8VXxD0H69Q9wNd0/RCAZyuuwdwvslH1S+OVGBVRoJU=",
       6763
@@ -63,8 +68,8 @@
     ],
     [
       "docs/recovery/checkpoints/QCP-2026-07-01-R1/RECOVERY_VERIFICATION_REPORT.md",
-      "80jTQ97imsqbEh1D9L+j6tX7iDxiWmNho0qzrYrMD8c=",
-      567
+      "cSLYQX8sksIC4oFT2tcSBe/R07+f/fISQnsVXv0TGeM=",
+      1645
     ],
     [
       "docs/recovery/checkpoints/QCP-2026-07-01-R1/REPOSITORY_MAP.md",
@@ -88,7 +93,7 @@
     ]
   ],
   "hash_encoding": "sha256-base64",
-  "overlay_version": 2,
-  "reason": "QCP-2026-07-01-R1 recovery checkpoint admission and review remediation",
+  "overlay_version": 3,
+  "reason": "QCP-2026-07-01-R1 post-merge closure evidence",
   "remove_paths": []
 }
