@@ -13,6 +13,7 @@ from ._admission_contracts import (
     StorageControlEvidence,
     _aware_utc,
     _safe_identifier,
+    _uuid,
 )
 
 
@@ -46,14 +47,26 @@ class _AdmissionDecisionMixin:
             self._require_monotonic_time(record, current)
             if record.state is not DatasetAdmissionState.VALIDATED:
                 raise AdmissionError("DATASET_NOT_VALIDATED")
-            if dataset_control_evidence.dataset_id != record.declaration.dataset_id:
+            if (
+                _uuid(
+                    dataset_control_evidence.dataset_id,
+                    "DATASET_EVIDENCE_DATASET_INVALID",
+                )
+                != record.declaration.dataset_id
+            ):
                 raise AdmissionError("DATASET_EVIDENCE_DATASET_MISMATCH")
             if (
                 dataset_control_evidence.original_file_sha256
                 != record.declaration.original_file_sha256
             ):
                 raise AdmissionError("DATASET_EVIDENCE_FILE_MISMATCH")
-            if storage_evidence.dataset_id != record.declaration.dataset_id:
+            if (
+                _uuid(
+                    storage_evidence.dataset_id,
+                    "STORAGE_EVIDENCE_DATASET_INVALID",
+                )
+                != record.declaration.dataset_id
+            ):
                 raise AdmissionError("STORAGE_EVIDENCE_DATASET_MISMATCH")
             if storage_evidence.original_file_sha256 != record.declaration.original_file_sha256:
                 raise AdmissionError("STORAGE_EVIDENCE_FILE_MISMATCH")
