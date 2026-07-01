@@ -1,0 +1,61 @@
+snapshot_id: QCP-2026-07-01-R1-WIP
+captured_at: "2026-07-01T07:15:55+02:00"
+pull_request: 33
+title: "[BUILD][B1b][R3] Add synthetic-only Decimal financial kernel and Golden Oracle gate"
+state: OPEN
+merged: false
+mergeable_snapshot: true
+base_branch: main
+base_sha: d1e8b46c0809476f6faece7b2808e6dd5d1f22c3
+head_branch: build-b1b-financial-kernel-v1
+head_sha: b3b33a11f8da671356c9bc6c8073b59819a9654c
+pull_request_merge_ref_sha: 9858df459c4103ae653aa48b8d5fb978f608b48a
+changed_files: 40
+commits: 136
+status: WIP_RECOVERY_ONLY
+merge_allowed: false
+release_status: RELEASE_BLOCKED
+
+manifest:
+  path: docs/evidence/ARTIFACT_MANIFEST_OVERLAY_B1B.json
+  overlay_version: 26
+  manifest_blob_sha: 5fb7200e052cdc9c21c2ccc4a332019d0870734d
+
+latest_ci:
+  foundation:
+    run_id: 28480911185
+    job_id: 84416836576
+    conclusion: FAILURE
+  oss_admission:
+    run_id: 28480911169
+    job_id: 84416836267
+    conclusion: FAILURE
+    registry_and_osv_step: SKIPPED
+
+confirmed_failure:
+  type: ARTIFACT_MANIFEST_HASH_MISMATCH
+  failing_checks:
+    - tests.test_a0_manifest_diagnostic.ManifestDiagnosticTests.test_manifest_diff_is_empty
+    - tests.test_b1a_artifact_manifest.B1aArtifactManifestTests.test_manifest_matches_current_tracked_tree
+  mismatches:
+    - path: src/quantum/finance/_common.py
+      manifest_sha256: a9324e0257565491a40dd68761e13d1d4cd0dccb56a4205ea8f9ab6c19edc7a0
+      tracked_sha256: a9324e02c9e1801c23035223d4c51e39427d9a20a4c706d3da73e7a97c49e6c7
+      size_bytes: 10032
+    - path: src/quantum/finance/_rules_hardening.py
+      manifest_sha256: d66d40ed37516f3286663ae6267af59907491f02ae1f3c9b62be4a98fbebd60d
+      tracked_sha256: d66d40ed0718ba52aae67b28715010b695f06a17ca7de73e0dddfca9a08b65aa
+      size_bytes: 12158
+
+stale_evidence:
+  execution_state_verified_head: e6393a808574da415e8e6caf9d24d9d61127ed8e
+  execution_state_targeted_test_methods: 67
+  reason: execution-state file predates current head and manifest overlay v26
+
+hard_boundaries:
+  synthetic_only: true
+  active_rules_created: false
+  source_authority_activated: false
+  real_or_anonymized_commercial_data_admitted: false
+  marketplace_write_capability: false
+  deployment_or_external_access: false
