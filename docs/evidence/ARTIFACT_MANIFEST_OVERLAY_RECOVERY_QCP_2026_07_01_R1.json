@@ -2,11 +2,6 @@
   "base_p15_closure_overlay_git_blob_sha": "33c32292050762759aeb89c647bf91f2072b8493",
   "entries": [
     [
-      ".github/workflows/recovery-bundle-qcp-2026-07-01-r1.yml",
-      "WW7xTTE6VZHsIq5+HfM6185u7SGkOUixTjC4M4Hu1/A=",
-      4865
-    ],
-    [
       "docs/recovery/checkpoints/QCP-2026-07-01-R1/ARTIFACT_MANIFEST.sha256",
       "6Jg8JWiOdNQBIee6dQz3AFaNBdJ1yyILAtywuv0B70c=",
       1333
@@ -48,8 +43,8 @@
     ],
     [
       "docs/recovery/checkpoints/QCP-2026-07-01-R1/POST_MERGE_CLOSURE.yaml",
-      "wRnmChqfMxi3sj1LJjgmlj5BtoA3xZ0FL1zib+wvXmI=",
-      1124
+      "eEThNH1V7yUtq+0pMZ7qql4HezOpMbFjyTRfiBSNHaA=",
+      2632
     ],
     [
       "docs/recovery/checkpoints/QCP-2026-07-01-R1/PROJECT_RULES_MASTER.md",
@@ -73,8 +68,8 @@
     ],
     [
       "docs/recovery/checkpoints/QCP-2026-07-01-R1/RECOVERY_VERIFICATION_REPORT.md",
-      "cSLYQX8sksIC4oFT2tcSBe/R07+f/fISQnsVXv0TGeM=",
-      1645
+      "O/3xx+Z2IU6jge1/KeoxHI+4noQaqNgw1faNTus4KNk=",
+      2820
     ],
     [
       "docs/recovery/checkpoints/QCP-2026-07-01-R1/REPOSITORY_MAP.md",
@@ -98,7 +93,7 @@
     ]
   ],
   "hash_encoding": "sha256-base64",
-  "overlay_version": 5,
-  "reason": "QCP-2026-07-01-R1 verifiable pull-request export workflow",
+  "overlay_version": 6,
+  "reason": "QCP-2026-07-01-R1 external recovery closure and one-shot workflow cleanup",
   "remove_paths": []
 }
