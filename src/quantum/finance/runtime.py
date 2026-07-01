@@ -5,11 +5,18 @@ from typing import Any
 from ._calculation_core import calculate_units_and_product_cost
 from ._calculation_expenses import calculate_other_expense
 from ._calculation_profit import calculate_settlement_tax_profit
-from ._common import FinanceError,KERNEL_SCHEMA_VERSION,PUBLICATION_STATE,_CURRENCY_RE,_MAX_EXPRESSION_NODES,_is_nonempty_string,_parse_rfc3339,_value_from_dict,canonical_hash
+from ._common import FinanceError,KERNEL_SCHEMA_VERSION,PUBLICATION_STATE,_CURRENCY_RE,_MAX_EXPRESSION_NODES,_MAX_OTHER_EXPENSE_COMPONENTS,_is_nonempty_string,_parse_rfc3339,_value_from_dict,canonical_hash
 from ._expression import evaluate_expression as _evaluate_expression
 from ._metrics import _metric,_validate_ref
 from ._rounding import _decimal_context,_normalize_value,validate_rounding_policy
 from ._rules_hardening import evaluate_resolved_rule,resolve_rule
+
+_KERNEL_INPUT_NAMES=frozenset({
+ "gross_sales_units","returned_units","gross_sales_amount","discounts_amount",
+ "subsidies_amount","marketplace_commission_amount","forward_logistics_amount",
+ "reverse_logistics_amount","storage_amount","advertising_amount",
+ "fines_withholdings_amount",
+})
 
 
 def evaluate_expression(
@@ -42,13 +49,20 @@ def calculate(request:Mapping[str,Any])->dict[str,Any]:
     currency=request["currency"]
     if not isinstance(currency,str) or _CURRENCY_RE.fullmatch(currency) is None: raise FinanceError("KERNEL_CURRENCY_INVALID")
     raw_inputs=request["inputs"]
-    if not isinstance(raw_inputs,Mapping): raise FinanceError("KERNEL_INPUTS_INVALID")
+    if (
+        not isinstance(raw_inputs,Mapping)
+        or len(raw_inputs)>len(_KERNEL_INPUT_NAMES)
+        or any(not _is_nonempty_string(name) or name not in _KERNEL_INPUT_NAMES for name in raw_inputs)
+    ): raise FinanceError("KERNEL_INPUTS_INVALID")
     raw_expenses=request["other_expense_components"]
-    expense_count=len(raw_expenses) if isinstance(raw_expenses,list) else 1
+    if isinstance(raw_expenses,list):
+        if len(raw_expenses)>_MAX_OTHER_EXPENSE_COMPONENTS: raise FinanceError("OTHER_EXPENSE_COMPONENTS_INVALID")
+        expense_count=len(raw_expenses)
+    else:
+        expense_count=1
     operation_budget=max(2,len(raw_inputs)+expense_count+8)
     with _decimal_context(policy,operation_budget=operation_budget):
-        inputs={name:_normalize_value(_value_from_dict(raw,source_id=name),policy) for name,raw in raw_inputs.items() if _is_nonempty_string(name)}
-        if len(inputs)!=len(raw_inputs): raise FinanceError("KERNEL_INPUTS_INVALID")
+        inputs={name:_normalize_value(_value_from_dict(raw,source_id=name),policy) for name,raw in raw_inputs.items()}
         net_units,product_cost=calculate_units_and_product_cost(inputs,request["cost_per_unit"],policy,currency)
         other_expense=calculate_other_expense(raw_expenses,inputs,net_units,policy,currency)
         income,tax,profit,ppu,profitability=calculate_settlement_tax_profit(inputs,request["tax_rate"],request["tax_base_metric_id"],policy,currency,net_units,product_cost,other_expense)
