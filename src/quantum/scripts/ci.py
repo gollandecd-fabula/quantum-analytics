@@ -36,6 +36,17 @@ def scan_forbidden_markers(root: Path) -> None:
         raise RuntimeError("Forbidden source markers:\n" + "\n".join(violations))
 
 
+def _emit_test_output(result: subprocess.CompletedProcess[str]) -> None:
+    output = (result.stdout or "") + (result.stderr or "")
+    if result.returncode == 0:
+        print(output, end="")
+        return
+    lines = output.splitlines()
+    print("UNITTEST_FAILURE_TAIL_BEGIN")
+    print("\n".join(lines[-120:]))
+    print("UNITTEST_FAILURE_TAIL_END")
+
+
 def main() -> None:
     root = project_root()
     src = root / "src"
@@ -64,7 +75,10 @@ def main() -> None:
         cwd=root,
         env=env,
         check=False,
+        capture_output=True,
+        text=True,
     )
+    _emit_test_output(result)
     raise SystemExit(result.returncode)
 
 
