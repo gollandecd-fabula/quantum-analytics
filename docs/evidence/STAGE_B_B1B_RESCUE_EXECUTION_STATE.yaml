@@ -1,0 +1,43 @@
+execution_state_id: STAGE-B-B1B-RESCUE-CANDIDATE-v3
+stage_contract_id: STAGE-B-BUILD-v1
+unit: B1b
+risk: R3
+updated_on: 2026-07-01
+status: CANDIDATE_MANIFEST_AND_INDEPENDENT_REVIEW_PENDING
+tracking_issue: 43
+pull_request: 45
+working_branch: rescue-b1b-current-main-v3
+frozen_source:
+  pull_request: 33
+  head: b3b33a11f8da671356c9bc6c8073b59819a9654c
+target_base: 12190bbd2b560be2d74ae24e8b54aadc03ad9fbc
+candidate_before_manifest_closure:
+  branch_head: 2a41031d8a5eb26b9d7f8ad0f58073d8fd3ef852
+  synthetic_merge: 3f97904aa2b04d3884fa91d0bb28d331ce858453
+verification:
+  compileall: PASS_FOUNDATION_CI_RUN_28509821131
+  forbidden_marker_scan: PASS_FOUNDATION_CI_RUN_28509821131
+  complete_b1b_rescue_preflight: PASS_FOUNDATION_CI_RUN_28509821131
+  missing_dependency_signature_regression: PASS_INSIDE_B1B_PREFLIGHT
+  independent_synthetic_oracle: PASS_INSIDE_B1B_PREFLIGHT
+  actual_scenario_isolation: PASS_INSIDE_B1B_PREFLIGHT
+  trusted_trace_attack_regressions: PASS_INSIDE_B1B_PREFLIGHT
+  artifact_manifest: PENDING_RESCUE_OVERLAY
+  full_foundation_ci: FAIL_MANIFEST_ONLY_CONFIRMED
+  oss_admission: BLOCKED_BY_FOUNDATION_MANIFEST
+boundaries:
+  publication_state: PREVIEW_ONLY
+  active_rules_created: false
+  source_authority_activated: false
+  marketplace_write_capability: false
+  production_credentials_present: false
+  production_release: BLOCKED
+  raw_commercial_data_in_repository: false
+  real_data_admission_contract_preserved: true
+limitations:
+  - SYNTHETIC_GOLDEN_ORACLE_IS_NOT_REAL_SOURCE_RECONCILIATION
+  - B2_RECONCILIATION_NOT_IMPLEMENTED
+  - PROFITABILITY_DENOMINATOR_NOT_APPROVED
+  - INDEPENDENT_REVIEW_PENDING
+  - FINAL_EXACT_HEAD_CI_PENDING
+release_status: RELEASE_BLOCKED
