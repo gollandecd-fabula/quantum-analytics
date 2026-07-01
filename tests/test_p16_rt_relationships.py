@@ -72,6 +72,37 @@ class P16RedTeamRelationshipTests(unittest.TestCase):
             "XLSX_ROOT_RELATIONSHIP_INVALID",
         )
 
+    def test_root_relationship_id_is_required(self):
+        payload = rewrite_xlsx_part(
+            build_xlsx(),
+            "_rels/.rels",
+            lambda value: value.replace(b' Id="rId1"', b"", 1),
+        )
+        with self.assertRaises(XlsxInspectionError) as error:
+            XlsxPackageInspector().inspect(payload=payload, policy=policy())
+        self.assertEqual(error.exception.code, "XLSX_ROOT_RELATIONSHIP_INVALID")
+
+    def test_root_relationship_ids_must_be_unique(self):
+        payload = rewrite_xlsx_part(
+            build_xlsx(
+                extra_entries={
+                    "docProps/core.xml": b"<coreProperties/>",
+                }
+            ),
+            "_rels/.rels",
+            lambda value: value.replace(
+                b"</Relationships>",
+                b'<Relationship Id="rId1" '
+                b'Type="http://schemas.openxmlformats.org/package/2006/'
+                b'relationships/metadata/core-properties" '
+                b'Target="docProps/core.xml"/></Relationships>',
+                1,
+            ),
+        )
+        with self.assertRaises(XlsxInspectionError) as error:
+            XlsxPackageInspector().inspect(payload=payload, policy=policy())
+        self.assertEqual(error.exception.code, "XLSX_ROOT_RELATIONSHIP_INVALID")
+
 
 if __name__ == "__main__":
     unittest.main()
