@@ -1,16 +1,22 @@
 from collections.abc import Mapping
 from decimal import Decimal
 from typing import Any
-from ._common import _Value,_make_nonvalid,_make_valid,_value_from_dict
+from ._common import FinanceError,_Value,_is_nonempty_string,_make_nonvalid,_make_valid,_value_from_dict
 from ._metrics import _money_sum
 from ._rounding import _normalize_value,_propagate
 
 def calculate_other_expense(raw:object,inputs:Mapping[str,_Value],net:_Value,policy:Mapping[str,Any],currency:str)->_Value:
     if not isinstance(raw,list) or not raw:
         return _make_nonvalid("BLOCKED",value_type="MONEY",unit="MONEY",currency=currency,reason_code="OTHER_EXPENSE_RULE_REQUIRED_MISSING")
-    terms=[]
+    terms=[];seen=set()
     for item in raw:
-        value=_normalize_value(_value_from_dict(item["value"],source_id="other_expense"),policy)
+        if not isinstance(item,Mapping) or set(item)!={"component_id","value"}:
+            raise FinanceError("OTHER_EXPENSE_COMPONENTS_INVALID")
+        component_id=item.get("component_id")
+        if not _is_nonempty_string(component_id) or component_id in seen:
+            raise FinanceError("OTHER_EXPENSE_COMPONENTS_INVALID")
+        seen.add(component_id)
+        value=_normalize_value(_value_from_dict(item["value"],source_id="other_expense:"+str(component_id)),policy)
         if value.value_type!="MONEY" or value.currency!=currency or value.unit not in {"MONEY","MONEY_PER_ITEM"}:
             return _make_nonvalid("BLOCKED",value_type="MONEY",unit="MONEY",currency=currency,reason_code="OTHER_EXPENSE_SIGNATURE_MISMATCH",source_ids=value.source_ids)
         amount=value
