@@ -125,18 +125,16 @@ class XlsxPackageInspectorTests(unittest.TestCase):
             schema_id="wb-weekly-synthetic-duplicate-v1",
             schema_authority_reference="schema-review-duplicate",
         )
-        ambiguous = replace(
-            base,
-            version=base.version + 1,
-            schemas=(base.schemas[0], duplicate, base.schemas[1]),
+        with self.assertRaises(XlsxInspectionError) as error:
+            replace(
+                base,
+                version=base.version + 1,
+                schemas=(base.schemas[0], duplicate, base.schemas[1]),
+            )
+        self.assertEqual(
+            error.exception.code,
+            "XLSX_SCHEMA_PROFILE_AMBIGUOUS",
         )
-        result = XlsxPackageInspector().inspect(
-            payload=build_xlsx(),
-            policy=ambiguous,
-        )
-        self.assertFalse(result.matched)
-        self.assertIsNone(result.matched_schema_id)
-        self.assertIn("XLSX_SCHEMA_MATCH_AMBIGUOUS", result.diagnostics)
 
     def test_compression_ratio_limit_is_enforced(self):
         base = policy()
