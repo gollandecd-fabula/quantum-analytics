@@ -60,7 +60,12 @@ def _validate_root_binding(zf: ZipFile, limits: XlsxInspectionLimits) -> None:
     }
     office_document_count = 0
     auxiliary_targets: set[str] = set()
+    relationship_ids: set[str] = set()
     for relationship in root.findall(f"{{{_RELATIONSHIP_NS}}}Relationship"):
+        relationship_id = relationship.get("Id")
+        if not relationship_id or relationship_id in relationship_ids:
+            raise XlsxInspectionError("XLSX_ROOT_RELATIONSHIP_INVALID")
+        relationship_ids.add(relationship_id)
         target_value = relationship.get("Target") or ""
         _reject_external_target(
             target_value,
