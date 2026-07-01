@@ -1,0 +1,42 @@
+closure_id: QCP-2026-07-01-R1-CLOSURE
+checkpoint_id: QCP-2026-07-01-R1
+created_at: "2026-07-01T08:33:49+02:00"
+status: MERGED_PENDING_EXTERNAL_COMPLETION
+
+implementation:
+  pull_request: 34
+  reviewed_head: dba81778f3c9cc931acf3bfe44a692d8d08213d6
+  merge_commit: eed62fcc22f624b3632d16db3cf00410d3d4d412
+  merged_at: "2026-07-01T06:33:49Z"
+
+verification:
+  foundation_ci:
+    run_id: 28498083253
+    conclusion: SUCCESS
+  oss_admission_ci:
+    run_id: 28498083225
+    conclusion: SUCCESS
+  official_registry_and_osv: PASS
+  repository_manifest_equality: PASS
+  independent_exact_head_review: PASS
+  codex_pr_reaction: "+1"
+  review_findings_received: 3
+  review_findings_remediated: 3
+  unresolved_review_threads: 0
+
+external_completion:
+  immutable_tag:
+    name: quantum-recovery-2026-07-01-r1
+    status: PENDING
+  git_bundle:
+    status: PENDING_EXTERNAL
+    required_refs:
+      - refs/heads/main
+      - refs/heads/build-b1b-financial-kernel-v1
+      - refs/tags/quantum-recovery-2026-07-01-r1
+  fresh_restore_drill:
+    status: PENDING
+  github_release:
+    status: OPTIONAL_PENDING
+
+release_status: RELEASE_BLOCKED
