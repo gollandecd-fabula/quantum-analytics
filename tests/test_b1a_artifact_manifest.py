@@ -140,7 +140,7 @@ def load_effective_manifest() -> dict:
     if p13_overlay["base_p1_closure_overlay_git_blob_sha"] != git_blob_sha(
         p1_closure_bytes
     ):
-        raise AssertionError("ARTIFACT_MANIEST_P13_OVERLAY_BASE_MISMATCH")
+        raise AssertionError("ARTIFACT_MANIFEST_P13_OVERLAY_BASE_MISMATCH")
     if p13_merge_gate_overlay["base_p13_overlay_git_blob_sha"] != git_blob_sha(
         p13_bytes
     ):
@@ -152,7 +152,7 @@ def load_effective_manifest() -> dict:
     if p14_overlay["base_p13_closure_overlay_git_blob_sha"] != git_blob_sha(
         p13_closure_bytes
     ):
-        raise AssertionError("ARTIFACT_MANIFEST_P15_OVERLAY_BASE_MISMATCH")
+        raise AssertionError("ARTIFACT_MANIFEST_P14_OVERLAY_BASE_MISMATCH")
     if p14_closure_overlay["base_p14_overlay_git_blob_sha"] != git_blob_sha(
         p14_bytes
     ):
