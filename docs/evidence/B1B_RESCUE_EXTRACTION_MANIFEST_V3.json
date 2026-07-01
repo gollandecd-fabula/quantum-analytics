@@ -1,0 +1,23 @@
+{
+  "manifest_id": "B1B-RESCUE-EXTRACTION-MANIFEST-v3",
+  "issue": 43,
+  "source_pr": 33,
+  "source_head": "b3b33a11f8da671356c9bc6c8073b59819a9654c",
+  "target_base": "12190bbd2b560be2d74ae24e8b54aadc03ad9fbc",
+  "merge_base": "d1e8b46c0809476f6faece7b2808e6dd5d1f22c3",
+  "status": "EXTRACTION_IN_PROGRESS",
+  "transfer_policy": {
+    "COPY_EXACT": "new B1b-only code, fixtures and independent tests copied by exact Git blob",
+    "THREE_WAY_PORT": "shared schemas and tests receive minimal semantic patches against current main",
+    "RECREATE_ON_TARGET": "execution state, closure evidence and manifest overlay are created only after green gates",
+    "FORBIDDEN": "historical governance, live state, README, assurance plan and old overlays are never copied"
+  },
+  "protected_invariants": [
+    "real commercial data admission remains mandatory",
+    "marketplace mode remains read-only",
+    "marketplace write capability remains disabled",
+    "production release remains blocked",
+    "raw commercial data remains prohibited in GitHub, CI and external model prompts"
+  ],
+  "entries": []
+}
