@@ -7,6 +7,8 @@ from decimal import Decimal
 from ._common import (
     FinanceError,
     _INTEGER_RE,
+    _MAX_DECIMAL_INPUT_PRECISION,
+    _MAX_DECIMAL_INPUT_SCALE,
     _MAX_EXPRESSION_ARGUMENTS,
     _MAX_EXPRESSION_DEPENDENCIES,
     _MAX_EXPRESSION_DEPTH,
@@ -83,8 +85,19 @@ def validate_expression_ast(
             elif value_type == "INTEGER":
                 if not isinstance(raw, str) or _INTEGER_RE.fullmatch(raw) is None:
                     raise FinanceError("EXPRESSION_TYPE_MISMATCH")
+                _parse_decimal(
+                    raw,
+                    code="EXPRESSION_TYPE_MISMATCH",
+                    max_precision=_MAX_DECIMAL_INPUT_PRECISION,
+                    max_scale=0,
+                )
             else:
-                _parse_decimal(raw, code="EXPRESSION_NON_FINITE_LITERAL")
+                _parse_decimal(
+                    raw,
+                    code="EXPRESSION_NON_FINITE_LITERAL",
+                    max_precision=_MAX_DECIMAL_INPUT_PRECISION,
+                    max_scale=_MAX_DECIMAL_INPUT_SCALE,
+                )
             return _dummy_value(value_type, unit, currency)
 
         if kind == "VARIABLE":
