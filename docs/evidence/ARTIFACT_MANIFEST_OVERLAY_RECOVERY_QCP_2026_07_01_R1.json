@@ -80,6 +80,11 @@
       "tests/test_b1a_artifact_manifest.py",
       "bxiHV75qVrBIdmVdN/EiohecJljEyKbnjIXwOUA/T0E=",
       10248
+    ],
+    [
+      "tests/test_p15_manifest_payload.py",
+      "Rb1EIPAHb7K4eoMyApGryuQqtxDvH4FfhyAU5OWdHnI=",
+      3631
     ]
   ],
   "hash_encoding": "sha256-base64",
