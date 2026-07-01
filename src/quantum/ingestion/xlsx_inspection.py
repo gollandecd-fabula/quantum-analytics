@@ -56,6 +56,10 @@ class XlsxPackageInspector:
                 local.add("XLSX_HEADER_HASH_MISMATCH")
             if shape.column_count != schema.column_count:
                 local.add("XLSX_COLUMN_COUNT_MISMATCH")
+            if shape.max_used_column > schema.column_count:
+                local.add("XLSX_DATA_COLUMN_COUNT_EXCEEDED")
+            if shape.unmodeled_worksheet_count:
+                local.add("XLSX_UNMODELED_WORKSHEET_CONTENT")
             if not (
                 schema.min_data_rows
                 <= shape.data_row_count
@@ -87,6 +91,8 @@ class XlsxPackageInspector:
             "header_row_index": shape.header_row_index,
             "header_sha256": shape.header_sha256,
             "column_count": shape.column_count,
+            "max_used_column": shape.max_used_column,
+            "unmodeled_worksheet_count": shape.unmodeled_worksheet_count,
             "data_row_count": shape.data_row_count,
             "formula_count": shape.formula_count,
             "prohibited_header_count": shape.prohibited_header_count,
