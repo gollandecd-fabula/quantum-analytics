@@ -69,6 +69,8 @@ def _parse_worksheet(
     rows = sheet_data.findall(f"{{{_SPREADSHEET_NS}}}row")
     if len(sheet_data.findall(f".//{{{_SPREADSHEET_NS}}}row")) != len(rows):
         raise XlsxInspectionError("XLSX_ROW_STRUCTURE_INVALID")
+    if len(sheet_root.findall(f".//{{{_SPREADSHEET_NS}}}row")) != len(rows):
+        raise XlsxInspectionError("XLSX_ROW_OUTSIDE_SHEET_DATA")
     if len(rows) > limits.max_rows:
         raise XlsxInspectionError("XLSX_ROW_LIMIT_EXCEEDED")
     direct_cell_count = sum(
@@ -76,6 +78,8 @@ def _parse_worksheet(
     )
     if len(sheet_data.findall(f".//{{{_SPREADSHEET_NS}}}c")) != direct_cell_count:
         raise XlsxInspectionError("XLSX_CELL_OUTSIDE_ROW")
+    if len(sheet_root.findall(f".//{{{_SPREADSHEET_NS}}}c")) != direct_cell_count:
+        raise XlsxInspectionError("XLSX_CELL_OUTSIDE_SHEET_DATA")
 
     parsed_rows: dict[int, dict[int, str]] = {}
     nonempty_rows: set[int] = set()
