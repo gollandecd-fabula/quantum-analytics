@@ -1,3 +1,4 @@
+import unittest
 from copy import deepcopy
 from quantum.finance import calculate,canonical_hash,evaluate_resolved_rule,resolve_rule
 from quantum.finance.oracle import reference_calculate
@@ -23,22 +24,26 @@ def context():
     return {"organization_id":"org-1","mode":"ACTUAL","scenario_id":None,"calculation_instant":"2026-07-01T00:00:00Z","marketplace_account_id":None,"marketplace":None,"product_id":None,"product_group_id":None,"calculation_profile_id":"profile-1","resolved_at":"2026-07-01T00:00:00Z","actor":"pilot"}
 
 
-def test_missing_dependency_preserves_selected_rule_signature():
-    rule=money_rule(); resolution=resolve_rule([rule],context())
-    result=evaluate_resolved_rule(resolution,[rule],{},policy())
-    assert result["state"]=="UNAVAILABLE"
-    assert (result["value_type"],result["unit"],result["currency"])==("MONEY","MONEY","RUB")
-    assert resolution["trace_id"] in result["source_ids"]
-    assert rule["content_hash"] in result["source_ids"]
+class B1bRescueSmokeTests(unittest.TestCase):
+    def test_missing_dependency_preserves_selected_rule_signature(self):
+        rule=money_rule(); resolution=resolve_rule([rule],context())
+        result=evaluate_resolved_rule(resolution,[rule],{},policy())
+        self.assertEqual(result["state"],"UNAVAILABLE")
+        self.assertEqual((result["value_type"],result["unit"],result["currency"]),("MONEY","MONEY","RUB"))
+        self.assertIn(resolution["trace_id"],result["source_ids"])
+        self.assertIn(rule["content_hash"],result["source_ids"])
+
+    def test_kernel_matches_independent_oracle(self):
+        p=policy(); zero=typed("VALID","0","MONEY","MONEY","RUB")
+        inputs={"gross_sales_units":typed("VALID","10","INTEGER","ITEM"),"returned_units":typed("VALID","2","INTEGER","ITEM"),"gross_sales_amount":typed("VALID","10000","MONEY","MONEY","RUB"),"discounts_amount":deepcopy(zero),"subsidies_amount":deepcopy(zero),"marketplace_commission_amount":typed("VALID","1000","MONEY","MONEY","RUB"),"forward_logistics_amount":typed("VALID","500","MONEY","MONEY","RUB"),"reverse_logistics_amount":typed("VALID","100","MONEY","MONEY","RUB"),"storage_amount":typed("VALID","100","MONEY","MONEY","RUB"),"advertising_amount":typed("VALID","200","MONEY","MONEY","RUB"),"fines_withholdings_amount":deepcopy(zero)}
+        request={"calculation_id":"calc-1","organization_id":"org-1","mode":"ACTUAL","scenario_id":None,"calculated_at":"2026-07-01T00:00:00Z","profile_ref":{"id":"profile-1","version":1,"content_hash":"0"*64},"profile_status":"PILOT","rounding_policy":p,"currency":"RUB","inputs":inputs,"cost_per_unit":typed("VALID","400","MONEY","MONEY_PER_ITEM","RUB"),"other_expense_components":[{"component_id":"other-per-unit","value":typed("VALID","40","MONEY","MONEY_PER_ITEM","RUB")}],"tax_rate":typed("VALID","0.06","RATE","RATE"),"tax_base_metric_id":"gross_sales_amount"}
+        actual=calculate(request)["results"]
+        case={"money_scale":2,"rounding_mode":"HALF_EVEN","inputs":{"gross_sales_amount":"10000","discounts_amount":"0","subsidies_amount":"0","marketplace_commission_amount":"1000","forward_logistics_amount":"500","reverse_logistics_amount":"100","storage_amount":"100","advertising_amount":"200","fines_withholdings_amount":"0"},"gross_sales_units":10,"returned_units":2,"cost_per_unit":"400","other_expenses":[{"unit":"MONEY_PER_ITEM","value":"40"}],"tax_base_metric_id":"gross_sales_amount","tax_rate":"0.06"}
+        expected=reference_calculate(case)
+        for key,value in expected.items():
+            self.assertEqual(actual[key]["state"],value["state"],key)
+            self.assertEqual(actual[key]["value"],value["value"],key)
 
 
-def test_kernel_matches_independent_oracle():
-    p=policy(); zero=typed("VALID","0","MONEY","MONEY","RUB")
-    inputs={"gross_sales_units":typed("VALID","10","INTEGER","ITEM"),"returned_units":typed("VALID","2","INTEGER","ITEM"),"gross_sales_amount":typed("VALID","10000","MONEY","MONEY","RUB"),"discounts_amount":deepcopy(zero),"subsidies_amount":deepcopy(zero),"marketplace_commission_amount":typed("VALID","1000","MONEY","MONEY","RUB"),"forward_logistics_amount":typed("VALID","500","MONEY","MONEY","RUB"),"reverse_logistics_amount":typed("VALID","100","MONEY","MONEY","RUB"),"storage_amount":typed("VALID","100","MONEY","MONEY","RUB"),"advertising_amount":typed("VALID","200","MONEY","MONEY","RUB"),"fines_withholdings_amount":deepcopy(zero)}
-    request={"calculation_id":"calc-1","organization_id":"org-1","mode":"ACTUAL","scenario_id":None,"calculated_at":"2026-07-01T00:00:00Z","profile_ref":{"id":"profile-1","version":1,"content_hash":"0"*64},"profile_status":"PILOT","rounding_policy":p,"currency":"RUB","inputs":inputs,"cost_per_unit":typed("VALID","400","MONEY","MONEY_PER_ITEM","RUB"),"other_expense_components":[{"component_id":"other-per-unit","value":typed("VALID","40","MONEY","MONEY_PER_ITEM","RUB")}],"tax_rate":typed("VALID","0.06","RATE","RATE"),"tax_base_metric_id":"gross_sales_amount"}
-    actual=calculate(request)["results"]
-    case={"money_scale":2,"rounding_mode":"HALF_EVEN","inputs":{"gross_sales_amount":"10000","discounts_amount":"0","subsidies_amount":"0","marketplace_commission_amount":"1000","forward_logistics_amount":"500","reverse_logistics_amount":"100","storage_amount":"100","advertising_amount":"200","fines_withholdings_amount":"0"},"gross_sales_units":10,"returned_units":2,"cost_per_unit":"400","other_expenses":[{"unit":"MONEY_PER_ITEM","value":"40"}],"tax_base_metric_id":"gross_sales_amount","tax_rate":"0.06"}
-    expected=reference_calculate(case)
-    for key,value in expected.items():
-        assert actual[key]["state"]==value["state"]
-        assert actual[key]["value"]==value["value"]
+if __name__=="__main__":
+    unittest.main()
