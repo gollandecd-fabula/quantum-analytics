@@ -65,6 +65,14 @@ class P16AdmissionEvidenceTests(unittest.TestCase):
         self.assertNotIn("SALE", serialized)
         self.assertNotIn("100.00", serialized)
         self.assertNotIn(self.tenant.tenant_id, summary["tenant_id_sha256"])
+        self.assertNotIn(record.declaration.source_internal_id, serialized)
+        self.assertNotIn("source_internal_id", summary)
+        self.assertEqual(
+            summary["source_internal_id_sha256"],
+            sha256(
+                record.declaration.source_internal_id.encode("utf-8")
+            ).hexdigest(),
+        )
     def test_declaration_requires_future_retention_and_authority(self):
         payload = build_xlsx()
         values = declaration(self.tenant, payload).__dict__ if hasattr(declaration(self.tenant, payload), "__dict__") else {
