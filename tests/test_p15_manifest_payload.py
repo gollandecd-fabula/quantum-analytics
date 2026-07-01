@@ -38,6 +38,11 @@ P15_SNAPSHOT_ENTRIES = {
         base64.b64decode("SW+hmnweKSFft7iL5mdDk4RqHfzFEM3gimWKlCz7Fig=", validate=True).hex(),
         9630,
     ],
+    "tests/test_p15_manifest_payload.py": [
+        "tests/test_p15_manifest_payload.py",
+        base64.b64decode("8Ue4JwxQhlMeurSnbijS0WOaufQs7Ehy4wrJArHPE60=", validate=True).hex(),
+        2773,
+    ],
 }
 
 
