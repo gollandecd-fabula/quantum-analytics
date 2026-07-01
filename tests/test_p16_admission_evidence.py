@@ -168,6 +168,36 @@ class P16AdmissionEvidenceTests(unittest.TestCase):
                 admitted_at=NOW + timedelta(minutes=2),
             )
         self.assertEqual(error.exception.code, "STORAGE_EVIDENCE_FILE_MISMATCH")
+    def test_evidence_dataset_uuid_spelling_is_canonical(self):
+        payload = build_xlsx()
+        record = self.registry.declare(
+            tenant=self.tenant,
+            declaration=declaration(self.tenant, payload),
+        )
+        validated = self.registry.inspect_and_validate(
+            tenant=self.tenant,
+            dataset_id=record.declaration.dataset_id,
+            payload=payload,
+            policy=policy(),
+            observed_at=NOW + timedelta(minutes=1),
+        )
+        uppercase_id = validated.declaration.dataset_id.upper()
+        admitted = self.registry.admit(
+            tenant=self.tenant,
+            dataset_id=validated.declaration.dataset_id,
+            dataset_control_evidence=dataset_evidence(
+                self.tenant,
+                validated,
+                dataset_id=uppercase_id,
+            ),
+            storage_evidence=evidence(
+                self.tenant,
+                validated,
+                dataset_id=uppercase_id,
+            ),
+            admitted_at=NOW + timedelta(minutes=2),
+        )
+        self.assertEqual(admitted.state, DatasetAdmissionState.ADMITTED)
     def test_decision_history_is_privacy_safe_and_complete(self):
         payload = build_xlsx()
         record = self.registry.declare(
