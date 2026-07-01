@@ -26,7 +26,7 @@ _BLOCKED_PATH_MARKERS = (
     "xl/activex/", "xl/embeddings/", "xl/externallinks/",
     "customui/", "vbaproject.bin",
 )
-_XML_DECLARATION_MARKERS = (b"<!DOCTYPE", b"<!ENTITY")
+_XML_DECLARATION_MARKERS = ("<!DOCTYPE", "<!ENTITY")
 _SPREADSHEET_NS = "http://schemas.openxmlformats.org/spreadsheetml/2006/main"
 _ALLOWED_COMPRESSION_METHODS = {ZIP_STORED, ZIP_DEFLATED}
 
@@ -35,12 +35,14 @@ def _reject_xml_declarations(payload: bytes) -> None:
     if payload.startswith((b"\xff\xfe", b"\xfe\xff", b"\x00\x00\xfe\xff", b"\xff\xfe\x00\x00")):
         raise XlsxInspectionError("XLSX_XML_ENCODING_UNSUPPORTED")
     try:
-        payload.decode("utf-8-sig")
+        decoded = payload.decode("utf-8-sig")
     except UnicodeDecodeError as exc:
         raise XlsxInspectionError("XLSX_XML_ENCODING_UNSUPPORTED") from exc
-    upper = payload.upper()
+    upper = decoded.replace("\x00", "").upper()
     if any(marker in upper for marker in _XML_DECLARATION_MARKERS):
         raise XlsxInspectionError("XLSX_XML_ENTITY_DECLARATION_FORBIDDEN")
+    if "\x00" in decoded:
+        raise XlsxInspectionError("XLSX_XML_ENCODING_UNSUPPORTED")
 
 
 def _safe_member_name(name: str) -> str:
