@@ -130,6 +130,34 @@ class P16AdmissionLifecycleTests(unittest.TestCase):
             )
         self.assertEqual(error.exception.code, "DATASET_NOT_FOUND")
 
+    def test_uppercase_dataset_uuid_is_canonical_and_idempotent(self):
+        payload = build_xlsx()
+        uppercase_id = "AAAAAAAA-AAAA-4AAA-8AAA-AAAAAAAAAAAA"
+        supplied = replace(
+            declaration(self.tenant, payload),
+            dataset_id=uppercase_id,
+        )
+        declared = self.registry.declare(
+            tenant=self.tenant,
+            declaration=supplied,
+        )
+        canonical_id = uppercase_id.lower()
+        self.assertEqual(declared.declaration.dataset_id, canonical_id)
+        self.assertIs(
+            self.registry.get(
+                tenant=self.tenant,
+                dataset_id=uppercase_id,
+            ),
+            declared,
+        )
+        self.assertIs(
+            self.registry.declare(
+                tenant=self.tenant,
+                declaration=replace(supplied, dataset_id=canonical_id),
+            ),
+            declared,
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
