@@ -212,9 +212,11 @@ def _cell_text(cell: ElementTree.Element, shared: tuple[str, ...]) -> str:
     if cell_type == "s":
         try:
             index = int(raw)
-            return shared[index]
-        except (ValueError, IndexError) as exc:
+        except ValueError as exc:
             raise XlsxInspectionError("XLSX_SHARED_STRING_REFERENCE_INVALID") from exc
+        if index < 0 or index >= len(shared):
+            raise XlsxInspectionError("XLSX_SHARED_STRING_REFERENCE_INVALID")
+        return shared[index]
     return raw
 
 
