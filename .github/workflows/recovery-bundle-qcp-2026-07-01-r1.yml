@@ -1,17 +1,24 @@
 name: Recovery Bundle QCP-2026-07-01-R1
 
 on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - .github/workflows/recovery-bundle-qcp-2026-07-01-r1.yml
+      - docs/evidence/ARTIFACT_MANIFEST_OVERLAY_RECOVERY_QCP_2026_07_01_R1.json
   push:
     branches:
       - main
     paths:
       - .github/workflows/recovery-bundle-qcp-2026-07-01-r1.yml
+      - docs/evidence/ARTIFACT_MANIFEST_OVERLAY_RECOVERY_QCP_2026_07_01_R1.json
 
 permissions:
   contents: write
 
 concurrency:
-  group: recovery-bundle-qcp-2026-07-01-r1
+  group: recovery-bundle-qcp-2026-07-01-r1-${{ github.event_name }}-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -21,21 +28,22 @@ jobs:
     timeout-minutes: 10
 
     steps:
-      - name: Fetch required refs without checkout action
+      - name: Fetch exact stable and WIP refs
         env:
           GH_TOKEN: ${{ github.token }}
+          EXPECTED_MAIN_SHA: ${{ github.event.pull_request.base.sha || github.sha }}
           EXPECTED_WIP_SHA: b3b33a11f8da671356c9bc6c8073b59819a9654c
         run: |
           set -euo pipefail
           git init .
           gh auth setup-git
           git remote add origin "https://github.com/${GITHUB_REPOSITORY}.git"
-          git fetch origin "refs/heads/main:refs/heads/main"
+          git fetch origin "${EXPECTED_MAIN_SHA}:refs/heads/main"
           git fetch origin "refs/heads/build-b1b-financial-kernel-v1:refs/heads/build-b1b-financial-kernel-v1"
-          test "$(git rev-parse refs/heads/main)" = "${GITHUB_SHA}"
+          test "$(git rev-parse refs/heads/main)" = "${EXPECTED_MAIN_SHA}"
           test "$(git rev-parse refs/heads/build-b1b-financial-kernel-v1)" = "${EXPECTED_WIP_SHA}"
 
-      - name: Create or verify immutable recovery tag
+      - name: Create or verify recovery tag
         env:
           TAG_NAME: quantum-recovery-2026-07-01-r1
           TAG_TARGET: eed62fcc22f624b3632d16db3cf00410d3d4d412
@@ -44,20 +52,24 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git cat-file -e "${TAG_TARGET}^{commit}"
-          remote_target="$(git ls-remote --tags origin "refs/tags/${TAG_NAME}^{}" | awk '{print $1}')"
-          if [ -n "${remote_target}" ]; then
-            test "${remote_target}" = "${TAG_TARGET}"
+
+          if git ls-remote --exit-code --tags origin "refs/tags/${TAG_NAME}" >/dev/null 2>&1; then
             git fetch origin "refs/tags/${TAG_NAME}:refs/tags/${TAG_NAME}"
           else
             git tag -a "${TAG_NAME}" "${TAG_TARGET}" -m "Quantum recovery checkpoint QCP-2026-07-01-R1"
-            git push origin "refs/tags/${TAG_NAME}"
+            if [ "${GITHUB_EVENT_NAME}" = "push" ]; then
+              git push origin "refs/tags/${TAG_NAME}"
+            fi
           fi
+
           test "$(git rev-parse "refs/tags/${TAG_NAME}^{}")" = "${TAG_TARGET}"
 
       - name: Build and verify multi-ref bundle
         env:
           TAG_NAME: quantum-recovery-2026-07-01-r1
+          EXPECTED_MAIN_SHA: ${{ github.event.pull_request.base.sha || github.sha }}
           EXPECTED_WIP_SHA: b3b33a11f8da671356c9bc6c8073b59819a9654c
+          SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
           TAG_TARGET: eed62fcc22f624b3632d16db3cf00410d3d4d412
         run: |
           set -euo pipefail
@@ -70,13 +82,15 @@ jobs:
           mkdir restored
           git -C restored init
           git -C restored fetch "../${bundle}" refs/heads/main:refs/heads/main refs/heads/build-b1b-financial-kernel-v1:refs/heads/build-b1b-financial-kernel-v1 "refs/tags/${TAG_NAME}:refs/tags/${TAG_NAME}"
+          test "$(git -C restored rev-parse refs/heads/main)" = "${EXPECTED_MAIN_SHA}"
           test "$(git -C restored rev-parse refs/heads/build-b1b-financial-kernel-v1)" = "${EXPECTED_WIP_SHA}"
           test "$(git -C restored rev-parse "refs/tags/${TAG_NAME}^{}")" = "${TAG_TARGET}"
           git -C restored merge-base --is-ancestor "${TAG_TARGET}" refs/heads/main
 
           {
             echo "checkpoint=QCP-2026-07-01-R1"
-            echo "workflow_commit=${GITHUB_SHA}"
+            echo "event_name=${GITHUB_EVENT_NAME}"
+            echo "workflow_source_sha=${SOURCE_SHA}"
             echo "main=$(git rev-parse refs/heads/main)"
             echo "wip=$(git rev-parse refs/heads/build-b1b-financial-kernel-v1)"
             echo "tag=$(git rev-parse "refs/tags/${TAG_NAME}^{}")"

@@ -3,8 +3,8 @@
   "entries": [
     [
       ".github/workflows/recovery-bundle-qcp-2026-07-01-r1.yml",
-      "/Q1tCfntJdoFnRQ3z5uOElpZnnMyYBjCPzZ2YfrbpDI=",
-      4191
+      "WW7xTTE6VZHsIq5+HfM6185u7SGkOUixTjC4M4Hu1/A=",
+      4865
     ],
     [
       "docs/recovery/checkpoints/QCP-2026-07-01-R1/ARTIFACT_MANIFEST.sha256",
@@ -98,7 +98,7 @@
     ]
   ],
   "hash_encoding": "sha256-base64",
-  "overlay_version": 4,
-  "reason": "QCP-2026-07-01-R1 export workflow manifest correction",
+  "overlay_version": 5,
+  "reason": "QCP-2026-07-01-R1 verifiable pull-request export workflow",
   "remove_paths": []
 }
