@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import replace
-from datetime import datetime
+from datetime import date, datetime
 import hmac
 from threading import RLock
 
@@ -24,7 +24,10 @@ class _AdmissionRegistryBaseV2:
         self._inspector = inspector or XlsxPackageInspector()
         self._records: dict[tuple[str, str], DatasetAdmissionRecord] = {}
         self._original_digest_owners: dict[tuple[str, str], str] = {}
-        self._source_identity_owners: dict[tuple[str, str, str, str], str] = {}
+        self._source_identity_owners: dict[
+            tuple[str, str, str, str, date, date],
+            str,
+        ] = {}
         self._workbook_digest_owners: dict[tuple[str, str], str] = {}
         self._dataset_evidence_id_owners: dict[tuple[str, str], str] = {}
         self._storage_evidence_id_owners: dict[tuple[str, str], str] = {}
@@ -163,6 +166,8 @@ class _AdmissionRegistryBaseV2:
             declaration.marketplace,
             declaration.report_type,
             declaration.source_internal_id,
+            declaration.reporting_period_start,
+            declaration.reporting_period_end,
         )
         with self._lock:
             existing = self._records.get(key)
