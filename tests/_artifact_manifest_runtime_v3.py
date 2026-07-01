@@ -1,13 +1,18 @@
 from __future__ import annotations
 import base64, hashlib, json, subprocess
 from pathlib import Path
-from tests._artifact_manifest_chain_v3 import CORRECTION_NAME, OVERLAY_NAMES
+from tests._artifact_manifest_chain_v3 import OVERLAY_NAMES
 
 ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE = ROOT / "docs/evidence"
 MANIFEST_PATH = EVIDENCE / "ARTIFACT_MANIFEST.json"
-ALL_OVERLAY_NAMES = (*OVERLAY_NAMES, CORRECTION_NAME)
-CONTROL_PATHS = {"docs/evidence/ARTIFACT_MANIFEST.json", *(f"docs/evidence/{name}" for name in ALL_OVERLAY_NAMES)}
+CORRECTION_PATH = EVIDENCE / "B1B_RESCUE_MANIFEST_CORRECTION_V1.txt"
+OVERLAY_PATHS = tuple(EVIDENCE / name for name in OVERLAY_NAMES)
+CONTROL_PATHS = {
+    "docs/evidence/ARTIFACT_MANIFEST.json",
+    *(f"docs/evidence/{name}" for name in OVERLAY_NAMES),
+    str(CORRECTION_PATH.relative_to(ROOT)).replace("\\", "/"),
+}
 ARTIFACT_FIELDS = ["path", "sha256", "size_bytes"]
 B1A_SCHEMAS = {
     "schemas/calculation-profile.schema.json",
@@ -36,17 +41,26 @@ def apply_entries(artifacts: dict[str, list], overlay: dict) -> None:
     for path in overlay.get("remove_paths", []):
         artifacts.pop(path, None)
 
-def _overlay_paths() -> list[Path]:
-    names = list(OVERLAY_NAMES)
-    if (EVIDENCE / CORRECTION_NAME).exists():
-        names.append(CORRECTION_NAME)
-    return [EVIDENCE / name for name in names]
+def apply_correction(artifacts: dict[str, list], previous: bytes) -> None:
+    if not CORRECTION_PATH.exists():
+        return
+    lines = CORRECTION_PATH.read_text(encoding="utf-8").splitlines()
+    prefix = "base_b1b_rescue_overlay_git_blob_sha="
+    if not lines or not lines[0].startswith(prefix):
+        raise AssertionError("B1B_RESCUE_MANIFEST_CORRECTION_HEADER_INVALID")
+    if lines[0][len(prefix):] != git_blob_sha(previous):
+        raise AssertionError("B1B_RESCUE_MANIFEST_CORRECTION_BASE_MISMATCH")
+    for line in lines[1:]:
+        path, digest, size = line.split("|", 2)
+        if len(digest) != 64:
+            raise AssertionError("B1B_RESCUE_MANIFEST_CORRECTION_DIGEST_INVALID")
+        artifacts[path] = [path, digest, int(size)]
 
 def load_effective_manifest() -> dict:
     previous = MANIFEST_PATH.read_bytes()
     current = json.loads(previous)
     artifacts = {row[0]: row for row in current["artifacts"]}
-    for path in _overlay_paths():
+    for path in OVERLAY_PATHS:
         raw = path.read_bytes()
         overlay = json.loads(raw)
         keys = [key for key in overlay if key.startswith("base_") and key.endswith("_git_blob_sha")]
@@ -54,6 +68,7 @@ def load_effective_manifest() -> dict:
             raise AssertionError(f"ARTIFACT_MANIFEST_OVERLAY_BASE_MISMATCH:{path.name}")
         apply_entries(artifacts, overlay)
         previous = raw
+    apply_correction(artifacts, previous)
     result = dict(current)
     result["artifacts"] = [artifacts[path] for path in sorted(artifacts)]
     result["artifact_count"] = len(result["artifacts"])
