@@ -4,8 +4,10 @@ from io import BytesIO
 from pathlib import PurePosixPath
 import re
 import stat
+import unicodedata
 from xml.etree import ElementTree
-from zipfile import BadZipFile, ZipFile, ZipInfo
+from zlib import error as ZlibError
+from zipfile import BadZipFile, ZIP_DEFLATED, ZIP_STORED, ZipFile, ZipInfo
 
 from ._xlsx_contracts import XlsxInspectionError, XlsxInspectionLimits
 
@@ -26,7 +28,16 @@ _BLOCKED_PATH_MARKERS = (
 )
 _XML_DECLARATION_MARKERS = (b"<!DOCTYPE", b"<!ENTITY")
 _SPREADSHEET_NS = "http://schemas.openxmlformats.org/spreadsheetml/2006/main"
+_ALLOWED_COMPRESSION_METHODS = {ZIP_STORED, ZIP_DEFLATED}
+
+
 def _reject_xml_declarations(payload: bytes) -> None:
+    if payload.startswith((b"\xff\xfe", b"\xfe\xff", b"\x00\x00\xfe\xff", b"\xff\xfe\x00\x00")):
+        raise XlsxInspectionError("XLSX_XML_ENCODING_UNSUPPORTED")
+    try:
+        payload.decode("utf-8-sig")
+    except UnicodeDecodeError as exc:
+        raise XlsxInspectionError("XLSX_XML_ENCODING_UNSUPPORTED") from exc
     upper = payload.upper()
     if any(marker in upper for marker in _XML_DECLARATION_MARKERS):
         raise XlsxInspectionError("XLSX_XML_ENTITY_DECLARATION_FORBIDDEN")
@@ -36,10 +47,15 @@ def _safe_member_name(name: str) -> str:
     if not isinstance(name, str) or not name or "\x00" in name:
         raise XlsxInspectionError("XLSX_ARCHIVE_PATH_INVALID")
     normalized = name.replace("\\", "/")
+    if normalized.startswith("//") or re.match(r"^[A-Za-z]:", normalized):
+        raise XlsxInspectionError("XLSX_ARCHIVE_PATH_INVALID")
     path = PurePosixPath(normalized)
     if path.is_absolute() or any(part in {"", ".", ".."} for part in path.parts):
         raise XlsxInspectionError("XLSX_ARCHIVE_PATH_INVALID")
-    return str(path)
+    canonical = unicodedata.normalize("NFC", str(path))
+    if any(":" in part for part in PurePosixPath(canonical).parts):
+        raise XlsxInspectionError("XLSX_ARCHIVE_PATH_INVALID")
+    return canonical
 
 
 def _is_symlink(info: ZipInfo) -> bool:
@@ -55,12 +71,14 @@ def _validate_archive(zf: ZipFile, limits: XlsxInspectionLimits) -> dict[str, Zi
     total_uncompressed = 0
     for info in infos:
         name = _safe_member_name(info.filename)
-        key = name.casefold()
+        key = unicodedata.normalize("NFC", name).casefold()
         if key in normalized:
             raise XlsxInspectionError("XLSX_ARCHIVE_DUPLICATE_PATH")
         normalized[key] = info
         if info.flag_bits & 0x1:
             raise XlsxInspectionError("XLSX_ARCHIVE_ENCRYPTED_ENTRY")
+        if info.compress_type not in _ALLOWED_COMPRESSION_METHODS:
+            raise XlsxInspectionError("XLSX_ARCHIVE_COMPRESSION_UNSUPPORTED")
         if _is_symlink(info):
             raise XlsxInspectionError("XLSX_ARCHIVE_SYMLINK_FORBIDDEN")
         if info.file_size > limits.max_entry_uncompressed_bytes:
@@ -86,7 +104,17 @@ def _read_limited(zf: ZipFile, name: str, limits: XlsxInspectionLimits) -> bytes
         raise XlsxInspectionError("XLSX_REQUIRED_PART_MISSING") from exc
     if info.file_size > limits.max_xml_bytes:
         raise XlsxInspectionError("XLSX_XML_SIZE_EXCEEDED")
-    payload = zf.read(info)
+    try:
+        payload = zf.read(info)
+    except (
+        BadZipFile,
+        RuntimeError,
+        NotImplementedError,
+        OSError,
+        EOFError,
+        ZlibError,
+    ) as exc:
+        raise XlsxInspectionError("XLSX_ARCHIVE_READ_FAILED") from exc
     if len(payload) != info.file_size:
         raise XlsxInspectionError("XLSX_ARCHIVE_READ_MISMATCH")
     _reject_xml_declarations(payload)
@@ -112,6 +140,8 @@ def _cell_position(reference: str) -> tuple[int, int]:
 
 def _relationship_target(target: str) -> str:
     normalized = target.replace("\\", "/")
+    if re.match(r"^[A-Za-z][A-Za-z0-9+.-]*:", normalized):
+        raise XlsxInspectionError("XLSX_RELATIONSHIP_TARGET_INVALID")
     if normalized.startswith("/"):
         normalized = normalized.removeprefix("/")
     elif not normalized.startswith("xl/"):
@@ -171,9 +201,28 @@ def _extract_workbook(
             if len(files) != 1 or len(workbook_entries) != 1:
                 raise XlsxInspectionError("XLSX_OUTER_ARCHIVE_CONTENT_INVALID")
             workbook_info = workbook_entries[0]
-            workbook = zf.read(workbook_info)
+            try:
+                workbook = zf.read(workbook_info)
+            except (
+                BadZipFile,
+                RuntimeError,
+                NotImplementedError,
+                OSError,
+                EOFError,
+                ZlibError,
+            ) as exc:
+                raise XlsxInspectionError("XLSX_ARCHIVE_READ_FAILED") from exc
             if len(workbook) != workbook_info.file_size:
                 raise XlsxInspectionError("XLSX_ARCHIVE_READ_MISMATCH")
             return "ZIP_XLSX", workbook
-    except BadZipFile as exc:
+    except XlsxInspectionError:
+        raise
+    except (
+        BadZipFile,
+        NotImplementedError,
+        ValueError,
+        OSError,
+        EOFError,
+        ZlibError,
+    ) as exc:
         raise XlsxInspectionError("XLSX_ARCHIVE_INVALID") from exc
