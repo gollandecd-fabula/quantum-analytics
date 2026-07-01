@@ -147,7 +147,16 @@ class _AdmissionRegistryBaseV2:
             declaration.uploader_account_id.encode("utf-8"),
         ):
             raise AdmissionError("DATASET_UPLOADER_SCOPE_MISMATCH")
-        key = (tenant.tenant_id, declaration.dataset_id)
+        normalized_dataset_id = _uuid(
+            declaration.dataset_id,
+            "DATASET_ID_INVALID",
+        )
+        if declaration.dataset_id != normalized_dataset_id:
+            declaration = replace(
+                declaration,
+                dataset_id=normalized_dataset_id,
+            )
+        key = (tenant.tenant_id, normalized_dataset_id)
         digest_key = (tenant.tenant_id, declaration.original_file_sha256)
         source_key = (
             tenant.tenant_id,
@@ -162,10 +171,10 @@ class _AdmissionRegistryBaseV2:
                     return existing
                 raise AdmissionError("DATASET_DECLARATION_CONFLICT")
             digest_owner = self._original_digest_owners.get(digest_key)
-            if digest_owner is not None and digest_owner != declaration.dataset_id:
+            if digest_owner is not None and digest_owner != normalized_dataset_id:
                 raise AdmissionError("DATASET_ORIGINAL_REPLAY_DETECTED")
             source_owner = self._source_identity_owners.get(source_key)
-            if source_owner is not None and source_owner != declaration.dataset_id:
+            if source_owner is not None and source_owner != normalized_dataset_id:
                 raise AdmissionError("DATASET_SOURCE_REPLAY_DETECTED")
             decision = self._decision(
                 state=DatasetAdmissionState.DECLARED,
@@ -179,8 +188,8 @@ class _AdmissionRegistryBaseV2:
                 decisions=(decision,),
             )
             self._records[key] = record
-            self._original_digest_owners[digest_key] = declaration.dataset_id
-            self._source_identity_owners[source_key] = declaration.dataset_id
+            self._original_digest_owners[digest_key] = normalized_dataset_id
+            self._source_identity_owners[source_key] = normalized_dataset_id
             return record
 
     def get(
