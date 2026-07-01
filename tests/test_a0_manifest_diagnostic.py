@@ -40,7 +40,7 @@ class ManifestDiagnosticTests(unittest.TestCase):
             "mismatched": [],
             "top_level": {},
         }:
-            print("MANIFEST_DIFF=" + json.dumps(diagnostic, sort_keys=True), flush=True)
+            print("MANIFEST_DIFF=" + json.dumps(diagnostic, sort_keys=False), flush=True)
         self.assertEqual(current, expected)
 
 
