@@ -1,0 +1,195 @@
+# B1b Calculation Kernel Contract v1
+
+Status: `OWNER_APPROVED_BASELINE_PENDING_CI_AND_INDEPENDENT_REVIEW`
+Risk class: `R3`
+Tracking issue: `#32`
+Implementation branch: `build-b1b-financial-kernel-v1`
+
+## Purpose
+
+This contract defines the synthetic-only, dependency-free financial calculation
+kernel implemented in B1b. It evaluates explicit financial inputs under B1a
+configuration, typed-state, calculation-profile, rule-resolution, safe-expression,
+and rounding contracts. It does not activate financial rules, admit marketplace
+data, publish verified metric snapshots, reconcile periods, or authorize release.
+
+## Authorization and separation of duties
+
+- Explicit user R3 authorization was recorded on 2026-06-30.
+- Business Golden Oracle Owner: `PROJECT_OWNER_USER`.
+- Baseline source: synthetic scenarios independently derived from approved contracts.
+- The Business Golden Oracle Owner explicitly approved scenarios 1–3 without
+  modification and approved scenario 4 with `profit_per_sold_unit` blocked when
+  `net_sold_units < 0`, while preserving `net_profit_amount = -44.00`.
+- Public production facade: `src/quantum/finance/runtime.py`.
+- Internal production modules: `_common.py`, `_rounding.py`, `_expression.py`,
+  `_rules.py`, `_rules_hardening.py`, `_metrics.py`, `_calculation_core.py`,
+  `_calculation_expenses.py`, and `_calculation_profit.py`; these are package-private
+  and CI-scanned.
+- Independent reference path: `src/quantum/finance/oracle.py`.
+- The reference path must not import or call the production runtime.
+- The Golden Baseline fixture approval state is `APPROVED`.
+- External second-line financial review remains mandatory before real or anonymized
+  commercial data or production use.
+
+## Public runtime boundary
+
+The runtime exposes:
+
+- `validate_rounding_policy(policy, preview=True)`;
+- `evaluate_expression(expression, variables, declared_dependencies, policy)`;
+- `resolve_rule(rules, context)`;
+- `evaluate_resolved_rule(resolution, rules, variables, policy)`;
+- `calculate(request)`.
+
+All arithmetic uses `decimal.Decimal`. Binary floating point is rejected. Inputs
+and results are canonical JSON-compatible mappings and are never mutated.
+
+## Typed values
+
+Every value has exactly these fields:
+
+- `state`: `VALID`, `EMPTY`, `BLOCKED`, `UNAVAILABLE`, or `CONFLICT`;
+- `value`: normalized string/integer/boolean for `VALID`, otherwise `null`;
+- `value_type`: `MONEY`, `DECIMAL`, `RATE`, `INTEGER`, or `BOOLEAN`;
+- `unit` and explicit `currency` where applicable;
+- `reason_code`: null for `VALID`, non-empty for a non-valid state;
+- sorted unique `source_ids`.
+
+Numeric zero is a valid value. Missing configuration, unavailable evidence,
+conflict, and zero remain distinct. Non-valid state precedence for a dependent
+calculation is `CONFLICT > BLOCKED > UNAVAILABLE > EMPTY`. Every supplied
+`source_ids` item is validated as a non-empty string before uniqueness processing;
+malformed or unhashable entries fail with `VALUE_SOURCES_INVALID`.
+
+## Rounding
+
+The kernel implements the B1a allowlist:
+
+- `HALF_EVEN`;
+- `HALF_UP`;
+- `DOWN`;
+- `UP`;
+- `FLOOR`;
+- `CEILING`.
+
+Only named application points are accepted. Input normalization uses
+`RULE_INPUT_NORMALIZATION`; component results may use `RULE_COMPONENT_RESULT`;
+final money and rate metrics use `METRIC_FINAL_ACCOUNTING`. Presentation and
+export rounding are not reused as calculation inputs. No rounding policy is
+selected implicitly.
+
+## Rule resolution and evaluation
+
+Resolution is deterministic over the complete ordering tuple:
+
+```text
+(specificity_vector, priority, valid_from, version)
+```
+
+A complete tie returns `CONFLICT/RULE_RESOLUTION_TIE`. A forbidden exclusivity
+collision returns `CONFLICT/RULE_EXCLUSIVITY_OVERLAP`. Missing required rules or
+publication approval return `BLOCKED`. The deterministic `trace_id` is integrity
+evidence, not authentication and not independent selection authority.
+
+The public resolver registers a deep-copied immutable snapshot of every issued
+resolution together with a canonical fingerprint of the complete normalized
+ruleset. The process-local registry is lock-protected and bounded to 4096 entries;
+eviction fails closed. The evaluator accepts only an exact resolver-issued payload
+with the same complete ruleset. A caller-recomputed trace, changed selection,
+changed candidate payload, or changed ruleset fails with
+`RULE_RESOLUTION_REPLAY_MISMATCH`. Structurally invalid or stale-hash resolutions
+retain their narrower contract diagnostics.
+
+This trusted-trace mechanism is intentionally limited to the current local,
+single-process preview boundary. Rehydrated traces after process restart are not
+trusted and fail closed. Persistent or distributed evaluation requires a separately
+approved authenticated, context-bound proof contract and is not implemented in B1b.
+
+Supported rule methods are `FIXED_VALUE`, `RATE`, and `SAFE_EXPRESSION`.
+`ALLOCATION` is not implemented because allocation recognition and reconciliation
+belong to a later approved contract/B2 boundary.
+
+Safe expressions are typed JSON AST data. The evaluator is limited to the
+contracted arithmetic, comparison, and conditional operators over declared typed
+variables. Every capability outside that explicit allowlist is denied, including
+executable text, external-resource access, dynamic lookup, and implicit fallback.
+
+## Preview calculation request
+
+A request explicitly supplies:
+
+- calculation, organization, mode, Scenario, and timestamp identity;
+- immutable Calculation Profile reference;
+- a `SHADOW` or isolated `PILOT` profile status;
+- one explicit rounding policy;
+- ISO 4217 currency;
+- typed source values for every requested source metric;
+- explicit cost per unit;
+- an explicit list of other-expense components, including an explicit zero when
+  the intended expense is zero;
+- explicit tax rate and tax-base metric identifier.
+
+`ACTIVE` profiles are rejected. An empty other-expense component list is not zero;
+it blocks the dependent metrics with `OTHER_EXPENSE_RULE_REQUIRED_MISSING`.
+
+## Implemented preview metrics
+
+- `net_sold_units = gross_sales_units - returned_units`;
+- `product_cost_amount = net_sold_units × explicit cost_per_unit`;
+- `other_expense_amount = sum(explicit named components after unit expansion)`;
+- `net_marketplace_income_amount = gross_sales_amount - discounts_amount + subsidies_amount - marketplace_commission_amount - forward_logistics_amount - reverse_logistics_amount - storage_amount - advertising_amount - fines_withholdings_amount`;
+- `tax_amount = explicit tax rate × explicit selected money base`;
+- `net_profit_amount = net_marketplace_income_amount - product_cost_amount - other_expense_amount - tax_amount`;
+- `profit_per_sold_unit = net_profit_amount / net_sold_units` only when
+  `net_sold_units > 0`; zero returns `BLOCKED/ZERO_DENOMINATOR`, and a negative
+  value returns `BLOCKED/NON_POSITIVE_DENOMINATOR` without changing net profit;
+- `profitability_of_costs = BLOCKED/COST_DENOMINATOR_NOT_APPROVED` until an independent denominator boundary is approved.
+
+No formula contains a product, brand, marketplace, cost, tax, tax-base, currency,
+or other-expense commercial constant.
+
+## Result boundary
+
+`calculate` returns `quantum-financial-kernel-result-v1` with:
+
+- organization, mode, Scenario, profile, and rounding identity;
+- `publication_state: PREVIEW_ONLY`;
+- the eight typed metric results and confirmed expense boundaries;
+- deterministic `input_hash` and `result_hash`;
+- explicit limitations.
+
+The result is not a B3 published metric snapshot and cannot bypass B3 Evidence
+Chain validation. B4 may render it only after the approved snapshot-building
+boundary is satisfied.
+
+## Golden baseline and tests
+
+Approved fixture: `tests/contracts/fixtures/b1b-golden-baseline.json`.
+
+Required and implemented test classes:
+
+- golden calculations;
+- independent differential oracle comparison;
+- conservation, sign, monotonicity, and no-double-count invariants;
+- all supported decimal rounding modes and tie behavior;
+- typed-state propagation and valid-zero separation;
+- Actual/Scenario isolation;
+- rule precedence, tie, exclusivity, deterministic candidate order, and trusted-trace replay rejection;
+- Safe Expression type, unit, currency, arity, limit, and capability rejection;
+- malformed typed-source validation;
+- request mutation and replay determinism;
+- fixed-commercial-constant and forbidden-capability scans.
+
+## Deferred boundaries
+
+- authenticated persistent or distributed resolver proof;
+- Source Authority activation;
+- real or anonymized marketplace data;
+- B2 reconciliation, periods, reversals, restatements, and lifecycle accounting;
+- approved allocation rules;
+- approved profitability denominator;
+- verified metric publication;
+- external access, deployment, marketplace writes, or production release.
+
+`RELEASE_BLOCKED` remains mandatory.
