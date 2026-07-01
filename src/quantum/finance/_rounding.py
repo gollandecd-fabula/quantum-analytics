@@ -7,6 +7,7 @@ from typing import Any
 
 from ._common import (
     FinanceError, _ACCOUNTING_POINTS, _CURRENCY_RE, _HASH_RE, _ID_RE,
+    _MAX_DECIMAL_INPUT_PRECISION, _MAX_DECIMAL_INPUT_SCALE,
     _PRESENTATION_POINTS, _STATE_PRECEDENCE,
     _ROUNDING_MODES, _Value, _decimal_text, _is_non_negative_int,
     _is_nonempty_string, _is_positive_int, _make_nonvalid, _make_valid,
@@ -89,9 +90,13 @@ def validate_rounding_policy(policy: object, *, preview: bool = True) -> dict[st
         value = policy[field]
         if not _is_non_negative_int(value) or value > 28:
             raise FinanceError("ROUNDING_SCALE_INVALID")
-    for field in ("max_input_precision", "max_input_scale"):
+    input_limits = {
+        "max_input_precision": _MAX_DECIMAL_INPUT_PRECISION,
+        "max_input_scale": _MAX_DECIMAL_INPUT_SCALE,
+    }
+    for field, maximum in input_limits.items():
         value = policy[field]
-        if not _is_non_negative_int(value) or value > 1000:
+        if not _is_non_negative_int(value) or value > maximum:
             raise FinanceError("ROUNDING_SCALE_INVALID")
     if policy["max_input_precision"] < 1 or policy["max_input_scale"] > policy["max_input_precision"]:
         raise FinanceError("ROUNDING_SCALE_INVALID")
@@ -153,7 +158,7 @@ def _decimal_context(
         policy["max_input_precision"] * operation_budget + work_scale + 8
     )
     with localcontext() as context:
-        context.prec = max(context.prec, required_precision)
+        context.prec = required_precision
         yield
 
 
@@ -181,7 +186,7 @@ def _quantize(
     ) + 1
     try:
         with localcontext() as context:
-            context.prec = max(context.prec, required_precision)
+            context.prec = required_precision
             rounded = value.quantize(quantum, rounding=_ROUNDING_MODES[mode])
     except InvalidOperation as exc:
         raise FinanceError("ROUNDING_OPERATION_INVALID") from exc
