@@ -43,7 +43,7 @@ def _emit_test_output(result: subprocess.CompletedProcess[str]) -> None:
         return
     lines = output.splitlines()
     print("UNITTEST_FAILURE_TAIL_BEGIN")
-    print("\n".join(lines[-120:]))
+    print("\n".join(lines[-24:]))
     print("UNITTEST_FAILURE_TAIL_END")
 
 
