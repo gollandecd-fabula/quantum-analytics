@@ -63,6 +63,33 @@ class XlsxPackageInspectorTests(unittest.TestCase):
             XlsxPackageInspector().inspect(payload=build_xlsx(doctype=True), policy=policy())
         self.assertEqual(error.exception.code, "XLSX_XML_ENTITY_DECLARATION_FORBIDDEN")
 
+    def test_utf16_without_bom_doctype_is_hard_rejected(self):
+        def encode_utf16_without_bom(value: bytes) -> bytes:
+            text = value.decode("utf-8")
+            text = text.replace(
+                '<?xml version="1.0" encoding="UTF-8"?>',
+                '<?xml version="1.0" encoding="UTF-16"?>',
+                1,
+            )
+            text = text.replace(
+                "<worksheet ",
+                "<!DOCTYPE worksheet [<!ENTITY x 'bad'>]><worksheet ",
+                1,
+            )
+            return text.encode("utf-16-le")
+
+        payload = rewrite_xlsx_part(
+            build_xlsx(),
+            "xl/worksheets/sheet1.xml",
+            encode_utf16_without_bom,
+        )
+        with self.assertRaises(XlsxInspectionError) as error:
+            XlsxPackageInspector().inspect(payload=payload, policy=policy())
+        self.assertEqual(
+            error.exception.code,
+            "XLSX_XML_ENTITY_DECLARATION_FORBIDDEN",
+        )
+
     def test_zip_slip_is_hard_rejected(self):
         payload = wrap_xlsx(build_xlsx(), name="../weekly-report.xlsx")
         with self.assertRaises(XlsxInspectionError) as error:
@@ -90,6 +117,26 @@ class XlsxPackageInspectorTests(unittest.TestCase):
         self.assertFalse(result.matched)
         self.assertEqual(result.sheet_count, 2)
         self.assertIn("XLSX_SHEET_COUNT_MISMATCH", result.diagnostics)
+
+    def test_ambiguous_schema_match_fails_closed(self):
+        base = policy()
+        duplicate = replace(
+            base.schemas[0],
+            schema_id="wb-weekly-synthetic-duplicate-v1",
+            schema_authority_reference="schema-review-duplicate",
+        )
+        ambiguous = replace(
+            base,
+            version=base.version + 1,
+            schemas=(base.schemas[0], duplicate, base.schemas[1]),
+        )
+        result = XlsxPackageInspector().inspect(
+            payload=build_xlsx(),
+            policy=ambiguous,
+        )
+        self.assertFalse(result.matched)
+        self.assertIsNone(result.matched_schema_id)
+        self.assertIn("XLSX_SCHEMA_MATCH_AMBIGUOUS", result.diagnostics)
 
     def test_compression_ratio_limit_is_enforced(self):
         base = policy()
@@ -127,6 +174,31 @@ class XlsxPackageInspectorTests(unittest.TestCase):
             XlsxPackageInspector().inspect(payload=payload, policy=policy())
         self.assertEqual(error.exception.code, "XLSX_CELL_ROW_MISMATCH")
 
+    def test_data_cell_row_mismatch_is_rejected(self):
+        payload = rewrite_xlsx_part(
+            build_xlsx(),
+            "xl/worksheets/sheet1.xml",
+            lambda value: value.replace(b'<c r="A2"', b'<c r="A999"', 1),
+        )
+        with self.assertRaises(XlsxInspectionError) as error:
+            XlsxPackageInspector().inspect(payload=payload, policy=policy())
+        self.assertEqual(error.exception.code, "XLSX_CELL_ROW_MISMATCH")
+
+    def test_duplicate_data_cell_is_rejected(self):
+        payload = rewrite_xlsx_part(
+            build_xlsx(),
+            "xl/worksheets/sheet1.xml",
+            lambda value: value.replace(
+                b'</row></sheetData>',
+                b'<c r="A2" t="inlineStr"><is><t>duplicate</t></is></c>'
+                b'</row></sheetData>',
+                1,
+            ),
+        )
+        with self.assertRaises(XlsxInspectionError) as error:
+            XlsxPackageInspector().inspect(payload=payload, policy=policy())
+        self.assertEqual(error.exception.code, "XLSX_CELL_DUPLICATE")
+
     def test_schema_profile_cannot_approve_direct_identifiers(self):
         base = policy().schemas[0]
         with self.assertRaises(XlsxInspectionError) as error:
@@ -159,7 +231,6 @@ class XlsxPackageInspectorTests(unittest.TestCase):
             result.matched_schema_authority_reference,
             "schema-review-001",
         )
-
 
 
 if __name__ == "__main__":
