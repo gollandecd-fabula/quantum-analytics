@@ -19,6 +19,17 @@ class B1bInputBoundaryTests(unittest.TestCase):
   r=request();c=r["other_expense_components"][0];r["other_expense_components"]=[c,deepcopy(c)]
   with self.assertRaises(FinanceError) as e:calculate(r)
   self.assertEqual(e.exception.code,"OTHER_EXPENSE_COMPONENTS_INVALID")
+ def test_unknown_inputs_cannot_expand_decimal_budget(self):
+  r=request()
+  for index in range(1000):
+   r["inputs"][f"unused_{index}"]=typed("VALID","1","MONEY","MONEY","RUB")
+  with self.assertRaises(FinanceError) as e:calculate(r)
+  self.assertEqual(e.exception.code,"KERNEL_INPUTS_INVALID")
+ def test_expense_components_are_bounded_before_decimal_budget(self):
+  r=request()
+  r["other_expense_components"]=[{"component_id":f"expense-{index}","value":typed("VALID","0","MONEY","MONEY","RUB")} for index in range(65)]
+  with self.assertRaises(FinanceError) as e:calculate(r)
+  self.assertEqual(e.exception.code,"OTHER_EXPENSE_COMPONENTS_INVALID")
  def test_zero_is_valid(self):
   x=calculate(request())["results"]["other_expense_amount"]
   self.assertEqual((x["state"],x["value"]),("VALID","0.00"))
