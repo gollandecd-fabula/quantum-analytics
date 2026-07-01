@@ -1,0 +1,107 @@
+from __future__ import annotations
+
+from hashlib import sha256
+
+from ._xlsx_archive import _extract_workbook
+from ._xlsx_contracts import (
+    XlsxInspectionError,
+    XlsxInspectionLimits,
+    XlsxInspectionPolicy,
+    XlsxPackageInspection,
+    XlsxSchemaExpectation,
+    _canonical_hash,
+    normalized_header_sha256,
+)
+from ._xlsx_workbook import _workbook_shape
+class XlsxPackageInspector:
+    def inspect(
+        self,
+        *,
+        payload: bytes,
+        policy: XlsxInspectionPolicy,
+    ) -> XlsxPackageInspection:
+        if not isinstance(payload, bytes) or not payload:
+            raise XlsxInspectionError("XLSX_BYTES_REQUIRED")
+        if not isinstance(policy, XlsxInspectionPolicy):
+            raise XlsxInspectionError("XLSX_POLICY_REQUIRED")
+        package_kind, workbook = _extract_workbook(payload, policy.limits)
+        if len(workbook) > policy.limits.max_file_bytes:
+            raise XlsxInspectionError("XLSX_WORKBOOK_SIZE_EXCEEDED")
+        shape = _workbook_shape(workbook, policy=policy, package_kind=package_kind)
+
+        matched: XlsxSchemaExpectation | None = None
+        mismatch_codes: set[str] = set()
+        candidates = [schema for schema in policy.schemas if schema.package_kind == package_kind]
+        if not candidates:
+            mismatch_codes.add("XLSX_PACKAGE_KIND_UNREGISTERED")
+        for schema in candidates:
+            local: set[str] = set()
+            if shape.sheet_name != schema.sheet_name:
+                local.add("XLSX_SHEET_NAME_MISMATCH")
+            if shape.sheet_count != schema.sheet_count:
+                local.add("XLSX_SHEET_COUNT_MISMATCH")
+            if shape.header_row_index != schema.header_row_index:
+                local.add("XLSX_HEADER_ROW_MISMATCH")
+            if shape.header_sha256 != schema.header_sha256:
+                local.add("XLSX_HEADER_HASH_MISMATCH")
+            if shape.column_count != schema.column_count:
+                local.add("XLSX_COLUMN_COUNT_MISMATCH")
+            if not schema.min_data_rows <= shape.data_row_count <= schema.max_data_rows:
+                local.add("XLSX_ROW_COUNT_OUT_OF_RANGE")
+            if shape.formula_count > schema.max_formula_count:
+                local.add("XLSX_FORMULA_COUNT_EXCEEDED")
+            if not local:
+                matched = schema
+                break
+            mismatch_codes.update(local)
+        if shape.prohibited_header_count:
+            mismatch_codes.add("XLSX_DIRECT_IDENTIFIER_HEADER_PRESENT")
+            matched = None
+        if matched is None:
+            mismatch_codes.add("XLSX_SCHEMA_UNKNOWN")
+
+        structural = {
+            "package_kind": package_kind,
+            "sheet_name": shape.sheet_name,
+            "sheet_count": shape.sheet_count,
+            "header_row_index": shape.header_row_index,
+            "header_sha256": shape.header_sha256,
+            "column_count": shape.column_count,
+            "data_row_count": shape.data_row_count,
+            "formula_count": shape.formula_count,
+            "prohibited_header_count": shape.prohibited_header_count,
+        }
+        diagnostics = tuple(sorted(mismatch_codes)) if matched is None else ()
+        return XlsxPackageInspection(
+            package_kind=package_kind,
+            original_sha256=sha256(payload).hexdigest(),
+            original_size_bytes=len(payload),
+            workbook_sha256=sha256(workbook).hexdigest(),
+            workbook_size_bytes=len(workbook),
+            sheet_name=shape.sheet_name,
+            sheet_count=shape.sheet_count,
+            header_row_index=shape.header_row_index,
+            header_sha256=shape.header_sha256,
+            column_count=shape.column_count,
+            data_row_count=shape.data_row_count,
+            formula_count=shape.formula_count,
+            prohibited_header_count=shape.prohibited_header_count,
+            structural_fingerprint_sha256=_canonical_hash(structural),
+            matched_schema_id=matched.schema_id if matched else None,
+            matched_schema_version=matched.schema_version if matched else None,
+            matched_schema_authority_reference=(
+                matched.schema_authority_reference if matched else None
+            ),
+            diagnostics=diagnostics,
+        )
+
+
+__all__ = [
+    "XlsxInspectionError",
+    "XlsxInspectionLimits",
+    "XlsxInspectionPolicy",
+    "XlsxPackageInspection",
+    "XlsxPackageInspector",
+    "XlsxSchemaExpectation",
+    "normalized_header_sha256",
+]
