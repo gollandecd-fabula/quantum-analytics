@@ -4,7 +4,7 @@ updated_on: 2026-07-01
 source_of_truth_for_live_unit_state: true
 macro_stage: B
 status: ACTIVE
-current_unit: R3_REAL_DATA_PILOT_ADMISSION
+current_unit: R3D1
 tracking_issue: 41
 working_branch: r3-real-commercial-data-pilot-v1
 

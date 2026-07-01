@@ -4,7 +4,7 @@ Date: 2026-07-01
 Status: `BUILD_P1_5_COMPLETE_R3_REAL_DATA_PILOT_AUTHORIZED_PENDING_CONTROLS`
 Active contract: `STAGE-B-BUILD-v1`
 Live execution state: `docs/evidence/STAGE_B_EXECUTION_STATE.yaml`
-Active cross-cutting unit: `R3_REAL_DATA_PILOT_ADMISSION`
+Current unit: `R3D1 — REAL_DATA_PILOT_ADMISSION`
 Tracking issue: `#41`
 Working branch: `r3-real-commercial-data-pilot-v1`
 Decision: `docs/decisions/DR-2026-07-01-REAL-COMMERCIAL-DATA-PILOT.md`
