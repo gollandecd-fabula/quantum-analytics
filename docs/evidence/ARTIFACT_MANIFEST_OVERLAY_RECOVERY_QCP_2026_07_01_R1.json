@@ -3,13 +3,13 @@
   "entries": [
     [
       "docs/recovery/checkpoints/QCP-2026-07-01-R1/ARTIFACT_MANIFEST.sha256",
-      "ecfWKZaIP2whhZCzuA0Z/95R63gvYkzyWBo48bs9MSU=",
+      "HWMj5rBELjXBNCLzIJLjQbWMPUPrTjfF0Z6NoX2xCrI=",
       1243
     ],
     [
       "docs/recovery/checkpoints/QCP-2026-07-01-R1/CHECKPOINT.yaml",
-      "uEmAcVG1YQw5o630vBiUpxl+Qr5d4DpqhBagOm0Vl6U=",
-      1681
+      "Eajb9bNNLT0i5uwOwPg7FNYeLj3hOY7iEciO9VNwvXc=",
+      1889
     ],
     [
       "docs/recovery/checkpoints/QCP-2026-07-01-R1/CI_AND_REVIEW_EVIDENCE.md",
@@ -53,13 +53,13 @@
     ],
     [
       "docs/recovery/checkpoints/QCP-2026-07-01-R1/README.md",
-      "nQ+HfJcp3YJz3hheKxNM9UZHKqqsvRzmaNIzGrL2Is8=",
-      1449
+      "SONE/Z7H6yCjX8pqywWZf37EwL3CN0HcojYZq+LYGX8=",
+      1956
     ],
     [
       "docs/recovery/checkpoints/QCP-2026-07-01-R1/RECOVERY_RUNBOOK.md",
-      "Z3u5Yp2u0JJuY993cUzC7O/cZ2mOrVF2gOZUd5UfNvw=",
-      988
+      "LsNQkPmqp0hX8b39daHVZyFJI3H7BhPbHE8YJy62zkI=",
+      2145
     ],
     [
       "docs/recovery/checkpoints/QCP-2026-07-01-R1/RECOVERY_VERIFICATION_REPORT.md",
@@ -83,12 +83,12 @@
     ],
     [
       "tests/test_p15_manifest_payload.py",
-      "UKtENy9tqUitKgbp4/m9jxKh/cuGhDiRTdP0nbyoVXo=",
-      3837
+      "0P+85isQe33HiG1JGCJWVuLEThbYz4PcEEY6KKNq/uI=",
+      6152
     ]
   ],
   "hash_encoding": "sha256-base64",
-  "overlay_version": 1,
-  "reason": "QCP-2026-07-01-R1 recovery checkpoint admission",
+  "overlay_version": 2,
+  "reason": "QCP-2026-07-01-R1 recovery checkpoint admission and review remediation",
   "remove_paths": []
 }
