@@ -4,15 +4,29 @@ from io import BytesIO
 import re
 from zipfile import BadZipFile, ZipFile
 
-from ._xlsx_archive import _safe_member_name
+from ._xlsx_archive import (
+    _reject_xml_declarations,
+    _safe_member_name,
+    _xml_root,
+)
 from ._xlsx_contracts import XlsxInspectionError
 
 _ALLOWED_EXACT_PARTS = {
     "[content_types].xml",
     "_rels/.rels",
+    "docprops/app.xml",
+    "docprops/core.xml",
     "xl/workbook.xml",
     "xl/_rels/workbook.xml.rels",
     "xl/sharedstrings.xml",
+    "xl/styles.xml",
+    "xl/theme/theme1.xml",
+}
+_MODELED_AUXILIARY_XML_PARTS = {
+    "docprops/app.xml",
+    "docprops/core.xml",
+    "xl/styles.xml",
+    "xl/theme/theme1.xml",
 }
 _WORKSHEET_PART = re.compile(r"^xl/worksheets/[^/]+[.]xml$")
 
@@ -25,11 +39,14 @@ def validate_modeled_package_parts(workbook: bytes) -> None:
                     continue
                 part = _safe_member_name(info.filename).casefold()
                 if (
-                    part in _ALLOWED_EXACT_PARTS
-                    or _WORKSHEET_PART.fullmatch(part) is not None
+                    part not in _ALLOWED_EXACT_PARTS
+                    and _WORKSHEET_PART.fullmatch(part) is None
                 ):
-                    continue
-                raise XlsxInspectionError("XLSX_PACKAGE_PART_UNMODELED")
+                    raise XlsxInspectionError("XLSX_PACKAGE_PART_UNMODELED")
+                if part in _MODELED_AUXILIARY_XML_PARTS:
+                    payload = zf.read(info)
+                    _reject_xml_declarations(payload)
+                    _xml_root(payload, "XLSX_AUXILIARY_PART_INVALID")
     except XlsxInspectionError:
         raise
     except (
