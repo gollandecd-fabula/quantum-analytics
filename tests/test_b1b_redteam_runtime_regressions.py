@@ -4,6 +4,7 @@ import unittest
 from copy import deepcopy
 
 from quantum.finance import FinanceError, calculate
+from quantum.finance._runtime_legacy import calculate as calculate_underlying
 from tests.test_b1b_rescue_smoke import policy, typed
 
 
@@ -48,20 +49,29 @@ class ExplodingCopy:
 
 
 class B1bRedTeamRuntimeRegressions(unittest.TestCase):
-    def test_non_mapping_fails_before_deepcopy(self) -> None:
-        with self.assertRaisesRegex(FinanceError, "KERNEL_REQUEST_INVALID"):
-            calculate(ExplodingCopy())  # type: ignore[arg-type]
+    def test_non_mapping_fails_before_deepcopy_on_all_calculation_boundaries(self) -> None:
+        for target in (calculate, calculate_underlying):
+            with self.subTest(target=target.__module__):
+                with self.assertRaisesRegex(FinanceError, "KERNEL_REQUEST_INVALID"):
+                    target(ExplodingCopy())  # type: ignore[arg-type]
 
     def test_profit_per_unit_cites_complete_profit_expense_boundary(self) -> None:
-        payload = calculate(valid_request())
-        results = payload["results"]
-        self.assertEqual(
-            results["profit_per_sold_unit"]["expense_boundary"],
-            results["net_profit_amount"]["expense_boundary"],
-        )
-        self.assertIn("MARKETPLACE_COMMISSION", results["profit_per_sold_unit"]["expense_boundary"])
-        self.assertNotIn("B2_RECONCILIATION_NOT_IMPLEMENTED", payload["limitations"])
-        self.assertIn("B2_RECONCILIATION_REQUIRED", payload["limitations"])
+        for target in (calculate, calculate_underlying):
+            with self.subTest(target=target.__module__):
+                payload = target(valid_request())
+                results = payload["results"]
+                self.assertEqual(
+                    results["profit_per_sold_unit"]["expense_boundary"],
+                    results["net_profit_amount"]["expense_boundary"],
+                )
+                self.assertIn(
+                    "MARKETPLACE_COMMISSION",
+                    results["profit_per_sold_unit"]["expense_boundary"],
+                )
+                self.assertNotIn(
+                    "B2_RECONCILIATION_NOT_IMPLEMENTED", payload["limitations"]
+                )
+                self.assertIn("B2_RECONCILIATION_REQUIRED", payload["limitations"])
 
 
 if __name__ == "__main__":
