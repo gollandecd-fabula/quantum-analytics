@@ -1,0 +1,1 @@
+{"base_b1b_next_overlay_git_blob_sha":"31bbf4d4591996ea3b41710cc84848d63739c7e3","entries":[],"hash_encoding":"sha256-hex","overlay_version":4,"reason":"Treat the manifest loader as an explicit control path","remove_paths":["tests/test_b1a_artifact_manifest.py"]}

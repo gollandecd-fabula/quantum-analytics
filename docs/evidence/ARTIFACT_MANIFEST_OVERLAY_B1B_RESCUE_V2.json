@@ -1,0 +1,1 @@
+{"base_b1b_rescue_overlay_git_blob_sha":"a09a02e4145e14c1ad9a9d9df6b08bc227129fbf","entries":[["tests/test_b1a_artifact_manifest.py","9c6ac5507488b50fbab8f07bacce8a479a165dc01a50455c288a91b3c809f50b",3877]],"hash_encoding":"sha256-hex","overlay_version":2,"reason":"B1b rescue manifest synchronization","remove_paths":[]}
