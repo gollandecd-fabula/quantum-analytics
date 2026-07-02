@@ -39,6 +39,9 @@ ASSURANCE_PLAN_OVERLAY_PATH = (
 REAL_DATA_PILOT_OVERLAY_PATH = (
     ROOT / "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_REAL_DATA_PILOT_2026_07_08.json"
 )
+LOCAL_STORAGE_POLICY_OVERLAY_PATH = (
+    ROOT / "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_LOCAL_STORAGE_POLICY_2026_07_02.json"
+)
 CONTROL_PATHS = {
     "docs/evidence/ARTIFACT_MANIFEST.json",
     "docs/evidence/ARTIFACT_MANIFEST_OVERLAY.json",
@@ -57,6 +60,7 @@ CONTROL_PATHS = {
     "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_RECOVERY_QCP_2026_07_01_R1.json",
     "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_ASSURANCE_PLAN_2026_07_08.json",
     "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_REAL_DATA_PILOT_2026_07_08.json",
+    "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_LOCAL_STORAGE_POLICY_2026_07_02.json",
 }
 ARTIFACT_FIELDS = ["path", "sha256", "size_bytes"]
 B1A_SCHEMAS = {
@@ -132,6 +136,8 @@ def load_effective_manifest() -> dict:
     assurance_plan_overlay = json.loads(assurance_plan_bytes.decode("utf-8"))
     real_data_pilot_bytes = REAL_DATA_PILOT_OVERLAY_PATH.read_bytes()
     real_data_pilot_overlay = json.loads(real_data_pilot_bytes.decode("utf-8"))
+    local_storage_policy_bytes = LOCAL_STORAGE_POLICY_OVERLAY_PATH.read_bytes()
+    local_storage_policy_overlay = json.loads(local_storage_policy_bytes.decode("utf-8"))
 
     if overlay["base_manifest_git_blob_sha"] != git_blob_sha(base_bytes):
         raise AssertionError("ARTIFACT_MANIFEST_OVERLAY_BASE_MISMATCH")
@@ -189,6 +195,10 @@ def load_effective_manifest() -> dict:
         assurance_plan_bytes
     ):
         raise AssertionError("ARTIFACT_MANIFEST_REAL_DATA_PILOT_OVERLAY_BASE_MISMATCH")
+    if local_storage_policy_overlay["base_real_data_pilot_overlay_git_blob_sha"] != git_blob_sha(
+        real_data_pilot_bytes
+    ):
+        raise AssertionError("ARTIFACT_MANIFEST_LOCAL_STORAGE_POLICY_OVERLAY_BASE_MISMATCH")
 
     artifacts = {row[0]: row for row in current["artifacts"]}
     apply_entries(artifacts, overlay)
@@ -207,6 +217,7 @@ def load_effective_manifest() -> dict:
     apply_entries(artifacts, recovery_qcp_overlay)
     apply_entries(artifacts, assurance_plan_overlay)
     apply_entries(artifacts, real_data_pilot_overlay)
+    apply_entries(artifacts, local_storage_policy_overlay)
 
     effective = dict(current)
     effective["artifacts"] = [artifacts[path] for path in sorted(artifacts)]
