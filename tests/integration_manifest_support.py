@@ -47,7 +47,7 @@ _COMMON = (
     ("ARTIFACT_MANIFEST_OVERLAY_P13_CLOSURE.json", "base_p13_merge_gate_overlay_git_blob_sha"),
     ("ARTIFACT_MANIFEST_OVERLAY_P14.json", "base_p13_closure_overlay_git_blob_sha"),
     ("ARTIFACT_MANIFEST_OVERLAY_P14_CLOSURE.json", "base_p14_overlay_git_blob_sha"),
-    ("ARTIFACT_MANIFEST_OVERLAY_P15.json", "base_p14_overlay_git_blob_sha"),
+    ("ARTIFACT_MANIFEST_OVERLAY_P15.json", "base_p14_closure_overlay_git_blob_sha"),
     ("ARTIFACT_MANIFEST_OVERLAY_P15_CLOSURE.json", "base_p15_overlay_git_blob_sha"),
     ("ARTIFACT_MANIFEST_OVERLAY_RECOVERY_QCP_2026_07_01_R1.json", "base_p15_closure_overlay_git_blob_sha"),
     ("ARTIFACT_MANIFEST_OVERLAY_ASSURANCE_PLAN_2026_07_08.json", "base_recovery_qcp_overlay_git_blob_sha"),
