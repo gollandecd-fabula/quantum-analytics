@@ -47,7 +47,7 @@ _COMMON = (
     ("ARTIFACT_MANIFEST_OVERLAY_P13_CLOSURE.json", "base_p13_merge_gate_overlay_git_blob_sha"),
     ("ARTIFACT_MANIFEST_OVERLAY_P14.json", "base_p13_closure_overlay_git_blob_sha"),
     ("ARTIFACT_MANIFEST_OVERLAY_P14_CLOSURE.json", "base_p14_overlay_git_blob_sha"),
-    ("ARTIFACT_MANIFEST_OVERLAY_P15.json", "base_p14_closure_overlay_git_blob_sha"),
+    ("ARTIFACT_MANIFEST_OVERLAY_P15.json", "base_p14_overlay_git_blob_sha"),
     ("ARTIFACT_MANIFEST_OVERLAY_P15_CLOSURE.json", "base_p15_overlay_git_blob_sha"),
     ("ARTIFACT_MANIFEST_OVERLAY_RECOVERY_QCP_2026_07_01_R1.json", "base_p15_closure_overlay_git_blob_sha"),
     ("ARTIFACT_MANIFEST_OVERLAY_ASSURANCE_PLAN_2026_07_08.json", "base_recovery_qcp_overlay_git_blob_sha"),
@@ -73,7 +73,7 @@ _LOCAL = (
 )
 _FINAL_NAMES = tuple(
     f"ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R{n}.json"
-    for n in range(1, 23)
+    for n in range(1, 24)
 )
 _FINAL = _linear(_FINAL_NAMES, "unused")
 _ALL_NAMES = tuple(name for name, _ in _COMMON + _B1B + _P16) + (
