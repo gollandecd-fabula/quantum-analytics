@@ -13,12 +13,12 @@ from ._admission_contracts_v2 import (
     DatasetControlEvidence,
     DatasetDeclaration,
     DatasetSensitivity,
-    StorageControlEvidence,
     _aware_utc,
 )
 from ._admission_finalize_v2 import finalize_validated_record
 from ._admission_registry_base_v2 import _AdmissionRegistryBaseV2
 from ._admission_validation_v2 import _AdmissionValidationMixinV2
+from ._storage_contracts_v3 import StorageControlEvidence, StorageEnvironment
 
 
 class RealDatasetAdmissionRegistryV2(
@@ -76,4 +76,5 @@ __all__ = [
     "RealDatasetAdmissionRegistry",
     "RealDatasetAdmissionRegistryV2",
     "StorageControlEvidence",
+    "StorageEnvironment",
 ]
