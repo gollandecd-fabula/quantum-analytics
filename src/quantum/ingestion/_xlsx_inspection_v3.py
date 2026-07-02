@@ -18,6 +18,7 @@ from ._xlsx_package_parts import validate_modeled_package_parts
 from ._xlsx_relationships import validate_relationships
 from ._xlsx_workbook import _workbook_shape
 from ._xlsx_workbook_content import validate_workbook_xml_content
+from ._xlsx_worksheet_attributes import validate_worksheet_structural_attributes
 from ._xlsx_xml_lexical import validate_xml_lexical_content
 from ._xlsx_zip_coverage import validate_zip_record_coverage
 
@@ -39,11 +40,18 @@ class XlsxPackageInspector:
             raise XlsxInspectionError("XLSX_WORKBOOK_SIZE_EXCEEDED")
         if package_kind == "ZIP_XLSX":
             validate_zip_record_coverage(workbook)
-        validate_modeled_package_parts(workbook, policy.limits)
+        content_types_part = validate_modeled_package_parts(
+            workbook,
+            policy.limits,
+        )
         validate_xml_lexical_content(workbook, policy.limits)
         workbook_part = validate_workbook_xml_content(workbook, policy.limits)
         auxiliary_parts = validate_modeled_xml_content(workbook, policy.limits)
-        validate_relationships(workbook, policy.limits)
+        worksheet_parts = validate_worksheet_structural_attributes(
+            workbook,
+            policy.limits,
+        )
+        relationship_parts = validate_relationships(workbook, policy.limits)
         validate_cell_structures(workbook, policy.limits)
         shape = _workbook_shape(
             workbook,
@@ -112,7 +120,10 @@ class XlsxPackageInspector:
             "data_row_count": shape.data_row_count,
             "formula_count": shape.formula_count,
             "prohibited_header_count": shape.prohibited_header_count,
+            "content_types_part": content_types_part,
             "workbook_part": workbook_part,
+            "worksheet_parts": worksheet_parts,
+            "relationship_parts": relationship_parts,
             "auxiliary_parts": auxiliary_parts,
         }
         diagnostics = tuple(sorted(mismatch_codes)) if matched is None else ()
