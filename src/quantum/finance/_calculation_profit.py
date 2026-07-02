@@ -39,7 +39,6 @@ def _validated_return_compensation(
         compensated_units.value < 0
         or amount.value < 0
         or (compensated_units.value == 0 and amount.value != 0)
-        or (compensated_units.value > 0 and amount.value <= 0)
     ):
         return _make_nonvalid(
             "BLOCKED",
