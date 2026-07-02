@@ -4,6 +4,7 @@ from hashlib import sha256
 
 from ._xlsx_archive import _extract_workbook
 from ._xlsx_cell_structure import validate_cell_structures
+from ._xlsx_content_model import validate_modeled_xml_content
 from ._xlsx_contracts import (
     XlsxInspectionError,
     XlsxInspectionLimits,
@@ -13,7 +14,6 @@ from ._xlsx_contracts import (
     _canonical_hash,
     normalized_header_sha256,
 )
-from ._xlsx_hidden_content import validate_hidden_xml_content
 from ._xlsx_package_parts import validate_modeled_package_parts
 from ._xlsx_relationships import validate_relationships
 from ._xlsx_workbook import _workbook_shape
@@ -38,7 +38,7 @@ class XlsxPackageInspector:
         if package_kind == "ZIP_XLSX":
             validate_zip_record_coverage(workbook)
         validate_modeled_package_parts(workbook, policy.limits)
-        auxiliary_parts = validate_hidden_xml_content(workbook, policy.limits)
+        auxiliary_parts = validate_modeled_xml_content(workbook, policy.limits)
         validate_relationships(workbook, policy.limits)
         validate_cell_structures(workbook, policy.limits)
         shape = _workbook_shape(
