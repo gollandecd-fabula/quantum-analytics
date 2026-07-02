@@ -6,7 +6,6 @@ from decimal import Decimal
 
 from ._common import (
     FinanceError,
-    _INTEGER_RE,
     _MAX_DECIMAL_INPUT_PRECISION,
     _MAX_DECIMAL_INPUT_SCALE,
     _MAX_EXPRESSION_ARGUMENTS,
@@ -15,9 +14,9 @@ from ._common import (
     _MAX_EXPRESSION_NODES,
     _NUMERIC_TYPES,
     _Value,
-    _is_nonempty_string,
     _make_valid,
     _parse_decimal,
+    _parse_integer,
     _validate_signature,
 )
 from ._expression import _validate_operation_signature
@@ -83,13 +82,10 @@ def validate_expression_ast(
                 if not isinstance(raw, bool):
                     raise FinanceError("EXPRESSION_TYPE_MISMATCH")
             elif value_type == "INTEGER":
-                if not isinstance(raw, str) or _INTEGER_RE.fullmatch(raw) is None:
-                    raise FinanceError("EXPRESSION_TYPE_MISMATCH")
-                _parse_decimal(
+                _parse_integer(
                     raw,
                     code="EXPRESSION_TYPE_MISMATCH",
                     max_precision=_MAX_DECIMAL_INPUT_PRECISION,
-                    max_scale=0,
                 )
             else:
                 _parse_decimal(
