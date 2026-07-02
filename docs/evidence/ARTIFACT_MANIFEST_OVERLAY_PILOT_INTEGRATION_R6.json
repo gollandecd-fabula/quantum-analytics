@@ -1,0 +1,1 @@
+{"base_pilot_integration_r5_overlay_git_blob_sha":"234935dae51c747a1b70922f4cce094fb9a48655","entries":[["tests/integration_manifest_support.py","7fd746fd38208c81e0c5902116f8065e369851b2dfc0aa759e9d250d4cc46a9e",9072]],"hash_encoding":"sha256-hex","overlay_version":6,"reason":"Bind final integration manifest loader","remove_paths":[]}
