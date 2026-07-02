@@ -84,21 +84,35 @@ def calculate_settlement_tax_profit(
         for metric_id in ids
     }
     return_compensation = _validated_return_compensation(inputs, currency)
-    income = _money_sum(
-        [
-            (1, values[ids[0]]),
-            (-1, values[ids[1]]),
-            (1, values[ids[2]]),
-            (1, return_compensation),
-            (-1, values[ids[3]]),
-            (-1, values[ids[4]]),
-            (-1, values[ids[5]]),
-            (-1, values[ids[6]]),
-            (-1, values[ids[7]]),
-            (-1, values[ids[8]]),
-        ],
-        currency=currency,
-    )
+    if return_compensation.state != "VALID":
+        reason = return_compensation.reason_code or "RETURN_COMPENSATION_SEMANTICS_INVALID"
+        prefix = f"DEPENDENCY_{return_compensation.state}:"
+        while reason.startswith(prefix):
+            reason = reason[len(prefix):]
+        income = _make_nonvalid(
+            return_compensation.state,
+            value_type="MONEY",
+            unit="MONEY",
+            currency=currency,
+            reason_code=reason,
+            source_ids=return_compensation.source_ids,
+        )
+    else:
+        income = _money_sum(
+            [
+                (1, values[ids[0]]),
+                (-1, values[ids[1]]),
+                (1, values[ids[2]]),
+                (1, return_compensation),
+                (-1, values[ids[3]]),
+                (-1, values[ids[4]]),
+                (-1, values[ids[5]]),
+                (-1, values[ids[6]]),
+                (-1, values[ids[7]]),
+                (-1, values[ids[8]]),
+            ],
+            currency=currency,
+        )
     rate = _normalize_value(
         _value_from_dict(tax_rate_raw, source_id="tax_rate"),
         policy,
