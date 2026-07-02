@@ -4,7 +4,13 @@ from dataclasses import dataclass
 from datetime import datetime
 from enum import StrEnum
 
-from ._admission_contracts_v2 import AdmissionError, _aware_utc, _safe_identifier, _sha, _uuid
+from ._admission_contracts_v2 import (
+    AdmissionError,
+    _aware_utc,
+    _safe_identifier,
+    _sha,
+    _uuid,
+)
 
 
 class StorageEnvironment(StrEnum):
@@ -19,8 +25,6 @@ class StorageControlEvidence:
     dataset_id: str
     original_file_sha256: str
     storage_key_sha256: str
-    storage_environment: StorageEnvironment
-    loopback_only: bool
     transport_encrypted: bool
     encryption_at_rest: bool
     tenant_scoped_paths: bool
@@ -29,6 +33,8 @@ class StorageControlEvidence:
     least_privilege_credentials: bool
     verified_at: datetime
     verifier_account_id: str
+    storage_environment: StorageEnvironment = StorageEnvironment.HOSTED_EXTERNAL
+    loopback_only: bool = False
 
     def __post_init__(self) -> None:
         _safe_identifier(self.evidence_id, "STORAGE_EVIDENCE_ID_INVALID")
