@@ -136,6 +136,34 @@ class LocalRealDataPilotOrchestratorTests(unittest.TestCase):
         ):
             self.execute(scope=bad)
 
+    def test_required_scope_flags_require_exact_boolean_true(self) -> None:
+        cases = (
+            ("read_only", "false", "PILOT_READ_ONLY_REQUIRED"),
+            ("single_operator", 1, "PILOT_SINGLE_OPERATOR_REQUIRED"),
+            ("single_organization", "yes", "PILOT_SINGLE_ORGANIZATION_REQUIRED"),
+        )
+        for field, value, code in cases:
+            with self.subTest(field=field):
+                bad = replace(self.scope, **{field: value})
+                with self.assertRaisesRegex(LocalPilotExecutionError, code):
+                    self.execute(scope=bad)
+
+    def test_forbidden_scope_flags_require_exact_boolean_false(self) -> None:
+        cases = (
+            ("marketplace_write_enabled", 0, "PILOT_MARKETPLACE_WRITES_FORBIDDEN"),
+            (
+                "production_credentials_enabled",
+                "false",
+                "PILOT_PRODUCTION_CREDENTIALS_FORBIDDEN",
+            ),
+            ("public_hosting_enabled", None, "PILOT_PUBLIC_HOSTING_FORBIDDEN"),
+        )
+        for field, value, code in cases:
+            with self.subTest(field=field):
+                bad = replace(self.scope, **{field: value})
+                with self.assertRaisesRegex(LocalPilotExecutionError, code):
+                    self.execute(scope=bad)
+
     def test_finance_organization_mismatch_fails_closed(self) -> None:
         request = deepcopy(self.request)
         request["organization_id"] = "org-2"
