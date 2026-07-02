@@ -167,15 +167,15 @@ class B2SourceReconciliationTests(unittest.TestCase):
                 reconciled_at=deadline + timedelta(microseconds=1),
             )
 
-    def test_reconciliation_at_retention_deadline_is_allowed(self) -> None:
+    def test_reconciliation_at_retention_deadline_fails_closed(self) -> None:
         deadline = datetime(2026, 7, 3, tzinfo=UTC)
-        result = self.reconcile(
-            snapshot(),
-            snapshot(),
-            record=admitted_record(retention_deadline=deadline),
-            reconciled_at=deadline,
-        )
-        self.assertEqual(result["state"], "RECONCILED")
+        with self.assertRaisesRegex(ReconciliationError, "RECONCILIATION_RETENTION_EXPIRED"):
+            self.reconcile(
+                snapshot(),
+                snapshot(),
+                record=admitted_record(retention_deadline=deadline),
+                reconciled_at=deadline,
+            )
 
     def test_dataset_and_source_hash_are_bound(self) -> None:
         changed = deepcopy(snapshot())
