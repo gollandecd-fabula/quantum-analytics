@@ -12,10 +12,30 @@ _EXTENDED_PROPERTIES_NS = (
 _DRAWING_NS = "http://schemas.openxmlformats.org/drawingml/2006/main"
 
 _EXPECTED_ROOTS = {
-    "docprops/core.xml": f"{{{_CORE_PROPERTIES_NS}}}coreProperties",
-    "docprops/app.xml": f"{{{_EXTENDED_PROPERTIES_NS}}}Properties",
-    "xl/styles.xml": f"{{{_SPREADSHEET_NS}}}styleSheet",
-    "xl/theme/theme1.xml": f"{{{_DRAWING_NS}}}theme",
+    "docprops/core.xml": frozenset(
+        {
+            "coreProperties",
+            f"{{{_CORE_PROPERTIES_NS}}}coreProperties",
+        }
+    ),
+    "docprops/app.xml": frozenset(
+        {
+            "Properties",
+            f"{{{_EXTENDED_PROPERTIES_NS}}}Properties",
+        }
+    ),
+    "xl/styles.xml": frozenset(
+        {
+            "styleSheet",
+            f"{{{_SPREADSHEET_NS}}}styleSheet",
+        }
+    ),
+    "xl/theme/theme1.xml": frozenset(
+        {
+            "theme",
+            f"{{{_DRAWING_NS}}}theme",
+        }
+    ),
 }
 
 
@@ -24,11 +44,11 @@ def _has_text(value: str | None) -> bool:
 
 
 def validate_auxiliary_content(path: str, root) -> None:
-    expected_root = _EXPECTED_ROOTS.get(path)
-    if expected_root is None:
+    expected_roots = _EXPECTED_ROOTS.get(path)
+    if expected_roots is None:
         raise XlsxInspectionError("XLSX_AUXILIARY_PART_UNMODELED")
     if (
-        root.tag != expected_root
+        root.tag not in expected_roots
         or root.attrib
         or list(root)
         or _has_text(root.text)
