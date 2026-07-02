@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import compileall
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -13,6 +14,14 @@ FORBIDDEN_SOURCE_MARKERS = (
     "BEGIN PRIVATE KEY",
     "marketplace_write_enabled = true",
 )
+
+_FAILURE_HEADER = re.compile(r"^(?:FAIL|ERROR): .+$")
+_FAILURE_DETAIL = re.compile(
+    r"^(?:AssertionError|TypeError|ValueError|RuntimeError|ImportError|"
+    r"ModuleNotFoundError|AttributeError|KeyError|FinanceError|"
+    r"XlsxInspectionError|ReconciliationError):"
+)
+_SUMMARY_LINE = re.compile(r"^(?:Ran \d+ tests? in |FAILED \(|OK$)")
 
 
 def project_root() -> Path:
@@ -26,7 +35,15 @@ def scan_forbidden_markers(root: Path) -> None:
             continue
         if any(part in {".git", "__pycache__"} for part in path.parts):
             continue
-        if path.suffix.lower() not in {".py", ".md", ".toml", ".sql", ".json", ".yaml", ".yml"}:
+        if path.suffix.lower() not in {
+            ".py",
+            ".md",
+            ".toml",
+            ".sql",
+            ".json",
+            ".yaml",
+            ".yml",
+        }:
             continue
         text = path.read_text(encoding="utf-8", errors="ignore")
         for marker in FORBIDDEN_SOURCE_MARKERS:
@@ -47,6 +64,17 @@ def _emit_test_output(result: subprocess.CompletedProcess[str]) -> None:
         print("UNITTEST_DIAGNOSTICS_BEGIN")
         print("\n".join(diagnostics))
         print("UNITTEST_DIAGNOSTICS_END")
+    failure_index = [
+        line
+        for line in lines
+        if _FAILURE_HEADER.match(line)
+        or _FAILURE_DETAIL.match(line)
+        or _SUMMARY_LINE.match(line)
+    ]
+    if failure_index:
+        print("UNITTEST_FAILURE_INDEX_BEGIN")
+        print("\n".join(failure_index))
+        print("UNITTEST_FAILURE_INDEX_END")
     print("UNITTEST_FAILURE_TAIL_BEGIN")
     print("\n".join(lines[-24:]))
     print("UNITTEST_FAILURE_TAIL_END")
