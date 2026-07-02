@@ -1,6 +1,6 @@
-execution_state_id: STAGE-B-EXECUTION-STATE-v2
+execution_state_id: STAGE-B-EXECUTION-STATE-v3
 stage_contract_id: STAGE-B-BUILD-v1
-updated_on: 2026-07-01
+updated_on: 2026-07-02
 source_of_truth_for_live_unit_state: true
 macro_stage: B
 status: ACTIVE
@@ -118,8 +118,13 @@ cross_cutting_units:
     required_for_pilot: true
     issue: 41
     decision: docs/decisions/DR-2026-07-01-REAL-COMMERCIAL-DATA-PILOT.md
+    local_storage_decision: docs/decisions/DR-2026-07-02-LOCAL-DISK-ENCRYPTION-NOT-REQUIRED.md
     contract: docs/security/REAL_COMMERCIAL_DATA_ADMISSION_CONTRACT_2026_07_08.md
     allowed_access: CLOSED_INVITE_ONLY
+    local_network_exposure: LOOPBACK_ONLY
+    local_disk_encryption: NOT_REQUIRED
+    hosted_external_storage_encryption: REQUIRED
+    non_loopback_transport_tls: REQUIRED
     raw_data_external_models: PROHIBITED
     marketplace_mode: READ_ONLY
 
