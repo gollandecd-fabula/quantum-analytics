@@ -188,7 +188,7 @@ def execute_local_read_only_pilot(
             label,
             finance_requests[label],
             scope,
-            admitted_at=admitted_at,
+            admitted_at=admitted.latest_decision.decided_at,
             reconciled_at=reconciled_at,
         )
         result = calculate(request)
