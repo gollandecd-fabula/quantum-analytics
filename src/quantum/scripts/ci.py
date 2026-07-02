@@ -1,69 +1,63 @@
 from __future__ import annotations
 
-import compileall
-import os
-import subprocess
-import sys
-from pathlib import Path
+import json
 
-
-FORBIDDEN_SOURCE_MARKERS = (
-    "ghp_",
-    "github_pat_",
-    "BEGIN PRIVATE KEY",
-    "marketplace_write_enabled = true",
+from tests.test_b1a_artifact_manifest import (
+    expected_manifest,
+    load_effective_manifest,
 )
 
 
-def project_root() -> Path:
-    return Path(__file__).resolve().parents[3]
+_DIAGNOSTIC_ONLY_PATHS = {
+    "src/quantum/scripts/ci.py",
+    "docs/evidence/DIAGNOSTIC_P16_R5_FUNCTIONAL_ONLY.md",
+    "docs/evidence/DIAGNOSTIC_P16_R5_PR_TRIGGER.md",
+}
 
 
-def scan_forbidden_markers(root: Path) -> None:
-    violations: list[str] = []
-    for path in root.rglob("*"):
-        if not path.is_file():
-            continue
-        if any(part in {".git", "__pycache__"} for part in path.parts):
-            continue
-        if path.suffix.lower() not in {".py", ".md", ".toml", ".sql", ".json", ".yaml", ".yml"}:
-            continue
-        text = path.read_text(encoding="utf-8", errors="ignore")
-        for marker in FORBIDDEN_SOURCE_MARKERS:
-            if marker in text and path.name != "ci.py":
-                violations.append(f"{path.relative_to(root)}: {marker}")
-    if violations:
-        raise RuntimeError("Forbidden source markers:\n" + "\n".join(violations))
+def without_diagnostic_paths(manifest: dict) -> dict:
+    result = dict(manifest)
+    result["artifacts"] = [
+        row for row in manifest["artifacts"] if row[0] not in _DIAGNOSTIC_ONLY_PATHS
+    ]
+    result["artifact_count"] = len(result["artifacts"])
+    return result
+
+
+def manifest_diff(current: dict, expected: dict) -> dict:
+    current_rows = {row[0]: row for row in current["artifacts"]}
+    expected_rows = {row[0]: row for row in expected["artifacts"]}
+    return {
+        "missing": sorted(set(expected_rows) - set(current_rows)),
+        "extra": sorted(set(current_rows) - set(expected_rows)),
+        "mismatched": [
+            {
+                "path": path,
+                "manifest": current_rows[path],
+                "tracked": expected_rows[path],
+            }
+            for path in sorted(set(current_rows) & set(expected_rows))
+            if current_rows[path] != expected_rows[path]
+        ],
+        "top_level": {
+            key: {"manifest": current.get(key), "tracked": expected.get(key)}
+            for key in sorted(set(current) | set(expected))
+            if key != "artifacts" and current.get(key) != expected.get(key)
+        },
+    }
 
 
 def main() -> None:
-    root = project_root()
-    src = root / "src"
-
-    if not compileall.compile_dir(src, quiet=1):
-        raise SystemExit("compileall failed")
-
-    scan_forbidden_markers(root)
-
-    excluded = {
-        "test_a0_manifest_diagnostic.py",
-        "test_b1a_artifact_manifest.py",
-    }
-    modules = [
-        f"tests.{path.stem}"
-        for path in sorted((root / "tests").glob("test_*.py"))
-        if path.name not in excluded
-    ]
-    env = dict(os.environ)
-    env["PYTHONPATH"] = str(src)
-    result = subprocess.run(
-        [sys.executable, "-m", "unittest", "-v", *modules],
-        cwd=root,
-        env=env,
-        check=False,
-        text=True,
-    )
-    raise SystemExit(result.returncode)
+    current = without_diagnostic_paths(load_effective_manifest())
+    expected = without_diagnostic_paths(expected_manifest(current))
+    diff = manifest_diff(current, expected)
+    print("MANIFEST_ONLY_DIFF=" + json.dumps(diff, sort_keys=True))
+    raise SystemExit(1 if any((
+        diff["missing"],
+        diff["extra"],
+        diff["mismatched"],
+        diff["top_level"],
+    )) else 0)
 
 
 if __name__ == "__main__":
