@@ -93,7 +93,7 @@ class P16TenthReviewFollowupTests(unittest.TestCase):
         )
         payload = _add_workbook_relationship(
             workbook,
-            b'<Relationship Id="rHidden" '
+            b'<Relationship Id="rId2" '
             b'Type="http://schemas.openxmlformats.org/officeDocument/2006/'
             b'relationships/worksheet" Target="worksheets/hidden.xml"/>',
         )
