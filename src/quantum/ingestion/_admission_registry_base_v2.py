@@ -25,7 +25,7 @@ class _AdmissionRegistryBaseV2:
         self._records: dict[tuple[str, str], DatasetAdmissionRecord] = {}
         self._original_digest_owners: dict[tuple[str, str], str] = {}
         self._source_identity_owners: dict[
-            tuple[str, str, str, str, date, date],
+            tuple[str, str, str, str, str, date, date],
             str,
         ] = {}
         self._workbook_digest_owners: dict[tuple[str, str], str] = {}
@@ -163,6 +163,7 @@ class _AdmissionRegistryBaseV2:
         digest_key = (tenant.tenant_id, declaration.original_file_sha256)
         source_key = (
             tenant.tenant_id,
+            declaration.uploader_account_id,
             declaration.marketplace,
             declaration.report_type,
             declaration.source_internal_id,
