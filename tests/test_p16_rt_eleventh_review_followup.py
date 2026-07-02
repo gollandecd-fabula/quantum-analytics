@@ -32,6 +32,48 @@ class P16EleventhReviewFollowupTests(unittest.TestCase):
             XlsxPackageInspector().inspect(payload=payload, policy=policy())
         self.assertEqual(error.exception.code, "XLSX_ROOT_RELATIONSHIP_INVALID")
 
+    def test_root_relationship_hidden_identifier_value_is_rejected(self):
+        payload = rewrite_xlsx_part(
+            build_xlsx(),
+            "_rels/.rels",
+            lambda value: value.replace(
+                b'Id="rId1"',
+                b'Id="customer_email_alice@example.com"',
+                1,
+            ),
+        )
+        with self.assertRaises(XlsxInspectionError) as error:
+            XlsxPackageInspector().inspect(payload=payload, policy=policy())
+        self.assertEqual(error.exception.code, "XLSX_ROOT_RELATIONSHIP_INVALID")
+
+    def test_root_relationship_unmodeled_target_mode_is_rejected(self):
+        payload = rewrite_xlsx_part(
+            build_xlsx(),
+            "_rels/.rels",
+            lambda value: value.replace(
+                b'Target="xl/workbook.xml"',
+                b'Target="xl/workbook.xml" TargetMode="hidden-commercial-text"',
+                1,
+            ),
+        )
+        with self.assertRaises(XlsxInspectionError) as error:
+            XlsxPackageInspector().inspect(payload=payload, policy=policy())
+        self.assertEqual(error.exception.code, "XLSX_ROOT_RELATIONSHIP_INVALID")
+
+    def test_root_relationship_internal_target_mode_is_allowed(self):
+        payload = rewrite_xlsx_part(
+            build_xlsx(),
+            "_rels/.rels",
+            lambda value: value.replace(
+                b'Target="xl/workbook.xml"',
+                b'Target="xl/workbook.xml" TargetMode="Internal"',
+                1,
+            ),
+        )
+        result = XlsxPackageInspector().inspect(payload=payload, policy=policy())
+        self.assertIsNotNone(result.matched_schema_id)
+        self.assertEqual(result.diagnostics, ())
+
     def test_defined_name_attribute_is_rejected(self):
         payload = rewrite_xlsx_part(
             build_xlsx(),
