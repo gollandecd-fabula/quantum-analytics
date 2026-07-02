@@ -15,6 +15,10 @@ from ._xlsx_contracts import (
     normalized_header_sha256,
 )
 from ._xlsx_package_parts import validate_modeled_package_parts
+from ._xlsx_r19_hardening import (
+    validate_archive_extra_fields,
+    validate_workbook_r19_hardening,
+)
 from ._xlsx_relationships import validate_relationships
 from ._xlsx_workbook import _workbook_shape
 from ._xlsx_workbook_content import validate_workbook_xml_content
@@ -35,11 +39,14 @@ class XlsxPackageInspector:
         if not isinstance(policy, XlsxInspectionPolicy):
             raise XlsxInspectionError("XLSX_POLICY_REQUIRED")
         validate_zip_record_coverage(payload)
+        validate_archive_extra_fields(payload)
         package_kind, workbook = _extract_workbook(payload, policy.limits)
         if len(workbook) > policy.limits.max_file_bytes:
             raise XlsxInspectionError("XLSX_WORKBOOK_SIZE_EXCEEDED")
         if package_kind == "ZIP_XLSX":
             validate_zip_record_coverage(workbook)
+            validate_archive_extra_fields(workbook)
+        validate_workbook_r19_hardening(workbook, policy.limits)
         content_types_part = validate_modeled_package_parts(
             workbook,
             policy.limits,
