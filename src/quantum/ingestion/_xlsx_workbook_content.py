@@ -89,9 +89,9 @@ def _validate_workbook_root(root) -> None:
     for element in root.iter():
         if element.tag not in _ALLOWED_TAGS:
             raise XlsxInspectionError("XLSX_WORKBOOK_ELEMENT_UNMODELED")
-        _validate_attributes(element)
         if _has_text(element.text) or _has_text(element.tail):
             raise XlsxInspectionError("XLSX_WORKBOOK_TEXT_UNMODELED")
+        _validate_attributes(element)
     sheets = [child for child in root if child.tag == _SHEETS]
     if len(sheets) != 1:
         raise XlsxInspectionError("XLSX_SHEETS_MISSING")
