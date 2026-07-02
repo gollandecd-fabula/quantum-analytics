@@ -4,6 +4,7 @@ from collections.abc import Mapping
 from typing import Any
 
 from ._common import FinanceError, canonical_hash
+from ._rounding import validate_rounding_policy
 from ._runtime_legacy import (
     evaluate_expression,
     evaluate_resolved_rule,
