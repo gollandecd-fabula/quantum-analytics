@@ -31,6 +31,7 @@ OVERLAYS = (
     ("ARTIFACT_MANIFEST_OVERLAY_P16_REAL_XLSX_ADMISSION_R3.json", "base_p16_real_xlsx_admission_r2_overlay_git_blob_sha"),
     ("ARTIFACT_MANIFEST_OVERLAY_P16_REAL_XLSX_ADMISSION_R4.json", "base_p16_real_xlsx_admission_r3_overlay_git_blob_sha"),
     ("ARTIFACT_MANIFEST_OVERLAY_P16_REAL_XLSX_ADMISSION_R5.json", "base_p16_real_xlsx_admission_r4_overlay_git_blob_sha"),
+    ("ARTIFACT_MANIFEST_OVERLAY_P16_REAL_XLSX_ADMISSION_R6.json", "base_p16_real_xlsx_admission_r5_overlay_git_blob_sha"),
 )
 CONTROL_PATHS = {
     "docs/evidence/ARTIFACT_MANIFEST.json",
