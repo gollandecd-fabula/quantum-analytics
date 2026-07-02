@@ -79,6 +79,23 @@ class B1bReturnSemanticsTests(unittest.TestCase):
             "RETURN_COMPENSATION_SEMANTICS_INVALID",
         )
 
+    def test_tiny_positive_compensation_remains_valid_after_rounding(self) -> None:
+        request = valid_request()
+        request["inputs"]["resalable_returned_units"] = typed(
+            "VALID", "1", "INTEGER", "ITEM"
+        )
+        request["inputs"]["compensated_returned_units"] = typed(
+            "VALID", "1", "INTEGER", "ITEM"
+        )
+        request["inputs"]["return_compensation_amount"] = typed(
+            "VALID", "0.00000004", "MONEY", "MONEY", "RUB"
+        )
+        results = calculate(request)["results"]
+        self.assertEqual(results["net_marketplace_income_amount"]["state"], "VALID")
+        self.assertEqual(results["net_marketplace_income_amount"]["value"], "8100.00")
+        self.assertEqual(results["net_profit_amount"]["state"], "VALID")
+        self.assertEqual(results["net_profit_amount"]["value"], "3580.00")
+
     def test_missing_return_disposition_blocks_cost_and_profit(self) -> None:
         request = valid_request()
         request["inputs"].pop("resalable_returned_units")
