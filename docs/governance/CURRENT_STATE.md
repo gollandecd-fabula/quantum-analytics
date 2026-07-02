@@ -1,6 +1,6 @@
 # CURRENT STATE
 
-Date: 2026-07-01
+Date: 2026-07-02
 Status: `BUILD_P1_5_COMPLETE_R3_REAL_DATA_PILOT_AUTHORIZED_PENDING_CONTROLS`
 Active contract: `STAGE-B-BUILD-v1`
 Live execution state: `docs/evidence/STAGE_B_EXECUTION_STATE.yaml`
@@ -8,7 +8,9 @@ Current unit: `R3D1 — REAL_DATA_PILOT_ADMISSION`
 Tracking issue: `#41`
 Working branch: `r3-real-commercial-data-pilot-v1`
 Decision: `docs/decisions/DR-2026-07-01-REAL-COMMERCIAL-DATA-PILOT.md`
+Local-storage decision: `docs/decisions/DR-2026-07-02-LOCAL-DISK-ENCRYPTION-NOT-REQUIRED.md`
 Admission contract: `docs/security/REAL_COMMERCIAL_DATA_ADMISSION_CONTRACT_2026_07_08.md`
+Assurance-plan amendment: `docs/governance/ASSURANCE_EXECUTION_PLAN_2026_07_08_LOCAL_STORAGE_AMENDMENT.md`
 
 ## Completed foundation
 
@@ -33,7 +35,7 @@ Prior verification remains valid for its exact historical head:
 - artifact-manifest equality passed;
 - unresolved review threads: 0.
 
-## New explicit R3 decision
+## New explicit R3 decisions
 
 The July 8 closed pilot must operate on real commercial data. Synthetic fixtures remain required for
 testing but are insufficient for `PILOT_READY`.
@@ -41,11 +43,20 @@ testing but are insufficient for `PILOT_READY`.
 Real data is `AUTHORIZED_FOR_CLOSED_PILOT_PENDING_ADMISSION_CONTROLS`, not yet automatically
 `ADMITTED`. Every dataset must pass the Real Commercial Data Admission Contract.
 
+For the local single-user version:
+
+- full-disk encryption is not required;
+- local application-level encryption at rest is not required;
+- absence of local disk encryption is not a pilot blocker;
+- the runtime must remain loopback-only unless separately approved;
+- encryption remains required for hosted, cloud, shared, removable, exported, and backup storage;
+- TLS remains required for separately approved non-loopback transport.
+
 Required boundaries:
 
 - invitation or approved-request access only;
 - pseudonymous accounts and minimized personal data;
-- encrypted, tenant-scoped storage;
+- tenant- and account-scoped storage and access;
 - immutable source SHA-256 and Evidence Chain;
 - row-level and aggregate source reconciliation;
 - privacy-safe logging;
@@ -56,11 +67,11 @@ Required boundaries:
 ## Critical path
 
 B1b, B2, and B6 remain on the financial critical path. The real-data pilot additionally requires
-quarantine, classification, tenant isolation, secure persistence, reconciliation, deletion/retention,
-and recovery controls. External public access remains unauthorized.
+quarantine, classification, tenant/account isolation, controlled persistence, reconciliation,
+deletion/retention, and recovery controls. External public access remains unauthorized.
 
 `PILOT_READY` requires at least one authorized real dataset to complete admission, ingestion, calculation,
-reconciliation, tenant-isolation, and deletion/retention verification with zero open P0/P1 findings.
+reconciliation, tenant/account-isolation, and deletion/retention verification with zero open P0/P1 findings.
 
 ## Exclusions
 
