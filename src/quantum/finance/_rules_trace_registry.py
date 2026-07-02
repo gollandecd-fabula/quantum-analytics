@@ -7,7 +7,7 @@ from threading import RLock
 from typing import Any
 
 from ._common import FinanceError, canonical_hash
-from ._rules import _validate_rule_document
+from ._rule_documents import _validate_rule_document
 
 _CACHE_LIMIT = 4096
 _LOCK = RLock()
