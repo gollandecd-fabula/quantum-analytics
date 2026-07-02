@@ -17,7 +17,11 @@ DATASET_ID = "11111111-1111-4111-8111-111111111111"
 FILE_HASH = "a" * 64
 
 
-def declaration(*, expected_rows: int | None = 10) -> DatasetDeclaration:
+def declaration(
+    *,
+    expected_rows: int | None = 10,
+    retention_deadline: datetime | None = None,
+) -> DatasetDeclaration:
     now = datetime(2026, 7, 2, tzinfo=UTC)
     return DatasetDeclaration(
         dataset_id=DATASET_ID,
@@ -37,13 +41,20 @@ def declaration(*, expected_rows: int | None = 10) -> DatasetDeclaration:
         sensitivity=DatasetSensitivity.COMMERCIAL_CONFIDENTIAL,
         owner_authority_reference="owner-approval-1",
         lawful_authority_attested=True,
-        retention_deadline=now + timedelta(days=30),
+        retention_deadline=retention_deadline or now + timedelta(days=30),
         declared_at=now,
     )
 
 
-def admitted_record(*, state: DatasetAdmissionState = DatasetAdmissionState.ADMITTED) -> DatasetAdmissionRecord:
-    return DatasetAdmissionRecord(declaration=declaration(), state=state)
+def admitted_record(
+    *,
+    state: DatasetAdmissionState = DatasetAdmissionState.ADMITTED,
+    retention_deadline: datetime | None = None,
+) -> DatasetAdmissionRecord:
+    return DatasetAdmissionRecord(
+        declaration=declaration(retention_deadline=retention_deadline),
+        state=state,
+    )
 
 
 def policy() -> dict:
@@ -94,7 +105,15 @@ def snapshot(*, sales: str = "10000.00", commission: str = "1000.00", rows: int 
 
 
 class B2SourceReconciliationTests(unittest.TestCase):
-    def reconcile(self, source: dict, calculated: dict, *, record: DatasetAdmissionRecord | None = None, account_id: str = "account-1") -> dict:
+    def reconcile(
+        self,
+        source: dict,
+        calculated: dict,
+        *,
+        record: DatasetAdmissionRecord | None = None,
+        account_id: str = "account-1",
+        reconciled_at: datetime = datetime(2026, 7, 2, 12, tzinfo=UTC),
+    ) -> dict:
         return reconcile_source_totals(
             admission_record=record or admitted_record(),
             tenant_id="tenant-1",
@@ -102,7 +121,7 @@ class B2SourceReconciliationTests(unittest.TestCase):
             source_snapshot=source,
             calculated_snapshot=calculated,
             policy=policy(),
-            reconciled_at=datetime(2026, 7, 2, 12, tzinfo=UTC),
+            reconciled_at=reconciled_at,
         )
 
     def test_exact_match_is_reconciled_and_hashed(self) -> None:
@@ -137,6 +156,26 @@ class B2SourceReconciliationTests(unittest.TestCase):
     def test_same_tenant_non_owner_account_fails_closed(self) -> None:
         with self.assertRaisesRegex(ReconciliationError, "RECONCILIATION_DATASET_NOT_FOUND"):
             self.reconcile(snapshot(), snapshot(), account_id="account-2")
+
+    def test_reconciliation_after_retention_deadline_fails_closed(self) -> None:
+        deadline = datetime(2026, 7, 3, tzinfo=UTC)
+        with self.assertRaisesRegex(ReconciliationError, "RECONCILIATION_RETENTION_EXPIRED"):
+            self.reconcile(
+                snapshot(),
+                snapshot(),
+                record=admitted_record(retention_deadline=deadline),
+                reconciled_at=deadline + timedelta(microseconds=1),
+            )
+
+    def test_reconciliation_at_retention_deadline_is_allowed(self) -> None:
+        deadline = datetime(2026, 7, 3, tzinfo=UTC)
+        result = self.reconcile(
+            snapshot(),
+            snapshot(),
+            record=admitted_record(retention_deadline=deadline),
+            reconciled_at=deadline,
+        )
+        self.assertEqual(result["state"], "RECONCILED")
 
     def test_dataset_and_source_hash_are_bound(self) -> None:
         changed = deepcopy(snapshot())
