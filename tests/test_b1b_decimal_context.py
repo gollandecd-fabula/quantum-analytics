@@ -89,9 +89,13 @@ class B1bDecimalContextTests(unittest.TestCase):
 
     def test_kernel_preserves_policy_precision_across_arithmetic(self):
         zero = typed("VALID", "0", "MONEY", "MONEY", "RUB")
+        zero_items = typed("VALID", "0", "INTEGER", "ITEM")
         inputs = {
             "gross_sales_units": typed("VALID", "3", "INTEGER", "ITEM"),
-            "returned_units": typed("VALID", "0", "INTEGER", "ITEM"),
+            "returned_units": deepcopy(zero_items),
+            "resalable_returned_units": deepcopy(zero_items),
+            "compensated_returned_units": deepcopy(zero_items),
+            "return_compensation_amount": deepcopy(zero),
             "gross_sales_amount": typed("VALID", BIG, "MONEY", "MONEY", "RUB"),
             "discounts_amount": deepcopy(zero),
             "subsidies_amount": deepcopy(zero),
