@@ -7,6 +7,7 @@ from ._calculation_expenses import calculate_other_expense
 from ._calculation_profit import calculate_settlement_tax_profit
 from ._common import FinanceError,KERNEL_SCHEMA_VERSION,PUBLICATION_STATE,_CURRENCY_RE,_MAX_EXPRESSION_NODES,_MAX_OTHER_EXPENSE_COMPONENTS,_is_nonempty_string,_parse_rfc3339,_value_from_dict,canonical_hash
 from ._expression import evaluate_expression as _evaluate_expression
+from ._expression_limits import validate_expression_policy_limits
 from ._metrics import _metric,_validate_ref
 from ._rounding import _decimal_context,_normalize_value,validate_rounding_policy
 from ._rules_hardening import evaluate_resolved_rule,resolve_rule
@@ -26,6 +27,7 @@ def evaluate_expression(
     policy: Mapping[str, Any],
 ) -> dict[str, Any]:
     validated_policy=validate_rounding_policy(policy)
+    validate_expression_policy_limits(expression,validated_policy)
     with _decimal_context(validated_policy,operation_budget=_MAX_EXPRESSION_NODES):
         return _evaluate_expression(expression,variables,dependencies,validated_policy)
 
