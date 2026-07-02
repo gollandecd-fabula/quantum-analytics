@@ -49,6 +49,20 @@ class P16RedTeamCellStructureTests(unittest.TestCase):
         )
         self._assert_structure_rejected(payload)
 
+    def test_unmodeled_cell_child_is_rejected(self):
+        payload = rewrite_xlsx_part(
+            build_xlsx(),
+            "xl/worksheets/sheet1.xml",
+            lambda value: value.replace(
+                b'<c r="A2" t="inlineStr"><is><t>1</t></is></c>',
+                b'<c r="A2"><ext><secret>hidden</secret></ext></c>',
+                1,
+            ),
+        )
+        with self.assertRaises(XlsxInspectionError) as error:
+            XlsxPackageInspector().inspect(payload=payload, policy=policy())
+        self.assertEqual(error.exception.code, "XLSX_CELL_CHILD_UNMODELED")
+
     def test_cell_outside_sheet_data_is_rejected(self):
         payload = rewrite_xlsx_part(
             build_xlsx(),
