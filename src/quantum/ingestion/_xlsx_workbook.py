@@ -112,7 +112,6 @@ def _parse_worksheet(
     if len(sheet_data_nodes) != 1:
         raise XlsxInspectionError("XLSX_SHEET_DATA_STRUCTURE_INVALID")
     sheet_data = sheet_data_nodes[0]
-    _validate_unmodeled_worksheet_nodes(sheet_root, sheet_data)
     rows = sheet_data.findall(f"{{{_SPREADSHEET_NS}}}row")
     if len(sheet_data.findall(f".//{{{_SPREADSHEET_NS}}}row")) != len(rows):
         raise XlsxInspectionError("XLSX_ROW_STRUCTURE_INVALID")
@@ -127,6 +126,7 @@ def _parse_worksheet(
         raise XlsxInspectionError("XLSX_CELL_OUTSIDE_ROW")
     if len(sheet_root.findall(f".//{{{_SPREADSHEET_NS}}}c")) != direct_cell_count:
         raise XlsxInspectionError("XLSX_CELL_OUTSIDE_SHEET_DATA")
+    _validate_unmodeled_worksheet_nodes(sheet_root, sheet_data)
 
     parsed_rows: dict[int, dict[int, str]] = {}
     nonempty_rows: set[int] = set()
