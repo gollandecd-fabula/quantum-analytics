@@ -13,8 +13,10 @@ from ._rounding import _decimal_context,_normalize_value,validate_rounding_polic
 from ._rules_hardening import evaluate_resolved_rule,resolve_rule
 
 _KERNEL_INPUT_NAMES=frozenset({
- "gross_sales_units","returned_units","gross_sales_amount","discounts_amount",
- "subsidies_amount","marketplace_commission_amount","forward_logistics_amount",
+ "gross_sales_units","returned_units","resalable_returned_units",
+ "compensated_returned_units","return_compensation_amount",
+ "gross_sales_amount","discounts_amount","subsidies_amount",
+ "marketplace_commission_amount","forward_logistics_amount",
  "reverse_logistics_amount","storage_amount","advertising_amount",
  "fines_withholdings_amount",
 })
