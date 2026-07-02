@@ -43,7 +43,10 @@ class P16SeventhReviewFollowupTests(unittest.TestCase):
                 payload=wrap_xlsx(workbook),
                 policy=limited_policy,
             )
-        self.assertEqual(error.exception.code, "XLSX_ENTRY_LIMIT_EXCEEDED")
+        self.assertEqual(
+            error.exception.code,
+            "XLSX_ARCHIVE_ENTRY_LIMIT_EXCEEDED",
+        )
 
     def test_blank_root_relationship_id_is_rejected(self):
         payload = rewrite_xlsx_part(
