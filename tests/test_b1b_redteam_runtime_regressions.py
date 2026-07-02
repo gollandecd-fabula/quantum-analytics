@@ -45,7 +45,7 @@ def valid_request() -> dict:
 
 class ExplodingCopy:
     def __deepcopy__(self, memo):
-        raise AssertionError("deepcopy must not run for a non-mapping request")
+        raise AssertionError("deepcopy must not run before request admission")
 
 
 class B1bRedTeamRuntimeRegressions(unittest.TestCase):
@@ -54,6 +54,13 @@ class B1bRedTeamRuntimeRegressions(unittest.TestCase):
             with self.subTest(target=target.__module__):
                 with self.assertRaisesRegex(FinanceError, "KERNEL_REQUEST_INVALID"):
                     target(ExplodingCopy())  # type: ignore[arg-type]
+
+    def test_malformed_mapping_fails_before_nested_deepcopy(self) -> None:
+        malformed = {"extra": ExplodingCopy()}
+        for target in (calculate, calculate_underlying):
+            with self.subTest(target=target.__module__):
+                with self.assertRaisesRegex(FinanceError, "KERNEL_REQUEST_INVALID"):
+                    target(malformed)  # type: ignore[arg-type]
 
     def test_profit_per_unit_cites_complete_profit_expense_boundary(self) -> None:
         for target in (calculate, calculate_underlying):
