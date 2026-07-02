@@ -24,7 +24,7 @@ class P16ArchiveBoundsAndWorksheetXmlTests(unittest.TestCase):
         with self.assertRaises(XlsxInspectionError) as error:
             XlsxPackageInspector().inspect(
                 payload=wrap_xlsx(workbook),
-                policy=policy(package_kind="ZIP_XLSX"),
+                policy=policy(),
             )
         self.assertEqual(
             error.exception.code,
