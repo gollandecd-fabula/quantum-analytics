@@ -32,6 +32,9 @@ _WORKSHEET_RELATIONSHIP_TYPES = {
     "http://purl.oclc.org/ooxml/officeDocument/relationships/worksheet",
 }
 _URI_SCHEME = re.compile(r"^[A-Za-z][A-Za-z0-9+.-]*:")
+_WORKBOOK_RELATIONSHIP_ID = re.compile(
+    r"^(?:rId[1-9][0-9]{0,5}|rStyles|rTheme|rSharedStrings)$"
+)
 _AUXILIARY_TARGETS = {
     "styles": "xl/styles.xml",
     "theme": "xl/theme/theme1.xml",
@@ -42,6 +45,14 @@ _ALLOWED_RELATIONSHIP_ATTRIBUTES = frozenset({"Id", "Type", "Target"})
 
 def _has_text(value: str | None) -> bool:
     return value is not None and bool(value.strip())
+
+
+def _valid_workbook_relationship_id(value: object) -> bool:
+    return (
+        isinstance(value, str)
+        and value == value.strip()
+        and _WORKBOOK_RELATIONSHIP_ID.fullmatch(value) is not None
+    )
 
 
 def _reject_external_target(target: str, target_mode: str | None) -> None:
@@ -168,7 +179,10 @@ def validate_relationships(
             referenced_ids: set[str] = set()
             for sheet in sheets.findall(f"{{{_SPREADSHEET_NS}}}sheet"):
                 relation_id = sheet.get(f"{{{_OFFICE_RELATIONSHIP_NS}}}id")
-                if not relation_id or relation_id in referenced_ids:
+                if (
+                    not _valid_workbook_relationship_id(relation_id)
+                    or relation_id in referenced_ids
+                ):
                     raise XlsxInspectionError("XLSX_SHEET_RELATIONSHIP_MISSING")
                 referenced_ids.add(relation_id)
 
@@ -194,9 +208,7 @@ def validate_relationships(
                 relation_type = relation.get("Type")
                 raw_target = relation.get("Target")
                 if (
-                    not isinstance(relation_id, str)
-                    or relation_id != relation_id.strip()
-                    or not relation_id
+                    not _valid_workbook_relationship_id(relation_id)
                     or relation_id in seen_ids
                     or not isinstance(relation_type, str)
                     or relation_type != relation_type.strip()
