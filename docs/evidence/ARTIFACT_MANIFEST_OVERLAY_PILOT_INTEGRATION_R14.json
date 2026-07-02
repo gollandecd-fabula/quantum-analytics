@@ -1,0 +1,1 @@
+{"base_pilot_integration_r13_overlay_git_blob_sha":"8161cca824b2f7f28df57219f51df1e58684d8f2","entries":[["src/quantum/ingestion/_xlsx_xml_lexical.py","e1400f0a6209784fe3cca5d7b7ab73a63ecc2f3b0f901e697b8fea8d02dca1f3",5615]],"hash_encoding":"sha256-hex","overlay_version":14,"reason":"Bind XML namespace declaration policy","remove_paths":[]}
