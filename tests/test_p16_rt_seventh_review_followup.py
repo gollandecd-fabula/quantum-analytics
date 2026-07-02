@@ -23,6 +23,28 @@ class P16SeventhReviewFollowupTests(unittest.TestCase):
             )
         self.assertEqual(error.exception.code, "XLSX_XML_SIZE_EXCEEDED")
 
+    def test_inner_archive_limits_precede_relationship_parsing(self):
+        base_policy = policy()
+        limited_policy = replace(
+            base_policy,
+            limits=replace(base_policy.limits, max_entries=4),
+        )
+        workbook = rewrite_xlsx_part(
+            build_xlsx(),
+            "_rels/.rels",
+            lambda value: value.replace(
+                b'Target="xl/workbook.xml"',
+                b'Target="https://example.invalid/workbook.xml"',
+                1,
+            ),
+        )
+        with self.assertRaises(XlsxInspectionError) as error:
+            XlsxPackageInspector().inspect(
+                payload=wrap_xlsx(workbook),
+                policy=limited_policy,
+            )
+        self.assertEqual(error.exception.code, "XLSX_ENTRY_LIMIT_EXCEEDED")
+
     def test_blank_root_relationship_id_is_rejected(self):
         payload = rewrite_xlsx_part(
             build_xlsx(),
