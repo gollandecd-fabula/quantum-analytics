@@ -17,6 +17,7 @@ from ._common import (
     _value_to_dict,
     canonical_hash,
 )
+from ._expression_limits import validate_expression_policy_limits
 from ._rounding import _decimal_context, validate_rounding_policy
 from ._rules import (
     _validate_rule_document,
@@ -179,6 +180,8 @@ def evaluate_resolved_rule(
                 source_ids=(str(resolution["trace_id"]), str(selected["content_hash"])),
             ))
     validated_policy = validate_rounding_policy(policy)
+    if selected is not None and selected["method"] == "SAFE_EXPRESSION":
+        validate_expression_policy_limits(selected["expression"], validated_policy)
     with _decimal_context(validated_policy, operation_budget=_MAX_EXPRESSION_NODES):
         result = _base_evaluate(resolution, snapshot, variables, validated_policy)
     if selected is not None and selected["method"] == "SAFE_EXPRESSION":
