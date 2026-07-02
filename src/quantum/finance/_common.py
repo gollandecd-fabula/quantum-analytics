@@ -157,6 +157,22 @@ def _parse_decimal(
     return parsed
 
 
+def _parse_integer(
+    value: object,
+    *,
+    code: str,
+    max_precision: int | None = None,
+) -> int:
+    if not isinstance(value, str) or _INTEGER_RE.fullmatch(value) is None:
+        raise FinanceError(code)
+    if max_precision is not None and len(value.lstrip("-")) > max_precision:
+        raise FinanceError("ROUNDING_INPUT_PRECISION_EXCEEDED")
+    try:
+        return int(value)
+    except ValueError as exc:
+        raise FinanceError(code) from exc
+
+
 def _decimal_text(value: Decimal, scale: int | None = None) -> str:
     if value.is_zero():
         value = abs(value)
@@ -302,13 +318,12 @@ def _value_from_dict(raw: object, *, source_id: str) -> _Value:
             source_ids=source_ids,
         )
     if value_type == "INTEGER":
-        value = raw.get("value")
-        if not isinstance(value, str) or _INTEGER_RE.fullmatch(value) is None:
-            raise FinanceError("VALUE_TYPE_INVALID")
-        if len(value.lstrip("-")) > _MAX_DECIMAL_INPUT_PRECISION:
-            raise FinanceError("ROUNDING_INPUT_PRECISION_EXCEEDED")
         return _make_valid(
-            int(value),
+            _parse_integer(
+                raw.get("value"),
+                code="VALUE_TYPE_INVALID",
+                max_precision=_MAX_DECIMAL_INPUT_PRECISION,
+            ),
             value_type=value_type,
             unit=unit,
             currency=currency,
