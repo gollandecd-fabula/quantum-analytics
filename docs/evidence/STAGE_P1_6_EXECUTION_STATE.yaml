@@ -1,8 +1,8 @@
-execution_state_id: STAGE-P1-6-REAL-XLSX-ADMISSION-v1
+execution_state_id: STAGE-P1-6-REAL-XLSX-ADMISSION-v2
 stage_contract_id: STAGE-B-BUILD-v1
 unit: P1.6
 risk: R3
-updated_on: 2026-07-01
+updated_on: 2026-07-02
 tracking_issue: 48
 base_commit: 12190bbd2b560be2d74ae24e8b54aadc03ad9fbc
 working_branch: p16-real-xlsx-admission-foundation-v1
@@ -27,7 +27,10 @@ implemented_controls:
   - exact_sheet_header_row_header_hash_column_row_and_formula_contract
   - personal_data_schema_and_direct_identifier_header_block
   - source_authority_period_control_total_malware_and_pii_evidence_gate
-  - encrypted_transport_storage_tenant_zone_and_least_privilege_evidence_gate
+  - explicit_LOCAL_SINGLE_USER_and_HOSTED_EXTERNAL_storage_environment_classification
+  - local_single_user_requires_loopback_but_not_local_disk_or_application_at_rest_encryption
+  - hosted_external_requires_encrypted_transport_and_encryption_at_rest
+  - tenant_zone_immutable_original_and_least_privilege_storage_evidence_gate
   - monotonic_immutable_decision_history
   - privacy_safe_evidence_summary
   - revocation_and_require_admitted_gate
@@ -51,7 +54,12 @@ hard_boundaries:
   raw_commercial_data_in_ci: PROHIBITED
   raw_commercial_data_in_external_models: PROHIBITED
   actual_wb_schema_registration: NOT_IMPLEMENTED_PENDING_LOCAL_SOURCE_MATERIALIZATION
-  durable_encrypted_storage_implementation: NOT_IMPLEMENTED_EVIDENCE_INTERFACE_ONLY
+  durable_hosted_external_encrypted_storage_implementation: NOT_IMPLEMENTED_EVIDENCE_INTERFACE_ONLY
+  local_runtime_network_exposure: LOOPBACK_ONLY
+  local_disk_encryption: NOT_REQUIRED
+  local_application_storage_encryption_at_rest: NOT_REQUIRED
+  hosted_external_storage_encryption_at_rest: REQUIRED
+  approved_non_loopback_transport_tls: REQUIRED
   real_commercial_dataset_admission: NOT_EXECUTED_NO_LOCAL_BYTES
   canonical_ingestion_of_real_xlsx: NOT_IMPLEMENTED
   b2_source_reconciliation: NOT_IMPLEMENTED
