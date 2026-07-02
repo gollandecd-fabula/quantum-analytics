@@ -59,11 +59,15 @@ LOCAL_OVERLAY = (
     "ARTIFACT_MANIFEST_OVERLAY_LOCAL_STORAGE_POLICY_2026_07_02.json",
     "base_real_data_pilot_overlay_git_blob_sha",
 )
-FINAL_OVERLAY = "ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R1.json"
+FINAL_OVERLAY_R1 = "ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R1.json"
+FINAL_OVERLAY_R2 = "ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R2.json"
 
-ALL_OVERLAY_NAMES = tuple(name for name, _ in COMMON_OVERLAYS + B1B_OVERLAYS + P16_OVERLAYS) + (
+ALL_OVERLAY_NAMES = tuple(
+    name for name, _ in COMMON_OVERLAYS + B1B_OVERLAYS + P16_OVERLAYS
+) + (
     LOCAL_OVERLAY[0],
-    FINAL_OVERLAY,
+    FINAL_OVERLAY_R1,
+    FINAL_OVERLAY_R2,
 )
 CONTROL_PATHS = {
     "docs/evidence/ARTIFACT_MANIFEST.json",
@@ -135,16 +139,21 @@ def load_effective_manifest() -> dict:
         raise AssertionError("ARTIFACT_MANIFEST_OVERLAY_BASE_MISMATCH:" + LOCAL_OVERLAY[0])
     apply_entries(artifacts, local_overlay)
 
-    _, final_overlay = _read_overlay(FINAL_OVERLAY)
+    final_r1_raw, final_r1 = _read_overlay(FINAL_OVERLAY_R1)
     anchors = {
         "base_b1b_r15_overlay_git_blob_sha": git_blob_sha(b1b_tip),
         "base_p16_r9_overlay_git_blob_sha": git_blob_sha(p16_tip),
         "base_local_storage_overlay_git_blob_sha": git_blob_sha(local_raw),
     }
     for field, expected in anchors.items():
-        if final_overlay[field] != expected:
+        if final_r1[field] != expected:
             raise AssertionError(f"ARTIFACT_MANIFEST_INTEGRATION_ANCHOR_MISMATCH:{field}")
-    apply_entries(artifacts, final_overlay)
+    apply_entries(artifacts, final_r1)
+
+    _, final_r2 = _read_overlay(FINAL_OVERLAY_R2)
+    if final_r2["base_pilot_integration_r1_overlay_git_blob_sha"] != git_blob_sha(final_r1_raw):
+        raise AssertionError("ARTIFACT_MANIFEST_INTEGRATION_R2_BASE_MISMATCH")
+    apply_entries(artifacts, final_r2)
 
     current["artifacts"] = [artifacts[path] for path in sorted(artifacts)]
     current["artifact_count"] = len(current["artifacts"])
