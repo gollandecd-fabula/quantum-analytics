@@ -29,7 +29,7 @@ def reconcile_source_totals(
         raise ReconciliationError("RECONCILIATION_TIMESTAMP_INVALID")
     if isinstance(admission_record, DatasetAdmissionRecord):
         deadline = admission_record.declaration.retention_deadline
-        if reconciled_at.astimezone(UTC) > deadline.astimezone(UTC):
+        if reconciled_at.astimezone(UTC) >= deadline.astimezone(UTC):
             raise ReconciliationError("RECONCILIATION_RETENTION_EXPIRED")
     return _core_reconcile_source_totals(
         admission_record=admission_record,
