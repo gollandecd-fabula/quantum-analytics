@@ -1,0 +1,54 @@
+{
+  "base_real_data_pilot_overlay_git_blob_sha": "7e3a0a7838f5ac79f494d9d40430ada459eab70e",
+  "entries": [
+    [
+      "docs/decisions/DR-2026-07-01-REAL-COMMERCIAL-DATA-PILOT.md",
+      "a9268699901b6f9b22e9d24415f8e7aab975f4f10d265e1066be199da8a06652",
+      2898
+    ],
+    [
+      "docs/decisions/DR-2026-07-02-LOCAL-DISK-ENCRYPTION-NOT-REQUIRED.md",
+      "749a5774ac29d5932c0298565f6690a7d80ddc328bf5622d74c2533be9cc5168",
+      2519
+    ],
+    [
+      "docs/evidence/STAGE_B_EXECUTION_STATE.yaml",
+      "df2ed2498f587d2d08f031b020d94021911d999a70aff6b0cef61692817d463c",
+      4205
+    ],
+    [
+      "docs/governance/ASSURANCE_EXECUTION_PLAN_2026_07_08.yaml",
+      "f7196181d55d57b2357c0ee61448e03da5736d5d67c6660e20c9292688a4b755",
+      6029
+    ],
+    [
+      "docs/governance/ASSURANCE_EXECUTION_PLAN_2026_07_08_LOCAL_STORAGE_AMENDMENT.md",
+      "f5f1ca98990471611198d97b11aa3055c5ad90b8a051abd455274a30828762ca",
+      1796
+    ],
+    [
+      "docs/governance/CURRENT_STATE.md",
+      "571f8fd513180dec3e9117c54bcbef6b651d9f0defa9e647804923417e4c0a25",
+      3703
+    ],
+    [
+      "docs/security/REAL_COMMERCIAL_DATA_ADMISSION_CONTRACT_2026_07_08.md",
+      "3cb7f6abb8113cf33821cd1b327c49f7400413193336f61c405af011f8f291d3",
+      7938
+    ],
+    [
+      "tests/test_b1a_artifact_manifest.py",
+      "91bffd737921916b04b770eca6b9bd17b9035c2a2dad167ec806584b2c65d5de",
+      12143
+    ],
+    [
+      "tests/test_real_commercial_data_pilot_contract.py",
+      "dbe7c2deeed5ba700d140550e244a3b546874225410d3ce32009feb99eb87a65",
+      3389
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 1,
+  "reason": "Remove local disk encryption from the closed local-pilot gate while retaining loopback, hosted-storage, transport, tenant, retention, and reconciliation controls",
+  "remove_paths": []
+}
