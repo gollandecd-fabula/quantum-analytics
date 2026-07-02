@@ -1,7 +1,7 @@
 from copy import deepcopy
 import unittest
 
-from quantum.finance import calculate
+from quantum.finance import FinanceError, calculate
 from tests.test_b1b_redteam_runtime_regressions import valid_request
 from tests.test_b1b_rescue_smoke import typed
 
@@ -39,6 +39,45 @@ class B1bReturnSemanticsTests(unittest.TestCase):
         self.assertEqual(results["product_cost_amount"]["value"], "3600.00")
         self.assertEqual(results["net_marketplace_income_amount"]["value"], "8600.00")
         self.assertEqual(results["net_profit_amount"]["value"], "4080.00")
+
+    def test_disjoint_subsidy_and_return_compensation_are_counted_once_each(self) -> None:
+        request = valid_request()
+        request["inputs"]["resalable_returned_units"] = typed(
+            "VALID", "1", "INTEGER", "ITEM"
+        )
+        request["inputs"]["compensated_returned_units"] = typed(
+            "VALID", "1", "INTEGER", "ITEM"
+        )
+        request["inputs"]["return_compensation_amount"] = typed(
+            "VALID", "500", "MONEY", "MONEY", "RUB"
+        )
+        request["inputs"][
+            "subsidies_excluding_return_compensation_amount"
+        ] = typed("VALID", "200", "MONEY", "MONEY", "RUB")
+        results = calculate(request)["results"]
+        self.assertEqual(results["net_marketplace_income_amount"]["value"], "8800.00")
+        self.assertEqual(results["net_profit_amount"]["value"], "4280.00")
+
+    def test_ambiguous_legacy_subsidy_input_is_rejected(self) -> None:
+        request = valid_request()
+        value = request["inputs"].pop(
+            "subsidies_excluding_return_compensation_amount"
+        )
+        request["inputs"]["subsidies_amount"] = value
+        with self.assertRaisesRegex(FinanceError, "KERNEL_INPUTS_INVALID"):
+            calculate(request)
+
+    def test_tiny_negative_compensation_is_blocked_before_rounding(self) -> None:
+        request = valid_request()
+        request["inputs"]["return_compensation_amount"] = typed(
+            "VALID", "-0.00000004", "MONEY", "MONEY", "RUB"
+        )
+        results = calculate(request)["results"]
+        self.assertEqual(results["net_marketplace_income_amount"]["state"], "BLOCKED")
+        self.assertEqual(
+            results["net_marketplace_income_amount"]["reason_code"],
+            "RETURN_COMPENSATION_SEMANTICS_INVALID",
+        )
 
     def test_missing_return_disposition_blocks_cost_and_profit(self) -> None:
         request = valid_request()
