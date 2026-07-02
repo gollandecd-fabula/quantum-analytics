@@ -17,6 +17,14 @@ class LocalPilotExecutionError(ValueError):
         self.code = code
 
 
+def secure_equal(left: object, right: object) -> bool:
+    return (
+        isinstance(left, str)
+        and isinstance(right, str)
+        and hmac.compare_digest(left.encode("utf-8"), right.encode("utf-8"))
+    )
+
+
 @dataclass(frozen=True, slots=True)
 class LocalPilotScope:
     host: str
@@ -63,10 +71,10 @@ class LocalPilotScope:
             raise LocalPilotExecutionError("PILOT_PUBLIC_HOSTING_FORBIDDEN")
         if not isinstance(tenant, TenantContext):
             raise LocalPilotExecutionError("PILOT_TENANT_CONTEXT_REQUIRED")
-        if not hmac.compare_digest(
+        if not secure_equal(
             self.tenant_id,
             tenant.tenant_id,
-        ) or not hmac.compare_digest(self.account_id, tenant.account_id):
+        ) or not secure_equal(self.account_id, tenant.account_id):
             raise LocalPilotExecutionError("PILOT_TENANT_SCOPE_MISMATCH")
 
 
@@ -97,8 +105,8 @@ def scope_matches_declaration(
     return (
         isinstance(tenant_id, str)
         and isinstance(uploader_account_id, str)
-        and hmac.compare_digest(scope.tenant_id, tenant_id)
-        and hmac.compare_digest(scope.account_id, uploader_account_id)
+        and secure_equal(scope.tenant_id, tenant_id)
+        and secure_equal(scope.account_id, uploader_account_id)
     )
 
 
@@ -130,10 +138,7 @@ def validate_finance_request(
     if not isinstance(request, Mapping):
         raise LocalPilotExecutionError("PILOT_FINANCE_REQUEST_INVALID")
     organization_id = request.get("organization_id")
-    if not isinstance(organization_id, str) or not hmac.compare_digest(
-        organization_id,
-        scope.organization_id,
-    ):
+    if not secure_equal(organization_id, scope.organization_id):
         raise LocalPilotExecutionError(
             "PILOT_FINANCE_ORGANIZATION_MISMATCH"
         )
@@ -151,6 +156,7 @@ __all__ = [
     "LocalPilotExecutionError",
     "LocalPilotScope",
     "require_aware",
+    "secure_equal",
     "scope_matches_declaration",
     "validate_finance_request",
     "validate_time_order",
