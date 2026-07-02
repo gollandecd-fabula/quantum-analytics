@@ -1,0 +1,1 @@
+{"base_pilot_integration_r10_overlay_git_blob_sha":"5fe4c5a2c18930405b8911514e1afad0838ed09f","entries":[["tests/integration_manifest_support.py","c42578c9ee0ff3e4f5362508fab4eb32979ac3e381b58b8d4fd4566ec67adb2c",9630]],"hash_encoding":"sha256-hex","overlay_version":11,"reason":"Bind final integration loader after relationship value hardening","remove_paths":[]}
