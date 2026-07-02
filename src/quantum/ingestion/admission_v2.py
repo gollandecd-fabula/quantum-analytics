@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+import hmac
 
 from quantum.access import TenantContext
 
@@ -26,6 +27,21 @@ class RealDatasetAdmissionRegistryV2(
     _AdmissionAccessMixinV2,
     _AdmissionRegistryBaseV2,
 ):
+    def get(
+        self,
+        *,
+        tenant: TenantContext,
+        dataset_id: str,
+    ) -> DatasetAdmissionRecord:
+        tenant = self._require_tenant(tenant)
+        record = super().get(tenant=tenant, dataset_id=dataset_id)
+        if not hmac.compare_digest(
+            tenant.account_id.encode("utf-8"),
+            record.declaration.uploader_account_id.encode("utf-8"),
+        ):
+            raise AdmissionError("DATASET_NOT_FOUND")
+        return record
+
     def admit(
         self,
         *,
