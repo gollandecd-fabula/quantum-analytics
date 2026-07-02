@@ -18,6 +18,21 @@ def _return_semantics_blocked(source_ids: tuple[str, ...]) -> _Value:
     )
 
 
+def _preserve_primary_reason(value: _Value) -> _Value:
+    reason = value.reason_code or "RETURN_UNIT_SEMANTICS_INVALID"
+    prefix = f"DEPENDENCY_{value.state}:"
+    while reason.startswith(prefix):
+        reason = reason[len(prefix):]
+    return _make_nonvalid(
+        value.state,
+        value_type="INTEGER",
+        unit="ITEM",
+        currency=None,
+        reason_code=reason,
+        source_ids=value.source_ids,
+    )
+
+
 def calculate_units_and_product_cost(
     inputs: Mapping[str, _Value],
     cost_per_unit_raw: Mapping[str, Any],
@@ -79,7 +94,9 @@ def calculate_units_and_product_cost(
         unit="ITEM",
         currency=None,
     )
-    if cost_units is None:
+    if cost_units is not None:
+        cost_units = _preserve_primary_reason(cost_units)
+    else:
         assert isinstance(gross.value, int)
         assert isinstance(returned.value, int)
         assert isinstance(resalable.value, int)
@@ -112,7 +129,16 @@ def calculate_units_and_product_cost(
         _value_from_dict(cost_per_unit_raw, source_id="cost_per_unit"),
         policy,
     )
-    if (cpu.value_type, cpu.unit, cpu.currency) != (
+    if cost_units.state != "VALID":
+        cost = _make_nonvalid(
+            cost_units.state,
+            value_type="MONEY",
+            unit="MONEY",
+            currency=currency,
+            reason_code=cost_units.reason_code or "RETURN_UNIT_SEMANTICS_INVALID",
+            source_ids=cost_units.source_ids,
+        )
+    elif (cpu.value_type, cpu.unit, cpu.currency) != (
         "MONEY",
         "MONEY_PER_ITEM",
         currency,
@@ -127,7 +153,7 @@ def calculate_units_and_product_cost(
         )
     else:
         cost = _propagate(
-            [cost_units, cpu],
+            [cpu],
             value_type="MONEY",
             unit="MONEY",
             currency=currency,
