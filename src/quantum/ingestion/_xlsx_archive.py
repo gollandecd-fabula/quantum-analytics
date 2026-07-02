@@ -29,6 +29,10 @@ _BLOCKED_PATH_MARKERS = (
 _XML_DECLARATION_MARKERS = ("<!DOCTYPE", "<!ENTITY")
 _SPREADSHEET_NS = "http://schemas.openxmlformats.org/spreadsheetml/2006/main"
 _ALLOWED_COMPRESSION_METHODS = {ZIP_STORED, ZIP_DEFLATED}
+_ZIP_LOCAL_HEADER = b"PK\x03\x04"
+_ZIP_END_RECORD = b"PK\x05\x06"
+_ZIP_END_RECORD_SIZE = 22
+_ZIP_MAX_COMMENT_SIZE = 65535
 
 
 def _reject_xml_declarations(payload: bytes) -> None:
@@ -63,6 +67,51 @@ def _safe_member_name(name: str) -> str:
 def _is_symlink(info: ZipInfo) -> bool:
     mode = (info.external_attr >> 16) & 0xFFFF
     return stat.S_ISLNK(mode)
+
+
+def _end_record_offset(payload: bytes) -> int:
+    search_start = max(
+        0,
+        len(payload) - (_ZIP_END_RECORD_SIZE + _ZIP_MAX_COMMENT_SIZE),
+    )
+    cursor = len(payload)
+    while cursor > search_start:
+        offset = payload.rfind(_ZIP_END_RECORD, search_start, cursor)
+        if offset < 0:
+            break
+        if offset + _ZIP_END_RECORD_SIZE <= len(payload):
+            comment_size = int.from_bytes(
+                payload[offset + 20 : offset + 22],
+                "little",
+            )
+            if offset + _ZIP_END_RECORD_SIZE + comment_size == len(payload):
+                return offset
+        cursor = offset
+    raise XlsxInspectionError("XLSX_ARCHIVE_POLYGLOT_FORBIDDEN")
+
+
+def _validate_zip_payload_bounds(payload: bytes, zf: ZipFile) -> None:
+    if not payload.startswith(_ZIP_LOCAL_HEADER):
+        raise XlsxInspectionError("XLSX_ARCHIVE_POLYGLOT_FORBIDDEN")
+    end_record_offset = _end_record_offset(payload)
+    central_directory_size = int.from_bytes(
+        payload[end_record_offset + 12 : end_record_offset + 16],
+        "little",
+    )
+    central_directory_offset = int.from_bytes(
+        payload[end_record_offset + 16 : end_record_offset + 20],
+        "little",
+    )
+    if (
+        central_directory_size == 0xFFFFFFFF
+        or central_directory_offset == 0xFFFFFFFF
+        or central_directory_offset != zf.start_dir
+        or central_directory_offset + central_directory_size != end_record_offset
+    ):
+        raise XlsxInspectionError("XLSX_ARCHIVE_POLYGLOT_FORBIDDEN")
+    files = [info for info in zf.infolist() if not info.is_dir()]
+    if not files or min(info.header_offset for info in files) != 0:
+        raise XlsxInspectionError("XLSX_ARCHIVE_POLYGLOT_FORBIDDEN")
 
 
 def _validate_archive(zf: ZipFile, limits: XlsxInspectionLimits) -> dict[str, ZipInfo]:
@@ -228,6 +277,7 @@ def _extract_workbook(
         raise XlsxInspectionError("XLSX_FILE_SIZE_EXCEEDED")
     try:
         with ZipFile(BytesIO(payload)) as zf:
+            _validate_zip_payload_bounds(payload, zf)
             names = _validate_archive(zf, limits)
             if {item.casefold() for item in _XLSX_REQUIRED_PARTS}.issubset(names):
                 return "XLSX", payload
@@ -249,6 +299,8 @@ def _extract_workbook(
                 raise XlsxInspectionError("XLSX_ARCHIVE_READ_FAILED") from exc
             if len(workbook) != workbook_info.file_size:
                 raise XlsxInspectionError("XLSX_ARCHIVE_READ_MISMATCH")
+            with ZipFile(BytesIO(workbook)) as inner_zf:
+                _validate_zip_payload_bounds(workbook, inner_zf)
             return "ZIP_XLSX", workbook
     except XlsxInspectionError:
         raise
