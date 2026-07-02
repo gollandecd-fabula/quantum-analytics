@@ -173,6 +173,24 @@ class LocalRealDataPilotOrchestratorTests(unittest.TestCase):
         ):
             self.execute(finance_requests={"synthetic": request})
 
+    def test_unicode_tenant_mismatch_uses_stable_error(self) -> None:
+        bad = replace(self.scope, tenant_id="тенант")
+        with self.assertRaisesRegex(
+            LocalPilotExecutionError,
+            "PILOT_TENANT_SCOPE_MISMATCH",
+        ):
+            self.execute(scope=bad)
+
+    def test_matching_unicode_organization_is_supported(self) -> None:
+        scope = replace(self.scope, organization_id="организация")
+        request = deepcopy(self.request)
+        request["organization_id"] = "организация"
+        result = self.execute(
+            scope=scope,
+            finance_requests={"synthetic": request},
+        )
+        self.assertEqual(result["reconciliation"]["state"], "RECONCILED")
+
     def test_non_string_finance_label_fails_with_stable_code(self) -> None:
         with self.assertRaisesRegex(
             LocalPilotExecutionError,
@@ -208,6 +226,15 @@ class LocalRealDataPilotOrchestratorTests(unittest.TestCase):
     def test_source_identity_mismatch_fails_before_finance(self) -> None:
         source = self.source_snapshot()
         source["original_file_sha256"] = "b" * 64
+        with self.assertRaisesRegex(
+            LocalPilotExecutionError,
+            "PILOT_SOURCE_SNAPSHOT_IDENTITY_MISMATCH",
+        ):
+            self.execute(source_snapshot=source)
+
+    def test_unicode_source_identity_mismatch_uses_stable_error(self) -> None:
+        source = self.source_snapshot()
+        source["dataset_id"] = "набор-данных"
         with self.assertRaisesRegex(
             LocalPilotExecutionError,
             "PILOT_SOURCE_SNAPSHOT_IDENTITY_MISMATCH",
