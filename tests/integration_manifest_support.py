@@ -60,14 +60,20 @@ LOCAL_OVERLAY = (
     "base_real_data_pilot_overlay_git_blob_sha",
 )
 FINAL_OVERLAY_R1 = "ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R1.json"
-FINAL_OVERLAY_R2 = "ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R2.json"
+FINAL_OVERLAYS = (
+    ("ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R2.json", "base_pilot_integration_r1_overlay_git_blob_sha"),
+    ("ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R3.json", "base_pilot_integration_r2_overlay_git_blob_sha"),
+    ("ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R4.json", "base_pilot_integration_r3_overlay_git_blob_sha"),
+    ("ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R5.json", "base_pilot_integration_r4_overlay_git_blob_sha"),
+    ("ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R6.json", "base_pilot_integration_r5_overlay_git_blob_sha"),
+)
 
 ALL_OVERLAY_NAMES = tuple(
     name for name, _ in COMMON_OVERLAYS + B1B_OVERLAYS + P16_OVERLAYS
 ) + (
     LOCAL_OVERLAY[0],
     FINAL_OVERLAY_R1,
-    FINAL_OVERLAY_R2,
+    *(name for name, _ in FINAL_OVERLAYS),
 )
 CONTROL_PATHS = {
     "docs/evidence/ARTIFACT_MANIFEST.json",
@@ -149,11 +155,7 @@ def load_effective_manifest() -> dict:
         if final_r1[field] != expected:
             raise AssertionError(f"ARTIFACT_MANIFEST_INTEGRATION_ANCHOR_MISMATCH:{field}")
     apply_entries(artifacts, final_r1)
-
-    _, final_r2 = _read_overlay(FINAL_OVERLAY_R2)
-    if final_r2["base_pilot_integration_r1_overlay_git_blob_sha"] != git_blob_sha(final_r1_raw):
-        raise AssertionError("ARTIFACT_MANIFEST_INTEGRATION_R2_BASE_MISMATCH")
-    apply_entries(artifacts, final_r2)
+    _validate_branch(FINAL_OVERLAYS, final_r1_raw, artifacts)
 
     current["artifacts"] = [artifacts[path] for path in sorted(artifacts)]
     current["artifact_count"] = len(current["artifacts"])
