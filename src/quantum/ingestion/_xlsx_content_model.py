@@ -7,6 +7,7 @@ from zlib import error as ZlibError
 
 from ._xlsx_archive import _read_limited, _xml_root
 from ._xlsx_contracts import XlsxInspectionError, XlsxInspectionLimits
+from ._xlsx_formula_validation import validate_formula_element
 
 _SPREADSHEET_NS = "http://schemas.openxmlformats.org/spreadsheetml/2006/main"
 _XML_NS = "http://www.w3.org/XML/1998/namespace"
@@ -176,13 +177,7 @@ def _validate_cell_content(cell) -> None:
         raise XlsxInspectionError("XLSX_SHEET_DATA_CONTENT_UNMODELED")
     for child in cell:
         if child.tag == _FORMULA:
-            _require_attributes(
-                child,
-                _ALLOWED_FORMULA_ATTRIBUTES,
-                "XLSX_SHEET_DATA_CONTENT_UNMODELED",
-            )
-            if list(child) or _has_text(child.tail):
-                raise XlsxInspectionError("XLSX_SHEET_DATA_CONTENT_UNMODELED")
+            validate_formula_element(child)
         elif child.tag == _VALUE:
             if child.attrib or list(child) or _has_text(child.tail):
                 raise XlsxInspectionError("XLSX_SHEET_DATA_CONTENT_UNMODELED")
