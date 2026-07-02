@@ -1,9 +1,10 @@
-plan_id: QUANTUM-ASSURANCE-2026-07-08-v2
+plan_id: QUANTUM-ASSURANCE-2026-07-08-v3
 status: ACTIVE
 authority:
   decision_date: 2026-07-01
   tracking_issues: [39, 41]
   real_data_decision: DR-2026-07-01-REAL-COMMERCIAL-DATA-PILOT
+  local_storage_decision: DR-2026-07-02-LOCAL-DISK-ENCRYPTION-NOT-REQUIRED
   risk_class: R3
 target:
   date: 2026-07-08
@@ -22,6 +23,14 @@ scope:
   marketplace_write_capability: DISABLED
   raw_data_in_external_model_prompts: PROHIBITED
   raw_data_in_github_ci_evidence: PROHIBITED
+  local_version:
+    network_exposure: LOOPBACK_ONLY
+    full_disk_encryption: NOT_REQUIRED
+    application_storage_encryption_at_rest: NOT_REQUIRED
+  hosted_external_storage:
+    encryption_at_rest: REQUIRED
+  approved_non_loopback_transport:
+    tls: REQUIRED
 data_admission:
   contract: docs/security/REAL_COMMERCIAL_DATA_ADMISSION_CONTRACT_2026_07_08.md
   state_machine: [DECLARED, QUARANTINED, VALIDATED, ADMITTED, REJECTED, REVOKED]
@@ -31,7 +40,9 @@ data_admission:
     - OWNER_AUTHORIZATION
     - DATA_INVENTORY_CLASSIFICATION
     - MINIMIZATION_IDENTIFIER_STRIPPING
-    - ENCRYPTION_IN_TRANSIT_AT_REST
+    - LOOPBACK_ONLY_LOCAL_RUNTIME
+    - TLS_FOR_APPROVED_NON_LOOPBACK_TRANSPORT
+    - HOSTED_EXTERNAL_STORAGE_ENCRYPTION_AT_REST
     - TENANT_SCOPED_ACCESS
     - ISOLATED_QUARANTINE_RAW_ADMITTED_DERIVED_BACKUP_ZONES
     - IMMUTABLE_SOURCE_SHA256
@@ -67,7 +78,7 @@ teams:
   independent_assurance:
     functions:
       ivv: [TRACEABILITY, INDEPENDENT_REPRODUCTION, REAL_DATA_E2E, REGRESSION, EXACT_HEAD_VERIFICATION]
-      appsec: [THREAT_MODEL, SAST, SECRETS, TENANT_ISOLATION, AUTHN_AUTHZ, ENCRYPTION, DATA_LEAKAGE, RETENTION_DELETION, FILE_ABUSE, SBOM, OSV]
+      appsec: [THREAT_MODEL, SAST, SECRETS, TENANT_ISOLATION, AUTHN_AUTHZ, TRANSPORT_SECURITY, HOSTED_STORAGE_ENCRYPTION, DATA_LEAKAGE, RETENTION_DELETION, FILE_ABUSE, SBOM, OSV]
       financial_qa: [GOLDEN_ORACLE, DECIMAL, ROUNDING, PROPERTY, DIFFERENTIAL, REAL_SOURCE_RECONCILIATION, NO_DOUBLE_COUNT]
       release_audit: [COMMIT, CI, MANIFEST, THREADS, DATA_ADMISSION, EVIDENCE, RECOVERY, ROLLBACK, BOUNDARIES]
     can_approve_own_changes: false
@@ -128,7 +139,11 @@ pilot_ready_exit:
   real_source_reconciliation_pass: true
   actual_scenario_isolation_pass: true
   tenant_isolation_pass: true
-  encryption_and_privacy_logging_pass: true
+  local_loopback_only_pass: true
+  approved_non_loopback_transport_tls_pass: true
+  hosted_external_storage_encryption_pass: true
+  local_disk_encryption_required: false
+  privacy_logging_pass: true
   retention_deletion_revocation_pass: true
   raw_data_external_disclosure_absent: true
   write_capability_absent: true
