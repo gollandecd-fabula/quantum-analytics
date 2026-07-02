@@ -65,7 +65,7 @@ def calculate_settlement_tax_profit(
     ids = (
         "gross_sales_amount",
         "discounts_amount",
-        "subsidies_amount",
+        "subsidies_excluding_return_compensation_amount",
         "marketplace_commission_amount",
         "forward_logistics_amount",
         "reverse_logistics_amount",
@@ -85,7 +85,10 @@ def calculate_settlement_tax_profit(
     }
     return_compensation = _validated_return_compensation(inputs, currency)
     if return_compensation.state != "VALID":
-        reason = return_compensation.reason_code or "RETURN_COMPENSATION_SEMANTICS_INVALID"
+        reason = (
+            return_compensation.reason_code
+            or "RETURN_COMPENSATION_SEMANTICS_INVALID"
+        )
         prefix = f"DEPENDENCY_{return_compensation.state}:"
         while reason.startswith(prefix):
             reason = reason[len(prefix):]
@@ -158,7 +161,8 @@ def calculate_settlement_tax_profit(
             currency=currency,
         )
         if tax is None:
-            assert isinstance(rate.value, Decimal) and isinstance(base.value, Decimal)
+            assert isinstance(rate.value, Decimal)
+            assert isinstance(base.value, Decimal)
             tax = _make_valid(
                 base.value * rate.value,
                 value_type="MONEY",
