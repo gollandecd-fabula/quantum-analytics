@@ -10,8 +10,9 @@ ROOT = Path(__file__).resolve().parents[1]
 
 class B1bManifestProbeDiagnosticsV3Tests(unittest.TestCase):
     def test_emit_ci_preserved_entries(self):
+        entries = []
         for path in PATHS:
             data = (ROOT / path).read_bytes()
-            entry = [path, hashlib.sha256(data).hexdigest(), len(data)]
-            print("MANIFEST_DIFF=B1B_MANIFEST_ENTRY:" + json.dumps(entry, separators=(",", ":")))
+            entries.append([path, hashlib.sha256(data).hexdigest(), len(data)])
+        print("MANIFEST_DIFF=B1B_MANIFEST_ENTRIES:" + json.dumps(entries, separators=(",", ":")))
         self.assertTrue(True)
