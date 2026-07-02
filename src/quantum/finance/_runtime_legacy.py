@@ -33,8 +33,8 @@ def evaluate_expression(
 
 
 def calculate(request:Mapping[str,Any])->dict[str,Any]:
-    original=deepcopy(request)
     if not isinstance(request,Mapping): raise FinanceError("KERNEL_REQUEST_INVALID")
+    original=deepcopy(request)
     required={"calculation_id","organization_id","mode","scenario_id","calculated_at","profile_ref","profile_status","rounding_policy","currency","inputs","cost_per_unit","other_expense_components","tax_rate","tax_base_metric_id"}
     if set(request)!=required: raise FinanceError("KERNEL_REQUEST_INVALID")
     for field in ("calculation_id","organization_id","tax_base_metric_id"):
@@ -75,10 +75,10 @@ def calculate(request:Mapping[str,Any])->dict[str,Any]:
           "tax_amount":_metric(tax,accounting_view="TAX_RECOGNITION",expense_boundary=("TAX",),policy=policy,final_round=True),
           "net_marketplace_income_amount":_metric(income,accounting_view="SETTLEMENT",expense_boundary=("MARKETPLACE_COMMISSION","FORWARD_LOGISTICS","REVERSE_LOGISTICS","STORAGE","ADVERTISING","FINES_WITHHOLDINGS"),policy=policy,final_round=True),
           "net_profit_amount":_metric(profit,accounting_view="SETTLEMENT",expense_boundary=("MARKETPLACE_COMMISSION","FORWARD_LOGISTICS","REVERSE_LOGISTICS","STORAGE","ADVERTISING","FINES_WITHHOLDINGS","PRODUCT_COST","OTHER_EXPENSE","TAX"),policy=policy,final_round=True),
-          "profit_per_sold_unit":_metric(ppu,accounting_view="SETTLEMENT",expense_boundary=("PRODUCT_COST","OTHER_EXPENSE","TAX"),policy=policy,final_round=True),
+          "profit_per_sold_unit":_metric(ppu,accounting_view="SETTLEMENT",expense_boundary=("MARKETPLACE_COMMISSION","FORWARD_LOGISTICS","REVERSE_LOGISTICS","STORAGE","ADVERTISING","FINES_WITHHOLDINGS","PRODUCT_COST","OTHER_EXPENSE","TAX"),policy=policy,final_round=True),
           "profitability_of_costs":_metric(profitability,accounting_view="SETTLEMENT",expense_boundary=(),policy=policy,final_round=True),
         }
-    payload={"schema_version":KERNEL_SCHEMA_VERSION,"calculation_id":request["calculation_id"],"organization_id":request["organization_id"],"mode":request["mode"],"scenario_id":request["scenario_id"],"profile_ref":profile_ref,"rounding_policy_ref":{"id":policy["policy_id"],"version":policy["version"],"content_hash":policy["content_hash"]},"publication_state":PUBLICATION_STATE,"results":results,"limitations":["SOURCE_AUTHORITY_NOT_ACTIVATED","REAL_COMMERCIAL_DATA_REQUIRES_ADMISSION","B2_RECONCILIATION_NOT_IMPLEMENTED","EXPENSE_UNITS_PILOT_SCOPE","PROFITABILITY_DENOMINATOR_NOT_APPROVED","PRODUCTION_RELEASE_BLOCKED"],"calculated_at":request["calculated_at"],"input_hash":canonical_hash(request),"result_hash":""}
+    payload={"schema_version":KERNEL_SCHEMA_VERSION,"calculation_id":request["calculation_id"],"organization_id":request["organization_id"],"mode":request["mode"],"scenario_id":request["scenario_id"],"profile_ref":profile_ref,"rounding_policy_ref":{"id":policy["policy_id"],"version":policy["version"],"content_hash":policy["content_hash"]},"publication_state":PUBLICATION_STATE,"results":results,"limitations":["SOURCE_AUTHORITY_NOT_ACTIVATED","REAL_COMMERCIAL_DATA_REQUIRES_ADMISSION","B2_RECONCILIATION_REQUIRED","EXPENSE_UNITS_PILOT_SCOPE","PROFITABILITY_DENOMINATOR_NOT_APPROVED","PRODUCTION_RELEASE_BLOCKED"],"calculated_at":request["calculated_at"],"input_hash":canonical_hash(request),"result_hash":""}
     payload["result_hash"]=canonical_hash(payload,exclude=frozenset({"result_hash"}))
     if request!=original: raise FinanceError("KERNEL_MUTATED_INPUT")
     return payload
