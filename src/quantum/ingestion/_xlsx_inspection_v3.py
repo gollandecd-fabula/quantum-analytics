@@ -32,8 +32,8 @@ class XlsxPackageInspector:
         package_kind, workbook = _extract_workbook(payload, policy.limits)
         if len(workbook) > policy.limits.max_file_bytes:
             raise XlsxInspectionError("XLSX_WORKBOOK_SIZE_EXCEEDED")
-        validate_relationships(workbook, policy.limits)
         validate_modeled_package_parts(workbook, policy.limits)
+        validate_relationships(workbook, policy.limits)
         validate_cell_structures(workbook, policy.limits)
         shape = _workbook_shape(
             workbook,
