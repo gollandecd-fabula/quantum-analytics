@@ -9,6 +9,8 @@ from ._xlsx_archive import _read_limited, _xml_root
 from ._xlsx_contracts import XlsxInspectionError, XlsxInspectionLimits
 
 _SPREADSHEET_NS = "http://schemas.openxmlformats.org/spreadsheetml/2006/main"
+_XML_NS = "http://www.w3.org/XML/1998/namespace"
+_MC_NS = "http://schemas.openxmlformats.org/markup-compatibility/2006"
 _WORKSHEET = f"{{{_SPREADSHEET_NS}}}worksheet"
 _SHEET_DATA = f"{{{_SPREADSHEET_NS}}}sheetData"
 _ROW = f"{{{_SPREADSHEET_NS}}}row"
@@ -59,6 +61,44 @@ _ALLOWED_RICH_PROPERTY_TAGS = frozenset({
     f"{{{_SPREADSHEET_NS}}}vertAlign",
     f"{{{_SPREADSHEET_NS}}}scheme",
 })
+_ALLOWED_WORKSHEET_ATTRIBUTES = frozenset({f"{{{_MC_NS}}}Ignorable"})
+_ALLOWED_ROW_ATTRIBUTES = frozenset({
+    "r",
+    "spans",
+    "s",
+    "customFormat",
+    "ht",
+    "hidden",
+    "customHeight",
+    "outlineLevel",
+    "collapsed",
+    "thickTop",
+    "thickBot",
+    "ph",
+})
+_ALLOWED_CELL_ATTRIBUTES = frozenset({"r", "s", "t"})
+_ALLOWED_FORMULA_ATTRIBUTES = frozenset({
+    "t",
+    "ref",
+    "si",
+    "ca",
+    "dt2D",
+    "dtr",
+    "del1",
+    "del2",
+    "r1",
+    "r2",
+    "bx",
+})
+_ALLOWED_TEXT_ATTRIBUTES = frozenset({f"{{{_XML_NS}}}space"})
+_ALLOWED_RICH_PROPERTY_ATTRIBUTES = frozenset({
+    "val",
+    "rgb",
+    "theme",
+    "tint",
+    "indexed",
+    "auto",
+})
 _AUXILIARY_PARTS = frozenset({
     "docprops/app.xml",
     "docprops/core.xml",
@@ -71,6 +111,11 @@ def _has_text(value: str | None) -> bool:
     return value is not None and bool(value.strip())
 
 
+def _require_attributes(element, allowed: frozenset[str], code: str) -> None:
+    if any(name not in allowed for name in element.attrib):
+        raise XlsxInspectionError(code)
+
+
 def _require_whitespace_only(element, code: str) -> None:
     if _has_text(element.text) or _has_text(element.tail):
         raise XlsxInspectionError(code)
@@ -79,21 +124,23 @@ def _require_whitespace_only(element, code: str) -> None:
 def _validate_text_node(element, code: str) -> None:
     if element.tag != _TEXT or list(element) or _has_text(element.tail):
         raise XlsxInspectionError(code)
+    _require_attributes(element, _ALLOWED_TEXT_ATTRIBUTES, code)
 
 
 def _validate_rich_properties(element, code: str) -> None:
-    if element.tag != _RICH_PROPERTIES:
+    if element.tag != _RICH_PROPERTIES or element.attrib:
         raise XlsxInspectionError(code)
     _require_whitespace_only(element, code)
     for child in element:
         if child.tag not in _ALLOWED_RICH_PROPERTY_TAGS:
             raise XlsxInspectionError(code)
+        _require_attributes(child, _ALLOWED_RICH_PROPERTY_ATTRIBUTES, code)
         if list(child) or _has_text(child.text) or _has_text(child.tail):
             raise XlsxInspectionError(code)
 
 
 def _validate_rich_run(element, code: str) -> None:
-    if element.tag != _RICH_RUN:
+    if element.tag != _RICH_RUN or element.attrib:
         raise XlsxInspectionError(code)
     _require_whitespace_only(element, code)
     children = list(element)
@@ -108,6 +155,8 @@ def _validate_rich_run(element, code: str) -> None:
 
 
 def _validate_string_container(element, code: str) -> None:
+    if element.attrib:
+        raise XlsxInspectionError(code)
     _require_whitespace_only(element, code)
     children = list(element)
     if not children:
@@ -122,11 +171,20 @@ def _validate_string_container(element, code: str) -> None:
 
 
 def _validate_cell_content(cell) -> None:
+    _require_attributes(cell, _ALLOWED_CELL_ATTRIBUTES, "XLSX_CELL_ATTRIBUTE_UNMODELED")
     if _has_text(cell.text) or _has_text(cell.tail):
         raise XlsxInspectionError("XLSX_SHEET_DATA_CONTENT_UNMODELED")
     for child in cell:
-        if child.tag in {_FORMULA, _VALUE}:
+        if child.tag == _FORMULA:
+            _require_attributes(
+                child,
+                _ALLOWED_FORMULA_ATTRIBUTES,
+                "XLSX_SHEET_DATA_CONTENT_UNMODELED",
+            )
             if list(child) or _has_text(child.tail):
+                raise XlsxInspectionError("XLSX_SHEET_DATA_CONTENT_UNMODELED")
+        elif child.tag == _VALUE:
+            if child.attrib or list(child) or _has_text(child.tail):
                 raise XlsxInspectionError("XLSX_SHEET_DATA_CONTENT_UNMODELED")
         elif child.tag == _INLINE:
             _validate_string_container(
@@ -137,9 +195,22 @@ def _validate_cell_content(cell) -> None:
             raise XlsxInspectionError("XLSX_CELL_CHILD_UNMODELED")
 
 
+def _validate_non_sheet_data_child(child) -> None:
+    elements = tuple(child.iter())
+    if any(_has_text(element.text) or _has_text(element.tail) for element in elements):
+        raise XlsxInspectionError("XLSX_UNMODELED_WORKSHEET_TEXT")
+    if any(element.tag not in _ALLOWED_WORKSHEET_STRUCTURE_TAGS for element in elements):
+        raise XlsxInspectionError("XLSX_WORKSHEET_ELEMENT_UNMODELED")
+
+
 def _validate_worksheet_root(root) -> None:
     if root.tag != _WORKSHEET or _has_text(root.text) or _has_text(root.tail):
         raise XlsxInspectionError("XLSX_UNMODELED_WORKSHEET_TEXT")
+    _require_attributes(
+        root,
+        _ALLOWED_WORKSHEET_ATTRIBUTES,
+        "XLSX_WORKSHEET_ATTRIBUTE_UNMODELED",
+    )
     sheet_data_nodes = [child for child in root if child.tag == _SHEET_DATA]
     if len(sheet_data_nodes) != 1:
         raise XlsxInspectionError("XLSX_SHEET_DATA_STRUCTURE_INVALID")
@@ -148,23 +219,27 @@ def _validate_worksheet_root(root) -> None:
     for child in root:
         if child is sheet_data:
             continue
-        for element in child.iter():
-            if element.tag not in _ALLOWED_WORKSHEET_STRUCTURE_TAGS:
-                raise XlsxInspectionError("XLSX_WORKSHEET_ELEMENT_UNMODELED")
-            _require_whitespace_only(
-                element,
-                "XLSX_UNMODELED_WORKSHEET_TEXT",
-            )
+        if child.tag in {_ROW, _CELL}:
+            continue
+        _validate_non_sheet_data_child(child)
 
-    if _has_text(sheet_data.text) or _has_text(sheet_data.tail):
+    if sheet_data.attrib or _has_text(sheet_data.text) or _has_text(sheet_data.tail):
         raise XlsxInspectionError("XLSX_SHEET_DATA_CONTENT_UNMODELED")
     for row in sheet_data:
+        if row.tag == _CELL:
+            continue
         if row.tag != _ROW:
             raise XlsxInspectionError("XLSX_SHEET_DATA_CHILD_UNMODELED")
+        _require_attributes(row, _ALLOWED_ROW_ATTRIBUTES, "XLSX_ROW_ATTRIBUTE_UNMODELED")
         if _has_text(row.text) or _has_text(row.tail):
             raise XlsxInspectionError("XLSX_SHEET_DATA_CONTENT_UNMODELED")
         for cell in row:
             if cell.tag != _CELL:
+                if any(
+                    _has_text(element.text) or _has_text(element.tail)
+                    for element in cell.iter()
+                ):
+                    raise XlsxInspectionError("XLSX_SHEET_DATA_CONTENT_UNMODELED")
                 raise XlsxInspectionError("XLSX_ROW_CHILD_UNMODELED")
             _validate_cell_content(cell)
 
@@ -172,6 +247,11 @@ def _validate_worksheet_root(root) -> None:
 def _validate_shared_strings(root) -> None:
     if root.tag != _SHARED_ROOT or _has_text(root.text) or _has_text(root.tail):
         raise XlsxInspectionError("XLSX_SHARED_STRING_STRUCTURE_UNMODELED")
+    _require_attributes(
+        root,
+        frozenset({"count", "uniqueCount"}),
+        "XLSX_SHARED_STRING_STRUCTURE_UNMODELED",
+    )
     for item in root:
         if item.tag != _SHARED_ITEM:
             raise XlsxInspectionError("XLSX_SHARED_STRING_STRUCTURE_UNMODELED")
