@@ -70,11 +70,16 @@ def _emit_manifest_diagnostics(lines: list[str]) -> None:
     if not required_entries and not extras and not top_level:
         return
     required_entries.sort(key=lambda row: str(row[0]))
+    groups: dict[str, list[list[object]]] = {}
+    for row in required_entries:
+        top = str(row[0]).split("/", 1)[0].upper()
+        groups.setdefault(top, []).append(row)
     print("UNITTEST_DIAGNOSTICS_BEGIN")
-    print(
-        "MANIFEST_REQUIRED_ENTRIES="
-        + json.dumps(required_entries, separators=(",", ":"))
-    )
+    for top in sorted(groups):
+        print(
+            f"MANIFEST_REQUIRED_ENTRIES_{top}="
+            + json.dumps(groups[top], separators=(",", ":"))
+        )
     if extras:
         print("MANIFEST_EXTRA_PATHS=" + json.dumps(sorted(extras), separators=(",", ":")))
     if top_level:
