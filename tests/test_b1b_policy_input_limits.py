@@ -6,7 +6,7 @@ from tests.test_b1b_rescue_smoke import policy, typed
 
 
 POLICY_OVERSIZED_NUMBER = "1" * 29
-HARD_OVERSIZED_NUMBER = "1" + ("0" * 1000)
+HARD_OVERSIZED_NUMBER = "1" + ("0" * 5000)
 
 
 class B1bPolicyInputLimitTests(unittest.TestCase):
