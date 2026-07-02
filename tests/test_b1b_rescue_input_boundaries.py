@@ -27,7 +27,7 @@ def request():
             "VALID", "1000", "MONEY", "MONEY", "RUB"
         ),
         "discounts_amount": deepcopy(zero_money),
-        "subsidies_amount": deepcopy(zero_money),
+        "subsidies_excluding_return_compensation_amount": deepcopy(zero_money),
         "marketplace_commission_amount": deepcopy(zero_money),
         "forward_logistics_amount": deepcopy(zero_money),
         "reverse_logistics_amount": deepcopy(zero_money),
