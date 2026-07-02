@@ -1,0 +1,67 @@
+execution_state_id: STAGE-P1-6-REAL-XLSX-ADMISSION-v1
+stage_contract_id: STAGE-B-BUILD-v1
+unit: P1.6
+risk: R3
+updated_on: 2026-07-01
+tracking_issue: 48
+base_commit: 12190bbd2b560be2d74ae24e8b54aadc03ad9fbc
+working_branch: p16-real-xlsx-admission-foundation-v1
+status: IMPLEMENTED_CANDIDATE
+release_state: RELEASE_BLOCKED
+
+objective: >-
+  Provide a dependency-free, fail-closed local admission foundation for
+  authorized commercial ZIP/XLSX reports without retaining raw bytes in the
+  admission registry or exposing raw rows in GitHub, CI, evidence, screenshots,
+  comments, or external model prompts.
+
+implemented_controls:
+  - separate DECLARED_QUARANTINED_VALIDATED_ADMITTED_REJECTED_REVOKED state machine
+  - tenant_scoped_fail_closed_access
+  - immutable_original_sha256_binding
+  - versioned_schema_policy_hash
+  - schema_authority_reference
+  - bounded_archive_xml_row_column_limits
+  - zip_slip_symlink_encryption_active_content_external_relationship_rejection
+  - duplicate_path_relationship_sheet_cell_and_index_anomaly_rejection
+  - exact_sheet_header_row_header_hash_column_row_and_formula_contract
+  - personal_data_schema_and_direct_identifier_header_block
+  - source_authority_period_control_total_malware_and_pii_evidence_gate
+  - encrypted_transport_storage_tenant_zone_and_least_privilege_evidence_gate
+  - monotonic_immutable_decision_history
+  - privacy_safe_evidence_summary
+  - revocation_and_require_admitted_gate
+
+local_verification:
+  compileall: PASS
+  synthetic_unittest_count: 34
+  synthetic_unittest_result: PASS
+  randomized_valid_or_drift_xlsx_cases: 200
+  randomized_invalid_byte_payloads: 100
+  randomized_result: PASS
+
+exact_head_verification:
+  foundation_ci: PENDING
+  oss_admission: PENDING
+  artifact_manifest_equality: PENDING
+  independent_review: PENDING
+
+hard_boundaries:
+  raw_commercial_data_in_repository: PROHIBITED
+  raw_commercial_data_in_ci: PROHIBITED
+  raw_commercial_data_in_external_models: PROHIBITED
+  actual_wb_schema_registration: NOT_IMPLEMENTED_PENDING_LOCAL_SOURCE_MATERIALIZATION
+  durable_encrypted_storage_implementation: NOT_IMPLEMENTED_EVIDENCE_INTERFACE_ONLY
+  real_commercial_dataset_admission: NOT_EXECUTED_NO_LOCAL_BYTES
+  canonical_ingestion_of_real_xlsx: NOT_IMPLEMENTED
+  b2_source_reconciliation: NOT_IMPLEMENTED
+  marketplace_write_capability: DISABLED
+  production_release: BLOCKED
+
+next_gate:
+  - exact_head_ci_and_oss_admission
+  - independent_review
+  - materialize_one_authorized_source_locally_without_repository_upload
+  - register_independently_reviewed_wb_schema_profile
+  - implement_secure_local_storage_adapter
+  - perform_admission_ingestion_calculation_and_b2_reconciliation

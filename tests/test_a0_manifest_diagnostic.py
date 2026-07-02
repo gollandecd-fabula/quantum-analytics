@@ -12,9 +12,11 @@ class ManifestDiagnosticTests(unittest.TestCase):
         expected = expected_manifest(current)
         current_rows = {row[0]: row for row in current["artifacts"]}
         expected_rows = {row[0]: row for row in expected["artifacts"]}
+        missing_paths = sorted(expected_rows.keys() - current_rows.keys())
         shared = sorted(current_rows.keys() & expected_rows.keys())
         diagnostic = {
-            "missing": sorted(expected_rows.keys() - current_rows.keys()),
+            "missing": missing_paths,
+            "missing_entries": [expected_rows[path] for path in missing_paths],
             "extra": sorted(current_rows.keys() - expected_rows.keys()),
             "mismatched": [
                 {
@@ -32,9 +34,13 @@ class ManifestDiagnosticTests(unittest.TestCase):
             },
         }
         if diagnostic != {
-            "missing": [], "extra": [], "mismatched": [], "top_level": {}
+            "missing": [],
+            "missing_entries": [],
+            "extra": [],
+            "mismatched": [],
+            "top_level": {},
         }:
-            print("MANIFEST_DIFF=" + json.dumps(diagnostic, sort_keys=True), flush=True)
+            print("MANIFEST_DIFF=" + json.dumps(diagnostic, sort_keys=False), flush=True)
         self.assertEqual(current, expected)
 
 
