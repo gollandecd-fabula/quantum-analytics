@@ -29,6 +29,26 @@ _OFFICE_RELATIONSHIP_NS = (
     "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
 )
 _SPREADSHEET_NS = "http://schemas.openxmlformats.org/spreadsheetml/2006/main"
+_ALLOWED_WORKSHEET_STRUCTURE_TAGS = frozenset({
+    "sheetPr",
+    "outlinePr",
+    "pageSetUpPr",
+    "dimension",
+    "sheetViews",
+    "sheetView",
+    "pane",
+    "selection",
+    "sheetFormatPr",
+    "cols",
+    "col",
+    "mergeCells",
+    "mergeCell",
+    "printOptions",
+    "pageMargins",
+    "pageSetup",
+    "sheetProtection",
+    "phoneticPr",
+})
 
 
 @dataclass(frozen=True, slots=True)
@@ -53,6 +73,32 @@ class _WorkbookShape:
     prohibited_header_count: int
 
 
+def _worksheet_local_name(tag: object) -> str:
+    prefix = f"{{{_SPREADSHEET_NS}}}"
+    if not isinstance(tag, str) or not tag.startswith(prefix):
+        raise XlsxInspectionError("XLSX_WORKSHEET_ELEMENT_UNMODELED")
+    return tag[len(prefix):]
+
+
+def _validate_unmodeled_worksheet_nodes(
+    sheet_root,
+    sheet_data,
+) -> None:
+    for child in list(sheet_root):
+        if child is sheet_data:
+            continue
+        elements = tuple(child.iter())
+        if any(
+            (element.text is not None and element.text.strip())
+            or (element.tail is not None and element.tail.strip())
+            for element in elements
+        ):
+            raise XlsxInspectionError("XLSX_UNMODELED_WORKSHEET_TEXT")
+        for element in elements:
+            if _worksheet_local_name(element.tag) not in _ALLOWED_WORKSHEET_STRUCTURE_TAGS:
+                raise XlsxInspectionError("XLSX_WORKSHEET_ELEMENT_UNMODELED")
+
+
 def _parse_worksheet(
     zf: ZipFile,
     *,
@@ -66,6 +112,7 @@ def _parse_worksheet(
     if len(sheet_data_nodes) != 1:
         raise XlsxInspectionError("XLSX_SHEET_DATA_STRUCTURE_INVALID")
     sheet_data = sheet_data_nodes[0]
+    _validate_unmodeled_worksheet_nodes(sheet_root, sheet_data)
     rows = sheet_data.findall(f"{{{_SPREADSHEET_NS}}}row")
     if len(sheet_data.findall(f".//{{{_SPREADSHEET_NS}}}row")) != len(rows):
         raise XlsxInspectionError("XLSX_ROW_STRUCTURE_INVALID")
