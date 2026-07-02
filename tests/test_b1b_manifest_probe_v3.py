@@ -29,6 +29,7 @@ PATHS = (
     "src/quantum/finance/oracle.py",
     "src/quantum/finance/runtime.py",
     "tests/b1a_artifact_manifest_r8.py",
+    "tests/test_a0_b1b_rescue_preflight.py",
     "tests/test_b1b_decimal_context_rescue_v4.py",
     "tests/test_b1b_integer_literal_limits.py",
     "tests/test_b1b_policy_input_limits.py",
