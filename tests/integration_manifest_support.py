@@ -66,6 +66,8 @@ FINAL_OVERLAYS = (
     ("ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R4.json", "base_pilot_integration_r3_overlay_git_blob_sha"),
     ("ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R5.json", "base_pilot_integration_r4_overlay_git_blob_sha"),
     ("ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R6.json", "base_pilot_integration_r5_overlay_git_blob_sha"),
+    ("ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R7.json", "base_pilot_integration_r6_overlay_git_blob_sha"),
+    ("ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R8.json", "base_pilot_integration_r7_overlay_git_blob_sha"),
 )
 
 ALL_OVERLAY_NAMES = tuple(
