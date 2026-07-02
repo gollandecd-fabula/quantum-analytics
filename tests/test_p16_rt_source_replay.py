@@ -64,6 +64,38 @@ class P16RedTeamSourceReplayTests(unittest.TestCase):
             "DATASET_SOURCE_REPLAY_DETECTED",
         )
 
+    def test_same_source_identity_is_independent_between_accounts(self):
+        other_account = TenantContext(self.tenant.tenant_id, "account-other")
+        first_payload = build_xlsx(rows=(("1", "SALE", "100.00"),))
+        other_payload = build_xlsx(rows=(("2", "SALE", "200.00"),))
+        first = declaration(self.tenant, first_payload)
+        other = replace(
+            declaration(other_account, other_payload),
+            source_internal_id=first.source_internal_id,
+            marketplace=first.marketplace,
+            report_type=first.report_type,
+            reporting_period_start=first.reporting_period_start,
+            reporting_period_end=first.reporting_period_end,
+        )
+
+        first_record = self.registry.declare(
+            tenant=self.tenant,
+            declaration=first,
+        )
+        other_record = self.registry.declare(
+            tenant=other_account,
+            declaration=other,
+        )
+
+        self.assertNotEqual(
+            first_record.declaration.dataset_id,
+            other_record.declaration.dataset_id,
+        )
+        self.assertEqual(
+            other_record.declaration.uploader_account_id,
+            "account-other",
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
