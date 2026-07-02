@@ -140,7 +140,7 @@ class B1bRescueSmokeTests(unittest.TestCase):
                 "VALID", "10000", "MONEY", "MONEY", "RUB"
             ),
             "discounts_amount": deepcopy(zero),
-            "subsidies_amount": deepcopy(zero),
+            "subsidies_excluding_return_compensation_amount": deepcopy(zero),
             "marketplace_commission_amount": typed(
                 "VALID", "1000", "MONEY", "MONEY", "RUB"
             ),
@@ -194,7 +194,7 @@ class B1bRescueSmokeTests(unittest.TestCase):
             "inputs": {
                 "gross_sales_amount": "10000",
                 "discounts_amount": "0",
-                "subsidies_amount": "0",
+                "subsidies_excluding_return_compensation_amount": "0",
                 "return_compensation_amount": "0",
                 "marketplace_commission_amount": "1000",
                 "forward_logistics_amount": "500",
