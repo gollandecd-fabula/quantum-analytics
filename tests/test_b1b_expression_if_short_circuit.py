@@ -79,7 +79,7 @@ class ExpressionIfShortCircuitTests(unittest.TestCase):
             )
         )
         self.assertEqual(result["state"], "VALID")
-        self.assertEqual(result["value"], "42.0000")
+        self.assertEqual(result["value"], "42.000000")
 
     def test_true_condition_skips_second_branch_failure(self) -> None:
         result = self.evaluate(
@@ -90,7 +90,7 @@ class ExpressionIfShortCircuitTests(unittest.TestCase):
             )
         )
         self.assertEqual(result["state"], "VALID")
-        self.assertEqual(result["value"], "42.0000")
+        self.assertEqual(result["value"], "42.000000")
 
     def test_sources_include_condition_and_selected_value_only(self) -> None:
         expression = operation(
