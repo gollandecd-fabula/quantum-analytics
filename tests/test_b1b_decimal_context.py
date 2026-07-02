@@ -98,7 +98,7 @@ class B1bDecimalContextTests(unittest.TestCase):
             "return_compensation_amount": deepcopy(zero),
             "gross_sales_amount": typed("VALID", BIG, "MONEY", "MONEY", "RUB"),
             "discounts_amount": deepcopy(zero),
-            "subsidies_amount": deepcopy(zero),
+            "subsidies_excluding_return_compensation_amount": deepcopy(zero),
             "marketplace_commission_amount": deepcopy(zero),
             "forward_logistics_amount": deepcopy(zero),
             "reverse_logistics_amount": deepcopy(zero),
