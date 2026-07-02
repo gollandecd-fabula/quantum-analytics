@@ -6,6 +6,7 @@ Risk class: `R3`
 Status: `APPROVED`
 Owner decision: the Quantum pilot must operate on real commercial data.
 Tracking issue: `#41`
+Local-storage amendment: `DR-2026-07-02-LOCAL-DISK-ENCRYPTION-NOT-REQUIRED`
 
 ## Decision
 
@@ -39,17 +40,27 @@ A dataset may instead transition to `REJECTED` or `REVOKED`. Failures are fail-c
   model prompts, issue bodies, PR comments, test fixtures, screenshots, and evidence packages.
 - External AI services may receive only sanitized, aggregated, or synthetic material unless a separate
   lawful data-processing decision explicitly authorizes otherwise.
+- The local single-user runtime remains loopback-only.
+- Full-disk encryption and local application-level encryption at rest are not mandatory.
+- Hosted, cloud, shared, removable, exported, and backup storage remains encrypted at rest.
+- Any approved non-loopback transport requires TLS.
 
 ## Required gate
 
 Data is not admitted merely because the owner approved real-data use. Each dataset must pass the
 Real Commercial Data Admission Contract, including authorization, classification, minimization,
-encryption, tenant isolation, retention, deletion, recovery, and independent reconciliation controls.
+tenant/account isolation, retention, deletion, recovery, independent reconciliation, transport security,
+and hosted/external storage controls.
+
+Local disk encryption is explicitly excluded from the mandatory pilot gate by
+`DR-2026-07-02-LOCAL-DISK-ENCRYPTION-NOT-REQUIRED`.
 
 ## Consequences
 
 - The pilot becomes an R3 financial and data-security exercise.
 - Red, Blue, Purple, AppSec, IV&V, Financial QA, and Release Audit must test the real-data control path.
 - `PILOT_READY` is impossible without end-to-end evidence from an admitted real dataset.
-- A data leak, cross-tenant read, unencrypted storage, unapproved export, or unreconciled material
-  financial difference is P0/P1 and blocks the pilot.
+- A data leak, cross-tenant or same-tenant non-owner read, unencrypted approved non-loopback transport,
+  unencrypted hosted/external storage, unapproved export, or unreconciled material financial difference
+  is P0/P1 and blocks the pilot.
+- Absence of local full-disk encryption is not a blocker.
