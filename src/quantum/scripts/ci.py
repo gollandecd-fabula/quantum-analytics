@@ -59,7 +59,17 @@ def _diagnostic_group(path: str) -> str:
     if top != "TESTS":
         return top
     filename = path.rsplit("/", 1)[-1]
-    return "TESTS_A_M" if filename < "test_n" else "TESTS_N_Z"
+    if filename.startswith("test_b1b_rescue"):
+        return "TESTS_B1B_RESCUE"
+    if filename.startswith("test_b1b"):
+        return "TESTS_B1B"
+    if filename.startswith("test_p16"):
+        return "TESTS_P16"
+    return "TESTS_OTHER"
+
+
+def _diagnostic_group_order(group: str) -> tuple[int, str]:
+    return (0 if group.startswith("TESTS_") else 1, group)
 
 
 def _emit_manifest_diagnostics(lines: list[str]) -> None:
@@ -82,7 +92,7 @@ def _emit_manifest_diagnostics(lines: list[str]) -> None:
     for row in required_entries:
         groups.setdefault(_diagnostic_group(str(row[0])), []).append(row)
     print("UNITTEST_DIAGNOSTICS_BEGIN")
-    for group in sorted(groups):
+    for group in sorted(groups, key=_diagnostic_group_order):
         print(
             f"MANIFEST_REQUIRED_ENTRIES_{group}="
             + json.dumps(groups[group], separators=(",", ":"))
