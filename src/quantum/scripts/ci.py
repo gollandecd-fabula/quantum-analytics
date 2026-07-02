@@ -54,6 +54,14 @@ def scan_forbidden_markers(root: Path) -> None:
         raise RuntimeError("Forbidden source markers:\n" + "\n".join(violations))
 
 
+def _diagnostic_group(path: str) -> str:
+    top = path.split("/", 1)[0].upper()
+    if top != "TESTS":
+        return top
+    filename = path.rsplit("/", 1)[-1]
+    return "TESTS_A_M" if filename < "test_n" else "TESTS_N_Z"
+
+
 def _emit_manifest_diagnostics(lines: list[str]) -> None:
     required_entries: list[list[object]] = []
     extras: list[str] = []
@@ -72,13 +80,12 @@ def _emit_manifest_diagnostics(lines: list[str]) -> None:
     required_entries.sort(key=lambda row: str(row[0]))
     groups: dict[str, list[list[object]]] = {}
     for row in required_entries:
-        top = str(row[0]).split("/", 1)[0].upper()
-        groups.setdefault(top, []).append(row)
+        groups.setdefault(_diagnostic_group(str(row[0])), []).append(row)
     print("UNITTEST_DIAGNOSTICS_BEGIN")
-    for top in sorted(groups):
+    for group in sorted(groups):
         print(
-            f"MANIFEST_REQUIRED_ENTRIES_{top}="
-            + json.dumps(groups[top], separators=(",", ":"))
+            f"MANIFEST_REQUIRED_ENTRIES_{group}="
+            + json.dumps(groups[group], separators=(",", ":"))
         )
     if extras:
         print("MANIFEST_EXTRA_PATHS=" + json.dumps(sorted(extras), separators=(",", ":")))
