@@ -68,7 +68,9 @@ def _validate_central_directory(
         name_size = _u16(payload, cursor + 28)
         extra_size = _u16(payload, cursor + 30)
         comment_size = _u16(payload, cursor + 32)
-        cursor += _CENTRAL_FIXED_SIZE + name_size + extra_size + comment_size
+        if comment_size:
+            raise XlsxInspectionError("XLSX_ARCHIVE_POLYGLOT_FORBIDDEN")
+        cursor += _CENTRAL_FIXED_SIZE + name_size + extra_size
     if cursor != offset + size or cursor != end_record_offset:
         raise XlsxInspectionError("XLSX_ARCHIVE_POLYGLOT_FORBIDDEN")
 
