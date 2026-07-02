@@ -112,6 +112,22 @@ class LocalRealDataPilotOrchestratorTests(unittest.TestCase):
         self.assertEqual(first["dataset"], second["dataset"])
         self.assertEqual(first["evidence_hash"], second["evidence_hash"])
 
+    def test_retry_uses_actual_admission_decision_time(self) -> None:
+        self.execute()
+        request = deepcopy(self.request)
+        request["calculated_at"] = (
+            NOW + timedelta(minutes=1, seconds=30)
+        ).isoformat().replace("+00:00", "Z")
+        with self.assertRaisesRegex(
+            LocalPilotExecutionError,
+            "PILOT_FINANCE_TIMESTAMP_OUT_OF_RANGE",
+        ):
+            self.execute(
+                observed_at=NOW - timedelta(minutes=1),
+                admitted_at=NOW,
+                finance_requests={"synthetic": request},
+            )
+
     def test_retry_rejects_different_inspection_policy(self) -> None:
         self.execute()
         with self.assertRaisesRegex(
