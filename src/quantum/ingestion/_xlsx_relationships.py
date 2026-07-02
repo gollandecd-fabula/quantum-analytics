@@ -14,7 +14,7 @@ _RELATIONSHIPS = f"{{{_RELATIONSHIP_NS}}}Relationships"
 _RELATIONSHIP = f"{{{_RELATIONSHIP_NS}}}Relationship"
 _REQUIRED_RELATIONSHIP_ATTRIBUTES = frozenset({"Id", "Type", "Target"})
 _OPTIONAL_RELATIONSHIP_ATTRIBUTES = frozenset({"TargetMode"})
-_ROOT_RELATIONSHIP_ID = re.compile(r"^(?:rId[1-9][0-9]{0,5}|rCore|rApp)$")
+_ROOT_RELATIONSHIP_ID = re.compile(r"^(?:rId[1-9][0-9]{0,5}|rCore|rApp|rExt)$")
 _ALLOWED_TARGET_MODES = frozenset({"internal", "external"})
 
 
