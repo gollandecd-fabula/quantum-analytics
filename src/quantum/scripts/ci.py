@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import compileall
+import json
 import os
 import re
 import subprocess
@@ -53,6 +54,34 @@ def scan_forbidden_markers(root: Path) -> None:
         raise RuntimeError("Forbidden source markers:\n" + "\n".join(violations))
 
 
+def _emit_manifest_diagnostics(lines: list[str]) -> None:
+    required_entries: list[list[object]] = []
+    extras: list[str] = []
+    top_level: list[dict[str, object]] = []
+    for line in lines:
+        if line.startswith("MANIFEST_MISSING_ENTRY="):
+            required_entries.append(json.loads(line.split("=", 1)[1]))
+        elif line.startswith("MANIFEST_MISMATCH_TRACKED="):
+            required_entries.append(json.loads(line.split("=", 1)[1]))
+        elif line.startswith("MANIFEST_EXTRA_PATH="):
+            extras.append(line.split("=", 1)[1])
+        elif line.startswith("MANIFEST_TOP_LEVEL="):
+            top_level.append(json.loads(line.split("=", 1)[1]))
+    if not required_entries and not extras and not top_level:
+        return
+    required_entries.sort(key=lambda row: str(row[0]))
+    print("UNITTEST_DIAGNOSTICS_BEGIN")
+    print(
+        "MANIFEST_REQUIRED_ENTRIES="
+        + json.dumps(required_entries, separators=(",", ":"))
+    )
+    if extras:
+        print("MANIFEST_EXTRA_PATHS=" + json.dumps(sorted(extras), separators=(",", ":")))
+    if top_level:
+        print("MANIFEST_TOP_LEVEL=" + json.dumps(top_level, separators=(",", ":")))
+    print("UNITTEST_DIAGNOSTICS_END")
+
+
 def _emit_test_output(result: subprocess.CompletedProcess[str]) -> None:
     output = (result.stdout or "") + (result.stderr or "")
     if result.returncode == 0:
@@ -70,11 +99,7 @@ def _emit_test_output(result: subprocess.CompletedProcess[str]) -> None:
         print("UNITTEST_FAILURE_INDEX_BEGIN")
         print("\n".join(failure_index))
         print("UNITTEST_FAILURE_INDEX_END")
-    diagnostics = [line for line in lines if line.startswith("MANIFEST_")]
-    if diagnostics:
-        print("UNITTEST_DIAGNOSTICS_BEGIN")
-        print("\n".join(diagnostics))
-        print("UNITTEST_DIAGNOSTICS_END")
+    _emit_manifest_diagnostics(lines)
     print("UNITTEST_FAILURE_TAIL_BEGIN")
     print("\n".join(lines[-24:]))
     print("UNITTEST_FAILURE_TAIL_END")
