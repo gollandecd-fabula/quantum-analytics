@@ -28,6 +28,7 @@ OVERLAYS = (
     ("ARTIFACT_MANIFEST_OVERLAY_REAL_DATA_PILOT_2026_07_08.json", "base_assurance_plan_overlay_git_blob_sha"),
     ("ARTIFACT_MANIFEST_OVERLAY_P16_REAL_XLSX_ADMISSION.json", "base_real_data_pilot_overlay_git_blob_sha"),
     ("ARTIFACT_MANIFEST_OVERLAY_P16_REAL_XLSX_ADMISSION_R2.json", "base_p16_real_xlsx_admission_overlay_git_blob_sha"),
+    ("ARTIFACT_MANIFEST_OVERLAY_P16_REAL_XLSX_ADMISSION_R3.json", "base_p16_real_xlsx_admission_r2_overlay_git_blob_sha"),
 )
 CONTROL_PATHS = {
     "docs/evidence/ARTIFACT_MANIFEST.json",
