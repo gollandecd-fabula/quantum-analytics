@@ -17,6 +17,8 @@ from ._xlsx_contracts import (
 from ._xlsx_package_parts import validate_modeled_package_parts
 from ._xlsx_relationships import validate_relationships
 from ._xlsx_workbook import _workbook_shape
+from ._xlsx_workbook_content import validate_workbook_xml_content
+from ._xlsx_xml_lexical import validate_xml_lexical_content
 from ._xlsx_zip_coverage import validate_zip_record_coverage
 
 
@@ -38,6 +40,8 @@ class XlsxPackageInspector:
         if package_kind == "ZIP_XLSX":
             validate_zip_record_coverage(workbook)
         validate_modeled_package_parts(workbook, policy.limits)
+        validate_xml_lexical_content(workbook, policy.limits)
+        workbook_part = validate_workbook_xml_content(workbook, policy.limits)
         auxiliary_parts = validate_modeled_xml_content(workbook, policy.limits)
         validate_relationships(workbook, policy.limits)
         validate_cell_structures(workbook, policy.limits)
@@ -108,6 +112,7 @@ class XlsxPackageInspector:
             "data_row_count": shape.data_row_count,
             "formula_count": shape.formula_count,
             "prohibited_header_count": shape.prohibited_header_count,
+            "workbook_part": workbook_part,
             "auxiliary_parts": auxiliary_parts,
         }
         diagnostics = tuple(sorted(mismatch_codes)) if matched is None else ()
