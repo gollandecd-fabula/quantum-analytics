@@ -27,7 +27,7 @@ class P16SeventhReviewFollowupTests(unittest.TestCase):
         base_policy = policy()
         limited_policy = replace(
             base_policy,
-            limits=replace(base_policy.limits, max_entries=4),
+            limits=replace(base_policy.limits, max_archive_entries=4),
         )
         workbook = rewrite_xlsx_part(
             build_xlsx(),
