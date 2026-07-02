@@ -18,7 +18,7 @@ def valid_request() -> dict:
         "return_compensation_amount": deepcopy(zero),
         "gross_sales_amount": typed("VALID", "10000", "MONEY", "MONEY", "RUB"),
         "discounts_amount": deepcopy(zero),
-        "subsidies_amount": deepcopy(zero),
+        "subsidies_excluding_return_compensation_amount": deepcopy(zero),
         "marketplace_commission_amount": typed(
             "VALID", "1000", "MONEY", "MONEY", "RUB"
         ),
