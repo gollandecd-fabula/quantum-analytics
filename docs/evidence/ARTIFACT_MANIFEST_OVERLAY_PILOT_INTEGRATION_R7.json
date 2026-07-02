@@ -1,0 +1,1 @@
+{"base_pilot_integration_r6_overlay_git_blob_sha":"f44ada0f01e62060b3f19cddc62ac8ef3c86139a","entries":[["src/quantum/ingestion/_xlsx_workbook_content.py","e3b4990573e53d6142d757727c84c493bcd733e52c0b4233e64bdd9a96bf70da",4984]],"hash_encoding":"sha256-hex","overlay_version":7,"reason":"Bind workbook diagnostic priority","remove_paths":[]}
