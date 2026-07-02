@@ -2,12 +2,11 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from decimal import Decimal, InvalidOperation
-import hmac
 from typing import Any
 
 from quantum.ingestion.admission_v2 import DatasetAdmissionRecord
 
-from ._scope import LocalPilotExecutionError
+from ._scope import LocalPilotExecutionError, secure_equal
 
 
 MetricBindings = Mapping[str, tuple[tuple[str, str], ...]]
@@ -155,8 +154,8 @@ def validate_source_identity(
     if (
         not isinstance(dataset_id, str)
         or not isinstance(original_hash, str)
-        or not hmac.compare_digest(dataset_id, admitted.declaration.dataset_id)
-        or not hmac.compare_digest(
+        or not secure_equal(dataset_id, admitted.declaration.dataset_id)
+        or not secure_equal(
             original_hash,
             admitted.declaration.original_file_sha256,
         )
