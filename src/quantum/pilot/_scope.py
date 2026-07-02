@@ -49,17 +49,17 @@ class LocalPilotScope:
         ):
             if not isinstance(value, str) or not value:
                 raise LocalPilotExecutionError(code)
-        if not self.read_only:
+        if self.read_only is not True:
             raise LocalPilotExecutionError("PILOT_READ_ONLY_REQUIRED")
-        if not self.single_operator:
+        if self.single_operator is not True:
             raise LocalPilotExecutionError("PILOT_SINGLE_OPERATOR_REQUIRED")
-        if not self.single_organization:
+        if self.single_organization is not True:
             raise LocalPilotExecutionError("PILOT_SINGLE_ORGANIZATION_REQUIRED")
-        if self.marketplace_write_enabled:
+        if self.marketplace_write_enabled is not False:
             raise LocalPilotExecutionError("PILOT_MARKETPLACE_WRITES_FORBIDDEN")
-        if self.production_credentials_enabled:
+        if self.production_credentials_enabled is not False:
             raise LocalPilotExecutionError("PILOT_PRODUCTION_CREDENTIALS_FORBIDDEN")
-        if self.public_hosting_enabled:
+        if self.public_hosting_enabled is not False:
             raise LocalPilotExecutionError("PILOT_PUBLIC_HOSTING_FORBIDDEN")
         if not isinstance(tenant, TenantContext):
             raise LocalPilotExecutionError("PILOT_TENANT_CONTEXT_REQUIRED")
