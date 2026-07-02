@@ -1,0 +1,1 @@
+{"base_pilot_integration_r11_overlay_git_blob_sha":"1809f43cb677021db0de1ff002b5965f7c26dced","entries":[["src/quantum/ingestion/_xlsx_relationships.py","4c650741ff67e80cd6552ee541fce308e1b57bb3459979f2bae68105dfc01dab",3257]],"hash_encoding":"sha256-hex","overlay_version":12,"reason":"Bind external relationship diagnostic compatibility","remove_paths":[]}
