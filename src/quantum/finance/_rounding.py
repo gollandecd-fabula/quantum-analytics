@@ -16,8 +16,33 @@ from ._common import (
 )
 
 
+def _validate_policy_input_limits(
+    value: _Value,
+    policy: Mapping[str, Any],
+) -> None:
+    if value.state != "VALID":
+        return
+    if value.value_type == "INTEGER":
+        assert isinstance(value.value, int) and not isinstance(value.value, bool)
+        if len(str(abs(value.value))) > policy["max_input_precision"]:
+            raise FinanceError("ROUNDING_INPUT_PRECISION_EXCEEDED")
+        return
+    if value.value_type not in {"MONEY", "DECIMAL", "RATE"}:
+        return
+    assert isinstance(value.value, Decimal)
+    _parse_decimal(
+        format(value.value, "f"),
+        code="VALUE_DECIMAL_INVALID",
+        max_precision=policy["max_input_precision"],
+        max_scale=policy["max_input_scale"],
+    )
+
+
 def _normalize_value(value: _Value, policy: Mapping[str, Any]) -> _Value:
-    if value.state != "VALID" or value.value_type not in {"MONEY", "DECIMAL", "RATE"}:
+    if value.state != "VALID":
+        return value
+    _validate_policy_input_limits(value, policy)
+    if value.value_type not in {"MONEY", "DECIMAL", "RATE"}:
         return value
     assert isinstance(value.value, Decimal)
     normalized, _ = _quantize(
