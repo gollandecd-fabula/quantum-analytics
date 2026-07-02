@@ -305,6 +305,8 @@ def _value_from_dict(raw: object, *, source_id: str) -> _Value:
         value = raw.get("value")
         if not isinstance(value, str) or _INTEGER_RE.fullmatch(value) is None:
             raise FinanceError("VALUE_TYPE_INVALID")
+        if len(value.lstrip("-")) > _MAX_DECIMAL_INPUT_PRECISION:
+            raise FinanceError("ROUNDING_INPUT_PRECISION_EXCEEDED")
         return _make_valid(
             int(value),
             value_type=value_type,
@@ -313,7 +315,12 @@ def _value_from_dict(raw: object, *, source_id: str) -> _Value:
             source_ids=source_ids,
         )
     return _make_valid(
-        _parse_decimal(raw.get("value"), code="VALUE_DECIMAL_INVALID"),
+        _parse_decimal(
+            raw.get("value"),
+            code="VALUE_DECIMAL_INVALID",
+            max_precision=_MAX_DECIMAL_INPUT_PRECISION,
+            max_scale=_MAX_DECIMAL_INPUT_SCALE,
+        ),
         value_type=value_type,
         unit=unit,
         currency=currency,
