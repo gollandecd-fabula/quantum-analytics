@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from io import BytesIO
+import re
 from zipfile import BadZipFile, ZipFile
 from zlib import error as ZlibError
 
@@ -13,6 +14,8 @@ _RELATIONSHIPS = f"{{{_RELATIONSHIP_NS}}}Relationships"
 _RELATIONSHIP = f"{{{_RELATIONSHIP_NS}}}Relationship"
 _REQUIRED_RELATIONSHIP_ATTRIBUTES = frozenset({"Id", "Type", "Target"})
 _OPTIONAL_RELATIONSHIP_ATTRIBUTES = frozenset({"TargetMode"})
+_ROOT_RELATIONSHIP_ID = re.compile(r"^(?:rId[1-9][0-9]{0,5}|rCore|rApp)$")
+_ALLOWED_TARGET_MODES = frozenset({"internal", "external"})
 
 
 def _has_text(value: str | None) -> bool:
@@ -39,11 +42,22 @@ def _validate_root_relationship_structure(
                 raise XlsxInspectionError("XLSX_ROOT_RELATIONSHIP_INVALID")
             for relationship in root:
                 attributes = set(relationship.attrib)
+                relationship_id = relationship.get("Id")
+                target_mode = relationship.get("TargetMode")
                 if (
                     not _REQUIRED_RELATIONSHIP_ATTRIBUTES.issubset(attributes)
                     or attributes
                     - _REQUIRED_RELATIONSHIP_ATTRIBUTES
                     - _OPTIONAL_RELATIONSHIP_ATTRIBUTES
+                    or not isinstance(relationship_id, str)
+                    or _ROOT_RELATIONSHIP_ID.fullmatch(relationship_id) is None
+                    or (
+                        target_mode is not None
+                        and (
+                            not isinstance(target_mode, str)
+                            or target_mode.casefold() not in _ALLOWED_TARGET_MODES
+                        )
+                    )
                     or list(relationship)
                     or _has_text(relationship.text)
                     or _has_text(relationship.tail)
