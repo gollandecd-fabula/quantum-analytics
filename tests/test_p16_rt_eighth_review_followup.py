@@ -164,7 +164,7 @@ class P16EighthReviewFollowupTests(unittest.TestCase):
             build_xlsx(
                 extra_entries={
                     "xl/sharedStrings.xml": _shared_payload(values, hidden=True),
-                },
+                }
             ),
             "xl/worksheets/sheet1.xml",
             lambda value: _use_shared_indexes(value, values),
@@ -176,25 +176,15 @@ class P16EighthReviewFollowupTests(unittest.TestCase):
             "XLSX_SHARED_STRING_STRUCTURE_UNMODELED",
         )
 
-    def test_auxiliary_xml_content_changes_structural_fingerprint(self):
-        first = build_xlsx(
+    def test_auxiliary_xml_content_is_rejected(self):
+        payload = build_xlsx(
             extra_entries={
                 "docProps/core.xml": b'<core owner="alpha"><title>first</title></core>',
             }
         )
-        second = build_xlsx(
-            extra_entries={
-                "docProps/core.xml": b'<core owner="beta"><title>second</title></core>',
-            }
-        )
-        first_result = XlsxPackageInspector().inspect(payload=first, policy=policy())
-        second_result = XlsxPackageInspector().inspect(payload=second, policy=policy())
-        self.assertIsNotNone(first_result.matched_schema_id)
-        self.assertIsNotNone(second_result.matched_schema_id)
-        self.assertNotEqual(
-            first_result.structural_fingerprint_sha256,
-            second_result.structural_fingerprint_sha256,
-        )
+        with self.assertRaises(XlsxInspectionError) as error:
+            XlsxPackageInspector().inspect(payload=payload, policy=policy())
+        self.assertEqual(error.exception.code, "XLSX_AUXILIARY_CONTENT_UNMODELED")
 
 
 if __name__ == "__main__":
