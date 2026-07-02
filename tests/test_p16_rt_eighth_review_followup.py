@@ -129,7 +129,10 @@ class P16EighthReviewFollowupTests(unittest.TestCase):
         )
         with self.assertRaises(XlsxInspectionError) as error:
             XlsxPackageInspector().inspect(payload=payload, policy=policy())
-        self.assertEqual(error.exception.code, "XLSX_WORKSHEET_ELEMENT_UNMODELED")
+        self.assertEqual(
+            error.exception.code,
+            "XLSX_SHEET_DATA_CONTENT_UNMODELED",
+        )
 
     def test_inline_string_hidden_descendant_is_rejected(self):
         payload = rewrite_xlsx_part(
@@ -143,7 +146,10 @@ class P16EighthReviewFollowupTests(unittest.TestCase):
         )
         with self.assertRaises(XlsxInspectionError) as error:
             XlsxPackageInspector().inspect(payload=payload, policy=policy())
-        self.assertEqual(error.exception.code, "XLSX_INLINE_STRING_UNMODELED")
+        self.assertEqual(
+            error.exception.code,
+            "XLSX_INLINE_STRING_STRUCTURE_UNMODELED",
+        )
 
     def test_referenced_shared_string_hidden_descendant_is_rejected(self):
         values = (
@@ -165,7 +171,10 @@ class P16EighthReviewFollowupTests(unittest.TestCase):
         )
         with self.assertRaises(XlsxInspectionError) as error:
             XlsxPackageInspector().inspect(payload=payload, policy=policy())
-        self.assertEqual(error.exception.code, "XLSX_SHARED_STRINGS_INVALID")
+        self.assertEqual(
+            error.exception.code,
+            "XLSX_SHARED_STRING_STRUCTURE_UNMODELED",
+        )
 
     def test_auxiliary_xml_content_changes_structural_fingerprint(self):
         first = build_xlsx(
