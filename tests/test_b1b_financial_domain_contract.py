@@ -150,7 +150,7 @@ class B1bFinancialDomainContractTests(unittest.TestCase):
         )
         self.assertEqual(
             results["other_expense_amount"]["reason_code"],
-            "NEGATIVE_NET_UNITS_EXPENSE_POLICY_REQUIRED",
+            "DEPENDENCY_BLOCKED:NEGATIVE_NET_UNITS_EXPENSE_POLICY_REQUIRED",
         )
         self.assertIn(
             "RETURN_COST_RESTORATION_POLICY_NOT_APPROVED",
