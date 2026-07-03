@@ -5,7 +5,7 @@ from tests import integration_manifest_support_v5 as _previous
 _base = _previous._base
 FINAL_NAMES = tuple(
     f"ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R{n}.json"
-    for n in range(1, 30)
+    for n in range(1, 31)
 )
 _base.FINAL_NAMES = FINAL_NAMES
 _base.FINAL_OVERLAY_R1 = FINAL_NAMES[0]
