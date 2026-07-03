@@ -1,0 +1,190 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://quantum.local/schemas/local-pilot-manifest.schema.json",
+  "title": "Quantum Local Pilot Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "run_id",
+    "source_file",
+    "scope",
+    "timestamps",
+    "dataset",
+    "inspection_policy",
+    "controls",
+    "finance_requests",
+    "finance_lineage",
+    "source_snapshot",
+    "reconciliation_metric_bindings",
+    "reconciliation_policy"
+  ],
+  "properties": {
+    "schema_version": {"const": "quantum-local-pilot-manifest-v1"},
+    "run_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,159}$"},
+    "source_file": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?![/\\\\]|[A-Za-z]:).+\\.(xlsx|zip)$"
+    },
+    "scope": {"$ref": "#/$defs/scope"},
+    "timestamps": {"$ref": "#/$defs/timestamps"},
+    "dataset": {"$ref": "#/$defs/dataset"},
+    "inspection_policy": {"$ref": "#/$defs/inspectionPolicy"},
+    "controls": {"$ref": "#/$defs/controls"},
+    "finance_requests": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {"pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,159}$"},
+      "additionalProperties": {"type": "object"}
+    },
+    "finance_lineage": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {"$ref": "#/$defs/lineage"}
+    },
+    "source_snapshot": {"$ref": "#/$defs/sourceSnapshot"},
+    "reconciliation_metric_bindings": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "type": "array",
+          "prefixItems": [{"type": "string"}, {"type": "string"}],
+          "minItems": 2,
+          "maxItems": 2
+        }
+      }
+    },
+    "reconciliation_policy": {"type": "object", "minProperties": 1}
+  },
+  "$defs": {
+    "safeId": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,159}$"},
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "host", "port", "operator_id", "organization_id", "tenant_id", "account_id",
+        "read_only", "single_operator", "single_organization", "marketplace_write_enabled",
+        "production_credentials_enabled", "public_hosting_enabled"
+      ],
+      "properties": {
+        "host": {"const": "127.0.0.1"},
+        "port": {"type": "integer", "minimum": 1, "maximum": 65535},
+        "operator_id": {"$ref": "#/$defs/safeId"},
+        "organization_id": {"$ref": "#/$defs/safeId"},
+        "tenant_id": {"$ref": "#/$defs/safeId"},
+        "account_id": {"$ref": "#/$defs/safeId"},
+        "read_only": {"const": true},
+        "single_operator": {"const": true},
+        "single_organization": {"const": true},
+        "marketplace_write_enabled": {"const": false},
+        "production_credentials_enabled": {"const": false},
+        "public_hosting_enabled": {"const": false}
+      }
+    },
+    "timestamps": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["declared_at", "observed_at", "admitted_at", "reconciled_at"],
+      "properties": {
+        "declared_at": {"type": "string", "format": "date-time"},
+        "observed_at": {"type": "string", "format": "date-time"},
+        "admitted_at": {"type": "string", "format": "date-time"},
+        "reconciled_at": {"type": "string", "format": "date-time"}
+      }
+    },
+    "dataset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dataset_id", "source_internal_id", "marketplace", "report_type",
+        "reporting_period_start", "reporting_period_end", "timezone",
+        "expected_row_count", "control_totals_sha256", "data_categories",
+        "sensitivity", "owner_authority_reference", "lawful_authority_attested",
+        "retention_deadline"
+      ],
+      "properties": {
+        "dataset_id": {"type": "string", "format": "uuid"},
+        "source_internal_id": {"$ref": "#/$defs/safeId"},
+        "marketplace": {"$ref": "#/$defs/safeId"},
+        "report_type": {"$ref": "#/$defs/safeId"},
+        "reporting_period_start": {"type": "string", "format": "date"},
+        "reporting_period_end": {"type": "string", "format": "date"},
+        "timezone": {"type": "string", "minLength": 1},
+        "expected_row_count": {"type": ["integer", "null"], "minimum": 0},
+        "control_totals_sha256": {"oneOf": [{"$ref": "#/$defs/sha256"}, {"type": "null"}]},
+        "data_categories": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/safeId"}},
+        "sensitivity": {"enum": ["COMMERCIAL_CONFIDENTIAL", "PUBLIC"]},
+        "owner_authority_reference": {"$ref": "#/$defs/safeId"},
+        "lawful_authority_attested": {"const": true},
+        "retention_deadline": {"type": "string", "format": "date-time"}
+      }
+    },
+    "inspectionPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["policy_id", "version", "limits", "schemas", "prohibited_header_tokens"],
+      "properties": {
+        "policy_id": {"$ref": "#/$defs/safeId"},
+        "version": {"type": "integer", "minimum": 1},
+        "limits": {"type": "object", "minProperties": 8, "maxProperties": 8},
+        "schemas": {"type": "array", "minItems": 1, "items": {"type": "object"}},
+        "prohibited_header_tokens": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}}
+      }
+    },
+    "controls": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dataset_evidence_id", "dataset_verifier_account_id", "source_authority_verified",
+        "report_period_verified", "control_totals_verified", "direct_identifiers_absent_or_approved",
+        "malware_scan_clean", "malware_scan_evidence_sha256", "storage_evidence_id",
+        "storage_verifier_account_id", "loopback_only", "transport_encrypted",
+        "encryption_at_rest", "tenant_scoped_paths", "immutable_original",
+        "separated_quarantine_and_admitted_zones", "least_privilege_credentials"
+      ],
+      "properties": {
+        "dataset_evidence_id": {"$ref": "#/$defs/safeId"},
+        "dataset_verifier_account_id": {"$ref": "#/$defs/safeId"},
+        "source_authority_verified": {"type": "boolean"},
+        "report_period_verified": {"type": "boolean"},
+        "control_totals_verified": {"type": "boolean"},
+        "direct_identifiers_absent_or_approved": {"type": "boolean"},
+        "malware_scan_clean": {"type": "boolean"},
+        "malware_scan_evidence_sha256": {"$ref": "#/$defs/sha256"},
+        "storage_evidence_id": {"$ref": "#/$defs/safeId"},
+        "storage_verifier_account_id": {"$ref": "#/$defs/safeId"},
+        "loopback_only": {"const": true},
+        "transport_encrypted": {"type": "boolean"},
+        "encryption_at_rest": {"type": "boolean"},
+        "tenant_scoped_paths": {"const": true},
+        "immutable_original": {"const": true},
+        "separated_quarantine_and_admitted_zones": {"const": true},
+        "least_privilege_credentials": {"const": true}
+      }
+    },
+    "lineage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dataset_id", "normalization_evidence_sha256", "source_row_count"],
+      "properties": {
+        "dataset_id": {"type": "string", "format": "uuid"},
+        "normalization_evidence_sha256": {"$ref": "#/$defs/sha256"},
+        "source_row_count": {"type": "integer", "minimum": 0}
+      }
+    },
+    "sourceSnapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["row_count", "totals"],
+      "properties": {
+        "row_count": {"type": "integer", "minimum": 0},
+        "totals": {"type": "object", "minProperties": 1}
+      }
+    }
+  }
+}

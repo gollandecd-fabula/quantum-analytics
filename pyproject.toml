@@ -13,8 +13,9 @@ dependencies = []
 quantum-api = "quantum.api.main:main"
 quantum-worker = "quantum.worker.main:main"
 quantum-ci = "quantum.scripts.ci:main"
+quantum-local-pilot = "quantum.pilot.cli:main"
 
 [tool.quantum]
 architecture = "modular-monolith"
-runtime_entry_points = ["api", "worker"]
+runtime_entry_points = ["api", "worker", "local-pilot"]
 marketplace_write_enabled = false
