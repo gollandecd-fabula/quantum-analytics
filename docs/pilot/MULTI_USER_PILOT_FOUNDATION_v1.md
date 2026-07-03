@@ -36,9 +36,9 @@ The pilot registration surface accepts only:
 
 The core flow does not request or store full name, phone, email, postal address or social-network identity. The password and recovery key are never stored in plaintext. The approved password-hashing algorithm is Argon2id. The recovery key is displayed once and only a hardened verifier is stored.
 
-There is no email password reset. Account recovery uses the recovery key and produces a fully audited credential rotation.
+There is no email password reset. Account recovery uses the recovery key and produces a fully audited credential rotation. Every credential rotation increments the account `authentication_epoch`; all sessions issued under an earlier epoch become invalid immediately.
 
-## 4. Roles
+## 4. Roles and sessions
 
 Initial tenant roles are deliberately minimal:
 
@@ -48,7 +48,7 @@ Initial tenant roles are deliberately minimal:
 
 A session is bound to one active tenant. A role in tenant A never grants access to tenant B. The pilot operator is not a cross-tenant data superuser and cannot read raw tenant data by default.
 
-Authorization is evaluated against the current account, membership and tenant records on every request. A revoked account, suspended membership or suspended tenant is denied immediately; cached session claims are not sufficient. Sessions are invalid before their issue time, expire absolutely, and may not exceed 12 hours.
+Authorization is evaluated against the current session, account, membership and tenant records on every request. A revoked session, revoked account, suspended membership or suspended tenant is denied immediately; cached session claims are not sufficient. Sessions are invalid before their issue time, expire absolutely, and may not exceed 12 hours.
 
 ## 5. Data protection
 
@@ -92,9 +92,11 @@ This unit does not authorize:
 3. cross-tenant authorization attempts fail closed;
 4. no direct identifier is required by the account model;
 5. Argon2id is the only admitted credential algorithm;
-6. marketplace writes remain disabled;
-7. the integrated artifact manifest matches the exact branch head;
-8. Foundation CI and security tests pass;
-9. an independent exact-head review reports zero open P0/P1 findings.
+6. credential rotation invalidates all prior sessions;
+7. individual session revocation denies immediately;
+8. marketplace writes remain disabled;
+9. the integrated artifact manifest matches the exact branch head;
+10. Foundation CI and security tests pass;
+11. an independent exact-head review reports zero open P0/P1 findings.
 
 Real-user onboarding remains separately gated and requires explicit approval.
