@@ -190,7 +190,8 @@ def calculate_settlement_tax_profit(
             source_ids=rate.source_ids,
         )
     elif (
-        base.state == "VALID"
+        rate.state == "VALID"
+        and base.state == "VALID"
         and isinstance(base.value, Decimal)
         and base.value < 0
     ):
