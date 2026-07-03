@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from enum import StrEnum
 import re
 from typing import Final
@@ -9,6 +9,7 @@ from typing import Final
 
 _SAFE_ID: Final = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:-]{0,159}$")
 _PSEUDONYM: Final = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{2,63}$")
+_MAX_SESSION_LIFETIME: Final = timedelta(hours=12)
 
 
 class PilotIdentityError(ValueError):
@@ -106,11 +107,16 @@ class PseudonymousAccount:
             or "@" in self.pseudonym
         ):
             raise PilotIdentityError("ACCOUNT_PSEUDONYM_INVALID")
-        _safe_id(
+        credential_reference = _safe_id(
             self.credential_record_id,
             "ACCOUNT_CREDENTIAL_REFERENCE_INVALID",
         )
-        _safe_id(self.recovery_record_id, "ACCOUNT_RECOVERY_REFERENCE_INVALID")
+        recovery_reference = _safe_id(
+            self.recovery_record_id,
+            "ACCOUNT_RECOVERY_REFERENCE_INVALID",
+        )
+        if credential_reference == recovery_reference:
+            raise PilotIdentityError("ACCOUNT_RECOVERY_REFERENCE_REUSED")
         if self.credential_algorithm != "argon2id":
             raise PilotIdentityError("ACCOUNT_CREDENTIAL_ALGORITHM_INVALID")
         if not isinstance(self.status, AccountStatus):
@@ -201,24 +207,60 @@ class SessionPrincipal:
         expires = _aware_utc(self.expires_at, "SESSION_EXPIRES_TIMEZONE_REQUIRED")
         if expires <= issued:
             raise PilotIdentityError("SESSION_EXPIRY_INVALID")
+        if expires - issued > _MAX_SESSION_LIFETIME:
+            raise PilotIdentityError("SESSION_LIFETIME_EXCEEDED")
 
 
 def authorize(
     principal: SessionPrincipal,
     *,
+    account: PseudonymousAccount,
+    membership: TenantMembership,
+    tenant: Tenant,
     tenant_id: str,
     permission: Permission,
     now: datetime,
 ) -> None:
     if not isinstance(principal, SessionPrincipal):
         raise PilotIdentityError("SESSION_PRINCIPAL_INVALID")
+    if not isinstance(account, PseudonymousAccount):
+        raise PilotIdentityError("AUTHORIZATION_ACCOUNT_INVALID")
+    if not isinstance(membership, TenantMembership):
+        raise PilotIdentityError("AUTHORIZATION_MEMBERSHIP_INVALID")
+    if not isinstance(tenant, Tenant):
+        raise PilotIdentityError("AUTHORIZATION_TENANT_STATE_INVALID")
     requested_tenant = _safe_id(tenant_id, "AUTHORIZATION_TENANT_INVALID")
     if not isinstance(permission, Permission):
         raise PilotIdentityError("AUTHORIZATION_PERMISSION_INVALID")
+
     current = _aware_utc(now, "AUTHORIZATION_TIMEZONE_REQUIRED")
-    if current >= principal.expires_at.astimezone(UTC):
+    issued = principal.issued_at.astimezone(UTC)
+    expires = principal.expires_at.astimezone(UTC)
+    if current < issued:
+        raise PilotIdentityError("SESSION_NOT_YET_VALID")
+    if current >= expires:
         raise PilotIdentityError("SESSION_EXPIRED")
-    if principal.tenant_id != requested_tenant:
+
+    if account.status is not AccountStatus.ACTIVE:
+        raise PilotIdentityError("ACCOUNT_NOT_ACTIVE")
+    if membership.status is not MembershipStatus.ACTIVE:
+        raise PilotIdentityError("MEMBERSHIP_NOT_ACTIVE")
+    if tenant.status is not TenantStatus.ACTIVE:
+        raise PilotIdentityError("TENANT_NOT_ACTIVE")
+
+    if account.account_id != principal.account_id:
+        raise PilotIdentityError("SESSION_ACCOUNT_MISMATCH")
+    if membership.membership_id != principal.membership_id:
+        raise PilotIdentityError("SESSION_MEMBERSHIP_MISMATCH")
+    if membership.account_id != principal.account_id:
+        raise PilotIdentityError("MEMBERSHIP_ACCOUNT_MISMATCH")
+    if membership.role is not principal.role:
+        raise PilotIdentityError("SESSION_ROLE_STALE")
+    if (
+        principal.tenant_id != requested_tenant
+        or membership.tenant_id != requested_tenant
+        or tenant.tenant_id != requested_tenant
+    ):
         raise PilotIdentityError("TENANT_SCOPE_MISMATCH")
     if permission not in _ROLE_PERMISSIONS[principal.role]:
         raise PilotIdentityError("PERMISSION_DENIED")
