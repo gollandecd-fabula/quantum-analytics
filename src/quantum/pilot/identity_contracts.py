@@ -34,6 +34,16 @@ def _aware_utc(value: object, code: str) -> datetime:
     return value.astimezone(UTC)
 
 
+def _positive_epoch(value: object, code: str) -> int:
+    if (
+        not isinstance(value, int)
+        or isinstance(value, bool)
+        or value < 1
+    ):
+        raise PilotIdentityError(code)
+    return value
+
+
 class AccountStatus(StrEnum):
     INVITED = "INVITED"
     ACTIVE = "ACTIVE"
@@ -59,6 +69,11 @@ class InviteStatus(StrEnum):
 class MembershipStatus(StrEnum):
     ACTIVE = "ACTIVE"
     SUSPENDED = "SUSPENDED"
+    REVOKED = "REVOKED"
+
+
+class SessionStatus(StrEnum):
+    ACTIVE = "ACTIVE"
     REVOKED = "REVOKED"
 
 
@@ -96,6 +111,7 @@ class PseudonymousAccount:
     credential_record_id: str
     recovery_record_id: str
     credential_algorithm: str
+    authentication_epoch: int
     status: AccountStatus
     created_at: datetime
 
@@ -119,6 +135,10 @@ class PseudonymousAccount:
             raise PilotIdentityError("ACCOUNT_RECOVERY_REFERENCE_REUSED")
         if self.credential_algorithm != "argon2id":
             raise PilotIdentityError("ACCOUNT_CREDENTIAL_ALGORITHM_INVALID")
+        _positive_epoch(
+            self.authentication_epoch,
+            "ACCOUNT_AUTHENTICATION_EPOCH_INVALID",
+        )
         if not isinstance(self.status, AccountStatus):
             raise PilotIdentityError("ACCOUNT_STATUS_INVALID")
         _aware_utc(self.created_at, "ACCOUNT_CREATED_TIMEZONE_REQUIRED")
@@ -193,6 +213,8 @@ class SessionPrincipal:
     tenant_id: str
     membership_id: str
     role: TenantRole
+    authentication_epoch: int
+    status: SessionStatus
     issued_at: datetime
     expires_at: datetime
 
@@ -203,6 +225,12 @@ class SessionPrincipal:
         _safe_id(self.membership_id, "SESSION_MEMBERSHIP_INVALID")
         if not isinstance(self.role, TenantRole):
             raise PilotIdentityError("SESSION_ROLE_INVALID")
+        _positive_epoch(
+            self.authentication_epoch,
+            "SESSION_AUTHENTICATION_EPOCH_INVALID",
+        )
+        if not isinstance(self.status, SessionStatus):
+            raise PilotIdentityError("SESSION_STATUS_INVALID")
         issued = _aware_utc(self.issued_at, "SESSION_ISSUED_TIMEZONE_REQUIRED")
         expires = _aware_utc(self.expires_at, "SESSION_EXPIRES_TIMEZONE_REQUIRED")
         if expires <= issued:
@@ -240,6 +268,8 @@ def authorize(
         raise PilotIdentityError("SESSION_NOT_YET_VALID")
     if current >= expires:
         raise PilotIdentityError("SESSION_EXPIRED")
+    if principal.status is not SessionStatus.ACTIVE:
+        raise PilotIdentityError("SESSION_NOT_ACTIVE")
 
     if account.status is not AccountStatus.ACTIVE:
         raise PilotIdentityError("ACCOUNT_NOT_ACTIVE")
@@ -250,6 +280,8 @@ def authorize(
 
     if account.account_id != principal.account_id:
         raise PilotIdentityError("SESSION_ACCOUNT_MISMATCH")
+    if account.authentication_epoch != principal.authentication_epoch:
+        raise PilotIdentityError("SESSION_AUTHENTICATION_STALE")
     if membership.membership_id != principal.membership_id:
         raise PilotIdentityError("SESSION_MEMBERSHIP_MISMATCH")
     if membership.account_id != principal.account_id:
@@ -274,6 +306,7 @@ __all__ = [
     "PilotIdentityError",
     "PseudonymousAccount",
     "SessionPrincipal",
+    "SessionStatus",
     "Tenant",
     "TenantInvite",
     "TenantMembership",
