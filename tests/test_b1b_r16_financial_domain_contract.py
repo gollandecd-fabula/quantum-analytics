@@ -71,6 +71,37 @@ class B1bR16FinancialDomainContractTests(unittest.TestCase):
                     "TAX_RATE_OUT_OF_RANGE",
                 )
 
+    def test_nonvalid_tax_rate_reason_precedes_negative_base_policy(self):
+        candidate = request()
+        candidate["inputs"]["gross_sales_amount"] = typed(
+            "VALID",
+            "0",
+            "MONEY",
+            "MONEY",
+            "RUB",
+        )
+        candidate["inputs"]["marketplace_commission_amount"] = typed(
+            "VALID",
+            "1",
+            "MONEY",
+            "MONEY",
+            "RUB",
+        )
+        candidate["tax_rate"] = typed(
+            "BLOCKED",
+            None,
+            "RATE",
+            "RATE",
+            reason_code="TAX_RATE_SOURCE_BLOCKED",
+        )
+        candidate["tax_base_metric_id"] = "net_marketplace_income_amount"
+        result = calculate(candidate)["results"]["tax_amount"]
+        self.assertEqual(result["state"], "BLOCKED")
+        self.assertEqual(
+            result["reason_code"],
+            "DEPENDENCY_BLOCKED:TAX_RATE_SOURCE_BLOCKED",
+        )
+
     def test_negative_tax_base_requires_an_approved_policy(self):
         candidate = request()
         candidate["inputs"]["gross_sales_amount"] = typed(
