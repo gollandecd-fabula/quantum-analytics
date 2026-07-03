@@ -23,12 +23,17 @@
     "production_persistence_ready": false,
     "production_argon2id_adapter_ready": false,
     "real_user_ready": false,
-    "authoritative_module": "src/quantum/pilot/runtime_v2.py",
-    "superseded_module": "src/quantum/pilot/runtime.py",
+    "authoritative_module": "src/quantum/pilot/runtime_v3.py",
     "resource_limits_required": true,
     "authoritative_behavioral_regressions": 28,
     "authoritative_remediation_regressions": 5,
-    "authoritative_regressions_total": 33
+    "authoritative_regressions_total": 36,
+    "superseded_modules": [
+      "src/quantum/pilot/runtime.py",
+      "src/quantum/pilot/runtime_v2.py"
+    ],
+    "authoritative_ordering_regressions": 3,
+    "authentication_before_capacity_preflight_required": true
   },
   "identity": {
     "registration_mode": "INVITE_ONLY",
@@ -116,10 +121,10 @@
     "PRODUCTION_RELEASE"
   ],
   "definition_of_done": [
-    "33_FOCUSED_RUNTIME_TESTS_PASS",
+    "36_FOCUSED_RUNTIME_V3_TESTS_PASS",
     "FOUNDATION_CI_EXACT_HEAD_PASS",
     "OSS_ADMISSION_CI_EXACT_HEAD_PASS",
-    "IMMUTABLE_MANIFEST_R25_PASS",
+    "IMMUTABLE_MANIFEST_R26_PASS",
     "ZERO_OPEN_P0_P1_INTERNAL_FINDINGS",
     "ZERO_UNRESOLVED_REVIEW_THREADS"
   ],
@@ -134,6 +139,7 @@
     "default_max_verifiers": 30000,
     "default_max_audit_events": 100000,
     "default_max_active_sessions_per_account": 10,
-    "expired_and_revoked_sessions_pruned_before_issue": true
+    "expired_and_revoked_sessions_pruned_before_issue": true,
+    "capacity_errors_after_successful_authentication_only": true
   }
 }
