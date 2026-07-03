@@ -21,6 +21,23 @@ class P16RedTeamRelationshipTests(unittest.TestCase):
             "XLSX_EXTERNAL_RELATIONSHIP_FORBIDDEN",
         )
 
+    def test_external_mode_with_surrounding_whitespace_is_rejected(self):
+        payload = rewrite_xlsx_part(
+            build_xlsx(),
+            "_rels/.rels",
+            lambda value: value.replace(
+                b'Target="xl/workbook.xml"',
+                b'Target="xl/workbook.xml" TargetMode=" External "',
+                1,
+            ),
+        )
+        with self.assertRaises(XlsxInspectionError) as error:
+            XlsxPackageInspector().inspect(payload=payload, policy=policy())
+        self.assertEqual(
+            error.exception.code,
+            "XLSX_EXTERNAL_RELATIONSHIP_FORBIDDEN",
+        )
+
     def test_sheet_binding_requires_worksheet_relationship_type(self):
         payload = rewrite_xlsx_part(
             build_xlsx(),
