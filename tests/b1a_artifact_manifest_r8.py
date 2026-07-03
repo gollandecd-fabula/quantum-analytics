@@ -38,6 +38,7 @@ OVERLAYS = (
     ("ARTIFACT_MANIFEST_OVERLAY_P16_REAL_XLSX_ADMISSION_R10.json", "base_p16_real_xlsx_admission_r9_overlay_git_blob_sha"),
     ("ARTIFACT_MANIFEST_OVERLAY_P16_REAL_XLSX_ADMISSION_R11.json", "base_p16_real_xlsx_admission_r10_overlay_git_blob_sha"),
     ("ARTIFACT_MANIFEST_OVERLAY_P16_REAL_XLSX_ADMISSION_R12.json", "base_p16_real_xlsx_admission_r11_overlay_git_blob_sha"),
+    ("ARTIFACT_MANIFEST_OVERLAY_B1B_RESCUE_V4.json", "base_p16_real_xlsx_admission_r12_overlay_git_blob_sha"),
 )
 CONTROL_PATHS = {
     "docs/evidence/ARTIFACT_MANIFEST.json",
@@ -89,11 +90,15 @@ def load_effective_manifest() -> dict:
         raw = (ROOT / "docs/evidence" / name).read_bytes()
         overlay = json.loads(raw.decode("utf-8"))
         if overlay[base_field] != git_blob_sha(previous):
-            raise AssertionError(f"ARTIFACT_MANIFEST_OVERLAY_BASE_MISMATCH:{name}")
+            raise AssertionError(
+                f"ARTIFACT_MANIFEST_OVERLAY_BASE_MISMATCH:{name}"
+            )
         apply_entries(artifacts, overlay)
         previous = raw
     effective = dict(current)
-    effective["artifacts"] = [artifacts[path] for path in sorted(artifacts)]
+    effective["artifacts"] = [
+        artifacts[path] for path in sorted(artifacts)
+    ]
     effective["artifact_count"] = len(effective["artifacts"])
     return effective
 
@@ -102,13 +107,17 @@ def expected_manifest(current: dict) -> dict:
     artifacts = []
     for path in tracked_paths():
         data = (ROOT / path).read_bytes()
-        artifacts.append([path, hashlib.sha256(data).hexdigest(), len(data)])
+        artifacts.append(
+            [path, hashlib.sha256(data).hexdigest(), len(data)]
+        )
     return {
         "project": current["project"],
         "generated_on": "2026-06-27",
         "package_version": "6",
         "source_constitution_file": current["source_constitution_file"],
-        "source_constitution_sha256": current["source_constitution_sha256"],
+        "source_constitution_sha256": current[
+            "source_constitution_sha256"
+        ],
         "artifact_count": len(artifacts),
         "artifact_fields": ARTIFACT_FIELDS,
         "artifacts": artifacts,
@@ -124,4 +133,7 @@ class B1aArtifactManifestTests(unittest.TestCase):
         current = load_effective_manifest()
         self.assertEqual(current["artifact_fields"], ARTIFACT_FIELDS)
         paths = {entry[0] for entry in current["artifacts"]}
-        self.assertTrue(B1A_SCHEMAS.issubset(paths), B1A_SCHEMAS - paths)
+        self.assertTrue(
+            B1A_SCHEMAS.issubset(paths),
+            B1A_SCHEMAS - paths,
+        )
