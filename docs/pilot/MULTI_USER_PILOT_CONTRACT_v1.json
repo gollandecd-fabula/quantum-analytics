@@ -41,6 +41,10 @@
     "recovery_key_plaintext_storage": false,
     "recovery_key_shown_once": true,
     "email_password_reset": false,
+    "credential_rotation": {
+      "authentication_epoch_increment_required": true,
+      "all_prior_sessions_invalidated": true
+    },
     "session": {
       "cookie_http_only": true,
       "cookie_secure": true,
@@ -50,7 +54,9 @@
       "absolute_expiry_required": true,
       "max_lifetime_hours": 12,
       "future_issued_session_rejected": true,
+      "live_session_state_required_each_request": true,
       "live_account_membership_tenant_state_required_each_request": true,
+      "revoked_session_denies_immediately": true,
       "revoked_or_suspended_state_denies_immediately": true
     },
     "operator_mfa_required": true
