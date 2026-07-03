@@ -48,6 +48,8 @@ Initial tenant roles are deliberately minimal:
 
 A session is bound to one active tenant. A role in tenant A never grants access to tenant B. The pilot operator is not a cross-tenant data superuser and cannot read raw tenant data by default.
 
+Authorization is evaluated against the current account, membership and tenant records on every request. A revoked account, suspended membership or suspended tenant is denied immediately; cached session claims are not sufficient. Sessions are invalid before their issue time, expire absolutely, and may not exceed 12 hours.
+
 ## 5. Data protection
 
 Before any real tester is admitted:
