@@ -1,0 +1,63 @@
+{
+  "evidence_id": "QRT-P2.1-R1-2026-07-03",
+  "unit_id": "P2.1",
+  "stacked_base_sha": "83662255091c45f9d7bb699b2212f0803bfdec19",
+  "state": "LOCAL_PASS_GITHUB_CI_PENDING",
+  "implementation": {
+    "runtime_module": "src/quantum/pilot/runtime.py",
+    "test_module": "tests/test_multi_user_pilot_runtime.py",
+    "contract": "docs/pilot/MULTI_USER_RUNTIME_CONTRACT_v1.json",
+    "architecture": "docs/pilot/MULTI_USER_RUNTIME_FOUNDATION_v1.md"
+  },
+  "verification": {
+    "python_compilation": "PASS",
+    "focused_tests_run": 28,
+    "failures": 0,
+    "errors": 0,
+    "concurrency_double_acceptance_test": "PASS",
+    "plaintext_session_token_persistence_test": "PASS",
+    "credential_rotation_revocation_test": "PASS",
+    "cross_tenant_fail_closed_test": "PASS",
+    "non_boolean_backend_fail_closed_test": "PASS",
+    "plaintext_backend_output_rejection_test": "PASS",
+    "temporal_regression_tests": "PASS"
+  },
+  "security_properties": {
+    "argon2id_backend_required": true,
+    "test_backend_is_production_approved": false,
+    "plaintext_password_persisted": false,
+    "plaintext_recovery_key_persisted": false,
+    "plaintext_invite_secret_persisted": false,
+    "plaintext_session_token_persisted": false,
+    "session_token_digest_algorithm": "sha256",
+    "session_entropy_bits": 256,
+    "tenant_scope_fail_closed": true,
+    "invite_replay_rejected": true,
+    "credential_epoch_rotation": true,
+    "individual_session_revocation": true
+  },
+  "known_blockers": [
+    "PROCESS_LOCAL_STORE_ONLY",
+    "PRODUCTION_ARGON2ID_ADAPTER_MISSING",
+    "RATE_LIMITING_MISSING",
+    "HTTP_COOKIE_CSRF_LAYER_MISSING",
+    "OPERATOR_MFA_MISSING",
+    "PERSISTENT_AUDIT_LOG_MISSING",
+    "BACKUP_RESTORE_NOT_REHEARSED",
+    "INDEPENDENT_EXACT_HEAD_REVIEW_MISSING"
+  ],
+  "hard_boundaries": {
+    "http_auth_endpoints_enabled": false,
+    "real_user_onboarding": false,
+    "marketplace_writes": false,
+    "protected_main_merge": false,
+    "deploy": false,
+    "release": false
+  },
+  "next_required_evidence": [
+    "EXACT_HEAD_FOUNDATION_CI_SUCCESS",
+    "EXACT_HEAD_OSS_ADMISSION_CI_SUCCESS",
+    "ZERO_UNRESOLVED_REVIEW_THREADS",
+    "INTERNAL_EXACT_HEAD_REVIEW_PASS"
+  ]
+}
