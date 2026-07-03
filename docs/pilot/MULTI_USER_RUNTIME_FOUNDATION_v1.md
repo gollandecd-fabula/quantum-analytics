@@ -8,7 +8,7 @@
 
 ## 1. Scope
 
-P2.1 converts the P2.0 identity and tenant contracts into an internal service runtime. It does not expose authentication over HTTP and does not authorize real users.
+P2.1 converts the P2.0 identity and tenant contracts into an internal service runtime. The authoritative implementation after security remediation R2 is `src/quantum/pilot/runtime_v2.py`; `runtime.py` is retained only as the reviewed R1 baseline. It does not expose authentication over HTTP and does not authorize real users.
 
 The runtime implements the closed pilot sequence:
 
@@ -51,7 +51,7 @@ Each authorization checks current:
 
 Sessions have a one-hour default lifetime and a hard maximum of twelve hours. Authentication, revocation and recovery reject time regressions. Individual revocation takes effect immediately.
 
-Credential recovery increments `authentication_epoch`, supersedes old password and recovery verifier records, and revokes all active sessions for the account.
+Credential recovery increments `authentication_epoch`, supersedes old password and recovery verifier records, and revokes all active sessions for the account. Neither previous password nor previous recovery material may be reused in either new credential purpose.
 
 ## 5. Tenant isolation
 
@@ -59,11 +59,11 @@ Authentication failures do not reveal whether a pseudonym, password, tenant or m
 
 Member invites require an authorized owner session. Viewer and analyst sessions cannot create members.
 
-## 6. Audit boundary
+## 6. Audit and resource boundary
 
 The runtime records immutable in-process event objects containing identifiers and event codes only. Passwords, recovery keys, invite secrets and bearer tokens are excluded.
 
-The in-process audit list is not a production audit log. Persistent append-only audit storage remains mandatory before real users.
+The in-process audit list is not a production audit log. Persistent append-only audit storage remains mandatory before real users. Runtime v2 applies validated hard limits to tenants, accounts, memberships, invites, sessions, verifier records and audit events. Capacity is checked before mutation, and expired or revoked session records are pruned before new session issuance.
 
 ## 7. Current limitations
 
@@ -85,14 +85,14 @@ These limitations are explicit release blockers rather than hidden assumptions.
 
 P2.1 is internally complete when:
 
-1. 28 focused runtime regressions pass;
+1. 33 focused runtime regressions pass;
 2. session tokens are not stored in plaintext;
 3. invite replay and concurrent double acceptance fail closed;
 4. tenant-owner authorization is required for member invites;
 5. credential recovery invalidates previous credentials and sessions;
 6. no direct identifier fields exist in the account contract;
 7. Foundation CI and OSS Admission CI pass on the exact head;
-8. immutable manifest overlay R23 validates;
+8. immutable manifest overlay R24 validates;
 9. no unresolved internal P0/P1 findings or review threads remain.
 
 Protected-main merge, deployment and real-user activation remain separately gated.
