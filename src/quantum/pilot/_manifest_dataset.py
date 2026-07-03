@@ -3,14 +3,12 @@ from __future__ import annotations
 from datetime import datetime
 from hashlib import sha256
 
-from quantum.ingestion.admission import (
-    DatasetDeclaration,
-    DatasetSensitivity,
-)
+from quantum.ingestion.admission import DatasetDeclaration, DatasetSensitivity
 
 from ._manifest_common import (
     boolean,
     date_value,
+    datetime_value,
     exact_keys,
     integer,
     mapping,
@@ -95,8 +93,9 @@ def build_declaration(
             item["lawful_authority_attested"],
             "PILOT_DATASET_INVALID",
         ),
-        retention_deadline=datetime.fromisoformat(
-            str(item["retention_deadline"]).replace("Z", "+00:00")
+        retention_deadline=datetime_value(
+            item["retention_deadline"],
+            "PILOT_DATASET_INVALID",
         ),
         declared_at=declared_at,
     )
