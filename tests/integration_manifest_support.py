@@ -11,7 +11,16 @@ _INVALID_AUDIT_OVERLAYS = tuple(
     f"ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R{n}.json"
     for n in range(27, 31)
 )
-_RECOVERY_OVERLAY = "ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R31.json"
+_RECOVERY_OVERLAYS = (
+    (
+        "ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R31.json",
+        "base_pilot_integration_r26_overlay_git_blob_sha",
+    ),
+    (
+        "ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R32.json",
+        "base_pilot_integration_r31_overlay_git_blob_sha",
+    ),
+)
 
 _base.FINAL_NAMES = _LINEAR_FINAL_NAMES
 _base.FINAL_OVERLAY_R1 = _LINEAR_FINAL_NAMES[0]
@@ -23,7 +32,7 @@ _base.ALL_OVERLAY_NAMES = tuple(
     _base.LOCAL_OVERLAY[0],
     *_LINEAR_FINAL_NAMES,
     *_INVALID_AUDIT_OVERLAYS,
-    _RECOVERY_OVERLAY,
+    *(name for name, _ in _RECOVERY_OVERLAYS),
 )
 _base.CONTROL_PATHS = {
     "docs/evidence/ARTIFACT_MANIFEST.json",
@@ -38,15 +47,17 @@ expected_manifest = _base.expected_manifest
 def load_effective_manifest() -> dict:
     current = _base.load_effective_manifest()
     artifacts = {row[0]: row for row in current["artifacts"]}
-    r26_raw = (
+    previous_raw = (
         _base.ROOT / "docs/evidence" / _LINEAR_FINAL_NAMES[-1]
     ).read_bytes()
-    _, recovery = _base._read_overlay(_RECOVERY_OVERLAY)
-    if recovery["base_pilot_integration_r26_overlay_git_blob_sha"] != _base.git_blob_sha(
-        r26_raw
-    ):
-        raise AssertionError("ARTIFACT_MANIFEST_RECOVERY_R31_BASE_MISMATCH")
-    _base.apply_entries(artifacts, recovery)
+    for name, base_field in _RECOVERY_OVERLAYS:
+        raw, recovery = _base._read_overlay(name)
+        if recovery[base_field] != _base.git_blob_sha(previous_raw):
+            raise AssertionError(
+                f"ARTIFACT_MANIFEST_RECOVERY_BASE_MISMATCH:{name}"
+            )
+        _base.apply_entries(artifacts, recovery)
+        previous_raw = raw
     current["artifacts"] = [artifacts[path] for path in sorted(artifacts)]
     current["artifact_count"] = len(current["artifacts"])
     return current
