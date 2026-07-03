@@ -3,6 +3,9 @@ from .runtime import (
     LocalPilotScope,
     execute_local_read_only_pilot,
     finance_result_snapshot,
+    purge_workspace,
+    run_manifest,
+    validate_manifest,
 )
 
 __all__ = [
@@ -10,4 +13,7 @@ __all__ = [
     "LocalPilotScope",
     "execute_local_read_only_pilot",
     "finance_result_snapshot",
+    "purge_workspace",
+    "run_manifest",
+    "validate_manifest",
 ]
