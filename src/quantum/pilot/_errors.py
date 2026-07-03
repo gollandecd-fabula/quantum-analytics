@@ -4,6 +4,7 @@ from quantum.finance import FinanceError
 from quantum.ingestion.admission import AdmissionError
 from quantum.reconciliation import ReconciliationError
 
+from ._input_errors import INPUT_PILOT_ERRORS
 from ._scope import LocalPilotExecutionError
 
 KNOWN_PILOT_ERRORS = (
@@ -11,7 +12,7 @@ KNOWN_PILOT_ERRORS = (
     AdmissionError,
     FinanceError,
     ReconciliationError,
-)
+) + INPUT_PILOT_ERRORS
 
 
 def error_code(error: BaseException) -> str:
