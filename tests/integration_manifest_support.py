@@ -73,7 +73,7 @@ _LOCAL = (
 )
 _FINAL_NAMES = tuple(
     f"ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R{n}.json"
-    for n in range(1, 25)
+    for n in range(1, 26)
 )
 _FINAL = _linear(_FINAL_NAMES, "unused")
 _ALL_NAMES = tuple(name for name, _ in _COMMON + _B1B + _P16) + (
