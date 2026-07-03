@@ -1,0 +1,32 @@
+{
+  "evidence_id": "QRT-P2.1-R3-2026-07-03",
+  "unit_id": "P2.1",
+  "reviewed_exact_head": "3e7e7ccf969b1a944037e914bf57803bdaffcb9d",
+  "state": "AUTHORITATIVE_COVERAGE_ADDED_CI_PENDING",
+  "review_independence": "SAME_AUTOMATION_INTERNAL_REVIEW_NOT_INDEPENDENT_APPROVAL",
+  "finding": {
+    "id": "QRT-P21-003",
+    "severity": "P1",
+    "finding": "The complete 28-test behavioral suite executed against runtime R1 while authoritative runtime_v2 was directly covered only by five remediation tests.",
+    "fix": "A dedicated subclass adapter now executes all 28 behavioral tests against runtime_v2; the five focused R2 tests remain separate, producing 33 authoritative runtime_v2 regressions."
+  },
+  "verification": {
+    "behavioral_tests_against_runtime_v2": 28,
+    "focused_remediation_tests_against_runtime_v2": 5,
+    "authoritative_runtime_v2_tests_total": 33,
+    "adapter": "tests/test_multi_user_pilot_runtime_v2.py",
+    "status": "GITHUB_CI_PENDING"
+  },
+  "hard_boundaries": {
+    "real_user_onboarding": false,
+    "protected_main_merge": false,
+    "deploy": false,
+    "release": false
+  },
+  "next_required_evidence": [
+    "EXACT_HEAD_FOUNDATION_CI_SUCCESS",
+    "EXACT_HEAD_OSS_ADMISSION_CI_SUCCESS",
+    "ZERO_UNRESOLVED_REVIEW_THREADS",
+    "INTERNAL_EXACT_HEAD_REVIEW_PASS"
+  ]
+}
