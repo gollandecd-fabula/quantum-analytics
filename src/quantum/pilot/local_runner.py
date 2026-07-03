@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import argparse
-from dataclasses import asdict
 from datetime import UTC, date, datetime, timedelta
 from hashlib import sha256
 import json
@@ -68,16 +67,16 @@ def _text(value: object, code: str) -> str:
 
 def _date(value: object, code: str) -> date:
     try:
-        parsed = date.fromisoformat(_text(value, code))
+        return date.fromisoformat(_text(value, code))
     except ValueError as exc:
         raise LocalPilotError(code) from exc
-    return parsed
 
 
 def _datetime(value: object, code: str) -> datetime:
-    text = _text(value, code)
     try:
-        parsed = datetime.fromisoformat(text.replace("Z", "+00:00"))
+        parsed = datetime.fromisoformat(
+            _text(value, code).replace("Z", "+00:00")
+        )
     except ValueError as exc:
         raise LocalPilotError(code) from exc
     if parsed.tzinfo is None or parsed.utcoffset() is None:
@@ -94,6 +93,21 @@ def _optional_sha(value: object, code: str) -> str | None:
     return text
 
 
+def _required_sha(value: object, code: str) -> str:
+    parsed = _optional_sha(value, code)
+    if parsed is None:
+        raise LocalPilotError(code)
+    return parsed
+
+
+def _categories(value: object) -> tuple[str, ...]:
+    if not isinstance(value, list) or not value or any(
+        not isinstance(item, str) or not item.strip() for item in value
+    ):
+        raise LocalPilotError("LOCAL_PILOT_CATEGORIES_INVALID")
+    return tuple(item.strip() for item in value)
+
+
 def _build_policy(raw: object) -> XlsxInspectionPolicy:
     data = _mapping(raw, "LOCAL_PILOT_POLICY_INVALID")
     limits_raw = _mapping(data.get("limits"), "LOCAL_PILOT_LIMITS_INVALID")
@@ -103,14 +117,20 @@ def _build_policy(raw: object) -> XlsxInspectionPolicy:
         if not isinstance(schemas_raw, list) or not schemas_raw:
             raise LocalPilotError("LOCAL_PILOT_SCHEMAS_REQUIRED")
         schemas = tuple(
-            XlsxSchemaExpectation(**dict(_mapping(item, "LOCAL_PILOT_SCHEMA_INVALID")))
+            XlsxSchemaExpectation(
+                **dict(_mapping(item, "LOCAL_PILOT_SCHEMA_INVALID"))
+            )
             for item in schemas_raw
         )
         tokens = data.get("prohibited_header_tokens", [])
-        if not isinstance(tokens, list) or any(not isinstance(item, str) for item in tokens):
+        if not isinstance(tokens, list) or any(
+            not isinstance(item, str) for item in tokens
+        ):
             raise LocalPilotError("LOCAL_PILOT_PROHIBITED_TOKENS_INVALID")
         return XlsxInspectionPolicy(
-            policy_id=_text(data.get("policy_id"), "LOCAL_PILOT_POLICY_ID_INVALID"),
+            policy_id=_text(
+                data.get("policy_id"), "LOCAL_PILOT_POLICY_ID_INVALID"
+            ),
             version=data.get("version"),
             limits=limits,
             schemas=schemas,
@@ -120,25 +140,44 @@ def _build_policy(raw: object) -> XlsxInspectionPolicy:
         raise LocalPilotError("LOCAL_PILOT_POLICY_INVALID") from exc
 
 
-def _atomic_json(path: Path, payload: Mapping[str, Any]) -> None:
-    path = path.resolve()
+def _atomic_bytes(path: Path, payload: bytes) -> None:
     path.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
-    encoded = json.dumps(
-        payload,
-        ensure_ascii=False,
-        sort_keys=True,
-        indent=2,
-    ).encode("utf-8")
     with tempfile.NamedTemporaryFile(dir=path.parent, delete=False) as handle:
         temporary = Path(handle.name)
         try:
-            handle.write(encoded)
+            handle.write(payload)
             handle.flush()
             os.fsync(handle.fileno())
             os.replace(temporary, path)
+            try:
+                path.chmod(0o600)
+            except OSError:
+                pass
         except Exception:
             temporary.unlink(missing_ok=True)
             raise
+
+
+def _atomic_json(path: Path, payload: Mapping[str, Any]) -> None:
+    encoded = json.dumps(
+        payload, ensure_ascii=False, sort_keys=True, indent=2
+    ).encode("utf-8")
+    _atomic_bytes(path.resolve(), encoded)
+
+
+def _zone_paths(
+    storage_root: Path,
+    tenant_id: str,
+    dataset_id: str,
+    digest: str,
+) -> tuple[Path, Path]:
+    tenant_token = sha256(tenant_id.encode("utf-8")).hexdigest()
+    root = storage_root.resolve() / "pilot-zones" / tenant_token
+    quarantine_dir = root / "quarantine" / dataset_id
+    admitted_dir = root / "admitted" / dataset_id
+    quarantine_dir.mkdir(mode=0o700, parents=True, exist_ok=True)
+    admitted_dir.mkdir(mode=0o700, parents=True, exist_ok=True)
+    return quarantine_dir / digest, admitted_dir / digest
 
 
 def _inspection_summary(record: object) -> dict[str, Any] | None:
@@ -161,21 +200,9 @@ def _inspection_summary(record: object) -> dict[str, Any] | None:
 
 
 def _base_report(
-    *,
-    dataset_id: str,
-    receipt: object,
-    record: object,
-    policy: XlsxInspectionPolicy,
+    *, dataset_id: str, receipt: object, record: object,
+    policy: XlsxInspectionPolicy, zone_state: str,
 ) -> dict[str, Any]:
-    decisions = [
-        {
-            "state": decision.state.value,
-            "reason_code": decision.reason_code,
-            "decided_at": decision.decided_at.isoformat(),
-            "diagnostics": list(decision.diagnostics),
-        }
-        for decision in record.decisions
-    ]
     return {
         "runner_version": "LOCAL_PILOT_RUNNER_R1",
         "dataset_id": dataset_id,
@@ -186,22 +213,28 @@ def _base_report(
         "duplicate_upload": receipt.duplicate,
         "admission_state": record.state.value,
         "admission_diagnostics": list(record.diagnostics),
-        "decisions": decisions,
+        "decisions": [
+            {
+                "state": item.state.value,
+                "reason_code": item.reason_code,
+                "decided_at": item.decided_at.isoformat(),
+                "diagnostics": list(item.diagnostics),
+            }
+            for item in record.decisions
+        ],
         "policy": {
             "id": policy.policy_id,
             "version": policy.version,
             "content_hash": policy.content_hash,
         },
         "inspection": _inspection_summary(record),
+        "storage_zone_state": zone_state,
         "marketplace_write_enabled": False,
         "raw_rows_in_report": False,
     }
 
 
-def _reconcile(
-    result: Mapping[str, Any],
-    raw: object,
-) -> dict[str, Any]:
+def _reconcile(result: Mapping[str, Any], raw: object) -> dict[str, Any]:
     if raw is None:
         return {"state": "PENDING", "differences": []}
     data = _mapping(raw, "LOCAL_PILOT_RECONCILIATION_INVALID")
@@ -209,24 +242,16 @@ def _reconcile(
         data.get("expected_metrics"),
         "LOCAL_PILOT_EXPECTED_METRICS_INVALID",
     )
-    differences: list[dict[str, str | None]] = []
     results = _mapping(result.get("results"), "LOCAL_PILOT_RESULTS_INVALID")
+    differences: list[dict[str, str | None]] = []
     for metric_id, expected_value in expected.items():
         if not isinstance(metric_id, str) or not isinstance(expected_value, str):
             raise LocalPilotError("LOCAL_PILOT_EXPECTED_METRICS_INVALID")
-        actual_metric = results.get(metric_id)
-        actual_value = (
-            actual_metric.get("value")
-            if isinstance(actual_metric, Mapping)
-            else None
-        )
-        if actual_value != expected_value:
+        metric = results.get(metric_id)
+        actual = metric.get("value") if isinstance(metric, Mapping) else None
+        if actual != expected_value:
             differences.append(
-                {
-                    "metric_id": metric_id,
-                    "expected": expected_value,
-                    "actual": actual_value,
-                }
+                {"metric_id": metric_id, "expected": expected_value, "actual": actual}
             )
     return {
         "state": "CONFLICT" if differences else "RECONCILED",
@@ -235,10 +260,7 @@ def _reconcile(
 
 
 def run_local_pilot(
-    *,
-    file_path: Path,
-    config: Mapping[str, Any],
-    storage_root: Path,
+    *, file_path: Path, config: Mapping[str, Any], storage_root: Path,
 ) -> dict[str, Any]:
     if not isinstance(file_path, Path) or not file_path.is_file():
         raise LocalPilotError("LOCAL_PILOT_FILE_NOT_FOUND")
@@ -251,48 +273,45 @@ def run_local_pilot(
     tenant_id = _text(config.get("tenant_id"), "LOCAL_PILOT_TENANT_INVALID")
     account_id = _text(config.get("account_id"), "LOCAL_PILOT_ACCOUNT_INVALID")
     verifier_id = _text(
-        config.get("verifier_account_id"),
-        "LOCAL_PILOT_VERIFIER_INVALID",
+        config.get("verifier_account_id"), "LOCAL_PILOT_VERIFIER_INVALID"
     )
     if verifier_id == account_id:
         raise LocalPilotError("LOCAL_PILOT_INDEPENDENT_VERIFIER_REQUIRED")
     tenant = TenantContext(tenant_id, account_id)
 
     receipt = UploadReceiptRegistry().receive(
-        tenant=tenant,
-        payload=payload,
-        filename=file_path.name,
+        tenant=tenant, payload=payload, filename=file_path.name
     )
     storage = LocalRawStorage(storage_root)
-    storage_record = storage.store(tenant=tenant, receipt=receipt, payload=payload)
-    if storage_record.sha256 != receipt.sha256:
+    stored = storage.store(tenant=tenant, receipt=receipt, payload=payload)
+    if stored.sha256 != receipt.sha256:
         raise LocalPilotError("LOCAL_PILOT_STORAGE_INTEGRITY_FAILED")
 
     now = datetime.now(UTC)
     dataset_id = str(uuid4())
+    quarantine_path, admitted_path = _zone_paths(
+        storage_root, tenant_id, dataset_id, receipt.sha256
+    )
+    _atomic_bytes(quarantine_path, payload)
+
     declaration = DatasetDeclaration(
         dataset_id=dataset_id,
         tenant_id=tenant_id,
         uploader_account_id=account_id,
         source_internal_id=_text(
-            config.get("source_internal_id"),
-            "LOCAL_PILOT_SOURCE_ID_INVALID",
+            config.get("source_internal_id"), "LOCAL_PILOT_SOURCE_ID_INVALID"
         ),
         marketplace=_text(
-            config.get("marketplace"),
-            "LOCAL_PILOT_MARKETPLACE_INVALID",
+            config.get("marketplace"), "LOCAL_PILOT_MARKETPLACE_INVALID"
         ),
         report_type=_text(
-            config.get("report_type"),
-            "LOCAL_PILOT_REPORT_TYPE_INVALID",
+            config.get("report_type"), "LOCAL_PILOT_REPORT_TYPE_INVALID"
         ),
         reporting_period_start=_date(
-            config.get("reporting_period_start"),
-            "LOCAL_PILOT_PERIOD_INVALID",
+            config.get("reporting_period_start"), "LOCAL_PILOT_PERIOD_INVALID"
         ),
         reporting_period_end=_date(
-            config.get("reporting_period_end"),
-            "LOCAL_PILOT_PERIOD_INVALID",
+            config.get("reporting_period_end"), "LOCAL_PILOT_PERIOD_INVALID"
         ),
         timezone=_text(config.get("timezone"), "LOCAL_PILOT_TIMEZONE_INVALID"),
         original_file_sha256=receipt.sha256,
@@ -302,7 +321,7 @@ def run_local_pilot(
             config.get("control_totals_sha256"),
             "LOCAL_PILOT_CONTROL_TOTALS_INVALID",
         ),
-        data_categories=tuple(config.get("data_categories", ())),
+        data_categories=_categories(config.get("data_categories")),
         sensitivity=DatasetSensitivity.COMMERCIAL_CONFIDENTIAL,
         owner_authority_reference=_text(
             config.get("owner_authority_reference"),
@@ -310,8 +329,7 @@ def run_local_pilot(
         ),
         lawful_authority_attested=config.get("lawful_authority_attested"),
         retention_deadline=_datetime(
-            config.get("retention_deadline"),
-            "LOCAL_PILOT_RETENTION_INVALID",
+            config.get("retention_deadline"), "LOCAL_PILOT_RETENTION_INVALID"
         ),
         declared_at=now,
     )
@@ -325,20 +343,17 @@ def run_local_pilot(
         policy=policy,
         observed_at=now + timedelta(seconds=1),
     )
-    report = _base_report(
-        dataset_id=dataset_id,
-        receipt=receipt,
-        record=record,
-        policy=policy,
-    )
     if record.state is not DatasetAdmissionState.VALIDATED:
+        report = _base_report(
+            dataset_id=dataset_id, receipt=receipt, record=record,
+            policy=policy, zone_state="QUARANTINED",
+        )
         report["status"] = "ADMISSION_REJECTED"
         report["limitations"] = ["CALCULATION_NOT_EXECUTED"]
         return report
 
     attestations = _mapping(
-        config.get("attestations"),
-        "LOCAL_PILOT_ATTESTATIONS_INVALID",
+        config.get("attestations"), "LOCAL_PILOT_ATTESTATIONS_INVALID"
     )
     if set(attestations) != _REQUIRED_ATTESTATIONS or any(
         attestations[name] is not True for name in _REQUIRED_ATTESTATIONS
@@ -346,6 +361,7 @@ def run_local_pilot(
         raise LocalPilotError("LOCAL_PILOT_ATTESTATIONS_INCOMPLETE")
     inspection = record.inspection
     assert inspection is not None
+    verified_at = now + timedelta(seconds=2)
     dataset_evidence = DatasetControlEvidence(
         evidence_id="dataset-evidence-" + str(uuid4()),
         tenant_id=tenant_id,
@@ -369,12 +385,11 @@ def run_local_pilot(
         control_totals_verified=True,
         direct_identifiers_absent_or_approved=True,
         malware_scan_clean=True,
-        malware_scan_evidence_sha256=_optional_sha(
+        malware_scan_evidence_sha256=_required_sha(
             config.get("malware_scan_evidence_sha256"),
             "LOCAL_PILOT_MALWARE_EVIDENCE_INVALID",
-        )
-        or "",
-        verified_at=now + timedelta(seconds=2),
+        ),
+        verified_at=verified_at,
         verifier_account_id=verifier_id,
     )
     storage_evidence = StorageControlEvidence(
@@ -387,9 +402,11 @@ def run_local_pilot(
         encryption_at_rest=False,
         tenant_scoped_paths=True,
         immutable_original=True,
-        separated_quarantine_and_admitted_zones=True,
+        separated_quarantine_and_admitted_zones=(
+            quarantine_path.parent.is_dir() and admitted_path.parent.is_dir()
+        ),
         least_privilege_credentials=True,
-        verified_at=now + timedelta(seconds=2),
+        verified_at=verified_at,
         verifier_account_id=verifier_id,
         storage_environment=StorageEnvironment.LOCAL_SINGLE_USER,
         loopback_only=True,
@@ -401,19 +418,29 @@ def run_local_pilot(
         storage_evidence=storage_evidence,
         admitted_at=now + timedelta(seconds=3),
     )
-    report = _base_report(
-        dataset_id=dataset_id,
-        receipt=receipt,
-        record=record,
-        policy=policy,
-    )
     if record.state is not DatasetAdmissionState.ADMITTED:
+        report = _base_report(
+            dataset_id=dataset_id, receipt=receipt, record=record,
+            policy=policy, zone_state="QUARANTINED",
+        )
         report["status"] = "ADMISSION_BLOCKED"
         report["limitations"] = ["CALCULATION_NOT_EXECUTED"]
         return report
 
+    _atomic_bytes(admitted_path, quarantine_path.read_bytes())
+    quarantine_path.unlink(missing_ok=False)
+    if sha256(admitted_path.read_bytes()).hexdigest() != receipt.sha256:
+        raise LocalPilotError("LOCAL_PILOT_ADMITTED_ZONE_INTEGRITY_FAILED")
+
+    report = _base_report(
+        dataset_id=dataset_id, receipt=receipt, record=record,
+        policy=policy, zone_state="ADMITTED",
+    )
     finance_request = dict(
-        _mapping(config.get("finance_request"), "LOCAL_PILOT_FINANCE_REQUEST_INVALID")
+        _mapping(
+            config.get("finance_request"),
+            "LOCAL_PILOT_FINANCE_REQUEST_INVALID",
+        )
     )
     if finance_request.get("organization_id") != tenant_id:
         raise LocalPilotError("LOCAL_PILOT_FINANCE_TENANT_MISMATCH")
@@ -455,17 +482,19 @@ def main() -> None:
     parser.add_argument("--output", required=True, type=Path)
     args = parser.parse_args()
     try:
-        config = json.loads(args.config.read_text(encoding="utf-8"))
+        raw_config = json.loads(args.config.read_text(encoding="utf-8"))
         report = run_local_pilot(
             file_path=args.file,
-            config=_mapping(config, "LOCAL_PILOT_CONFIG_INVALID"),
+            config=_mapping(raw_config, "LOCAL_PILOT_CONFIG_INVALID"),
             storage_root=args.storage_root,
         )
         _atomic_json(args.output, report)
         print(json.dumps({"status": report["status"], "output": str(args.output)}))
-        if report["status"] in {"PILOT_RUN_COMPLETE", "CALCULATED_RECONCILIATION_PENDING"}:
-            return
-        raise SystemExit(2)
+        if report["status"] not in {
+            "PILOT_RUN_COMPLETE",
+            "CALCULATED_RECONCILIATION_PENDING",
+        }:
+            raise SystemExit(2)
     except SystemExit:
         raise
     except Exception as exc:
