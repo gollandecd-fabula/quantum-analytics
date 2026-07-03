@@ -248,6 +248,19 @@ class LocalRealDataPilotOrchestratorTests(unittest.TestCase):
         ):
             self.execute(source_snapshot=source)
 
+    def test_uppercase_dataset_uuid_is_normalized(self) -> None:
+        declaration_value = replace(
+            self.declaration,
+            dataset_id=self.declaration.dataset_id.upper(),
+        )
+        source = self.source_snapshot()
+        source["dataset_id"] = declaration_value.dataset_id
+        result = self.execute(
+            declaration=declaration_value,
+            source_snapshot=source,
+        )
+        self.assertEqual(result["reconciliation"]["state"], "RECONCILED")
+
     def test_unicode_source_identity_mismatch_uses_stable_error(self) -> None:
         source = self.source_snapshot()
         source["dataset_id"] = "набор-данных"
