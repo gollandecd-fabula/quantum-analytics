@@ -1,6 +1,7 @@
 import tempfile
 import unittest
 from dataclasses import asdict
+from hashlib import sha256
 from pathlib import Path
 
 from quantum.pilot import LocalPilotError, run_local_pilot
@@ -56,10 +57,41 @@ class LocalPilotRunnerTests(unittest.TestCase):
         report = self.run_candidate(self.config())
         self.assertEqual(report["status"], "CALCULATED_RECONCILIATION_PENDING")
         self.assertEqual(report["admission_state"], "ADMITTED")
+        self.assertEqual(report["storage_zone_state"], "ADMITTED")
         self.assertEqual(report["blocked_metrics"], [])
         self.assertFalse(report["raw_rows_in_report"])
         self.assertFalse(report["marketplace_write_enabled"])
         self.assertEqual(report["reconciliation"]["state"], "PENDING")
+
+    def test_payload_is_promoted_out_of_quarantine(self):
+        config = self.config()
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            storage_root = root / "storage"
+            source = root / "report.xlsx"
+            payload = build_xlsx()
+            source.write_bytes(payload)
+            report = run_local_pilot(
+                file_path=source,
+                config=config,
+                storage_root=storage_root,
+            )
+            tenant_token = sha256(config["tenant_id"].encode("utf-8")).hexdigest()
+            zone_root = storage_root / "pilot-zones" / tenant_token
+            admitted = (
+                zone_root
+                / "admitted"
+                / report["dataset_id"]
+                / report["file_sha256"]
+            )
+            quarantined = (
+                zone_root
+                / "quarantine"
+                / report["dataset_id"]
+                / report["file_sha256"]
+            )
+            self.assertEqual(admitted.read_bytes(), payload)
+            self.assertFalse(quarantined.exists())
 
     def test_matching_expected_metrics_completes_run(self):
         config = self.config()
