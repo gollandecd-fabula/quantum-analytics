@@ -1,0 +1,50 @@
+{
+  "audit_id": "QRT-P2.0-R2-2026-07-03",
+  "unit_id": "P2.0",
+  "reviewed_exact_head": "7f151bc6aaf3527e285396204461c2fe8a839100",
+  "review_state": "REMEDIATED_LOCAL_CI_PENDING",
+  "review_independence": "SECOND_PASS_SAME_AUTOMATION_NOT_INDEPENDENT_APPROVAL",
+  "findings": [
+    {
+      "id": "QRT-P20-005",
+      "severity": "P1",
+      "finding": "Credential rotation and recovery did not invalidate sessions issued under prior credentials.",
+      "proof": "The reviewed account and session contracts had no shared authentication epoch and authorization did not compare credential generations.",
+      "fix": "Account and session now carry a positive authentication_epoch; authorization denies mismatches with SESSION_AUTHENTICATION_STALE."
+    },
+    {
+      "id": "QRT-P20-006",
+      "severity": "P1",
+      "finding": "An individual compromised session could not be revoked before absolute expiry.",
+      "proof": "Authorization checked live account, membership and tenant state but the session contract had no live status.",
+      "fix": "SessionStatus is now mandatory and authorization denies every non-ACTIVE session with SESSION_NOT_ACTIVE."
+    }
+  ],
+  "verification": {
+    "pre_fix": {
+      "method": "EXACT_HEAD_STATIC_CODE_PATH_REVIEW",
+      "result": "BLOCKING_GAPS_CONFIRMED",
+      "review_comment_id": 4623934112
+    },
+    "post_fix": {
+      "focused_tests": 19,
+      "failures": 0,
+      "errors": 0,
+      "python_compilation": "PASS",
+      "status": "LOCAL_PASS"
+    }
+  },
+  "hard_boundaries": {
+    "marketplace_writes": false,
+    "real_user_onboarding": false,
+    "protected_main_merge": false,
+    "deploy": false,
+    "release": false
+  },
+  "next_required_evidence": [
+    "EXACT_HEAD_FOUNDATION_CI_SUCCESS",
+    "EXACT_HEAD_OSS_ADMISSION_CI_SUCCESS",
+    "ZERO_UNRESOLVED_REVIEW_THREADS",
+    "INDEPENDENT_EXACT_HEAD_REVIEW"
+  ]
+}
