@@ -1,0 +1,140 @@
+{
+  "contract_version": "1.0.0",
+  "contract_id": "QUANTUM-MULTI-USER-PILOT-2026-07-03-v1",
+  "project": {
+    "name": "Quantum",
+    "repository": "gollandecd-fabula/quantum-analytics",
+    "architecture": "modular-monolith",
+    "operating_mode": "READ_ONLY",
+    "marketplace_write_enabled": false,
+    "release_state": "RELEASE_BLOCKED"
+  },
+  "unit": {
+    "unit_id": "P2.0",
+    "name": "MULTI_USER_PILOT_FOUNDATION",
+    "risk_class": "R3",
+    "state": "IN_DEVELOPMENT",
+    "base_sha": "2954475609883dce0953a08ce60c11ba517058cf"
+  },
+  "pilot": {
+    "access": "INVITE_OR_APPROVED_REQUEST_ONLY",
+    "commercial_terms": "FREE_TESTING_FOR_FIRST_CLIENTS",
+    "public_self_registration": false,
+    "personal_cabinet_required": true,
+    "direct_identifiers_required": false,
+    "allowed_registration_fields": [
+      "pseudonym",
+      "password",
+      "recovery_key"
+    ],
+    "forbidden_registration_fields": [
+      "full_name",
+      "phone",
+      "email",
+      "postal_address",
+      "social_network_id"
+    ]
+  },
+  "identity": {
+    "credential_algorithm": "argon2id",
+    "password_plaintext_storage": false,
+    "recovery_key_plaintext_storage": false,
+    "recovery_key_shown_once": true,
+    "email_password_reset": false,
+    "session": {
+      "cookie_http_only": true,
+      "cookie_secure": true,
+      "same_site": "Strict",
+      "csrf_protection": true,
+      "rotate_on_authentication": true,
+      "absolute_expiry_required": true
+    },
+    "operator_mfa_required": true
+  },
+  "tenancy": {
+    "isolation": "FAIL_CLOSED",
+    "tenant_id_required_on_every_business_record": true,
+    "tenant_id_required_on_every_query": true,
+    "cross_tenant_queries_forbidden": true,
+    "cross_tenant_raw_data_access_for_operator": false,
+    "roles": [
+      "TENANT_OWNER",
+      "TENANT_ANALYST",
+      "TENANT_VIEWER"
+    ],
+    "default_role": "TENANT_VIEWER",
+    "personal_cabinet_scope": "ONE_ACTIVE_TENANT_PER_SESSION"
+  },
+  "privacy": {
+    "operator_must_be_defined_before_real_users": true,
+    "roskomnadzor_notification_required_before_real_users": true,
+    "separate_personal_data_consent_required": true,
+    "consent_version_and_hash_logged": true,
+    "consent_withdrawal_supported": true,
+    "account_deletion_supported": true,
+    "tenant_data_deletion_supported": true,
+    "data_minimization": true,
+    "raw_ip_persistence": false,
+    "third_party_telemetry": false,
+    "external_raw_data_transfer": false
+  },
+  "storage": {
+    "production_data_residency": "RUSSIAN_FEDERATION",
+    "environment": "HOSTED_EXTERNAL",
+    "tls_required": true,
+    "encryption_at_rest_required": true,
+    "tenant_scoped_paths": true,
+    "immutable_original_upload": true,
+    "quarantine_and_admitted_zones_separated": true,
+    "least_privilege_credentials": true,
+    "backup_restore_rehearsal_required": true
+  },
+  "ingestion": {
+    "quarantine_before_validation": true,
+    "malware_scan_required": true,
+    "active_content_rejected": true,
+    "personal_data_in_uploads": "REJECT_UNLESS_SEPARATELY_APPROVED",
+    "evidence_chain_required": true,
+    "reconciliation_required": true
+  },
+  "learning": {
+    "default_scope": "PRIVATE_PER_TENANT",
+    "cross_tenant_raw_training": false,
+    "global_learning_enabled": false,
+    "future_global_learning_input": "AGGREGATED_DEPERSONALIZED_BUSINESS_EVENTS_ONLY",
+    "shadow_mode_required_before_online_learning": true,
+    "financial_core_auto_change": false,
+    "safety_policy_auto_change": false,
+    "versioned_approval_required_for_governed_changes": true
+  },
+  "out_of_scope": [
+    "PUBLIC_REGISTRATION",
+    "BILLING",
+    "MOBILE_APPLICATION",
+    "MARKETPLACE_WRITES",
+    "EMAIL_AUTHENTICATION",
+    "CROSS_TENANT_RAW_DATA_ANALYTICS",
+    "GLOBAL_ONLINE_LEARNING",
+    "PRODUCTION_RELEASE"
+  ],
+  "release_gates": {
+    "real_user_pilot": [
+      "LEGAL_OPERATOR_DEFINED",
+      "ROSKOMNADZOR_NOTIFICATION_CONFIRMED",
+      "RUSSIAN_HOSTING_CONFIRMED",
+      "TENANT_ISOLATION_TESTS_PASS",
+      "AUTHENTICATION_SECURITY_REVIEW_PASS",
+      "CONSENT_WITHDRAWAL_AND_DELETE_TESTS_PASS",
+      "BACKUP_RESTORE_REHEARSAL_PASS",
+      "INDEPENDENT_EXACT_HEAD_REVIEW_PASS",
+      "EXPLICIT_USER_APPROVAL"
+    ],
+    "merge_to_protected_main": [
+      "ZERO_OPEN_P0_P1",
+      "ZERO_UNRESOLVED_REVIEW_THREADS",
+      "EXACT_HEAD_CI_PASS",
+      "INDEPENDENT_REVIEW_PASS",
+      "EXPLICIT_USER_APPROVAL"
+    ]
+  }
+}
