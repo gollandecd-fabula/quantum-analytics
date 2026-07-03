@@ -48,7 +48,7 @@ def _reject_external_target(target: str, target_mode: str | None) -> None:
     normalized = target.replace("\\", "/")
     if (
         isinstance(target_mode, str)
-        and target_mode.casefold() == "external"
+        and target_mode.strip().casefold() == "external"
     ) or normalized.startswith("//") or _URI_SCHEME.match(normalized):
         raise XlsxInspectionError("XLSX_EXTERNAL_RELATIONSHIP_FORBIDDEN")
 
