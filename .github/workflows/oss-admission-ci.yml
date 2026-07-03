@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - build-b3-metric-evidence-contracts-v4
+      - p16-real-xlsx-admission-r11-restored
   workflow_dispatch:
 
 permissions:
