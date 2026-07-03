@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from contextlib import closing
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from functools import lru_cache
@@ -146,21 +147,55 @@ class AttestedSqlitePilotIdentityRepository(_v1.SqlitePilotIdentityRepository):
         state: PersistentPilotState,
         created_at: datetime,
     ) -> AttestedCheckpointReceipt:
+        checkpoint = _v1._safe_id(checkpoint_id, "CHECKPOINT_ID_INVALID")
+        if not isinstance(state, PersistentPilotState):
+            raise PilotPersistenceError("STATE_INVALID")
+        created = _v1._utc(created_at, "CHECKPOINT_TIME_INVALID")
+        self._enforce_limits(state)
+        digest = _v1.state_sha256(state)
+        record_count = _v1._record_count(state)
         with self._connect() as conn:
             self._require_schema(conn)
-            schema_digest = _assert_expected_schema(conn)
-        receipt = super().save_checkpoint(
-            checkpoint_id=checkpoint_id,
-            state=state,
-            created_at=created_at,
-        )
+            try:
+                conn.execute("BEGIN IMMEDIATE")
+                schema_digest = _assert_expected_schema(conn)
+                checkpoint_count = conn.execute(
+                    "SELECT COUNT(*) FROM pilot_checkpoints"
+                ).fetchone()[0]
+                if checkpoint_count >= self._limits.max_checkpoints:
+                    raise PilotPersistenceError("CHECKPOINT_CAPACITY_EXCEEDED")
+                conn.execute(
+                    "INSERT INTO pilot_checkpoints("
+                    "checkpoint_id, created_at, state_sha256, schema_version, "
+                    "record_count) VALUES(?, ?, ?, ?, ?)",
+                    (
+                        checkpoint,
+                        _v1._dt(created),
+                        digest,
+                        _v1._SCHEMA_VERSION,
+                        record_count,
+                    ),
+                )
+                _v1._insert_state(conn, checkpoint, state)
+                conn.commit()
+            except sqlite3.IntegrityError as exc:
+                conn.rollback()
+                raise PilotPersistenceError(
+                    "CHECKPOINT_CONFLICT_OR_INVALID"
+                ) from exc
+            except sqlite3.DatabaseError as exc:
+                conn.rollback()
+                raise PilotPersistenceError("CHECKPOINT_STORAGE_FAILURE") from exc
+            except Exception:
+                conn.rollback()
+                raise
         return AttestedCheckpointReceipt(
-            checkpoint_id=receipt.checkpoint_id,
-            state_sha256=receipt.state_sha256,
+            checkpoint_id=checkpoint,
+            state_sha256=digest,
             schema_sha256=schema_digest,
-            created_at=receipt.created_at,
-            schema_version=receipt.schema_version,
-            record_count=receipt.record_count,
+            created_at=created,
+            schema_version=_v1._SCHEMA_VERSION,
+            record_count=record_count,
         )
 
     def load_checkpoint(
@@ -171,6 +206,8 @@ class AttestedSqlitePilotIdentityRepository(_v1.SqlitePilotIdentityRepository):
     ) -> PersistentPilotState:
         if not isinstance(receipt, AttestedCheckpointReceipt):
             raise PilotPersistenceError("ATTESTED_CHECKPOINT_RECEIPT_REQUIRED")
+        if expected_state_sha256 is not None:
+            raise PilotPersistenceError("LEGACY_DIGEST_ARGUMENT_FORBIDDEN")
 
         checkpoint = receipt.checkpoint_id
         with self._connect() as conn:
@@ -236,12 +273,19 @@ class AttestedSqlitePilotIdentityRepository(_v1.SqlitePilotIdentityRepository):
 
     def backup_to(self, destination: str | Path) -> Path:
         target = Path(destination)
-        if target.is_symlink():
+        if target == self.path or target.is_symlink():
             raise PilotPersistenceError("BACKUP_DESTINATION_INVALID")
-        with self._connect() as conn:
-            self._require_schema(conn)
-            _assert_expected_schema(conn)
-        return super().backup_to(target)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        with self._connect() as source, closing(sqlite3.connect(target)) as backup:
+            self._require_schema(source)
+            source.execute("BEGIN")
+            expected = _assert_expected_schema(source)
+            source.backup(backup)
+        with closing(sqlite3.connect(target)) as check:
+            if schema_sha256(check) != expected:
+                raise PilotPersistenceError("BACKUP_SCHEMA_MISMATCH")
+        _v1._restrict_file(target)
+        return target
 
 
 __all__ = [
