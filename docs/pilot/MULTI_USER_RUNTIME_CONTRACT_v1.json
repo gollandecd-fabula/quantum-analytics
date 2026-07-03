@@ -25,7 +25,10 @@
     "real_user_ready": false,
     "authoritative_module": "src/quantum/pilot/runtime_v2.py",
     "superseded_module": "src/quantum/pilot/runtime.py",
-    "resource_limits_required": true
+    "resource_limits_required": true,
+    "authoritative_behavioral_regressions": 28,
+    "authoritative_remediation_regressions": 5,
+    "authoritative_regressions_total": 33
   },
   "identity": {
     "registration_mode": "INVITE_ONLY",
@@ -116,7 +119,7 @@
     "33_FOCUSED_RUNTIME_TESTS_PASS",
     "FOUNDATION_CI_EXACT_HEAD_PASS",
     "OSS_ADMISSION_CI_EXACT_HEAD_PASS",
-    "IMMUTABLE_MANIFEST_R24_PASS",
+    "IMMUTABLE_MANIFEST_R25_PASS",
     "ZERO_OPEN_P0_P1_INTERNAL_FINDINGS",
     "ZERO_UNRESOLVED_REVIEW_THREADS"
   ],
