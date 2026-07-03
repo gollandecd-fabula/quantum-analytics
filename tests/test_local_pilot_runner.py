@@ -1,3 +1,4 @@
+import json
 import tempfile
 import unittest
 from dataclasses import asdict
@@ -30,7 +31,7 @@ class LocalPilotRunnerTests(unittest.TestCase):
             "owner_authority_reference": "OWNER-LOCAL-PILOT-1",
             "lawful_authority_attested": True,
             "retention_deadline": "2030-01-01T00:00:00Z",
-            "inspection_policy": asdict(policy()),
+            "inspection_policy": json.loads(json.dumps(asdict(policy()))),
             "malware_scan_evidence_sha256": "a" * 64,
             "attestations": {
                 "source_authority_verified": True,
