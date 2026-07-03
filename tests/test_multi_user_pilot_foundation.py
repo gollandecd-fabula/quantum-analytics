@@ -12,6 +12,7 @@ from quantum.pilot import (
     PilotIdentityError,
     PseudonymousAccount,
     SessionPrincipal,
+    SessionStatus,
     Tenant,
     TenantMembership,
     TenantRole,
@@ -71,18 +72,25 @@ class MultiUserPilotContractTests(unittest.TestCase):
         self.assertIn("EXPLICIT_USER_APPROVAL", gates)
 
     def test_session_contract_requires_live_state_and_bounded_ttl(self):
-        session = self.contract["identity"]["session"]
+        identity = self.contract["identity"]
+        session = identity["session"]
+        rotation = identity["credential_rotation"]
+        self.assertTrue(session["live_session_state_required_each_request"])
         self.assertTrue(
             session["live_account_membership_tenant_state_required_each_request"]
         )
         self.assertTrue(session["future_issued_session_rejected"])
         self.assertEqual(session["max_lifetime_hours"], 12)
+        self.assertTrue(rotation["authentication_epoch_increment_required"])
+        self.assertTrue(rotation["all_prior_sessions_invalidated"])
 
 
 class IdentityAndTenantIsolationTests(unittest.TestCase):
     def account(
         self,
         status: AccountStatus = AccountStatus.ACTIVE,
+        *,
+        authentication_epoch: int = 1,
     ) -> PseudonymousAccount:
         return PseudonymousAccount(
             account_id="account-001",
@@ -90,6 +98,7 @@ class IdentityAndTenantIsolationTests(unittest.TestCase):
             credential_record_id="credential-001",
             recovery_record_id="recovery-001",
             credential_algorithm="argon2id",
+            authentication_epoch=authentication_epoch,
             status=status,
             created_at=NOW,
         )
@@ -123,6 +132,8 @@ class IdentityAndTenantIsolationTests(unittest.TestCase):
         self,
         role: TenantRole,
         *,
+        authentication_epoch: int = 1,
+        status: SessionStatus = SessionStatus.ACTIVE,
         issued_at: datetime = NOW,
         expires_at: datetime | None = None,
     ) -> SessionPrincipal:
@@ -132,6 +143,8 @@ class IdentityAndTenantIsolationTests(unittest.TestCase):
             tenant_id="tenant-a",
             membership_id="membership-001",
             role=role,
+            authentication_epoch=authentication_epoch,
+            status=status,
             issued_at=issued_at,
             expires_at=expires_at or issued_at + timedelta(hours=1),
         )
@@ -144,6 +157,7 @@ class IdentityAndTenantIsolationTests(unittest.TestCase):
         now: datetime = NOW + timedelta(minutes=1),
         tenant_id: str = "tenant-a",
         account_status: AccountStatus = AccountStatus.ACTIVE,
+        account_authentication_epoch: int = 1,
         membership_status: MembershipStatus = MembershipStatus.ACTIVE,
         tenant_status: TenantStatus = TenantStatus.ACTIVE,
         principal: SessionPrincipal | None = None,
@@ -151,7 +165,10 @@ class IdentityAndTenantIsolationTests(unittest.TestCase):
         active_principal = principal or self.principal(role)
         authorize(
             active_principal,
-            account=self.account(account_status),
+            account=self.account(
+                account_status,
+                authentication_epoch=account_authentication_epoch,
+            ),
             membership=self.membership(role, membership_status),
             tenant=self.tenant(tenant_status),
             tenant_id=tenant_id,
@@ -173,6 +190,7 @@ class IdentityAndTenantIsolationTests(unittest.TestCase):
                 credential_record_id="credential-002",
                 recovery_record_id="recovery-002",
                 credential_algorithm="bcrypt",
+                authentication_epoch=1,
                 status=AccountStatus.ACTIVE,
                 created_at=NOW,
             )
@@ -188,6 +206,7 @@ class IdentityAndTenantIsolationTests(unittest.TestCase):
                 credential_record_id="same-reference",
                 recovery_record_id="same-reference",
                 credential_algorithm="argon2id",
+                authentication_epoch=1,
                 status=AccountStatus.ACTIVE,
                 created_at=NOW,
             )
@@ -203,6 +222,7 @@ class IdentityAndTenantIsolationTests(unittest.TestCase):
                 credential_record_id="credential-001",
                 recovery_record_id="recovery-001",
                 credential_algorithm="argon2id",
+                authentication_epoch=1,
                 status=AccountStatus.ACTIVE,
                 created_at=NOW,
             )
@@ -266,6 +286,37 @@ class IdentityAndTenantIsolationTests(unittest.TestCase):
             self.principal(
                 TenantRole.TENANT_ANALYST,
                 expires_at=NOW + timedelta(hours=13),
+            )
+
+    def test_revoked_session_fails_closed(self):
+        revoked = self.principal(
+            TenantRole.TENANT_ANALYST,
+            status=SessionStatus.REVOKED,
+        )
+        with self.assertRaisesRegex(
+            PilotIdentityError,
+            "SESSION_NOT_ACTIVE",
+        ):
+            self.authorize_live(
+                TenantRole.TENANT_ANALYST,
+                principal=revoked,
+                permission=Permission.RUN_ANALYSIS,
+            )
+
+    def test_credential_rotation_invalidates_prior_sessions(self):
+        stale = self.principal(
+            TenantRole.TENANT_ANALYST,
+            authentication_epoch=1,
+        )
+        with self.assertRaisesRegex(
+            PilotIdentityError,
+            "SESSION_AUTHENTICATION_STALE",
+        ):
+            self.authorize_live(
+                TenantRole.TENANT_ANALYST,
+                principal=stale,
+                account_authentication_epoch=2,
+                permission=Permission.RUN_ANALYSIS,
             )
 
     def test_revoked_account_fails_closed(self):
