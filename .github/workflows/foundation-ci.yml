@@ -4,10 +4,12 @@ on:
   pull_request:
     branches:
       - main
+      - p16-real-xlsx-admission-r11-restored
   push:
     branches:
       - main
       - bootstrap/foundation-v5
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -26,13 +28,17 @@ jobs:
       - name: Fetch exact commit without third-party actions
         env:
           GH_TOKEN: ${{ github.token }}
+          TARGET_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: |
           set -euo pipefail
+          test -n "${TARGET_SHA}"
           git init .
           git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
-          git fetch --depth=1 origin "${GITHUB_SHA}"
+          git fetch --depth=1 origin "${TARGET_SHA}"
           git checkout --detach FETCH_HEAD
+          test "$(git rev-parse HEAD)" = "${TARGET_SHA}"
           git remote set-url origin "https://github.com/${GITHUB_REPOSITORY}.git"
+          echo "Validated exact head ${TARGET_SHA}"
 
       - name: Verify runtime
         run: |
