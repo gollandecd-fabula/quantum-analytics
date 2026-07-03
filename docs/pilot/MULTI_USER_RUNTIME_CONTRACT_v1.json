@@ -1,0 +1,119 @@
+{
+  "contract_version": "1.0.0",
+  "contract_id": "QUANTUM-MULTI-USER-RUNTIME-2026-07-03-v1",
+  "project": {
+    "name": "Quantum",
+    "repository": "gollandecd-fabula/quantum-analytics",
+    "architecture": "modular-monolith",
+    "operating_mode": "READ_ONLY",
+    "marketplace_write_enabled": false,
+    "release_state": "RELEASE_BLOCKED"
+  },
+  "unit": {
+    "unit_id": "P2.1",
+    "name": "AUTHENTICATION_AND_TENANCY_RUNTIME",
+    "risk_class": "R3",
+    "state": "IN_DEVELOPMENT",
+    "stacked_base_sha": "83662255091c45f9d7bb699b2212f0803bfdec19"
+  },
+  "runtime": {
+    "exposure": "INTERNAL_SERVICE_ONLY",
+    "http_auth_endpoints_enabled": false,
+    "persistence": "PROCESS_LOCAL_IN_MEMORY",
+    "production_persistence_ready": false,
+    "production_argon2id_adapter_ready": false,
+    "real_user_ready": false
+  },
+  "identity": {
+    "registration_mode": "INVITE_ONLY",
+    "pseudonym_uniqueness": "GLOBAL_CASE_INSENSITIVE",
+    "direct_identifiers_required": false,
+    "credential_algorithm_required": "argon2id",
+    "encoded_verifier_prefix_required": "$argon2id$",
+    "plaintext_password_storage": false,
+    "plaintext_recovery_storage": false,
+    "plaintext_invite_secret_storage": false,
+    "credential_and_recovery_verifiers_separate": true
+  },
+  "invite": {
+    "one_time": true,
+    "minimum_lifetime_minutes": 1,
+    "maximum_lifetime_days": 7,
+    "roles": [
+      "TENANT_OWNER",
+      "TENANT_ANALYST",
+      "TENANT_VIEWER"
+    ],
+    "owner_authorization_required_for_member_invites": true,
+    "bootstrap_owner_invite_operator_internal_only": true,
+    "not_before_enforced": true
+  },
+  "session": {
+    "token_entropy_bits": 256,
+    "plaintext_token_persisted": false,
+    "token_digest_algorithm": "sha256",
+    "default_lifetime_hours": 1,
+    "maximum_lifetime_hours": 12,
+    "live_session_state_required": true,
+    "live_account_membership_tenant_state_required": true,
+    "credential_epoch_binding_required": true,
+    "individual_revocation_immediate": true,
+    "time_regression_rejected": true
+  },
+  "recovery": {
+    "email_reset_enabled": false,
+    "recovery_key_required": true,
+    "credential_reuse_rejected": true,
+    "authentication_epoch_incremented": true,
+    "all_active_sessions_revoked": true,
+    "time_regression_rejected": true
+  },
+  "tenancy": {
+    "tenant_scope_fail_closed": true,
+    "one_membership_per_tenant_account": true,
+    "owner_only_member_invitation": true,
+    "cross_tenant_authentication_error": "AUTHENTICATION_FAILED",
+    "cross_tenant_authorization_error": "TENANT_SCOPE_MISMATCH"
+  },
+  "audit": {
+    "event_metadata_only": true,
+    "plaintext_secrets_forbidden": true,
+    "events": [
+      "TENANT_PROVISIONED",
+      "INVITE_ISSUED",
+      "INVITE_ACCEPTED",
+      "SESSION_ISSUED",
+      "SESSION_REVOKED",
+      "CREDENTIALS_ROTATED"
+    ]
+  },
+  "current_blockers": [
+    "PERSISTENT_IDENTITY_STORE_PENDING",
+    "PRODUCTION_ARGON2ID_ADAPTER_PENDING",
+    "AUTH_RATE_LIMITING_PENDING",
+    "HTTP_COOKIE_CSRF_LAYER_PENDING",
+    "OPERATOR_MFA_PENDING",
+    "PERSISTENT_AUDIT_LOG_PENDING",
+    "BACKUP_RESTORE_REHEARSAL_PENDING",
+    "INDEPENDENT_EXACT_HEAD_REVIEW_PENDING",
+    "REAL_USER_ACTIVATION_NOT_AUTHORIZED"
+  ],
+  "out_of_scope": [
+    "PUBLIC_REGISTRATION",
+    "REAL_USER_ONBOARDING",
+    "PRODUCTION_CREDENTIAL_STORAGE",
+    "HTTP_AUTH_ENDPOINTS",
+    "BILLING",
+    "MARKETPLACE_WRITES",
+    "DEPLOY",
+    "PRODUCTION_RELEASE"
+  ],
+  "definition_of_done": [
+    "28_FOCUSED_RUNTIME_TESTS_PASS",
+    "FOUNDATION_CI_EXACT_HEAD_PASS",
+    "OSS_ADMISSION_CI_EXACT_HEAD_PASS",
+    "IMMUTABLE_MANIFEST_R23_PASS",
+    "ZERO_OPEN_P0_P1_INTERNAL_FINDINGS",
+    "ZERO_UNRESOLVED_REVIEW_THREADS"
+  ]
+}
