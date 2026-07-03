@@ -1,0 +1,82 @@
+{
+  "contract_version": "1.0.0",
+  "contract_id": "QUANTUM-PERSISTENT-IDENTITY-REPOSITORY-2026-07-03-v1",
+  "unit": {
+    "unit_id": "P2.2",
+    "name": "PERSISTENT_IDENTITY_REPOSITORY_FOUNDATION",
+    "risk_class": "R3",
+    "state": "IN_DEVELOPMENT",
+    "stacked_base_sha": "85fd7089196deda52f3893c7cad23fff7a99c95e"
+  },
+  "implementation": {
+    "module": "src/quantum/pilot/persistence.py",
+    "backend": "SQLITE_REFERENCE",
+    "file_database_required": true,
+    "schema_version": 1,
+    "production_ready": false,
+    "encryption_at_rest": false,
+    "real_data_allowed": false,
+    "runtime_live_write_integration": false
+  },
+  "integrity": {
+    "checkpoint_immutable": true,
+    "canonical_state_sha256": true,
+    "external_receipt_digest_required_for_load": true,
+    "database_local_digest_is_not_trust_anchor": true,
+    "record_count_verified": true,
+    "typed_corruption_failure": true,
+    "schema_metadata_immutable": true
+  },
+  "data_controls": {
+    "plaintext_bearer_persisted": false,
+    "plaintext_credentials_persisted": false,
+    "argon2id_verifier_only": true,
+    "session_digest_unique": true,
+    "tenant_account_membership_unique": true,
+    "cross_tenant_session_reference_rejected": true,
+    "file_mode_posix": "0600",
+    "append_only_triggers": true
+  },
+  "resource_limits": {
+    "max_checkpoints": 1000,
+    "max_tenants_per_checkpoint": 100,
+    "max_accounts_per_checkpoint": 10000,
+    "max_memberships_per_checkpoint": 10000,
+    "max_invites_per_checkpoint": 20000,
+    "max_sessions_per_checkpoint": 50000,
+    "max_verifiers_per_checkpoint": 30000,
+    "max_audit_events_per_checkpoint": 100000,
+    "max_codes_per_audit_event": 32
+  },
+  "backup": {
+    "sqlite_online_backup_supported": true,
+    "initialized_source_required": true,
+    "external_receipt_must_be_stored_separately": true,
+    "backup_rehearsal_for_real_data_complete": false
+  },
+  "verification": {
+    "focused_tests": 24,
+    "resource_warnings_allowed": false,
+    "immutable_manifest_required": "R27",
+    "foundation_ci_required": true,
+    "oss_admission_ci_required": true
+  },
+  "current_blockers": [
+    "ENCRYPTION_AT_REST_MISSING",
+    "EXTERNAL_RECEIPT_STORE_MISSING",
+    "LIVE_RUNTIME_REPOSITORY_INTEGRATION_MISSING",
+    "MULTI_INSTANCE_DATABASE_BACKEND_MISSING",
+    "SCHEMA_MIGRATION_FRAMEWORK_MISSING",
+    "REAL_DATA_BACKUP_RESTORE_REHEARSAL_MISSING",
+    "INDEPENDENT_EXACT_HEAD_REVIEW_MISSING"
+  ],
+  "hard_boundaries": {
+    "real_user_data": false,
+    "production_credentials": false,
+    "http_exposure": false,
+    "marketplace_writes": false,
+    "protected_main_merge": false,
+    "deploy": false,
+    "release": false
+  }
+}
