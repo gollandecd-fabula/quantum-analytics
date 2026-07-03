@@ -7,11 +7,15 @@ import unittest
 
 from quantum.pilot import (
     AccountStatus,
+    MembershipStatus,
     Permission,
     PilotIdentityError,
     PseudonymousAccount,
     SessionPrincipal,
+    Tenant,
+    TenantMembership,
     TenantRole,
+    TenantStatus,
     authorize,
 )
 
@@ -66,29 +70,97 @@ class MultiUserPilotContractTests(unittest.TestCase):
         self.assertIn("RUSSIAN_HOSTING_CONFIRMED", gates)
         self.assertIn("EXPLICIT_USER_APPROVAL", gates)
 
+    def test_session_contract_requires_live_state_and_bounded_ttl(self):
+        session = self.contract["identity"]["session"]
+        self.assertTrue(
+            session["live_account_membership_tenant_state_required_each_request"]
+        )
+        self.assertTrue(session["future_issued_session_rejected"])
+        self.assertEqual(session["max_lifetime_hours"], 12)
+
 
 class IdentityAndTenantIsolationTests(unittest.TestCase):
-    def principal(self, role: TenantRole) -> SessionPrincipal:
+    def account(
+        self,
+        status: AccountStatus = AccountStatus.ACTIVE,
+    ) -> PseudonymousAccount:
+        return PseudonymousAccount(
+            account_id="account-001",
+            pseudonym="pilot_user",
+            credential_record_id="credential-001",
+            recovery_record_id="recovery-001",
+            credential_algorithm="argon2id",
+            status=status,
+            created_at=NOW,
+        )
+
+    def tenant(
+        self,
+        status: TenantStatus = TenantStatus.ACTIVE,
+    ) -> Tenant:
+        return Tenant(
+            tenant_id="tenant-a",
+            tenant_alias="tenant-alpha",
+            status=status,
+            created_at=NOW,
+        )
+
+    def membership(
+        self,
+        role: TenantRole,
+        status: MembershipStatus = MembershipStatus.ACTIVE,
+    ) -> TenantMembership:
+        return TenantMembership(
+            membership_id="membership-001",
+            tenant_id="tenant-a",
+            account_id="account-001",
+            role=role,
+            status=status,
+            created_at=NOW,
+        )
+
+    def principal(
+        self,
+        role: TenantRole,
+        *,
+        issued_at: datetime = NOW,
+        expires_at: datetime | None = None,
+    ) -> SessionPrincipal:
         return SessionPrincipal(
             session_id="session-001",
             account_id="account-001",
             tenant_id="tenant-a",
             membership_id="membership-001",
             role=role,
-            issued_at=NOW,
-            expires_at=NOW + timedelta(hours=1),
+            issued_at=issued_at,
+            expires_at=expires_at or issued_at + timedelta(hours=1),
+        )
+
+    def authorize_live(
+        self,
+        role: TenantRole,
+        *,
+        permission: Permission,
+        now: datetime = NOW + timedelta(minutes=1),
+        tenant_id: str = "tenant-a",
+        account_status: AccountStatus = AccountStatus.ACTIVE,
+        membership_status: MembershipStatus = MembershipStatus.ACTIVE,
+        tenant_status: TenantStatus = TenantStatus.ACTIVE,
+        principal: SessionPrincipal | None = None,
+    ) -> None:
+        active_principal = principal or self.principal(role)
+        authorize(
+            active_principal,
+            account=self.account(account_status),
+            membership=self.membership(role, membership_status),
+            tenant=self.tenant(tenant_status),
+            tenant_id=tenant_id,
+            permission=permission,
+            now=now,
         )
 
     def test_only_argon2id_is_admitted(self):
-        account = PseudonymousAccount(
-            account_id="account-001",
-            pseudonym="pilot_user",
-            credential_record_id="credential-001",
-            recovery_record_id="recovery-001",
-            credential_algorithm="argon2id",
-            status=AccountStatus.ACTIVE,
-            created_at=NOW,
-        )
+        account = self.account()
         self.assertEqual(account.credential_algorithm, "argon2id")
 
         with self.assertRaisesRegex(
@@ -101,6 +173,21 @@ class IdentityAndTenantIsolationTests(unittest.TestCase):
                 credential_record_id="credential-002",
                 recovery_record_id="recovery-002",
                 credential_algorithm="bcrypt",
+                status=AccountStatus.ACTIVE,
+                created_at=NOW,
+            )
+
+    def test_credential_and_recovery_references_must_differ(self):
+        with self.assertRaisesRegex(
+            PilotIdentityError,
+            "ACCOUNT_RECOVERY_REFERENCE_REUSED",
+        ):
+            PseudonymousAccount(
+                account_id="account-001",
+                pseudonym="pilot_user",
+                credential_record_id="same-reference",
+                recovery_record_id="same-reference",
+                credential_algorithm="argon2id",
                 status=AccountStatus.ACTIVE,
                 created_at=NOW,
             )
@@ -125,11 +212,10 @@ class IdentityAndTenantIsolationTests(unittest.TestCase):
             PilotIdentityError,
             "TENANT_SCOPE_MISMATCH",
         ):
-            authorize(
-                self.principal(TenantRole.TENANT_OWNER),
+            self.authorize_live(
+                TenantRole.TENANT_OWNER,
                 tenant_id="tenant-b",
                 permission=Permission.VIEW_ANALYTICS,
-                now=NOW + timedelta(minutes=1),
             )
 
     def test_viewer_cannot_upload(self):
@@ -137,28 +223,82 @@ class IdentityAndTenantIsolationTests(unittest.TestCase):
             PilotIdentityError,
             "PERMISSION_DENIED",
         ):
-            authorize(
-                self.principal(TenantRole.TENANT_VIEWER),
-                tenant_id="tenant-a",
+            self.authorize_live(
+                TenantRole.TENANT_VIEWER,
                 permission=Permission.UPLOAD_DATASET,
-                now=NOW + timedelta(minutes=1),
             )
 
     def test_analyst_can_run_analysis_in_own_tenant(self):
-        authorize(
-            self.principal(TenantRole.TENANT_ANALYST),
-            tenant_id="tenant-a",
+        self.authorize_live(
+            TenantRole.TENANT_ANALYST,
             permission=Permission.RUN_ANALYSIS,
-            now=NOW + timedelta(minutes=1),
         )
 
     def test_expired_session_fails_closed(self):
         with self.assertRaisesRegex(PilotIdentityError, "SESSION_EXPIRED"):
-            authorize(
-                self.principal(TenantRole.TENANT_ANALYST),
-                tenant_id="tenant-a",
+            self.authorize_live(
+                TenantRole.TENANT_ANALYST,
                 permission=Permission.RUN_ANALYSIS,
                 now=NOW + timedelta(hours=1),
+            )
+
+    def test_future_issued_session_fails_closed(self):
+        future = self.principal(
+            TenantRole.TENANT_ANALYST,
+            issued_at=NOW + timedelta(minutes=5),
+        )
+        with self.assertRaisesRegex(
+            PilotIdentityError,
+            "SESSION_NOT_YET_VALID",
+        ):
+            self.authorize_live(
+                TenantRole.TENANT_ANALYST,
+                principal=future,
+                permission=Permission.RUN_ANALYSIS,
+                now=NOW + timedelta(minutes=1),
+            )
+
+    def test_overlong_session_is_rejected(self):
+        with self.assertRaisesRegex(
+            PilotIdentityError,
+            "SESSION_LIFETIME_EXCEEDED",
+        ):
+            self.principal(
+                TenantRole.TENANT_ANALYST,
+                expires_at=NOW + timedelta(hours=13),
+            )
+
+    def test_revoked_account_fails_closed(self):
+        with self.assertRaisesRegex(
+            PilotIdentityError,
+            "ACCOUNT_NOT_ACTIVE",
+        ):
+            self.authorize_live(
+                TenantRole.TENANT_ANALYST,
+                account_status=AccountStatus.REVOKED,
+                permission=Permission.RUN_ANALYSIS,
+            )
+
+    def test_suspended_membership_fails_closed(self):
+        with self.assertRaisesRegex(
+            PilotIdentityError,
+            "MEMBERSHIP_NOT_ACTIVE",
+        ):
+            self.authorize_live(
+                TenantRole.TENANT_ANALYST,
+                membership_status=MembershipStatus.SUSPENDED,
+                permission=Permission.RUN_ANALYSIS,
+            )
+
+    def test_suspended_tenant_fails_closed(self):
+        with self.assertRaisesRegex(
+            PilotIdentityError,
+            "TENANT_NOT_ACTIVE",
+        ):
+            self.authorize_live(
+                TenantRole.TENANT_ANALYST,
+                tenant_status=TenantStatus.SUSPENDED,
+                permission=Permission.RUN_ANALYSIS,
             )
 
 
