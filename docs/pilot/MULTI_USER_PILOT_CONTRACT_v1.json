@@ -47,7 +47,11 @@
       "same_site": "Strict",
       "csrf_protection": true,
       "rotate_on_authentication": true,
-      "absolute_expiry_required": true
+      "absolute_expiry_required": true,
+      "max_lifetime_hours": 12,
+      "future_issued_session_rejected": true,
+      "live_account_membership_tenant_state_required_each_request": true,
+      "revoked_or_suspended_state_denies_immediately": true
     },
     "operator_mfa_required": true
   },
