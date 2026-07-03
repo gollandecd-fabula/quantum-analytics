@@ -3,6 +3,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from decimal import Decimal, InvalidOperation
 from typing import Any
+from uuid import UUID
 
 from quantum.ingestion.admission_v2 import DatasetAdmissionRecord
 
@@ -10,6 +11,15 @@ from ._scope import LocalPilotExecutionError, secure_equal
 
 
 MetricBindings = Mapping[str, tuple[tuple[str, str], ...]]
+
+
+def _canonical_dataset_id(value: object) -> str | None:
+    if not isinstance(value, str):
+        return None
+    try:
+        return str(UUID(value))
+    except (ValueError, AttributeError):
+        return None
 
 
 def _metric_view(metric: object) -> dict[str, Any]:
@@ -149,12 +159,16 @@ def validate_source_identity(
 ) -> Mapping[str, Any]:
     if not isinstance(source_snapshot, Mapping):
         raise LocalPilotExecutionError("PILOT_SOURCE_SNAPSHOT_INVALID")
-    dataset_id = source_snapshot.get("dataset_id")
+    dataset_id = _canonical_dataset_id(source_snapshot.get("dataset_id"))
+    admitted_dataset_id = _canonical_dataset_id(
+        admitted.declaration.dataset_id
+    )
     original_hash = source_snapshot.get("original_file_sha256")
     if (
-        not isinstance(dataset_id, str)
+        dataset_id is None
+        or admitted_dataset_id is None
         or not isinstance(original_hash, str)
-        or not secure_equal(dataset_id, admitted.declaration.dataset_id)
+        or not secure_equal(dataset_id, admitted_dataset_id)
         or not secure_equal(
             original_hash,
             admitted.declaration.original_file_sha256,
