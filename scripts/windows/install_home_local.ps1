@@ -54,13 +54,17 @@ if (-not (Test-Path -LiteralPath $sourceLauncher -PathType Leaf)) {
     throw "Package launcher is missing: $sourceLauncher"
 }
 
+$runtimeTarget = [IO.Path]::GetFullPath((Join-Path $TargetRoot "src"))
+if ($sourceRuntime.TrimEnd("\", "/") -ieq $runtimeTarget.TrimEnd("\", "/")) {
+    throw "Installer must be run from an extracted package, not from the already installed runtime."
+}
+
 New-Item -ItemType Directory -Path $TargetRoot -Force | Out-Null
 Reset-ManagedAcl -Path $TargetRoot
 foreach ($name in @("config", "data", "output", "scripts")) {
     New-Item -ItemType Directory -Path (Join-Path $TargetRoot $name) -Force | Out-Null
 }
 
-$runtimeTarget = [IO.Path]::GetFullPath((Join-Path $TargetRoot "src"))
 $scriptsTarget = [IO.Path]::GetFullPath((Join-Path $TargetRoot "scripts"))
 $launcherTarget = Join-Path $scriptsTarget "import_source.ps1"
 $obsoleteCommon = Join-Path $scriptsTarget "common.ps1"
@@ -69,10 +73,6 @@ Reset-ManagedAcl -Path $scriptsTarget -Recursive
 Reset-ManagedAcl -Path $runtimeTarget -Recursive
 if (Test-Path -LiteralPath $obsoleteCommon -ErrorAction SilentlyContinue) {
     Remove-Item -LiteralPath $obsoleteCommon -Force
-}
-
-if ($sourceRuntime.TrimEnd("\", "/") -ieq $runtimeTarget.TrimEnd("\", "/")) {
-    throw "Installer must be run from an extracted package, not from the already installed runtime."
 }
 
 $installId = "{0}_{1}" -f (Get-Date -Format "yyyyMMdd_HHmmss"), ([guid]::NewGuid().ToString("N").Substring(0, 8))
