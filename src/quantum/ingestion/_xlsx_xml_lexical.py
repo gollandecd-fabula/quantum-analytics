@@ -100,15 +100,49 @@ _ALLOWED_NAMESPACE_BINDINGS: dict[str | None, frozenset[str]] = {
 }
 
 
+def _safe_namespace_uri(uri: str) -> bool:
+    return (
+        bool(uri)
+        and len(uri) <= 512
+        and uri.isascii()
+        and not any(character.isspace() or ord(character) < 32 for character in uri)
+        and uri.startswith(("http://", "https://", "urn:"))
+    )
+
+
+def _prefix_is_used_outside_declaration(
+    text: str,
+    declaration: re.Match[str],
+    prefix: str,
+) -> bool:
+    without_declaration = text[: declaration.start()] + text[declaration.end() :]
+    return (
+        re.search(
+            rf"(?<![A-Za-z0-9_.-]){re.escape(prefix)}\s*:",
+            without_declaration,
+        )
+        is not None
+    )
+
+
 def _validate_namespaces(text: str) -> None:
     assignments = tuple(_NAMESPACE_ASSIGNMENT.finditer(text))
     declarations = tuple(_NAMESPACE_DECLARATION.finditer(text))
     if len(assignments) != len(declarations):
         raise XlsxInspectionError("XLSX_XML_NAMESPACE_UNMODELED")
+    prefixes = tuple(declaration.group("prefix") for declaration in declarations)
+    if len(set(prefixes)) != len(prefixes):
+        raise XlsxInspectionError("XLSX_XML_NAMESPACE_UNMODELED")
     for declaration in declarations:
         prefix = declaration.group("prefix")
         uri = declaration.group("uri")
-        if uri not in _ALLOWED_NAMESPACE_BINDINGS.get(prefix, frozenset()):
+        if not _safe_namespace_uri(uri):
+            raise XlsxInspectionError("XLSX_XML_NAMESPACE_UNMODELED")
+        if uri in _ALLOWED_NAMESPACE_BINDINGS.get(prefix, frozenset()):
+            continue
+        if prefix is None or prefix in {"xml", "xmlns"}:
+            raise XlsxInspectionError("XLSX_XML_NAMESPACE_UNMODELED")
+        if _prefix_is_used_outside_declaration(text, declaration, prefix):
             raise XlsxInspectionError("XLSX_XML_NAMESPACE_UNMODELED")
 
 
