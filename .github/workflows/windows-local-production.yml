@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - local-pilot-windows-repair-r1
+      - local-pilot-windows-acl-repair-r2
       - local-pilot-runner-r1
     paths:
       - "src/quantum/pilot/**"
@@ -38,6 +39,18 @@ jobs:
     steps:
       - name: Checkout exact head
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Assert exact head
+        shell: pwsh
+        run: |
+          $expected = "${{ github.event.pull_request.head.sha || github.sha }}"
+          $actual = (& git rev-parse HEAD).Trim()
+          if ($actual -ne $expected) {
+            throw "Exact-head checkout failed. Expected $expected, got $actual"
+          }
+          Write-Host "Validated exact head: $actual"
 
       - name: Set up Python 3.12
         uses: actions/setup-python@v5
@@ -173,6 +186,9 @@ jobs:
           }
           if ([string]$manifest.tzdata_version -ne "2026.2") {
             throw "Unexpected packaged tzdata version: $($manifest.tzdata_version)"
+          }
+          if ([string]$manifest.source_commit -ne "${{ github.event.pull_request.head.sha || github.sha }}") {
+            throw "Package source commit does not match exact workflow head: $($manifest.source_commit)"
           }
           foreach ($entry in $manifest.files) {
             $entryPath = Join-Path $extractRoot ([string]$entry.path).Replace("/", "\")
