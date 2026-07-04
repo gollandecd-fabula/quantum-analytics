@@ -13,6 +13,8 @@ on:
       - "tests/test_windows_storage_compat.py"
       - "scripts/windows/**"
       - "config/home-local.template.json"
+      - "requirements/windows-home-local.txt"
+      - "pyproject.toml"
       - ".github/workflows/windows-local-production.yml"
   pull_request:
     paths:
@@ -22,6 +24,8 @@ on:
       - "tests/test_windows_storage_compat.py"
       - "scripts/windows/**"
       - "config/home-local.template.json"
+      - "requirements/windows-home-local.txt"
+      - "pyproject.toml"
       - ".github/workflows/windows-local-production.yml"
 
 permissions:
@@ -39,6 +43,23 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+
+      - name: Install hash-pinned Windows timezone data
+        shell: pwsh
+        run: |
+          python -m pip install `
+            --disable-pip-version-check `
+            --no-deps `
+            --only-binary=:all: `
+            --require-hashes `
+            -r requirements/windows-home-local.txt
+          if ($LASTEXITCODE -ne 0) {
+            throw "Pinned Windows dependency installation failed with exit code $LASTEXITCODE"
+          }
+          python -c "from zoneinfo import ZoneInfo; assert str(ZoneInfo('Europe/Moscow')) == 'Europe/Moscow'"
+          if ($LASTEXITCODE -ne 0) {
+            throw "Europe/Moscow timezone probe failed with exit code $LASTEXITCODE"
+          }
 
       - name: Compile repaired runner
         shell: pwsh
@@ -139,6 +160,9 @@ jobs:
           if ($manifest.marketplace_write_enabled -ne $false) {
             throw "Marketplace writes must remain disabled."
           }
+          if ([string]$manifest.tzdata_version -ne "2026.2") {
+            throw "Unexpected packaged tzdata version: $($manifest.tzdata_version)"
+          }
           foreach ($entry in $manifest.files) {
             $entryPath = Join-Path $extractRoot ([string]$entry.path).Replace("/", "\")
             if (-not (Test-Path -LiteralPath $entryPath -PathType Leaf)) {
@@ -148,6 +172,10 @@ jobs:
             if ($actual -ne [string]$entry.sha256) {
               throw "Manifest hash mismatch: $($entry.path)"
             }
+          }
+          $vendoredMoscow = Join-Path $extractRoot "src\tzdata\zoneinfo\Europe\Moscow"
+          if (-not (Test-Path -LiteralPath $vendoredMoscow -PathType Leaf)) {
+            throw "Vendored Europe/Moscow timezone is missing from package."
           }
 
           foreach ($name in @("config", "data", "output")) {
@@ -179,6 +207,7 @@ jobs:
           }
           foreach ($required in @(
             (Join-Path $installRoot "src\quantum\pilot\windows_runner.py"),
+            (Join-Path $installRoot "src\tzdata\zoneinfo\Europe\Moscow"),
             (Join-Path $installRoot "scripts\import_source.ps1"),
             (Join-Path $installRoot "IMPORT_XLSX.cmd")
           )) {
