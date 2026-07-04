@@ -1,0 +1,105 @@
+name: Windows Local Production Repair
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - local-pilot-windows-repair-r1
+    paths:
+      - "src/quantum/pilot/**"
+      - "src/quantum/ingestion/**"
+      - "tests/test_windows_local_runner.py"
+      - "scripts/windows/**"
+      - "config/home-local.template.json"
+      - ".github/workflows/windows-local-production.yml"
+  pull_request:
+    paths:
+      - "src/quantum/pilot/**"
+      - "src/quantum/ingestion/**"
+      - "tests/test_windows_local_runner.py"
+      - "scripts/windows/**"
+      - "config/home-local.template.json"
+      - ".github/workflows/windows-local-production.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  windows-regression-and-build:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact head
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Compile repaired runner
+        shell: pwsh
+        run: |
+          $env:PYTHONPATH = "src"
+          python -m py_compile src/quantum/pilot/windows_runner.py
+
+      - name: Run Windows repair regression suite
+        shell: pwsh
+        run: |
+          $env:PYTHONPATH = "src"
+          python -m unittest tests.test_windows_local_runner -v
+
+      - name: Re-run existing local pilot tests
+        shell: pwsh
+        run: |
+          $env:PYTHONPATH = "src"
+          python -m unittest tests.test_local_pilot_runner -v
+
+      - name: Parse PowerShell scripts
+        shell: pwsh
+        run: |
+          $files = @(
+            "scripts/windows/import_source.ps1",
+            "scripts/windows/install_home_local.ps1",
+            "scripts/windows/build_local_production.ps1"
+          )
+          foreach ($file in $files) {
+            $tokens = $null
+            $errors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile(
+              (Resolve-Path $file),
+              [ref]$tokens,
+              [ref]$errors
+            ) | Out-Null
+            if ($errors.Count -gt 0) {
+              $errors | Format-List | Out-String | Write-Error
+              throw "PowerShell parse failed: $file"
+            }
+          }
+
+      - name: Build HOME_LOCAL package
+        shell: pwsh
+        run: |
+          powershell.exe -NoProfile -ExecutionPolicy Bypass `
+            -File .\scripts\windows\build_local_production.ps1
+
+      - name: Verify package archive
+        shell: pwsh
+        run: |
+          $archive = "dist\QuantumLocalProduction_HOME_LOCAL.zip"
+          if (-not (Test-Path -LiteralPath $archive -PathType Leaf)) {
+            throw "Package archive was not produced."
+          }
+          $hash = (Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash
+          if ($hash -notmatch "^[0-9A-F]{64}$") {
+            throw "Package SHA-256 is invalid."
+          }
+          Write-Host "Archive SHA-256: $hash"
+
+      - name: Upload HOME_LOCAL package
+        uses: actions/upload-artifact@v4
+        with:
+          name: QuantumLocalProduction-HOME_LOCAL
+          path: dist/QuantumLocalProduction_HOME_LOCAL.zip
+          if-no-files-found: error
+          retention-days: 14
