@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Mapping, MutableMapping
 from pathlib import Path
 import re
 from typing import Any
@@ -115,9 +115,24 @@ def _recommendation_error(exc: Exception) -> dict[str, Any]:
         "reason_codes": [
             getattr(exc, "code", "RECOMMENDATION_UNEXPECTED_ERROR")
         ],
+        "priority_order": ["PROFIT", "SUSTAINABLE_GROWTH", "TURNOVER"],
+        "source_evidence_refs": [],
         "detail": type(exc).__name__,
         "bundle_hash": None,
     }
+
+
+def _recommendation_scope(config: Mapping[str, Any]) -> dict[str, str]:
+    scope: dict[str, str] = {}
+    for source, target in (
+        ("tenant_id", "organization_id"),
+        ("marketplace", "marketplace"),
+        ("source_internal_id", "source_internal_id"),
+    ):
+        value = config.get(source)
+        if isinstance(value, str) and value.strip():
+            scope[target] = value.strip()
+    return scope
 
 
 def attach_reviewed_source_bridge(
@@ -163,12 +178,26 @@ def attach_reviewed_source_bridge(
             detail=type(exc).__name__,
         )
     try:
-        result["recommendations"] = build_recommendations(
+        recommendations = build_recommendations(
             result,
             config.get("recommendation_policy"),
+            calculation=(
+                report.get("calculation")
+                if isinstance(report.get("calculation"), Mapping)
+                else None
+            ),
+            reconciliation=(
+                report.get("reconciliation")
+                if isinstance(report.get("reconciliation"), Mapping)
+                else None
+            ),
+            scope=_recommendation_scope(config),
         )
     except Exception as exc:
-        result["recommendations"] = _recommendation_error(exc)
+        recommendations = _recommendation_error(exc)
+    result["recommendations"] = recommendations
+    if isinstance(report, MutableMapping):
+        report["recommendations"] = recommendations
     result["windows_integration_schema_version"] = (
         WINDOWS_SOURCE_BRIDGE_SCHEMA_VERSION
     )
