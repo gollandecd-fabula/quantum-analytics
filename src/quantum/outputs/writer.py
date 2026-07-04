@@ -195,8 +195,11 @@ def _xlsx_sheet_names(path: Path) -> tuple[str, ...]:
             for name in archive.namelist():
                 if name.startswith("xl/worksheets/") and name.endswith(".xml"):
                     payload = archive.read(name)
-                    ElementTree.fromstring(payload)
-                    if b"<f" in payload:
+                    worksheet = ElementTree.fromstring(payload)
+                    formulas = worksheet.findall(
+                        ".//{http://schemas.openxmlformats.org/spreadsheetml/2006/main}f"
+                    )
+                    if formulas:
                         raise OutputBundleError("OUTPUT_XLSX_FORMULA_FORBIDDEN")
             return names
     except (BadZipFile, KeyError, ElementTree.ParseError, OSError) as exc:
