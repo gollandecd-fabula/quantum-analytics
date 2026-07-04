@@ -51,12 +51,11 @@ jobs:
             tests.test_local_pilot_runner \
             -v
 
-      - name: Remove one-shot staging files
+      - name: Remove staging bundle
         shell: bash
         run: |
           set -euo pipefail
           rm -rf .redteam_patch
-          rm -f .github/workflows/apply-redteam-patch.yml
 
       - name: Commit hardened tree
         shell: bash
