@@ -16,7 +16,7 @@ $ErrorActionPreference = "Stop"
 
 function Read-RequiredValue {
     param(
-        [Parameter(Mandatory = $true)][string]$CurrentValue,
+        [Parameter(Mandatory = $true)][AllowEmptyString()][string]$CurrentValue,
         [Parameter(Mandatory = $true)][string]$Prompt,
         [Parameter(Mandatory = $true)][string]$Name
     )
@@ -35,7 +35,7 @@ function Read-RequiredValue {
 
 function Read-IsoDate {
     param(
-        [Parameter(Mandatory = $true)][string]$CurrentValue,
+        [Parameter(Mandatory = $true)][AllowEmptyString()][string]$CurrentValue,
         [Parameter(Mandatory = $true)][string]$Prompt,
         [Parameter(Mandatory = $true)][string]$Name
     )
@@ -70,11 +70,14 @@ $SourceInternalId = Read-RequiredValue `
     -Prompt "Local source identifier (for example wb-sales-main)" `
     -Name "SourceInternalId"
 
-if ([DateTime]::ParseExact($ReportingPeriodEnd, "yyyy-MM-dd", $null) -lt [DateTime]::ParseExact($ReportingPeriodStart, "yyyy-MM-dd", $null)) {
+if ([DateTime]::ParseExact($ReportingPeriodEnd, "yyyy-MM-dd", [Globalization.CultureInfo]::InvariantCulture) -lt [DateTime]::ParseExact($ReportingPeriodStart, "yyyy-MM-dd", [Globalization.CultureInfo]::InvariantCulture)) {
     throw "ReportingPeriodEnd must not be earlier than ReportingPeriodStart."
 }
 
 $targetDirectory = Split-Path -Parent ([IO.Path]::GetFullPath($ConfigPath))
+if ([string]::IsNullOrWhiteSpace($targetDirectory)) {
+    throw "ConfigPath must include a parent directory."
+}
 New-Item -ItemType Directory -Path $targetDirectory -Force | Out-Null
 
 $config = [ordered]@{
@@ -148,7 +151,8 @@ $config = [ordered]@{
 }
 
 $configJson = $config | ConvertTo-Json -Depth 12
-[IO.File]::WriteAllText($ConfigPath, $configJson, ([System.Text.UTF8Encoding]::new($false)))
+$utf8NoBom = New-Object System.Text.UTF8Encoding
+[IO.File]::WriteAllText($ConfigPath, $configJson, $utf8NoBom)
 Write-Host "HOME_LOCAL configuration created." -ForegroundColor Green
 Write-Host "Path: $ConfigPath"
 Write-Host "Mode: ADMISSION_ONLY (financial calculation remains disabled until a reviewed finance profile is supplied)." -ForegroundColor Yellow
