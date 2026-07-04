@@ -45,6 +45,8 @@ Publication uses a staging directory, file and directory `fsync` where supported
 
 ## Excel contract
 
+The detailed management presentation, cell typing, formatting, chart, navigation and security contract is defined in `EXCEL_REPORT_R1.md`.
+
 The deterministic dependency-free XLSX contains exactly:
 
 1. `Управленческое резюме`;
@@ -60,7 +62,7 @@ The deterministic dependency-free XLSX contains exactly:
 11. `Источники данных`;
 12. `Журнал изменений`.
 
-The current source bridge is aggregate-level, so product-level sheets expose verified aggregate metrics or an explicit source/mapping requirement. The renderer does not invent SKU allocation. All cells are inline strings; source text cannot become an Excel formula. Worksheet formulas are forbidden and ZIP timestamps are fixed for deterministic bytes.
+The current source bridge is aggregate-level, so product-level sheets expose verified aggregate metrics or an explicit source/mapping requirement. The renderer does not invent SKU allocation. Valid governed numbers are emitted as numeric cells; missing or blocked values remain explicit text states. Source text is emitted as `inlineStr` and cannot become a cell formula. Worksheet cell formulas are forbidden, the chart uses literal caches without formula references, and ZIP timestamps are fixed for deterministic bytes.
 
 ## Dashboard contract
 
@@ -90,5 +92,5 @@ Directory verification rejects:
 - bundle/recommendation disagreement;
 - dashboard not bound to the bundle hash;
 - unexpected XLSX sheets;
-- worksheet formulas;
+- worksheet cell formulas;
 - malformed JSON, HTML binding or OOXML.
