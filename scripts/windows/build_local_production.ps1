@@ -111,14 +111,14 @@ if errorlevel 1 pause
 Set-Content -LiteralPath (Join-Path $stageRoot "INSTALL_HOME_LOCAL.cmd") -Value $installCommand -Encoding ASCII
 
 $readme = @'
-QUANTUM HOME_LOCAL WINDOWS PACKAGE — RED TEAM HARDENED
+QUANTUM HOME_LOCAL WINDOWS PACKAGE — UNIVERSAL IMPORT R3
 
 1. Extract the package outside cloud-synchronized folders.
 2. Run INSTALL_HOME_LOCAL.cmd.
 3. If no ready config exists, run CONFIGURE_HOME_LOCAL.cmd and enter the report period and retention deadline.
-4. Run IMPORT_XLSX.cmd and select the authorized XLSX report.
-5. Quantum displays the discovered sheet, header row and headers before REVIEWED can be confirmed.
-6. ADMISSION_ONLY validates and admits the report without inventing cost, tax or expense values.
+4. Run IMPORT_XLSX.cmd and select any authorized local file. The legacy launcher name is retained for compatibility.
+5. XLSX and ZIP_XLSX files use schema discovery and strict admission. Safe unsupported formats are stored locally without invented financial data.
+6. ADMISSION_ONLY validates and admits supported reports without inventing cost, tax or expense values.
 7. FULL financial calculation requires an explicit valid finance_request.
 8. The installer verifies every packaged file against manifest.sha256.json before changing the installation.
 9. Existing config, data and output directories are preserved.
@@ -166,7 +166,7 @@ if ([string]::IsNullOrWhiteSpace($sourceCommit) -or $sourceCommit -notmatch "^[0
 }
 $manifest = [ordered]@{
     package = "QuantumLocalProduction_HOME_LOCAL"
-    package_version = "R2_REDTEAM"
+    package_version = "R3_UNIVERSAL_IMPORT"
     source_branch = $sourceBranch
     source_commit = $sourceCommit.ToLowerInvariant()
     release_state = "RELEASE_BLOCKED"
