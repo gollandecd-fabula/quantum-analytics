@@ -1,6 +1,6 @@
 # Local output bundle R1
 
-Status: `INTEGRATION_BUILD_R1 / UNIT_2_3_A`
+Status: `INTEGRATION_BUILD_R1 / UNIT_2_3`
 
 ## Single source of truth
 
@@ -28,6 +28,16 @@ The atomic writer creates one local directory with:
 - `evidence_manifest.json`.
 
 The evidence manifest records size and SHA-256 for the first four artifacts and excludes itself from that list.
+
+## Automatic HOME_LOCAL execution
+
+After an admitted source is mapped and recommendations are attached, the Windows source bridge automatically creates the output bundle. The default root is:
+
+`%LOCALAPPDATA%\QuantumLocalProduction\output`
+
+An operator may set `local_output_root` only to an explicit absolute path. A missing `LOCALAPPDATA`, invalid path or writer failure is reported inside `source_bridge.output_bundle` and does not change admission or source-analysis status.
+
+`recommendation_policy` remains an explicit versioned configuration object. When it is absent, the files are still produced, but the recommendation bundle records that policy-dependent recommendations are blocked.
 
 ## Excel
 
