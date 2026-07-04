@@ -77,9 +77,13 @@ function Reset-Acl {
     if (-not (Test-Path -LiteralPath $Path)) {
         return
     }
-    & icacls.exe $Path /inheritance:e /reset /C | Out-Host
+    & icacls.exe $Path /inheritance:e /C | Out-Host
     if ($LASTEXITCODE -ne 0) {
-        throw "ACL repair failed for $Path"
+        throw "ACL inheritance repair failed for $Path with exit code $LASTEXITCODE"
+    }
+    & icacls.exe $Path /reset /C | Out-Host
+    if ($LASTEXITCODE -ne 0) {
+        throw "Explicit ACL reset failed for $Path with exit code $LASTEXITCODE"
     }
 }
 
