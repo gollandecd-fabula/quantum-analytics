@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections import Counter
 from io import BytesIO
 import re
 from zipfile import BadZipFile, ZipFile
@@ -7,6 +8,7 @@ from zlib import error as ZlibError
 
 from ._xlsx_archive import _read_limited, _xml_root
 from ._xlsx_contracts import XlsxInspectionError, XlsxInspectionLimits
+from ._xlsx_xml_lexical import _ALLOWED_NAMESPACE_BINDINGS
 
 _LOCAL_HEADER = b"PK\x03\x04"
 _LOCAL_FIXED_SIZE = 30
@@ -24,7 +26,7 @@ _GUID = re.compile(
 
 _SPREADSHEET_NS = "http://schemas.openxmlformats.org/spreadsheetml/2006/main"
 _MC_NS = "http://schemas.openxmlformats.org/markup-compatibility/2006"
-_X14AC_NS = "http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac"
+_X15_NS = "http://schemas.microsoft.com/office/spreadsheetml/2010/11/main"
 _XR_NS = "http://schemas.microsoft.com/office/spreadsheetml/2014/revision"
 
 _WORKSHEET = f"{{{_SPREADSHEET_NS}}}worksheet"
@@ -33,6 +35,16 @@ _XR_UID = f"{{{_XR_NS}}}uid"
 _RICH_PROPERTIES = f"{{{_SPREADSHEET_NS}}}rPr"
 _RICH_BOLD = f"{{{_SPREADSHEET_NS}}}b"
 _RICH_ITALIC = f"{{{_SPREADSHEET_NS}}}i"
+
+_IGNORABLE_REQUIRED_PREFIXES = frozenset(
+    {
+        "c14", "cdr14", "a14", "pic14", "x14", "xdr14", "x14ac",
+        "dsp", "mso14", "dgm14", "x15", "x12ac", "x15ac", "xda",
+        "xr", "xr2", "xr3", "xr4", "xr5", "xr6", "xr7", "xr8",
+        "xr9", "xr10", "xr11", "xr12", "xr13", "xr14", "xr15",
+        "xr16", "x16", "x16r2", "mo", "mx", "mv", "o", "v",
+    }
+)
 
 
 def _u16(payload: bytes, offset: int) -> int:
@@ -96,18 +108,27 @@ def _worksheet_namespace_bindings(payload: bytes) -> tuple[tuple[str | None, str
 def _validate_ignorable(
     value: str | None,
     bindings: dict[str | None, str],
-) -> None:
+) -> frozenset[str]:
     if value is None:
-        return
+        return frozenset()
     if not value or value != value.strip():
         raise XlsxInspectionError("XLSX_WORKSHEET_ATTRIBUTE_VALUE_INVALID")
     tokens = value.split()
-    if (
-        not tokens
-        or any(_PREFIX.fullmatch(token) is None for token in tokens)
-        or any(token not in bindings for token in tokens)
-    ):
+    if not tokens or any(_PREFIX.fullmatch(token) is None for token in tokens):
+        raise XlsxInspectionError("XLSX_WORKSHEET_ATTRIBUTE_VALUE_INVALID")
+    counts = Counter(tokens)
+    for token, count in counts.items():
+        if count == 1:
+            continue
+        if not (
+            token == "x15"
+            and count == 2
+            and bindings.get("x15") == _X15_NS
+        ):
+            raise XlsxInspectionError("XLSX_WORKSHEET_ATTRIBUTE_VALUE_INVALID")
+    if any(token not in bindings for token in counts):
         raise XlsxInspectionError("XLSX_XML_NAMESPACE_UNMODELED")
+    return frozenset(counts)
 
 
 def _validate_worksheet_namespace_contract(
@@ -116,16 +137,9 @@ def _validate_worksheet_namespace_contract(
     bindings = dict(_worksheet_namespace_bindings(payload))
     if bindings.get(None) != _SPREADSHEET_NS:
         raise XlsxInspectionError("XLSX_XML_NAMESPACE_UNMODELED")
-    expected = {
-        "mc": _MC_NS,
-        "x14ac": _X14AC_NS,
-        "xr": _XR_NS,
-    }
-    if any(
-        prefix in bindings and bindings[prefix] != uri
-        for prefix, uri in expected.items()
-    ):
-        raise XlsxInspectionError("XLSX_XML_NAMESPACE_UNMODELED")
+    for prefix, uri in bindings.items():
+        if uri not in _ALLOWED_NAMESPACE_BINDINGS.get(prefix, frozenset()):
+            raise XlsxInspectionError("XLSX_XML_NAMESPACE_UNMODELED")
     return bindings
 
 
@@ -152,7 +166,12 @@ def _validate_worksheet_semantics(
         raise XlsxInspectionError("XLSX_WORKSHEET_INVALID")
     if set(root.attrib) - {_MC_IGNORABLE, _XR_UID}:
         raise XlsxInspectionError("XLSX_WORKSHEET_ATTRIBUTE_UNMODELED")
-    _validate_ignorable(root.get(_MC_IGNORABLE), bindings)
+    ignorable = _validate_ignorable(root.get(_MC_IGNORABLE), bindings)
+    declared_compatibility = (
+        set(bindings).intersection(_IGNORABLE_REQUIRED_PREFIXES)
+    )
+    if declared_compatibility - set(ignorable):
+        raise XlsxInspectionError("XLSX_XML_NAMESPACE_UNMODELED")
     uid = root.get(_XR_UID)
     if uid is not None and _GUID.fullmatch(uid) is None:
         raise XlsxInspectionError("XLSX_WORKSHEET_ATTRIBUTE_VALUE_INVALID")
