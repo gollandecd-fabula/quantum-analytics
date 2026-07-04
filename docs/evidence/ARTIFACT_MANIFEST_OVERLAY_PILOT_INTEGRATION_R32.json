@@ -1,0 +1,1 @@
+{"base_pilot_integration_r31_overlay_git_blob_sha":"3ea0e6687bba3967c9ecb3434b3667a28092aeac","entries":[],"hash_encoding":"sha256-hex","overlay_version":32,"reason":"Register interactive offline dashboard R1, responsive views, filters, drill-down, CSV safety, accessibility, CSP, browser QA, and hardened dashboard artifact verification","remove_paths":[]}
