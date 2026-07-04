@@ -39,6 +39,7 @@ _OFFICE_RELATIONSHIP_NS = (
 _SPREADSHEET_NS = "http://schemas.openxmlformats.org/spreadsheetml/2006/main"
 _RELATIONSHIP = f"{{{_RELATIONSHIP_NS}}}Relationship"
 _URI_SCHEME = re.compile(r"^[A-Za-z][A-Za-z0-9+.-]*:")
+_SHA256_HEX = re.compile(r"^[0-9a-fA-F]{64}$")
 _HEADER_KEYWORDS = (
     "артикул",
     "номенклатур",
@@ -174,6 +175,17 @@ def _nonnegative_int(value: object, code: str) -> int:
     if not isinstance(value, int) or isinstance(value, bool) or value < 0:
         raise WindowsRunnerError(code)
     return value
+
+
+def _expected_file_sha256(value: object) -> str | None:
+    if value is None:
+        return None
+    if not isinstance(value, str):
+        raise WindowsRunnerError("HOME_LOCAL_EXPECTED_FILE_SHA256_INVALID")
+    normalized = value.strip().lower()
+    if _SHA256_HEX.fullmatch(normalized) is None:
+        raise WindowsRunnerError("HOME_LOCAL_EXPECTED_FILE_SHA256_INVALID")
+    return normalized
 
 
 def _limits(config: Mapping[str, Any]) -> XlsxInspectionLimits:
@@ -445,6 +457,7 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--home-local", action="store_true")
     parser.add_argument("--discover-schema", action="store_true")
     parser.add_argument("--discover-only", action="store_true")
+    parser.add_argument("--expected-file-sha256")
     parser.add_argument("--authority-attested", action="store_true")
     parser.add_argument("--schema-reviewed", action="store_true")
     parser.add_argument("--max-scan-rows", type=int, default=100)
@@ -467,6 +480,13 @@ def main() -> int:
             raise WindowsRunnerError("SCHEMA_DISCOVERY_MODE_CONFLICT")
         config["lawful_authority_attested"] = True
         source_payload = args.file.read_bytes()
+        source_sha256 = sha256(source_payload).hexdigest()
+        expected_file_sha256 = _expected_file_sha256(args.expected_file_sha256)
+        if (
+            expected_file_sha256 is not None
+            and source_sha256 != expected_file_sha256
+        ):
+            raise WindowsRunnerError("HOME_LOCAL_SOURCE_FILE_HASH_MISMATCH")
         if args.discover_only:
             candidate = discover_schema(
                 payload=source_payload,
@@ -476,7 +496,7 @@ def main() -> int:
             )
             preview = {
                 "status": "SCHEMA_DISCOVERED",
-                "file_sha256": sha256(source_payload).hexdigest(),
+                "file_sha256": source_sha256,
                 "file_size_bytes": len(source_payload),
                 "schema_discovery": candidate.report(),
             }
