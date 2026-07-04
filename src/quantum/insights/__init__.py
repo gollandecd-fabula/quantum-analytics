@@ -3,6 +3,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
 
+from .enrichment import enrich_recommendation_bundle
 from .recommendations import (
     RECOMMENDATION_BUNDLE_SCHEMA_VERSION,
     RECOMMENDATION_SCHEMA_VERSION,
@@ -15,8 +16,12 @@ from .recommendations import (
 def build_recommendations(
     analysis: Mapping[str, Any],
     policy: Mapping[str, Any] | None,
+    *,
+    calculation: Mapping[str, Any] | None = None,
+    reconciliation: Mapping[str, Any] | None = None,
+    scope: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """Normalize compatible bridge blocker forms before recommendation rules."""
+    """Build source rules and enrich them with governed finance results."""
     if not isinstance(analysis, Mapping):
         return _build_recommendations(analysis, policy)
     normalized = dict(analysis)
@@ -24,7 +29,14 @@ def build_recommendations(
     plural = normalized.get("finance_request_reason_codes")
     if plural is None and isinstance(singular, str) and singular:
         normalized["finance_request_reason_codes"] = [singular]
-    return _build_recommendations(normalized, policy)
+    bundle = _build_recommendations(normalized, policy)
+    return enrich_recommendation_bundle(
+        bundle,
+        normalized,
+        calculation=calculation,
+        reconciliation=reconciliation,
+        scope=scope,
+    )
 
 
 __all__ = [
