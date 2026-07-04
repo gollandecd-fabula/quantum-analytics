@@ -128,10 +128,21 @@ jobs:
         shell: pwsh
         run: |
           powershell.exe -NoProfile -ExecutionPolicy Bypass `
-            -File .\scripts\windows\build_local_production.ps1
-          if ($LASTEXITCODE -ne 0) {
-            throw "Package build failed with exit code $LASTEXITCODE"
+            -File .\scripts\windows\build_local_production.ps1 2>&1 |
+            Tee-Object -FilePath package-build.log
+          $buildExitCode = $LASTEXITCODE
+          if ($buildExitCode -ne 0) {
+            throw "Package build failed with exit code $buildExitCode"
           }
+
+      - name: Upload package build diagnostics on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-package-build-log
+          path: package-build.log
+          if-no-files-found: warn
+          retention-days: 7
 
       - name: Verify archive, manifest and transactional installer
         shell: pwsh
