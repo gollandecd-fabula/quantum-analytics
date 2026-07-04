@@ -13,6 +13,7 @@ on:
       - "tests/test_windows_local_runner.py"
       - "tests/test_windows_storage_compat.py"
       - "tests/test_windows_redteam_hardening.py"
+      - "tests/test_windows_reviewed_file_hash.py"
       - "scripts/windows/**"
       - "config/home-local.template.json"
       - "requirements/windows-home-local.txt"
@@ -25,6 +26,7 @@ on:
       - "tests/test_windows_local_runner.py"
       - "tests/test_windows_storage_compat.py"
       - "tests/test_windows_redteam_hardening.py"
+      - "tests/test_windows_reviewed_file_hash.py"
       - "scripts/windows/**"
       - "config/home-local.template.json"
       - "requirements/windows-home-local.txt"
@@ -90,6 +92,7 @@ jobs:
             tests.test_windows_local_runner `
             tests.test_windows_storage_compat `
             tests.test_windows_redteam_hardening `
+            tests.test_windows_reviewed_file_hash `
             -v 2>&1 | Tee-Object -FilePath windows-repair-tests.log
           if ($LASTEXITCODE -ne 0) {
             throw "Windows red-team regression suite failed with exit code $LASTEXITCODE"
