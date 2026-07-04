@@ -1,0 +1,112 @@
+name: Quantum Any File Extension R3
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [import-any-file-r1]
+    paths:
+      - "src/quantum/pilot/any_file_*.py"
+      - "tests/test_any_file_gateway.py"
+      - "scripts/windows/*any_file*.ps1"
+      - ".github/workflows/any-file-extension*.yml"
+  pull_request:
+    paths:
+      - "src/quantum/pilot/any_file_*.py"
+      - "tests/test_any_file_gateway.py"
+      - "scripts/windows/*any_file*.ps1"
+      - ".github/workflows/any-file-extension*.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  test-build-install:
+    runs-on: windows-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout exact head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Assert exact head
+        shell: pwsh
+        run: |
+          $expected = "${{ github.event.pull_request.head.sha || github.sha }}"
+          $actual = (& git rev-parse HEAD).Trim()
+          if ($actual -ne $expected) { throw "Exact-head checkout failed." }
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install pinned Windows timezone data
+        shell: pwsh
+        run: |
+          python -m pip install --disable-pip-version-check --no-deps `
+            --only-binary=:all: --require-hashes `
+            -r requirements/windows-home-local.txt
+          if ($LASTEXITCODE -ne 0) { throw "Pinned dependency installation failed." }
+
+      - name: Run universal intake regressions
+        shell: pwsh
+        run: |
+          $env:PYTHONPATH = "src"
+          python -m py_compile `
+            src/quantum/pilot/any_file_common.py `
+            src/quantum/pilot/any_file_detection.py `
+            src/quantum/pilot/any_file_gateway.py `
+            src/quantum/pilot/any_file_runner.py
+          if ($LASTEXITCODE -ne 0) { throw "Compile failed." }
+          python -m unittest tests.test_any_file_gateway `
+            tests.test_windows_local_runner `
+            tests.test_xlsx_real_office_compat -v 2>&1 |
+            Tee-Object -FilePath any-file-tests.log
+          $code = $LASTEXITCODE
+          if ($code -ne 0) { throw "Regression tests failed with exit code $code." }
+
+      - name: Parse extension scripts
+        shell: pwsh
+        run: |
+          foreach ($file in @(
+            "scripts/windows/import_any_file.ps1",
+            "scripts/windows/install_any_file_extension.ps1",
+            "scripts/windows/build_any_file_extension.ps1",
+            "scripts/windows/test_any_file_extension.ps1"
+          )) {
+            $tokens = $null
+            $errors = $null
+            [Management.Automation.Language.Parser]::ParseFile(
+              (Resolve-Path $file), [ref]$tokens, [ref]$errors
+            ) | Out-Null
+            if ($errors.Count -gt 0) { throw "PowerShell parse failed: $file" }
+          }
+
+      - name: Build install and smoke-test extension
+        shell: pwsh
+        run: |
+          powershell.exe -NoProfile -ExecutionPolicy Bypass `
+            -File .\scripts\windows\test_any_file_extension.ps1 2>&1 |
+            Tee-Object -FilePath any-file-e2e.log
+          $code = $LASTEXITCODE
+          if ($code -ne 0) { throw "R3 E2E failed with exit code $code." }
+
+      - name: Upload diagnostics on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: QuantumAnyFileExtension-R3-diagnostics
+          path: |
+            any-file-tests.log
+            any-file-e2e.log
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Upload extension artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: QuantumAnyFileExtension-R3
+          path: dist/QuantumAnyFileExtension_R3.zip
+          if-no-files-found: error
+          retention-days: 14
