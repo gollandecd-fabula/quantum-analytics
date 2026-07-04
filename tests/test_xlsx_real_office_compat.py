@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from dataclasses import replace
 from io import BytesIO
 import unittest
 from zipfile import ZIP_DEFLATED, ZipFile
@@ -24,7 +25,7 @@ MC = "http://schemas.openxmlformats.org/markup-compatibility/2006"
 XR = "http://schemas.microsoft.com/office/spreadsheetml/2014/revision"
 X15 = "http://schemas.microsoft.com/office/spreadsheetml/2010/11/main"
 AP = "http://schemas.openxmlformats.org/officeDocument/2006/extended-properties"
-AX = "http://schemas.microsoft.com/office/spreadsheetml/2016/activeX"
+AX = "http://schemas.microsoft.com/office/2006/activeX"
 V = "urn:schemas-microsoft-com:vml"
 
 HEADERS = ("Артикул", "Количество продаж", "Сумма продаж")
@@ -65,13 +66,9 @@ def _workbook_rels() -> bytes:
 </Relationships>'''.encode("utf-8")
 
 
-def _sheet(
-    *,
-    ignorable: str = "x15 xr v",
-    uid: str = "{00000000-0001-0000-0000-000000000000}",
-    used_unknown: bool = False,
-) -> bytes:
-    unknown = '<ap:Properties/>' if used_unknown else ""
+def _sheet(*, ignorable: str = "x15 xr v", uid: str = "{00000000-0001-0000-0000-000000000000}", used_unknown: bool = False) -> bytes:
+    unknown_decl = ' xmlns:evil="urn:unexpected"' if used_unknown else ""
+    unknown = '<evil:payload/>' if used_unknown else ""
     return f'''<?xml version="1.0" encoding="UTF-8"?>
 <worksheet xmlns="{SPREADSHEET}"
  xmlns:mc="{MC}"
@@ -79,7 +76,7 @@ def _sheet(
  xmlns:x15="{X15}"
  xmlns:ap="{AP}"
  xmlns:ax="{AX}"
- xmlns:v="{V}"
+ xmlns:v="{V}"{unknown_decl}
  mc:Ignorable="{ignorable}"
  xr:uid="{uid}">
   <dimension ref="A1:C2"/>
@@ -101,26 +98,14 @@ def _sheet(
 </worksheet>'''.encode("utf-8")
 
 
-def build_realistic_xlsx(
-    *,
-    ignorable: str = "x15 xr v",
-    uid: str = "{00000000-0001-0000-0000-000000000000}",
-    used_unknown: bool = False,
-) -> bytes:
+def build_realistic_xlsx(*, ignorable: str = "x15 xr v", uid: str = "{00000000-0001-0000-0000-000000000000}", used_unknown: bool = False) -> bytes:
     buffer = BytesIO()
     with ZipFile(buffer, "w", compression=ZIP_DEFLATED) as zf:
         zf.writestr("[Content_Types].xml", _content_types())
         zf.writestr("_rels/.rels", _root_rels())
         zf.writestr("xl/workbook.xml", _workbook())
         zf.writestr("xl/_rels/workbook.xml.rels", _workbook_rels())
-        zf.writestr(
-            "xl/worksheets/sheet1.xml",
-            _sheet(
-                ignorable=ignorable,
-                uid=uid,
-                used_unknown=used_unknown,
-            ),
-        )
+        zf.writestr("xl/worksheets/sheet1.xml", _sheet(ignorable=ignorable, uid=uid, used_unknown=used_unknown))
     return buffer.getvalue()
 
 
@@ -191,42 +176,14 @@ class RealOfficeNamespaceCompatibilityTests(unittest.TestCase):
                 payload=build_realistic_xlsx(uid="not-a-guid"),
                 policy=policy(),
             )
-        self.assertEqual(
-            error.exception.code,
-            "XLSX_WORKSHEET_ATTRIBUTE_VALUE_INVALID",
-        )
+        self.assertEqual(error.exception.code, "XLSX_WORKSHEET_ATTRIBUTE_VALUE_INVALID")
 
     def test_standard_auxiliary_content_is_accepted(self):
         samples = {
-            "docprops/app.xml": (
-                f'<Properties xmlns="{AP}">'
-                '<Application>Microsoft Excel</Application>'
-                '</Properties>'
-            ),
-            "docprops/core.xml": (
-                '<cp:coreProperties '
-                'xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" '
-                'xmlns:dc="http://purl.org/dc/elements/1.1/">'
-                '<dc:title>Report</dc:title>'
-                '</cp:coreProperties>'
-            ),
-            "xl/styles.xml": (
-                f'<styleSheet xmlns="{SPREADSHEET}">'
-                '<fonts count="1"><font/></fonts>'
-                '<fills count="1"><fill/></fills>'
-                '<borders count="1"><border/></borders>'
-                '<cellStyleXfs count="1"><xf/></cellStyleXfs>'
-                '<cellXfs count="1"><xf/></cellXfs>'
-                '<cellStyles count="1">'
-                '<cellStyle name="Normal" xfId="0" builtinId="0"/>'
-                '</cellStyles><dxfs count="0"/><tableStyles count="0"/>'
-                '</styleSheet>'
-            ),
-            "xl/theme/theme1.xml": (
-                '<a:theme '
-                'xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" '
-                'name="Office"><a:themeElements/></a:theme>'
-            ),
+            "docprops/app.xml": f'<Properties xmlns="{AP}"><Application>Microsoft Excel</Application></Properties>',
+            "docprops/core.xml": '<cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/"><dc:title>Report</dc:title></cp:coreProperties>',
+            "xl/styles.xml": f'<styleSheet xmlns="{SPREADSHEET}"><fonts count="1"><font/></fonts><fills count="1"><fill/></fills><borders count="1"><border/></borders><cellStyleXfs count="1"><xf/></cellStyleXfs><cellXfs count="1"><xf/></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles><dxfs count="0"/><tableStyles count="0"/></styleSheet>',
+            "xl/theme/theme1.xml": '<a:theme xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" name="Office"><a:themeElements/></a:theme>',
         }
         for path, xml in samples.items():
             with self.subTest(path=path):
@@ -234,17 +191,10 @@ class RealOfficeNamespaceCompatibilityTests(unittest.TestCase):
                 validate_auxiliary_content(path, root)
 
     def test_unknown_auxiliary_namespace_is_rejected(self):
-        root = ElementTree.fromstring(
-            '<Properties xmlns="urn:unexpected">'
-            '<Application>X</Application>'
-            '</Properties>'
-        )
+        root = ElementTree.fromstring('<Properties xmlns="urn:unexpected"><Application>X</Application></Properties>')
         with self.assertRaises(XlsxInspectionError) as error:
             validate_auxiliary_content("docprops/app.xml", root)
-        self.assertEqual(
-            error.exception.code,
-            "XLSX_AUXILIARY_CONTENT_UNMODELED",
-        )
+        self.assertEqual(error.exception.code, "XLSX_AUXILIARY_CONTENT_UNMODELED")
 
 
 if __name__ == "__main__":
