@@ -144,17 +144,17 @@ $manifestEntries = Get-ChildItem -LiteralPath $stageRoot -Recurse -File | Sort-O
 }
 
 $sourceCommit = $null
-$sourceBranch = $env:GITHUB_HEAD_REF
+$sourceBranch = [string]$env:GITHUB_HEAD_REF
 $git = Get-Command git.exe -ErrorAction SilentlyContinue
 if ($git) {
-    $sourceCommit = (& $git.Source -C $repositoryRoot rev-parse HEAD 2>$null | Select-Object -First 1)
-    if ($LASTEXITCODE -ne 0) {
-        $sourceCommit = $null
+    $rawCommit = @(& $git.Source -C $repositoryRoot rev-parse --verify HEAD 2>$null)
+    if ($LASTEXITCODE -eq 0 -and $rawCommit.Count -ge 1) {
+        $sourceCommit = ([string]$rawCommit[0]).Trim()
     }
     if ([string]::IsNullOrWhiteSpace($sourceBranch)) {
-        $sourceBranch = (& $git.Source -C $repositoryRoot branch --show-current 2>$null | Select-Object -First 1)
-        if ($LASTEXITCODE -ne 0) {
-            $sourceBranch = $null
+        $rawBranch = @(& $git.Source -C $repositoryRoot branch --show-current 2>$null)
+        if ($LASTEXITCODE -eq 0 -and $rawBranch.Count -ge 1) {
+            $sourceBranch = ([string]$rawBranch[0]).Trim()
         }
     }
 }
