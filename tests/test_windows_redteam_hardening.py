@@ -122,6 +122,26 @@ class WindowsPowerShellCompatibilityTests(unittest.TestCase):
             self.assertIn(encoded, script)
             self.assertEqual(base64.b64decode(encoded).decode("utf-8"), expected)
 
+    def test_importer_consumes_schema_discovery_preview_contract(self):
+        repository_root = Path(__file__).resolve().parents[1]
+        importer = (
+            repository_root / "scripts" / "windows" / "import_source.ps1"
+        ).read_text(encoding="utf-8")
+        producer = (
+            repository_root / "src" / "quantum" / "pilot" / "windows_runner.py"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn('"schema_discovery": candidate.report()', producer)
+        self.assertIn(
+            '$preview.PSObject.Properties["schema_discovery"]',
+            importer,
+        )
+        self.assertIn(
+            'throw "Schema preview does not contain schema_discovery."',
+            importer,
+        )
+        self.assertNotIn("$preview.schema.", importer)
+
 
 class AdmissionOnlyRedTeamTests(unittest.TestCase):
     def config(self):
