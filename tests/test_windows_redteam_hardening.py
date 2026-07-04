@@ -10,6 +10,7 @@ from unittest import mock
 
 from quantum.pilot import LocalPilotError, run_local_pilot
 from quantum.pilot.windows_runner import discover_schema, main
+from tests import test_xlsx_real_office_compat
 from tests.p16_fixtures import build_xlsx, policy
 from tests.test_b1b_rescue_input_boundaries import request
 
@@ -141,6 +142,16 @@ class WindowsPowerShellCompatibilityTests(unittest.TestCase):
             importer,
         )
         self.assertNotIn("$preview.schema.", importer)
+
+    def test_real_office_namespace_regression_suite(self):
+        suite = unittest.defaultTestLoader.loadTestsFromModule(
+            test_xlsx_real_office_compat
+        )
+        result = unittest.TestResult()
+        suite.run(result)
+        self.assertGreaterEqual(result.testsRun, 6)
+        self.assertEqual(result.errors, [])
+        self.assertEqual(result.failures, [])
 
 
 class AdmissionOnlyRedTeamTests(unittest.TestCase):
