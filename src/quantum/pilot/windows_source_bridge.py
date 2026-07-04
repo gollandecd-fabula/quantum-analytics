@@ -7,6 +7,10 @@ from typing import Any
 
 from quantum.adapters.wildberries import bridge_reviewed_wb_source
 from quantum.ingestion import XlsxInspectionLimits
+from quantum.insights import (
+    RECOMMENDATION_BUNDLE_SCHEMA_VERSION,
+    build_recommendations,
+)
 
 
 WINDOWS_SOURCE_BRIDGE_SCHEMA_VERSION = "quantum-windows-source-bridge-v1"
@@ -100,6 +104,22 @@ def _blocked(
     return result
 
 
+def _recommendation_error(exc: Exception) -> dict[str, Any]:
+    return {
+        "schema_version": RECOMMENDATION_BUNDLE_SCHEMA_VERSION,
+        "status": "ERROR",
+        "source_type": None,
+        "policy_ref": None,
+        "recommendation_count": 0,
+        "recommendations": [],
+        "reason_codes": [
+            getattr(exc, "code", "RECOMMENDATION_UNEXPECTED_ERROR")
+        ],
+        "detail": type(exc).__name__,
+        "bundle_hash": None,
+    }
+
+
 def attach_reviewed_source_bridge(
     *,
     report: Mapping[str, Any],
@@ -142,6 +162,13 @@ def attach_reviewed_source_bridge(
             ),
             detail=type(exc).__name__,
         )
+    try:
+        result["recommendations"] = build_recommendations(
+            result,
+            config.get("recommendation_policy"),
+        )
+    except Exception as exc:
+        result["recommendations"] = _recommendation_error(exc)
     result["windows_integration_schema_version"] = (
         WINDOWS_SOURCE_BRIDGE_SCHEMA_VERSION
     )
