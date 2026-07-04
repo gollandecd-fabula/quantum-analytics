@@ -206,6 +206,42 @@ def _xlsx_sheet_names(path: Path) -> tuple[str, ...]:
         raise OutputBundleError("OUTPUT_XLSX_INVALID") from exc
 
 
+def _verify_dashboard_payload(payload: bytes, bundle_hash: str) -> None:
+    required = (
+        bundle_hash.encode("ascii"),
+        b'id="bundle-data"',
+        b'data-dashboard-schema="quantum-interactive-dashboard-v1"',
+        b'http-equiv="Content-Security-Policy"',
+        b"connect-src 'none'",
+        b"object-src 'none'",
+        b"frame-src 'none'",
+        b"form-action 'none'",
+    )
+    if any(item not in payload for item in required):
+        raise OutputBundleError("OUTPUT_DASHBOARD_BUNDLE_MISMATCH")
+    forbidden = (
+        b"http://",
+        b"https://",
+        b"<iframe",
+        b"<object",
+        b"<embed",
+        b"<link",
+        b"<base",
+        b' src="',
+        b" src='",
+        b"fetch(",
+        b"XMLHttpRequest",
+        b"WebSocket",
+        b"EventSource",
+        b"sendBeacon",
+        b".innerHTML",
+        b"document.write",
+        b"eval(",
+    )
+    if any(item in payload for item in forbidden):
+        raise OutputBundleError("OUTPUT_DASHBOARD_EXTERNAL_RESOURCE_FORBIDDEN")
+
+
 def verify_local_output_directory(directory: Path) -> dict[str, Any]:
     if not isinstance(directory, Path) or not directory.is_dir() or directory.is_symlink():
         raise OutputBundleError("OUTPUT_DIRECTORY_INVALID")
@@ -246,11 +282,7 @@ def verify_local_output_directory(directory: Path) -> dict[str, Any]:
     if _json_bytes(recommendations) != _json_bytes(bundle["recommendations"]):
         raise OutputBundleError("OUTPUT_RECOMMENDATIONS_MISMATCH")
     dashboard = (directory / "dashboard.html").read_bytes()
-    if (
-        bundle["bundle_hash"].encode("ascii") not in dashboard
-        or b'id="bundle-data"' not in dashboard
-    ):
-        raise OutputBundleError("OUTPUT_DASHBOARD_BUNDLE_MISMATCH")
+    _verify_dashboard_payload(dashboard, bundle["bundle_hash"])
     if _xlsx_sheet_names(directory / "Quantum_Report.xlsx") != EXPECTED_XLSX_SHEETS:
         raise OutputBundleError("OUTPUT_XLSX_SHEET_CONTRACT_INVALID")
     return {
