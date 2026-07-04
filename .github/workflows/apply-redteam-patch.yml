@@ -1,9 +1,9 @@
 name: Apply HOME_LOCAL Red-Team Patch
 
 on:
-  push:
-    branches:
-      - local-pilot-windows-acl-repair-r2
+  pull_request:
+    types:
+      - synchronize
     paths:
       - '.github/workflows/apply-redteam-patch.yml'
 
@@ -18,15 +18,16 @@ jobs:
       - name: Checkout staging head
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.sha }}
+          ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
 
       - name: Assert branch and exact head
         shell: bash
         run: |
           set -euo pipefail
-          test "${GITHUB_REF_NAME}" = "local-pilot-windows-acl-repair-r2"
-          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+          test "${{ github.event.pull_request.head.ref }}" = "local-pilot-windows-acl-repair-r2"
+          expected="${{ github.event.pull_request.head.sha }}"
+          test "$(git rev-parse HEAD)" = "${expected}"
 
       - name: Apply verified bundle
         shell: bash
