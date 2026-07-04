@@ -1,6 +1,8 @@
+import base64
 import json
 import sys
 import tempfile
+import unicodedata
 import unittest
 from dataclasses import asdict
 from hashlib import sha256
@@ -82,6 +84,55 @@ class ReviewedFileHashTests(unittest.TestCase):
         self.assertFalse(output.exists())
         error = json.loads(stderr.getvalue())
         self.assertEqual(error["code"], "HOME_LOCAL_SOURCE_FILE_HASH_MISMATCH")
+
+
+class ConfiguratorPrivacyTokenTests(unittest.TestCase):
+    def test_generated_privacy_tokens_are_normalized_unique(self):
+        repository_root = Path(__file__).resolve().parents[1]
+        script = (
+            repository_root / "scripts" / "windows" / "configure_home_local.ps1"
+        ).read_text(encoding="ascii")
+
+        plain_tokens = [
+            "email",
+            "phone",
+            "telephone",
+            "mobile",
+            "address",
+            "full name",
+            "surname",
+            "passport",
+            "snils",
+            "inn",
+        ]
+        encoded_tokens = [
+            "0Y3Qu9C10LrRgtGA0L7QvdC90LDRjyDQv9C+0YfRgtCw",
+            "0YLQtdC70LXRhNC+0L0=",
+            "0LDQtNGA0LXRgQ==",
+            "0YTQuNC+",
+            "0YTQsNC80LjQu9C40Y8=",
+            "0L/QsNGB0L/QvtGA0YI=",
+            "0YHQvdC40LvRgQ==",
+            "0LjQvdC9",
+        ]
+        self.assertNotIn('"e-mail"', script)
+        for token in plain_tokens:
+            self.assertIn(f'"{token}"', script)
+        decoded_tokens = []
+        for encoded in encoded_tokens:
+            self.assertIn(encoded, script)
+            decoded_tokens.append(base64.b64decode(encoded).decode("utf-8"))
+
+        normalized = [
+            "".join(
+                character
+                for character in unicodedata.normalize("NFKC", token).casefold()
+                if character.isalnum()
+            )
+            for token in plain_tokens + decoded_tokens
+        ]
+        self.assertTrue(all(normalized))
+        self.assertEqual(len(normalized), len(set(normalized)))
 
 
 if __name__ == "__main__":
