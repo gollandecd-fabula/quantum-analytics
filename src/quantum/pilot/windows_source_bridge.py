@@ -141,6 +141,18 @@ def _recommendation_error(exc: Exception) -> dict[str, Any]:
     }
 
 
+def _output_error(exc: Exception) -> dict[str, Any]:
+    return {
+        "status": "OUTPUT_BUNDLE_ERROR",
+        "reason_code": getattr(
+            exc,
+            "code",
+            "OUTPUT_BUNDLE_UNEXPECTED_ERROR",
+        ),
+        "detail": type(exc).__name__,
+    }
+
+
 def _attach_outputs(
     *,
     report: Mapping[str, Any],
@@ -150,15 +162,7 @@ def _attach_outputs(
     try:
         output_path = _output_path(config)
     except Exception as exc:
-        result["output_bundle"] = {
-            "status": "OUTPUT_BUNDLE_ERROR",
-            "reason_code": getattr(
-                exc,
-                "code",
-                "WINDOWS_LOCAL_OUTPUT_ROOT_INVALID",
-            ),
-            "detail": type(exc).__name__,
-        }
+        result["output_bundle"] = _output_error(exc)
         return
     if output_path is None:
         result["output_bundle"] = {
@@ -166,20 +170,24 @@ def _attach_outputs(
             "reason_code": "LOCALAPPDATA_NOT_AVAILABLE",
         }
         return
-    output_report = dict(report)
-    limitations = list(output_report.get("limitations", []))
-    for item in (
-        "HOME_LOCAL_UNENCRYPTED_STORAGE",
-        "PHYSICAL_ACCESS_RISK_ACCEPTED",
-    ):
-        if item not in limitations:
-            limitations.append(item)
-    output_report["limitations"] = limitations
-    output_report["source_bridge"] = result
-    attached = attach_local_output_bundle(
-        report=output_report,
-        output_path=output_path,
-    )
+    try:
+        output_report = dict(report)
+        limitations = list(output_report.get("limitations", []))
+        for item in (
+            "HOME_LOCAL_UNENCRYPTED_STORAGE",
+            "PHYSICAL_ACCESS_RISK_ACCEPTED",
+        ):
+            if item not in limitations:
+                limitations.append(item)
+        output_report["limitations"] = limitations
+        output_report["source_bridge"] = result
+        attached = attach_local_output_bundle(
+            report=output_report,
+            output_path=output_path,
+        )
+    except Exception as exc:
+        result["output_bundle"] = _output_error(exc)
+        return
     if attached is not None:
         result["output_bundle"] = attached
 
