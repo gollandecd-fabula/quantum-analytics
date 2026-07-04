@@ -30,6 +30,7 @@ from quantum.ingestion._xlsx_contracts import (
 from quantum.ingestion import _xlsx_relationships_core as _relationship_core
 
 from . import local_runner as _engine
+from .windows_source_bridge import attach_reviewed_source_bridge
 
 
 _RELATIONSHIP_NS = "http://schemas.openxmlformats.org/package/2006/relationships"
@@ -533,6 +534,16 @@ def main() -> int:
         report["storage_encryption_required"] = False
         if candidate is not None:
             report["schema_discovery"] = candidate.report()
+        source_bridge = attach_reviewed_source_bridge(
+            report=report,
+            payload=source_payload,
+            schema_discovery=(candidate.report() if candidate is not None else None),
+            limits=_limits(config),
+            config=config,
+            source_path=args.file,
+        )
+        if source_bridge is not None:
+            report["source_bridge"] = source_bridge
         limitations = list(report.get("limitations", []))
         for item in (
             "HOME_LOCAL_UNENCRYPTED_STORAGE",
