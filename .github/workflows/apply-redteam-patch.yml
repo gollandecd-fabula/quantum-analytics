@@ -1,4 +1,4 @@
-name: Apply HOME_LOCAL Red-Team Patch
+name: Prepare HOME_LOCAL Red-Team Tree
 
 on:
   pull_request:
@@ -8,10 +8,10 @@ on:
       - '.github/workflows/apply-redteam-patch.yml'
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  apply:
+  prepare:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -51,20 +51,44 @@ jobs:
             tests.test_local_pilot_runner \
             -v
 
-      - name: Remove staging bundle
+      - name: Prepare final staged tree metadata
         shell: bash
         run: |
           set -euo pipefail
           rm -rf .redteam_patch
-
-      - name: Commit hardened tree to isolated output branch
-        shell: bash
-        run: |
-          set -euo pipefail
-          git config user.name "quantum-redteam-bot"
-          git config user.email "quantum-redteam-bot@users.noreply.github.com"
+          rm -f .github/workflows/apply-redteam-patch.yml
           git add -A
-          test -n "$(git status --porcelain)"
-          git commit -m "Red-team harden HOME_LOCAL onboarding and integrity"
-          git push origin HEAD:refs/heads/local-pilot-windows-redteam-output-r3-2f125986
-          echo "HARDENED_COMMIT=$(git rev-parse HEAD)"
+          git diff --cached --check
+          python3 - <<'PY'
+          import json
+          import subprocess
+          from pathlib import Path
+
+          def git(*args: str) -> str:
+              return subprocess.check_output(['git', *args], text=True).strip()
+
+          changed = [
+              line.split('\t', 1)[-1]
+              for line in git('diff', '--cached', '--name-status').splitlines()
+              if line.strip()
+          ]
+          payload = {
+              'parent_sha': git('rev-parse', 'HEAD'),
+              'base_tree_sha': git('rev-parse', 'HEAD^{tree}'),
+              'bundle_json_sha256': '7d0a997f504d8d6e3c4b70b80018c5992b25f38e45b8ad606d5327e0106c0589',
+              'changed_paths': changed,
+          }
+          Path('redteam-tree-metadata.json').write_text(
+              json.dumps(payload, sort_keys=True, indent=2) + '\n',
+              encoding='utf-8',
+          )
+          print(json.dumps(payload, sort_keys=True))
+          PY
+
+      - name: Upload final tree metadata
+        uses: actions/upload-artifact@v4
+        with:
+          name: HOME_LOCAL-redteam-tree-metadata
+          path: redteam-tree-metadata.json
+          if-no-files-found: error
+          retention-days: 7
