@@ -166,7 +166,8 @@ if ([string]::IsNullOrWhiteSpace($sourceCommit) -or $sourceCommit -notmatch "^[0
 }
 $manifest = [ordered]@{
     package = "QuantumLocalProduction_HOME_LOCAL"
-    package_version = "R3_UNIVERSAL_IMPORT"
+    package_version = "R2_REDTEAM"
+    feature_set = "R3_UNIVERSAL_IMPORT"
     source_branch = $sourceBranch
     source_commit = $sourceCommit.ToLowerInvariant()
     release_state = "RELEASE_BLOCKED"
