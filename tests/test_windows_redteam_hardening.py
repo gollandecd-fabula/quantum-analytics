@@ -1,3 +1,4 @@
+import base64
 import json
 import sys
 import tempfile
@@ -68,6 +69,58 @@ class DiscoveryRedTeamTests(unittest.TestCase):
             self.assertEqual(preview["file_sha256"], sha256(workbook).hexdigest())
             self.assertEqual(preview["schema_discovery"]["header_row_index"], 1)
             self.assertEqual(preview["schema_discovery"]["headers"][0], "Артикул")
+
+
+class WindowsPowerShellCompatibilityTests(unittest.TestCase):
+    def test_configurator_is_ascii_safe_and_matches_limit_contract(self):
+        repository_root = Path(__file__).resolve().parents[1]
+        payload = (
+            repository_root / "scripts" / "windows" / "configure_home_local.ps1"
+        ).read_bytes()
+        script = payload.decode("ascii")
+        self.assertFalse(payload.startswith(b"\xef\xbb\xbf"))
+
+        limits_block = script.split("limits = [ordered]@{", 1)[1].split(
+            "schemas = @(", 1
+        )[0]
+        required_limit_keys = {
+            "max_file_bytes",
+            "max_archive_entries",
+            "max_total_uncompressed_bytes",
+            "max_entry_uncompressed_bytes",
+            "max_compression_ratio",
+            "max_xml_bytes",
+            "max_rows",
+            "max_columns",
+        }
+        obsolete_limit_keys = {
+            "max_package_entries",
+            "max_package_uncompressed_bytes",
+            "max_single_part_bytes",
+            "max_xml_nodes_per_part",
+            "max_sheets",
+            "max_cell_text_length",
+            "max_shared_strings",
+            "max_shared_string_characters",
+        }
+        for key in required_limit_keys:
+            self.assertIn(key, limits_block)
+        for key in obsolete_limit_keys:
+            self.assertNotIn(key, limits_block)
+
+        encoded_tokens = {
+            "электронная почта": "0Y3Qu9C10LrRgtGA0L7QvdC90LDRjyDQv9C+0YfRgtCw",
+            "телефон": "0YLQtdC70LXRhNC+0L0=",
+            "адрес": "0LDQtNGA0LXRgQ==",
+            "фио": "0YTQuNC+",
+            "фамилия": "0YTQsNC80LjQu9C40Y8=",
+            "паспорт": "0L/QsNGB0L/QvtGA0YI=",
+            "снилс": "0YHQvdC40LvRgQ==",
+            "инн": "0LjQvdC9",
+        }
+        for expected, encoded in encoded_tokens.items():
+            self.assertIn(encoded, script)
+            self.assertEqual(base64.b64decode(encoded).decode("utf-8"), expected)
 
 
 class AdmissionOnlyRedTeamTests(unittest.TestCase):
