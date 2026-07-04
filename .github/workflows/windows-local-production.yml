@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - local-pilot-windows-repair-r1
+      - local-pilot-runner-r1
     paths:
       - "src/quantum/pilot/**"
       - "src/quantum/ingestion/**"
@@ -47,13 +48,32 @@ jobs:
         shell: pwsh
         run: |
           $env:PYTHONPATH = "src"
-          python -m unittest tests.test_windows_local_runner -v
+          python -m unittest tests.test_windows_local_runner -v 2>&1 |
+            Tee-Object -FilePath windows-repair-tests.log
+          if ($LASTEXITCODE -ne 0) {
+            throw "Windows repair regression suite failed with exit code $LASTEXITCODE"
+          }
 
       - name: Re-run existing local pilot tests
         shell: pwsh
         run: |
           $env:PYTHONPATH = "src"
-          python -m unittest tests.test_local_pilot_runner -v
+          python -m unittest tests.test_local_pilot_runner -v 2>&1 |
+            Tee-Object -FilePath existing-local-pilot-tests.log
+          if ($LASTEXITCODE -ne 0) {
+            throw "Existing local pilot tests failed with exit code $LASTEXITCODE"
+          }
+
+      - name: Upload test diagnostics on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-local-pilot-test-logs
+          path: |
+            windows-repair-tests.log
+            existing-local-pilot-tests.log
+          if-no-files-found: warn
+          retention-days: 7
 
       - name: Parse PowerShell scripts
         shell: pwsh
