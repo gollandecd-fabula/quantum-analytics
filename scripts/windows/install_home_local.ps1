@@ -13,8 +13,9 @@ if ([string]::IsNullOrWhiteSpace($SourceRoot)) {
 else {
     $SourceRoot = (Resolve-Path -LiteralPath $SourceRoot).Path
 }
+$TargetRoot = [IO.Path]::GetFullPath($TargetRoot)
 
-$sourceRuntime = Join-Path $SourceRoot "src"
+$sourceRuntime = [IO.Path]::GetFullPath((Join-Path $SourceRoot "src"))
 $sourceLauncher = Join-Path $SourceRoot "scripts\import_source.ps1"
 if (-not (Test-Path -LiteralPath $sourceRuntime -PathType Container)) {
     throw "Package runtime directory is missing: $sourceRuntime"
@@ -24,24 +25,64 @@ if (-not (Test-Path -LiteralPath $sourceLauncher -PathType Leaf)) {
 }
 
 New-Item -ItemType Directory -Path $TargetRoot -Force | Out-Null
+$runtimeTarget = [IO.Path]::GetFullPath((Join-Path $TargetRoot "src"))
+if ($sourceRuntime.TrimEnd("\", "/") -ieq $runtimeTarget.TrimEnd("\", "/")) {
+    throw "Installer must be run from an extracted package, not from the already installed runtime."
+}
+
 foreach ($name in @("config", "data", "output", "scripts")) {
     New-Item -ItemType Directory -Path (Join-Path $TargetRoot $name) -Force | Out-Null
 }
 
-$timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
-$runtimeTarget = Join-Path $TargetRoot "src"
-if (Test-Path -LiteralPath $runtimeTarget) {
-    $runtimeBackup = Join-Path $TargetRoot ("src.backup_{0}" -f $timestamp)
-    Move-Item -LiteralPath $runtimeTarget -Destination $runtimeBackup
-    Write-Host "Previous runtime backed up to: $runtimeBackup"
+$installId = "{0}_{1}" -f (Get-Date -Format "yyyyMMdd_HHmmss"), ([guid]::NewGuid().ToString("N").Substring(0, 8))
+$runtimeStage = Join-Path $TargetRoot ("src.installing_{0}" -f $installId)
+$runtimeBackup = Join-Path $TargetRoot ("src.backup_{0}" -f $installId)
+
+try {
+    Copy-Item -LiteralPath $sourceRuntime -Destination $runtimeStage -Recurse -Force
+    $stagedRunner = Join-Path $runtimeStage "quantum\pilot\windows_runner.py"
+    if (-not (Test-Path -LiteralPath $stagedRunner -PathType Leaf)) {
+        throw "Staged runtime verification failed: $stagedRunner"
+    }
+
+    $hadPreviousRuntime = Test-Path -LiteralPath $runtimeTarget -PathType Container
+    if ($hadPreviousRuntime) {
+        Move-Item -LiteralPath $runtimeTarget -Destination $runtimeBackup
+        Write-Host "Previous runtime backed up to: $runtimeBackup"
+    }
+
+    try {
+        Move-Item -LiteralPath $runtimeStage -Destination $runtimeTarget
+    }
+    catch {
+        if ((-not (Test-Path -LiteralPath $runtimeTarget)) -and (Test-Path -LiteralPath $runtimeBackup)) {
+            Move-Item -LiteralPath $runtimeBackup -Destination $runtimeTarget
+        }
+        throw
+    }
 }
-Copy-Item -LiteralPath $sourceRuntime -Destination $runtimeTarget -Recurse -Force
+catch {
+    if (Test-Path -LiteralPath $runtimeStage) {
+        Remove-Item -LiteralPath $runtimeStage -Recurse -Force -ErrorAction SilentlyContinue
+    }
+    throw
+}
 
 $launcherTarget = Join-Path $TargetRoot "scripts\import_source.ps1"
+$launcherBackup = $null
 if (Test-Path -LiteralPath $launcherTarget -PathType Leaf) {
-    Copy-Item -LiteralPath $launcherTarget -Destination ("{0}.backup_{1}" -f $launcherTarget, $timestamp) -Force
+    $launcherBackup = "{0}.backup_{1}" -f $launcherTarget, $installId
+    Copy-Item -LiteralPath $launcherTarget -Destination $launcherBackup -Force
 }
-Copy-Item -LiteralPath $sourceLauncher -Destination $launcherTarget -Force
+try {
+    Copy-Item -LiteralPath $sourceLauncher -Destination $launcherTarget -Force
+}
+catch {
+    if ($launcherBackup -and (Test-Path -LiteralPath $launcherBackup -PathType Leaf)) {
+        Copy-Item -LiteralPath $launcherBackup -Destination $launcherTarget -Force
+    }
+    throw
+}
 
 $templateSource = Join-Path $SourceRoot "config\home-local.template.json"
 $templateTarget = Join-Path $TargetRoot "config\home-local.template.json"
