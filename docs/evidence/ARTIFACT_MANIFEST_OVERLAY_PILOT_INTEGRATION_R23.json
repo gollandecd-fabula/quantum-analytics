@@ -43,8 +43,8 @@
     ],
     [
       "scripts/windows/build_any_file_extension.ps1",
-      "b743d24bff7fe745dec293400b6dfb496ca703ebe7693a3b44d75c14816f0adf",
-      4390
+      "c3efda5d10847dabaf10a87c212678be14fff440ebaa252dc3232780df6a184b",
+      4617
     ],
     [
       "scripts/windows/build_local_production.ps1",
