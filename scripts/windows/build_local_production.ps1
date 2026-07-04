@@ -11,6 +11,7 @@ if ([string]::IsNullOrWhiteSpace($OutputDirectory)) {
     $OutputDirectory = Join-Path $repositoryRoot "dist"
 }
 New-Item -ItemType Directory -Path $OutputDirectory -Force | Out-Null
+$OutputDirectory = (Resolve-Path -LiteralPath $OutputDirectory).Path
 
 $stageRoot = Join-Path $OutputDirectory "QuantumLocalProduction"
 $archivePath = Join-Path $OutputDirectory "QuantumLocalProduction_HOME_LOCAL.zip"
@@ -54,35 +55,55 @@ $readme = @'
 QUANTUM HOME_LOCAL WINDOWS PACKAGE
 
 1. Existing installation: run INSTALL_HOME_LOCAL.cmd once.
-2. Import a report: run IMPORT_XLSX.cmd.
-3. The installer preserves config, data and output directories.
-4. HOME_LOCAL does not require BitLocker. The report records this limitation.
-5. No marketplace writes, deploy, public/LAN exposure or production release are enabled.
-6. Do not upload real reports, configs, data or output to GitHub or cloud-sync folders.
-
-The configuration template contains placeholders. Existing production.local.json or default-production.json is reused when present.
+2. Complete config\home-local.template.json and save it as config\default-home-local.json if no ready local config exists.
+3. Import a report: run IMPORT_XLSX.cmd.
+4. The installer preserves config, data and output directories.
+5. HOME_LOCAL does not require BitLocker. The report records this limitation.
+6. No marketplace writes, deploy, public/LAN exposure or production release are enabled.
+7. Do not upload real reports, configs, data or output to GitHub or cloud-sync folders.
 '@
 Set-Content -LiteralPath (Join-Path $stageRoot "README_FIRST.txt") -Value $readme -Encoding UTF8
 
+$stageFullPath = [IO.Path]::GetFullPath($stageRoot).TrimEnd("\", "/")
+$stagePrefix = $stageFullPath + [IO.Path]::DirectorySeparatorChar
 $manifestEntries = Get-ChildItem -LiteralPath $stageRoot -Recurse -File | Sort-Object FullName | ForEach-Object {
+    $fullPath = [IO.Path]::GetFullPath($_.FullName)
+    if (-not $fullPath.StartsWith($stagePrefix, [StringComparison]::OrdinalIgnoreCase)) {
+        throw "Package file escaped staging root: $fullPath"
+    }
+    $relativePath = $fullPath.Substring($stagePrefix.Length).Replace("\", "/")
     [pscustomobject]@{
-        path = [IO.Path]::GetRelativePath($stageRoot, $_.FullName).Replace("\\", "/")
+        path = $relativePath
         size_bytes = $_.Length
         sha256 = (Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+    }
+}
+
+$sourceCommit = $null
+$git = Get-Command git.exe -ErrorAction SilentlyContinue
+if ($git) {
+    $sourceCommit = (& $git.Source -C $repositoryRoot rev-parse HEAD 2>$null | Select-Object -First 1)
+    if ($LASTEXITCODE -ne 0) {
+        $sourceCommit = $null
     }
 }
 $manifest = [ordered]@{
     package = "QuantumLocalProduction_HOME_LOCAL"
     package_version = "R1"
     source_branch = "local-pilot-windows-repair-r1"
+    source_commit = $sourceCommit
     release_state = "RELEASE_BLOCKED"
     marketplace_write_enabled = $false
+    manifest_excludes_self = $true
     files = @($manifestEntries)
 }
 $manifest | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath (Join-Path $stageRoot "manifest.sha256.json") -Encoding UTF8
 
-Compress-Archive -LiteralPath (Join-Path $stageRoot "*") -DestinationPath $archivePath -CompressionLevel Optimal
+Compress-Archive -Path (Join-Path $stageRoot "*") -DestinationPath $archivePath -CompressionLevel Optimal
 
+if (-not (Test-Path -LiteralPath $archivePath -PathType Leaf)) {
+    throw "Package archive was not produced: $archivePath"
+}
 $archiveHash = (Get-FileHash -LiteralPath $archivePath -Algorithm SHA256).Hash.ToLowerInvariant()
 Write-Host "Package built." -ForegroundColor Green
 Write-Host "Archive: $archivePath"
