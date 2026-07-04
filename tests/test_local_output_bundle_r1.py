@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import copy
 import hashlib
+import json
 from pathlib import Path
 import tempfile
 import unittest
@@ -202,13 +203,10 @@ class LocalOutputBundleTests(unittest.TestCase):
         payload = report()
         payload.pop("reconciliation")
         bundle = build_local_output_bundle(payload, generated_at=GENERATED_AT)
-        self.assertEqual(
-            bundle["reconciliation"],
-            {
-                "state": "NOT_AVAILABLE",
-                "differences": [],
-            },
-        )
+        self.assertEqual(bundle["reconciliation"], {
+            "state": "NOT_AVAILABLE",
+            "differences": [],
+        })
 
     def test_raw_payload_is_rejected_recursively(self):
         unsafe = report()
@@ -223,10 +221,7 @@ class LocalOutputBundleTests(unittest.TestCase):
         unsafe["recommendations"]["bundle_hash"] = "9" * 64
         with self.assertRaises(OutputBundleError) as error:
             build_local_output_bundle(unsafe, generated_at=GENERATED_AT)
-        self.assertEqual(
-            error.exception.code,
-            "OUTPUT_RECOMMENDATION_BUNDLE_MISMATCH",
-        )
+        self.assertEqual(error.exception.code, "OUTPUT_RECOMMENDATION_BUNDLE_MISMATCH")
 
     def test_xlsx_is_deterministic_valid_and_has_exact_sheet_contract(self):
         bundle = build_local_output_bundle(report(), generated_at=GENERATED_AT)
@@ -246,11 +241,33 @@ class LocalOutputBundleTests(unittest.TestCase):
                     tuple(item.get("name") for item in list(sheets)),
                     EXPECTED_XLSX_SHEETS,
                 )
+                namespace = "{http://schemas.openxmlformats.org/spreadsheetml/2006/main}"
                 for name in archive.namelist():
                     if name.endswith(".xml"):
-                        ElementTree.fromstring(archive.read(name))
-                    if name.startswith("xl/worksheets/"):
-                        self.assertNotIn(b"<f", archive.read(name))
+                        root = ElementTree.fromstring(archive.read(name))
+                        if name.startswith("xl/worksheets/sheet"):
+                            self.assertEqual(root.findall(f".//{namespace}f"), [])
+                self.assertIn("xl/charts/chart1.xml", archive.namelist())
+                self.assertIn("xl/drawings/drawing1.xml", archive.namelist())
+                chart = ElementTree.fromstring(archive.read("xl/charts/chart1.xml"))
+                chart_namespace = "{http://schemas.openxmlformats.org/drawingml/2006/chart}"
+                self.assertEqual(chart.findall(f".//{chart_namespace}f"), [])
+                self.assertIsNotNone(chart.find(f".//{chart_namespace}strLit"))
+                self.assertIsNotNone(chart.find(f".//{chart_namespace}numLit"))
+                styles = ElementTree.fromstring(archive.read("xl/styles.xml"))
+                self.assertIsNotNone(styles.find(f"{namespace}numFmts"))
+                self.assertIsNotNone(styles.find(f"{namespace}dxfs"))
+                summary = ElementTree.fromstring(archive.read("xl/worksheets/sheet1.xml"))
+                self.assertIsNotNone(summary.find(f"{namespace}mergeCells"))
+                self.assertIsNotNone(summary.find(f"{namespace}conditionalFormatting"))
+                self.assertIsNotNone(summary.find(f"{namespace}hyperlinks"))
+                self.assertIsNotNone(summary.find(f"{namespace}drawing"))
+                recommendations = ElementTree.fromstring(archive.read("xl/worksheets/sheet2.xml"))
+                self.assertIsNotNone(recommendations.find(f"{namespace}autoFilter"))
+                pane = recommendations.find(f".//{namespace}pane")
+                self.assertIsNotNone(pane)
+                self.assertEqual(pane.get("xSplit"), "4")
+                self.assertEqual(pane.get("ySplit"), "5")
 
     def test_dashboard_is_offline_and_bound_to_bundle(self):
         bundle = build_local_output_bundle(report(), generated_at=GENERATED_AT)
@@ -293,10 +310,7 @@ class LocalOutputBundleTests(unittest.TestCase):
             for item in result["artifacts"]:
                 payload = Path(item["path"]).read_bytes()
                 self.assertEqual(len(payload), item["size_bytes"])
-                self.assertEqual(
-                    hashlib.sha256(payload).hexdigest(),
-                    item["sha256"],
-                )
+                self.assertEqual(hashlib.sha256(payload).hexdigest(), item["sha256"])
             reused = write_local_output_bundle(
                 report(),
                 output_root=root,
