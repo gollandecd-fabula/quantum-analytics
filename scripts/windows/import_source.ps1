@@ -34,11 +34,11 @@ function Resolve-ProjectRoot {
     throw "Quantum project root was not found from launcher location: $PSScriptRoot"
 }
 
-function Select-XlsxFile {
+function Select-SourceFile {
     Add-Type -AssemblyName System.Windows.Forms
     $dialog = New-Object System.Windows.Forms.OpenFileDialog
-    $dialog.Title = "Select authorized Wildberries XLSX report"
-    $dialog.Filter = "Excel Workbook (*.xlsx)|*.xlsx"
+    $dialog.Title = "Select authorized file for Quantum"
+    $dialog.Filter = "All files (*.*)|*.*"
     $dialog.Multiselect = $false
     if ($dialog.ShowDialog() -ne [System.Windows.Forms.DialogResult]::OK) {
         throw "Source selection cancelled."
@@ -202,27 +202,9 @@ function New-RuntimeConfig {
 $projectRoot = Resolve-ProjectRoot
 
 if ([string]::IsNullOrWhiteSpace($File)) {
-    $File = Select-XlsxFile
+    $File = Select-SourceFile
 }
 $File = (Resolve-Path -LiteralPath $File).Path
-if ([IO.Path]::GetExtension($File) -ine ".xlsx") {
-    throw "Only .xlsx source files are accepted."
-}
-
-if ([string]::IsNullOrWhiteSpace($Config)) {
-    $candidates = @(
-        (Join-Path $env:LOCALAPPDATA "QuantumLocalProduction\config\production.local.json"),
-        (Join-Path $env:LOCALAPPDATA "QuantumLocalProduction\config\default-home-local.json"),
-        (Join-Path $env:LOCALAPPDATA "QuantumLocalProduction\config\default-production.json")
-    )
-    $Config = $candidates | Where-Object { Test-Path -LiteralPath $_ -PathType Leaf } | Select-Object -First 1
-    if (-not $Config) {
-        $template = Join-Path $projectRoot "config\home-local.template.json"
-        throw "No ready Quantum configuration was found. Run CONFIGURE_HOME_LOCAL.cmd. Template: $template"
-    }
-}
-$Config = (Resolve-Path -LiteralPath $Config).Path
-Test-UsableConfig -Path $Config
 
 if ([string]::IsNullOrWhiteSpace($StorageRoot)) {
     $StorageRoot = Join-Path $env:LOCALAPPDATA "QuantumLocalProduction\data"
@@ -240,10 +222,53 @@ $reviewedFileHash = [string]$scanReceipt.source_sha256
 Write-Host "Runtime profile: HOME_LOCAL" -ForegroundColor Cyan
 Write-Host "Disk encryption is not required in HOME_LOCAL. The result will record the unencrypted-storage limitation." -ForegroundColor Yellow
 
-Confirm-Literal -Expected "AUTHORIZE" -Prompt "Type AUTHORIZE to attest lawful authority to process this report" -AlreadyAttested ([bool]$AuthorityAttested)
+Confirm-Literal -Expected "AUTHORIZE" -Prompt "Type AUTHORIZE to attest lawful authority to process this file" -AlreadyAttested ([bool]$AuthorityAttested)
 
 $pythonCommand = Resolve-PythonCommand
 $env:PYTHONPATH = Join-Path $projectRoot "src"
+
+$universalArguments = @()
+$universalArguments += $pythonCommand.Prefix
+$universalArguments += @(
+    "-m", "quantum.pilot.universal_import",
+    "--file", $File,
+    "--storage-root", $StorageRoot,
+    "--output", $Output,
+    "--authority-attested",
+    "--malware-scan-evidence-sha256", ([string]$scanReceipt.evidence_sha256),
+    "--malware-scan-outcome", ([string]$scanResult.outcome)
+)
+& $pythonCommand.Executable @universalArguments
+$universalExitCode = $LASTEXITCODE
+if (-not (Test-Path -LiteralPath $Output -PathType Leaf)) {
+    throw "Universal import did not produce a report: $Output"
+}
+$universalReport = Get-Content -LiteralPath $Output -Raw -Encoding UTF8 | ConvertFrom-Json
+$universalStatus = [string]$universalReport.status
+if ($universalStatus -ne "ROUTE_XLSX") {
+    if ($universalExitCode -ne 0) {
+        throw "Quantum quarantined the file with status $universalStatus. Report: $Output"
+    }
+    Write-Host "File accepted with status: $universalStatus" -ForegroundColor Green
+    Write-Host "Detected format: $($universalReport.detected_format)"
+    Write-Host "Report: $Output"
+    return
+}
+
+if ([string]::IsNullOrWhiteSpace($Config)) {
+    $candidates = @(
+        (Join-Path $env:LOCALAPPDATA "QuantumLocalProduction\config\production.local.json"),
+        (Join-Path $env:LOCALAPPDATA "QuantumLocalProduction\config\default-home-local.json"),
+        (Join-Path $env:LOCALAPPDATA "QuantumLocalProduction\config\default-production.json")
+    )
+    $Config = $candidates | Where-Object { Test-Path -LiteralPath $_ -PathType Leaf } | Select-Object -First 1
+    if (-not $Config) {
+        $template = Join-Path $projectRoot "config\home-local.template.json"
+        throw "No ready Quantum configuration was found. Run CONFIGURE_HOME_LOCAL.cmd. Template: $template"
+    }
+}
+$Config = (Resolve-Path -LiteralPath $Config).Path
+Test-UsableConfig -Path $Config
 $runtimeConfig = Join-Path ([IO.Path]::GetTempPath()) ("quantum-runtime-config-{0}.json" -f [guid]::NewGuid().ToString("N"))
 $previewOutput = Join-Path ([IO.Path]::GetTempPath()) ("quantum-schema-preview-{0}.json" -f [guid]::NewGuid().ToString("N"))
 
