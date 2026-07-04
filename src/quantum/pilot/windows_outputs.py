@@ -33,10 +33,12 @@ def attach_local_output_bundle(
             "reason_code": "OUTPUT_PATH_INVALID",
             "detail": "TypeError",
         }
+    resolved_output = output_path.resolve()
+    output_root = resolved_output.parent / "Quantum_Output"
     try:
         result = write_local_output_bundle(
             report,
-            output_root=output_path.resolve().parent,
+            output_root=output_root,
             generated_at=generated_at or datetime.now(UTC),
         )
     except Exception as exc:
@@ -49,4 +51,6 @@ def attach_local_output_bundle(
     result["windows_integration_schema_version"] = (
         WINDOWS_OUTPUT_INTEGRATION_SCHEMA_VERSION
     )
+    result["primary_output_path"] = str(resolved_output)
+    result["output_root"] = str(output_root)
     return result
