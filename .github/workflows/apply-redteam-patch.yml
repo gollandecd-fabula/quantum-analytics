@@ -1,0 +1,69 @@
+name: Apply HOME_LOCAL Red-Team Patch
+
+on:
+  push:
+    branches:
+      - local-pilot-windows-acl-repair-r2
+    paths:
+      - '.github/workflows/apply-redteam-patch.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout staging head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+
+      - name: Assert branch and exact head
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${GITHUB_REF_NAME}" = "local-pilot-windows-acl-repair-r2"
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+
+      - name: Apply verified bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 .redteam_patch/apply.py
+
+      - name: Compile and run focused regressions
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PYTHONPATH=src
+          python3 -m py_compile \
+            src/quantum/pilot/local_runner.py \
+            src/quantum/pilot/windows_runner.py \
+            tests/test_windows_redteam_hardening.py
+          python3 -m unittest \
+            tests.test_windows_redteam_hardening \
+            tests.test_windows_local_runner \
+            tests.test_windows_storage_compat \
+            tests.test_local_pilot_runner \
+            -v
+
+      - name: Remove one-shot staging files
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf .redteam_patch
+          rm -f .github/workflows/apply-redteam-patch.yml
+
+      - name: Commit hardened tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "quantum-redteam-bot"
+          git config user.email "quantum-redteam-bot@users.noreply.github.com"
+          git add -A
+          test -n "$(git status --porcelain)"
+          git commit -m "Red-team harden HOME_LOCAL onboarding and integrity"
+          git push origin HEAD:local-pilot-windows-acl-repair-r2
