@@ -10,6 +10,7 @@ on:
       - "src/quantum/pilot/**"
       - "src/quantum/ingestion/**"
       - "tests/test_windows_local_runner.py"
+      - "tests/test_windows_storage_compat.py"
       - "scripts/windows/**"
       - "config/home-local.template.json"
       - ".github/workflows/windows-local-production.yml"
@@ -18,6 +19,7 @@ on:
       - "src/quantum/pilot/**"
       - "src/quantum/ingestion/**"
       - "tests/test_windows_local_runner.py"
+      - "tests/test_windows_storage_compat.py"
       - "scripts/windows/**"
       - "config/home-local.template.json"
       - ".github/workflows/windows-local-production.yml"
@@ -42,14 +44,18 @@ jobs:
         shell: pwsh
         run: |
           $env:PYTHONPATH = "src"
-          python -m py_compile src/quantum/pilot/windows_runner.py
+          python -m py_compile `
+            src/quantum/pilot/windows_runner.py `
+            src/quantum/pilot/windows_storage_compat.py
 
       - name: Run Windows repair regression suite
         shell: pwsh
         run: |
           $env:PYTHONPATH = "src"
-          python -m unittest tests.test_windows_local_runner -v 2>&1 |
-            Tee-Object -FilePath windows-repair-tests.log
+          python -m unittest `
+            tests.test_windows_local_runner `
+            tests.test_windows_storage_compat `
+            -v 2>&1 | Tee-Object -FilePath windows-repair-tests.log
           if ($LASTEXITCODE -ne 0) {
             throw "Windows repair regression suite failed with exit code $LASTEXITCODE"
           }
