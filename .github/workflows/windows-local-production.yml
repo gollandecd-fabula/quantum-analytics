@@ -271,9 +271,11 @@ jobs:
             -ReportingPeriodEnd "2026-07-04" `
             -RetentionDeadline "2030-01-01" `
             -SourceInternalId "ci-home-local" `
-            -NonInteractive
-          if ($LASTEXITCODE -ne 0) {
-            throw "HOME_LOCAL configurator failed with exit code $LASTEXITCODE"
+            -NonInteractive 2>&1 |
+            Tee-Object -FilePath configurator.log
+          $configuratorExitCode = $LASTEXITCODE
+          if ($configuratorExitCode -ne 0) {
+            throw "HOME_LOCAL configurator failed with exit code $configuratorExitCode"
           }
           $configured = Get-Content -LiteralPath $configPath -Raw -Encoding UTF8 | ConvertFrom-Json
           if ([string]$configured.execution_mode -ne "ADMISSION_ONLY") {
@@ -319,6 +321,7 @@ jobs:
           path: |
             windows-verification-error.log
             tamper-rejection.log
+            configurator.log
             installed-import.log
             package-build.log
           if-no-files-found: warn
