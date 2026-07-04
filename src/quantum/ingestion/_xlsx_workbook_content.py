@@ -59,7 +59,6 @@ _BOOLEAN = frozenset({"0", "1", "true", "false"})
 _UINT = re.compile(r"(?:0|[1-9][0-9]{0,9})")
 _INT = re.compile(r"-?(?:0|[1-9][0-9]{0,9})")
 _APP_NAME = re.compile(r"[A-Za-z0-9_.-]{1,32}")
-_RELATIONSHIP = re.compile(r"rId[1-9][0-9]{0,5}")
 _PREFIX = re.compile(r"[A-Za-z_][A-Za-z0-9_.-]*")
 
 
@@ -78,6 +77,7 @@ def _validate_ignorable(value: str | None) -> None:
     if (
         value != value.strip()
         or not tokens
+        or len(tokens) != len(set(tokens))
         or any(_PREFIX.fullmatch(token) is None for token in tokens)
     ):
         raise XlsxInspectionError("XLSX_WORKBOOK_ATTRIBUTE_UNMODELED")
@@ -148,8 +148,6 @@ def _validate_attributes(element) -> None:
         if not _matches(_UINT, element.get("sheetId", "")) or int(
             element.get("sheetId", "0")
         ) < 1:
-            raise XlsxInspectionError("XLSX_WORKBOOK_ATTRIBUTE_UNMODELED")
-        if not _matches(_RELATIONSHIP, element.get(_RELATIONSHIP_ID, "")):
             raise XlsxInspectionError("XLSX_WORKBOOK_ATTRIBUTE_UNMODELED")
         state = element.get("state")
         if state is not None and state not in _ALLOWED_SHEET_STATES:
