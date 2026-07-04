@@ -162,6 +162,11 @@ jobs:
       - name: Verify archive, manifest, tamper rejection and user workflow
         shell: pwsh
         run: |
+          $verificationErrorLog = "windows-verification-error.log"
+          trap {
+            $_ | Format-List * -Force | Out-String | Set-Content -LiteralPath $verificationErrorLog -Encoding UTF8
+            exit 1
+          }
           $archive = "dist\QuantumLocalProduction_HOME_LOCAL.zip"
           if (-not (Test-Path -LiteralPath $archive -PathType Leaf)) {
             throw "Package archive was not produced."
@@ -302,6 +307,18 @@ jobs:
           if ($null -ne $importReport.calculation) {
             throw "ADMISSION_ONLY unexpectedly produced a calculation."
           }
+
+      - name: Upload verification diagnostics on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-redteam-verification-diagnostics
+          path: |
+            windows-verification-error.log
+            tamper-rejection.log
+            package-build.log
+          if-no-files-found: warn
+          retention-days: 7
 
       - name: Upload HOME_LOCAL package
         uses: actions/upload-artifact@v4
