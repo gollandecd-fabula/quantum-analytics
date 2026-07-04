@@ -6,11 +6,13 @@ from dataclasses import asdict, replace
 from pathlib import Path
 from unittest import mock
 
+from quantum.ingestion import _xlsx_relationships_core
 from quantum.ingestion._xlsx_contracts import (
     XlsxInspectionError,
     XlsxInspectionPolicy,
 )
 from quantum.ingestion._xlsx_inspection_v3 import XlsxPackageInspector
+from quantum.pilot import local_runner as public_engine
 from quantum.pilot.windows_runner import (
     _atomic_bytes,
     _workbook_target_compatible,
@@ -61,6 +63,17 @@ def _realistic_workbook() -> bytes:
         "xl/worksheets/sheet1.xml",
         shift_rows,
     )
+
+
+class WindowsCompatibilityActivationTests(unittest.TestCase):
+    def test_public_engine_uses_windows_atomic_write(self):
+        self.assertIs(public_engine._atomic_bytes, _atomic_bytes)
+
+    def test_ingestion_core_uses_compatible_relationship_resolver(self):
+        self.assertIs(
+            _xlsx_relationships_core._workbook_target,
+            _workbook_target_compatible,
+        )
 
 
 class WindowsAtomicWriteTests(unittest.TestCase):
