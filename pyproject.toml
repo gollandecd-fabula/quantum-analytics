@@ -7,7 +7,9 @@ name = "quantum-analytics"
 version = "0.0.1"
 description = "Foundation skeleton for Quantum Analytics"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+  "tzdata==2026.2; platform_system == 'Windows'",
+]
 
 [project.scripts]
 quantum-api = "quantum.api.main:main"
