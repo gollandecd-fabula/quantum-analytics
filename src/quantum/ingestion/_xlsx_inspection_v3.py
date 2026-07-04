@@ -3,6 +3,7 @@ from __future__ import annotations
 from hashlib import sha256
 
 from ._xlsx_archive import _extract_workbook
+from ._xlsx_auxiliary_compat import hash_unmodeled_auxiliary_parts
 from ._xlsx_cell_structure import validate_cell_structures
 from ._xlsx_content_model import validate_modeled_xml_content
 from ._xlsx_contracts import (
@@ -53,7 +54,25 @@ class XlsxPackageInspector:
         )
         validate_xml_lexical_content(workbook, policy.limits)
         workbook_part = validate_workbook_xml_content(workbook, policy.limits)
-        auxiliary_parts = validate_modeled_xml_content(workbook, policy.limits)
+        try:
+            auxiliary_parts = validate_modeled_xml_content(
+                workbook,
+                policy.limits,
+            )
+        except XlsxInspectionError as exc:
+            if (
+                policy.policy_id != "wb-home-local-discovery"
+                or exc.code
+                not in {
+                    "XLSX_AUXILIARY_CONTENT_UNMODELED",
+                    "XLSX_AUXILIARY_PART_UNMODELED",
+                }
+            ):
+                raise
+            auxiliary_parts = hash_unmodeled_auxiliary_parts(
+                workbook,
+                policy.limits,
+            )
         worksheet_parts = validate_worksheet_structural_attributes(
             workbook,
             policy.limits,
