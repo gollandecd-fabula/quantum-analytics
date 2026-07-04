@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
+import os
 from pathlib import Path
 import re
 from typing import Any
@@ -11,6 +12,8 @@ from quantum.insights import (
     RECOMMENDATION_BUNDLE_SCHEMA_VERSION,
     build_recommendations,
 )
+
+from .windows_outputs import attach_local_output_bundle
 
 
 WINDOWS_SOURCE_BRIDGE_SCHEMA_VERSION = "quantum-windows-source-bridge-v1"
@@ -85,6 +88,24 @@ def build_source_context(
     return context or None
 
 
+def _output_path(config: Mapping[str, Any]) -> Path | None:
+    explicit = config.get("local_output_root")
+    if explicit is not None:
+        root = Path(
+            _text(explicit, "WINDOWS_LOCAL_OUTPUT_ROOT_INVALID")
+        ).expanduser()
+        if not root.is_absolute():
+            raise WindowsSourceBridgeError(
+                "WINDOWS_LOCAL_OUTPUT_ROOT_MUST_BE_ABSOLUTE"
+            )
+    else:
+        local_app_data = os.environ.get("LOCALAPPDATA")
+        if not local_app_data:
+            return None
+        root = Path(local_app_data) / "QuantumLocalProduction" / "output"
+    return root / "source_bridge_output.json"
+
+
 def _blocked(
     *,
     status: str,
@@ -118,6 +139,49 @@ def _recommendation_error(exc: Exception) -> dict[str, Any]:
         "detail": type(exc).__name__,
         "bundle_hash": None,
     }
+
+
+def _attach_outputs(
+    *,
+    report: Mapping[str, Any],
+    result: dict[str, Any],
+    config: Mapping[str, Any],
+) -> None:
+    try:
+        output_path = _output_path(config)
+    except Exception as exc:
+        result["output_bundle"] = {
+            "status": "OUTPUT_BUNDLE_ERROR",
+            "reason_code": getattr(
+                exc,
+                "code",
+                "WINDOWS_LOCAL_OUTPUT_ROOT_INVALID",
+            ),
+            "detail": type(exc).__name__,
+        }
+        return
+    if output_path is None:
+        result["output_bundle"] = {
+            "status": "OUTPUT_BUNDLE_SKIPPED",
+            "reason_code": "LOCALAPPDATA_NOT_AVAILABLE",
+        }
+        return
+    output_report = dict(report)
+    limitations = list(output_report.get("limitations", []))
+    for item in (
+        "HOME_LOCAL_UNENCRYPTED_STORAGE",
+        "PHYSICAL_ACCESS_RISK_ACCEPTED",
+    ):
+        if item not in limitations:
+            limitations.append(item)
+    output_report["limitations"] = limitations
+    output_report["source_bridge"] = result
+    attached = attach_local_output_bundle(
+        report=output_report,
+        output_path=output_path,
+    )
+    if attached is not None:
+        result["output_bundle"] = attached
 
 
 def attach_reviewed_source_bridge(
@@ -172,4 +236,5 @@ def attach_reviewed_source_bridge(
     result["windows_integration_schema_version"] = (
         WINDOWS_SOURCE_BRIDGE_SCHEMA_VERSION
     )
+    _attach_outputs(report=report, result=result, config=config)
     return result
