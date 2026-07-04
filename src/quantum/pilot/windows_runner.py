@@ -30,6 +30,7 @@ from quantum.ingestion._xlsx_contracts import (
 from quantum.ingestion import _xlsx_relationships_core as _relationship_core
 
 from . import local_runner as _engine
+from .windows_outputs import attach_local_output_bundle
 from .windows_source_bridge import attach_reviewed_source_bridge
 
 
@@ -552,17 +553,22 @@ def main() -> int:
             if item not in limitations:
                 limitations.append(item)
         report["limitations"] = limitations
-        _atomic_json(args.output, report)
-        print(
-            json.dumps(
-                {
-                    "status": report["status"],
-                    "output": str(args.output),
-                    "runtime_profile": report["runtime_profile"],
-                },
-                ensure_ascii=False,
-            )
+        output_bundle = attach_local_output_bundle(
+            report=report,
+            output_path=args.output,
         )
+        if output_bundle is not None:
+            report["output_bundle"] = output_bundle
+        _atomic_json(args.output, report)
+        summary = {
+            "status": report["status"],
+            "output": str(args.output),
+            "runtime_profile": report["runtime_profile"],
+        }
+        if output_bundle is not None:
+            summary["output_bundle_status"] = output_bundle.get("status")
+            summary["output_bundle_directory"] = output_bundle.get("directory")
+        print(json.dumps(summary, ensure_ascii=False))
         if report["status"] not in {
             "PILOT_RUN_COMPLETE",
             "CALCULATED_RECONCILIATION_PENDING",
