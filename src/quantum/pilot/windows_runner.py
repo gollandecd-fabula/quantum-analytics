@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 from dataclasses import dataclass
+from io import BytesIO
 import json
 import os
 from pathlib import Path
@@ -168,6 +169,12 @@ def _positive_int(value: object, code: str) -> int:
     return value
 
 
+def _nonnegative_int(value: object, code: str) -> int:
+    if not isinstance(value, int) or isinstance(value, bool) or value < 0:
+        raise WindowsRunnerError(code)
+    return value
+
+
 def _limits(config: Mapping[str, Any]) -> XlsxInspectionLimits:
     policy = _mapping(config.get("inspection_policy"), "LOCAL_PILOT_POLICY_INVALID")
     raw = _mapping(policy.get("limits"), "LOCAL_PILOT_LIMITS_INVALID")
@@ -177,7 +184,11 @@ def _limits(config: Mapping[str, Any]) -> XlsxInspectionLimits:
         raise WindowsRunnerError("LOCAL_PILOT_LIMITS_INVALID") from exc
 
 
-def _row_values(row, shared: tuple[str, ...], max_columns: int) -> tuple[tuple[str, ...], int]:
+def _row_values(
+    row,
+    shared: tuple[str, ...],
+    max_columns: int,
+) -> tuple[tuple[str, ...], int]:
     values: dict[int, str] = {}
     formula_count = 0
     for cell in row.findall(f"{{{_SPREADSHEET_NS}}}c"):
@@ -197,7 +208,9 @@ def _row_values(row, shared: tuple[str, ...], max_columns: int) -> tuple[tuple[s
 
 
 def _candidate_score(headers: tuple[str, ...], row_index: int) -> int:
-    text_cells = sum(any(character.isalpha() for character in value) for value in headers)
+    text_cells = sum(
+        any(character.isalpha() for character in value) for value in headers
+    )
     normalized = tuple(" ".join(value.split()).casefold() for value in headers)
     keyword_hits = sum(
         any(keyword in value for keyword in _HEADER_KEYWORDS) for value in normalized
@@ -232,8 +245,6 @@ def discover_schema(
     package_kind, workbook = _extract_workbook(payload, limits)
     candidates: list[tuple[int, DiscoveredSchema]] = []
     try:
-        from io import BytesIO
-
         with ZipFile(BytesIO(workbook)) as archive:
             workbook_root = _xml_root(
                 _read_limited(archive, "xl/workbook.xml", limits),
@@ -290,7 +301,11 @@ def discover_schema(
                         row_index = int(raw_index)
                     except ValueError as exc:
                         raise XlsxInspectionError("XLSX_ROW_INDEX_INVALID") from exc
-                    values, formulas = _row_values(row, shared, limits.max_columns)
+                    values, formulas = _row_values(
+                        row,
+                        shared,
+                        limits.max_columns,
+                    )
                     total_formulas += formulas
                     parsed_rows.append((row_index, values, formulas))
                 for row_index, values, _ in parsed_rows:
@@ -344,7 +359,8 @@ def discover_schema(
 
 
 def apply_discovered_schema(
-    config: Mapping[str, Any], candidate: DiscoveredSchema
+    config: Mapping[str, Any],
+    candidate: DiscoveredSchema,
 ) -> dict[str, Any]:
     updated = json.loads(json.dumps(dict(config), ensure_ascii=False))
     policy = _mapping(updated.get("inspection_policy"), "LOCAL_PILOT_POLICY_INVALID")
@@ -352,6 +368,26 @@ def apply_discovered_schema(
     if not isinstance(schemas, list) or not schemas:
         raise WindowsRunnerError("LOCAL_PILOT_SCHEMAS_REQUIRED")
     template = dict(_mapping(schemas[0], "LOCAL_PILOT_SCHEMA_INVALID"))
+    min_data_rows = _nonnegative_int(
+        template.get("min_data_rows"),
+        "XLSX_DISCOVERY_MIN_ROWS_POLICY_INVALID",
+    )
+    max_data_rows = _nonnegative_int(
+        template.get("max_data_rows"),
+        "XLSX_DISCOVERY_MAX_ROWS_POLICY_INVALID",
+    )
+    max_formula_count = _nonnegative_int(
+        template.get("max_formula_count"),
+        "XLSX_DISCOVERY_FORMULA_POLICY_INVALID",
+    )
+    if max_data_rows < min_data_rows:
+        raise WindowsRunnerError("XLSX_DISCOVERY_ROW_POLICY_INVALID")
+    if candidate.data_row_count < min_data_rows:
+        raise WindowsRunnerError("XLSX_DISCOVERED_ROW_COUNT_BELOW_POLICY")
+    if candidate.data_row_count > max_data_rows:
+        raise WindowsRunnerError("XLSX_DISCOVERED_ROW_COUNT_EXCEEDS_POLICY")
+    if candidate.formula_count > max_formula_count:
+        raise WindowsRunnerError("XLSX_DISCOVERED_FORMULA_COUNT_EXCEEDS_POLICY")
     template.update(
         {
             "schema_id": str(template.get("schema_id", "WB_REPORT"))
@@ -366,15 +402,9 @@ def apply_discovered_schema(
             "header_row_index": candidate.header_row_index,
             "header_sha256": candidate.header_sha256,
             "column_count": candidate.column_count,
-            "min_data_rows": 0,
-            "max_data_rows": max(
-                int(template.get("max_data_rows", 0)),
-                candidate.data_row_count,
-            ),
-            "max_formula_count": max(
-                int(template.get("max_formula_count", 0)),
-                candidate.formula_count,
-            ),
+            "min_data_rows": min_data_rows,
+            "max_data_rows": max_data_rows,
+            "max_formula_count": max_formula_count,
         }
     )
     policy["schemas"] = [template]
@@ -401,7 +431,7 @@ def _safe_error(exc: Exception, *, debug: bool) -> dict[str, Any]:
 
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Run the Windows-compatible loopback-only Quantum local pilot"
+        description="Run the Windows-compatible HOME_LOCAL Quantum pilot"
     )
     parser.add_argument("--file", required=True, type=Path)
     parser.add_argument("--config", required=True, type=Path)
@@ -421,15 +451,14 @@ def main() -> int:
     args = _parser().parse_args()
     install_windows_compatibility()
     try:
+        if not args.home_local:
+            raise WindowsRunnerError("WINDOWS_RUNNER_HOME_LOCAL_REQUIRED")
         raw_config = json.loads(args.config.read_text(encoding="utf-8"))
         config = dict(_mapping(raw_config, "LOCAL_PILOT_CONFIG_INVALID"))
-        if args.home_local:
-            if not args.authority_attested:
-                raise WindowsRunnerError("HOME_LOCAL_AUTHORITY_ATTESTATION_REQUIRED")
-            config["lawful_authority_attested"] = True
+        if not args.authority_attested:
+            raise WindowsRunnerError("HOME_LOCAL_AUTHORITY_ATTESTATION_REQUIRED")
+        config["lawful_authority_attested"] = True
         if args.discover_schema:
-            if not args.home_local:
-                raise WindowsRunnerError("SCHEMA_DISCOVERY_HOME_LOCAL_ONLY")
             if not args.schema_reviewed:
                 raise WindowsRunnerError("SCHEMA_DISCOVERY_REVIEW_REQUIRED")
             candidate = discover_schema(
@@ -446,19 +475,18 @@ def main() -> int:
             config=config,
             storage_root=args.storage_root,
         )
-        report["runtime_profile"] = "HOME_LOCAL" if args.home_local else "CONTROLLED_LOCAL"
-        report["storage_encryption_required"] = not args.home_local
+        report["runtime_profile"] = "HOME_LOCAL"
+        report["storage_encryption_required"] = False
         if candidate is not None:
             report["schema_discovery"] = candidate.report()
-        if args.home_local:
-            limitations = list(report.get("limitations", []))
-            for item in (
-                "HOME_LOCAL_UNENCRYPTED_STORAGE",
-                "PHYSICAL_ACCESS_RISK_ACCEPTED",
-            ):
-                if item not in limitations:
-                    limitations.append(item)
-            report["limitations"] = limitations
+        limitations = list(report.get("limitations", []))
+        for item in (
+            "HOME_LOCAL_UNENCRYPTED_STORAGE",
+            "PHYSICAL_ACCESS_RISK_ACCEPTED",
+        ):
+            if item not in limitations:
+                limitations.append(item)
+        report["limitations"] = limitations
         _atomic_json(args.output, report)
         print(
             json.dumps(
