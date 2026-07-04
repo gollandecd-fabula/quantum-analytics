@@ -88,18 +88,6 @@ function Confirm-Literal {
     }
 }
 
-function Get-Sha256Hex {
-    param([Parameter(Mandatory = $true)][string]$Text)
-    $algorithm = [Security.Cryptography.SHA256]::Create()
-    try {
-        $bytes = [Text.Encoding]::UTF8.GetBytes($Text)
-        return ([BitConverter]::ToString($algorithm.ComputeHash($bytes))).Replace("-", "").ToLowerInvariant()
-    }
-    finally {
-        $algorithm.Dispose()
-    }
-}
-
 function Resolve-DefenderScanner {
     $direct = Join-Path $env:ProgramFiles "Windows Defender\MpCmdRun.exe"
     if (Test-Path -LiteralPath $direct -PathType Leaf) {
@@ -121,15 +109,11 @@ function Resolve-DefenderScanner {
 
 function Invoke-DefenderScan {
     param([Parameter(Mandatory = $true)][string]$Path)
-    $sourceHash = (Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash.ToLowerInvariant()
-    $scannedAt = [datetime]::UtcNow.ToString("o")
     if ($SkipDefenderScan) {
-        Write-Host "Defender scan skipped by explicit switch after equivalent local scan." -ForegroundColor Yellow
+        Write-Host "Defender scan skipped by explicit switch." -ForegroundColor Yellow
         return [ordered]@{
-            scanner = "EQUIVALENT_SCAN_ATTESTED"
-            scanned_at = $scannedAt
-            source_sha256 = $sourceHash
-            result = "CLEAN_ATTESTED"
+            scanner = "EXPLICIT_EQUIVALENT_SCAN_ATTESTED"
+            outcome = "SKIPPED_BY_EXPLICIT_SWITCH"
         }
     }
     $scanner = Resolve-DefenderScanner
@@ -143,9 +127,7 @@ function Invoke-DefenderScan {
     }
     return [ordered]@{
         scanner = $scanner
-        scanned_at = $scannedAt
-        source_sha256 = $sourceHash
-        result = "CLEAN"
+        outcome = "CLEAN"
     }
 }
 
@@ -159,15 +141,15 @@ function Test-UsableConfig {
     }
     $statusProperty = $raw.PSObject.Properties["configuration_status"]
     if ($statusProperty -and [string]$statusProperty.Value -eq "REQUIRES_USER_VALUES") {
-        throw "Configuration template is not ready. Run CONFIGURE_HOME_LOCAL.cmd or provide a ready production config."
+        throw "Configuration template is not ready. Run CONFIGURE_HOME_LOCAL.cmd first."
     }
     $modeProperty = $raw.PSObject.Properties["execution_mode"]
-    $mode = if ($modeProperty) { [string]$modeProperty.Value } else { "FULL" }
-    if ($mode -notin @("FULL", "ADMISSION_ONLY")) {
-        throw "Unsupported execution_mode in Quantum configuration: $mode"
-    }
-    if ($mode -eq "ADMISSION_ONLY") {
+    $executionMode = if ($modeProperty) { [string]$modeProperty.Value } else { "FULL" }
+    if ($executionMode -eq "ADMISSION_ONLY") {
         return
+    }
+    if ($executionMode -ne "FULL") {
+        throw "Configuration has unsupported execution_mode: $executionMode"
     }
     $financeProperty = $raw.PSObject.Properties["finance_request"]
     if (-not $financeProperty -or $null -eq $financeProperty.Value) {
@@ -177,6 +159,44 @@ function Test-UsableConfig {
     if ($placeholderProperty -and $placeholderProperty.Value -eq $true) {
         throw "FULL configuration still contains a finance_request placeholder: $Path"
     }
+}
+
+function New-ScanReceipt {
+    param(
+        [Parameter(Mandatory = $true)][string]$SourcePath,
+        [Parameter(Mandatory = $true)]$ScanResult
+    )
+    $sourceHash = (Get-FileHash -LiteralPath $SourcePath -Algorithm SHA256).Hash.ToLowerInvariant()
+    $receipt = [ordered]@{
+        receipt_version = 1
+        source_sha256 = $sourceHash
+        scanner = [string]$ScanResult.scanner
+        outcome = [string]$ScanResult.outcome
+        created_at_utc = [DateTime]::UtcNow.ToString("o")
+    }
+    $receiptJson = $receipt | ConvertTo-Json -Compress
+    $receiptBytes = [Text.Encoding]::UTF8.GetBytes($receiptJson)
+    $receiptStream = [IO.MemoryStream]::new($receiptBytes)
+    try {
+        return [ordered]@{
+            source_sha256 = $sourceHash
+            evidence_sha256 = (Get-FileHash -InputStream $receiptStream -Algorithm SHA256).Hash.ToLowerInvariant()
+            receipt = $receipt
+        }
+    }
+    finally {
+        $receiptStream.Dispose()
+    }
+}
+
+function New-RuntimeConfig {
+    param(
+        [Parameter(Mandatory = $true)][string]$SourceConfig,
+        [Parameter(Mandatory = $true)][string]$MalwareEvidenceSha256
+    )
+    $raw = Get-Content -LiteralPath $SourceConfig -Raw -Encoding UTF8 | ConvertFrom-Json
+    $raw.malware_scan_evidence_sha256 = $MalwareEvidenceSha256
+    return $raw
 }
 
 $projectRoot = Resolve-ProjectRoot
@@ -198,7 +218,7 @@ if ([string]::IsNullOrWhiteSpace($Config)) {
     $Config = $candidates | Where-Object { Test-Path -LiteralPath $_ -PathType Leaf } | Select-Object -First 1
     if (-not $Config) {
         $template = Join-Path $projectRoot "config\home-local.template.json"
-        throw "No ready Quantum configuration was found. Run CONFIGURE_HOME_LOCAL.cmd, then retry the import."
+        throw "No ready Quantum configuration was found. Run CONFIGURE_HOME_LOCAL.cmd. Template: $template"
     }
 }
 $Config = (Resolve-Path -LiteralPath $Config).Path
@@ -213,23 +233,9 @@ if ([string]::IsNullOrWhiteSpace($Output)) {
     $Output = Join-Path $outputDirectory ("import_{0}.json" -f (Get-Date -Format "yyyyMMdd_HHmmss"))
 }
 
-$scanReceipt = Invoke-DefenderScan -Path $File
-$scanReceiptJson = $scanReceipt | ConvertTo-Json -Compress
-$scanReceiptHash = Get-Sha256Hex -Text $scanReceiptJson
-$runtimeConfig = Join-Path ([IO.Path]::GetTempPath()) ("quantum_config_{0}.json" -f [guid]::NewGuid().ToString("N"))
-try {
-    $runtimeConfigObject = Get-Content -LiteralPath $Config -Raw -Encoding UTF8 | ConvertFrom-Json
-    $runtimeConfigObject.malware_scan_evidence_sha256 = $scanReceiptHash
-    if (-not $runtimeConfigObject.PSObject.Properties["attestations"] -or $null -eq $runtimeConfigObject.attestations) {
-        throw "Quantum configuration has no attestations object."
-    }
-    $runtimeConfigObject.attestations.malware_scan_clean = $true
-    $runtimeConfigObject | ConvertTo-Json -Depth 16 | Set-Content -LiteralPath $runtimeConfig -Encoding UTF8
-}
-catch {
-    Remove-Item -LiteralPath $runtimeConfig -Force -ErrorAction SilentlyContinue
-    throw
-}
+$scanResult = Invoke-DefenderScan -Path $File
+$scanReceipt = New-ScanReceipt -SourcePath $File -ScanResult $scanResult
+$reviewedFileHash = [string]$scanReceipt.source_sha256
 
 Write-Host "Runtime profile: HOME_LOCAL" -ForegroundColor Cyan
 Write-Host "Disk encryption is not required in HOME_LOCAL. The result will record the unencrypted-storage limitation." -ForegroundColor Yellow
@@ -238,62 +244,49 @@ Confirm-Literal -Expected "AUTHORIZE" -Prompt "Type AUTHORIZE to attest lawful a
 
 $pythonCommand = Resolve-PythonCommand
 $env:PYTHONPATH = Join-Path $projectRoot "src"
-$sourceHashBefore = [string]$scanReceipt.source_sha256
-$discoveryOutput = Join-Path ([IO.Path]::GetTempPath()) ("quantum_schema_{0}.json" -f [guid]::NewGuid().ToString("N"))
+$runtimeConfig = Join-Path ([IO.Path]::GetTempPath()) ("quantum-runtime-config-{0}.json" -f [guid]::NewGuid().ToString("N"))
+$previewOutput = Join-Path ([IO.Path]::GetTempPath()) ("quantum-schema-preview-{0}.json" -f [guid]::NewGuid().ToString("N"))
 
 try {
-    $discoveryArguments = @()
-    $discoveryArguments += $pythonCommand.Prefix
-    $discoveryArguments += @(
+    $runtimeConfigObject = New-RuntimeConfig -SourceConfig $Config -MalwareEvidenceSha256 ([string]$scanReceipt.evidence_sha256)
+    $runtimeConfigJson = $runtimeConfigObject | ConvertTo-Json -Depth 16
+    [IO.File]::WriteAllText($runtimeConfig, $runtimeConfigJson, ([System.Text.UTF8Encoding]::new($false)))
+
+    $previewArguments = @()
+    $previewArguments += $pythonCommand.Prefix
+    $previewArguments += @(
         "-m", "quantum.pilot.windows_runner",
         "--file", $File,
         "--config", $runtimeConfig,
         "--storage-root", $StorageRoot,
-        "--output", $discoveryOutput,
+        "--output", $previewOutput,
         "--home-local",
         "--discover-only",
         "--authority-attested"
     )
     if ($DebugErrors) {
-        $discoveryArguments += "--debug-errors"
+        $previewArguments += "--debug-errors"
     }
+    & $pythonCommand.Executable @previewArguments
+    if ($LASTEXITCODE -ne 0) {
+        throw "Quantum schema discovery failed with exit code $LASTEXITCODE."
+    }
+    $preview = Get-Content -LiteralPath $previewOutput -Raw -Encoding UTF8 | ConvertFrom-Json
+    if ([string]$preview.file_sha256 -ne $reviewedFileHash) {
+        throw "Schema preview file hash does not match the scanned file."
+    }
+    $headers = @($preview.schema.headers) -join " | "
+    Write-Host "Discovered sheet: $($preview.schema.sheet_name)" -ForegroundColor Cyan
+    Write-Host "Header row: $($preview.schema.header_row_index)"
+    Write-Host "Columns: $($preview.schema.column_count)"
+    Write-Host "Data rows: $($preview.schema.data_row_count)"
+    Write-Host "Headers: $headers"
+    Write-Host "File SHA-256: $reviewedFileHash"
+    Confirm-Literal -Expected "REVIEWED" -Prompt "Review the displayed schema and type REVIEWED to continue" -AlreadyAttested ([bool]$SchemaReviewed)
 
-    & $pythonCommand.Executable @discoveryArguments
-    $discoveryExitCode = $LASTEXITCODE
-    if ($discoveryExitCode -ne 0) {
-        throw "Quantum schema discovery failed with exit code $discoveryExitCode."
-    }
-    $preview = Get-Content -LiteralPath $discoveryOutput -Raw -Encoding UTF8 | ConvertFrom-Json
-    if ([string]$preview.status -ne "SCHEMA_DISCOVERED") {
-        throw "Quantum schema discovery returned an unexpected status."
-    }
-    if ([string]$preview.file_sha256 -ne $sourceHashBefore) {
-        throw "Schema preview file hash does not match the selected source."
-    }
-
-    $schema = $preview.schema_discovery
-    Write-Host ""
-    Write-Host "Discovered XLSX schema:" -ForegroundColor Cyan
-    Write-Host ("  File SHA-256: {0}" -f $preview.file_sha256)
-    Write-Host ("  Sheet: {0} of {1}" -f $schema.sheet_name, $schema.sheet_count)
-    Write-Host ("  Header row: {0}" -f $schema.header_row_index)
-    Write-Host ("  Columns: {0}; data rows: {1}; formulas: {2}" -f $schema.column_count, $schema.data_row_count, $schema.formula_count)
-    $displayHeaders = @(
-        $schema.headers | Select-Object -First 30 | ForEach-Object {
-            ([string]$_ -replace "[\r\n\t]", " ").Trim()
-        }
-    )
-    Write-Host ("  Headers: {0}" -f ($displayHeaders -join " | "))
-    if ([int]$schema.column_count -gt $displayHeaders.Count) {
-        Write-Host ("  ... plus {0} additional columns" -f ([int]$schema.column_count - $displayHeaders.Count))
-    }
-    Write-Host ""
-
-    Confirm-Literal -Expected "REVIEWED" -Prompt "Type REVIEWED only if the displayed sheet and header row are correct" -AlreadyAttested ([bool]$SchemaReviewed)
-
-    $sourceHashAfter = (Get-FileHash -LiteralPath $File -Algorithm SHA256).Hash.ToLowerInvariant()
-    if ($sourceHashAfter -ne $sourceHashBefore) {
-        throw "Selected XLSX changed after schema review. Select and review it again."
+    $currentFileHash = (Get-FileHash -LiteralPath $File -Algorithm SHA256).Hash.ToLowerInvariant()
+    if ($currentFileHash -ne $reviewedFileHash) {
+        throw "Source file changed after schema review. Restart the import."
     }
 
     $arguments = @()
@@ -306,13 +299,13 @@ try {
         "--output", $Output,
         "--home-local",
         "--discover-schema",
+        "--expected-file-sha256", $reviewedFileHash,
         "--authority-attested",
         "--schema-reviewed"
     )
     if ($DebugErrors) {
         $arguments += "--debug-errors"
     }
-
     & $pythonCommand.Executable @arguments
     $exitCode = $LASTEXITCODE
     if ($exitCode -ne 0) {
@@ -320,8 +313,8 @@ try {
     }
 }
 finally {
-    Remove-Item -LiteralPath $discoveryOutput -Force -ErrorAction SilentlyContinue
     Remove-Item -LiteralPath $runtimeConfig -Force -ErrorAction SilentlyContinue
+    Remove-Item -LiteralPath $previewOutput -Force -ErrorAction SilentlyContinue
 }
 
 Write-Host "Import completed." -ForegroundColor Green
