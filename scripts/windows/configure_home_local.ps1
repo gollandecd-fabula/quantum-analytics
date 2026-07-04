@@ -118,16 +118,13 @@ $config = [ordered]@{
         version = 2
         limits = [ordered]@{
             max_file_bytes = 104857600
-            max_package_entries = 5000
-            max_package_uncompressed_bytes = 536870912
-            max_single_part_bytes = 134217728
-            max_xml_nodes_per_part = 2000000
-            max_sheets = 64
+            max_archive_entries = 10000
+            max_total_uncompressed_bytes = 536870912
+            max_entry_uncompressed_bytes = 134217728
+            max_compression_ratio = 100
+            max_xml_bytes = 134217728
             max_rows = 1000000
-            max_columns = 512
-            max_cell_text_length = 32767
-            max_shared_strings = 1000000
-            max_shared_string_characters = 134217728
+            max_columns = 500
         }
         schemas = @(
             [ordered]@{
