@@ -53,6 +53,13 @@ function Read-IsoDate {
     return $parsed.ToString("yyyy-MM-dd")
 }
 
+function Convert-FromUtf8Base64 {
+    param(
+        [Parameter(Mandatory = $true)][string]$Value
+    )
+    return [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($Value))
+}
+
 $ReportingPeriodStart = Read-IsoDate `
     -CurrentValue $ReportingPeriodStart `
     -Prompt "Report period start (YYYY-MM-DD)" `
@@ -142,8 +149,14 @@ $config = [ordered]@{
         prohibited_header_tokens = @(
             "email", "e-mail", "phone", "telephone", "mobile", "address",
             "full name", "surname", "passport", "snils", "inn",
-            "электронная почта", "телефон", "адрес", "фио", "фамилия",
-            "паспорт", "снилс", "инн"
+            (Convert-FromUtf8Base64 -Value "0Y3Qu9C10LrRgtGA0L7QvdC90LDRjyDQv9C+0YfRgtCw"),
+            (Convert-FromUtf8Base64 -Value "0YLQtdC70LXRhNC+0L0="),
+            (Convert-FromUtf8Base64 -Value "0LDQtNGA0LXRgQ=="),
+            (Convert-FromUtf8Base64 -Value "0YTQuNC+"),
+            (Convert-FromUtf8Base64 -Value "0YTQsNC80LjQu9C40Y8="),
+            (Convert-FromUtf8Base64 -Value "0L/QsNGB0L/QvtGA0YI="),
+            (Convert-FromUtf8Base64 -Value "0YHQvdC40LvRgQ=="),
+            (Convert-FromUtf8Base64 -Value "0LjQvdC9")
         )
     }
     finance_request = $null
