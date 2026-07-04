@@ -14,6 +14,7 @@ from quantum.ingestion._xlsx_contracts import (
 from quantum.ingestion._xlsx_inspection_v3 import XlsxPackageInspector
 from quantum.pilot import local_runner as public_engine
 from quantum.pilot.windows_runner import (
+    WindowsRunnerError,
     _atomic_bytes,
     _workbook_target_compatible,
     apply_discovered_schema,
@@ -169,9 +170,6 @@ class HomeLocalDiscoveryTests(unittest.TestCase):
             header_row_index=candidate.header_row_index,
             header_sha256=candidate.header_sha256,
             column_count=candidate.column_count,
-            min_data_rows=0,
-            max_data_rows=max(template.max_data_rows, candidate.data_row_count),
-            max_formula_count=max(template.max_formula_count, candidate.formula_count),
         )
         discovered_policy = XlsxInspectionPolicy(
             policy_id=base_policy.policy_id,
@@ -204,7 +202,44 @@ class HomeLocalDiscoveryTests(unittest.TestCase):
         schema = updated["inspection_policy"]["schemas"][0]
         self.assertEqual(schema["sheet_name"], "Документы")
         self.assertEqual(schema["header_row_index"], 4)
+        self.assertEqual(schema["min_data_rows"], 1)
+        self.assertEqual(schema["max_data_rows"], 100)
+        self.assertEqual(schema["max_formula_count"], 0)
         self.assertEqual(updated["expected_row_count"], 1)
+
+    def test_discovery_does_not_approve_formulas(self):
+        base_policy = policy(formulas=0)
+        workbook = build_xlsx(formula=True)
+        candidate = discover_schema(
+            payload=workbook,
+            limits=base_policy.limits,
+        )
+        config = {
+            "inspection_policy": json.loads(json.dumps(asdict(base_policy))),
+        }
+        with self.assertRaises(WindowsRunnerError) as error:
+            apply_discovered_schema(config, candidate)
+        self.assertEqual(
+            error.exception.code,
+            "XLSX_DISCOVERED_FORMULA_COUNT_EXCEEDS_POLICY",
+        )
+
+    def test_discovery_does_not_lower_minimum_row_policy(self):
+        base_policy = policy()
+        config = {
+            "inspection_policy": json.loads(json.dumps(asdict(base_policy))),
+        }
+        config["inspection_policy"]["schemas"][0]["min_data_rows"] = 2
+        candidate = discover_schema(
+            payload=_realistic_workbook(),
+            limits=base_policy.limits,
+        )
+        with self.assertRaises(WindowsRunnerError) as error:
+            apply_discovered_schema(config, candidate)
+        self.assertEqual(
+            error.exception.code,
+            "XLSX_DISCOVERED_ROW_COUNT_BELOW_POLICY",
+        )
 
 
 if __name__ == "__main__":
