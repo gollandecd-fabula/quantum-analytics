@@ -15,8 +15,23 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 function Resolve-ProjectRoot {
-    $candidate = Join-Path $PSScriptRoot "..\.."
-    return (Resolve-Path -LiteralPath $candidate).Path
+    $candidates = @(
+        (Join-Path $PSScriptRoot ".."),
+        (Join-Path $PSScriptRoot "..\..")
+    )
+    foreach ($candidate in $candidates) {
+        try {
+            $resolved = (Resolve-Path -LiteralPath $candidate).Path
+        }
+        catch {
+            continue
+        }
+        $runner = Join-Path $resolved "src\quantum\pilot\windows_runner.py"
+        if (Test-Path -LiteralPath $runner -PathType Leaf) {
+            return $resolved
+        }
+    }
+    throw "Quantum project root was not found from launcher location: $PSScriptRoot"
 }
 
 function Select-XlsxFile {
@@ -31,13 +46,25 @@ function Select-XlsxFile {
     return $dialog.FileName
 }
 
+function Test-PythonVersion {
+    param(
+        [Parameter(Mandatory = $true)][string]$Executable,
+        [Parameter(Mandatory = $true)][string[]]$Prefix
+    )
+    $probe = @()
+    $probe += $Prefix
+    $probe += @("-c", "import sys; raise SystemExit(0 if sys.version_info >= (3,12) else 17)")
+    & $Executable @probe | Out-Null
+    return $LASTEXITCODE -eq 0
+}
+
 function Resolve-PythonCommand {
     $python = Get-Command python.exe -ErrorAction SilentlyContinue
-    if ($python) {
+    if ($python -and (Test-PythonVersion -Executable $python.Source -Prefix @())) {
         return [pscustomobject]@{ Executable = $python.Source; Prefix = @() }
     }
     $py = Get-Command py.exe -ErrorAction SilentlyContinue
-    if ($py) {
+    if ($py -and (Test-PythonVersion -Executable $py.Source -Prefix @("-3.12"))) {
         return [pscustomobject]@{ Executable = $py.Source; Prefix = @("-3.12") }
     }
     throw "Python 3.12 or newer was not found."
@@ -61,20 +88,55 @@ function Confirm-Literal {
     }
 }
 
+function Resolve-DefenderScanner {
+    $direct = Join-Path $env:ProgramFiles "Windows Defender\MpCmdRun.exe"
+    if (Test-Path -LiteralPath $direct -PathType Leaf) {
+        return $direct
+    }
+    $platformRoot = Join-Path $env:ProgramData "Microsoft\Windows Defender\Platform"
+    if (Test-Path -LiteralPath $platformRoot -PathType Container) {
+        $scanner = Get-ChildItem -LiteralPath $platformRoot -Directory -ErrorAction SilentlyContinue |
+            Sort-Object Name -Descending |
+            ForEach-Object { Join-Path $_.FullName "MpCmdRun.exe" } |
+            Where-Object { Test-Path -LiteralPath $_ -PathType Leaf } |
+            Select-Object -First 1
+        if ($scanner) {
+            return $scanner
+        }
+    }
+    return $null
+}
+
 function Invoke-DefenderScan {
     param([Parameter(Mandatory = $true)][string]$Path)
     if ($SkipDefenderScan) {
         Write-Host "Defender scan skipped by explicit switch." -ForegroundColor Yellow
         return
     }
-    $scanner = Join-Path $env:ProgramFiles "Windows Defender\MpCmdRun.exe"
-    if (-not (Test-Path -LiteralPath $scanner -PathType Leaf)) {
+    $scanner = Resolve-DefenderScanner
+    if (-not $scanner) {
         throw "Microsoft Defender command-line scanner was not found. Use -SkipDefenderScan only after an equivalent scan."
     }
     Write-Host "Scanning source file with Microsoft Defender..."
     & $scanner -Scan -ScanType 3 -File $Path | Out-Host
     if ($LASTEXITCODE -ne 0) {
         throw "Microsoft Defender scan failed or reported a threat. Exit code: $LASTEXITCODE"
+    }
+}
+
+function Test-UsableConfig {
+    param([Parameter(Mandatory = $true)][string]$Path)
+    try {
+        $raw = Get-Content -LiteralPath $Path -Raw -Encoding UTF8 | ConvertFrom-Json
+    }
+    catch {
+        throw "Quantum configuration is not valid JSON: $Path"
+    }
+    if ($raw.configuration_status -eq "REQUIRES_USER_VALUES") {
+        throw "Configuration template is not ready. Fill it and save it as config\default-home-local.json or config\production.local.json."
+    }
+    if ($raw.finance_request.replace_with_a_valid_versioned_finance_request -eq $true) {
+        throw "Configuration still contains a finance_request placeholder: $Path"
     }
 }
 
@@ -92,15 +154,16 @@ if ([string]::IsNullOrWhiteSpace($Config)) {
     $candidates = @(
         (Join-Path $env:LOCALAPPDATA "QuantumLocalProduction\config\production.local.json"),
         (Join-Path $env:LOCALAPPDATA "QuantumLocalProduction\config\default-home-local.json"),
-        (Join-Path $env:LOCALAPPDATA "QuantumLocalProduction\config\default-production.json"),
-        (Join-Path $projectRoot "config\home-local.template.json")
+        (Join-Path $env:LOCALAPPDATA "QuantumLocalProduction\config\default-production.json")
     )
     $Config = $candidates | Where-Object { Test-Path -LiteralPath $_ -PathType Leaf } | Select-Object -First 1
     if (-not $Config) {
-        throw "No Quantum configuration was found. Create config\production.local.json first."
+        $template = Join-Path $projectRoot "config\home-local.template.json"
+        throw "No ready Quantum configuration was found. Fill $template and save it as config\default-home-local.json."
     }
 }
 $Config = (Resolve-Path -LiteralPath $Config).Path
+Test-UsableConfig -Path $Config
 
 if ([string]::IsNullOrWhiteSpace($StorageRoot)) {
     $StorageRoot = Join-Path $env:LOCALAPPDATA "QuantumLocalProduction\data"
