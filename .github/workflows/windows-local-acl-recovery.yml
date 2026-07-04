@@ -25,6 +25,18 @@ jobs:
     steps:
       - name: Checkout exact head
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Assert exact head
+        shell: pwsh
+        run: |
+          $expected = "${{ github.event.pull_request.head.sha || github.sha }}"
+          $actual = (& git rev-parse HEAD).Trim()
+          if ($actual -ne $expected) {
+            throw "Exact-head checkout failed. Expected $expected, got $actual"
+          }
+          Write-Host "Validated exact head: $actual"
 
       - name: Parse repaired installer
         shell: pwsh
