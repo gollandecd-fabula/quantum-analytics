@@ -275,11 +275,30 @@ try {
     if ([string]$preview.file_sha256 -ne $reviewedFileHash) {
         throw "Schema preview file hash does not match the scanned file."
     }
-    $headers = @($preview.schema.headers) -join " | "
-    Write-Host "Discovered sheet: $($preview.schema.sheet_name)" -ForegroundColor Cyan
-    Write-Host "Header row: $($preview.schema.header_row_index)"
-    Write-Host "Columns: $($preview.schema.column_count)"
-    Write-Host "Data rows: $($preview.schema.data_row_count)"
+    $schemaProperty = $preview.PSObject.Properties["schema_discovery"]
+    if (-not $schemaProperty -or $null -eq $schemaProperty.Value) {
+        throw "Schema preview does not contain schema_discovery."
+    }
+    $schema = $schemaProperty.Value
+    foreach ($requiredProperty in @(
+        "headers",
+        "sheet_name",
+        "header_row_index",
+        "column_count",
+        "data_row_count"
+    )) {
+        if (-not $schema.PSObject.Properties[$requiredProperty]) {
+            throw "Schema preview is missing required property: $requiredProperty"
+        }
+    }
+    if (@($schema.headers).Count -lt 1) {
+        throw "Schema preview headers are empty."
+    }
+    $headers = @($schema.headers) -join " | "
+    Write-Host "Discovered sheet: $($schema.sheet_name)" -ForegroundColor Cyan
+    Write-Host "Header row: $($schema.header_row_index)"
+    Write-Host "Columns: $($schema.column_count)"
+    Write-Host "Data rows: $($schema.data_row_count)"
     Write-Host "Headers: $headers"
     Write-Host "File SHA-256: $reviewedFileHash"
     Confirm-Literal -Expected "REVIEWED" -Prompt "Review the displayed schema and type REVIEWED to continue" -AlreadyAttested ([bool]$SchemaReviewed)
