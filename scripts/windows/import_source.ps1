@@ -132,10 +132,16 @@ function Test-UsableConfig {
     catch {
         throw "Quantum configuration is not valid JSON: $Path"
     }
-    if ($raw.configuration_status -eq "REQUIRES_USER_VALUES") {
+    $statusProperty = $raw.PSObject.Properties["configuration_status"]
+    if ($statusProperty -and [string]$statusProperty.Value -eq "REQUIRES_USER_VALUES") {
         throw "Configuration template is not ready. Fill it and save it as config\default-home-local.json or config\production.local.json."
     }
-    if ($raw.finance_request.replace_with_a_valid_versioned_finance_request -eq $true) {
+    $financeProperty = $raw.PSObject.Properties["finance_request"]
+    if (-not $financeProperty -or $null -eq $financeProperty.Value) {
+        throw "Configuration has no finance_request object: $Path"
+    }
+    $placeholderProperty = $financeProperty.Value.PSObject.Properties["replace_with_a_valid_versioned_finance_request"]
+    if ($placeholderProperty -and $placeholderProperty.Value -eq $true) {
         throw "Configuration still contains a finance_request placeholder: $Path"
     }
 }
