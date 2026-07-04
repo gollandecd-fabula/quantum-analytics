@@ -54,9 +54,15 @@ QUANTUM R3 ANY FILE EXTENSION
 '@
 Set-Content -LiteralPath (Join-Path $stage "README_FIRST.txt") -Value $readme -Encoding UTF8
 
-$sourceCommit = (& git.exe -C $repositoryRoot rev-parse HEAD).Trim()
+$sourceCommitOutput = @(& git.exe -C $repositoryRoot rev-parse HEAD)
+$sourceCommit = ($sourceCommitOutput -join "").Trim()
 if ($LASTEXITCODE -ne 0 -or $sourceCommit -notmatch "^[0-9a-fA-F]{40}$") {
     throw "Exact source commit is required."
+}
+$sourceBranchOutput = @(& git.exe -C $repositoryRoot branch --show-current)
+$sourceBranch = ($sourceBranchOutput -join "").Trim()
+if ([string]::IsNullOrWhiteSpace($sourceBranch)) {
+    $sourceBranch = "DETACHED_HEAD"
 }
 
 $stageFull = [IO.Path]::GetFullPath($stage).TrimEnd([char[]]"\/")
@@ -76,7 +82,7 @@ $manifest = [ordered]@{
     package = "QuantumAnyFileExtension"
     package_version = "R3_ANY_FILE_EXTENSION"
     compatible_base = "HOME_LOCAL_R2"
-    source_branch = (& git.exe -C $repositoryRoot branch --show-current).Trim()
+    source_branch = $sourceBranch
     source_commit = $sourceCommit.ToLowerInvariant()
     release_state = "RELEASE_BLOCKED"
     marketplace_write_enabled = $false
