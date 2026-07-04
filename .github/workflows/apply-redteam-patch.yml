@@ -57,7 +57,7 @@ jobs:
           set -euo pipefail
           rm -rf .redteam_patch
 
-      - name: Commit hardened tree
+      - name: Commit hardened tree to isolated output branch
         shell: bash
         run: |
           set -euo pipefail
@@ -66,4 +66,5 @@ jobs:
           git add -A
           test -n "$(git status --porcelain)"
           git commit -m "Red-team harden HOME_LOCAL onboarding and integrity"
-          git push origin HEAD:local-pilot-windows-acl-repair-r2
+          git push origin HEAD:refs/heads/local-pilot-windows-redteam-output-r3-2f125986
+          echo "HARDENED_COMMIT=$(git rev-parse HEAD)"
