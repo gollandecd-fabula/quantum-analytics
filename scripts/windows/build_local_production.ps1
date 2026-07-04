@@ -9,7 +9,7 @@ $ErrorActionPreference = "Stop"
 function Test-PythonVersion {
     param(
         [Parameter(Mandatory = $true)][string]$Executable,
-        [Parameter(Mandatory = $true)][string[]]$Prefix
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][string[]]$Prefix
     )
     $probe = @()
     $probe += $Prefix
