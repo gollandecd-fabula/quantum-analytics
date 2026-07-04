@@ -7,6 +7,36 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
+function Invoke-Icacls {
+    param(
+        [Parameter(Mandatory = $true)][string]$Path,
+        [Parameter(Mandatory = $true)][string[]]$Arguments,
+        [Parameter(Mandatory = $true)][string]$Operation
+    )
+    & icacls.exe $Path @Arguments | Out-Host
+    if ($LASTEXITCODE -ne 0) {
+        throw "$Operation failed for $Path with exit code $LASTEXITCODE"
+    }
+}
+
+function Reset-ManagedAcl {
+    param(
+        [Parameter(Mandatory = $true)][string]$Path,
+        [switch]$Recursive
+    )
+    if (-not (Test-Path -LiteralPath $Path -ErrorAction SilentlyContinue)) {
+        return
+    }
+    $inheritanceArguments = @("/inheritance:e", "/C")
+    $resetArguments = @("/reset", "/C")
+    if ($Recursive) {
+        $inheritanceArguments += "/T"
+        $resetArguments += "/T"
+    }
+    Invoke-Icacls -Path $Path -Arguments $inheritanceArguments -Operation "ACL inheritance repair"
+    Invoke-Icacls -Path $Path -Arguments $resetArguments -Operation "Explicit ACL reset"
+}
+
 if ([string]::IsNullOrWhiteSpace($SourceRoot)) {
     $SourceRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot "..")).Path
 }
@@ -25,13 +55,24 @@ if (-not (Test-Path -LiteralPath $sourceLauncher -PathType Leaf)) {
 }
 
 New-Item -ItemType Directory -Path $TargetRoot -Force | Out-Null
-$runtimeTarget = [IO.Path]::GetFullPath((Join-Path $TargetRoot "src"))
-if ($sourceRuntime.TrimEnd("\", "/") -ieq $runtimeTarget.TrimEnd("\", "/")) {
-    throw "Installer must be run from an extracted package, not from the already installed runtime."
-}
-
+Reset-ManagedAcl -Path $TargetRoot
 foreach ($name in @("config", "data", "output", "scripts")) {
     New-Item -ItemType Directory -Path (Join-Path $TargetRoot $name) -Force | Out-Null
+}
+
+$runtimeTarget = [IO.Path]::GetFullPath((Join-Path $TargetRoot "src"))
+$scriptsTarget = [IO.Path]::GetFullPath((Join-Path $TargetRoot "scripts"))
+$launcherTarget = Join-Path $scriptsTarget "import_source.ps1"
+$obsoleteCommon = Join-Path $scriptsTarget "common.ps1"
+
+Reset-ManagedAcl -Path $scriptsTarget -Recursive
+Reset-ManagedAcl -Path $runtimeTarget -Recursive
+if (Test-Path -LiteralPath $obsoleteCommon -ErrorAction SilentlyContinue) {
+    Remove-Item -LiteralPath $obsoleteCommon -Force
+}
+
+if ($sourceRuntime.TrimEnd("\", "/") -ieq $runtimeTarget.TrimEnd("\", "/")) {
+    throw "Installer must be run from an extracted package, not from the already installed runtime."
 }
 
 $installId = "{0}_{1}" -f (Get-Date -Format "yyyyMMdd_HHmmss"), ([guid]::NewGuid().ToString("N").Substring(0, 8))
@@ -68,11 +109,16 @@ catch {
     throw
 }
 
-$launcherTarget = Join-Path $TargetRoot "scripts\import_source.ps1"
 $launcherBackup = $null
 if (Test-Path -LiteralPath $launcherTarget -PathType Leaf) {
     $launcherBackup = "{0}.backup_{1}" -f $launcherTarget, $installId
-    Copy-Item -LiteralPath $launcherTarget -Destination $launcherBackup -Force
+    try {
+        Copy-Item -LiteralPath $launcherTarget -Destination $launcherBackup -Force
+    }
+    catch {
+        Write-Warning "Existing launcher could not be backed up after ACL repair and will be replaced: $($_.Exception.GetType().Name)"
+        $launcherBackup = $null
+    }
 }
 try {
     Copy-Item -LiteralPath $sourceLauncher -Destination $launcherTarget -Force
@@ -95,29 +141,38 @@ $cmd = @'
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\import_source.ps1"
 if errorlevel 1 pause
 '@
-Set-Content -LiteralPath (Join-Path $TargetRoot "IMPORT_XLSX.cmd") -Value $cmd -Encoding ASCII
+$commandTarget = Join-Path $TargetRoot "IMPORT_XLSX.cmd"
+Set-Content -LiteralPath $commandTarget -Value $cmd -Encoding ASCII
 
 $readmeSource = Join-Path $SourceRoot "README_FIRST.txt"
+$readmeTarget = Join-Path $TargetRoot "README_FIRST.txt"
 if (Test-Path -LiteralPath $readmeSource -PathType Leaf) {
-    Copy-Item -LiteralPath $readmeSource -Destination (Join-Path $TargetRoot "README_FIRST.txt") -Force
+    Copy-Item -LiteralPath $readmeSource -Destination $readmeTarget -Force
 }
 
-& icacls.exe $TargetRoot /inheritance:e /T /C | Out-Host
-if ($LASTEXITCODE -ne 0) {
-    throw "Failed to restore inherited ACLs under $TargetRoot"
+Reset-ManagedAcl -Path $runtimeTarget -Recursive
+Reset-ManagedAcl -Path $scriptsTarget -Recursive
+Reset-ManagedAcl -Path $commandTarget
+if (Test-Path -LiteralPath $readmeTarget -PathType Leaf) {
+    Reset-ManagedAcl -Path $readmeTarget
 }
 
 foreach ($required in @(
-    (Join-Path $TargetRoot "src\quantum\pilot\windows_runner.py"),
+    (Join-Path $runtimeTarget "quantum\pilot\windows_runner.py"),
     $launcherTarget,
-    (Join-Path $TargetRoot "IMPORT_XLSX.cmd")
+    $commandTarget
 )) {
     if (-not (Test-Path -LiteralPath $required -PathType Leaf)) {
         throw "Installation verification failed: $required"
     }
+    $stream = [IO.File]::Open($required, [IO.FileMode]::Open, [IO.FileAccess]::Read, [IO.FileShare]::ReadWrite)
+    $stream.Dispose()
+}
+if (Test-Path -LiteralPath $obsoleteCommon -ErrorAction SilentlyContinue) {
+    throw "Obsolete managed script was not removed: $obsoleteCommon"
 }
 
 Write-Host "Quantum HOME_LOCAL runtime installed." -ForegroundColor Green
 Write-Host "Target: $TargetRoot"
 Write-Host "Existing config, data and output directories were preserved."
-Write-Host "Launch: $(Join-Path $TargetRoot 'IMPORT_XLSX.cmd')"
+Write-Host "Launch: $commandTarget"
