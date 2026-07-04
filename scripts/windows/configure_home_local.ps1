@@ -144,7 +144,7 @@ $config = [ordered]@{
             }
         )
         prohibited_header_tokens = @(
-            "email", "e-mail", "phone", "telephone", "mobile", "address",
+            "email", "phone", "telephone", "mobile", "address",
             "full name", "surname", "passport", "snils", "inn",
             (Convert-FromUtf8Base64 -Value "0Y3Qu9C10LrRgtGA0L7QvdC90LDRjyDQv9C+0YfRgtCw"),
             (Convert-FromUtf8Base64 -Value "0YLQtdC70LXRhNC+0L0="),
