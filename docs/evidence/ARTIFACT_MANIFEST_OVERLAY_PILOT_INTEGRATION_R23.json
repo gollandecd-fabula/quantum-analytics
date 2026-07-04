@@ -57,6 +57,31 @@
       11695
     ],
     [
+      "src/quantum/ingestion/_xlsx_auxiliary_content.py",
+      "c101e83f5ff7c3f3a58bd415942a3c9b861fc3c0d0f47437be97dfa7389ca7a5",
+      18427
+    ],
+    [
+      "src/quantum/ingestion/_xlsx_content_model.py",
+      "f50df5a40c1912293331e350c28b9b5b2596da2f3a30a8d5a9d5c59c8717ea46",
+      12874
+    ],
+    [
+      "src/quantum/ingestion/_xlsx_r19_hardening.py",
+      "3d5a93ebb70d001874c7e45b5b8f891425624cbabf6c6b00f0cd078131477985",
+      8094
+    ],
+    [
+      "src/quantum/ingestion/_xlsx_workbook_content.py",
+      "6f21e5d7c5602a8be7ec3fed75209843b10138b137b69cf8a9dd6300a27c1d54",
+      8127
+    ],
+    [
+      "src/quantum/ingestion/_xlsx_xml_lexical.py",
+      "decd334e40ec09a3c3d6c6840f8f21aabc94b19e66430297710b7b8e6600abf6",
+      10505
+    ],
+    [
       "src/quantum/pilot/__init__.py",
       "3a71c0173545900d5062caa312dc0b5babab5ce22eecb8e2d92114694ae5aedd",
       407
@@ -93,8 +118,8 @@
     ],
     [
       "tests/test_windows_redteam_hardening.py",
-      "dd2bcb70c5ebb35006d247aa62ba27f3a54848f845d2c4d8101ac61e2946cc95",
-      8778
+      "d0736b83abfc2ef4b2c2f65dbed30fdd3272d9046bc5d3c825489623fff322da",
+      9207
     ],
     [
       "tests/test_windows_reviewed_file_hash.py",
@@ -105,10 +130,15 @@
       "tests/test_windows_storage_compat.py",
       "b5ec50aaab8e409d4e25bdc36cb706618e6759f5b62c02dc0c707ef92363ebb2",
       1921
+    ],
+    [
+      "tests/test_xlsx_real_office_compat.py",
+      "9c2eed9328aeae1b4cf848330e8702d344daf81121c8ca6b8cb30a7cd855b7bb",
+      8786
     ]
   ],
   "hash_encoding": "sha256-hex",
   "overlay_version": 23,
-  "reason": "HOME_LOCAL exact-head Windows hardening with schema review, file digest binding, unique header filters, admission-only onboarding and end-to-end package verification",
+  "reason": "HOME_LOCAL exact-head Windows hardening with real Wildberries Excel OOXML compatibility, strict namespace and auxiliary-content modeling, schema review, file digest binding, admission-only onboarding and end-to-end package verification",
   "remove_paths": []
 }
