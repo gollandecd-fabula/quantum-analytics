@@ -12,6 +12,7 @@ DASHBOARD_BODY = r"""
           <span id="header-dataset"></span>
           <span id="header-generated"></span>
           <span id="header-source"></span>
+          <span>Внешние библиотеки и сетевые запросы отсутствуют</span>
         </div>
       </div>
       <div class="header-actions" aria-label="Действия отчёта">
