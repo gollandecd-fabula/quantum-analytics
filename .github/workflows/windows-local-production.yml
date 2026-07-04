@@ -296,9 +296,12 @@ jobs:
             -NonInteractive `
             -AuthorityAttested `
             -SchemaReviewed `
-            -SkipDefenderScan
-          if ($LASTEXITCODE -ne 0) {
-            throw "Installed HOME_LOCAL import failed with exit code $LASTEXITCODE"
+            -SkipDefenderScan `
+            -DebugErrors 2>&1 |
+            Tee-Object -FilePath installed-import.log
+          $importExitCode = $LASTEXITCODE
+          if ($importExitCode -ne 0) {
+            throw "Installed HOME_LOCAL import failed with exit code $importExitCode"
           }
           $importReport = Get-Content -LiteralPath $importOutput -Raw -Encoding UTF8 | ConvertFrom-Json
           if ([string]$importReport.status -ne "ADMISSION_COMPLETE") {
@@ -316,6 +319,7 @@ jobs:
           path: |
             windows-verification-error.log
             tamper-rejection.log
+            installed-import.log
             package-build.log
           if-no-files-found: warn
           retention-days: 7
