@@ -2,9 +2,14 @@
   "base_pilot_integration_r22_overlay_git_blob_sha": "5943d46a2245389a38e369ab35109a94ae36297a",
   "entries": [
     [
+      ".github/workflows/any-file-extension-r3.yml",
+      "088eb5c433c8ebba711702358b2d9b808246ce4ca716144cc33903d15694d9d2",
+      3864
+    ],
+    [
       ".github/workflows/any-file-extension.yml",
-      "79459c79abb25d2a8b27f8142e0cc444ba6a4c7cc109b84557c2bf4cec0f56cc",
-      8397
+      "9e673e2e909c59784c62e50fb586831886660611ef08784e6555ee314b69a063",
+      241
     ],
     [
       ".github/workflows/windows-local-acl-recovery.yml",
@@ -68,13 +73,18 @@
     ],
     [
       "scripts/windows/install_any_file_extension.ps1",
-      "40f169c2b2e500e16782945ba225fe9043a65b4c6e2f99af99f66634f5c54d16",
-      7426
+      "5c609ca60b0a744744c99421dadb145f5a616ced10528b9c73f00f0e2f742fd7",
+      7622
     ],
     [
       "scripts/windows/install_home_local.ps1",
       "fce7d34fb26ce6700ae4ae1a1e84c3b98c05458e18d97aafbfb2fcdd72e0aa33",
       11695
+    ],
+    [
+      "scripts/windows/test_any_file_extension.ps1",
+      "49e379c931d85eddf68cd65aea23c2eb9f21c1db92de0d104d814836fe26fdd3",
+      5144
     ],
     [
       "src/quantum/ingestion/_xlsx_auxiliary_content.py",
