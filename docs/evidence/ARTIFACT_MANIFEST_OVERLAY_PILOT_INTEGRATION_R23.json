@@ -38,8 +38,8 @@
     ],
     [
       "scripts/windows/build_local_production.ps1",
-      "61ab2fbcc95f8a1db7499c42a869ef8705d700a3c1fdb2737905955589b97f84",
-      8527
+      "748efee9c3e03a52fd29cd05b64ae23d52c9f824068c733d80b2c54e3a3bd777",
+      8648
     ],
     [
       "scripts/windows/configure_home_local.ps1",
