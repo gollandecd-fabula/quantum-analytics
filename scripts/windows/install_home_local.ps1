@@ -37,6 +37,110 @@ function Reset-ManagedAcl {
     Invoke-Icacls -Path $Path -Arguments $resetArguments -Operation "Explicit ACL reset"
 }
 
+function Assert-PackageManifest {
+    param([Parameter(Mandatory = $true)][string]$Root)
+
+    $manifestPath = Join-Path $Root "manifest.sha256.json"
+    if (-not (Test-Path -LiteralPath $manifestPath -PathType Leaf)) {
+        throw "Package manifest is missing: $manifestPath"
+    }
+    try {
+        $manifest = Get-Content -LiteralPath $manifestPath -Raw -Encoding UTF8 | ConvertFrom-Json
+    }
+    catch {
+        throw "Package manifest is not valid JSON: $manifestPath"
+    }
+    if ([string]$manifest.package -ne "QuantumLocalProduction_HOME_LOCAL") {
+        throw "Unexpected package identity in manifest."
+    }
+    if ([string]$manifest.release_state -ne "RELEASE_BLOCKED") {
+        throw "Unexpected package release state."
+    }
+    if ($manifest.marketplace_write_enabled -ne $false) {
+        throw "Marketplace writes must remain disabled in HOME_LOCAL."
+    }
+    if ($manifest.manifest_excludes_self -ne $true) {
+        throw "Package manifest self-exclusion contract is invalid."
+    }
+    if ([string]$manifest.source_commit -notmatch "^[0-9a-fA-F]{40}$") {
+        throw "Package source commit is missing or malformed."
+    }
+    $entries = @($manifest.files)
+    if ($entries.Count -lt 1) {
+        throw "Package manifest contains no files."
+    }
+
+    $rootFull = [IO.Path]::GetFullPath($Root).TrimEnd([char[]]"\/")
+    $rootPrefix = $rootFull + [IO.Path]::DirectorySeparatorChar
+    $seen = [Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
+    foreach ($entry in $entries) {
+        $relative = [string]$entry.path
+        if ([string]::IsNullOrWhiteSpace($relative)) {
+            throw "Package manifest contains an empty path."
+        }
+        $normalized = $relative.Replace("/", "\")
+        if ([IO.Path]::IsPathRooted($normalized)) {
+            throw "Package manifest contains a rooted path: $relative"
+        }
+        $parts = @($normalized.Split("\"))
+        $unsafeParts = @(
+            $parts | Where-Object {
+                [string]::IsNullOrWhiteSpace($_) -or $_ -in @(".", "..")
+            }
+        )
+        if ($parts.Count -eq 0 -or $unsafeParts.Count -gt 0) {
+            throw "Package manifest contains an unsafe path: $relative"
+        }
+        $full = [IO.Path]::GetFullPath((Join-Path $rootFull $normalized))
+        if (-not $full.StartsWith($rootPrefix, [StringComparison]::OrdinalIgnoreCase)) {
+            throw "Package manifest path escaped the package root: $relative"
+        }
+        $portable = $full.Substring($rootPrefix.Length).Replace("\", "/")
+        if (-not $seen.Add($portable)) {
+            throw "Package manifest contains a duplicate path: $portable"
+        }
+        if (-not (Test-Path -LiteralPath $full -PathType Leaf)) {
+            throw "Manifest file is missing: $portable"
+        }
+        $item = Get-Item -LiteralPath $full
+        if ([int64]$entry.size_bytes -ne [int64]$item.Length) {
+            throw "Manifest size mismatch: $portable"
+        }
+        $actual = (Get-FileHash -LiteralPath $full -Algorithm SHA256).Hash.ToLowerInvariant()
+        if ($actual -ne ([string]$entry.sha256).ToLowerInvariant()) {
+            throw "Manifest hash mismatch: $portable"
+        }
+    }
+
+    $actualFiles = @(
+        Get-ChildItem -LiteralPath $rootFull -Recurse -File |
+            Where-Object { $_.FullName -ne $manifestPath } |
+            ForEach-Object {
+                $_.FullName.Substring($rootPrefix.Length).Replace("\", "/")
+            }
+    )
+    if ($actualFiles.Count -ne $seen.Count) {
+        throw "Package file count does not match the manifest."
+    }
+    foreach ($relative in $actualFiles) {
+        if (-not $seen.Contains($relative)) {
+            throw "Package contains an unmanifested file: $relative"
+        }
+    }
+    foreach ($required in @(
+        "src/quantum/pilot/windows_runner.py",
+        "scripts/import_source.ps1",
+        "scripts/configure_home_local.ps1",
+        "IMPORT_XLSX.cmd",
+        "CONFIGURE_HOME_LOCAL.cmd"
+    )) {
+        if (-not $seen.Contains($required)) {
+            throw "Required package entry is not covered by the manifest: $required"
+        }
+    }
+    return $manifest
+}
+
 if ([string]::IsNullOrWhiteSpace($SourceRoot)) {
     $SourceRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot "..")).Path
 }
@@ -45,13 +149,18 @@ else {
 }
 $TargetRoot = [IO.Path]::GetFullPath($TargetRoot)
 
+$packageManifest = Assert-PackageManifest -Root $SourceRoot
 $sourceRuntime = [IO.Path]::GetFullPath((Join-Path $SourceRoot "src"))
 $sourceLauncher = Join-Path $SourceRoot "scripts\import_source.ps1"
+$sourceConfigurator = Join-Path $SourceRoot "scripts\configure_home_local.ps1"
 if (-not (Test-Path -LiteralPath $sourceRuntime -PathType Container)) {
     throw "Package runtime directory is missing: $sourceRuntime"
 }
 if (-not (Test-Path -LiteralPath $sourceLauncher -PathType Leaf)) {
     throw "Package launcher is missing: $sourceLauncher"
+}
+if (-not (Test-Path -LiteralPath $sourceConfigurator -PathType Leaf)) {
+    throw "Package configurator is missing: $sourceConfigurator"
 }
 
 $runtimeTarget = [IO.Path]::GetFullPath((Join-Path $TargetRoot "src"))
@@ -67,6 +176,7 @@ foreach ($name in @("config", "data", "output", "scripts")) {
 
 $scriptsTarget = [IO.Path]::GetFullPath((Join-Path $TargetRoot "scripts"))
 $launcherTarget = Join-Path $scriptsTarget "import_source.ps1"
+$configuratorTarget = Join-Path $scriptsTarget "configure_home_local.ps1"
 $obsoleteCommon = Join-Path $scriptsTarget "common.ps1"
 
 Reset-ManagedAcl -Path $scriptsTarget -Recursive
@@ -130,6 +240,8 @@ catch {
     throw
 }
 
+Copy-Item -LiteralPath $sourceConfigurator -Destination $configuratorTarget -Force
+
 $templateSource = Join-Path $SourceRoot "config\home-local.template.json"
 $templateTarget = Join-Path $TargetRoot "config\home-local.template.json"
 if ((Test-Path -LiteralPath $templateSource -PathType Leaf) -and -not (Test-Path -LiteralPath $templateTarget)) {
@@ -144,6 +256,14 @@ if errorlevel 1 pause
 $commandTarget = Join-Path $TargetRoot "IMPORT_XLSX.cmd"
 Set-Content -LiteralPath $commandTarget -Value $cmd -Encoding ASCII
 
+$configureCmd = @'
+@echo off
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\configure_home_local.ps1"
+if errorlevel 1 pause
+'@
+$configureCommandTarget = Join-Path $TargetRoot "CONFIGURE_HOME_LOCAL.cmd"
+Set-Content -LiteralPath $configureCommandTarget -Value $configureCmd -Encoding ASCII
+
 $readmeSource = Join-Path $SourceRoot "README_FIRST.txt"
 $readmeTarget = Join-Path $TargetRoot "README_FIRST.txt"
 if (Test-Path -LiteralPath $readmeSource -PathType Leaf) {
@@ -153,6 +273,7 @@ if (Test-Path -LiteralPath $readmeSource -PathType Leaf) {
 Reset-ManagedAcl -Path $runtimeTarget -Recursive
 Reset-ManagedAcl -Path $scriptsTarget -Recursive
 Reset-ManagedAcl -Path $commandTarget
+Reset-ManagedAcl -Path $configureCommandTarget
 if (Test-Path -LiteralPath $readmeTarget -PathType Leaf) {
     Reset-ManagedAcl -Path $readmeTarget
 }
@@ -160,7 +281,9 @@ if (Test-Path -LiteralPath $readmeTarget -PathType Leaf) {
 foreach ($required in @(
     (Join-Path $runtimeTarget "quantum\pilot\windows_runner.py"),
     $launcherTarget,
-    $commandTarget
+    $configuratorTarget,
+    $commandTarget,
+    $configureCommandTarget
 )) {
     if (-not (Test-Path -LiteralPath $required -PathType Leaf)) {
         throw "Installation verification failed: $required"

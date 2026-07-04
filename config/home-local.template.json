@@ -67,8 +67,7 @@
       "фио"
     ]
   },
-  "finance_request": {
-    "replace_with_a_valid_versioned_finance_request": true
-  },
-  "reconciliation": null
+  "finance_request": null,
+  "reconciliation": null,
+  "execution_mode": "ADMISSION_ONLY"
 }

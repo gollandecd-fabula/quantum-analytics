@@ -54,6 +54,7 @@ foreach ($directory in @("scripts", "config", "docs", "requirements")) {
 Copy-Item -LiteralPath (Join-Path $repositoryRoot "src") -Destination (Join-Path $stageRoot "src") -Recurse -Force
 Copy-Item -LiteralPath (Join-Path $repositoryRoot "scripts\windows\import_source.ps1") -Destination (Join-Path $stageRoot "scripts\import_source.ps1") -Force
 Copy-Item -LiteralPath (Join-Path $repositoryRoot "scripts\windows\install_home_local.ps1") -Destination (Join-Path $stageRoot "scripts\install_home_local.ps1") -Force
+Copy-Item -LiteralPath (Join-Path $repositoryRoot "scripts\windows\configure_home_local.ps1") -Destination (Join-Path $stageRoot "scripts\configure_home_local.ps1") -Force
 Copy-Item -LiteralPath (Join-Path $repositoryRoot "config\home-local.template.json") -Destination (Join-Path $stageRoot "config\home-local.template.json") -Force
 
 $requirementsPath = Join-Path $repositoryRoot "requirements\windows-home-local.txt"
@@ -95,6 +96,13 @@ if errorlevel 1 pause
 '@
 Set-Content -LiteralPath (Join-Path $stageRoot "IMPORT_XLSX.cmd") -Value $importCommand -Encoding ASCII
 
+$configureCommand = @'
+@echo off
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\configure_home_local.ps1"
+if errorlevel 1 pause
+'@
+Set-Content -LiteralPath (Join-Path $stageRoot "CONFIGURE_HOME_LOCAL.cmd") -Value $configureCommand -Encoding ASCII
+
 $installCommand = @'
 @echo off
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\install_home_local.ps1"
@@ -103,16 +111,20 @@ if errorlevel 1 pause
 Set-Content -LiteralPath (Join-Path $stageRoot "INSTALL_HOME_LOCAL.cmd") -Value $installCommand -Encoding ASCII
 
 $readme = @'
-QUANTUM HOME_LOCAL WINDOWS PACKAGE
+QUANTUM HOME_LOCAL WINDOWS PACKAGE — RED TEAM HARDENED
 
-1. Existing installation: run INSTALL_HOME_LOCAL.cmd once.
-2. Complete config\home-local.template.json and save it as config\default-home-local.json if no ready local config exists.
-3. Import a report: run IMPORT_XLSX.cmd.
-4. The installer preserves config, data and output directories.
-5. HOME_LOCAL does not require BitLocker. The report records this limitation.
-6. The package includes the hash-pinned IANA timezone database required by Windows Python.
-7. No marketplace writes, deploy, public/LAN exposure or production release are enabled.
-8. Do not upload real reports, configs, data or output to GitHub or cloud-sync folders.
+1. Extract the package outside cloud-synchronized folders.
+2. Run INSTALL_HOME_LOCAL.cmd.
+3. If no ready config exists, run CONFIGURE_HOME_LOCAL.cmd and enter the report period and retention deadline.
+4. Run IMPORT_XLSX.cmd and select the authorized XLSX report.
+5. Quantum displays the discovered sheet, header row and headers before REVIEWED can be confirmed.
+6. ADMISSION_ONLY validates and admits the report without inventing cost, tax or expense values.
+7. FULL financial calculation requires an explicit valid finance_request.
+8. The installer verifies every packaged file against manifest.sha256.json before changing the installation.
+9. Existing config, data and output directories are preserved.
+10. HOME_LOCAL does not require BitLocker; the result records the unencrypted-storage limitation.
+11. No marketplace writes, deploy, public/LAN exposure or production release are enabled.
+12. Do not upload real reports, configs, data or output to GitHub or cloud-sync folders.
 '@
 Set-Content -LiteralPath (Join-Path $stageRoot "README_FIRST.txt") -Value $readme -Encoding UTF8
 
@@ -149,11 +161,14 @@ if ($git) {
 if ([string]::IsNullOrWhiteSpace($sourceBranch)) {
     $sourceBranch = "unknown"
 }
+if ([string]::IsNullOrWhiteSpace($sourceCommit) -or $sourceCommit -notmatch "^[0-9a-fA-F]{40}$") {
+    throw "A valid exact source commit is required to build the HOME_LOCAL package."
+}
 $manifest = [ordered]@{
     package = "QuantumLocalProduction_HOME_LOCAL"
-    package_version = "R1"
+    package_version = "R2_REDTEAM"
     source_branch = $sourceBranch
-    source_commit = $sourceCommit
+    source_commit = $sourceCommit.ToLowerInvariant()
     release_state = "RELEASE_BLOCKED"
     marketplace_write_enabled = $false
     tzdata_version = "2026.2"

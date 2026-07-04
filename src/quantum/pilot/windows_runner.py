@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+from hashlib import sha256
 from dataclasses import dataclass
 from io import BytesIO
 import json
@@ -207,7 +208,10 @@ def _row_values(
     return tuple(values.get(index, "") for index in range(1, last + 1)), formula_count
 
 
-def _candidate_score(headers: tuple[str, ...], row_index: int) -> int:
+def _candidate_score(
+    headers: tuple[str, ...],
+    row_index: int,
+) -> tuple[int, int, int, int, int, int]:
     text_cells = sum(
         any(character.isalpha() for character in value) for value in headers
     )
@@ -217,11 +221,12 @@ def _candidate_score(headers: tuple[str, ...], row_index: int) -> int:
     )
     unique = len(set(normalized))
     return (
-        len(headers) * 100
-        + text_cells * 20
-        + keyword_hits * 50
-        + unique * 5
-        - min(row_index, 1000)
+        int(keyword_hits > 0),
+        keyword_hits,
+        text_cells,
+        unique,
+        len(headers),
+        -min(row_index, 1000),
     )
 
 
@@ -243,7 +248,7 @@ def discover_schema(
         limits.max_columns,
     )
     package_kind, workbook = _extract_workbook(payload, limits)
-    candidates: list[tuple[int, DiscoveredSchema]] = []
+    candidates: list[tuple[tuple[int, int, int, int, int, int], DiscoveredSchema]] = []
     try:
         with ZipFile(BytesIO(workbook)) as archive:
             workbook_root = _xml_root(
@@ -439,6 +444,7 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--home-local", action="store_true")
     parser.add_argument("--discover-schema", action="store_true")
+    parser.add_argument("--discover-only", action="store_true")
     parser.add_argument("--authority-attested", action="store_true")
     parser.add_argument("--schema-reviewed", action="store_true")
     parser.add_argument("--max-scan-rows", type=int, default=100)
@@ -457,12 +463,40 @@ def main() -> int:
         config = dict(_mapping(raw_config, "LOCAL_PILOT_CONFIG_INVALID"))
         if not args.authority_attested:
             raise WindowsRunnerError("HOME_LOCAL_AUTHORITY_ATTESTATION_REQUIRED")
+        if args.discover_only and args.discover_schema:
+            raise WindowsRunnerError("SCHEMA_DISCOVERY_MODE_CONFLICT")
         config["lawful_authority_attested"] = True
+        source_payload = args.file.read_bytes()
+        if args.discover_only:
+            candidate = discover_schema(
+                payload=source_payload,
+                limits=_limits(config),
+                max_scan_rows=args.max_scan_rows,
+                min_columns=args.min_header_columns,
+            )
+            preview = {
+                "status": "SCHEMA_DISCOVERED",
+                "file_sha256": sha256(source_payload).hexdigest(),
+                "file_size_bytes": len(source_payload),
+                "schema_discovery": candidate.report(),
+            }
+            _atomic_json(args.output, preview)
+            print(
+                json.dumps(
+                    {
+                        "status": preview["status"],
+                        "output": str(args.output),
+                        "file_sha256": preview["file_sha256"],
+                    },
+                    ensure_ascii=False,
+                )
+            )
+            return 0
         if args.discover_schema:
             if not args.schema_reviewed:
                 raise WindowsRunnerError("SCHEMA_DISCOVERY_REVIEW_REQUIRED")
             candidate = discover_schema(
-                payload=args.file.read_bytes(),
+                payload=source_payload,
                 limits=_limits(config),
                 max_scan_rows=args.max_scan_rows,
                 min_columns=args.min_header_columns,
@@ -501,6 +535,7 @@ def main() -> int:
         if report["status"] not in {
             "PILOT_RUN_COMPLETE",
             "CALCULATED_RECONCILIATION_PENDING",
+            "ADMISSION_COMPLETE",
         }:
             return 2
         return 0

@@ -8,11 +8,15 @@ on:
     paths:
       - "scripts/windows/install_home_local.ps1"
       - "scripts/windows/import_source.ps1"
+      - "scripts/windows/configure_home_local.ps1"
+      - "config/home-local.template.json"
       - ".github/workflows/windows-local-acl-recovery.yml"
   pull_request:
     paths:
       - "scripts/windows/install_home_local.ps1"
       - "scripts/windows/import_source.ps1"
+      - "scripts/windows/configure_home_local.ps1"
+      - "config/home-local.template.json"
       - ".github/workflows/windows-local-acl-recovery.yml"
 
 permissions:
@@ -21,7 +25,7 @@ permissions:
 jobs:
   damaged-acl-recovery:
     runs-on: windows-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - name: Checkout exact head
         uses: actions/checkout@v4
@@ -38,19 +42,25 @@ jobs:
           }
           Write-Host "Validated exact head: $actual"
 
-      - name: Parse repaired installer
+      - name: Parse repaired scripts
         shell: pwsh
         run: |
-          $tokens = $null
-          $errors = $null
-          [System.Management.Automation.Language.Parser]::ParseFile(
-            (Resolve-Path "scripts/windows/install_home_local.ps1"),
-            [ref]$tokens,
-            [ref]$errors
-          ) | Out-Null
-          if ($errors.Count -gt 0) {
-            $errors | Format-List | Out-String | Write-Error
-            throw "PowerShell parse failed."
+          foreach ($file in @(
+            "scripts/windows/install_home_local.ps1",
+            "scripts/windows/import_source.ps1",
+            "scripts/windows/configure_home_local.ps1"
+          )) {
+            $tokens = $null
+            $errors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile(
+              (Resolve-Path $file),
+              [ref]$tokens,
+              [ref]$errors
+            ) | Out-Null
+            if ($errors.Count -gt 0) {
+              $errors | Format-List | Out-String | Write-Error
+              throw "PowerShell parse failed: $file"
+            }
           }
 
       - name: Reproduce and repair unreadable managed files
@@ -64,12 +74,45 @@ jobs:
           Remove-Item -LiteralPath $sourceRoot -Recurse -Force -ErrorAction SilentlyContinue
           Remove-Item -LiteralPath $installRoot -Recurse -Force -ErrorAction SilentlyContinue
 
-          New-Item -ItemType Directory -Path $sourceRoot -Force | Out-Null
-          New-Item -ItemType Directory -Path (Join-Path $sourceRoot "scripts") -Force | Out-Null
-          New-Item -ItemType Directory -Path (Join-Path $sourceRoot "config") -Force | Out-Null
+          foreach ($path in @(
+            $sourceRoot,
+            (Join-Path $sourceRoot "scripts"),
+            (Join-Path $sourceRoot "config")
+          )) {
+            New-Item -ItemType Directory -Path $path -Force | Out-Null
+          }
           Copy-Item -LiteralPath "src" -Destination (Join-Path $sourceRoot "src") -Recurse -Force
           Copy-Item -LiteralPath "scripts/windows/import_source.ps1" -Destination (Join-Path $sourceRoot "scripts/import_source.ps1") -Force
+          Copy-Item -LiteralPath "scripts/windows/install_home_local.ps1" -Destination (Join-Path $sourceRoot "scripts/install_home_local.ps1") -Force
+          Copy-Item -LiteralPath "scripts/windows/configure_home_local.ps1" -Destination (Join-Path $sourceRoot "scripts/configure_home_local.ps1") -Force
           Copy-Item -LiteralPath "config/home-local.template.json" -Destination (Join-Path $sourceRoot "config/home-local.template.json") -Force
+          Set-Content -LiteralPath (Join-Path $sourceRoot "IMPORT_XLSX.cmd") -Value "@echo off" -Encoding ASCII
+          Set-Content -LiteralPath (Join-Path $sourceRoot "INSTALL_HOME_LOCAL.cmd") -Value "@echo off" -Encoding ASCII
+          Set-Content -LiteralPath (Join-Path $sourceRoot "CONFIGURE_HOME_LOCAL.cmd") -Value "@echo off" -Encoding ASCII
+          Set-Content -LiteralPath (Join-Path $sourceRoot "README_FIRST.txt") -Value "ACL recovery fixture" -Encoding UTF8
+
+          $sourceFull = [IO.Path]::GetFullPath($sourceRoot).TrimEnd([char[]]"\/")
+          $sourcePrefix = $sourceFull + [IO.Path]::DirectorySeparatorChar
+          $entries = Get-ChildItem -LiteralPath $sourceRoot -Recurse -File | Sort-Object FullName | ForEach-Object {
+            $relative = $_.FullName.Substring($sourcePrefix.Length).Replace("\", "/")
+            [pscustomobject]@{
+              path = $relative
+              size_bytes = $_.Length
+              sha256 = (Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+            }
+          }
+          $manifest = [ordered]@{
+            package = "QuantumLocalProduction_HOME_LOCAL"
+            package_version = "R2_REDTEAM"
+            source_branch = "local-pilot-windows-acl-repair-r2"
+            source_commit = "${{ github.event.pull_request.head.sha || github.sha }}"
+            release_state = "RELEASE_BLOCKED"
+            marketplace_write_enabled = $false
+            tzdata_version = "2026.2"
+            manifest_excludes_self = $true
+            files = @($entries)
+          }
+          $manifest | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath (Join-Path $sourceRoot "manifest.sha256.json") -Encoding UTF8
 
           foreach ($name in @("config", "data", "output", "scripts", "src")) {
             New-Item -ItemType Directory -Path (Join-Path $installRoot $name) -Force | Out-Null
@@ -116,10 +159,15 @@ jobs:
             throw "Obsolete common.ps1 survived repair."
           }
 
-          $installedLauncher = Join-Path $installRoot "scripts/import_source.ps1"
-          $installedRunner = Join-Path $installRoot "src/quantum/pilot/windows_runner.py"
-          Get-Content -LiteralPath $installedLauncher -TotalCount 1 -ErrorAction Stop | Out-Null
-          Get-Content -LiteralPath $installedRunner -TotalCount 1 -ErrorAction Stop | Out-Null
+          foreach ($required in @(
+            (Join-Path $installRoot "scripts/import_source.ps1"),
+            (Join-Path $installRoot "scripts/configure_home_local.ps1"),
+            (Join-Path $installRoot "src/quantum/pilot/windows_runner.py"),
+            (Join-Path $installRoot "IMPORT_XLSX.cmd"),
+            (Join-Path $installRoot "CONFIGURE_HOME_LOCAL.cmd")
+          )) {
+            Get-Content -LiteralPath $required -TotalCount 1 -ErrorAction Stop | Out-Null
+          }
 
           $runtimeBackups = @(Get-ChildItem -LiteralPath $installRoot -Directory -Filter "src.backup_*")
           if ($runtimeBackups.Count -lt 1) {
