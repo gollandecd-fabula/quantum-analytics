@@ -30,6 +30,14 @@ function Resolve-PythonCommand {
     throw "Python 3.12 or newer was not found."
 }
 
+function Test-CommitSha {
+    param([AllowNull()][object]$Value)
+    if ($null -eq $Value) {
+        return $false
+    }
+    return ([string]$Value).Trim() -match "^[0-9a-fA-F]{40}$"
+}
+
 $repositoryRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot "..\..")).Path
 if ([string]::IsNullOrWhiteSpace($OutputDirectory)) {
     $OutputDirectory = Join-Path $repositoryRoot "dist"
@@ -143,13 +151,13 @@ $manifestEntries = Get-ChildItem -LiteralPath $stageRoot -Recurse -File | Sort-O
     }
 }
 
-$sourceCommit = $null
 $sourceBranch = $env:GITHUB_HEAD_REF
+$gitCommit = $null
 $git = Get-Command git.exe -ErrorAction SilentlyContinue
 if ($git) {
-    $sourceCommit = (& $git.Source -C $repositoryRoot rev-parse HEAD 2>$null | Select-Object -First 1)
-    if ($LASTEXITCODE -ne 0) {
-        $sourceCommit = $null
+    $gitCommit = (& $git.Source -C $repositoryRoot rev-parse HEAD 2>$null | Select-Object -First 1)
+    if ($LASTEXITCODE -ne 0 -or -not (Test-CommitSha $gitCommit)) {
+        $gitCommit = $null
     }
     if ([string]::IsNullOrWhiteSpace($sourceBranch)) {
         $sourceBranch = (& $git.Source -C $repositoryRoot branch --show-current 2>$null | Select-Object -First 1)
@@ -158,17 +166,55 @@ if ($git) {
         }
     }
 }
+
+$eventCommit = $null
+if (-not [string]::IsNullOrWhiteSpace($env:GITHUB_EVENT_PATH) -and (Test-Path -LiteralPath $env:GITHUB_EVENT_PATH -PathType Leaf)) {
+    try {
+        $event = Get-Content -LiteralPath $env:GITHUB_EVENT_PATH -Raw -Encoding UTF8 | ConvertFrom-Json
+        if ($event.pull_request -and $event.pull_request.head -and (Test-CommitSha $event.pull_request.head.sha)) {
+            $eventCommit = ([string]$event.pull_request.head.sha).Trim()
+        }
+        elseif (Test-CommitSha $event.after) {
+            $eventCommit = ([string]$event.after).Trim()
+        }
+    }
+    catch {
+        $eventCommit = $null
+    }
+}
+
+$targetCommit = $env:TARGET_SHA
+$sourceCommit = $gitCommit
+if (-not (Test-CommitSha $sourceCommit)) {
+    $sourceCommit = $targetCommit
+}
+if (-not (Test-CommitSha $sourceCommit)) {
+    $sourceCommit = $eventCommit
+}
+if (-not (Test-CommitSha $sourceCommit)) {
+    $sourceCommit = $env:GITHUB_SHA
+}
+if (-not (Test-CommitSha $sourceCommit)) {
+    throw "A valid exact source commit is required to build the HOME_LOCAL package."
+}
+$sourceCommit = ([string]$sourceCommit).Trim().ToLowerInvariant()
+foreach ($candidate in @($gitCommit, $targetCommit, $eventCommit)) {
+    if ((Test-CommitSha $candidate) -and ([string]$candidate).Trim().ToLowerInvariant() -ne $sourceCommit) {
+        throw "Exact source commit metadata does not match the checked-out source."
+    }
+}
+if ([string]::IsNullOrWhiteSpace($sourceBranch)) {
+    $sourceBranch = $env:GITHUB_REF_NAME
+}
 if ([string]::IsNullOrWhiteSpace($sourceBranch)) {
     $sourceBranch = "unknown"
 }
-if ([string]::IsNullOrWhiteSpace($sourceCommit) -or $sourceCommit -notmatch "^[0-9a-fA-F]{40}$") {
-    throw "A valid exact source commit is required to build the HOME_LOCAL package."
-}
+
 $manifest = [ordered]@{
     package = "QuantumLocalProduction_HOME_LOCAL"
     package_version = "R2_REDTEAM"
     source_branch = $sourceBranch
-    source_commit = $sourceCommit.ToLowerInvariant()
+    source_commit = $sourceCommit
     release_state = "RELEASE_BLOCKED"
     marketplace_write_enabled = $false
     tzdata_version = "2026.2"
