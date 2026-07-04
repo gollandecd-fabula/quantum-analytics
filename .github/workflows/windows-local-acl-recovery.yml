@@ -1,0 +1,184 @@
+name: Windows Local ACL Recovery
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - local-pilot-windows-acl-repair-r2
+    paths:
+      - "scripts/windows/install_home_local.ps1"
+      - "scripts/windows/import_source.ps1"
+      - "scripts/windows/configure_home_local.ps1"
+      - "config/home-local.template.json"
+      - ".github/workflows/windows-local-acl-recovery.yml"
+  pull_request:
+    paths:
+      - "scripts/windows/install_home_local.ps1"
+      - "scripts/windows/import_source.ps1"
+      - "scripts/windows/configure_home_local.ps1"
+      - "config/home-local.template.json"
+      - ".github/workflows/windows-local-acl-recovery.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  damaged-acl-recovery:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Assert exact head
+        shell: pwsh
+        run: |
+          $expected = "${{ github.event.pull_request.head.sha || github.sha }}"
+          $actual = (& git rev-parse HEAD).Trim()
+          if ($actual -ne $expected) {
+            throw "Exact-head checkout failed. Expected $expected, got $actual"
+          }
+          Write-Host "Validated exact head: $actual"
+
+      - name: Parse repaired scripts
+        shell: pwsh
+        run: |
+          foreach ($file in @(
+            "scripts/windows/install_home_local.ps1",
+            "scripts/windows/import_source.ps1",
+            "scripts/windows/configure_home_local.ps1"
+          )) {
+            $tokens = $null
+            $errors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile(
+              (Resolve-Path $file),
+              [ref]$tokens,
+              [ref]$errors
+            ) | Out-Null
+            if ($errors.Count -gt 0) {
+              $errors | Format-List | Out-String | Write-Error
+              throw "PowerShell parse failed: $file"
+            }
+          }
+
+      - name: Reproduce and repair unreadable managed files
+        shell: pwsh
+        run: |
+          Set-StrictMode -Version Latest
+          $ErrorActionPreference = "Stop"
+
+          $sourceRoot = Join-Path $env:RUNNER_TEMP "quantum-acl-package"
+          $installRoot = Join-Path $env:RUNNER_TEMP "quantum-acl-installed"
+          Remove-Item -LiteralPath $sourceRoot -Recurse -Force -ErrorAction SilentlyContinue
+          Remove-Item -LiteralPath $installRoot -Recurse -Force -ErrorAction SilentlyContinue
+
+          foreach ($path in @(
+            $sourceRoot,
+            (Join-Path $sourceRoot "scripts"),
+            (Join-Path $sourceRoot "config")
+          )) {
+            New-Item -ItemType Directory -Path $path -Force | Out-Null
+          }
+          Copy-Item -LiteralPath "src" -Destination (Join-Path $sourceRoot "src") -Recurse -Force
+          Copy-Item -LiteralPath "scripts/windows/import_source.ps1" -Destination (Join-Path $sourceRoot "scripts/import_source.ps1") -Force
+          Copy-Item -LiteralPath "scripts/windows/install_home_local.ps1" -Destination (Join-Path $sourceRoot "scripts/install_home_local.ps1") -Force
+          Copy-Item -LiteralPath "scripts/windows/configure_home_local.ps1" -Destination (Join-Path $sourceRoot "scripts/configure_home_local.ps1") -Force
+          Copy-Item -LiteralPath "config/home-local.template.json" -Destination (Join-Path $sourceRoot "config/home-local.template.json") -Force
+          Set-Content -LiteralPath (Join-Path $sourceRoot "IMPORT_XLSX.cmd") -Value "@echo off" -Encoding ASCII
+          Set-Content -LiteralPath (Join-Path $sourceRoot "INSTALL_HOME_LOCAL.cmd") -Value "@echo off" -Encoding ASCII
+          Set-Content -LiteralPath (Join-Path $sourceRoot "CONFIGURE_HOME_LOCAL.cmd") -Value "@echo off" -Encoding ASCII
+          Set-Content -LiteralPath (Join-Path $sourceRoot "README_FIRST.txt") -Value "ACL recovery fixture" -Encoding UTF8
+
+          $sourceFull = [IO.Path]::GetFullPath($sourceRoot).TrimEnd([char[]]"\/")
+          $sourcePrefix = $sourceFull + [IO.Path]::DirectorySeparatorChar
+          $entries = Get-ChildItem -LiteralPath $sourceRoot -Recurse -File | Sort-Object FullName | ForEach-Object {
+            $relative = $_.FullName.Substring($sourcePrefix.Length).Replace("\", "/")
+            [pscustomobject]@{
+              path = $relative
+              size_bytes = $_.Length
+              sha256 = (Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+            }
+          }
+          $manifest = [ordered]@{
+            package = "QuantumLocalProduction_HOME_LOCAL"
+            package_version = "R2_REDTEAM"
+            source_branch = "local-pilot-windows-acl-repair-r2"
+            source_commit = "${{ github.event.pull_request.head.sha || github.sha }}"
+            release_state = "RELEASE_BLOCKED"
+            marketplace_write_enabled = $false
+            tzdata_version = "2026.2"
+            manifest_excludes_self = $true
+            files = @($entries)
+          }
+          $manifest | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath (Join-Path $sourceRoot "manifest.sha256.json") -Encoding UTF8
+
+          foreach ($name in @("config", "data", "output", "scripts", "src")) {
+            New-Item -ItemType Directory -Path (Join-Path $installRoot $name) -Force | Out-Null
+          }
+          foreach ($name in @("config", "data", "output")) {
+            Set-Content -LiteralPath (Join-Path $installRoot "$name/sentinel.txt") -Value $name -Encoding ASCII
+          }
+
+          $oldLauncher = Join-Path $installRoot "scripts/import_source.ps1"
+          $obsoleteCommon = Join-Path $installRoot "scripts/common.ps1"
+          $legacyRuntime = Join-Path $installRoot "src/legacy-runtime.txt"
+          Set-Content -LiteralPath $oldLauncher -Value "throw 'legacy launcher'" -Encoding UTF8
+          Set-Content -LiteralPath $obsoleteCommon -Value "throw 'obsolete common'" -Encoding UTF8
+          Set-Content -LiteralPath $legacyRuntime -Value "legacy runtime" -Encoding UTF8
+
+          $identity = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
+          foreach ($path in @($oldLauncher, $obsoleteCommon, $legacyRuntime)) {
+            & icacls.exe $path /inheritance:r | Out-Host
+            if ($LASTEXITCODE -ne 0) {
+              throw "Failed to disable ACL inheritance for $path"
+            }
+            & icacls.exe $path /deny "${identity}:(R)" | Out-Host
+            if ($LASTEXITCODE -ne 0) {
+              throw "Failed to create unreadable managed file: $path"
+            }
+          }
+
+          $installer = Resolve-Path "scripts/windows/install_home_local.ps1"
+          powershell.exe -NoProfile -ExecutionPolicy Bypass `
+            -File $installer -SourceRoot $sourceRoot -TargetRoot $installRoot 2>&1 |
+            Tee-Object -FilePath acl-recovery-install.log
+          $installExitCode = $LASTEXITCODE
+          if ($installExitCode -ne 0) {
+            throw "ACL recovery installer failed with exit code $installExitCode"
+          }
+
+          foreach ($name in @("config", "data", "output")) {
+            $sentinel = Join-Path $installRoot "$name/sentinel.txt"
+            if (-not (Test-Path -LiteralPath $sentinel -PathType Leaf)) {
+              throw "Installer removed user-data sentinel: $sentinel"
+            }
+          }
+          if (Test-Path -LiteralPath $obsoleteCommon) {
+            throw "Obsolete common.ps1 survived repair."
+          }
+
+          foreach ($required in @(
+            (Join-Path $installRoot "scripts/import_source.ps1"),
+            (Join-Path $installRoot "scripts/configure_home_local.ps1"),
+            (Join-Path $installRoot "src/quantum/pilot/windows_runner.py"),
+            (Join-Path $installRoot "IMPORT_XLSX.cmd"),
+            (Join-Path $installRoot "CONFIGURE_HOME_LOCAL.cmd")
+          )) {
+            Get-Content -LiteralPath $required -TotalCount 1 -ErrorAction Stop | Out-Null
+          }
+
+          $runtimeBackups = @(Get-ChildItem -LiteralPath $installRoot -Directory -Filter "src.backup_*")
+          if ($runtimeBackups.Count -lt 1) {
+            throw "Damaged previous runtime was not transactionally backed up."
+          }
+
+      - name: Upload diagnostics on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-acl-recovery-log
+          path: acl-recovery-install.log
+          if-no-files-found: warn
+          retention-days: 7

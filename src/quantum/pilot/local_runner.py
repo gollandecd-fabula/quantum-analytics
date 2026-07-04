@@ -436,6 +436,27 @@ def run_local_pilot(
         dataset_id=dataset_id, receipt=receipt, record=record,
         policy=policy, zone_state="ADMITTED",
     )
+    execution_mode = config.get("execution_mode", "FULL")
+    if execution_mode == "ADMISSION_ONLY":
+        report["status"] = "ADMISSION_COMPLETE"
+        report["calculation"] = None
+        report["reconciliation"] = {
+            "state": "NOT_REQUESTED",
+            "differences": [],
+        }
+        report["blocked_metrics"] = []
+        report["limitations"] = [
+            "PILOT_READY_NOT_ASSERTED",
+            "FINANCE_CALCULATION_NOT_REQUESTED",
+            "FINANCE_CONFIGURATION_REQUIRED",
+            "DURABLE_AUTHENTICATION_NOT_INCLUDED",
+            "BACKUP_RESTORE_TEST_NOT_INCLUDED",
+            "DELETION_REHEARSAL_NOT_INCLUDED",
+            "INDEPENDENT_RELEASE_AUDIT_PENDING",
+        ]
+        return report
+    if execution_mode != "FULL":
+        raise LocalPilotError("LOCAL_PILOT_EXECUTION_MODE_INVALID")
     finance_request = dict(
         _mapping(
             config.get("finance_request"),
@@ -493,6 +514,7 @@ def main() -> None:
         if report["status"] not in {
             "PILOT_RUN_COMPLETE",
             "CALCULATED_RECONCILIATION_PENDING",
+            "ADMISSION_COMPLETE",
         }:
             raise SystemExit(2)
     except SystemExit:

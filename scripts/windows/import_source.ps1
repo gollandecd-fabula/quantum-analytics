@@ -111,7 +111,10 @@ function Invoke-DefenderScan {
     param([Parameter(Mandatory = $true)][string]$Path)
     if ($SkipDefenderScan) {
         Write-Host "Defender scan skipped by explicit switch." -ForegroundColor Yellow
-        return
+        return [ordered]@{
+            scanner = "EXPLICIT_EQUIVALENT_SCAN_ATTESTED"
+            outcome = "SKIPPED_BY_EXPLICIT_SWITCH"
+        }
     }
     $scanner = Resolve-DefenderScanner
     if (-not $scanner) {
@@ -121,6 +124,10 @@ function Invoke-DefenderScan {
     & $scanner -Scan -ScanType 3 -File $Path | Out-Host
     if ($LASTEXITCODE -ne 0) {
         throw "Microsoft Defender scan failed or reported a threat. Exit code: $LASTEXITCODE"
+    }
+    return [ordered]@{
+        scanner = $scanner
+        outcome = "CLEAN"
     }
 }
 
@@ -134,16 +141,62 @@ function Test-UsableConfig {
     }
     $statusProperty = $raw.PSObject.Properties["configuration_status"]
     if ($statusProperty -and [string]$statusProperty.Value -eq "REQUIRES_USER_VALUES") {
-        throw "Configuration template is not ready. Fill it and save it as config\default-home-local.json or config\production.local.json."
+        throw "Configuration template is not ready. Run CONFIGURE_HOME_LOCAL.cmd first."
+    }
+    $modeProperty = $raw.PSObject.Properties["execution_mode"]
+    $executionMode = if ($modeProperty) { [string]$modeProperty.Value } else { "FULL" }
+    if ($executionMode -eq "ADMISSION_ONLY") {
+        return
+    }
+    if ($executionMode -ne "FULL") {
+        throw "Configuration has unsupported execution_mode: $executionMode"
     }
     $financeProperty = $raw.PSObject.Properties["finance_request"]
     if (-not $financeProperty -or $null -eq $financeProperty.Value) {
-        throw "Configuration has no finance_request object: $Path"
+        throw "FULL configuration has no finance_request object: $Path"
     }
     $placeholderProperty = $financeProperty.Value.PSObject.Properties["replace_with_a_valid_versioned_finance_request"]
     if ($placeholderProperty -and $placeholderProperty.Value -eq $true) {
-        throw "Configuration still contains a finance_request placeholder: $Path"
+        throw "FULL configuration still contains a finance_request placeholder: $Path"
     }
+}
+
+function New-ScanReceipt {
+    param(
+        [Parameter(Mandatory = $true)][string]$SourcePath,
+        [Parameter(Mandatory = $true)]$ScanResult
+    )
+    $sourceHash = (Get-FileHash -LiteralPath $SourcePath -Algorithm SHA256).Hash.ToLowerInvariant()
+    $receipt = [ordered]@{
+        receipt_version = 1
+        source_sha256 = $sourceHash
+        scanner = [string]$ScanResult.scanner
+        outcome = [string]$ScanResult.outcome
+        created_at_utc = [DateTime]::UtcNow.ToString("o")
+    }
+    $receiptJson = $receipt | ConvertTo-Json -Compress
+    $receiptBytes = [Text.Encoding]::UTF8.GetBytes($receiptJson)
+    $receiptStream = [IO.MemoryStream]::new($receiptBytes)
+    try {
+        return [ordered]@{
+            source_sha256 = $sourceHash
+            evidence_sha256 = (Get-FileHash -InputStream $receiptStream -Algorithm SHA256).Hash.ToLowerInvariant()
+            receipt = $receipt
+        }
+    }
+    finally {
+        $receiptStream.Dispose()
+    }
+}
+
+function New-RuntimeConfig {
+    param(
+        [Parameter(Mandatory = $true)][string]$SourceConfig,
+        [Parameter(Mandatory = $true)][string]$MalwareEvidenceSha256
+    )
+    $raw = Get-Content -LiteralPath $SourceConfig -Raw -Encoding UTF8 | ConvertFrom-Json
+    $raw.malware_scan_evidence_sha256 = $MalwareEvidenceSha256
+    return $raw
 }
 
 $projectRoot = Resolve-ProjectRoot
@@ -165,7 +218,7 @@ if ([string]::IsNullOrWhiteSpace($Config)) {
     $Config = $candidates | Where-Object { Test-Path -LiteralPath $_ -PathType Leaf } | Select-Object -First 1
     if (-not $Config) {
         $template = Join-Path $projectRoot "config\home-local.template.json"
-        throw "No ready Quantum configuration was found. Fill $template and save it as config\default-home-local.json."
+        throw "No ready Quantum configuration was found. Run CONFIGURE_HOME_LOCAL.cmd. Template: $template"
     }
 }
 $Config = (Resolve-Path -LiteralPath $Config).Path
@@ -180,38 +233,107 @@ if ([string]::IsNullOrWhiteSpace($Output)) {
     $Output = Join-Path $outputDirectory ("import_{0}.json" -f (Get-Date -Format "yyyyMMdd_HHmmss"))
 }
 
-Invoke-DefenderScan -Path $File
+$scanResult = Invoke-DefenderScan -Path $File
+$scanReceipt = New-ScanReceipt -SourcePath $File -ScanResult $scanResult
+$reviewedFileHash = [string]$scanReceipt.source_sha256
 
 Write-Host "Runtime profile: HOME_LOCAL" -ForegroundColor Cyan
 Write-Host "Disk encryption is not required in HOME_LOCAL. The result will record the unencrypted-storage limitation." -ForegroundColor Yellow
 
 Confirm-Literal -Expected "AUTHORIZE" -Prompt "Type AUTHORIZE to attest lawful authority to process this report" -AlreadyAttested ([bool]$AuthorityAttested)
-Confirm-Literal -Expected "REVIEWED" -Prompt "Type REVIEWED to approve automatic sheet/header discovery for this selected report" -AlreadyAttested ([bool]$SchemaReviewed)
 
 $pythonCommand = Resolve-PythonCommand
 $env:PYTHONPATH = Join-Path $projectRoot "src"
+$runtimeConfig = Join-Path ([IO.Path]::GetTempPath()) ("quantum-runtime-config-{0}.json" -f [guid]::NewGuid().ToString("N"))
+$previewOutput = Join-Path ([IO.Path]::GetTempPath()) ("quantum-schema-preview-{0}.json" -f [guid]::NewGuid().ToString("N"))
 
-$arguments = @()
-$arguments += $pythonCommand.Prefix
-$arguments += @(
-    "-m", "quantum.pilot.windows_runner",
-    "--file", $File,
-    "--config", $Config,
-    "--storage-root", $StorageRoot,
-    "--output", $Output,
-    "--home-local",
-    "--discover-schema",
-    "--authority-attested",
-    "--schema-reviewed"
-)
-if ($DebugErrors) {
-    $arguments += "--debug-errors"
+try {
+    $runtimeConfigObject = New-RuntimeConfig -SourceConfig $Config -MalwareEvidenceSha256 ([string]$scanReceipt.evidence_sha256)
+    $runtimeConfigJson = $runtimeConfigObject | ConvertTo-Json -Depth 16
+    [IO.File]::WriteAllText($runtimeConfig, $runtimeConfigJson, ([System.Text.UTF8Encoding]::new($false)))
+
+    $previewArguments = @()
+    $previewArguments += $pythonCommand.Prefix
+    $previewArguments += @(
+        "-m", "quantum.pilot.windows_runner",
+        "--file", $File,
+        "--config", $runtimeConfig,
+        "--storage-root", $StorageRoot,
+        "--output", $previewOutput,
+        "--home-local",
+        "--discover-only",
+        "--authority-attested"
+    )
+    if ($DebugErrors) {
+        $previewArguments += "--debug-errors"
+    }
+    & $pythonCommand.Executable @previewArguments
+    if ($LASTEXITCODE -ne 0) {
+        throw "Quantum schema discovery failed with exit code $LASTEXITCODE."
+    }
+    $preview = Get-Content -LiteralPath $previewOutput -Raw -Encoding UTF8 | ConvertFrom-Json
+    if ([string]$preview.file_sha256 -ne $reviewedFileHash) {
+        throw "Schema preview file hash does not match the scanned file."
+    }
+    $schemaProperty = $preview.PSObject.Properties["schema_discovery"]
+    if (-not $schemaProperty -or $null -eq $schemaProperty.Value) {
+        throw "Schema preview does not contain schema_discovery."
+    }
+    $schema = $schemaProperty.Value
+    foreach ($requiredProperty in @(
+        "headers",
+        "sheet_name",
+        "header_row_index",
+        "column_count",
+        "data_row_count"
+    )) {
+        if (-not $schema.PSObject.Properties[$requiredProperty]) {
+            throw "Schema preview is missing required property: $requiredProperty"
+        }
+    }
+    if (@($schema.headers).Count -lt 1) {
+        throw "Schema preview headers are empty."
+    }
+    $headers = @($schema.headers) -join " | "
+    Write-Host "Discovered sheet: $($schema.sheet_name)" -ForegroundColor Cyan
+    Write-Host "Header row: $($schema.header_row_index)"
+    Write-Host "Columns: $($schema.column_count)"
+    Write-Host "Data rows: $($schema.data_row_count)"
+    Write-Host "Headers: $headers"
+    Write-Host "File SHA-256: $reviewedFileHash"
+    Confirm-Literal -Expected "REVIEWED" -Prompt "Review the displayed schema and type REVIEWED to continue" -AlreadyAttested ([bool]$SchemaReviewed)
+
+    $currentFileHash = (Get-FileHash -LiteralPath $File -Algorithm SHA256).Hash.ToLowerInvariant()
+    if ($currentFileHash -ne $reviewedFileHash) {
+        throw "Source file changed after schema review. Restart the import."
+    }
+
+    $arguments = @()
+    $arguments += $pythonCommand.Prefix
+    $arguments += @(
+        "-m", "quantum.pilot.windows_runner",
+        "--file", $File,
+        "--config", $runtimeConfig,
+        "--storage-root", $StorageRoot,
+        "--output", $Output,
+        "--home-local",
+        "--discover-schema",
+        "--expected-file-sha256", $reviewedFileHash,
+        "--authority-attested",
+        "--schema-reviewed"
+    )
+    if ($DebugErrors) {
+        $arguments += "--debug-errors"
+    }
+    & $pythonCommand.Executable @arguments
+    $exitCode = $LASTEXITCODE
+    if ($exitCode -ne 0) {
+        throw "Quantum import failed with exit code $exitCode."
+    }
 }
-
-& $pythonCommand.Executable @arguments
-$exitCode = $LASTEXITCODE
-if ($exitCode -ne 0) {
-    throw "Quantum import failed with exit code $exitCode."
+finally {
+    Remove-Item -LiteralPath $runtimeConfig -Force -ErrorAction SilentlyContinue
+    Remove-Item -LiteralPath $previewOutput -Force -ErrorAction SilentlyContinue
 }
 
 Write-Host "Import completed." -ForegroundColor Green
