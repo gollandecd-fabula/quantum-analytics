@@ -67,6 +67,8 @@
       "фио"
     ]
   },
+  "recommendation_policy": null,
+  "local_output_root": null,
   "finance_request": null,
   "reconciliation": null,
   "execution_mode": "ADMISSION_ONLY"
