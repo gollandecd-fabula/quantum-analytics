@@ -16,23 +16,23 @@ _NAMESPACE_DECLARATION = re.compile(
     r"(?P<quote>[\"'])(?P<uri>[^\"']*)(?P=quote)",
 )
 _WORKSHEET_ROOT_START = re.compile(r"^\s*<worksheet\b[^>]*>", re.DOTALL)
+_PREFIX = re.compile(r"^[A-Za-z_][A-Za-z0-9_.-]*$")
+_GUID = re.compile(
+    r"^\{[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-"
+    r"[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}\}$"
+)
 
 _SPREADSHEET_NS = "http://schemas.openxmlformats.org/spreadsheetml/2006/main"
 _MC_NS = "http://schemas.openxmlformats.org/markup-compatibility/2006"
 _X14AC_NS = "http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac"
+_XR_NS = "http://schemas.microsoft.com/office/spreadsheetml/2014/revision"
 
 _WORKSHEET = f"{{{_SPREADSHEET_NS}}}worksheet"
 _MC_IGNORABLE = f"{{{_MC_NS}}}Ignorable"
+_XR_UID = f"{{{_XR_NS}}}uid"
 _RICH_PROPERTIES = f"{{{_SPREADSHEET_NS}}}rPr"
 _RICH_BOLD = f"{{{_SPREADSHEET_NS}}}b"
 _RICH_ITALIC = f"{{{_SPREADSHEET_NS}}}i"
-
-_BASE_BINDINGS = ((None, _SPREADSHEET_NS),)
-_COMPATIBILITY_BINDINGS = (
-    (None, _SPREADSHEET_NS),
-    ("mc", _MC_NS),
-    ("x14ac", _X14AC_NS),
-)
 
 
 def _u16(payload: bytes, offset: int) -> int:
@@ -93,10 +93,40 @@ def _worksheet_namespace_bindings(payload: bytes) -> tuple[tuple[str | None, str
     return bindings
 
 
-def _validate_worksheet_namespace_contract(payload: bytes) -> None:
-    bindings = _worksheet_namespace_bindings(payload)
-    if bindings not in {_BASE_BINDINGS, _COMPATIBILITY_BINDINGS}:
+def _validate_ignorable(
+    value: str | None,
+    bindings: dict[str | None, str],
+) -> None:
+    if value is None:
+        return
+    if not value or value != value.strip():
+        raise XlsxInspectionError("XLSX_WORKSHEET_ATTRIBUTE_VALUE_INVALID")
+    tokens = value.split()
+    if (
+        not tokens
+        or any(_PREFIX.fullmatch(token) is None for token in tokens)
+        or any(token not in bindings for token in tokens)
+    ):
         raise XlsxInspectionError("XLSX_XML_NAMESPACE_UNMODELED")
+
+
+def _validate_worksheet_namespace_contract(
+    payload: bytes,
+) -> dict[str | None, str]:
+    bindings = dict(_worksheet_namespace_bindings(payload))
+    if bindings.get(None) != _SPREADSHEET_NS:
+        raise XlsxInspectionError("XLSX_XML_NAMESPACE_UNMODELED")
+    expected = {
+        "mc": _MC_NS,
+        "x14ac": _X14AC_NS,
+        "xr": _XR_NS,
+    }
+    if any(
+        prefix in bindings and bindings[prefix] != uri
+        for prefix, uri in expected.items()
+    ):
+        raise XlsxInspectionError("XLSX_XML_NAMESPACE_UNMODELED")
+    return bindings
 
 
 def _validate_rich_property_cardinality(root) -> None:
@@ -114,11 +144,17 @@ def _validate_rich_property_cardinality(root) -> None:
             )
 
 
-def _validate_worksheet_semantics(root) -> None:
+def _validate_worksheet_semantics(
+    root,
+    bindings: dict[str | None, str],
+) -> None:
     if root.tag != _WORKSHEET:
         raise XlsxInspectionError("XLSX_WORKSHEET_INVALID")
-    ignorable = root.get(_MC_IGNORABLE)
-    if ignorable is not None and ignorable != "x14ac":
+    if set(root.attrib) - {_MC_IGNORABLE, _XR_UID}:
+        raise XlsxInspectionError("XLSX_WORKSHEET_ATTRIBUTE_UNMODELED")
+    _validate_ignorable(root.get(_MC_IGNORABLE), bindings)
+    uid = root.get(_XR_UID)
+    if uid is not None and _GUID.fullmatch(uid) is None:
         raise XlsxInspectionError("XLSX_WORKSHEET_ATTRIBUTE_VALUE_INVALID")
     _validate_rich_property_cardinality(root)
 
@@ -137,9 +173,9 @@ def validate_workbook_r19_hardening(
                     ".xml"
                 ):
                     payload = _read_limited(zf, info.filename, limits)
-                    _validate_worksheet_namespace_contract(payload)
+                    bindings = _validate_worksheet_namespace_contract(payload)
                     root = _xml_root(payload, "XLSX_WORKSHEET_INVALID")
-                    _validate_worksheet_semantics(root)
+                    _validate_worksheet_semantics(root, bindings)
                 elif normalized == "xl/sharedstrings.xml":
                     root = _xml_root(
                         _read_limited(zf, info.filename, limits),
