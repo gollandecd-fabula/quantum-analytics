@@ -7,11 +7,12 @@ from typing import Any
 from quantum.ingestion import XlsxInspectionLimits
 from quantum.ingestion._xlsx_contracts import normalized_header_sha256
 
-from .detailed_financial import normalize_detailed_financial_rows
+from .detailed_financial import _ALIASES, normalize_detailed_financial_rows
 from .source_bridge import WbSourceBridgeError, _sheet_rows
 
 
 DETAILED_XLSX_SCHEMA_VERSION = "quantum-wb-detailed-xlsx-v1"
+_CONTEXT_FIELDS = frozenset({"report_id", "date_from", "date_to", "currency"})
 
 
 class WbDetailedXlsxError(ValueError):
@@ -57,7 +58,7 @@ def _read_bound_rows(
     payload: bytes,
     schema_discovery: Mapping[str, Any],
     limits: XlsxInspectionLimits,
-) -> tuple[list[dict[str, str]], dict[str, Any]]:
+) -> tuple[list[tuple[int, dict[str, str]]], dict[str, Any]]:
     if not isinstance(payload, bytes) or not payload:
         raise WbDetailedXlsxError("WB_DETAILED_XLSX_PAYLOAD_REQUIRED")
     if not isinstance(schema_discovery, Mapping):
@@ -126,7 +127,7 @@ def _read_bound_rows(
     if normalized_header_sha256(actual_headers) != claimed_hash:
         raise WbDetailedXlsxError("WB_DETAILED_XLSX_HEADER_HASH_MISMATCH")
 
-    rows: list[dict[str, str]] = []
+    rows: list[tuple[int, dict[str, str]]] = []
     row_numbers: list[int] = []
     for row_index, values in parsed_rows:
         if row_index <= header_row_index or not any(
@@ -138,7 +139,7 @@ def _read_bound_rows(
                 "WB_DETAILED_XLSX_DATA_COLUMN_OVERFLOW"
             )
         padded = values + ("",) * (len(headers) - len(values))
-        rows.append(dict(zip(headers, padded, strict=True)))
+        rows.append((row_index, dict(zip(headers, padded, strict=True))))
         row_numbers.append(row_index)
 
     if expected_rows is not None and len(rows) != expected_rows:
@@ -159,12 +160,50 @@ def _read_bound_rows(
     return rows, binding
 
 
+def _has_value(row: Mapping[str, Any], field: str) -> bool:
+    return any(
+        alias in row and str(row[alias]).strip()
+        for alias in _ALIASES[field]
+    )
+
+
+def _prepare_rows(
+    rows: list[tuple[int, dict[str, str]]],
+    source_context: Mapping[str, Any] | None,
+) -> list[dict[str, Any]]:
+    if source_context is None:
+        context: Mapping[str, Any] = {}
+    elif not isinstance(source_context, Mapping):
+        raise WbDetailedXlsxError("WB_DETAILED_XLSX_CONTEXT_INVALID")
+    else:
+        context = source_context
+    if set(context) - _CONTEXT_FIELDS:
+        raise WbDetailedXlsxError("WB_DETAILED_XLSX_CONTEXT_INVALID")
+
+    prepared: list[dict[str, Any]] = []
+    for row_index, raw in rows:
+        row: dict[str, Any] = dict(raw)
+        if not _has_value(row, "row_id"):
+            row[_ALIASES["row_id"][0]] = str(row_index)
+        for field in _CONTEXT_FIELDS:
+            if not _has_value(row, field) and field in context:
+                value = context[field]
+                if value is None or isinstance(value, bool) or not str(value).strip():
+                    raise WbDetailedXlsxError(
+                        "WB_DETAILED_XLSX_CONTEXT_VALUE_INVALID:" + field
+                    )
+                row[_ALIASES[field][0]] = value
+        prepared.append(row)
+    return prepared
+
+
 def bridge_detailed_financial_xlsx(
     *,
     payload: bytes,
     schema_discovery: Mapping[str, Any],
     limits: XlsxInspectionLimits,
     source_id: str,
+    source_context: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Bridge an admitted ZIP/XLSX directly into the detailed mapper.
 
@@ -172,11 +211,12 @@ def bridge_detailed_financial_xlsx(
     actual workbook before normalization. Raw row mappings exist only inside
     this call and are not included in the returned report.
     """
-    rows, binding = _read_bound_rows(
+    bound_rows, binding = _read_bound_rows(
         payload=payload,
         schema_discovery=schema_discovery,
         limits=limits,
     )
+    rows = _prepare_rows(bound_rows, source_context)
     result = normalize_detailed_financial_rows(
         rows,
         source_id=source_id,
