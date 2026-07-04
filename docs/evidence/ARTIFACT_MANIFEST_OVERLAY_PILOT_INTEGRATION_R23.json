@@ -38,8 +38,8 @@
     ],
     [
       "scripts/windows/build_local_production.ps1",
-      "478f3c0d200b0045f7cb4a3879d5544a0a3254b16002683e18a20b141456944f",
-      8717
+      "19f67149abd997b18b56680bf34753fa68cc567d095d8a1c4faadc54200a0a20",
+      8748
     ],
     [
       "scripts/windows/configure_home_local.ps1",
@@ -138,7 +138,7 @@
     ],
     [
       "tests/test_windows_redteam_hardening.py",
-      "d0736b83abfc2ef4b2c2f65dbed30fdd3272d9046bc5d3c825489623fff322da",
+      "d0736b83abfc2ef4b2c65dbed30fdd3272d9046bc5d3c825489623fff322da",
       9207
     ],
     [
