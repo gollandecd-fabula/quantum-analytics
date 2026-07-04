@@ -25,6 +25,12 @@ _REQUIRED_BUNDLE_FIELDS = frozenset(
         "bundle_hash",
     }
 )
+_OPTIONAL_BUNDLE_FIELDS = frozenset(
+    {
+        "priority_order",
+        "source_evidence_refs",
+    }
+)
 
 
 def _canonical_json(value: Any) -> bytes:
@@ -84,7 +90,11 @@ def build_recommendation_bundle(
 def validate_recommendation_bundle(bundle: object) -> None:
     if not isinstance(bundle, Mapping):
         raise RecommendationError("RECOMMENDATION_BUNDLE_INVALID")
-    if set(bundle) != _REQUIRED_BUNDLE_FIELDS:
+    fields = set(bundle)
+    if (
+        not _REQUIRED_BUNDLE_FIELDS.issubset(fields)
+        or fields - _REQUIRED_BUNDLE_FIELDS - _OPTIONAL_BUNDLE_FIELDS
+    ):
         raise RecommendationError("RECOMMENDATION_BUNDLE_FIELDS_INVALID")
     if bundle.get("schema_version") != RECOMMENDATION_BUNDLE_SCHEMA_VERSION:
         raise RecommendationError("RECOMMENDATION_BUNDLE_SCHEMA_UNSUPPORTED")
@@ -108,6 +118,16 @@ def validate_recommendation_bundle(bundle: object) -> None:
         or count != len(recommendations)
     ):
         raise RecommendationError("RECOMMENDATION_BUNDLE_COUNT_INVALID")
+    if "priority_order" in bundle and bundle.get("priority_order") != [
+        "PROFIT",
+        "SUSTAINABLE_GROWTH",
+        "TURNOVER",
+    ]:
+        raise RecommendationError("RECOMMENDATION_BUNDLE_PRIORITY_INVALID")
+    if "source_evidence_refs" in bundle and not isinstance(
+        bundle.get("source_evidence_refs"), list
+    ):
+        raise RecommendationError("RECOMMENDATION_BUNDLE_EVIDENCE_INVALID")
     if status == "READY":
         if reason_codes:
             raise RecommendationError("RECOMMENDATION_BUNDLE_REASONS_INVALID")
