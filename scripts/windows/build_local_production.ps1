@@ -131,7 +131,7 @@ if errorlevel 1 pause
 Set-Content -LiteralPath (Join-Path $stageRoot "INSTALL_HOME_LOCAL.cmd") -Value $installCommand -Encoding ASCII
 
 $readme = @'
-QUANTUM HOME_LOCAL WINDOWS PACKAGE — ONE-CLICK LOCAL PILOT
+QUANTUM HOME_LOCAL WINDOWS PACKAGE - ONE-CLICK LOCAL PILOT
 
 PRIMARY ACTION
 1. Extract the ZIP outside OneDrive, Dropbox, Google Drive and other synchronized folders.
@@ -149,9 +149,9 @@ SAFETY
 - Real reports, configs, storage data and outputs must not be uploaded to GitHub or cloud-synchronized folders.
 
 RECOVERY TOOLS
-- INSTALL_HOME_LOCAL.cmd — installation/repair only.
-- CONFIGURE_HOME_LOCAL.cmd — configuration only.
-- IMPORT_XLSX.cmd — import only.
+- INSTALL_HOME_LOCAL.cmd - installation/repair only.
+- CONFIGURE_HOME_LOCAL.cmd - configuration only.
+- IMPORT_XLSX.cmd - import only.
 
 DEFAULT INSTALLATION
 %LOCALAPPDATA%\QuantumLocalProduction
