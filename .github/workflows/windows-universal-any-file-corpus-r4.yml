@@ -1,0 +1,89 @@
+name: Windows Universal Any-File Corpus R4
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/windows-universal-any-file-corpus-r4.yml"
+      - "scripts/windows/import_source.ps1"
+      - "src/quantum/pilot/universal_gateway.py"
+      - "src/quantum/pilot/universal_import.py"
+      - "src/quantum/pilot/universal_intake.py"
+      - "tests/test_universal_any_file_contract_r4.py"
+      - "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R33.json"
+
+permissions:
+  contents: read
+
+jobs:
+  universal-any-file-corpus:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Assert exact head
+        shell: pwsh
+        run: |
+          $expected = "${{ github.event.pull_request.head.sha || github.sha }}"
+          $actual = (& git rev-parse HEAD).Trim()
+          if ($actual -ne $expected) { throw "Exact-head checkout failed." }
+
+      - name: Run universal Python corpus
+        shell: pwsh
+        run: |
+          $env:PYTHONPATH = Join-Path $PWD "src"
+          python -m unittest tests.test_universal_any_file_contract_r4 -v
+          if ($LASTEXITCODE -ne 0) { throw "Universal Python corpus failed." }
+
+      - name: Run native Windows front-door corpus
+        shell: pwsh
+        run: |
+          Set-StrictMode -Version Latest
+          $ErrorActionPreference = "Stop"
+          $root = Join-Path $env:RUNNER_TEMP "quantum-any-file-corpus"
+          $data = Join-Path $root "data"
+          $output = Join-Path $root "output"
+          New-Item -ItemType Directory -Path $root,$data,$output -Force | Out-Null
+
+          $cases = @(
+            [ordered]@{ Name="table-wrong-extension.xlsx"; Bytes=[Text.Encoding]::UTF8.GetBytes('[{"sku":"A","sales":1}]'); Expected="ACCEPTED_PARTIAL"; Exit=0 },
+            [ordered]@{ Name="plain.csv"; Bytes=[Text.Encoding]::GetEncoding(1251).GetBytes("sku;sales`r`nA;1`r`n"); Expected="ACCEPTED_PARTIAL"; Exit=0 },
+            [ordered]@{ Name="passive.pdf"; Bytes=[Text.Encoding]::ASCII.GetBytes("%PDF-1.4`n%%EOF"); Expected="ACCEPTED_PARTIAL"; Exit=0 },
+            [ordered]@{ Name="opaque.bin"; Bytes=[byte[]](0..63); Expected="ACCEPTED_UNPARSED"; Exit=0 },
+            [ordered]@{ Name="active.txt"; Bytes=[byte[]](77,90,48,48,48,48); Expected="QUARANTINED_SECURITY"; Exit=2 }
+          )
+
+          foreach ($case in $cases) {
+            $source = Join-Path $root $case.Name
+            $report = Join-Path $output ($case.Name + ".json")
+            [IO.File]::WriteAllBytes($source, $case.Bytes)
+            & powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\windows\import_source.ps1 `
+              -File $source -StorageRoot $data -Output $report -NonInteractive `
+              -AuthorityAttested -SchemaReviewed -SkipDefenderScan
+            $exitCode = $LASTEXITCODE
+            if ($exitCode -ne $case.Exit) {
+              throw "Unexpected exit code for $($case.Name): $exitCode"
+            }
+            if (-not (Test-Path -LiteralPath $report -PathType Leaf)) {
+              throw "Missing report for $($case.Name)"
+            }
+            $payload = Get-Content -LiteralPath $report -Raw -Encoding UTF8 | ConvertFrom-Json
+            if ([string]$payload.status -ne $case.Expected) {
+              throw "Unexpected status for $($case.Name): $($payload.status)"
+            }
+            if ($null -ne $payload.calculation) {
+              throw "Non-XLSX case produced a calculation: $($case.Name)"
+            }
+            if ([bool]$payload.marketplace_write_enabled) {
+              throw "Marketplace writes enabled for $($case.Name)"
+            }
+          }
+
+          Write-Host "WINDOWS_UNIVERSAL_ANY_FILE_CORPUS_PASS" -ForegroundColor Green
