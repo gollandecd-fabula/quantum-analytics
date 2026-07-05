@@ -1,0 +1,70 @@
+name: Debug Quantum Inner Package Inventory
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [local-one-button-redteam-r3]
+    paths:
+      - ".github/workflows/debug-inner-package-inventory.yml"
+      - "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R33.json"
+
+permissions:
+  contents: read
+
+jobs:
+  inventory:
+    runs-on: windows-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and inspect with Windows Expand-Archive
+        shell: pwsh
+        env:
+          TARGET_SHA: ${{ github.sha }}
+        run: |
+          Set-StrictMode -Version Latest
+          $ErrorActionPreference = "Stop"
+          powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\windows\build_two_installer_bundles.ps1
+          if ($LASTEXITCODE -ne 0) { throw "Build failed: $LASTEXITCODE" }
+          $outer = Join-Path $env:RUNNER_TEMP "debug-outer"
+          $inner = Join-Path $env:RUNNER_TEMP "debug-inner"
+          Remove-Item $outer,$inner -Recurse -Force -ErrorAction SilentlyContinue
+          Expand-Archive "dist\installer-bundles-r2\2_QUANTUM_FULL_OFFLINE_INSTALLER.zip" $outer
+          Expand-Archive "$outer\QuantumLocalProduction_HOME_LOCAL.zip" $inner
+          $manifestPath = Join-Path $inner "manifest.sha256.json"
+          $manifest = Get-Content $manifestPath -Raw -Encoding UTF8 | ConvertFrom-Json
+          $root = [IO.Path]::GetFullPath($inner).TrimEnd([char[]]"\/")
+          $prefix = $root + [IO.Path]::DirectorySeparatorChar
+          $seen = [Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
+          foreach ($entry in @($manifest.files)) { [void]$seen.Add(([string]$entry.path).Replace("\", "/")) }
+          $actual = @(Get-ChildItem $root -Recurse -File | Where-Object { $_.FullName -ne $manifestPath } | ForEach-Object { $_.FullName.Substring($prefix.Length).Replace("\", "/") })
+          $extra = @($actual | Where-Object { -not $seen.Contains($_) })
+          $actualSet = [Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
+          foreach ($path in $actual) { [void]$actualSet.Add($path) }
+          $missing = @($seen | Where-Object { -not $actualSet.Contains($_) })
+          @(
+            "manifest_count=$($seen.Count)",
+            "actual_count=$($actual.Count)",
+            "actual_unique_count=$($actualSet.Count)",
+            "extra_count=$($extra.Count)",
+            "missing_count=$($missing.Count)",
+            "EXTRA_BEGIN",
+            $extra,
+            "EXTRA_END",
+            "MISSING_BEGIN",
+            $missing,
+            "MISSING_END",
+            "ACTUAL_BEGIN",
+            $actual,
+            "ACTUAL_END"
+          ) | Set-Content inner-inventory.log -Encoding UTF8
+          Get-Content inner-inventory.log
+          if ($extra.Count -gt 0 -or $missing.Count -gt 0 -or $actual.Count -ne $seen.Count) { exit 17 }
+      - name: Upload inventory
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Quantum-Inner-Inventory-Debug
+          path: inner-inventory.log
+          if-no-files-found: error
+          retention-days: 3
