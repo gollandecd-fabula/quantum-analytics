@@ -102,7 +102,7 @@ $startCommand = @'
 @echo off
 setlocal
 title Quantum HOME_LOCAL
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\one_click_home_local.ps1" -PackageRoot "%~dp0"
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\one_click_home_local.ps1" -PackageRoot "%~dp0" -AuthorityAttested -SchemaReviewed
 set "quantum_exit=%errorlevel%"
 if not "%quantum_exit%"=="0" pause
 exit /b %quantum_exit%
@@ -111,7 +111,7 @@ Set-Content -LiteralPath (Join-Path $stageRoot "START_QUANTUM.cmd") -Value $star
 
 $importCommand = @'
 @echo off
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\import_source.ps1"
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\import_source.ps1" -AuthorityAttested -SchemaReviewed
 if errorlevel 1 pause
 '@
 Set-Content -LiteralPath (Join-Path $stageRoot "IMPORT_XLSX.cmd") -Value $importCommand -Encoding ASCII
@@ -136,12 +136,13 @@ QUANTUM HOME_LOCAL WINDOWS PACKAGE - ONE-CLICK LOCAL PILOT
 PRIMARY ACTION
 1. Extract the ZIP outside OneDrive, Dropbox, Google Drive and other synchronized folders.
 2. Double-click START_QUANTUM.cmd.
-3. On the first run, the same window verifies and installs the package, creates a safe ADMISSION_ONLY configuration when required, opens XLSX selection, performs the local scan and continues to the report review.
-4. Type AUTHORIZE only when you have lawful authority to process the selected report.
-5. Type REVIEWED only after Quantum displays the sheet, header row and headers.
-6. After a successful run, Quantum opens the local dashboard/output directory.
+3. On the first run, the same window verifies and installs the package, creates a safe ADMISSION_ONLY configuration when required, opens XLSX selection, performs the local scan and continues automatically.
+4. No AUTHORIZE or REVIEWED console input is required in the one-click launch path.
+5. After a successful run, Quantum opens the local dashboard/output directory.
 
 SAFETY
+- The one-click launchers carry explicit local authority and schema-review attestations. Use them only for reports you are lawfully authorized to process and have selected for review.
+- Microsoft Defender scanning remains enabled during normal use.
 - The installer verifies every packaged file against manifest.sha256.json before changing the installation.
 - Existing config, data and output directories are preserved.
 - Cost, tax and expense values are never invented. FULL financial calculation still requires an explicit valid finance_request.
@@ -151,7 +152,7 @@ SAFETY
 RECOVERY TOOLS
 - INSTALL_HOME_LOCAL.cmd - installation/repair only.
 - CONFIGURE_HOME_LOCAL.cmd - configuration only.
-- IMPORT_XLSX.cmd - import only.
+- IMPORT_XLSX.cmd - authorized import only; no AUTHORIZE or REVIEWED console input is required.
 
 DEFAULT INSTALLATION
 %LOCALAPPDATA%\QuantumLocalProduction
