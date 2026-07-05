@@ -18,16 +18,21 @@ class WindowsHashCompatR4Tests(unittest.TestCase):
         self.assertIn('ParameterSetName = "InputStream"', script)
         self.assertIn("ComputeHash", script)
 
-    def test_front_door_and_xlsx_helper_load_shim_before_hashing(self):
-        for path in (
-            WINDOWS / "import_source.ps1",
-            PILOT / "import_xlsx_source.ps1",
-        ):
-            script = path.read_text(encoding="utf-8")
-            load = script.index(". $hashCompat")
-            first_hash = script.index("Get-FileHash", load)
-            self.assertLess(load, first_hash, path.name)
-            self.assertIn("Quantum SHA-256 compatibility shim was not found", script)
+    def test_front_door_loads_shim_before_scan_receipt_execution(self):
+        script = (WINDOWS / "import_source.ps1").read_text(encoding="utf-8")
+        load = script.index(". $hashCompat")
+        execution = script.index("$scanReceipt = New-ScanReceipt", load)
+        self.assertLess(load, execution)
+        self.assertIn("Get-FileHash", script)
+        self.assertIn("Quantum SHA-256 compatibility shim was not found", script)
+
+    def test_xlsx_helper_loads_shim_before_scan_receipt_execution(self):
+        script = (PILOT / "import_xlsx_source.ps1").read_text(encoding="utf-8")
+        load = script.index(". $hashCompat")
+        execution = script.index("$scanReceipt = Resolve-ScanReceipt", load)
+        self.assertLess(load, execution)
+        self.assertIn("Get-FileHash", script)
+        self.assertIn("Quantum SHA-256 compatibility shim was not found", script)
 
     def test_compatibility_scripts_are_ascii_for_windows_powershell(self):
         for path in (
