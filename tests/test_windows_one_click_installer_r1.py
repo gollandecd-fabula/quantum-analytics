@@ -84,6 +84,15 @@ class WindowsOneClickInstallerR1Tests(unittest.TestCase):
         self.assertRegex(script, re.compile(r'if \(\$AuthorityAttested\).*AuthorityAttested', re.DOTALL))
         self.assertRegex(script, re.compile(r'if \(\$SchemaReviewed\).*SchemaReviewed', re.DOTALL))
 
+    def test_windows_entry_scripts_are_ascii_for_powershell_51(self):
+        for name, script in (
+            ("one_click_home_local.ps1", self.one_click),
+            ("install_home_local.ps1", self.installer),
+            ("build_local_production.ps1", self.builder),
+        ):
+            non_ascii = sorted({character for character in script if ord(character) > 127})
+            self.assertEqual(non_ascii, [], name)
+
 
 if __name__ == "__main__":
     unittest.main()
