@@ -63,6 +63,7 @@ Copy-Item -LiteralPath (Join-Path $repositoryRoot "src") -Destination (Join-Path
 Copy-Item -LiteralPath (Join-Path $repositoryRoot "scripts\windows\import_source.ps1") -Destination (Join-Path $stageRoot "scripts\import_source.ps1") -Force
 Copy-Item -LiteralPath (Join-Path $repositoryRoot "scripts\windows\install_home_local.ps1") -Destination (Join-Path $stageRoot "scripts\install_home_local.ps1") -Force
 Copy-Item -LiteralPath (Join-Path $repositoryRoot "scripts\windows\configure_home_local.ps1") -Destination (Join-Path $stageRoot "scripts\configure_home_local.ps1") -Force
+Copy-Item -LiteralPath (Join-Path $repositoryRoot "scripts\windows\one_click_home_local.ps1") -Destination (Join-Path $stageRoot "scripts\one_click_home_local.ps1") -Force
 Copy-Item -LiteralPath (Join-Path $repositoryRoot "config\home-local.template.json") -Destination (Join-Path $stageRoot "config\home-local.template.json") -Force
 
 $requirementsPath = Join-Path $repositoryRoot "requirements\windows-home-local.txt"
@@ -97,6 +98,17 @@ if (Test-Path -LiteralPath $documentation -PathType Leaf) {
     Copy-Item -LiteralPath $documentation -Destination (Join-Path $stageRoot "docs\WINDOWS_HOME_LOCAL_PACKAGE.md") -Force
 }
 
+$startCommand = @'
+@echo off
+setlocal
+title Quantum HOME_LOCAL
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\one_click_home_local.ps1" -PackageRoot "%~dp0"
+set "quantum_exit=%errorlevel%"
+if not "%quantum_exit%"=="0" pause
+exit /b %quantum_exit%
+'@
+Set-Content -LiteralPath (Join-Path $stageRoot "START_QUANTUM.cmd") -Value $startCommand -Encoding ASCII
+
 $importCommand = @'
 @echo off
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\import_source.ps1"
@@ -119,20 +131,31 @@ if errorlevel 1 pause
 Set-Content -LiteralPath (Join-Path $stageRoot "INSTALL_HOME_LOCAL.cmd") -Value $installCommand -Encoding ASCII
 
 $readme = @'
-QUANTUM HOME_LOCAL WINDOWS PACKAGE — RED TEAM HARDENED
+QUANTUM HOME_LOCAL WINDOWS PACKAGE — ONE-CLICK LOCAL PILOT
 
-1. Extract the package outside cloud-synchronized folders.
-2. Run INSTALL_HOME_LOCAL.cmd.
-3. If no ready config exists, run CONFIGURE_HOME_LOCAL.cmd and enter the report period and retention deadline.
-4. Run IMPORT_XLSX.cmd and select the authorized XLSX report.
-5. Quantum displays the discovered sheet, header row and headers before REVIEWED can be confirmed.
-6. ADMISSION_ONLY validates and admits the report without inventing cost, tax or expense values.
-7. FULL financial calculation requires an explicit valid finance_request.
-8. The installer verifies every packaged file against manifest.sha256.json before changing the installation.
-9. Existing config, data and output directories are preserved.
-10. HOME_LOCAL does not require BitLocker; the result records the unencrypted-storage limitation.
-11. No marketplace writes, deploy, public/LAN exposure or production release are enabled.
-12. Do not upload real reports, configs, data or output to GitHub or cloud-sync folders.
+PRIMARY ACTION
+1. Extract the ZIP outside OneDrive, Dropbox, Google Drive and other synchronized folders.
+2. Double-click START_QUANTUM.cmd.
+3. On the first run, the same window verifies and installs the package, creates a safe ADMISSION_ONLY configuration when required, opens XLSX selection, performs the local scan and continues to the report review.
+4. Type AUTHORIZE only when you have lawful authority to process the selected report.
+5. Type REVIEWED only after Quantum displays the sheet, header row and headers.
+6. After a successful run, Quantum opens the local dashboard/output directory.
+
+SAFETY
+- The installer verifies every packaged file against manifest.sha256.json before changing the installation.
+- Existing config, data and output directories are preserved.
+- Cost, tax and expense values are never invented. FULL financial calculation still requires an explicit valid finance_request.
+- Marketplace writes, public/LAN exposure and production release remain disabled.
+- Real reports, configs, storage data and outputs must not be uploaded to GitHub or cloud-synchronized folders.
+
+RECOVERY TOOLS
+- INSTALL_HOME_LOCAL.cmd — installation/repair only.
+- CONFIGURE_HOME_LOCAL.cmd — configuration only.
+- IMPORT_XLSX.cmd — import only.
+
+DEFAULT INSTALLATION
+%LOCALAPPDATA%\QuantumLocalProduction
+A desktop shortcut named "Quantum HOME_LOCAL" is created when Windows permits it.
 '@
 Set-Content -LiteralPath (Join-Path $stageRoot "README_FIRST.txt") -Value $readme -Encoding UTF8
 
@@ -212,7 +235,7 @@ if ([string]::IsNullOrWhiteSpace($sourceBranch)) {
 
 $manifest = [ordered]@{
     package = "QuantumLocalProduction_HOME_LOCAL"
-    package_version = "R2_REDTEAM"
+    package_version = "R3_ONE_CLICK"
     source_branch = $sourceBranch
     source_commit = $sourceCommit
     release_state = "RELEASE_BLOCKED"
