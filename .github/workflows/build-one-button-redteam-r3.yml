@@ -103,7 +103,7 @@ jobs:
           try{New-Item -ItemType Directory $temp -Force|Out-Null;Add-Type -AssemblyName System.IO.Compression.FileSystem;[IO.Compression.ZipFile]::ExtractToDirectory($zip,$package);$launch="$package\scripts\one_click_home_local.ps1";if(-not(Test-Path $launch)){throw "Launcher missing."}
             Write-Host "No dates, AUTHORIZE or REVIEWED input is required." -ForegroundColor Green;if(-not$InstallOnly-and-not$File){Write-Host "Select only the XLSX file when Windows asks." -ForegroundColor Cyan};Write-Host "Microsoft Defender scanning remains enabled." -ForegroundColor Green
             $a=@{PackageRoot=$package;TargetRoot=$TargetRoot;ReportingPeriodStart="2022-01-01";ReportingPeriodEnd="2035-12-31";RetentionDeadline="2036-12-31";SourceInternalId="wb-auto-local";AuthorityAttested=$true;SchemaReviewed=$true}
-            if($File){$a.File=$File};if($InstallOnly){$a.InstallOnly=$true};if($NoOpenResult){$a.NoOpenResult=$true};if($SkipDefenderScanForCi){$a.SkipDefenderScan=$true};& $launch @a
+            if($File){$a.File=$File;$a.NonInteractive=$true};if($InstallOnly){$a.InstallOnly=$true};if($NoOpenResult){$a.NoOpenResult=$true};if($SkipDefenderScanForCi){$a.SkipDefenderScan=$true};& $launch @a
           }finally{Remove-Item $temp -Recurse -Force -ErrorAction SilentlyContinue}
           '@
           $entry=$entry.Replace("__PYTHON_HASH__",$pythonHash).Replace("__QUANTUM_HASH__",$quantumHash)
