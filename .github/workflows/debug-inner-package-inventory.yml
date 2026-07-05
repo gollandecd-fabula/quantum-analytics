@@ -25,7 +25,8 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - name: Initialize inventory log
         shell: pwsh
-        run: "inventory_started | Set-Content inner-inventory.log"
+        run: |
+          "inventory_started" | Set-Content inner-inventory.log
       - name: Build and inspect with Windows Expand-Archive
         shell: pwsh
         env:
