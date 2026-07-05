@@ -52,7 +52,7 @@ function New-QuantumShortcut {
         $shortcut = $shell.CreateShortcut($shortcutPath)
         $shortcut.TargetPath = $Launcher
         $shortcut.WorkingDirectory = $WorkingDirectory
-        $shortcut.Description = "Quantum HOME_LOCAL — local pilot launcher"
+        $shortcut.Description = "Quantum HOME_LOCAL - local pilot launcher"
         $shortcut.IconLocation = "$env:SystemRoot\System32\shell32.dll,167"
         $shortcut.Save()
         Write-Host "Desktop shortcut created: $shortcutPath"
