@@ -75,7 +75,6 @@ jobs:
         run: |
           Set-StrictMode -Version Latest
           $ErrorActionPreference = "Stop"
-          [Text.Encoding]::RegisterProvider([Text.CodePagesEncodingProvider]::Instance)
           $expectedHead = "${{ github.event.pull_request.head.sha || github.sha }}"
           if ((& git rev-parse HEAD).Trim() -ne $expectedHead) {
             throw "Exact-head checkout failed."
@@ -92,11 +91,11 @@ jobs:
           switch ($caseId) {
             "json-spoofed-xlsx" {
               $name = "table.xlsx"
-              $bytes = [Text.Encoding]::UTF8.GetBytes('[{"sku":"A","sales":1}]')
+              $bytes = [Text.Encoding]::UTF8.GetBytes('[{"sku":"A","sales":1}]'.Replace('\',''))
             }
             "cp1251-csv" {
               $name = "table.csv"
-              $bytes = [Text.Encoding]::GetEncoding(1251).GetBytes("sku;sales`r`nA;1`r`n")
+              $bytes = [Convert]::FromBase64String("wPDy6Orz6zvP8O7k4OboDQpTS1UtMTsyDQo=")
             }
             "passive-pdf" {
               $name = "document.pdf"
@@ -116,10 +115,12 @@ jobs:
           $source = Join-Path $root $name
           $report = Join-Path $output ($name + ".json")
           [IO.File]::WriteAllBytes($source, $bytes)
+          Write-Host "Running native case: $caseId"
           & powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\windows\import_source.ps1 `
             -File $source -StorageRoot $data -Output $report -NonInteractive `
             -AuthorityAttested -SchemaReviewed -SkipDefenderScan
           $actualExit = $LASTEXITCODE
+          Write-Host "Native exit code: $actualExit"
 
           if ($actualExit -ne $expectedExit) {
             throw "Unexpected exit code for $caseId: $actualExit"
@@ -128,6 +129,7 @@ jobs:
             throw "Missing report for $caseId"
           }
           $payload = Get-Content -LiteralPath $report -Raw -Encoding UTF8 | ConvertFrom-Json
+          Write-Host "Native status: $($payload.status)"
           if ([string]$payload.status -ne $expectedStatus) {
             throw "Unexpected status for $caseId: $($payload.status)"
           }
