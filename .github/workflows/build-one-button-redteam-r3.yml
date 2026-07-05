@@ -139,6 +139,9 @@ jobs:
         run: |
           git config core.autocrlf false
           git restore --source=HEAD --worktree -- .
+          $env:PYTHONUTF8="1"
+          python -m pip install --disable-pip-version-check --no-deps --only-binary=:all: --require-hashes -r requirements/windows-home-local.txt
+          if($LASTEXITCODE-ne 0){throw "Windows test dependency installation failed with exit code $LASTEXITCODE."}
           $env:PYTHONPATH="src"
           python -m quantum.scripts.ci 2>&1 | Tee-Object repository-ci.log
           $ciExitCode=$LASTEXITCODE
