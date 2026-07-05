@@ -37,7 +37,7 @@ def classify_payload(payload: bytes, suffix: str) -> IntakeDecision:
             ("OLE_COMPOUND_REQUIRES_DEDICATED_ADAPTER",),
         )
     if payload.startswith(b"%PDF-"):
-        lowered = payload.casefold()
+        lowered = payload.lower()
         if any(marker in lowered for marker in _PDF_ACTIVE_MARKERS):
             return IntakeDecision(
                 "QUARANTINED_SECURITY",
