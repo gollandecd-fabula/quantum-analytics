@@ -76,11 +76,11 @@ function Confirm-Literal {
         [Parameter(Mandatory = $true)][string]$Prompt,
         [Parameter(Mandatory = $true)][bool]$AlreadyAttested
     )
-    if ($NonInteractive) {
-        if (-not $AlreadyAttested) {
-            throw "Non-interactive mode requires explicit $Expected attestation switch."
-        }
+    if ($AlreadyAttested) {
         return
+    }
+    if ($NonInteractive) {
+        throw "Non-interactive mode requires explicit $Expected attestation switch."
     }
     $answer = Read-Host $Prompt
     if ($answer -cne $Expected) {
@@ -255,7 +255,7 @@ try {
     $previewArguments = @()
     $previewArguments += $pythonCommand.Prefix
     $previewArguments += @(
-        "-m", "quantum.pilot.windows_runner",
+        "-c", "from quantum.pilot.windows_runner import main; raise SystemExit(main())",
         "--file", $File,
         "--config", $runtimeConfig,
         "--storage-root", $StorageRoot,
@@ -311,7 +311,7 @@ try {
     $arguments = @()
     $arguments += $pythonCommand.Prefix
     $arguments += @(
-        "-m", "quantum.pilot.windows_runner",
+        "-c", "from quantum.pilot.windows_runner import main; raise SystemExit(main())",
         "--file", $File,
         "--config", $runtimeConfig,
         "--storage-root", $StorageRoot,
