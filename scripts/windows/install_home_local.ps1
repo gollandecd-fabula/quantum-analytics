@@ -37,6 +37,31 @@ function Reset-ManagedAcl {
     Invoke-Icacls -Path $Path -Arguments $resetArguments -Operation "Explicit ACL reset"
 }
 
+function New-QuantumShortcut {
+    param(
+        [Parameter(Mandatory = $true)][string]$Launcher,
+        [Parameter(Mandatory = $true)][string]$WorkingDirectory
+    )
+    try {
+        $desktop = [Environment]::GetFolderPath("Desktop")
+        if ([string]::IsNullOrWhiteSpace($desktop)) {
+            return
+        }
+        $shortcutPath = Join-Path $desktop "Quantum HOME_LOCAL.lnk"
+        $shell = New-Object -ComObject WScript.Shell
+        $shortcut = $shell.CreateShortcut($shortcutPath)
+        $shortcut.TargetPath = $Launcher
+        $shortcut.WorkingDirectory = $WorkingDirectory
+        $shortcut.Description = "Quantum HOME_LOCAL - local pilot launcher"
+        $shortcut.IconLocation = "$env:SystemRoot\System32\shell32.dll,167"
+        $shortcut.Save()
+        Write-Host "Desktop shortcut created: $shortcutPath"
+    }
+    catch {
+        Write-Warning "Desktop shortcut could not be created: $($_.Exception.GetType().Name)"
+    }
+}
+
 function Assert-PackageManifest {
     param([Parameter(Mandatory = $true)][string]$Root)
 
@@ -131,8 +156,10 @@ function Assert-PackageManifest {
         "src/quantum/pilot/windows_runner.py",
         "scripts/import_source.ps1",
         "scripts/configure_home_local.ps1",
+        "scripts/one_click_home_local.ps1",
         "IMPORT_XLSX.cmd",
-        "CONFIGURE_HOME_LOCAL.cmd"
+        "CONFIGURE_HOME_LOCAL.cmd",
+        "START_QUANTUM.cmd"
     )) {
         if (-not $seen.Contains($required)) {
             throw "Required package entry is not covered by the manifest: $required"
@@ -153,6 +180,7 @@ $packageManifest = Assert-PackageManifest -Root $SourceRoot
 $sourceRuntime = [IO.Path]::GetFullPath((Join-Path $SourceRoot "src"))
 $sourceLauncher = Join-Path $SourceRoot "scripts\import_source.ps1"
 $sourceConfigurator = Join-Path $SourceRoot "scripts\configure_home_local.ps1"
+$sourceOneClick = Join-Path $SourceRoot "scripts\one_click_home_local.ps1"
 if (-not (Test-Path -LiteralPath $sourceRuntime -PathType Container)) {
     throw "Package runtime directory is missing: $sourceRuntime"
 }
@@ -161,6 +189,9 @@ if (-not (Test-Path -LiteralPath $sourceLauncher -PathType Leaf)) {
 }
 if (-not (Test-Path -LiteralPath $sourceConfigurator -PathType Leaf)) {
     throw "Package configurator is missing: $sourceConfigurator"
+}
+if (-not (Test-Path -LiteralPath $sourceOneClick -PathType Leaf)) {
+    throw "Package one-click launcher is missing: $sourceOneClick"
 }
 
 $runtimeTarget = [IO.Path]::GetFullPath((Join-Path $TargetRoot "src"))
@@ -177,6 +208,7 @@ foreach ($name in @("config", "data", "output", "scripts")) {
 $scriptsTarget = [IO.Path]::GetFullPath((Join-Path $TargetRoot "scripts"))
 $launcherTarget = Join-Path $scriptsTarget "import_source.ps1"
 $configuratorTarget = Join-Path $scriptsTarget "configure_home_local.ps1"
+$oneClickTarget = Join-Path $scriptsTarget "one_click_home_local.ps1"
 $obsoleteCommon = Join-Path $scriptsTarget "common.ps1"
 
 Reset-ManagedAcl -Path $scriptsTarget -Recursive
@@ -241,6 +273,7 @@ catch {
 }
 
 Copy-Item -LiteralPath $sourceConfigurator -Destination $configuratorTarget -Force
+Copy-Item -LiteralPath $sourceOneClick -Destination $oneClickTarget -Force
 
 $templateSource = Join-Path $SourceRoot "config\home-local.template.json"
 $templateTarget = Join-Path $TargetRoot "config\home-local.template.json"
@@ -264,6 +297,17 @@ if errorlevel 1 pause
 $configureCommandTarget = Join-Path $TargetRoot "CONFIGURE_HOME_LOCAL.cmd"
 Set-Content -LiteralPath $configureCommandTarget -Value $configureCmd -Encoding ASCII
 
+$startCmd = @'
+@echo off
+setlocal
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\one_click_home_local.ps1" -InstalledRoot "%~dp0" -SkipInstall
+set "quantum_exit=%errorlevel%"
+if not "%quantum_exit%"=="0" pause
+exit /b %quantum_exit%
+'@
+$startCommandTarget = Join-Path $TargetRoot "START_QUANTUM.cmd"
+Set-Content -LiteralPath $startCommandTarget -Value $startCmd -Encoding ASCII
+
 $readmeSource = Join-Path $SourceRoot "README_FIRST.txt"
 $readmeTarget = Join-Path $TargetRoot "README_FIRST.txt"
 if (Test-Path -LiteralPath $readmeSource -PathType Leaf) {
@@ -274,6 +318,7 @@ Reset-ManagedAcl -Path $runtimeTarget -Recursive
 Reset-ManagedAcl -Path $scriptsTarget -Recursive
 Reset-ManagedAcl -Path $commandTarget
 Reset-ManagedAcl -Path $configureCommandTarget
+Reset-ManagedAcl -Path $startCommandTarget
 if (Test-Path -LiteralPath $readmeTarget -PathType Leaf) {
     Reset-ManagedAcl -Path $readmeTarget
 }
@@ -282,8 +327,10 @@ foreach ($required in @(
     (Join-Path $runtimeTarget "quantum\pilot\windows_runner.py"),
     $launcherTarget,
     $configuratorTarget,
+    $oneClickTarget,
     $commandTarget,
-    $configureCommandTarget
+    $configureCommandTarget,
+    $startCommandTarget
 )) {
     if (-not (Test-Path -LiteralPath $required -PathType Leaf)) {
         throw "Installation verification failed: $required"
@@ -295,7 +342,10 @@ if (Test-Path -LiteralPath $obsoleteCommon -ErrorAction SilentlyContinue) {
     throw "Obsolete managed script was not removed: $obsoleteCommon"
 }
 
+New-QuantumShortcut -Launcher $startCommandTarget -WorkingDirectory $TargetRoot
+
 Write-Host "Quantum HOME_LOCAL runtime installed." -ForegroundColor Green
 Write-Host "Target: $TargetRoot"
 Write-Host "Existing config, data and output directories were preserved."
-Write-Host "Launch: $commandTarget"
+Write-Host "One-click launch: $startCommandTarget"
+Write-Host "Recovery import launcher: $commandTarget"

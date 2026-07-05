@@ -9,6 +9,7 @@ on:
       - "scripts/windows/install_home_local.ps1"
       - "scripts/windows/import_source.ps1"
       - "scripts/windows/configure_home_local.ps1"
+      - "scripts/windows/one_click_home_local.ps1"
       - "config/home-local.template.json"
       - ".github/workflows/windows-local-acl-recovery.yml"
   pull_request:
@@ -16,6 +17,7 @@ on:
       - "scripts/windows/install_home_local.ps1"
       - "scripts/windows/import_source.ps1"
       - "scripts/windows/configure_home_local.ps1"
+      - "scripts/windows/one_click_home_local.ps1"
       - "config/home-local.template.json"
       - ".github/workflows/windows-local-acl-recovery.yml"
 
@@ -48,7 +50,8 @@ jobs:
           foreach ($file in @(
             "scripts/windows/install_home_local.ps1",
             "scripts/windows/import_source.ps1",
-            "scripts/windows/configure_home_local.ps1"
+            "scripts/windows/configure_home_local.ps1",
+            "scripts/windows/one_click_home_local.ps1"
           )) {
             $tokens = $null
             $errors = $null
@@ -85,7 +88,9 @@ jobs:
           Copy-Item -LiteralPath "scripts/windows/import_source.ps1" -Destination (Join-Path $sourceRoot "scripts/import_source.ps1") -Force
           Copy-Item -LiteralPath "scripts/windows/install_home_local.ps1" -Destination (Join-Path $sourceRoot "scripts/install_home_local.ps1") -Force
           Copy-Item -LiteralPath "scripts/windows/configure_home_local.ps1" -Destination (Join-Path $sourceRoot "scripts/configure_home_local.ps1") -Force
+          Copy-Item -LiteralPath "scripts/windows/one_click_home_local.ps1" -Destination (Join-Path $sourceRoot "scripts/one_click_home_local.ps1") -Force
           Copy-Item -LiteralPath "config/home-local.template.json" -Destination (Join-Path $sourceRoot "config/home-local.template.json") -Force
+          Set-Content -LiteralPath (Join-Path $sourceRoot "START_QUANTUM.cmd") -Value "@echo off" -Encoding ASCII
           Set-Content -LiteralPath (Join-Path $sourceRoot "IMPORT_XLSX.cmd") -Value "@echo off" -Encoding ASCII
           Set-Content -LiteralPath (Join-Path $sourceRoot "INSTALL_HOME_LOCAL.cmd") -Value "@echo off" -Encoding ASCII
           Set-Content -LiteralPath (Join-Path $sourceRoot "CONFIGURE_HOME_LOCAL.cmd") -Value "@echo off" -Encoding ASCII
@@ -103,7 +108,7 @@ jobs:
           }
           $manifest = [ordered]@{
             package = "QuantumLocalProduction_HOME_LOCAL"
-            package_version = "R2_REDTEAM"
+            package_version = "R3_ONE_CLICK"
             source_branch = "local-pilot-windows-acl-repair-r2"
             source_commit = "${{ github.event.pull_request.head.sha || github.sha }}"
             release_state = "RELEASE_BLOCKED"
@@ -162,7 +167,9 @@ jobs:
           foreach ($required in @(
             (Join-Path $installRoot "scripts/import_source.ps1"),
             (Join-Path $installRoot "scripts/configure_home_local.ps1"),
+            (Join-Path $installRoot "scripts/one_click_home_local.ps1"),
             (Join-Path $installRoot "src/quantum/pilot/windows_runner.py"),
+            (Join-Path $installRoot "START_QUANTUM.cmd"),
             (Join-Path $installRoot "IMPORT_XLSX.cmd"),
             (Join-Path $installRoot "CONFIGURE_HOME_LOCAL.cmd")
           )) {
