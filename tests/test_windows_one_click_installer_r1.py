@@ -7,6 +7,7 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 WINDOWS = ROOT / "scripts" / "windows"
+PILOT = ROOT / "src" / "quantum" / "pilot"
 
 
 class WindowsOneClickInstallerR1Tests(unittest.TestCase):
@@ -14,6 +15,7 @@ class WindowsOneClickInstallerR1Tests(unittest.TestCase):
     def setUpClass(cls) -> None:
         cls.one_click = (WINDOWS / "one_click_home_local.ps1").read_text(encoding="utf-8")
         cls.importer = (WINDOWS / "import_source.ps1").read_text(encoding="utf-8")
+        cls.xlsx_helper = (PILOT / "import_xlsx_source.ps1").read_text(encoding="utf-8")
         cls.installer = (WINDOWS / "install_home_local.ps1").read_text(encoding="utf-8")
         cls.builder = (WINDOWS / "build_local_production.ps1").read_text(encoding="utf-8")
 
@@ -49,7 +51,7 @@ class WindowsOneClickInstallerR1Tests(unittest.TestCase):
         self.assertNotIn('SkipDefenderScan = $true', script)
         self.assertNotIn('finance_request =', script)
 
-    def test_importer_honors_explicit_attestations_but_fails_closed_without_them(self):
+    def test_universal_front_door_honors_attestation_and_routes_xlsx(self):
         script = self.importer
         attested = script.index('if ($AlreadyAttested)')
         noninteractive = script.index('if ($NonInteractive)', attested)
@@ -57,8 +59,22 @@ class WindowsOneClickInstallerR1Tests(unittest.TestCase):
         self.assertLess(attested, noninteractive)
         self.assertLess(noninteractive, read_host)
         self.assertIn('Non-interactive mode requires explicit $Expected attestation switch.', script)
+        self.assertIn('All files (*.*)|*.*', script)
+        self.assertIn('from quantum.pilot.universal_gateway import main; raise SystemExit(main())', script)
+        self.assertIn('if ($status -eq "ROUTE_XLSX")', script)
+        self.assertIn('PreScannedEvidenceSha256', script)
+        self.assertIn('ExpectedFileSha256', script)
+
+    def test_xlsx_helper_preserves_reviewed_admission_pipeline(self):
+        script = self.xlsx_helper
         self.assertIn('from quantum.pilot.windows_runner import main; raise SystemExit(main())', script)
         self.assertNotIn('"-m", "quantum.pilot.windows_runner"', script)
+        self.assertIn('--discover-only', script)
+        self.assertIn('--discover-schema', script)
+        self.assertIn('--expected-file-sha256', script)
+        self.assertIn('Source file changed after schema review.', script)
+        self.assertIn('PreScannedEvidenceSha256', script)
+        self.assertIn('XLSX helper source hash does not match the reviewed file.', script)
 
     def test_cloud_sync_paths_and_unmanaged_outputs_are_blocked(self):
         script = self.one_click
@@ -104,6 +120,7 @@ class WindowsOneClickInstallerR1Tests(unittest.TestCase):
         for name, script in (
             ("one_click_home_local.ps1", self.one_click),
             ("import_source.ps1", self.importer),
+            ("import_xlsx_source.ps1", self.xlsx_helper),
             ("install_home_local.ps1", self.installer),
             ("build_local_production.ps1", self.builder),
         ):
