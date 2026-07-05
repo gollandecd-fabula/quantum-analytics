@@ -134,6 +134,19 @@ jobs:
           $cfg=Get-Content "$full\config\default-home-local.json" -Raw|ConvertFrom-Json;if($cfg.reporting_period_start-ne"2022-01-01"-or$cfg.reporting_period_end-ne"2035-12-31"-or$cfg.retention_deadline-ne"2036-12-31T00:00:00Z"){throw "Automatic config mismatch."}
           $reports=@(Get-ChildItem "$full\output" -Filter "pilot_*.json");if($reports.Count-ne 1){throw "Result count mismatch."};$r=Get-Content $reports[0].FullName -Raw|ConvertFrom-Json;if($r.status-ne"ADMISSION_COMPLETE"-or$null-ne$r.calculation){throw "Admission result invalid."}
 
+          $startText=Get-Content "$full\START_QUANTUM.cmd" -Raw
+          $importText=Get-Content "$full\IMPORT_XLSX.cmd" -Raw
+          if($startText-notmatch'-AuthorityAttested\s+-SchemaReviewed'){throw "Installed START_QUANTUM.cmd did not propagate attestations."}
+          if($importText-notmatch'-AuthorityAttested\s+-SchemaReviewed'){throw "Installed IMPORT_XLSX.cmd did not propagate attestations."}
+          $before=@(Get-ChildItem "$full\output" -Filter "pilot_*.json").Count
+          Start-Sleep -Seconds 2
+          powershell.exe -NonInteractive -NoProfile -ExecutionPolicy Bypass -File "$full\scripts\one_click_home_local.ps1" -InstalledRoot $full -SkipInstall -File $xlsx -AuthorityAttested -SchemaReviewed -NoOpenResult -SkipDefenderScan 2>&1|Tee-Object native-gui-path.log
+          if($LASTEXITCODE-ne 0){throw "GUI-selected-file attestation regression failed: $LASTEXITCODE"}
+          $guiReports=@(Get-ChildItem "$full\output" -Filter "pilot_*.json")
+          if($guiReports.Count-ne($before+1)){throw "GUI-selected-file result count mismatch."}
+          $guiResult=Get-Content ($guiReports|Sort-Object LastWriteTime -Descending|Select-Object -First 1).FullName -Raw|ConvertFrom-Json
+          if($guiResult.status-ne"ADMISSION_COMPLETE"-or$null-ne$guiResult.calculation){throw "GUI-selected-file admission result invalid."}
+
       - name: Complete repository CI
         shell: pwsh
         run: |
@@ -163,7 +176,7 @@ jobs:
         shell: pwsh
         run: |
           $out="dist\one-button-redteam-r3";$r=Get-Content "$out\result.json" -Raw|ConvertFrom-Json
-          $qa=[ordered]@{source_commit=$r.source_commit;status="NATIVE_WINDOWS_REDTEAM_PASS";native_install_runs=2;repair_preservation="PASS";contamination_rejection="PASS";full_xlsx_workflow="PASS";automatic_dates_and_attestations="PASS";python_hash_and_signature="PASS";repository_ci="PASS";normal_defender_scan_enabled=$true;release_state="RELEASE_BLOCKED";archive_sha256=$r.sha256;archive_size_bytes=$r.size_bytes}
+          $qa=[ordered]@{source_commit=$r.source_commit;status="NATIVE_WINDOWS_REDTEAM_PASS";native_install_runs=2;repair_preservation="PASS";contamination_rejection="PASS";full_xlsx_workflow="PASS";gui_selected_file_path="PASS";automatic_dates_and_attestations="PASS";python_hash_and_signature="PASS";repository_ci="PASS";normal_defender_scan_enabled=$true;release_state="RELEASE_BLOCKED";archive_sha256=$r.sha256;archive_size_bytes=$r.size_bytes}
           [IO.File]::WriteAllText("$out\qa.json",($qa|ConvertTo-Json),[Text.UTF8Encoding]::new($false))
 
       - name: Upload failure diagnostics
@@ -176,6 +189,7 @@ jobs:
             native-install-1.log
             native-install-2.log
             native-full.log
+            native-gui-path.log
             contamination.log
             repository-ci.log
             dist/one-button-redteam-r3/**
