@@ -27,6 +27,11 @@
       17300
     ],
     [
+      ".github/workflows/windows-source-package-launchers-r1.yml",
+      "09e0ad55b902f9ccfe814575c886d7f38a9ffb77c33fb31621df2fb685dc5ff7",
+      3598
+    ],
+    [
       "docs/architecture/ONE_CLICK_HOME_LOCAL_R1.md",
       "b190d15051c7d3fe50e77c1bc1dcf83d50a2e98d02aa83417453ee93634d0bb5",
       4330
@@ -38,8 +43,8 @@
     ],
     [
       "scripts/windows/build_local_production.ps1",
-      "3b006bd77d717be9bf6b973d614e6268643eb22e818406bd445cb410f46cc7d8",
-      10997
+      "a341b69c9b16aa40a2fc79e63df136e2099b654cec0bc1a42eb71f9498866465",
+      11290
     ],
     [
       "scripts/windows/build_two_installer_bundles.ps1",
@@ -75,10 +80,15 @@
       "tests/test_windows_one_click_installer_r1.py",
       "72d8acd727ed407b9b3fa302eb79af8cd2124476889622b4b7ef70c5fb81190b",
       5874
+    ],
+    [
+      "tests/test_windows_source_package_launchers_r1.py",
+      "5653f90b83b8998b9ca3b3fd75d69fac6f87e1e8144b102446682415714a129a",
+      1144
     ]
   ],
   "hash_encoding": "sha256-hex",
   "overlay_version": 33,
-  "reason": "Register one-click HOME_LOCAL pilot installer, reusable launcher, cloud-path safety, PowerShell 5.1 compatibility, package documentation, dedicated tests, ACL recovery fixture, and verified R3 one-click package workflow; complete installer-bundle manifest coverage and add native Windows one-button red-team execution; register Windows-safe durable JSON event ledger writes and transactional installer rollback; honor explicit one-click attestations for GUI-selected XLSX files, propagate them through installed launchers, remove runpy warnings, and replace stale safety regression tests; add a native Windows regression for the GUI-selected-file one-click path without console prompts",
+  "reason": "Register one-click HOME_LOCAL pilot installer, reusable launcher, cloud-path safety, PowerShell 5.1 compatibility, package documentation, dedicated tests, ACL recovery fixture, and verified R3 one-click package workflow; complete installer-bundle manifest coverage and add native Windows one-button red-team execution; register Windows-safe durable JSON event ledger writes and transactional installer rollback; honor explicit one-click attestations for GUI-selected XLSX files, propagate them through installed launchers, remove runpy warnings, and replace stale safety regression tests; add native Windows regressions for the GUI-selected-file path and the source package launchers; synchronize source START_QUANTUM.cmd, IMPORT_XLSX.cmd and README with the one-click behavior",
   "remove_paths": []
 }
