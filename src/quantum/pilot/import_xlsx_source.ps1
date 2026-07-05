@@ -213,6 +213,12 @@ function New-RuntimeConfig {
 }
 
 $projectRoot = Resolve-ProjectRoot
+$hashCompat = Join-Path $projectRoot "src\quantum\pilot\hash_compat.ps1"
+if (-not (Test-Path -LiteralPath $hashCompat -PathType Leaf)) {
+    throw "Quantum SHA-256 compatibility shim was not found: $hashCompat"
+}
+. $hashCompat
+
 $File = (Resolve-Path -LiteralPath $File).Path
 
 if ([string]::IsNullOrWhiteSpace($Config)) {
