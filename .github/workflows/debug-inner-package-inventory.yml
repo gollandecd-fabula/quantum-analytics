@@ -21,10 +21,15 @@ jobs:
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Initialize inventory log
+        shell: pwsh
+        run: "inventory_started | Set-Content inner-inventory.log"
       - name: Build and inspect with Windows Expand-Archive
         shell: pwsh
         env:
-          TARGET_SHA: ${{ github.sha }}
+          TARGET_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: |
           Set-StrictMode -Version Latest
           $ErrorActionPreference = "Stop"
