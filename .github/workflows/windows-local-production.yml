@@ -14,6 +14,7 @@ on:
       - "tests/test_windows_storage_compat.py"
       - "tests/test_windows_redteam_hardening.py"
       - "tests/test_windows_reviewed_file_hash.py"
+      - "tests/test_windows_one_click_installer_r1.py"
       - "scripts/windows/**"
       - "config/home-local.template.json"
       - "requirements/windows-home-local.txt"
@@ -27,6 +28,7 @@ on:
       - "tests/test_windows_storage_compat.py"
       - "tests/test_windows_redteam_hardening.py"
       - "tests/test_windows_reviewed_file_hash.py"
+      - "tests/test_windows_one_click_installer_r1.py"
       - "scripts/windows/**"
       - "config/home-local.template.json"
       - "requirements/windows-home-local.txt"
@@ -93,6 +95,7 @@ jobs:
             tests.test_windows_storage_compat `
             tests.test_windows_redteam_hardening `
             tests.test_windows_reviewed_file_hash `
+            tests.test_windows_one_click_installer_r1 `
             -v 2>&1 | Tee-Object -FilePath windows-repair-tests.log
           if ($LASTEXITCODE -ne 0) {
             throw "Windows red-team regression suite failed with exit code $LASTEXITCODE"
@@ -126,6 +129,7 @@ jobs:
             "scripts/windows/import_source.ps1",
             "scripts/windows/install_home_local.ps1",
             "scripts/windows/configure_home_local.ps1",
+            "scripts/windows/one_click_home_local.ps1",
             "scripts/windows/build_local_production.ps1"
           )
           foreach ($file in $files) {
@@ -184,7 +188,8 @@ jobs:
           $tamperedRoot = Join-Path $env:RUNNER_TEMP "quantum-tampered-package"
           $tamperedInstall = Join-Path $env:RUNNER_TEMP "quantum-tampered-install"
           $installRoot = Join-Path $env:RUNNER_TEMP "quantum-installed"
-          foreach ($path in @($extractRoot, $tamperedRoot, $tamperedInstall, $installRoot)) {
+          $oneClickInstall = Join-Path $env:RUNNER_TEMP "quantum-one-click-installed"
+          foreach ($path in @($extractRoot, $tamperedRoot, $tamperedInstall, $installRoot, $oneClickInstall)) {
             Remove-Item -LiteralPath $path -Recurse -Force -ErrorAction SilentlyContinue
           }
           Expand-Archive -LiteralPath $archive -DestinationPath $extractRoot
@@ -197,7 +202,7 @@ jobs:
           if ($manifest.marketplace_write_enabled -ne $false) {
             throw "Marketplace writes must remain disabled."
           }
-          if ([string]$manifest.package_version -ne "R2_REDTEAM") {
+          if ([string]$manifest.package_version -ne "R3_ONE_CLICK") {
             throw "Unexpected package version: $($manifest.package_version)"
           }
           if ([string]$manifest.tzdata_version -ne "2026.2") {
@@ -214,6 +219,14 @@ jobs:
             $actual = (Get-FileHash -LiteralPath $entryPath -Algorithm SHA256).Hash.ToLowerInvariant()
             if ($actual -ne [string]$entry.sha256) {
               throw "Manifest hash mismatch: $($entry.path)"
+            }
+          }
+          foreach ($requiredPackageFile in @(
+            (Join-Path $extractRoot "START_QUANTUM.cmd"),
+            (Join-Path $extractRoot "scripts\one_click_home_local.ps1")
+          )) {
+            if (-not (Test-Path -LiteralPath $requiredPackageFile -PathType Leaf)) {
+              throw "One-click package entry is missing: $requiredPackageFile"
             }
           }
 
@@ -258,6 +271,8 @@ jobs:
             (Join-Path $installRoot "src\tzdata\zoneinfo\Europe\Moscow"),
             (Join-Path $installRoot "scripts\import_source.ps1"),
             (Join-Path $installRoot "scripts\configure_home_local.ps1"),
+            (Join-Path $installRoot "scripts\one_click_home_local.ps1"),
+            (Join-Path $installRoot "START_QUANTUM.cmd"),
             (Join-Path $installRoot "IMPORT_XLSX.cmd"),
             (Join-Path $installRoot "CONFIGURE_HOME_LOCAL.cmd")
           )) {
@@ -316,6 +331,47 @@ jobs:
             throw "ADMISSION_ONLY unexpectedly produced a calculation."
           }
 
+          $oneClick = Join-Path $extractRoot "scripts\one_click_home_local.ps1"
+          powershell.exe -NoProfile -ExecutionPolicy Bypass `
+            -File $oneClick `
+            -PackageRoot $extractRoot `
+            -TargetRoot $oneClickInstall `
+            -File $syntheticXlsx `
+            -ReportingPeriodStart "2026-07-01" `
+            -ReportingPeriodEnd "2026-07-04" `
+            -RetentionDeadline "2030-01-01" `
+            -SourceInternalId "ci-one-click" `
+            -NonInteractive `
+            -AuthorityAttested `
+            -SchemaReviewed `
+            -SkipDefenderScan `
+            -NoOpenResult 2>&1 |
+            Tee-Object -FilePath one-click-pilot.log
+          $oneClickExitCode = $LASTEXITCODE
+          if ($oneClickExitCode -ne 0) {
+            throw "One-click HOME_LOCAL pilot failed with exit code $oneClickExitCode"
+          }
+          foreach ($requiredOneClick in @(
+            (Join-Path $oneClickInstall "START_QUANTUM.cmd"),
+            (Join-Path $oneClickInstall "scripts\one_click_home_local.ps1"),
+            (Join-Path $oneClickInstall "config\default-home-local.json")
+          )) {
+            if (-not (Test-Path -LiteralPath $requiredOneClick -PathType Leaf)) {
+              throw "One-click installed file is missing: $requiredOneClick"
+            }
+          }
+          $pilotOutputs = @(Get-ChildItem -LiteralPath (Join-Path $oneClickInstall "output") -File -Filter "pilot_*.json")
+          if ($pilotOutputs.Count -ne 1) {
+            throw "One-click run produced an unexpected number of pilot results: $($pilotOutputs.Count)"
+          }
+          $pilotReport = Get-Content -LiteralPath $pilotOutputs[0].FullName -Raw -Encoding UTF8 | ConvertFrom-Json
+          if ([string]$pilotReport.status -ne "ADMISSION_COMPLETE") {
+            throw "Unexpected one-click pilot status: $($pilotReport.status)"
+          }
+          if ($null -ne $pilotReport.calculation) {
+            throw "One-click ADMISSION_ONLY unexpectedly produced a calculation."
+          }
+
       - name: Upload verification diagnostics on failure
         if: failure()
         uses: actions/upload-artifact@v4
@@ -326,6 +382,7 @@ jobs:
             tamper-rejection.log
             configurator.log
             installed-import.log
+            one-click-pilot.log
             package-build.log
           if-no-files-found: warn
           retention-days: 7
