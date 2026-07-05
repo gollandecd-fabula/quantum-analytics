@@ -95,8 +95,9 @@ function Assert-PackageManifest {
         throw "Package manifest contains no files."
     }
 
-    $rootFull = [IO.Path]::GetFullPath($Root).TrimEnd([char[]]"\/")
+    $rootFull = (Get-Item -LiteralPath $Root).FullName.TrimEnd([char[]]"\/")
     $rootPrefix = $rootFull + [IO.Path]::DirectorySeparatorChar
+    $manifestFull = (Get-Item -LiteralPath $manifestPath).FullName
     $seen = [Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
     foreach ($entry in $entries) {
         $relative = [string]$entry.path
@@ -137,20 +138,30 @@ function Assert-PackageManifest {
         }
     }
 
-    $actualFiles = @(
-        Get-ChildItem -LiteralPath $rootFull -Recurse -File |
-            Where-Object { $_.FullName -ne $manifestPath } |
-            ForEach-Object {
-                $_.FullName.Substring($rootPrefix.Length).Replace("\", "/")
-            }
-    )
-    if ($actualFiles.Count -ne $seen.Count) {
-        throw "Package file count does not match the manifest."
-    }
-    foreach ($relative in $actualFiles) {
+    $actualSeen = [Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
+    foreach ($item in @(Get-ChildItem -LiteralPath $rootFull -Recurse -File)) {
+        $itemFull = $item.FullName
+        if ($itemFull.Equals($manifestFull, [StringComparison]::OrdinalIgnoreCase)) {
+            continue
+        }
+        if (-not $itemFull.StartsWith($rootPrefix, [StringComparison]::OrdinalIgnoreCase)) {
+            throw "Enumerated package file escaped the package root: $itemFull"
+        }
+        $relative = $itemFull.Substring($rootPrefix.Length).Replace("\", "/")
+        if (-not $actualSeen.Add($relative)) {
+            throw "Package contains a duplicate filesystem path: $relative"
+        }
         if (-not $seen.Contains($relative)) {
             throw "Package contains an unmanifested file: $relative"
         }
+    }
+    foreach ($relative in $seen) {
+        if (-not $actualSeen.Contains($relative)) {
+            throw "Manifest-covered package file was not enumerated: $relative"
+        }
+    }
+    if ($actualSeen.Count -ne $seen.Count) {
+        throw "Package inventory count mismatch after exact path comparison: actual=$($actualSeen.Count), manifest=$($seen.Count)."
     }
     foreach ($required in @(
         "src/quantum/pilot/windows_runner.py",
@@ -200,7 +211,7 @@ if ($sourceRuntime.TrimEnd("\", "/") -ieq $runtimeTarget.TrimEnd("\", "/")) {
 }
 
 New-Item -ItemType Directory -Path $TargetRoot -Force | Out-Null
-Reset-ManagedAcl -Path $TargetRoot
+Reset-ManaedAcl -Path $TargetRoot
 foreach ($name in @("config", "data", "output", "scripts")) {
     New-Item -ItemType Directory -Path (Join-Path $TargetRoot $name) -Force | Out-Null
 }
@@ -318,7 +329,7 @@ Reset-ManagedAcl -Path $runtimeTarget -Recursive
 Reset-ManagedAcl -Path $scriptsTarget -Recursive
 Reset-ManagedAcl -Path $commandTarget
 Reset-ManagedAcl -Path $configureCommandTarget
-Reset-ManagedAcl -Path $startCommandTarget
+Reset-ManaedAcl -Path $startCommandTarget
 if (Test-Path -LiteralPath $readmeTarget -PathType Leaf) {
     Reset-ManagedAcl -Path $readmeTarget
 }
