@@ -24,11 +24,11 @@ class WbDispatcherTests(unittest.TestCase):
         self.assertEqual(result["event_count"], 1)
         self.assertEqual(
             result["dispatch_schema_version"],
-            "quantum-wb-source-dispatch-v1",
+            "quantum-wb-source-dispatch-v2",
         )
         self.assertFalse(result["raw_rows_in_report"])
 
-    def test_unknown_schema_remains_admitted_but_unmapped(self):
+    def test_unknown_schema_remains_admitted_with_partial_metadata(self):
         headers = ["Unknown A", "Unknown B", "Unknown C"]
         result = bridge_reviewed_wb_source(
             payload=workbook(headers=headers, rows=(("1", "2", "3"),)),
@@ -43,11 +43,20 @@ class WbDispatcherTests(unittest.TestCase):
             limits=limits(),
             source_id="SRC-UNKNOWN",
         )
-        self.assertEqual(result["status"], "SOURCE_BRIDGE_UNSUPPORTED")
+        self.assertEqual(result["status"], "SOURCE_BRIDGE_PARTIAL")
+        self.assertEqual(result["source_type"], "WB_GENERIC_TABULAR")
         self.assertEqual(result["finance_request_state"], "BLOCKED")
         self.assertEqual(
             result["finance_request_reason_codes"],
-            ["WB_SCHEMA_NOT_MAPPED"],
+            ["WB_SCHEMA_PROFILE_REQUIRED", "CALCULATION_PROFILE_REQUIRED"],
+        )
+        self.assertEqual(
+            result["observed_metrics"]["source_row_count"]["value"],
+            "1",
+        )
+        self.assertEqual(
+            result["observed_metrics"]["source_column_count"]["value"],
+            "3",
         )
         self.assertFalse(result["raw_rows_in_report"])
 
