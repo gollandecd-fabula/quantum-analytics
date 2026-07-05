@@ -141,7 +141,7 @@ class WindowsPowerShellCompatibilityTests(unittest.TestCase):
 
         self.assertIn('"schema_discovery": candidate.report()', producer)
         self.assertIn(
-            "from quantum.pilot.universal_gateway import main; raise SystemExit(main())",
+            "from quantum.pilot.universal_import import main; raise SystemExit(main())",
             front_door,
         )
         self.assertIn('if ($status -eq "ROUTE_XLSX")', front_door)
