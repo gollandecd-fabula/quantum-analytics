@@ -24,6 +24,7 @@ UNIVERSAL_IMPORT_SCHEMA_VERSION = "quantum-universal-import-v1"
 
 _MAX_FILE_BYTES = 100 * 1024 * 1024
 _MAX_STRUCTURED_TEXT_BYTES = 16 * 1024 * 1024
+_MAX_XML_MEMBER_BYTES = 8 * 1024 * 1024
 _MAX_ARCHIVE_ENTRIES = 10_000
 _MAX_TOTAL_UNCOMPRESSED = 512 * 1024 * 1024
 _MAX_ENTRY_UNCOMPRESSED = 128 * 1024 * 1024
@@ -31,38 +32,17 @@ _MAX_COMPRESSION_RATIO = 100
 _MAX_MEMBER_PREFIX_BYTES = 4096
 _MAX_SAMPLE_TEXT_CHARS = 256_000
 _ALLOWED_ZIP_METHODS = frozenset({ZIP_STORED, ZIP_DEFLATED})
-
 _BLOCKED_SUFFIXES = (
-    ".exe",
-    ".dll",
-    ".com",
-    ".scr",
-    ".js",
-    ".jse",
-    ".vbs",
-    ".vbe",
-    ".ps1",
-    ".bat",
-    ".cmd",
-    ".sh",
-    ".py",
-    ".jar",
-    ".msi",
+    ".exe", ".dll", ".com", ".scr", ".js", ".jse", ".vbs", ".vbe",
+    ".ps1", ".bat", ".cmd", ".sh", ".py", ".jar", ".msi",
 )
 _BLOCKED_OFFICE_PATH_MARKERS = (
-    "xl/activex/",
-    "xl/embeddings/",
-    "xl/externallinks/",
-    "customui/",
-    "vbaproject.bin",
+    "xl/activex/", "xl/embeddings/", "xl/externallinks/",
+    "customui/", "vbaproject.bin",
 )
 _EXECUTABLE_MAGIC = (
-    b"MZ",
-    b"\x7fELF",
-    b"\xfe\xed\xfa\xce",
-    b"\xce\xfa\xed\xfe",
-    b"\xfe\xed\xfa\xcf",
-    b"\xcf\xfa\xed\xfe",
+    b"MZ", b"\x7fELF", b"\xfe\xed\xfa\xce", b"\xce\xfa\xed\xfe",
+    b"\xfe\xed\xfa\xcf", b"\xcf\xfa\xed\xfe",
 )
 _XLSX_REQUIRED_PARTS = frozenset(
     {
@@ -72,8 +52,10 @@ _XLSX_REQUIRED_PARTS = frozenset(
         "xl/_rels/workbook.xml.rels",
     }
 )
+_RELATIONSHIP_NS = "http://schemas.openxmlformats.org/package/2006/relationships"
+_RELATIONSHIP_TAG = f"{{{_RELATIONSHIP_NS}}}Relationship"
 _SAFE_NAME = re.compile(r"[^A-Za-zА-Яа-яЁё0-9._() +\-]+")
-_URI_SCHEME = re.compile(rb"(?:https?|ftp|file|mailto|mhtml):", re.IGNORECASE)
+_URI_SCHEME_TEXT = re.compile(r"^[A-Za-z][A-Za-z0-9+.-]*:")
 
 
 class UniversalImportError(ValueError):
@@ -150,28 +132,25 @@ def _atomic_store(source: Path, destination: Path) -> None:
 def _read_source(path: Path) -> tuple[bytes, str]:
     if not path.is_file():
         raise UniversalImportError("FILE_NOT_FOUND")
-    size = path.stat().st_size
-    if size < 1:
+    expected_size = path.stat().st_size
+    if expected_size < 1:
         raise UniversalImportError("FILE_EMPTY")
-    if size > _MAX_FILE_BYTES:
+    if expected_size > _MAX_FILE_BYTES:
         raise UniversalImportError("FILE_SIZE_EXCEEDED")
     digest = sha256()
-    chunks: list[bytes] = []
-    total = 0
+    payload = bytearray()
     with path.open("rb") as handle:
         while True:
             chunk = handle.read(1024 * 1024)
             if not chunk:
                 break
-            total += len(chunk)
-            if total > _MAX_FILE_BYTES:
+            payload.extend(chunk)
+            if len(payload) > _MAX_FILE_BYTES:
                 raise UniversalImportError("FILE_SIZE_EXCEEDED")
             digest.update(chunk)
-            chunks.append(chunk)
-    payload = b"".join(chunks)
-    if len(payload) != size:
+    if len(payload) != expected_size:
         raise UniversalImportError("FILE_READ_MISMATCH")
-    return payload, digest.hexdigest()
+    return bytes(payload), digest.hexdigest()
 
 
 def _looks_executable(payload: bytes, suffix: str) -> bool:
@@ -202,6 +181,25 @@ def _safe_member_name(name: str) -> str:
     return canonical
 
 
+def _read_member(archive: ZipFile, info: ZipInfo, limit: int) -> bytes:
+    if info.file_size > limit:
+        raise UniversalImportError("ARCHIVE_MEMBER_INSPECTION_LIMIT_EXCEEDED")
+    try:
+        payload = archive.read(info)
+    except (
+        BadZipFile,
+        RuntimeError,
+        NotImplementedError,
+        OSError,
+        EOFError,
+        ZlibError,
+    ) as exc:
+        raise UniversalImportError("ARCHIVE_READ_FAILED") from exc
+    if len(payload) != info.file_size:
+        raise UniversalImportError("ARCHIVE_READ_MISMATCH")
+    return payload
+
+
 def _member_prefix(archive: ZipFile, info: ZipInfo) -> bytes:
     try:
         with archive.open(info, "r") as stream:
@@ -217,18 +215,41 @@ def _member_prefix(archive: ZipFile, info: ZipInfo) -> bytes:
         raise UniversalImportError("ARCHIVE_READ_FAILED") from exc
 
 
-def _validate_relationship_payload(name: str, prefix: bytes) -> None:
-    lowered = prefix.lower()
+def _validate_xml_member(name: str, payload: bytes) -> None:
+    lowered = payload.lower()
     if b"<!doctype" in lowered or b"<!entity" in lowered:
         raise UniversalImportError("ARCHIVE_XML_ENTITY_DECLARATION_FORBIDDEN")
-    if name.casefold().endswith(".rels"):
-        if b'targetmode="external"' in lowered or b"targetmode='external'" in lowered:
+    try:
+        root = ElementTree.fromstring(payload)
+    except ElementTree.ParseError as exc:
+        raise UniversalImportError("ARCHIVE_XML_INVALID") from exc
+    if not name.casefold().endswith(".rels"):
+        return
+    if root.tag not in {"Relationships", f"{{{_RELATIONSHIP_NS}}}Relationships"}:
+        raise UniversalImportError("ARCHIVE_RELATIONSHIPS_INVALID")
+    seen_ids: set[str] = set()
+    for relation in root:
+        if relation.tag not in {"Relationship", _RELATIONSHIP_TAG}:
+            raise UniversalImportError("ARCHIVE_RELATIONSHIPS_INVALID")
+        relation_id = relation.get("Id")
+        target = relation.get("Target")
+        mode = relation.get("TargetMode")
+        if not relation_id or relation_id in seen_ids or not target:
+            raise UniversalImportError("ARCHIVE_RELATIONSHIPS_INVALID")
+        seen_ids.add(relation_id)
+        if mode is not None and mode.casefold() == "external":
             raise UniversalImportError("ARCHIVE_EXTERNAL_RELATIONSHIP_FORBIDDEN")
-        if _URI_SCHEME.search(lowered):
+        if mode is not None and mode.casefold() != "internal":
+            raise UniversalImportError("ARCHIVE_RELATIONSHIPS_INVALID")
+        if _URI_SCHEME_TEXT.match(target.strip()):
             raise UniversalImportError("ARCHIVE_EXTERNAL_RELATIONSHIP_FORBIDDEN")
 
 
-def _zip_summary(payload: bytes, *, allow_single_xlsx_wrapper: bool = True) -> dict[str, Any]:
+def _zip_summary(
+    payload: bytes,
+    *,
+    allow_single_xlsx_wrapper: bool = True,
+) -> dict[str, Any]:
     try:
         with ZipFile(BytesIO(payload)) as archive:
             infos = archive.infolist()
@@ -239,7 +260,8 @@ def _zip_summary(payload: bytes, *, allow_single_xlsx_wrapper: bool = True) -> d
             total = 0
             files: list[str] = []
             seen: set[str] = set()
-            inner_xlsx_info: ZipInfo | None = None
+            inner_xlsx: list[ZipInfo] = []
+            nested_archive_detected = False
             for info in infos:
                 name = _safe_member_name(info.filename)
                 key = unicodedata.normalize("NFC", name).casefold()
@@ -273,35 +295,29 @@ def _zip_summary(payload: bytes, *, allow_single_xlsx_wrapper: bool = True) -> d
                 ):
                     raise UniversalImportError("ARCHIVE_ACTIVE_CONTENT_FORBIDDEN")
                 if lower.endswith((".xml", ".rels")):
-                    _validate_relationship_payload(name, prefix)
+                    _validate_xml_member(
+                        name,
+                        _read_member(archive, info, _MAX_XML_MEMBER_BYTES),
+                    )
+                elif prefix.startswith(b"PK\x03\x04"):
+                    nested_archive_detected = True
                 files.append(name)
                 if lower.endswith(".xlsx"):
-                    if inner_xlsx_info is not None:
-                        inner_xlsx_info = None
-                    else:
-                        inner_xlsx_info = info
+                    inner_xlsx.append(info)
             lowered_files = {item.casefold() for item in files}
             is_xlsx = _XLSX_REQUIRED_PARTS.issubset(lowered_files)
             is_single_wrapper = (
                 allow_single_xlsx_wrapper
                 and len(files) == 1
-                and inner_xlsx_info is not None
+                and len(inner_xlsx) == 1
             )
             inner_xlsx_sha256: str | None = None
             if is_single_wrapper:
-                try:
-                    inner_payload = archive.read(inner_xlsx_info)
-                except (
-                    BadZipFile,
-                    RuntimeError,
-                    NotImplementedError,
-                    OSError,
-                    EOFError,
-                    ZlibError,
-                ) as exc:
-                    raise UniversalImportError("ARCHIVE_READ_FAILED") from exc
-                if len(inner_payload) != inner_xlsx_info.file_size:
-                    raise UniversalImportError("ARCHIVE_READ_MISMATCH")
+                inner_payload = _read_member(
+                    archive,
+                    inner_xlsx[0],
+                    _MAX_ENTRY_UNCOMPRESSED,
+                )
                 inner_summary = _zip_summary(
                     inner_payload,
                     allow_single_xlsx_wrapper=False,
@@ -309,6 +325,7 @@ def _zip_summary(payload: bytes, *, allow_single_xlsx_wrapper: bool = True) -> d
                 if not inner_summary["is_xlsx"]:
                     raise UniversalImportError("ARCHIVE_SINGLE_XLSX_INVALID")
                 inner_xlsx_sha256 = sha256(inner_payload).hexdigest()
+                nested_archive_detected = False
             return {
                 "entries": len(infos),
                 "file_entries": len(files),
@@ -316,6 +333,7 @@ def _zip_summary(payload: bytes, *, allow_single_xlsx_wrapper: bool = True) -> d
                 "is_xlsx": is_xlsx,
                 "is_single_xlsx_wrapper": is_single_wrapper,
                 "inner_xlsx_sha256": inner_xlsx_sha256,
+                "nested_archive_detected": nested_archive_detected,
             }
     except UniversalImportError:
         raise
@@ -323,20 +341,24 @@ def _zip_summary(payload: bytes, *, allow_single_xlsx_wrapper: bool = True) -> d
         raise UniversalImportError("ARCHIVE_CORRUPTED") from exc
 
 
-def _decode_text(payload: bytes) -> tuple[str, str] | None:
-    candidates: tuple[tuple[str, bytes], ...] = (
-        ("utf-8-sig", payload),
-        ("utf-16", payload),
-        ("cp1251", payload),
+def _plausible_text(text: str) -> bool:
+    if not text:
+        return False
+    controls = sum(
+        ord(character) < 32 and character not in "\r\n\t"
+        for character in text[:100_000]
     )
-    for encoding, candidate in candidates:
+    return controls / max(1, min(len(text), 100_000)) <= 0.01
+
+
+def _decode_text(payload: bytes) -> tuple[str, str] | None:
+    for encoding in ("utf-8-sig", "utf-16", "cp1251"):
         try:
-            text = candidate.decode(encoding)
+            text = payload.decode(encoding)
         except (UnicodeDecodeError, UnicodeError):
             continue
-        if "\x00" in text and encoding != "utf-16":
-            continue
-        return text, encoding
+        if _plausible_text(text):
+            return text, encoding
     return None
 
 
@@ -418,7 +440,6 @@ def _classify_text(payload: bytes) -> IntakeDecision:
         rows = []
         dialect = None
     if dialect is not None and rows and len(rows[0]) > 1:
-        header = [item.strip() for item in rows[0]]
         return IntakeDecision(
             "ACCEPTED_PARTIAL",
             "DELIMITED_TEXT",
@@ -428,7 +449,7 @@ def _classify_text(payload: bytes) -> IntakeDecision:
                 "delimiter": dialect.delimiter,
                 "sample_rows": len(rows),
                 "sample_columns": len(rows[0]),
-                "headers": header[:500],
+                "headers": [item.strip() for item in rows[0]][:500],
             },
         )
     return IntakeDecision(
@@ -455,19 +476,18 @@ def classify_payload(payload: bytes, suffix: str) -> IntakeDecision:
         try:
             summary = _zip_summary(payload)
         except UniversalImportError as exc:
+            security_tokens = (
+                "ACTIVE_CONTENT",
+                "ENCRYPTED",
+                "EXTERNAL_RELATIONSHIP",
+                "SYMLINK",
+                "PATH_INVALID",
+                "COMPRESSION_RATIO",
+                "XML_ENTITY",
+            )
             status = (
                 "QUARANTINED_SECURITY"
-                if any(
-                    token in exc.code
-                    for token in (
-                        "ACTIVE_CONTENT",
-                        "ENCRYPTED",
-                        "EXTERNAL_RELATIONSHIP",
-                        "SYMLINK",
-                        "PATH_INVALID",
-                        "COMPRESSION_RATIO",
-                    )
-                )
+                if any(token in exc.code for token in security_tokens)
                 else "QUARANTINED_CORRUPTED"
             )
             return IntakeDecision(status, exc.code, None, {}, (exc.code,))
@@ -475,12 +495,15 @@ def classify_payload(payload: bytes, suffix: str) -> IntakeDecision:
             return IntakeDecision("ROUTE_XLSX", "XLSX", "XLSX", summary)
         if summary["is_single_xlsx_wrapper"]:
             return IntakeDecision("ROUTE_XLSX", "ZIP_XLSX", "XLSX", summary)
+        reasons = ["ARCHIVE_FORMAT_NOT_MAPPED"]
+        if summary["nested_archive_detected"]:
+            reasons.append("NESTED_ARCHIVE_NOT_RECURSIVELY_INSPECTED")
         return IntakeDecision(
             "ACCEPTED_UNPARSED",
             "SAFE_ARCHIVE_UNSUPPORTED",
             None,
             summary,
-            ("ARCHIVE_FORMAT_NOT_MAPPED",),
+            tuple(reasons),
         )
     if payload.startswith(b"%PDF-"):
         return IntakeDecision("ACCEPTED_PARTIAL", "PDF", "PDF", {"signature": "PDF"})
@@ -505,6 +528,33 @@ def classify_payload(payload: bytes, suffix: str) -> IntakeDecision:
     return _classify_text(payload)
 
 
+def _base_report(
+    *,
+    status: str,
+    detected_format: str | None,
+    route: str | None,
+    reason_codes: list[str],
+    malware_scan_evidence_sha256: str | None,
+    malware_scan_outcome: str | None,
+) -> dict[str, Any]:
+    return {
+        "schema_version": UNIVERSAL_IMPORT_SCHEMA_VERSION,
+        "status": status,
+        "detected_format": detected_format,
+        "route": route,
+        "reason_codes": reason_codes,
+        "malware_scan_evidence_sha256": malware_scan_evidence_sha256,
+        "malware_scan_outcome": malware_scan_outcome,
+        "authority_attested": True,
+        "runtime_profile": "HOME_LOCAL",
+        "storage_encryption_required": False,
+        "marketplace_write_enabled": False,
+        "calculation": None,
+        "raw_rows_in_report": False,
+        "generated_at_utc": datetime.now(UTC).isoformat(),
+    }
+
+
 def register_file(
     *,
     file_path: Path,
@@ -527,56 +577,50 @@ def register_file(
                 / _safe_filename(source.name)
             )
             _atomic_store(source, destination)
-        return {
-            "schema_version": UNIVERSAL_IMPORT_SCHEMA_VERSION,
-            "status": decision.status,
-            "detected_format": decision.detected_format,
-            "route": decision.route,
-            "reason_codes": list(decision.reason_codes),
-            "file_sha256": digest,
-            "file_size_bytes": len(payload),
-            "sanitized_filename": _safe_filename(source.name),
-            "stored_path": str(destination) if destination is not None else None,
-            "metadata": decision.metadata,
-            "malware_scan_evidence_sha256": malware_scan_evidence_sha256,
-            "malware_scan_outcome": malware_scan_outcome,
-            "authority_attested": True,
-            "runtime_profile": "HOME_LOCAL",
-            "storage_encryption_required": False,
-            "marketplace_write_enabled": False,
-            "calculation": None,
-            "raw_rows_in_report": False,
-            "generated_at_utc": datetime.now(UTC).isoformat(),
-            "limitations": [
-                "RELEASE_BLOCKED",
-                "UNPARSED_OR_PARTIAL_FILES_EXCLUDED_FROM_FINANCE",
-                "HOME_LOCAL_UNENCRYPTED_STORAGE",
-            ],
-        }
+        report = _base_report(
+            status=decision.status,
+            detected_format=decision.detected_format,
+            route=decision.route,
+            reason_codes=list(decision.reason_codes),
+            malware_scan_evidence_sha256=malware_scan_evidence_sha256,
+            malware_scan_outcome=malware_scan_outcome,
+        )
+        report.update(
+            {
+                "file_sha256": digest,
+                "file_size_bytes": len(payload),
+                "sanitized_filename": _safe_filename(source.name),
+                "stored_path": str(destination) if destination is not None else None,
+                "metadata": decision.metadata,
+                "limitations": [
+                    "RELEASE_BLOCKED",
+                    "UNPARSED_OR_PARTIAL_FILES_EXCLUDED_FROM_FINANCE",
+                    "HOME_LOCAL_UNENCRYPTED_STORAGE",
+                ],
+            }
+        )
+        return report
     except Exception as exc:
         code = getattr(exc, "code", "UNIVERSAL_IMPORT_UNEXPECTED_ERROR")
-        return {
-            "schema_version": UNIVERSAL_IMPORT_SCHEMA_VERSION,
-            "status": "ERROR",
-            "detected_format": None,
-            "route": None,
-            "reason_codes": [code],
-            "file_sha256": None,
-            "file_size_bytes": None,
-            "sanitized_filename": _safe_filename(source.name),
-            "stored_path": None,
-            "metadata": {},
-            "malware_scan_evidence_sha256": malware_scan_evidence_sha256,
-            "malware_scan_outcome": malware_scan_outcome,
-            "authority_attested": True,
-            "runtime_profile": "HOME_LOCAL",
-            "storage_encryption_required": False,
-            "marketplace_write_enabled": False,
-            "calculation": None,
-            "raw_rows_in_report": False,
-            "generated_at_utc": datetime.now(UTC).isoformat(),
-            "limitations": ["RELEASE_BLOCKED"],
-        }
+        report = _base_report(
+            status="ERROR",
+            detected_format=None,
+            route=None,
+            reason_codes=[code],
+            malware_scan_evidence_sha256=malware_scan_evidence_sha256,
+            malware_scan_outcome=malware_scan_outcome,
+        )
+        report.update(
+            {
+                "file_sha256": None,
+                "file_size_bytes": None,
+                "sanitized_filename": _safe_filename(source.name),
+                "stored_path": None,
+                "metadata": {},
+                "limitations": ["RELEASE_BLOCKED"],
+            }
+        )
+        return report
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -626,7 +670,11 @@ def main() -> int:
             ensure_ascii=False,
         )
     )
-    return 2 if report["status"] in {"ERROR", "QUARANTINED_SECURITY", "QUARANTINED_CORRUPTED"} else 0
+    return 2 if report["status"] in {
+        "ERROR",
+        "QUARANTINED_SECURITY",
+        "QUARANTINED_CORRUPTED",
+    } else 0
 
 
 if __name__ == "__main__":
