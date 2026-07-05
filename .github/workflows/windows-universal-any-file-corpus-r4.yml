@@ -47,6 +47,7 @@ jobs:
         run: |
           Set-StrictMode -Version Latest
           $ErrorActionPreference = "Stop"
+          [Text.Encoding]::RegisterProvider([Text.CodePagesEncodingProvider]::Instance)
           $root = Join-Path $env:RUNNER_TEMP "quantum-any-file-corpus"
           $data = Join-Path $root "data"
           $output = Join-Path $root "output"
