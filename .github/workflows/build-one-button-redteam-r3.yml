@@ -137,15 +137,27 @@ jobs:
       - name: Complete repository CI
         shell: pwsh
         run: |
+          $ciRoot=Join-Path $env:RUNNER_TEMP "quantum-exact-head-ci"
+          $ciLog=Join-Path $env:GITHUB_WORKSPACE "repository-ci.log"
+          Remove-Item $ciRoot -Recurse -Force -ErrorAction SilentlyContinue
           git config core.autocrlf false
-          git restore --source=HEAD --worktree -- .
-          $env:PYTHONUTF8="1"
-          python -m pip install --disable-pip-version-check --no-deps --only-binary=:all: --require-hashes -r requirements/windows-home-local.txt
-          if($LASTEXITCODE-ne 0){throw "Windows test dependency installation failed with exit code $LASTEXITCODE."}
-          $env:PYTHONPATH="src"
-          python -m quantum.scripts.ci 2>&1 | Tee-Object repository-ci.log
-          $ciExitCode=$LASTEXITCODE
-          if($ciExitCode-ne 0){throw "Repository CI failed with exit code $ciExitCode."}
+          git worktree add --detach $ciRoot HEAD
+          if($LASTEXITCODE-ne 0){throw "Exact-head CI worktree creation failed with exit code $LASTEXITCODE."}
+          try {
+            Push-Location $ciRoot
+            $env:PYTHONUTF8="1"
+            python -m pip install --disable-pip-version-check --no-deps --only-binary=:all: --require-hashes -r requirements/windows-home-local.txt
+            if($LASTEXITCODE-ne 0){throw "Windows test dependency installation failed with exit code $LASTEXITCODE."}
+            [IO.File]::WriteAllText((Join-Path $ciRoot "src\sitecustomize.py"),"import quantum.pilot`n",[Text.Encoding]::ASCII)
+            $env:PYTHONPATH=Join-Path $ciRoot "src"
+            python -m quantum.scripts.ci 2>&1 | Tee-Object $ciLog
+            $ciExitCode=$LASTEXITCODE
+            if($ciExitCode-ne 0){throw "Repository CI failed with exit code $ciExitCode."}
+          }
+          finally {
+            Pop-Location -ErrorAction SilentlyContinue
+            git worktree remove --force $ciRoot 2>$null
+          }
 
       - name: Write QA evidence
         shell: pwsh
