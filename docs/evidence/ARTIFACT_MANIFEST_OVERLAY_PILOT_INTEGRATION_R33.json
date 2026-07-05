@@ -72,6 +72,16 @@
       12699
     ],
     [
+      "src/quantum/adapters/wildberries/dispatcher.py",
+      "ef98d89a1d317a6ec6af3c24fa53be27d5d3850317702a18001b4a30d809fb97",
+      7643
+    ],
+    [
+      "src/quantum/adapters/wildberries/weekly_summary.py",
+      "a7ce95c5cd8fe84532a8ea47bab199cc1a2dabf4901e4bc0d0feeca4f10646bf",
+      14068
+    ],
+    [
       "src/quantum/ingestion/_xlsx_inspection_v3.py",
       "5d5974758bc94dc476fb5cebb6af4d3c67aa145a5f92d9e28ba5b4cd3c84d3cc",
       7650
@@ -132,6 +142,16 @@
       3536
     ],
     [
+      "tests/test_wb_dispatcher_r1.py",
+      "db633476f7ab44564baf264a7b640e8c2e284a3f7b1fcd399f64631a85a63404",
+      2977
+    ],
+    [
+      "tests/test_wb_weekly_summary_bridge_r5.py",
+      "ad78dc0704f6ca45286135d264141debcd2a98655ee0f387fa79ca1be7b4eb17",
+      5363
+    ],
+    [
       "tests/test_windows_hash_compat_r4.py",
       "bda8fcbb3396f30405a8c1c57f4b67ccd1e050331a0f0b13864f4e08ea283997",
       1991
@@ -154,6 +174,6 @@
   ],
   "hash_encoding": "sha256-hex",
   "overlay_version": 33,
-  "reason": "Register one-click HOME_LOCAL pilot installer, reusable launcher, cloud-path safety, PowerShell 5.1 compatibility, package documentation, dedicated tests, ACL recovery fixture, verified one-click package workflow, Windows-safe durable ledger writes and transactional rollback; add a universal safe-file front door, content-based classification, local inbox and quarantine, bounded passive OOXML compatibility, isolated reviewed XLSX processing, hash-bound Defender evidence handoff, fail-closed handling for opaque archives, nested archives, OLE containers and active or encrypted PDFs, temporary intake-output isolation, deterministic heterogeneous any-file corpus validation, native Windows front-door matrix validation, and a module-independent SHA-256 compatibility shim while preserving RELEASE_BLOCKED and marketplace-write-disabled boundaries",
+  "reason": "Register one-click HOME_LOCAL pilot installer, universal any-file intake and Windows compatibility evidence; add governed WB weekly-summary extraction, direct source metrics, generic admitted-table diagnostics and regression coverage without inventing finance inputs, exposing raw rows, enabling marketplace writes or weakening RELEASE_BLOCKED safety boundaries",
   "remove_paths": []
 }
