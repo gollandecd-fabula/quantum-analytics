@@ -32,6 +32,11 @@
       3598
     ],
     [
+      ".github/workflows/windows-universal-any-file-corpus-r4.yml",
+      "850b05be777299400a540f2cbfb3697196e754e2ad3171de077c9c3b1de88cce",
+      7772
+    ],
+    [
       "docs/architecture/ONE_CLICK_HOME_LOCAL_R1.md",
       "b190d15051c7d3fe50e77c1bc1dcf83d50a2e98d02aa83417453ee93634d0bb5",
       4330
@@ -53,8 +58,8 @@
     ],
     [
       "scripts/windows/import_source.ps1",
-      "7078bec2e2b210a596dcc891f8ac889867e628942d723dc76c9a83feedd17c58",
-      9968
+      "17bf6f2654c65cbeba9f300f0abdaed06e5bd33c575449e5a058055d12612661",
+      10196
     ],
     [
       "scripts/windows/install_home_local.ps1",
@@ -82,9 +87,14 @@
       4820
     ],
     [
+      "src/quantum/pilot/hash_compat.ps1",
+      "e50c840ffebccca31cae4d08975c859fa6b2837a005a64f6df178da43f67a277",
+      1647
+    ],
+    [
       "src/quantum/pilot/import_xlsx_source.ps1",
-      "a447ffe1927d3ffe052583933df8a1a047b60ae8ac2aad3b7f3c73d4b09e83ed",
-      13686
+      "fef4e67a584515a109cf9a375971601dc014349768c10648d6ebb20ee13a3974",
+      13914
     ],
     [
       "src/quantum/pilot/universal_gateway.py",
@@ -107,6 +117,11 @@
       7845
     ],
     [
+      "tests/test_universal_any_file_contract_r4.py",
+      "3adfe899d7ceff4a91d4947b8a41738a8c6e559773003e2d7783d6fe777af8c3",
+      4630
+    ],
+    [
       "tests/test_universal_ingestion_r4.py",
       "1d740fd6dafc837bf54e1b411ec083151a3e46a5744b3e0dafe672d51dfd1c20",
       10258
@@ -115,6 +130,11 @@
       "tests/test_universal_intake_hardening_r4.py",
       "6a2429eff9d6fd28b3b8907b2b87d50646d05561427351bd56c0c36e5622a8bf",
       3536
+    ],
+    [
+      "tests/test_windows_hash_compat_r4.py",
+      "bda8fcbb3396f30405a8c1c57f4b67ccd1e050331a0f0b13864f4e08ea283997",
+      1991
     ],
     [
       "tests/test_windows_one_click_installer_r1.py",
@@ -134,6 +154,6 @@
   ],
   "hash_encoding": "sha256-hex",
   "overlay_version": 33,
-  "reason": "Register one-click HOME_LOCAL pilot installer, reusable launcher, cloud-path safety, PowerShell 5.1 compatibility, package documentation, dedicated tests, ACL recovery fixture, verified one-click package workflow, Windows-safe durable ledger writes and transactional rollback; add a universal safe-file front door, content-based classification, local inbox and quarantine, bounded passive OOXML compatibility, isolated reviewed XLSX processing, hash-bound Defender evidence handoff, fail-closed handling for opaque archives, nested archives, OLE containers and active or encrypted PDFs, temporary intake-output isolation, and expanded adversarial regression coverage while preserving RELEASE_BLOCKED and marketplace-write-disabled boundaries",
+  "reason": "Register one-click HOME_LOCAL pilot installer, reusable launcher, cloud-path safety, PowerShell 5.1 compatibility, package documentation, dedicated tests, ACL recovery fixture, verified one-click package workflow, Windows-safe durable ledger writes and transactional rollback; add a universal safe-file front door, content-based classification, local inbox and quarantine, bounded passive OOXML compatibility, isolated reviewed XLSX processing, hash-bound Defender evidence handoff, fail-closed handling for opaque archives, nested archives, OLE containers and active or encrypted PDFs, temporary intake-output isolation, deterministic heterogeneous any-file corpus validation, native Windows front-door matrix validation, and a module-independent SHA-256 compatibility shim while preserving RELEASE_BLOCKED and marketplace-write-disabled boundaries",
   "remove_paths": []
 }
