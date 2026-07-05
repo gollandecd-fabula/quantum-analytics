@@ -154,90 +154,180 @@ $launcherTarget = Join-Path $scriptsTarget "import_source.ps1"
 $configuratorTarget = Join-Path $scriptsTarget "configure_home_local.ps1"
 $oneClickTarget = Join-Path $scriptsTarget "one_click_home_local.ps1"
 $obsoleteCommon = Join-Path $scriptsTarget "common.ps1"
-Reset-ManagedAcl -Path $scriptsTarget -Recursive
-Reset-ManagedAcl -Path $runtimeTarget -Recursive
-if (Test-Path -LiteralPath $obsoleteCommon) { Remove-Item -LiteralPath $obsoleteCommon -Force }
-
-$installId = "{0}_{1}" -f (Get-Date -Format "yyyyMMdd_HHmmss"), ([guid]::NewGuid().ToString("N").Substring(0, 8))
-$stage = Join-Path $TargetRoot ("src.installing_{0}" -f $installId)
-$backup = Join-Path $TargetRoot ("src.backup_{0}" -f $installId)
-try {
-    Copy-Item -LiteralPath $sourceRuntime -Destination $stage -Recurse -Force
-    if (-not (Test-Path -LiteralPath (Join-Path $stage "quantum\pilot\windows_runner.py") -PathType Leaf)) {
-        throw "Staged runtime verification failed."
-    }
-    $hadRuntime = Test-Path -LiteralPath $runtimeTarget -PathType Container
-    if ($hadRuntime) { Move-Item -LiteralPath $runtimeTarget -Destination $backup }
-    try { Move-Item -LiteralPath $stage -Destination $runtimeTarget }
-    catch {
-        if ((-not (Test-Path -LiteralPath $runtimeTarget)) -and (Test-Path -LiteralPath $backup)) {
-            Move-Item -LiteralPath $backup -Destination $runtimeTarget
-        }
-        throw
-    }
-}
-catch {
-    Remove-Item -LiteralPath $stage -Recurse -Force -ErrorAction SilentlyContinue
-    throw
-}
-
-Copy-Item -LiteralPath $sourceLauncher -Destination $launcherTarget -Force
-Copy-Item -LiteralPath $sourceConfigurator -Destination $configuratorTarget -Force
-Copy-Item -LiteralPath $sourceOneClick -Destination $oneClickTarget -Force
+$commandTarget = Join-Path $TargetRoot "IMPORT_XLSX.cmd"
+$configureCommandTarget = Join-Path $TargetRoot "CONFIGURE_HOME_LOCAL.cmd"
+$startCommandTarget = Join-Path $TargetRoot "START_QUANTUM.cmd"
+$readmeSource = Join-Path $SourceRoot "README_FIRST.txt"
+$readmeTarget = Join-Path $TargetRoot "README_FIRST.txt"
 $templateSource = Join-Path $SourceRoot "config\home-local.template.json"
 $templateTarget = Join-Path $TargetRoot "config\home-local.template.json"
-if ((Test-Path -LiteralPath $templateSource -PathType Leaf) -and -not (Test-Path -LiteralPath $templateTarget)) {
-    Copy-Item -LiteralPath $templateSource -Destination $templateTarget
-}
 
-$commandTarget = Join-Path $TargetRoot "IMPORT_XLSX.cmd"
-@'
+Reset-ManagedAcl -Path $scriptsTarget -Recursive
+Reset-ManagedAcl -Path $runtimeTarget -Recursive
+
+$installId = "{0}_{1}" -f (Get-Date -Format "yyyyMMdd_HHmmss"), ([guid]::NewGuid().ToString("N").Substring(0, 8))
+$transactionRoot = Join-Path $TargetRoot (".installing_{0}" -f $installId)
+$runtimeStage = Join-Path $transactionRoot "src"
+$fileStageRoot = Join-Path $transactionRoot "files"
+$fileRollbackRoot = Join-Path $transactionRoot "rollback"
+$runtimeBackup = Join-Path $TargetRoot ("src.backup_{0}" -f $installId)
+$fileRollback = @()
+$hadRuntime = $false
+$runtimeActivated = $false
+
+try {
+    New-Item -ItemType Directory -Path $fileStageRoot,$fileRollbackRoot -Force | Out-Null
+    Copy-Item -LiteralPath $sourceRuntime -Destination $runtimeStage -Recurse -Force
+    if (-not (Test-Path -LiteralPath (Join-Path $runtimeStage "quantum\pilot\windows_runner.py") -PathType Leaf)) {
+        throw "Staged runtime verification failed."
+    }
+
+    $stagedLauncher = Join-Path $fileStageRoot "import_source.ps1"
+    $stagedConfigurator = Join-Path $fileStageRoot "configure_home_local.ps1"
+    $stagedOneClick = Join-Path $fileStageRoot "one_click_home_local.ps1"
+    Copy-Item -LiteralPath $sourceLauncher -Destination $stagedLauncher -Force
+    Copy-Item -LiteralPath $sourceConfigurator -Destination $stagedConfigurator -Force
+    Copy-Item -LiteralPath $sourceOneClick -Destination $stagedOneClick -Force
+
+    $stagedImportCommand = Join-Path $fileStageRoot "IMPORT_XLSX.cmd"
+    @'
 @echo off
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\import_source.ps1"
 if errorlevel 1 pause
-'@ | Set-Content -LiteralPath $commandTarget -Encoding ASCII
+'@ | Set-Content -LiteralPath $stagedImportCommand -Encoding ASCII
 
-$configureCommandTarget = Join-Path $TargetRoot "CONFIGURE_HOME_LOCAL.cmd"
-@'
+    $stagedConfigureCommand = Join-Path $fileStageRoot "CONFIGURE_HOME_LOCAL.cmd"
+    @'
 @echo off
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\configure_home_local.ps1"
 if errorlevel 1 pause
-'@ | Set-Content -LiteralPath $configureCommandTarget -Encoding ASCII
+'@ | Set-Content -LiteralPath $stagedConfigureCommand -Encoding ASCII
 
-$startCommandTarget = Join-Path $TargetRoot "START_QUANTUM.cmd"
-@'
+    $stagedStartCommand = Join-Path $fileStageRoot "START_QUANTUM.cmd"
+    @'
 @echo off
 setlocal
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\one_click_home_local.ps1" -InstalledRoot "%~dp0" -SkipInstall
 set "quantum_exit=%errorlevel%"
 if not "%quantum_exit%"=="0" pause
 exit /b %quantum_exit%
-'@ | Set-Content -LiteralPath $startCommandTarget -Encoding ASCII
+'@ | Set-Content -LiteralPath $stagedStartCommand -Encoding ASCII
 
-$readmeSource = Join-Path $SourceRoot "README_FIRST.txt"
-$readmeTarget = Join-Path $TargetRoot "README_FIRST.txt"
-if (Test-Path -LiteralPath $readmeSource -PathType Leaf) { Copy-Item -LiteralPath $readmeSource -Destination $readmeTarget -Force }
+    $replacements = @(
+        [pscustomobject]@{ Stage = $stagedLauncher; Target = $launcherTarget; Key = "scripts_import_source.ps1" },
+        [pscustomobject]@{ Stage = $stagedConfigurator; Target = $configuratorTarget; Key = "scripts_configure_home_local.ps1" },
+        [pscustomobject]@{ Stage = $stagedOneClick; Target = $oneClickTarget; Key = "scripts_one_click_home_local.ps1" },
+        [pscustomobject]@{ Stage = $stagedImportCommand; Target = $commandTarget; Key = "IMPORT_XLSX.cmd" },
+        [pscustomobject]@{ Stage = $stagedConfigureCommand; Target = $configureCommandTarget; Key = "CONFIGURE_HOME_LOCAL.cmd" },
+        [pscustomobject]@{ Stage = $stagedStartCommand; Target = $startCommandTarget; Key = "START_QUANTUM.cmd" }
+    )
 
-Reset-ManagedAcl -Path $runtimeTarget -Recursive
-Reset-ManagedAcl -Path $scriptsTarget -Recursive
-foreach ($path in @($commandTarget, $configureCommandTarget, $startCommandTarget, $readmeTarget)) {
-    if (Test-Path -LiteralPath $path) { Reset-ManagedAcl -Path $path }
+    if (Test-Path -LiteralPath $readmeSource -PathType Leaf) {
+        $stagedReadme = Join-Path $fileStageRoot "README_FIRST.txt"
+        Copy-Item -LiteralPath $readmeSource -Destination $stagedReadme -Force
+        $replacements += [pscustomobject]@{ Stage = $stagedReadme; Target = $readmeTarget; Key = "README_FIRST.txt" }
+    }
+    if ((Test-Path -LiteralPath $templateSource -PathType Leaf) -and -not (Test-Path -LiteralPath $templateTarget)) {
+        $stagedTemplate = Join-Path $fileStageRoot "home-local.template.json"
+        Copy-Item -LiteralPath $templateSource -Destination $stagedTemplate -Force
+        $replacements += [pscustomobject]@{ Stage = $stagedTemplate; Target = $templateTarget; Key = "home-local.template.json" }
+    }
+
+    foreach ($replacement in $replacements) {
+        if (-not (Test-Path -LiteralPath $replacement.Stage -PathType Leaf)) {
+            throw "Staged managed file is missing: $($replacement.Stage)"
+        }
+        if ((Test-Path -LiteralPath $replacement.Target) -and -not (Test-Path -LiteralPath $replacement.Target -PathType Leaf)) {
+            throw "Managed installation target is not a file: $($replacement.Target)"
+        }
+    }
+
+    $hadRuntime = Test-Path -LiteralPath $runtimeTarget -PathType Container
+    if ($hadRuntime) { Move-Item -LiteralPath $runtimeTarget -Destination $runtimeBackup }
+    Move-Item -LiteralPath $runtimeStage -Destination $runtimeTarget
+    $runtimeActivated = $true
+
+    foreach ($replacement in $replacements) {
+        $backupFile = Join-Path $fileRollbackRoot $replacement.Key
+        $hadOriginal = Test-Path -LiteralPath $replacement.Target -PathType Leaf
+        if ($hadOriginal) {
+            Move-Item -LiteralPath $replacement.Target -Destination $backupFile
+        }
+        $fileRollback += [pscustomobject]@{
+            Target = $replacement.Target
+            Backup = $backupFile
+            HadOriginal = $hadOriginal
+        }
+        Move-Item -LiteralPath $replacement.Stage -Destination $replacement.Target
+    }
+
+    $obsoleteBackup = Join-Path $fileRollbackRoot "obsolete_common.ps1"
+    $hadObsoleteCommon = Test-Path -LiteralPath $obsoleteCommon -PathType Leaf
+    if ($hadObsoleteCommon) {
+        Move-Item -LiteralPath $obsoleteCommon -Destination $obsoleteBackup
+        $fileRollback += [pscustomobject]@{
+            Target = $obsoleteCommon
+            Backup = $obsoleteBackup
+            HadOriginal = $true
+        }
+    }
+
+    Reset-ManagedAcl -Path $runtimeTarget -Recursive
+    Reset-ManagedAcl -Path $scriptsTarget -Recursive
+    foreach ($path in @($commandTarget, $configureCommandTarget, $startCommandTarget, $readmeTarget)) {
+        if (Test-Path -LiteralPath $path) { Reset-ManagedAcl -Path $path }
+    }
+
+    foreach ($required in @(
+        (Join-Path $runtimeTarget "quantum\pilot\windows_runner.py"),
+        $launcherTarget,
+        $configuratorTarget,
+        $oneClickTarget,
+        $commandTarget,
+        $configureCommandTarget,
+        $startCommandTarget
+    )) {
+        if (-not (Test-Path -LiteralPath $required -PathType Leaf)) { throw "Installation verification failed: $required" }
+        $stream = [IO.File]::Open($required, [IO.FileMode]::Open, [IO.FileAccess]::Read, [IO.FileShare]::ReadWrite)
+        $stream.Dispose()
+    }
+    if (Test-Path -LiteralPath $obsoleteCommon) { throw "Obsolete managed script was not removed: $obsoleteCommon" }
 }
-foreach ($required in @(
-    (Join-Path $runtimeTarget "quantum\pilot\windows_runner.py"),
-    $launcherTarget,
-    $configuratorTarget,
-    $oneClickTarget,
-    $commandTarget,
-    $configureCommandTarget,
-    $startCommandTarget
-)) {
-    if (-not (Test-Path -LiteralPath $required -PathType Leaf)) { throw "Installation verification failed: $required" }
-    $stream = [IO.File]::Open($required, [IO.FileMode]::Open, [IO.FileAccess]::Read, [IO.FileShare]::ReadWrite)
-    $stream.Dispose()
-}
-if (Test-Path -LiteralPath $obsoleteCommon) { throw "Obsolete managed script was not removed: $obsoleteCommon" }
+catch {
+    $failure = $_
+    $rollbackErrors = @()
 
+    for ($index = $fileRollback.Count - 1; $index -ge 0; $index--) {
+        $record = $fileRollback[$index]
+        try {
+            if (Test-Path -LiteralPath $record.Target) {
+                Remove-Item -LiteralPath $record.Target -Recurse -Force
+            }
+            if ($record.HadOriginal -and (Test-Path -LiteralPath $record.Backup)) {
+                Move-Item -LiteralPath $record.Backup -Destination $record.Target
+            }
+        }
+        catch { $rollbackErrors += $_.Exception.Message }
+    }
+
+    try {
+        if ($runtimeActivated -and (Test-Path -LiteralPath $runtimeTarget)) {
+            Remove-Item -LiteralPath $runtimeTarget -Recurse -Force
+        }
+        if ($hadRuntime -and (Test-Path -LiteralPath $runtimeBackup)) {
+            Move-Item -LiteralPath $runtimeBackup -Destination $runtimeTarget
+        }
+    }
+    catch { $rollbackErrors += $_.Exception.Message }
+
+    Remove-Item -LiteralPath $transactionRoot -Recurse -Force -ErrorAction SilentlyContinue
+    if ($rollbackErrors.Count -gt 0) {
+        throw "Installation failed: $($failure.Exception.Message). Rollback also failed: $($rollbackErrors -join '; ')"
+    }
+    throw $failure
+}
+
+Remove-Item -LiteralPath $transactionRoot -Recurse -Force -ErrorAction SilentlyContinue
 New-QuantumShortcut -Launcher $startCommandTarget -WorkingDirectory $TargetRoot
 Write-Host "Quantum HOME_LOCAL runtime installed." -ForegroundColor Green
 Write-Host "Target: $TargetRoot"
