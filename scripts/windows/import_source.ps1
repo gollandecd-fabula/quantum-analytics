@@ -163,6 +163,12 @@ function New-ScanReceipt {
 }
 
 $projectRoot = Resolve-ProjectRoot
+$hashCompat = Join-Path $projectRoot "src\quantum\pilot\hash_compat.ps1"
+if (-not (Test-Path -LiteralPath $hashCompat -PathType Leaf)) {
+    throw "Quantum SHA-256 compatibility shim was not found: $hashCompat"
+}
+. $hashCompat
+
 if ([string]::IsNullOrWhiteSpace($File)) {
     $File = Select-SourceFile
 }
