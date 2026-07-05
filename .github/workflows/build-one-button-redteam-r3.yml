@@ -137,8 +137,12 @@ jobs:
       - name: Complete repository CI
         shell: pwsh
         run: |
-          $env:PYTHONPATH="src";python -m quantum.scripts.ci
-          if($LASTEXITCODE-ne 0){throw "Repository CI failed."}
+          git config core.autocrlf false
+          git restore --source=HEAD --worktree -- .
+          $env:PYTHONPATH="src"
+          python -m quantum.scripts.ci 2>&1 | Tee-Object repository-ci.log
+          $ciExitCode=$LASTEXITCODE
+          if($ciExitCode-ne 0){throw "Repository CI failed with exit code $ciExitCode."}
 
       - name: Write QA evidence
         shell: pwsh
@@ -158,6 +162,7 @@ jobs:
             native-install-2.log
             native-full.log
             contamination.log
+            repository-ci.log
             dist/one-button-redteam-r3/**
           if-no-files-found: warn
           retention-days: 7
