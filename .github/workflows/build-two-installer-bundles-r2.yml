@@ -15,6 +15,17 @@ on:
       - "src/**"
       - "requirements/windows-home-local.txt"
       - ".github/workflows/build-two-installer-bundles-r2.yml"
+  pull_request:
+    paths:
+      - "scripts/windows/build_two_installer_bundles.ps1"
+      - "scripts/windows/build_local_production.ps1"
+      - "scripts/windows/install_home_local.ps1"
+      - "scripts/windows/one_click_home_local.ps1"
+      - "scripts/windows/import_source.ps1"
+      - "scripts/windows/configure_home_local.ps1"
+      - "src/**"
+      - "requirements/windows-home-local.txt"
+      - ".github/workflows/build-two-installer-bundles-r2.yml"
 
 permissions:
   contents: read
@@ -27,14 +38,15 @@ jobs:
       - name: Checkout exact head
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.sha }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
       - name: Assert exact head
         shell: pwsh
         run: |
+          $expected = "${{ github.event.pull_request.head.sha || github.sha }}"
           $actual = (& git rev-parse HEAD).Trim()
-          if ($actual -ne "${{ github.sha }}") {
-            throw "Exact-head checkout failed. Expected ${{ github.sha }}, got $actual"
+          if ($actual -ne $expected) {
+            throw "Exact-head checkout failed. Expected $expected, got $actual"
           }
 
       - name: Set up Python 3.12 for package build
@@ -60,7 +72,7 @@ jobs:
       - name: Build two installer bundles
         shell: pwsh
         env:
-          TARGET_SHA: ${{ github.sha }}
+          TARGET_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: |
           powershell.exe -NoProfile -ExecutionPolicy Bypass `
             -File .\scripts\windows\build_two_installer_bundles.ps1 2>&1 |
@@ -74,10 +86,11 @@ jobs:
         run: |
           Set-StrictMode -Version Latest
           $ErrorActionPreference = "Stop"
+          $expectedHead = "${{ github.event.pull_request.head.sha || github.sha }}"
           $output = Resolve-Path "dist/installer-bundles-r2"
           $resultPath = Join-Path $output "installer-bundles-result.json"
           $result = Get-Content -LiteralPath $resultPath -Raw -Encoding UTF8 | ConvertFrom-Json
-          if ([string]$result.source_commit -ne "${{ github.sha }}") {
+          if ([string]$result.source_commit -ne $expectedHead) {
             throw "Bundle source commit mismatch: $($result.source_commit)"
           }
 
