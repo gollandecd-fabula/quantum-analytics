@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from .universal_gateway import (
+from .universal_intake import (
     IntakeDecision,
     UNIVERSAL_IMPORT_SCHEMA_VERSION,
     UniversalImportError,
