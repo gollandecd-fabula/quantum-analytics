@@ -53,8 +53,8 @@
     ],
     [
       "scripts/windows/import_source.ps1",
-      "8aca9ab3ebeece5271fcb877459a1d499a5cb218ae7a5de05b92ce0f21dfc62a",
-      8993
+      "7078bec2e2b210a596dcc891f8ac889867e628942d723dc76c9a83feedd17c58",
+      9968
     ],
     [
       "scripts/windows/install_home_local.ps1",
@@ -93,8 +93,13 @@
     ],
     [
       "src/quantum/pilot/universal_import.py",
-      "a3e644e3eea066bd22799d232d31d05a287512cdcb209c9a5446a696f114e988",
-      424
+      "1501887e159474c7b2ffb3038110b0eb810d0a55dd9945c2af612e9b83808e59",
+      423
+    ],
+    [
+      "src/quantum/pilot/universal_intake.py",
+      "dc5733d78c62abb39b7e1b210aa7403e7fd8595197a266ae9a047b973f29c2b3",
+      6482
     ],
     [
       "tests/integration_manifest_support.py",
@@ -107,14 +112,19 @@
       10258
     ],
     [
+      "tests/test_universal_intake_hardening_r4.py",
+      "6a2429eff9d6fd28b3b8907b2b87d50646d05561427351bd56c0c36e5622a8bf",
+      3536
+    ],
+    [
       "tests/test_windows_one_click_installer_r1.py",
-      "a15597dd2b13c29c1d535636304c83b1e3a5dcecd1937b48ec7b59c56425a2e0",
-      6870
+      "cdf9a4f1b9b870ad38965bc416bcb278bd21b3e22e00ea96b3382e76ae4ee79a",
+      7077
     ],
     [
       "tests/test_windows_redteam_hardening.py",
-      "61feda46dbcec74cdf5aa94fa96d90153e40319f96691a2afdb7d53e87e8a80c",
-      9607
+      "a21050b033d4548dffe04fbdffd7dcf7b6e6d22ffe4cebaa615956aadd4e44ec",
+      9606
     ],
     [
       "tests/test_windows_source_package_launchers_r1.py",
@@ -124,6 +134,6 @@
   ],
   "hash_encoding": "sha256-hex",
   "overlay_version": 33,
-  "reason": "Register one-click HOME_LOCAL pilot installer, reusable launcher, cloud-path safety, PowerShell 5.1 compatibility, package documentation, dedicated tests, ACL recovery fixture, verified R3 one-click package workflow, Windows-safe durable ledger writes and transactional rollback; synchronize source launchers; add a universal safe-file front door, content-based classification, local inbox and quarantine, bounded passive OOXML compatibility, isolated reviewed XLSX processing, hash-bound Defender evidence handoff, and regression coverage while preserving RELEASE_BLOCKED and marketplace-write-disabled safety boundaries",
+  "reason": "Register one-click HOME_LOCAL pilot installer, reusable launcher, cloud-path safety, PowerShell 5.1 compatibility, package documentation, dedicated tests, ACL recovery fixture, verified one-click package workflow, Windows-safe durable ledger writes and transactional rollback; add a universal safe-file front door, content-based classification, local inbox and quarantine, bounded passive OOXML compatibility, isolated reviewed XLSX processing, hash-bound Defender evidence handoff, fail-closed handling for opaque archives, nested archives, OLE containers and active or encrypted PDFs, temporary intake-output isolation, and expanded adversarial regression coverage while preserving RELEASE_BLOCKED and marketplace-write-disabled boundaries",
   "remove_paths": []
 }
