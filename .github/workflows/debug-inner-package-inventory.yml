@@ -7,6 +7,10 @@ on:
     paths:
       - ".github/workflows/debug-inner-package-inventory.yml"
       - "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R33.json"
+  pull_request:
+    paths:
+      - ".github/workflows/debug-inner-package-inventory.yml"
+      - "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R33.json"
 
 permissions:
   contents: read
