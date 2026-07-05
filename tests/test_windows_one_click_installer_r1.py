@@ -13,6 +13,7 @@ class WindowsOneClickInstallerR1Tests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.one_click = (WINDOWS / "one_click_home_local.ps1").read_text(encoding="utf-8")
+        cls.importer = (WINDOWS / "import_source.ps1").read_text(encoding="utf-8")
         cls.installer = (WINDOWS / "install_home_local.ps1").read_text(encoding="utf-8")
         cls.builder = (WINDOWS / "build_local_production.ps1").read_text(encoding="utf-8")
 
@@ -35,15 +36,29 @@ class WindowsOneClickInstallerR1Tests(unittest.TestCase):
         self.assertIn('Open-PilotResult', script)
         self.assertIn('START_QUANTUM.cmd', script)
 
-    def test_safety_gates_are_not_automatically_bypassed(self):
+    def test_one_click_attestations_are_explicit_and_defender_remains_enabled(self):
         script = self.one_click
-        self.assertIn('AUTHORIZE and REVIEWED remain mandatory safety confirmations.', script)
+        self.assertIn(
+            'if ($NonInteractive -or ($AuthorityAttested -and $SchemaReviewed))',
+            script,
+        )
         self.assertIn('if ($AuthorityAttested) { $importArguments["AuthorityAttested"] = $true }', script)
         self.assertIn('if ($SchemaReviewed) { $importArguments["SchemaReviewed"] = $true }', script)
         self.assertIn('if ($SkipDefenderScan) { $importArguments["SkipDefenderScan"] = $true }', script)
-        self.assertNotIn('$importArguments["AuthorityAttested"] = $true\n$importArguments["SchemaReviewed"] = $true', script)
+        self.assertIn('No AUTHORIZE or REVIEWED console input is required.', script)
         self.assertNotIn('SkipDefenderScan = $true', script)
         self.assertNotIn('finance_request =', script)
+
+    def test_importer_honors_explicit_attestations_but_fails_closed_without_them(self):
+        script = self.importer
+        attested = script.index('if ($AlreadyAttested)')
+        noninteractive = script.index('if ($NonInteractive)', attested)
+        read_host = script.index('$answer = Read-Host $Prompt', noninteractive)
+        self.assertLess(attested, noninteractive)
+        self.assertLess(noninteractive, read_host)
+        self.assertIn('Non-interactive mode requires explicit $Expected attestation switch.', script)
+        self.assertIn('from quantum.pilot.windows_runner import main; raise SystemExit(main())', script)
+        self.assertNotIn('"-m", "quantum.pilot.windows_runner"', script)
 
     def test_cloud_sync_paths_and_unmanaged_outputs_are_blocked(self):
         script = self.one_click
@@ -61,7 +76,8 @@ class WindowsOneClickInstallerR1Tests(unittest.TestCase):
         self.assertIn('START_QUANTUM.cmd', script)
         self.assertIn('$sourceOneClick', script)
         self.assertIn('$oneClickTarget', script)
-        self.assertIn('-InstalledRoot "%~dp0" -SkipInstall', script)
+        self.assertIn('-InstalledRoot "%~dp0" -SkipInstall -AuthorityAttested -SchemaReviewed', script)
+        self.assertIn('import_source.ps1" -AuthorityAttested -SchemaReviewed', script)
         self.assertIn('New-QuantumShortcut', script)
         self.assertIn('Existing config, data and output directories were preserved.', script)
 
@@ -87,6 +103,7 @@ class WindowsOneClickInstallerR1Tests(unittest.TestCase):
     def test_windows_entry_scripts_are_ascii_for_powershell_51(self):
         for name, script in (
             ("one_click_home_local.ps1", self.one_click),
+            ("import_source.ps1", self.importer),
             ("install_home_local.ps1", self.installer),
             ("build_local_production.ps1", self.builder),
         ):
