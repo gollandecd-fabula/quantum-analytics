@@ -26,7 +26,7 @@ function Resolve-ProjectRoot {
         catch {
             continue
         }
-        $gateway = Join-Path $resolved "src\quantum\pilot\universal_gateway.py"
+        $gateway = Join-Path $resolved "src\quantum\pilot\universal_import.py"
         $xlsxHelper = Join-Path $resolved "src\quantum\pilot\import_xlsx_source.ps1"
         if (
             (Test-Path -LiteralPath $gateway -PathType Leaf) -and
@@ -175,6 +175,10 @@ if ([string]::IsNullOrWhiteSpace($Output)) {
     New-Item -ItemType Directory -Path $outputDirectory -Force | Out-Null
     $Output = Join-Path $outputDirectory ("import_{0}.json" -f (Get-Date -Format "yyyyMMdd_HHmmss"))
 }
+$Output = [IO.Path]::GetFullPath($Output)
+$outputDirectory = Split-Path -Parent $Output
+New-Item -ItemType Directory -Path $outputDirectory -Force | Out-Null
+$gatewayOutput = Join-Path $outputDirectory (".quantum-intake-{0}.json" -f [guid]::NewGuid().ToString("N"))
 
 $scanResult = Invoke-DefenderScan -Path $File
 $scanReceipt = New-ScanReceipt -SourcePath $File -ScanResult $scanResult
@@ -183,68 +187,84 @@ Confirm-Literal -Expected "AUTHORIZE" -Prompt "Type AUTHORIZE to attest lawful a
 
 $pythonCommand = Resolve-PythonCommand
 $env:PYTHONPATH = Join-Path $projectRoot "src"
-$arguments = @()
-$arguments += $pythonCommand.Prefix
-$arguments += @(
-    "-c", "from quantum.pilot.universal_gateway import main; raise SystemExit(main())",
-    "--file", $File,
-    "--storage-root", $StorageRoot,
-    "--output", $Output,
-    "--authority-attested",
-    "--malware-scan-evidence-sha256", ([string]$scanReceipt.evidence_sha256),
-    "--malware-scan-outcome", ([string]$scanResult.outcome)
-)
-& $pythonCommand.Executable @arguments
-$gatewayExitCode = $LASTEXITCODE
-if (-not (Test-Path -LiteralPath $Output -PathType Leaf)) {
-    throw "Universal gateway did not produce a report: $Output"
+$finalExitCode = 0
+try {
+    $arguments = @()
+    $arguments += $pythonCommand.Prefix
+    $arguments += @(
+        "-c", "from quantum.pilot.universal_import import main; raise SystemExit(main())",
+        "--file", $File,
+        "--storage-root", $StorageRoot,
+        "--output", $gatewayOutput,
+        "--authority-attested",
+        "--malware-scan-evidence-sha256", ([string]$scanReceipt.evidence_sha256),
+        "--malware-scan-outcome", ([string]$scanResult.outcome)
+    )
+    & $pythonCommand.Executable @arguments
+    $gatewayExitCode = $LASTEXITCODE
+    if (-not (Test-Path -LiteralPath $gatewayOutput -PathType Leaf)) {
+        throw "Universal intake did not produce a report: $gatewayOutput"
+    }
+    $report = Get-Content -LiteralPath $gatewayOutput -Raw -Encoding UTF8 | ConvertFrom-Json
+    $status = [string]$report.status
+    $hashProperty = $report.PSObject.Properties["file_sha256"]
+    if (
+        $hashProperty -and
+        -not [string]::IsNullOrWhiteSpace([string]$hashProperty.Value) -and
+        [string]$hashProperty.Value -ne $reviewedFileHash
+    ) {
+        throw "Universal intake file hash does not match the scanned file."
+    }
+
+    if ($status -eq "ROUTE_XLSX") {
+        if ($gatewayExitCode -ne 0) {
+            throw "Universal intake routed XLSX with non-zero exit code $gatewayExitCode."
+        }
+        $helper = Join-Path $projectRoot "src\quantum\pilot\import_xlsx_source.ps1"
+        $helperArguments = @{
+            File = $File
+            StorageRoot = $StorageRoot
+            Output = $Output
+            AuthorityAttested = $true
+            SchemaReviewed = [bool]$SchemaReviewed
+            PreScannedEvidenceSha256 = [string]$scanReceipt.evidence_sha256
+            PreScannedOutcome = [string]$scanResult.outcome
+            ExpectedFileSha256 = $reviewedFileHash
+        }
+        if (-not [string]::IsNullOrWhiteSpace($Config)) {
+            $helperArguments["Config"] = $Config
+        }
+        if ($NonInteractive) {
+            $helperArguments["NonInteractive"] = $true
+        }
+        if ($DebugErrors) {
+            $helperArguments["DebugErrors"] = $true
+        }
+        & $helper @helperArguments
+        return
+    }
+
+    Move-Item -LiteralPath $gatewayOutput -Destination $Output -Force
+    Write-Host "Universal intake completed." -ForegroundColor Cyan
+    Write-Host "Status: $status"
+    Write-Host "Detected format: $([string]$report.detected_format)"
+    Write-Host "Report: $Output"
+    if ($status -like "QUARANTINED*") {
+        Write-Host "The file was isolated and was not used for calculations." -ForegroundColor Red
+        $finalExitCode = 2
+    }
+    elseif ($status -eq "ERROR" -or $gatewayExitCode -ne 0) {
+        Write-Host "The file could not be processed. Review reason_codes in the report." -ForegroundColor Red
+        $finalExitCode = 2
+    }
+    else {
+        Write-Host "No financial calculation was performed for this file." -ForegroundColor Green
+    }
 }
-$report = Get-Content -LiteralPath $Output -Raw -Encoding UTF8 | ConvertFrom-Json
-$status = [string]$report.status
-$hashProperty = $report.PSObject.Properties["file_sha256"]
-if (
-    $hashProperty -and
-    -not [string]::IsNullOrWhiteSpace([string]$hashProperty.Value) -and
-    [string]$hashProperty.Value -ne $reviewedFileHash
-) {
-    throw "Universal gateway file hash does not match the scanned file."
+finally {
+    Remove-Item -LiteralPath $gatewayOutput -Force -ErrorAction SilentlyContinue
 }
 
-if ($status -eq "ROUTE_XLSX") {
-    $helper = Join-Path $projectRoot "src\quantum\pilot\import_xlsx_source.ps1"
-    $helperArguments = @{
-        File = $File
-        StorageRoot = $StorageRoot
-        Output = $Output
-        AuthorityAttested = $true
-        SchemaReviewed = [bool]$SchemaReviewed
-        PreScannedEvidenceSha256 = [string]$scanReceipt.evidence_sha256
-        PreScannedOutcome = [string]$scanResult.outcome
-        ExpectedFileSha256 = $reviewedFileHash
-    }
-    if (-not [string]::IsNullOrWhiteSpace($Config)) {
-        $helperArguments["Config"] = $Config
-    }
-    if ($NonInteractive) {
-        $helperArguments["NonInteractive"] = $true
-    }
-    if ($DebugErrors) {
-        $helperArguments["DebugErrors"] = $true
-    }
-    & $helper @helperArguments
-    return
+if ($finalExitCode -ne 0) {
+    exit $finalExitCode
 }
-
-Write-Host "Universal intake completed." -ForegroundColor Cyan
-Write-Host "Status: $status"
-Write-Host "Detected format: $([string]$report.detected_format)"
-Write-Host "Report: $Output"
-if ($status -like "QUARANTINED*") {
-    Write-Host "The file was isolated and was not used for calculations." -ForegroundColor Red
-    return
-}
-if ($status -eq "ERROR" -or $gatewayExitCode -ne 0) {
-    Write-Host "The file could not be processed. Review reason_codes in the report." -ForegroundColor Red
-    exit 2
-}
-Write-Host "No financial calculation was performed for this file." -ForegroundColor Green
