@@ -60,10 +60,13 @@ class WindowsOneClickInstallerR1Tests(unittest.TestCase):
         self.assertLess(noninteractive, read_host)
         self.assertIn('Non-interactive mode requires explicit $Expected attestation switch.', script)
         self.assertIn('All files (*.*)|*.*', script)
-        self.assertIn('from quantum.pilot.universal_gateway import main; raise SystemExit(main())', script)
+        self.assertIn('from quantum.pilot.universal_import import main; raise SystemExit(main())', script)
         self.assertIn('if ($status -eq "ROUTE_XLSX")', script)
         self.assertIn('PreScannedEvidenceSha256', script)
         self.assertIn('ExpectedFileSha256', script)
+        self.assertIn('.quantum-intake-', script)
+        self.assertIn('Move-Item -LiteralPath $gatewayOutput -Destination $Output -Force', script)
+        self.assertIn('if ($finalExitCode -ne 0)', script)
 
     def test_xlsx_helper_preserves_reviewed_admission_pipeline(self):
         script = self.xlsx_helper
