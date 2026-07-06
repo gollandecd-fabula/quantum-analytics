@@ -79,6 +79,34 @@ def _matches_aliases(headers: set[str], field: str) -> bool:
     )
 
 
+def _normalize_reason_code_schema(result: dict[str, Any]) -> dict[str, Any]:
+    """Keep one canonical reason-code list for all downstream renderers.
+
+    Older supplier-goods bridge output used finance_request_reason_code
+    (singular). The UI, output bundle and generic blocked results expect
+    finance_request_reason_codes (plural). Preserve the legacy field as a
+    deprecated alias, but always add the canonical list when a reason exists.
+    """
+    singular = result.get("finance_request_reason_code")
+    plural = result.get("finance_request_reason_codes")
+    if plural is None:
+        if isinstance(singular, str) and singular.strip():
+            result["finance_request_reason_codes"] = [singular.strip()]
+        elif isinstance(singular, list):
+            result["finance_request_reason_codes"] = [
+                str(item).strip() for item in singular if str(item).strip()
+            ]
+    elif isinstance(plural, str):
+        result["finance_request_reason_codes"] = [plural]
+    elif isinstance(plural, list):
+        result["finance_request_reason_codes"] = [
+            str(item).strip() for item in plural if str(item).strip()
+        ]
+    else:
+        raise WbSourceDispatchError("WB_DISPATCH_REASON_CODES_INVALID")
+    return result
+
+
 def _blocked_result(
     *,
     status: str,
@@ -186,6 +214,7 @@ def bridge_reviewed_wb_source(
                 reason_code=getattr(exc, "code", type(exc).__name__),
                 schema_discovery=schema_discovery,
             )
+        result = _normalize_reason_code_schema(result)
         result["dispatch_schema_version"] = DISPATCH_SCHEMA_VERSION
         return result
 
@@ -202,6 +231,7 @@ def bridge_reviewed_wb_source(
                 reason_code=getattr(exc, "code", type(exc).__name__),
                 schema_discovery=schema_discovery,
             )
+        result = _normalize_reason_code_schema(result)
         result["dispatch_schema_version"] = DISPATCH_SCHEMA_VERSION
         return result
 
@@ -229,6 +259,7 @@ def bridge_reviewed_wb_source(
                 reason_code=getattr(exc, "code", type(exc).__name__),
                 schema_discovery=schema_discovery,
             )
+        result = _normalize_reason_code_schema(result)
         result["dispatch_schema_version"] = DISPATCH_SCHEMA_VERSION
         return result
 
