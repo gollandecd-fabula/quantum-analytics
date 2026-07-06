@@ -4,15 +4,13 @@ Status: DEGRADED
 
 Date: 2026-07-06
 
-Head commit: `efb369fa1dfa541bcd1cc6a9ccfd4db5fd192d6b`
+Verified CI classes:
 
-Verified CI results:
-
-- Foundation CI: success.
-- OSS Admission CI: success.
-- Local Pilot Package: success.
-- Local Pilot Package job ran `PYTHONPATH=src python3 -m quantum.scripts.ci` and `PYTHONPATH=src python3 scripts/build_local_pilot_package.py`.
-- The prior manifest-only failure was corrected by updating the artifact-manifest overlay with exact diagnostics.
+- Foundation CI: success required.
+- OSS Admission CI: success required.
+- Local Pilot Package: success required.
+- Local Pilot Package job runs `PYTHONPATH=src python3 -m quantum.scripts.ci` and `PYTHONPATH=src python3 scripts/build_local_pilot_package.py`.
+- Manifest-only failures must be corrected only from exact CI diagnostics.
 
 Test scope added in this branch:
 
