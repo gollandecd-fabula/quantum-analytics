@@ -47,6 +47,11 @@
       5703
     ],
     [
+      "docs/redteam_home_local_r6.md",
+      "ac90df93e0d966b10cebff92ca809053e82bb9de71b5b110f5348c45f1286790",
+      508
+    ],
+    [
       "scripts/windows/build_local_production.ps1",
       "a341b69c9b16aa40a2fc79e63df136e2099b654cec0bc1a42eb71f9498866465",
       11290
@@ -214,6 +219,6 @@
   ],
   "hash_encoding": "sha256-hex",
   "overlay_version": 33,
-  "reason": "Register one-click HOME_LOCAL pilot installer, universal any-file intake and Windows compatibility evidence; add governed WB weekly-summary extraction, direct source metrics, generic admitted-table diagnostics, repaired HOME_LOCAL UI import diagnostics and regression coverage without inventing finance inputs, exposing raw rows, enabling marketplace writes or weakening RELEASE_BLOCKED safety boundaries",
+  "reason": "Register one-click HOME_LOCAL pilot installer, universal any-file intake and Windows compatibility evidence; add governed WB weekly-summary extraction, direct source metrics, generic admitted-table diagnostics, repaired HOME_LOCAL UI import diagnostics, R6 red-team blockers and regression coverage without inventing finance inputs, exposing raw rows, enabling marketplace writes or weakening RELEASE_BLOCKED safety boundaries",
   "remove_paths": []
 }
