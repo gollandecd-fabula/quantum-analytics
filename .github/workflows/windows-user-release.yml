@@ -1,0 +1,122 @@
+name: Windows User Release
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: windows-user-release-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-windows-exe:
+    name: build-windows-exe
+    runs-on: windows-2022
+    timeout-minutes: 20
+    steps:
+      - name: Fetch exact PR head without third-party checkout
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TARGET_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          $ErrorActionPreference = "Stop"
+          if (-not $env:TARGET_SHA) { throw "TARGET_SHA is empty" }
+          git init .
+          git remote add origin "https://x-access-token:$env:GH_TOKEN@github.com/$env:GITHUB_REPOSITORY.git"
+          git fetch --depth=1 origin $env:TARGET_SHA
+          git checkout --detach FETCH_HEAD
+          $actual = git rev-parse HEAD
+          if ($actual -ne $env:TARGET_SHA) { throw "Checked out $actual instead of $env:TARGET_SHA" }
+          git remote set-url origin "https://github.com/$env:GITHUB_REPOSITORY.git"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Run release tests before packaging
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          python -m quantum.scripts.ci
+
+      - name: Build Windows executable
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          python -m pip install --upgrade pip
+          python -m pip install pyinstaller
+          python -m PyInstaller --clean --noconfirm --onefile --name Quantum_WB_Release --paths src scripts/quantum_windows_exe_entry.py
+          if (-not (Test-Path "dist\Quantum_WB_Release.exe")) { throw "EXE was not produced" }
+
+      - name: Smoke-test packaged EXE
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $env:QUANTUM_NO_BROWSER = "1"
+          $env:QUANTUM_PORT = "8099"
+          $env:QUANTUM_RUNTIME_DIR = Join-Path $env:RUNNER_TEMP "quantum-runtime"
+          $process = Start-Process -FilePath "dist\Quantum_WB_Release.exe" -PassThru
+          try {
+            $ok = $false
+            for ($i = 0; $i -lt 30; $i++) {
+              try {
+                $response = Invoke-WebRequest -UseBasicParsing "http://127.0.0.1:8099/api/local-pilot/health"
+                if ($response.StatusCode -eq 200 -and $response.Content -like '*READY*') { $ok = $true; break }
+              } catch {
+                Start-Sleep -Seconds 1
+              }
+            }
+            if (-not $ok) { throw "Packaged EXE did not become healthy" }
+          } finally {
+            if (-not $process.HasExited) { Stop-Process -Id $process.Id -Force }
+          }
+
+      - name: Assemble user package
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $release = "dist\Quantum_WB_RELEASE_EXE"
+          New-Item -ItemType Directory -Force -Path $release | Out-Null
+          Copy-Item "dist\Quantum_WB_Release.exe" "$release\Quantum_WB_Release.exe" -Force
+          Set-Content -Encoding UTF8 "$release\0_INSTALL.cmd" '@echo off
+setlocal
+set "INSTALL=%USERPROFILE%\.quantum-analytics\app\QuantumWBRelease"
+set "RUNTIME=%USERPROFILE%\.quantum-analytics\local-pilot"
+if not exist "%INSTALL%" mkdir "%INSTALL%"
+if not exist "%RUNTIME%" mkdir "%RUNTIME%"
+copy /Y "%~dp0Quantum_WB_Release.exe" "%INSTALL%\Quantum_WB_Release.exe" >nul
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$s=(New-Object -ComObject WScript.Shell).CreateShortcut([Environment]::GetFolderPath(''Desktop'')+''\Quantum WB Release.lnk'');$s.TargetPath=$env:USERPROFILE+''\.quantum-analytics\app\QuantumWBRelease\Quantum_WB_Release.exe'';$s.WorkingDirectory=$env:USERPROFILE+''\.quantum-analytics\app\QuantumWBRelease'';$s.Save()"
+echo Installed. Desktop shortcut created: Quantum WB Release
+pause
+'
+          Set-Content -Encoding UTF8 "$release\1_START.cmd" '@echo off
+start "" "%~dp0Quantum_WB_Release.exe"
+'
+          Set-Content -Encoding UTF8 "$release\README_RU.txt" 'Quantum WB Release
+
+1. Распакуйте ZIP.
+2. Нажмите 0_INSTALL.cmd для установки и создания ярлыка.
+3. Запустите ярлык Quantum WB Release или файл 1_START.cmd.
+
+Python устанавливать не нужно. Внутри пакета находится Windows EXE.
+Данные сохраняются в %USERPROFILE%\.quantum-analytics\local-pilot.
+Marketplace writes отключены.
+'
+          Compress-Archive -Path "$release\*" -DestinationPath "dist\Quantum_WB_RELEASE_EXE.zip" -Force
+          if (-not (Test-Path "dist\Quantum_WB_RELEASE_EXE.zip")) { throw "release ZIP was not produced" }
+
+      - name: Upload Windows user release artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Quantum_WB_RELEASE_EXE
+          path: |
+            dist/Quantum_WB_RELEASE_EXE.zip
+            dist/Quantum_WB_Release.exe
+          if-no-files-found: error
