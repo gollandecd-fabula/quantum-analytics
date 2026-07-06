@@ -1,0 +1,49 @@
+name: Local Pilot Package
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: local-pilot-package-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  package:
+    name: package
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Fetch exact PR head without third-party checkout
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TARGET_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          test -n "${TARGET_SHA}"
+          git init .
+          git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git fetch --depth=1 origin "${TARGET_SHA}"
+          git checkout --detach FETCH_HEAD
+          test "$(git rev-parse HEAD)" = "${TARGET_SHA}"
+          git remote set-url origin "https://github.com/${GITHUB_REPOSITORY}.git"
+      - name: Run local pilot package smoke
+        run: |
+          set -euo pipefail
+          PYTHONPATH=src python3 -m quantum.scripts.ci
+          PYTHONPATH=src python3 scripts/build_local_pilot_package.py
+          test -s dist/quantum-local-pilot-one-click.zip
+          test -s dist/quantum-local-pilot-one-click.summary.json
+      - name: Upload package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: quantum-local-pilot-one-click
+          path: |
+            dist/quantum-local-pilot-one-click.zip
+            dist/quantum-local-pilot-one-click.summary.json
+          if-no-files-found: error
