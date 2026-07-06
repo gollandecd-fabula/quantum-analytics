@@ -73,13 +73,48 @@
     ],
     [
       "src/quantum/adapters/wildberries/dispatcher.py",
-      "ef98d89a1d317a6ec6af3c24fa53be27d5d3850317702a18001b4a30d809fb97",
-      7643
+      "a2af076a121b7c6b3feadaf16dceda24c32790b8369f731bdf0ca06f7e10ba7b",
+      9077
     ],
     [
       "src/quantum/adapters/wildberries/weekly_summary.py",
       "a7ce95c5cd8fe84532a8ea47bab199cc1a2dabf4901e4bc0d0feeca4f10646bf",
       14068
+    ],
+    [
+      "src/quantum/application/desktop_center.py",
+      "71e7fb7e36a3baf6b23fea293301d1b1bc35afd2aab412ddc01953a727f712d6",
+      1199
+    ],
+    [
+      "src/quantum/application/local_app.py",
+      "77d57a59aa336f270074210fcc62ef1610371375fffe00b47992af75af9f85b0",
+      17489
+    ],
+    [
+      "src/quantum/application/local_app_utils.py",
+      "5384bfdb2df380b6557cc7a71d16891415bccaa87699406e236f752c6415389f",
+      35
+    ],
+    [
+      "src/quantum/application/local_page.py",
+      "5384bfdb2df380b6557cc7a71d16891415bccaa87699406e236f752c6415389f",
+      35
+    ],
+    [
+      "src/quantum/application/local_processing.py",
+      "5384bfdb2df380b6557cc7a71d16891415bccaa87699406e236f752c6415389f",
+      35
+    ],
+    [
+      "src/quantum/application/local_runtime.py",
+      "5384bfdb2df380b6557cc7a71d16891415bccaa87699406e236f752c6415389f",
+      35
+    ],
+    [
+      "src/quantum/application/report_center.py",
+      "5384bfdb2df380b6557cc7a71d16891415bccaa87699406e236f752c6415389f",
+      35
     ],
     [
       "src/quantum/ingestion/_xlsx_inspection_v3.py",
@@ -147,6 +182,11 @@
       2977
     ],
     [
+      "tests/test_wb_supplier_goods_result_schema_r5.py",
+      "6122396e74187e3b02332206ecb3847e10caa4da35c4e930d09f6bb47da04933",
+      2174
+    ],
+    [
       "tests/test_wb_weekly_summary_bridge_r5.py",
       "ad78dc0704f6ca45286135d264141debcd2a98655ee0f387fa79ca1be7b4eb17",
       5363
@@ -174,6 +214,6 @@
   ],
   "hash_encoding": "sha256-hex",
   "overlay_version": 33,
-  "reason": "Register one-click HOME_LOCAL pilot installer, universal any-file intake and Windows compatibility evidence; add governed WB weekly-summary extraction, direct source metrics, generic admitted-table diagnostics and regression coverage without inventing finance inputs, exposing raw rows, enabling marketplace writes or weakening RELEASE_BLOCKED safety boundaries",
+  "reason": "Register one-click HOME_LOCAL pilot installer, universal any-file intake and Windows compatibility evidence; add governed WB weekly-summary extraction, direct source metrics, generic admitted-table diagnostics, repaired HOME_LOCAL UI import diagnostics and regression coverage without inventing finance inputs, exposing raw rows, enabling marketplace writes or weakening RELEASE_BLOCKED safety boundaries",
   "remove_paths": []
 }
