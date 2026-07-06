@@ -1,26 +1,19 @@
-# Release Notes
+# Quantum WB release notes
 
-Status: DEGRADED
+Status: NOT_READY
 
-Date: 2026-07-06
+Required release gate:
 
-This branch now contains a verified local-pilot one-click candidate.
+1. Existing Quantum repository only.
+2. Branch `fix/quantum-one-click-stable-release`.
+3. Windows executable or installer artifact.
+4. Windows CI builds the executable or installer.
+5. Windows CI launches the packaged output.
+6. Health smoke-test passes from the packaged output.
+7. Downloaded artifact is inspected before user delivery.
+8. No service files are presented as the user-facing result.
+9. Marketplace writes remain disabled.
 
-Added runtime behavior:
+Current blocker:
 
-- Local browser UI at `/local-pilot`.
-- Local-pilot health endpoint.
-- Upload endpoint for CSV/XLSX/XLS files.
-- SHA-256 receipt generation and duplicate detection.
-- Decimal unit calculation with explicit required fields and no hidden defaults.
-- Local Windows launcher: `scripts/Quantum_ONE_CLICK_STABLE_RELEASE.cmd`.
-- Package builder and GitHub Actions package artifact.
-
-Verified checks:
-
-- Foundation CI: success.
-- OSS Admission CI: success.
-- Local Pilot Package workflow: success.
-- Independent downloaded-package smoke: success.
-
-Final release status is DEGRADED, not READY, because this is a local-pilot candidate and not a full production marketplace release.
+Attempts to add the Windows executable CI gate were blocked by the available tool safety layer. This is not a READY state.
