@@ -63,8 +63,8 @@
     ],
     [
       "scripts/windows/import_source.ps1",
-      "17bf6f2654c65cbeba9f300f0abdaed06e5bd33c575449e5a058055d12612661",
-      10196
+      "61d3bcd9e9d4598066d99d52892faf07c61b8eda290d7b8dc7955f952bcb4783",
+      11369
     ],
     [
       "scripts/windows/install_home_local.ps1",
@@ -143,8 +143,8 @@
     ],
     [
       "src/quantum/pilot/import_xlsx_source.ps1",
-      "fef4e67a584515a109cf9a375971601dc014349768c10648d6ebb20ee13a3974",
-      13914
+      "8f302a9998d8606ee1066d5277c608a505c5dbd0c514214f68bb32587f9e7f90",
+      15087
     ],
     [
       "src/quantum/pilot/universal_gateway.py",
@@ -203,8 +203,8 @@
     ],
     [
       "tests/test_windows_one_click_installer_r1.py",
-      "cdf9a4f1b9b870ad38965bc416bcb278bd21b3e22e00ea96b3382e76ae4ee79a",
-      7077
+      "5b30fed80d96a6a755cac4dab3b01d2199c8a1a8c55519c5591f64dad2f92d93",
+      7888
     ],
     [
       "tests/test_windows_redteam_hardening.py",
@@ -219,6 +219,6 @@
   ],
   "hash_encoding": "sha256-hex",
   "overlay_version": 33,
-  "reason": "Register one-click HOME_LOCAL pilot installer, universal any-file intake and Windows compatibility evidence; add governed WB weekly-summary extraction, direct source metrics, generic admitted-table diagnostics, repaired HOME_LOCAL UI import diagnostics, R6 red-team blockers and regression coverage without inventing finance inputs, exposing raw rows, enabling marketplace writes or weakening RELEASE_BLOCKED safety boundaries",
+  "reason": "Register one-click HOME_LOCAL pilot installer, universal any-file intake, governed Defender-unavailable structural fallback, Windows compatibility evidence and regression coverage without inventing finance inputs, exposing raw rows, enabling marketplace writes or weakening active-content safety boundaries",
   "remove_paths": []
 }
