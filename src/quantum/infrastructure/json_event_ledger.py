@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import tempfile
 from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
@@ -33,14 +34,27 @@ class JsonEventLedger:
         return json.loads(self._path.read_text(encoding="utf-8"))
 
     def _atomic_write(self, payload: dict[str, Any]) -> None:
-        temporary = self._path.with_suffix(self._path.suffix + ".tmp")
-        temporary.write_text(
-            json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
-            encoding="utf-8",
-        )
-        with temporary.open("rb") as handle:
-            os.fsync(handle.fileno())
-        os.replace(temporary, self._path)
+        encoded = json.dumps(payload, ensure_ascii=False, indent=2) + "\n"
+        temporary: Path | None = None
+        try:
+            with tempfile.NamedTemporaryFile(
+                mode="w",
+                encoding="utf-8",
+                newline="\n",
+                dir=self._path.parent,
+                prefix=self._path.name + ".",
+                suffix=".tmp",
+                delete=False,
+            ) as handle:
+                temporary = Path(handle.name)
+                handle.write(encoded)
+                handle.flush()
+                os.fsync(handle.fileno())
+            os.replace(temporary, self._path)
+        except Exception:
+            if temporary is not None:
+                temporary.unlink(missing_ok=True)
+            raise
 
     @staticmethod
     def _serialize(event: CanonicalEvent) -> dict[str, Any]:

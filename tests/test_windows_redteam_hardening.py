@@ -125,8 +125,15 @@ class WindowsPowerShellCompatibilityTests(unittest.TestCase):
 
     def test_importer_consumes_schema_discovery_preview_contract(self):
         repository_root = Path(__file__).resolve().parents[1]
-        importer = (
+        front_door = (
             repository_root / "scripts" / "windows" / "import_source.ps1"
+        ).read_text(encoding="utf-8")
+        helper = (
+            repository_root
+            / "src"
+            / "quantum"
+            / "pilot"
+            / "import_xlsx_source.ps1"
         ).read_text(encoding="utf-8")
         producer = (
             repository_root / "src" / "quantum" / "pilot" / "windows_runner.py"
@@ -134,14 +141,19 @@ class WindowsPowerShellCompatibilityTests(unittest.TestCase):
 
         self.assertIn('"schema_discovery": candidate.report()', producer)
         self.assertIn(
+            "from quantum.pilot.universal_import import main; raise SystemExit(main())",
+            front_door,
+        )
+        self.assertIn('if ($status -eq "ROUTE_XLSX")', front_door)
+        self.assertIn(
             '$preview.PSObject.Properties["schema_discovery"]',
-            importer,
+            helper,
         )
         self.assertIn(
             'throw "Schema preview does not contain schema_discovery."',
-            importer,
+            helper,
         )
-        self.assertNotIn("$preview.schema.", importer)
+        self.assertNotIn("$preview.schema.", helper)
 
     def test_real_office_namespace_regression_suite(self):
         suite = unittest.defaultTestLoader.loadTestsFromModule(
