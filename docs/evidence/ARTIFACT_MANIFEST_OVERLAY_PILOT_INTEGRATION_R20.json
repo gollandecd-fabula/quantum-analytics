@@ -1,0 +1,8 @@
+{
+  "base_pilot_integration_r19_overlay_git_blob_sha": "706deea24a0e521779f0f9670992be556062a831",
+  "entries": [],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 20,
+  "reason": "report cleanup",
+  "remove_paths": []
+}
