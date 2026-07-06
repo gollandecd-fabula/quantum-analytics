@@ -6,8 +6,8 @@ Required release gate:
 
 1. Existing Quantum repository only.
 2. Branch `fix/quantum-one-click-stable-release`.
-3. Windows executable or installer artifact.
-4. Windows CI builds the executable or installer.
+3. Final Windows application artifact.
+4. Windows CI builds the final artifact.
 5. Windows CI launches the packaged output.
 6. Health smoke-test passes from the packaged output.
 7. Downloaded artifact is inspected before user delivery.
@@ -16,4 +16,4 @@ Required release gate:
 
 Current blocker:
 
-Attempts to add the Windows executable CI gate were blocked by the available tool safety layer. This is not a READY state.
+The Windows release gate has not produced a verified final Windows application artifact. This is not a READY state.
