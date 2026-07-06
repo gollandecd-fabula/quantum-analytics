@@ -111,28 +111,59 @@ function Resolve-DefenderScanner {
     return $null
 }
 
+function Test-DefenderUnavailableOutput {
+    param([AllowEmptyString()][string]$Text)
+    if ([string]::IsNullOrWhiteSpace($Text)) {
+        return $false
+    }
+    return $Text -match "0x800106BA|800106BA|0x80004003|Failed with hr|MpScanStart.*Failed"
+}
+
+function New-ScanResult {
+    param(
+        [Parameter(Mandatory = $true)][string]$Scanner,
+        [Parameter(Mandatory = $true)][string]$Outcome,
+        [string]$FallbackReason = ""
+    )
+    return [ordered]@{
+        scanner = $Scanner
+        outcome = $Outcome
+        fallback_reason = $FallbackReason
+    }
+}
+
+function New-StructuralFallbackScanResult {
+    param(
+        [Parameter(Mandatory = $true)][string]$Reason,
+        [string]$Scanner = "MICROSOFT_DEFENDER_UNAVAILABLE"
+    )
+    Write-Host "Microsoft Defender is unavailable: $Reason" -ForegroundColor Yellow
+    Write-Host "Continuing with Quantum local structural intake. Active content and corrupted archives remain blocked." -ForegroundColor Yellow
+    return New-ScanResult -Scanner $Scanner -Outcome "DEFENDER_UNAVAILABLE_STRUCTURAL_FALLBACK" -FallbackReason $Reason
+}
+
 function Invoke-DefenderScan {
     param([Parameter(Mandatory = $true)][string]$Path)
     if ($SkipDefenderScan) {
         Write-Host "Defender scan skipped by explicit switch." -ForegroundColor Yellow
-        return [ordered]@{
-            scanner = "EXPLICIT_EQUIVALENT_SCAN_ATTESTED"
-            outcome = "SKIPPED_BY_EXPLICIT_SWITCH"
-        }
+        return New-ScanResult -Scanner "EXPLICIT_EQUIVALENT_SCAN_ATTESTED" -Outcome "SKIPPED_BY_EXPLICIT_SWITCH"
     }
     $scanner = Resolve-DefenderScanner
     if (-not $scanner) {
-        throw "Microsoft Defender command-line scanner was not found. Use -SkipDefenderScan only after an equivalent scan."
+        return New-StructuralFallbackScanResult -Reason "MPCmdRun scanner was not found."
     }
     Write-Host "Scanning source file with Microsoft Defender..."
-    & $scanner -Scan -ScanType 3 -File $Path | Out-Host
-    if ($LASTEXITCODE -ne 0) {
-        throw "Microsoft Defender scan failed or reported a threat. Exit code: $LASTEXITCODE"
+    $scanOutput = @(& $scanner -Scan -ScanType 3 -File $Path 2>&1)
+    $exitCode = $LASTEXITCODE
+    $scanOutput | Out-Host
+    if ($exitCode -eq 0) {
+        return New-ScanResult -Scanner $scanner -Outcome "CLEAN"
     }
-    return [ordered]@{
-        scanner = $scanner
-        outcome = "CLEAN"
+    $outputText = ($scanOutput | Out-String)
+    if (Test-DefenderUnavailableOutput -Text $outputText) {
+        return New-StructuralFallbackScanResult -Reason ("MpCmdRun unavailable or service failure. Exit code: {0}" -f $exitCode) -Scanner $scanner
     }
+    throw "Microsoft Defender scan failed or reported a threat. Exit code: $exitCode"
 }
 
 function New-ScanReceipt {
@@ -142,10 +173,11 @@ function New-ScanReceipt {
     )
     $sourceHash = (Get-FileHash -LiteralPath $SourcePath -Algorithm SHA256).Hash.ToLowerInvariant()
     $receipt = [ordered]@{
-        receipt_version = 1
+        receipt_version = 2
         source_sha256 = $sourceHash
         scanner = [string]$ScanResult.scanner
         outcome = [string]$ScanResult.outcome
+        fallback_reason = [string]$ScanResult.fallback_reason
         created_at_utc = [DateTime]::UtcNow.ToString("o")
     }
     $receiptJson = $receipt | ConvertTo-Json -Compress

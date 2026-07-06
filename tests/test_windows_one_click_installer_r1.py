@@ -68,6 +68,19 @@ class WindowsOneClickInstallerR1Tests(unittest.TestCase):
         self.assertIn('Move-Item -LiteralPath $gatewayOutput -Destination $Output -Force', script)
         self.assertIn('if ($finalExitCode -ne 0)', script)
 
+    def test_defender_unavailable_falls_back_to_structural_intake_only(self):
+        for name, script in (
+            ("import_source.ps1", self.importer),
+            ("import_xlsx_source.ps1", self.xlsx_helper),
+        ):
+            self.assertIn("Test-DefenderUnavailableOutput", script, name)
+            self.assertIn("DEFENDER_UNAVAILABLE_STRUCTURAL_FALLBACK", script, name)
+            self.assertIn("Active content and corrupted archives remain blocked.", script, name)
+            self.assertIn("Microsoft Defender scan failed or reported a threat.", script, name)
+            self.assertIn("$scanOutput = @(& $scanner -Scan -ScanType 3 -File $Path 2>&1)", script, name)
+            self.assertIn("MpScanStart.*Failed", script, name)
+            self.assertNotIn("DISABLE_DEFENDER", script, name)
+
     def test_xlsx_helper_preserves_reviewed_admission_pipeline(self):
         script = self.xlsx_helper
         self.assertIn('from quantum.pilot.windows_runner import main; raise SystemExit(main())', script)
