@@ -4,25 +4,20 @@ Status: DEGRADED
 
 Date: 2026-07-06
 
-Verified artifact:
+Verified artifact class:
 
 - Workflow: Local Pilot Package.
-- Run ID: `28801520720`.
-- Artifact ID: `8113051714`.
-- Artifact SHA-256: `4f6fad2d515fed9f03180191874f3938f2600dea8af2299e3cd8809ef07e8ef8`.
-- Artifact size: `369075` bytes.
+- Artifact name: `quantum-local-pilot-one-click`.
+- The workflow builds `dist/quantum-local-pilot-one-click.zip` and uploads it with its summary file.
+- Exact artifact IDs and SHA-256 values are intentionally not embedded in this tracked document because they change after documentation updates.
 
-Verified inner package:
+Smoke scope:
 
-- File: `quantum-local-pilot-one-click.zip`.
-- SHA-256: `1b51ed30c0be1636deb0b2e55e56ca1a761d827315ad047560fd34dde28eb003`.
-- Size: `397430` bytes.
-- Entry count: `274`.
+- Local-pilot health endpoint returns `ok`.
+- Upload endpoint accepts a CSV report and creates a SHA-256 receipt.
+- Calculation endpoint returns `net_profit` from explicit Decimal inputs.
+- Marketplace writes remain disabled.
 
-Independent smoke after artifact download:
-
-- health: `ok`.
-- upload: `accepted`.
-- net profit: `335.00`.
+Independent smoke after artifact download is required before any final user-facing status.
 
 Limitation: this is a local-pilot candidate, not a production marketplace release.
