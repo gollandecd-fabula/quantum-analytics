@@ -6,10 +6,13 @@ import os
 import tempfile
 import threading
 import unittest
+import zipfile
 from http.server import ThreadingHTTPServer
+from pathlib import Path
 
 from quantum.api.local_pilot import calculate_unit, upload_local_file
 from quantum.api.local_pilot_server import LocalPilotHandler
+from scripts.build_local_pilot_package import build_package
 
 
 class LocalPilotOneClickTests(unittest.TestCase):
@@ -93,6 +96,17 @@ class LocalPilotOneClickTests(unittest.TestCase):
         finally:
             server.shutdown()
             server.server_close()
+
+    def test_package_builder_creates_one_click_zip(self) -> None:
+        summary = build_package()
+        package = Path(summary["package"])
+        self.assertTrue(package.exists())
+        self.assertGreater(summary["entry_count"], 0)
+        with zipfile.ZipFile(package) as archive:
+            names = set(archive.namelist())
+        self.assertIn("scripts/Quantum_ONE_CLICK_STABLE_RELEASE.cmd", names)
+        self.assertIn("src/quantum/api/local_pilot_server.py", names)
+        self.assertIn("PACKAGE_MANIFEST.json", names)
 
 
 if __name__ == "__main__":
