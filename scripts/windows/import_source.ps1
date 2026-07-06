@@ -119,6 +119,19 @@ function Test-DefenderUnavailableOutput {
     return $Text -match "0x800106BA|800106BA|0x80004003|Failed with hr|MpScanStart.*Failed"
 }
 
+function New-ScanResult {
+    param(
+        [Parameter(Mandatory = $true)][string]$Scanner,
+        [Parameter(Mandatory = $true)][string]$Outcome,
+        [string]$FallbackReason = ""
+    )
+    return [ordered]@{
+        scanner = $Scanner
+        outcome = $Outcome
+        fallback_reason = $FallbackReason
+    }
+}
+
 function New-StructuralFallbackScanResult {
     param(
         [Parameter(Mandatory = $true)][string]$Reason,
@@ -126,21 +139,14 @@ function New-StructuralFallbackScanResult {
     )
     Write-Host "Microsoft Defender is unavailable: $Reason" -ForegroundColor Yellow
     Write-Host "Continuing with Quantum local structural intake. Active content and corrupted archives remain blocked." -ForegroundColor Yellow
-    return [ordered]@{
-        scanner = $Scanner
-        outcome = "DEFENDER_UNAVAILABLE_STRUCTURAL_FALLBACK"
-        fallback_reason = $Reason
-    }
+    return New-ScanResult -Scanner $Scanner -Outcome "DEFENDER_UNAVAILABLE_STRUCTURAL_FALLBACK" -FallbackReason $Reason
 }
 
 function Invoke-DefenderScan {
     param([Parameter(Mandatory = $true)][string]$Path)
     if ($SkipDefenderScan) {
         Write-Host "Defender scan skipped by explicit switch." -ForegroundColor Yellow
-        return [ordered]@{
-            scanner = "EXPLICIT_EQUIVALENT_SCAN_ATTESTED"
-            outcome = "SKIPPED_BY_EXPLICIT_SWITCH"
-        }
+        return New-ScanResult -Scanner "EXPLICIT_EQUIVALENT_SCAN_ATTESTED" -Outcome "SKIPPED_BY_EXPLICIT_SWITCH"
     }
     $scanner = Resolve-DefenderScanner
     if (-not $scanner) {
@@ -151,10 +157,7 @@ function Invoke-DefenderScan {
     $exitCode = $LASTEXITCODE
     $scanOutput | Out-Host
     if ($exitCode -eq 0) {
-        return [ordered]@{
-            scanner = $scanner
-            outcome = "CLEAN"
-        }
+        return New-ScanResult -Scanner $scanner -Outcome "CLEAN"
     }
     $outputText = ($scanOutput | Out-String)
     if (Test-DefenderUnavailableOutput -Text $outputText) {
