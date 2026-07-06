@@ -1,1 +1,24 @@
-{"base_pilot_integration_r18_overlay_git_blob_sha":"c0c54bd4b1cce4817259b79de0597cf080fbf455","entries":[["src/quantum/ingestion/_xlsx_inspection_v3.py","18a307b2fc7729f84099bffe25f06c0b307df45d090a0429c08c243dba770c9c",6970],["src/quantum/ingestion/_xlsx_r19_hardening.py","b602ace94b3105f6dc3c957e3ce84d927013e8357e033f40a697e5d7286f2db3",5889],["tests/integration_manifest_support.py","287b4c5891184b113b8675a873ab231c61be18862759e0c14b07ac79cb6b829b",7845],["tests/test_p16_rt_fifteenth_review_followup.py","d44f83a12670f384ddb87881b1f66c8d67b516307ed6fd96cdd46f8e8144be3d",6574]],"hash_encoding":"sha256-hex","overlay_version":19,"reason":"Reject ZIP extra-field payloads, enforce the exact worksheet x14ac namespace contract, require exact mc:Ignorable semantics, and bound rich-text property cardinality and order","remove_paths":[]}
+{
+  "base_pilot_integration_r18_overlay_git_blob_sha": "c0c54bd4b1cce4817259b79de0597cf080fbf455",
+  "entries": [
+    ["docs/BUG_AUDIT.md", "1dd4966377dcd4ea4bc1367fbeffb5e635b1a21051c4045ebe679c81167dd582", 1887],
+    ["docs/CHANGELOG.md", "789a3a67b5247f39dea06cdc467b61348c16b30fb4fa3e1fa1ac076469c94beb", 83],
+    ["docs/EXISTING_STATE_AUDIT.md", "4c142582f2c5aa3be50163af9cf2a37d7438d735bbb77225a6a96e584a5a2b9f", 2896],
+    ["docs/PATCH_PLAN.md", "03c552f4673449b23da7147d4028a4f20a57fb591c751997378c2741e8e1768a", 1831],
+    ["docs/RED_TEAM_AUDIT.md", "2db37e2c93ae588ee5fb17e1b26a3e874589c7c51d01963521b17c58fb33e7e6", 380],
+    ["docs/RELEASE_NOTES.md", "3c97c237ed1e0ad61e457720c7cec8430b4599e4702fad2a556948c4121bb3bb", 304],
+    ["docs/RUN_AS_USER_REPORT.md", "39adf53baf8b87b56c2c3cdc6ff8e577627735b787839d9f09d4f73f6367a88f", 1344],
+    ["docs/SMOKE_TEST_REPORT.md", "b03211e0f6c75dbf7f863519cb84460a4e27b0dfb5b0e13b604d71c1d4716f13", 110],
+    ["docs/TEST_REPORT.md", "bd93bd042cebb570a5774ca442934aba0b7a9f733909a965e3737aadc4cc3f24", 121],
+    ["docs/UPDATE_WITHOUT_DATA_LOSS.md", "c898fc2f7efd94511e0655a6ecbadc709194c57b5e4aaabbd95b517d0db61554", 203],
+    ["docs/USER_INSTALL_GUIDE.md", "0ca26b1478919eefe6b49afdd4f6e37d63afa471553e23b5c405e050dfc33e35", 281],
+    ["src/quantum/ingestion/_xlsx_inspection_v3.py", "18a307b2fc7729f84099bffe25f06c0b307df45d090a0429c08c243dba770c9c", 6970],
+    ["src/quantum/ingestion/_xlsx_r19_hardening.py", "b602ace94b3105f6dc3c957e3ce84d927013e8357e033f40a697e5d7286f2db3", 5889],
+    ["tests/integration_manifest_support.py", "287b4c5891184b113b8675a873ab231c61be18862759e0c14b07ac79cb6b829b", 7845],
+    ["tests/test_p16_rt_fifteenth_review_followup.py", "d44f83a12670f384ddb87881b1f66c8d67b516307ed6fd96cdd46f8e8144be3d", 6574]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 19,
+  "reason": "Reject ZIP extra-field payloads, enforce the exact worksheet x14ac namespace contract, require exact mc:Ignorable semantics, and bound rich-text property cardinality and order",
+  "remove_paths": []
+}
