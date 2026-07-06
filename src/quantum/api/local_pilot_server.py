@@ -7,7 +7,15 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import Any
 from urllib.parse import parse_qs, urlsplit
 
-from quantum.api.local_pilot import calculate_unit, local_pilot_health, render_local_ui, upload_local_file
+from quantum.api.local_pilot import (
+    analyze_uploaded_report,
+    calculate_unit,
+    local_pilot_health,
+    render_local_ui,
+    save_analysis_export,
+    save_cost_table,
+    upload_local_file,
+)
 
 
 class LocalPilotHandler(BaseHTTPRequestHandler):
@@ -42,7 +50,14 @@ class LocalPilotHandler(BaseHTTPRequestHandler):
             self._json(HTTPStatus(code), payload)
             return
 
-        if parsed.path == "/api/local-pilot/calculate":
+        if parsed.path == "/api/local-pilot/cost-table":
+            query = parse_qs(parsed.query)
+            filename = self.headers.get("X-Quantum-Filename") or (query.get("filename") or ["cost-table.csv"])[0]
+            code, payload = save_cost_table(filename, data, self.headers.get("Content-Type", ""))
+            self._json(HTTPStatus(code), payload)
+            return
+
+        if parsed.path in {"/api/local-pilot/calculate", "/api/local-pilot/analyze", "/api/local-pilot/export"}:
             try:
                 payload = json.loads(data.decode("utf-8"))
             except (UnicodeDecodeError, json.JSONDecodeError):
@@ -51,7 +66,16 @@ class LocalPilotHandler(BaseHTTPRequestHandler):
             if not isinstance(payload, dict):
                 self._json(HTTPStatus.BAD_REQUEST, {"status": "blocked", "reason": "json_object_required"})
                 return
-            code, result = calculate_unit(payload)
+            if parsed.path == "/api/local-pilot/calculate":
+                code, result = calculate_unit(payload)
+            elif parsed.path == "/api/local-pilot/analyze":
+                sha256 = payload.get("sha256")
+                if not isinstance(sha256, str) or not sha256:
+                    self._json(HTTPStatus.BAD_REQUEST, {"status": "blocked", "reason": "missing:sha256"})
+                    return
+                code, result = analyze_uploaded_report(sha256, payload)
+            else:
+                code, result = save_analysis_export(payload)
             self._json(HTTPStatus(code), result)
             return
 
@@ -61,7 +85,11 @@ class LocalPilotHandler(BaseHTTPRequestHandler):
         return
 
     def _json(self, status: HTTPStatus, payload: dict[str, Any]) -> None:
-        self._bytes(status, json.dumps(payload, separators=(",", ":")).encode("utf-8"), "application/json")
+        self._bytes(
+            status,
+            json.dumps(payload, separators=(",", ":"), ensure_ascii=False).encode("utf-8"),
+            "application/json; charset=utf-8",
+        )
 
     def _bytes(self, status: HTTPStatus, body: bytes, content_type: str) -> None:
         self.send_response(status.value)
