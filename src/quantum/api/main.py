@@ -5,6 +5,9 @@ import json
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import Any
+from urllib.parse import urlsplit
+
+from quantum.api.local_pilot import local_pilot_health, render_local_ui
 
 
 def technical_health() -> dict[str, Any]:
@@ -20,23 +23,28 @@ class HealthHandler(BaseHTTPRequestHandler):
     server_version = "QuantumFoundation/0.0.1"
 
     def do_GET(self) -> None:
-        if self.path == "/health/technical":
-            payload = technical_health()
-            self._json_response(HTTPStatus.OK, payload)
+        parsed = urlsplit(self.path)
+        if parsed.path == "/health/technical":
+            self._json_response(HTTPStatus.OK, technical_health())
             return
-        self._json_response(
-            HTTPStatus.NOT_FOUND,
-            {"status": "not_found", "path": self.path},
-        )
+        if parsed.path in {"/", "/local-pilot"}:
+            self._bytes_response(HTTPStatus.OK, render_local_ui().encode("utf-8"), "text/html; charset=utf-8")
+            return
+        if parsed.path == "/api/local-pilot/health":
+            self._json_response(HTTPStatus.OK, local_pilot_health())
+            return
+        self._json_response(HTTPStatus.NOT_FOUND, {"status": "not_found", "path": parsed.path})
 
     def log_message(self, format: str, *args: object) -> None:
-        # Foundation avoids request-body or credential logging.
         return
 
     def _json_response(self, status: HTTPStatus, payload: dict[str, Any]) -> None:
         body = json.dumps(payload, separators=(",", ":")).encode("utf-8")
+        self._bytes_response(status, body, "application/json")
+
+    def _bytes_response(self, status: HTTPStatus, body: bytes, content_type: str) -> None:
         self.send_response(status.value)
-        self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Type", content_type)
         self.send_header("Content-Length", str(len(body)))
         self.send_header("Cache-Control", "no-store")
         self.end_headers()
