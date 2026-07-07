@@ -2,7 +2,7 @@
 
 Status: DEGRADED
 
-Date: 2026-07-06
+Date: 2026-07-07
 
 Verified CI classes:
 
@@ -20,4 +20,4 @@ Test scope added in this branch:
 - HTTP smoke for local-pilot health, upload and calculation.
 - Package builder creates a one-click ZIP with launcher and local-pilot runtime files.
 
-READY remains blocked for production release scope. The current verified output is a local-pilot one-click candidate.
+Final application delivery remains blocked until the dedicated release gate is complete.
