@@ -1,9 +1,10 @@
 name: Quantum Red Team Assembly
 
 on:
-  push:
+  pull_request:
     branches:
-      - fix/quantum-one-click-stable-release
+      - main
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -14,14 +15,13 @@ concurrency:
 
 jobs:
   assemble-test-commit:
-    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
-      - name: Checkout exact bootstrap commit
+      - name: Checkout exact temporary branch head
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.sha }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 0
 
       - name: Reconstruct audited files and verify hashes
@@ -58,6 +58,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m "Stabilize local pilot red-team boundaries"
