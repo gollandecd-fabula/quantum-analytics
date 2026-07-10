@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import errno
 import json
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -16,6 +17,48 @@ from quantum.api.local_pilot import (
     save_cost_table,
     upload_local_file,
 )
+
+
+def validate_loopback_host(host: str) -> str:
+    if host != "127.0.0.1":
+        raise ValueError("loopback_host_required")
+    return host
+
+
+def parse_content_length(raw: str | None) -> int:
+    try:
+        size = int(raw or "0")
+    except ValueError as exc:
+        raise ValueError("invalid_content_length") from exc
+    if size < 0:
+        raise ValueError("invalid_content_length")
+    return size
+
+
+def create_local_server(
+    host: str, preferred_port: int, *, attempts: int = 20
+) -> tuple[ThreadingHTTPServer, int]:
+    host = validate_loopback_host(host)
+    if not 1 <= preferred_port <= 65535:
+        raise ValueError("invalid_port")
+    if attempts < 1:
+        raise ValueError("invalid_port_attempts")
+
+    last_error: OSError | None = None
+    for offset in range(attempts):
+        port = preferred_port + offset
+        if port > 65535:
+            break
+        try:
+            server = ThreadingHTTPServer((host, port), LocalPilotHandler)
+            return server, int(server.server_address[1])
+        except OSError as exc:
+            if exc.errno not in {errno.EADDRINUSE, 10048}:
+                raise
+            last_error = exc
+    if last_error is not None:
+        raise OSError(errno.EADDRINUSE, "no_available_loopback_port") from last_error
+    raise ValueError("no_valid_port_in_range")
 
 
 class LocalPilotHandler(BaseHTTPRequestHandler):
@@ -34,7 +77,7 @@ class LocalPilotHandler(BaseHTTPRequestHandler):
     def do_POST(self) -> None:
         parsed = urlsplit(self.path)
         try:
-            size = int(self.headers.get("Content-Length", "0"))
+            size = parse_content_length(self.headers.get("Content-Length"))
         except ValueError:
             self._json(HTTPStatus.BAD_REQUEST, {"status": "rejected", "reason": "invalid_content_length"})
             return
@@ -75,7 +118,7 @@ class LocalPilotHandler(BaseHTTPRequestHandler):
                     return
                 code, result = analyze_uploaded_report(sha256, payload)
             else:
-                code, result = save_analysis_export(payload)
+                code, result = save_analysis_export(payload.get("analysis_sha256"))
             self._json(HTTPStatus(code), result)
             return
 
@@ -105,7 +148,12 @@ def main() -> None:
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=8080)
     args = parser.parse_args()
-    ThreadingHTTPServer((args.host, args.port), LocalPilotHandler).serve_forever()
+    try:
+        server, actual_port = create_local_server(args.host, args.port)
+    except (ValueError, OSError) as exc:
+        parser.error(str(exc))
+    print(f"Quantum local pilot listening on http://127.0.0.1:{actual_port}/local-pilot", flush=True)
+    server.serve_forever()
 
 
 if __name__ == "__main__":
