@@ -1,0 +1,210 @@
+name: Quantum R2 Windows Gate
+
+on:
+  pull_request:
+    branches:
+      - automation/quantum-r2-gate-base
+
+permissions:
+  contents: write
+
+concurrency:
+  group: quantum-r2-windows-gate
+  cancel-in-progress: false
+
+jobs:
+  windows-r2:
+    runs-on: windows-2022
+    timeout-minutes: 35
+    steps:
+      - name: Checkout exact stabilization branch
+        uses: actions/checkout@v4
+        with:
+          ref: fix/quantum-one-click-stable-release
+          fetch-depth: 0
+
+      - name: Set up Python 3.13 x64
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          architecture: x64
+
+      - name: Verify exact target head and baseline
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $expected = 'cf99012f95188f45bd7b1bc71f1e0aaa31211c40'
+          $actual = (git rev-parse HEAD).Trim()
+          if ($actual -ne $expected) { throw "Target moved: expected $expected, got $actual" }
+          if (git status --porcelain) { throw 'Target branch is not clean' }
+          $env:PYTHONPATH = 'src;.'
+          python -m quantum.scripts.ci
+
+      - name: Bump canonical Windows builder to R2 and update manifest
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          @'
+          from pathlib import Path
+          import hashlib
+          import json
+
+          builder = Path('scripts/build_windows_single_exe.py')
+          raw = builder.read_bytes()
+          old = b'private const string AppVersion = "quantum-wb-r1";'
+          new = b'private const string AppVersion = "quantum-wb-r2";'
+          if raw.count(old) != 1 or raw.count(new) != 0:
+              raise SystemExit('unexpected AppVersion source state')
+          raw = raw.replace(old, new)
+          builder.write_bytes(raw)
+
+          manifest_path = Path('docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R19.json')
+          manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
+          matches = 0
+          for entry in manifest['entries']:
+              if entry[0] == builder.as_posix():
+                  entry[1] = hashlib.sha256(raw).hexdigest()
+                  entry[2] = len(raw)
+                  matches += 1
+          if matches != 1:
+              raise SystemExit(f'expected one builder manifest entry, found {matches}')
+          manifest['reason'] = 'local pilot red-team stabilization and canonical R2 Windows rebuild'
+          manifest_path.write_bytes(json.dumps(manifest, separators=(',', ':'), ensure_ascii=False).encode('utf-8'))
+          '@ | python -
+          $changed = @(git diff --name-only)
+          $expectedChanged = @(
+            'docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R19.json',
+            'scripts/build_windows_single_exe.py'
+          )
+          if (($changed | Sort-Object) -join "`n" -ne ($expectedChanged | Sort-Object) -join "`n") {
+            throw "Unexpected changed files: $($changed -join ', ')"
+          }
+          git diff --check
+
+      - name: Run full gate and repeated targeted Red Team
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $env:PYTHONPATH = 'src;.'
+          python -m quantum.scripts.ci 2>&1 | Tee-Object -FilePath quantum-r2-ci.log
+          1..3 | ForEach-Object {
+            "TARGETED_RED_TEAM_RUN=$_" | Tee-Object -FilePath quantum-r2-ci.log -Append
+            python tests/test_local_pilot_one_click.py 2>&1 | Tee-Object -FilePath quantum-r2-ci.log -Append
+          }
+
+      - name: Build canonical Windows EXE
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          python scripts/build_windows_single_exe.py
+          if (-not (Test-Path 'dist\Quantum_WB_Release.exe')) { throw 'EXE was not produced' }
+          if (-not (Test-Path 'dist\Quantum_WB_Release.inspection.json')) { throw 'Inspection report was not produced' }
+
+      - name: Launch and Red Team the packaged EXE
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $env:QUANTUM_NO_BROWSER = '1'
+          $env:QUANTUM_PORT = '8099'
+          $env:QUANTUM_RUNTIME_DIR = Join-Path $env:RUNNER_TEMP 'quantum-r2-runtime'
+          $process = Start-Process -FilePath 'dist\Quantum_WB_Release.exe' -PassThru
+          try {
+            $health = $null
+            for ($i = 0; $i -lt 60; $i++) {
+              try {
+                $response = Invoke-WebRequest -UseBasicParsing -SkipHttpErrorCheck 'http://127.0.0.1:8099/api/local-pilot/health'
+                if ($response.StatusCode -eq 200) {
+                  $candidate = $response.Content | ConvertFrom-Json
+                  if ($candidate.status -eq 'READY') { $health = $candidate; break }
+                }
+              } catch { }
+              Start-Sleep -Seconds 1
+            }
+            if ($null -eq $health) { throw 'Packaged EXE did not become healthy' }
+            if ($health.scope_status -ne 'LOCAL_PILOT_READY') { throw 'Incorrect scoped health status' }
+            if ($health.release_status -ne 'RELEASE_BLOCKED') { throw 'Incorrect full release status' }
+            if ($health.marketplace_write_enabled -ne $false) { throw 'Marketplace writes unexpectedly enabled' }
+
+            $cost = [Text.Encoding]::UTF8.GetBytes("article,product_cost`nA-1,400`n")
+            $costResponse = Invoke-WebRequest -UseBasicParsing -SkipHttpErrorCheck -Method Post -Uri 'http://127.0.0.1:8099/api/local-pilot/cost-table?filename=costs.csv' -Body $cost
+            if ($costResponse.StatusCode -ne 201) { throw "Cost upload failed: $($costResponse.Content)" }
+
+            $report = [Text.Encoding]::UTF8.GetBytes("article,quantity,sale_price`nA-1,1,1000`n")
+            $uploadResponse = Invoke-WebRequest -UseBasicParsing -SkipHttpErrorCheck -Method Post -Uri 'http://127.0.0.1:8099/api/local-pilot/upload?filename=wb.csv' -Body $report
+            if ($uploadResponse.StatusCode -ne 201) { throw "Report upload failed: $($uploadResponse.Content)" }
+            $upload = $uploadResponse.Content | ConvertFrom-Json
+
+            $analysisRequest = @{
+              sha256 = $upload.sha256
+              tax_rate_percent = '6'
+              other_expense = '40'
+              commission_amount = '100'
+              forward_logistics = '50'
+              reverse_logistics = '0'
+              paid_storage = '10'
+              advertising = '0'
+              fines = '0'
+              software = '5'
+              defects = '0'
+              loss_damage = '0'
+            } | ConvertTo-Json
+            $analysisResponse = Invoke-WebRequest -UseBasicParsing -SkipHttpErrorCheck -Method Post -Uri 'http://127.0.0.1:8099/api/local-pilot/analyze' -ContentType 'application/json' -Body $analysisRequest
+            if ($analysisResponse.StatusCode -ne 200) { throw "Analysis failed: $($analysisResponse.Content)" }
+            $analysis = $analysisResponse.Content | ConvertFrom-Json
+            if ($analysis.dashboard.net_profit -ne '335.00') { throw "Wrong net profit: $($analysis.dashboard.net_profit)" }
+            if ($analysis.confirmed_calculation -ne $true) { throw 'Confirmed calculation flag missing' }
+
+            $exportRequest = @{ analysis_sha256 = $analysis.analysis_sha256 } | ConvertTo-Json
+            $exportResponse = Invoke-WebRequest -UseBasicParsing -SkipHttpErrorCheck -Method Post -Uri 'http://127.0.0.1:8099/api/local-pilot/export' -ContentType 'application/json' -Body $exportRequest
+            if ($exportResponse.StatusCode -ne 201) { throw "Evidence export failed: $($exportResponse.Content)" }
+
+            $negativeRequest = @{
+              sale_price='1000'; product_cost='-1'; commission_amount='100'; forward_logistics='50';
+              reverse_logistics='0'; paid_storage='10'; advertising='0'; fines='0'; tax='60';
+              software='5'; defects='0'; loss_damage='0'; other_expense='40'
+            } | ConvertTo-Json
+            $negativeResponse = Invoke-WebRequest -UseBasicParsing -SkipHttpErrorCheck -Method Post -Uri 'http://127.0.0.1:8099/api/local-pilot/calculate' -ContentType 'application/json' -Body $negativeRequest
+            if ($negativeResponse.StatusCode -ne 400) { throw 'Negative financial input was not blocked' }
+
+            $xlsResponse = Invoke-WebRequest -UseBasicParsing -SkipHttpErrorCheck -Method Post -Uri 'http://127.0.0.1:8099/api/local-pilot/upload?filename=legacy.xls' -Body ([byte[]](1,2,3))
+            if ($xlsResponse.StatusCode -ne 400) { throw 'Legacy XLS was not rejected' }
+
+            @{
+              health = $health
+              net_profit = $analysis.dashboard.net_profit
+              analysis_sha256 = $analysis.analysis_sha256
+              export_status = ($exportResponse.Content | ConvertFrom-Json).status
+              negative_input_status = $negativeResponse.StatusCode
+              legacy_xls_status = $xlsResponse.StatusCode
+            } | ConvertTo-Json -Depth 8 | Set-Content -Encoding UTF8 'dist\Quantum_WB_Release.smoke.json'
+          } finally {
+            if (-not $process.HasExited) { Stop-Process -Id $process.Id -Force }
+          }
+
+      - name: Commit verified canonical builder update
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $changed = @(git diff --name-only)
+          if ($changed.Count -ne 2) { throw "Unexpected final source diff: $($changed -join ', ')" }
+          git add scripts/build_windows_single_exe.py docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R19.json
+          git diff --cached --check
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Build canonical Quantum Windows R2 artifact'
+          git push origin HEAD:fix/quantum-one-click-stable-release
+          (git rev-parse HEAD).Trim() | Set-Content -Encoding ASCII 'dist\SOURCE_COMMIT.txt'
+          Get-FileHash 'dist\Quantum_WB_Release.exe' -Algorithm SHA256 | Select-Object Algorithm,Hash,Path | ConvertTo-Json | Set-Content -Encoding UTF8 'dist\Quantum_WB_Release.sha256.json'
+
+      - name: Upload R2 verification evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: Quantum_WB_R2_verified
+          path: |
+            dist/Quantum_WB_Release.exe
+            dist/Quantum_WB_Release.inspection.json
+            dist/Quantum_WB_Release.smoke.json
+            dist/Quantum_WB_Release.sha256.json
+            dist/SOURCE_COMMIT.txt
+            quantum-r2-ci.log
+          if-no-files-found: error
