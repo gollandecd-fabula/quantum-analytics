@@ -48,6 +48,7 @@ jobs:
           git add -A
           git diff --cached --check
           python3 - <<'PY'
+          import os
           import subprocess
           allowed = {
               'config/home-local.template.json',
@@ -65,7 +66,8 @@ jobs:
               'tests/test_windows_one_click_installer_r1.py',
               'tests/test_windows_source_package_launchers_r1.py',
           }
-          actual = set(subprocess.check_output(['git','diff','--cached','--name-only', '${CANONICAL_SHA}'], text=True).splitlines())
+          canonical = os.environ['CANONICAL_SHA']
+          actual = set(subprocess.check_output(['git','diff','--cached','--name-only', canonical], text=True).splitlines())
           if actual != allowed:
               raise SystemExit(f'M0_SCOPE_MISMATCH missing={sorted(allowed-actual)} extra={sorted(actual-allowed)}')
           print('M0_SCOPE_VERIFIED', len(actual))
