@@ -19,7 +19,41 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  verify-release:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout selected ref
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || 'fix/quantum-one-click-stable-release' }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Inspect selected ref
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "ref_head=$(git rev-parse HEAD)"
+          echo "ref_head=$(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Run Foundation checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH=src python -m quantum.scripts.ci
+
+      - name: Run OSS admission checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH=src python -m quantum.scripts.oss_admission_scan
+
   build:
+    needs: verify-release
     runs-on: windows-2022
     timeout-minutes: 35
     steps:
