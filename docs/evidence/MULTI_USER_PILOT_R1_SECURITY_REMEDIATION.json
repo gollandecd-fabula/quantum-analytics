@@ -1,0 +1,70 @@
+{
+  "audit_id": "QRT-P2.0-R1-2026-07-03",
+  "unit_id": "P2.0",
+  "prior_exact_head": "e73ae16633e68845c59e9db0c061d9ca59db9e8f",
+  "review_state": "REMEDIATED_LOCAL_CI_PENDING",
+  "findings": [
+    {
+      "id": "QRT-P20-001",
+      "severity": "P1",
+      "finding": "Authorization did not require current account, membership and tenant state.",
+      "impact": "Revoked or suspended principals could retain access until session expiry.",
+      "fix": "Authorization now requires live state objects on every request and denies non-active states."
+    },
+    {
+      "id": "QRT-P20-002",
+      "severity": "P1",
+      "finding": "A session with an issue time in the future was accepted.",
+      "impact": "Invalid or clock-manipulated session claims could be used before validity.",
+      "fix": "Authorization rejects current time earlier than issued_at."
+    },
+    {
+      "id": "QRT-P20-003",
+      "severity": "P2",
+      "finding": "Session lifetime had no upper bound.",
+      "impact": "An excessively long-lived session could expand the revocation exposure window.",
+      "fix": "SessionPrincipal rejects lifetimes above 12 hours."
+    },
+    {
+      "id": "QRT-P20-004",
+      "severity": "P2",
+      "finding": "Credential and recovery verifier references could be identical.",
+      "impact": "Credential and recovery controls could unintentionally share one verifier record.",
+      "fix": "PseudonymousAccount rejects reused credential and recovery references."
+    }
+  ],
+  "regression_first": {
+    "suite": "tests/test_multi_user_pilot_foundation.py",
+    "before": {
+      "tests_run": 17,
+      "failures": 2,
+      "errors": 9,
+      "status": "EXPECTED_FAIL",
+      "observed_defects": [
+        "authorize lacked live-state parameters",
+        "credential and recovery reference reuse was accepted",
+        "overlong sessions were accepted",
+        "session contract lacked live-state and TTL requirements"
+      ]
+    },
+    "after": {
+      "tests_run": 17,
+      "failures": 0,
+      "errors": 0,
+      "status": "PASS"
+    }
+  },
+  "hard_boundaries": {
+    "marketplace_writes": false,
+    "real_user_onboarding": false,
+    "protected_main_merge": false,
+    "deploy": false,
+    "release": false
+  },
+  "next_required_evidence": [
+    "EXACT_HEAD_FOUNDATION_CI_SUCCESS",
+    "EXACT_HEAD_OSS_ADMISSION_CI_SUCCESS",
+    "ZERO_UNRESOLVED_REVIEW_THREADS",
+    "INDEPENDENT_EXACT_HEAD_REVIEW"
+  ]
+}
