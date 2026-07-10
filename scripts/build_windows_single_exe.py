@@ -258,7 +258,7 @@ def csharp_source() -> str:
                 }}
                 ProcessStartInfo start = new ProcessStartInfo();
                 start.FileName = python;
-                start.Arguments = "\"" + script.Replace("\"", "\\\"") + "\"";
+                start.Arguments = "\\\"" + script.Replace("\\\"", "\\\\\\\"") + "\\\"";
                 start.WorkingDirectory = target;
                 start.UseShellExecute = false;
                 Process child = Process.Start(start);
@@ -313,12 +313,14 @@ def self_check() -> None:
     if not PYTHON_EMBED_URL.startswith("https://www.python.org/"):
         raise RuntimeError("embedded Python URL must use python.org HTTPS")
     source = csharp_source()
+    expected_argument_line = 'start.Arguments = "\\\"" + script.Replace("\\\"", "\\\\\\\"") + "\\\"";'
     for token in (
         RESOURCE_NAME,
         APP_VERSION,
         "QUANTUM_INSTALL_DIR",
         "QUANTUM_NO_BROWSER",
         "Unsafe embedded archive path",
+        expected_argument_line,
     ):
         if token not in source:
             raise RuntimeError(f"launcher template missing token: {token}")
