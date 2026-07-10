@@ -7,9 +7,6 @@ on:
         description: 'Git ref to build'
         required: true
         default: 'fix/quantum-one-click-stable-release'
-  pull_request:
-    branches:
-      - main
 
 permissions:
   contents: read
