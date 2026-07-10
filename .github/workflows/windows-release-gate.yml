@@ -19,7 +19,61 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  verify-release:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout selected ref
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || 'fix/quantum-one-click-stable-release' }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Inspect selected ref
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          echo "ref_head=$(git rev-parse HEAD)" | tee dist/RELEASE_REF_INSPECTION.txt
+          cat dist/RELEASE_REF_INSPECTION.txt >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Run Foundation checks
+        id: release_foundation
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -o pipefail
+          PYTHONPATH=src python -m quantum.scripts.ci 2>&1 | tee dist/RELEASE_FOUNDATION.log
+
+      - name: Upload release verification diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Quantum_Release_Verification_Diagnostics
+          path: |
+            dist/RELEASE_REF_INSPECTION.txt
+            dist/RELEASE_FOUNDATION.log
+          if-no-files-found: error
+
+      - name: Enforce Foundation result
+        if: steps.release_foundation.outcome != 'success'
+        shell: bash
+        run: |
+          tail -n 120 dist/RELEASE_FOUNDATION.log
+          exit 1
+
+      - name: Run OSS admission checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH=src python -m quantum.scripts.oss_admission_scan
+
   build:
+    needs: verify-release
     runs-on: windows-2022
     timeout-minutes: 35
     steps:
