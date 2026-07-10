@@ -6,10 +6,10 @@ from ._admission_contracts_v2 import (
     AdmissionError,
     DatasetAdmissionRecord,
     DatasetControlEvidence,
-    StorageControlEvidence,
     _aware_utc,
     _uuid,
 )
+from ._storage_contracts_v3 import StorageControlEvidence
 
 
 def require_evidence_binding(
