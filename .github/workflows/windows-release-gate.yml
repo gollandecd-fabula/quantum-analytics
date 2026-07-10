@@ -37,14 +37,34 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          echo "ref_head=$(git rev-parse HEAD)"
-          echo "ref_head=$(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
+          mkdir -p dist
+          echo "ref_head=$(git rev-parse HEAD)" | tee dist/RELEASE_REF_INSPECTION.txt
+          cat dist/RELEASE_REF_INSPECTION.txt >> "$GITHUB_STEP_SUMMARY"
 
       - name: Run Foundation checks
+        id: release_foundation
+        continue-on-error: true
         shell: bash
         run: |
-          set -euo pipefail
-          PYTHONPATH=src python -m quantum.scripts.ci
+          set -o pipefail
+          PYTHONPATH=src python -m quantum.scripts.ci 2>&1 | tee dist/RELEASE_FOUNDATION.log
+
+      - name: Upload release verification diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Quantum_Release_Verification_Diagnostics
+          path: |
+            dist/RELEASE_REF_INSPECTION.txt
+            dist/RELEASE_FOUNDATION.log
+          if-no-files-found: error
+
+      - name: Enforce Foundation result
+        if: steps.release_foundation.outcome != 'success'
+        shell: bash
+        run: |
+          tail -n 120 dist/RELEASE_FOUNDATION.log
+          exit 1
 
       - name: Run OSS admission checks
         shell: bash
