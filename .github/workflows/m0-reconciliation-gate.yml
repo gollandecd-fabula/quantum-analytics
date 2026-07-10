@@ -16,12 +16,11 @@ env:
   CANONICAL_SHA: 1edf62167253e56c1e7f81fd2d6911d4b599720a
   OLD_FIX_SHA: cf99012f95188f45bd7b1bc71f1e0aaa31211c40
   TARGET_BRANCH: fix/quantum-one-click-stable-release
-  ARCHIVE_SHA256: 9ebfdccae0149fcc10be3c79b4e22a5de3bf40081474eb355673f8141237fb07
 
 jobs:
   linux-red-team:
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 35
     steps:
       - name: Checkout exact pull request head
         shell: bash
@@ -32,26 +31,45 @@ jobs:
           set -euo pipefail
           git init .
           git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
-          git fetch --depth=400 origin "${TARGET_SHA}" "${CANONICAL_SHA}" "${OLD_FIX_SHA}"
+          git fetch --depth=500 origin "${TARGET_SHA}" "${CANONICAL_SHA}" "${OLD_FIX_SHA}"
           git checkout --detach "${TARGET_SHA}"
           test "$(git rev-parse HEAD)" = "${TARGET_SHA}"
           git merge-base --is-ancestor "${CANONICAL_SHA}" HEAD
           git remote set-url origin "https://github.com/${GITHUB_REPOSITORY}.git"
 
-      - name: Reconstruct exact audited files and R34 manifest overlay
+      - name: Apply transparent fail-closed patch and R34 overlay
         shell: bash
         run: |
           set -euo pipefail
-          cat .m0-staging/m0stage.part.* | base64 --decode > /tmp/m0_remaining_files.tar.gz
-          echo "${ARCHIVE_SHA256}  /tmp/m0_remaining_files.tar.gz" | sha256sum --check -
-          tar -xzf /tmp/m0_remaining_files.tar.gz
-          rm -rf .m0-staging
-          rm -f .github/workflows/m0-reconciliation-gate.yml
+          python3 .m0-tools/apply_m0_repo_gate.py
           python3 .m0-tools/finalize_m0_patch.py
           rm -rf .m0-tools
+          rm -f .github/workflows/m0-reconciliation-gate.yml
           git add -A
           git diff --cached --check
-          git status --short
+          python3 - <<'PY'
+          import subprocess
+          allowed = {
+              'config/home-local.template.json',
+              'docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R34.json',
+              'scripts/windows/build_local_production.ps1',
+              'scripts/windows/configure_home_local.ps1',
+              'scripts/windows/install_home_local.ps1',
+              'scripts/windows/one_click_home_local.ps1',
+              'src/quantum/application/local_app.py',
+              'src/quantum/pilot/import_xlsx_source.ps1',
+              'src/quantum/pilot/local_runner.py',
+              'src/quantum/pilot/windows_runner.py',
+              'tests/integration_manifest_support.py',
+              'tests/test_m0_attestation_redteam.py',
+              'tests/test_windows_one_click_installer_r1.py',
+              'tests/test_windows_source_package_launchers_r1.py',
+          }
+          actual = set(subprocess.check_output(['git','diff','--cached','--name-only', '${CANONICAL_SHA}'], text=True).splitlines())
+          if actual != allowed:
+              raise SystemExit(f'M0_SCOPE_MISMATCH missing={sorted(allowed-actual)} extra={sorted(actual-allowed)}')
+          print('M0_SCOPE_VERIFIED', len(actual))
+          PY
 
       - name: Run targeted Red Team three times
         shell: bash
@@ -71,7 +89,7 @@ jobs:
   windows-red-team-and-publish:
     needs: linux-red-team
     runs-on: windows-2022
-    timeout-minutes: 45
+    timeout-minutes: 50
     steps:
       - name: Checkout exact pull request head
         shell: bash
@@ -82,48 +100,42 @@ jobs:
           set -euo pipefail
           git init .
           git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
-          git fetch --depth=400 origin "${TARGET_SHA}" "${CANONICAL_SHA}" "${OLD_FIX_SHA}" "refs/heads/${TARGET_BRANCH}:refs/remotes/origin/${TARGET_BRANCH}"
+          git fetch --depth=500 origin "${TARGET_SHA}" "${CANONICAL_SHA}" "${OLD_FIX_SHA}" "refs/heads/${TARGET_BRANCH}:refs/remotes/origin/${TARGET_BRANCH}"
           git checkout --detach "${TARGET_SHA}"
           test "$(git rev-parse HEAD)" = "${TARGET_SHA}"
 
-      - name: Reconstruct exact audited files and R34 manifest overlay
+      - name: Apply transparent fail-closed patch and R34 overlay
         shell: bash
         run: |
           set -euo pipefail
-          cat .m0-staging/m0stage.part.* | base64 --decode > m0_remaining_files.tar.gz
-          echo "${ARCHIVE_SHA256}  m0_remaining_files.tar.gz" | sha256sum --check -
-          tar -xzf m0_remaining_files.tar.gz
-          rm -f m0_remaining_files.tar.gz
-          rm -rf .m0-staging
-          rm -f .github/workflows/m0-reconciliation-gate.yml
+          python .m0-tools/apply_m0_repo_gate.py
           python .m0-tools/finalize_m0_patch.py
           rm -rf .m0-tools
+          rm -f .github/workflows/m0-reconciliation-gate.yml
           git add -A
           git diff --cached --check
 
-      - name: Windows parser and focused regression gates
+      - name: Windows parser and focused Red Team gates
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
           $files = @(
+            "scripts/windows/build_local_production.ps1",
             "scripts/windows/configure_home_local.ps1",
-            "scripts/windows/import_source.ps1",
+            "scripts/windows/install_home_local.ps1",
             "scripts/windows/one_click_home_local.ps1",
             "src/quantum/pilot/import_xlsx_source.ps1"
           )
           foreach ($file in $files) {
-            $tokens = $null
-            $errors = $null
-            [System.Management.Automation.Language.Parser]::ParseFile(
-              (Resolve-Path $file), [ref]$tokens, [ref]$errors
-            ) | Out-Null
+            $tokens = $null; $errors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path $file), [ref]$tokens, [ref]$errors) | Out-Null
             if ($errors.Count -ne 0) { throw "PowerShell parse failed for $file: $errors" }
           }
           $env:PYTHONPATH = "src"
           python -m unittest tests.test_m0_attestation_redteam
           python -m unittest tests.test_windows_one_click_installer_r1 tests.test_windows_source_package_launchers_r1 tests.test_windows_redteam_hardening
 
-      - name: Build HOME_LOCAL package and verify package manifest
+      - name: Build HOME_LOCAL package and verify internal manifest
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
@@ -133,7 +145,7 @@ jobs:
           $extract = Join-Path $env:RUNNER_TEMP "quantum-m0-package"
           if (Test-Path $extract) { Remove-Item $extract -Recurse -Force }
           Expand-Archive -LiteralPath $archive -DestinationPath $extract
-          python -c "import hashlib,json,pathlib,sys; r=pathlib.Path(sys.argv[1]); m=json.loads((r/'manifest.sha256.json').read_text(encoding='utf-8-sig')); bad=[]; [(bad.append(x['path']) if (not (r/x['path']).is_file() or (r/x['path']).stat().st_size!=x['size_bytes'] or hashlib.sha256((r/x['path']).read_bytes()).hexdigest()!=x['sha256']) else None) for x in m['files']]; print('PACKAGE_ENTRIES',len(m['files'])); print('BAD',bad); raise SystemExit(1 if bad else 0)" $extract
+          python -c "import hashlib,json,pathlib,sys; r=pathlib.Path(sys.argv[1]); m=json.loads((r/'manifest.sha256.json').read_text(encoding='utf-8-sig')); bad=[x['path'] for x in m['files'] if not (r/x['path']).is_file() or (r/x['path']).stat().st_size!=x['size_bytes'] or hashlib.sha256((r/x['path']).read_bytes()).hexdigest()!=x['sha256']]; print('PACKAGE_ENTRIES',len(m['files'])); print('BAD',bad); raise SystemExit(bool(bad))" $extract
 
       - name: Create clean reconciliation merge commit and publish with lease
         shell: bash
@@ -149,7 +161,6 @@ jobs:
           git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
           git push origin "${commit}:refs/heads/${TARGET_BRANCH}" --force-with-lease="refs/heads/${TARGET_BRANCH}:${OLD_FIX_SHA}"
           echo "M0_FINAL_COMMIT=${commit}" | tee -a "$GITHUB_ENV"
-          echo "${commit}" > m0-final-commit.txt
 
       - name: Verify published branch exact head
         shell: bash
