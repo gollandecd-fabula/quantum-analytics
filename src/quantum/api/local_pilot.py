@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Any
 from xml.etree import ElementTree
 
-_ALLOWED_UPLOAD_SUFFIXES = {".csv", ".xlsx", ".xls"}
+_ALLOWED_UPLOAD_SUFFIXES = {".csv", ".xlsx"}
 _COST_TABLE_SUFFIXES = {".csv", ".xlsx"}
 _REQUIRED_CALCULATION_FIELDS = (
     "sale_price",
@@ -118,7 +118,34 @@ def _safe_name(name: str) -> str:
 def _json_file(path: Path) -> dict[str, Any] | None:
     if not path.exists():
         return None
-    return json.loads(path.read_text(encoding="utf-8"))
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError):
+        return None
+    return payload if isinstance(payload, dict) else None
+
+
+def _atomic_write_bytes(path: Path, data: bytes) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temp = path.with_name(f".{path.name}.{os.getpid()}.{time.time_ns()}.tmp")
+    try:
+        with temp.open("xb") as handle:
+            handle.write(data)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temp, path)
+    finally:
+        try:
+            temp.unlink()
+        except FileNotFoundError:
+            pass
+
+
+def _atomic_write_json(path: Path, payload: dict[str, Any]) -> None:
+    _atomic_write_bytes(
+        path,
+        json.dumps(payload, indent=2, sort_keys=True, ensure_ascii=False).encode("utf-8"),
+    )
 
 
 def _decimal(value: Any, field: str) -> Decimal:
@@ -130,6 +157,20 @@ def _decimal(value: Any, field: str) -> Decimal:
         )
     except (InvalidOperation, ValueError) as exc:
         raise ValueError(f"invalid_decimal:{field}") from exc
+
+
+def _non_negative_decimal(value: Any, field: str) -> Decimal:
+    parsed = _decimal(value, field)
+    if parsed < 0:
+        raise ValueError(f"negative_not_allowed:{field}")
+    return parsed
+
+
+def _percent(value: Any, field: str) -> Decimal:
+    parsed = _non_negative_decimal(value, field)
+    if parsed > Decimal("100.00"):
+        raise ValueError(f"percent_out_of_range:{field}")
+    return parsed
 
 
 def _normalize(value: str) -> str:
@@ -290,7 +331,7 @@ def upload_local_file(filename: str, body: bytes, content_type: str = "") -> tup
 
     stored_name = f"{digest}{suffix}"
     stored_path = Path(layout["uploads"]) / stored_name
-    stored_path.write_bytes(body)
+    _atomic_write_bytes(stored_path, body)
     receipt = {
         "status": "accepted",
         "duplicate": False,
@@ -303,7 +344,7 @@ def upload_local_file(filename: str, body: bytes, content_type: str = "") -> tup
         "data_status": "UPLOADED",
         "marketplace_write_enabled": False,
     }
-    receipt_path.write_text(json.dumps(receipt, indent=2, sort_keys=True), encoding="utf-8")
+    _atomic_write_json(receipt_path, receipt)
     return 201, receipt
 
 
@@ -318,7 +359,7 @@ def calculate_unit(payload: dict[str, Any]) -> tuple[int, dict[str, Any]]:
         }
 
     try:
-        values = {field: _decimal(payload.get(field), field) for field in _REQUIRED_CALCULATION_FIELDS}
+        values = {field: _non_negative_decimal(payload.get(field), field) for field in _REQUIRED_CALCULATION_FIELDS}
     except ValueError as exc:
         return 400, {"status": "blocked", "reason": str(exc), "no_hidden_defaults": True}
 
@@ -380,7 +421,7 @@ def save_cost_table(filename: str, body: bytes, content_type: str = "") -> tuple
             rejected += 1
             continue
         try:
-            costs[str(article).strip()] = str(_decimal(cost, "product_cost"))
+            costs[str(article).strip()] = str(_non_negative_decimal(cost, "product_cost"))
         except ValueError:
             rejected += 1
 
@@ -399,7 +440,7 @@ def save_cost_table(filename: str, body: bytes, content_type: str = "") -> tuple
         "rejected_rows": rejected,
         "marketplace_write_enabled": False,
     }
-    (Path(layout["config"]) / "cost_table.json").write_text(json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8")
+    _atomic_write_json(Path(layout["config"]) / "cost_table.json", payload)
     return 201, {key: value for key, value in payload.items() if key != "costs"} | {"articles": sorted(costs)}
 
 
@@ -413,23 +454,23 @@ def _load_costs() -> dict[str, str]:
 
 
 def _settings_decimal(settings: dict[str, Any], field: str) -> Decimal:
-    return _decimal(settings.get(field), field)
+    return _non_negative_decimal(settings.get(field), field)
 
 
 def _expense_for_row(row: dict[str, str], columns: dict[str, str], settings: dict[str, Any], field: str) -> Decimal:
     value = _value_from_row(row, columns, field)
     if value is not None:
-        return _decimal(value, field)
+        return _non_negative_decimal(value, field)
     explicit = settings.get(field)
     if explicit is not None and explicit != "":
-        return _decimal(explicit, field)
+        return _non_negative_decimal(explicit, field)
     raise ValueError(f"missing:{field}")
 
 
 def _quantity_for_row(row: dict[str, str], columns: dict[str, str], settings: dict[str, Any]) -> Decimal:
     value = _value_from_row(row, columns, "quantity")
     if value is not None:
-        return _decimal(value, "quantity")
+        return _non_negative_decimal(value, "quantity")
     if settings.get("row_quantity_mode") == "one_per_row":
         return Decimal("1.00")
     raise ValueError("missing:quantity")
@@ -438,9 +479,9 @@ def _quantity_for_row(row: dict[str, str], columns: dict[str, str], settings: di
 def _product_cost_for_row(row: dict[str, str], columns: dict[str, str], settings: dict[str, Any], costs: dict[str, str], article: str) -> Decimal:
     value = _value_from_row(row, columns, "product_cost")
     if value is not None:
-        return _decimal(value, "product_cost")
+        return _non_negative_decimal(value, "product_cost")
     if article in costs:
-        return _decimal(costs[article], "product_cost")
+        return _non_negative_decimal(costs[article], "product_cost")
     if settings.get("product_cost") not in (None, ""):
         return _settings_decimal(settings, "product_cost")
     raise ValueError("missing:product_cost")
@@ -485,8 +526,11 @@ def analyze_wb_rows(rows: list[dict[str, str]], settings: dict[str, Any] | None 
             "no_hidden_defaults": True,
         }
 
-    tax_rate = _settings_decimal(settings, "tax_rate_percent")
-    other_expense = _settings_decimal(settings, "other_expense")
+    try:
+        tax_rate = _percent(settings.get("tax_rate_percent"), "tax_rate_percent")
+        other_expense = _settings_decimal(settings, "other_expense")
+    except ValueError as exc:
+        return 400, {"status": "blocked", "reason": str(exc), "no_hidden_defaults": True}
     result_rows: list[dict[str, Any]] = []
     blocked_rows: list[dict[str, Any]] = []
 
@@ -505,7 +549,7 @@ def analyze_wb_rows(rows: list[dict[str, str]], settings: dict[str, Any] | None 
             if not article:
                 raise ValueError("missing:article")
             quantity = _quantity_for_row(row, columns, settings)
-            sale_price = _decimal(_value_from_row(row, columns, "sale_price"), "sale_price")
+            sale_price = _non_negative_decimal(_value_from_row(row, columns, "sale_price"), "sale_price")
             product_cost = _product_cost_for_row(row, columns, settings, costs, article)
             sale_price_total = (sale_price * quantity).quantize(_MONEY)
             product_cost_total = (product_cost * quantity).quantize(_MONEY)
@@ -553,8 +597,11 @@ def analyze_wb_rows(rows: list[dict[str, str]], settings: dict[str, Any] | None 
         "negative_items": sum(1 for row in result_rows if Decimal(row["net_profit"]) < 0),
         "promote_candidates": sum(1 for row in result_rows if row["recommendation"] == "PROMOTE_CANDIDATE"),
     }
+    confirmed = bool(result_rows) and not blocked_rows
     payload = {
-        "status": "analyzed" if result_rows else "blocked",
+        "status": "analyzed" if confirmed else "blocked",
+        "confirmed_calculation": confirmed,
+        "partial_results_status": None if confirmed else "UNCONFIRMED_PARTIAL_PREVIEW",
         "currency": "RUB",
         "marketplace": "Wildberries",
         "dashboard": dashboard,
@@ -570,7 +617,7 @@ def analyze_wb_rows(rows: list[dict[str, str]], settings: dict[str, Any] | None 
             "cost_sources": ["report_row", "uploaded_cost_table", "manual_product_cost"],
         },
     }
-    return (200 if result_rows else 400), payload
+    return (200 if confirmed else 400), payload
 
 
 def analyze_uploaded_report(sha256: str, settings: dict[str, Any] | None = None) -> tuple[int, dict[str, Any]]:
@@ -592,9 +639,7 @@ def analyze_uploaded_report(sha256: str, settings: dict[str, Any] | None = None)
     analysis["source_upload_sha256"] = sha256
     evidence_id = sha256_bytes(json.dumps(analysis, sort_keys=True, ensure_ascii=False).encode("utf-8"))
     analysis["analysis_sha256"] = evidence_id
-    (Path(layout["evidence"]) / f"analysis-{evidence_id}.json").write_text(
-        json.dumps(analysis, indent=2, sort_keys=True, ensure_ascii=False), encoding="utf-8"
-    )
+    _atomic_write_json(Path(layout["evidence"]) / f"analysis-{evidence_id}.json", analysis)
     return code, analysis
 
 
@@ -649,14 +694,38 @@ def analysis_to_xlsx_bytes(analysis: dict[str, Any]) -> bytes:
     return output.getvalue()
 
 
-def save_analysis_export(analysis: dict[str, Any]) -> tuple[int, dict[str, Any]]:
-    if not isinstance(analysis, dict) or analysis.get("status") != "analyzed":
-        return 400, {"status": "blocked", "reason": "analyzed_payload_required"}
+def _analysis_without_digest(analysis: dict[str, Any]) -> dict[str, Any]:
+    return {key: value for key, value in analysis.items() if key != "analysis_sha256"}
+
+
+def save_analysis_export(analysis_evidence_id: Any) -> tuple[int, dict[str, Any]]:
+    if not isinstance(analysis_evidence_id, str) or re.fullmatch(r"[0-9a-f]{64}", analysis_evidence_id) is None:
+        return 400, {"status": "blocked", "reason": "analysis_evidence_id_required"}
+
+    layout = ensure_runtime_layout()
+    evidence_path = Path(layout["evidence"]) / f"analysis-{analysis_evidence_id}.json"
+    if not evidence_path.exists():
+        return 404, {"status": "blocked", "reason": "analysis_evidence_not_found"}
+    analysis = _json_file(evidence_path)
+    if analysis is None:
+        return 409, {"status": "blocked", "reason": "analysis_evidence_corrupt"}
+
+    actual_id = sha256_bytes(
+        json.dumps(_analysis_without_digest(analysis), sort_keys=True, ensure_ascii=False).encode("utf-8")
+    )
+    if analysis.get("analysis_sha256") != analysis_evidence_id or actual_id != analysis_evidence_id:
+        return 409, {"status": "blocked", "reason": "analysis_evidence_integrity_failed"}
+    if (
+        analysis.get("status") != "analyzed"
+        or analysis.get("confirmed_calculation") is not True
+        or analysis.get("blocked_rows")
+    ):
+        return 400, {"status": "blocked", "reason": "confirmed_analysis_required"}
+
     data = analysis_to_xlsx_bytes(analysis)
     digest = sha256_bytes(data)
-    layout = ensure_runtime_layout()
     path = Path(layout["output"]) / f"quantum-wb-analysis-{digest[:12]}.xlsx"
-    path.write_bytes(data)
+    _atomic_write_bytes(path, data)
     return 201, {
         "status": "exported",
         "filename": path.name,
@@ -670,6 +739,8 @@ def save_analysis_export(analysis: dict[str, Any]) -> tuple[int, dict[str, Any]]
 def local_pilot_health() -> dict[str, Any]:
     return {
         "status": "READY",
+        "scope_status": "LOCAL_PILOT_READY",
+        "release_status": "RELEASE_BLOCKED",
         "component": "quantum-local-pilot",
         "runtime_layout": ensure_runtime_layout(),
         "allowed_upload_suffixes": sorted(_ALLOWED_UPLOAD_SUFFIXES),
@@ -715,11 +786,11 @@ table{{width:100%;border-collapse:collapse}} th,td{{border:1px solid #ddd;paddin
 </head>
 <body>
 <h1>Quantum WB Release</h1>
-<p><b>READY.</b> Локальная Windows-программа для Wildberries. Данные сохраняются в runtime-папку. Marketplace write disabled.</p>
+<p><b>LOCAL PILOT READY.</b> Локальная read-only программа для Wildberries. Полный production-релиз заблокирован. Данные сохраняются в runtime-папку. Marketplace write disabled.</p>
 
 <section>
 <h2>1. Загрузка отчёта Wildberries</h2>
-<input id="wbFile" type="file" accept=".csv,.xlsx,.xls">
+<input id="wbFile" type="file" accept=".csv,.xlsx">
 <button onclick="uploadWb()">Загрузить WB отчёт</button>
 <p id="uploadStatus"></p>
 </section>
@@ -761,6 +832,9 @@ table{{width:100%;border-collapse:collapse}} th,td{{border:1px solid #ddd;paddin
 let lastUploadSha = null;
 let lastAnalysis = null;
 function show(payload){{document.getElementById('out').textContent = JSON.stringify(payload,null,2);}}
+function escapeHtml(value){{
+  return String(value ?? '').replace(/[&<>"']/g, char => ({{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}}[char]));
+}}
 async function uploadWb(){{
   const file = document.getElementById('wbFile').files[0];
   if(!file) return show({{status:'blocked', reason:'no_wb_file_selected'}});
@@ -795,14 +869,14 @@ async function analyze(){{
 }}
 function renderAnalysis(payload){{
   const dashboard = payload.dashboard || {{}};
-  document.getElementById('dashboard').innerHTML = '<table>' + Object.entries(dashboard).map(([k,v]) => `<tr><th>${{k}}</th><td>${{v}}</td></tr>`).join('') + '</table>';
+  document.getElementById('dashboard').innerHTML = '<table>' + Object.entries(dashboard).map(([k,v]) => `<tr><th>${{escapeHtml(k)}}</th><td>${{escapeHtml(v)}}</td></tr>`).join('') + '</table>';
   const rows = payload.rows || [];
   document.getElementById('rows').innerHTML = '<table><tr><th>Артикул</th><th>Выручка</th><th>Прибыль</th><th>Рекомендация</th></tr>' +
-    rows.map(row => `<tr><td>${{row.article}}</td><td>${{row.revenue}}</td><td class="${{Number(row.net_profit)<0?'bad':'good'}}">${{row.net_profit}}</td><td>${{row.recommendation}}</td></tr>`).join('') + '</table>';
+    rows.map(row => `<tr><td>${{escapeHtml(row.article)}}</td><td>${{escapeHtml(row.revenue)}}</td><td class="${{Number(row.net_profit)<0?'bad':'good'}}">${{escapeHtml(row.net_profit)}}</td><td>${{escapeHtml(row.recommendation)}}</td></tr>`).join('') + '</table>';
 }}
 async function exportXlsx(){{
   if(!lastAnalysis || lastAnalysis.status !== 'analyzed') return show({{status:'blocked', reason:'no_successful_analysis_to_export'}});
-  const res = await fetch('/api/local-pilot/export', {{method:'POST', headers:{{'Content-Type':'application/json'}}, body:JSON.stringify(lastAnalysis)}});
+  const res = await fetch('/api/local-pilot/export', {{method:'POST', headers:{{'Content-Type':'application/json'}}, body:JSON.stringify({{analysis_sha256:lastAnalysis.analysis_sha256}})}});
   show(await res.json());
 }}
 async function calculate(){{
