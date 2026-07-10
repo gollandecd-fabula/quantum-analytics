@@ -7,54 +7,97 @@ on:
         description: 'Git ref to build'
         required: true
         default: 'fix/quantum-one-click-stable-release'
+  pull_request:
+    branches:
+      - main
 
 permissions:
   contents: read
 
+concurrency:
+  group: windows-release-gate-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: windows-2022
-    timeout-minutes: 25
+    timeout-minutes: 35
     steps:
       - name: Checkout selected ref
         uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.ref }}
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || 'fix/quantum-one-click-stable-release' }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: '3.13'
 
-      - name: Run tests
+      - name: Inspect selected ref
         shell: pwsh
         run: |
-          $env:PYTHONPATH = 'src'
-          python -m quantum.scripts.ci
+          New-Item -ItemType Directory -Force 'dist' | Out-Null
+          $builder = Get-Item 'scripts\build_windows_single_exe.py'
+          $builderHash = Get-FileHash $builder.FullName -Algorithm SHA256
+          $head = (& git rev-parse HEAD).Trim()
+          "ref_head=$head" | Out-File -FilePath 'dist\SELECTED_REF_INSPECTION.txt' -Encoding utf8
+          "builder_path=$($builder.FullName)" | Out-File -FilePath 'dist\SELECTED_REF_INSPECTION.txt' -Encoding utf8 -Append
+          "builder_size=$($builder.Length)" | Out-File -FilePath 'dist\SELECTED_REF_INSPECTION.txt' -Encoding utf8 -Append
+          "builder_sha256=$($builderHash.Hash.ToLowerInvariant())" | Out-File -FilePath 'dist\SELECTED_REF_INSPECTION.txt' -Encoding utf8 -Append
+          Get-Content 'dist\SELECTED_REF_INSPECTION.txt'
 
-      - name: Install admitted release packager
+      - name: Upload selected ref inspection
+        uses: actions/upload-artifact@v4
+        with:
+          name: Quantum_Selected_Ref_Inspection
+          path: dist/SELECTED_REF_INSPECTION.txt
+          if-no-files-found: error
+
+      - name: Red Team builder self-check
         shell: pwsh
         run: |
-          $lockFile = 'requirements\windows-release-packager.txt'
-          if (-not (Test-Path $lockFile)) { throw 'missing admitted release packager lock file' }
-          python -m pip install --require-hashes --only-binary :all: -r $lockFile
+          python scripts/build_windows_single_exe.py --self-check
 
-      - name: Build executable
+      - name: Build standalone executable
+        id: package_build
+        continue-on-error: true
         shell: pwsh
         run: |
-          python -m PyInstaller --clean --noconfirm --onefile --name Quantum_WB_Release --paths src scripts/quantum_windows_exe_entry.py
-          if (-not (Test-Path 'dist\Quantum_WB_Release.exe')) { throw 'missing executable' }
+          & python scripts/build_windows_single_exe.py 2>&1 | Tee-Object -FilePath 'dist\BUILD_WINDOWS.log'
+          $buildExit = $LASTEXITCODE
+          if ($buildExit -eq 0 -and -not (Test-Path 'dist\Quantum_WB_Release.exe')) {
+            'missing executable' | Tee-Object -FilePath 'dist\BUILD_WINDOWS.log' -Append
+            $buildExit = 1
+          }
+          exit $buildExit
 
-      - name: Smoke test executable
+      - name: Upload build diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Quantum_Windows_Build_Diagnostics
+          path: dist/BUILD_WINDOWS.log
+          if-no-files-found: error
+
+      - name: Enforce build result
+        if: steps.package_build.outcome != 'success'
+        shell: pwsh
+        run: |
+          Get-Content 'dist\BUILD_WINDOWS.log' -Tail 100
+          throw 'Windows standalone build failed'
+
+      - name: Smoke test packaged executable
         shell: pwsh
         run: |
           $env:QUANTUM_NO_BROWSER = '1'
           $env:QUANTUM_PORT = '8099'
           $env:QUANTUM_RUNTIME_DIR = Join-Path $env:RUNNER_TEMP 'quantum-runtime'
+          $env:QUANTUM_INSTALL_DIR = Join-Path $env:RUNNER_TEMP 'quantum-installed-app'
           $p = Start-Process -FilePath 'dist\Quantum_WB_Release.exe' -PassThru
           try {
             $ok = $false
-            for ($i = 0; $i -lt 40; $i++) {
+            for ($i = 0; $i -lt 60; $i++) {
+              if ($p.HasExited) { throw "packaged executable exited early with code $($p.ExitCode)" }
               try {
                 $r = Invoke-WebRequest -UseBasicParsing 'http://127.0.0.1:8099/api/local-pilot/health'
                 if ($r.StatusCode -eq 200 -and $r.Content -like '*READY*') { $ok = $true; break }
@@ -63,13 +106,31 @@ jobs:
               }
             }
             if (-not $ok) { throw 'health check failed' }
+            if (-not (Test-Path (Join-Path $env:QUANTUM_INSTALL_DIR '.installed'))) {
+              throw 'embedded application was not installed by packaged output'
+            }
           } finally {
-            if (-not $p.HasExited) { Stop-Process -Id $p.Id -Force }
+            if (-not $p.HasExited) {
+              & taskkill.exe /PID $p.Id /T /F | Out-Null
+            }
           }
+
+      - name: Inspect artifact
+        shell: pwsh
+        run: |
+          $file = Get-Item 'dist\Quantum_WB_Release.exe'
+          if ($file.Length -lt 1000000) { throw 'artifact is unexpectedly small' }
+          $hash = Get-FileHash $file.FullName -Algorithm SHA256
+          "artifact=$($file.Name)" | Out-File -FilePath 'dist\ARTIFACT_INSPECTION.txt' -Encoding utf8
+          "size=$($file.Length)" | Out-File -FilePath 'dist\ARTIFACT_INSPECTION.txt' -Encoding utf8 -Append
+          "sha256=$($hash.Hash.ToLowerInvariant())" | Out-File -FilePath 'dist\ARTIFACT_INSPECTION.txt' -Encoding utf8 -Append
+          Get-Content 'dist\ARTIFACT_INSPECTION.txt'
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: Quantum_WB_RELEASE_EXE
-          path: dist/Quantum_WB_Release.exe
+          path: |
+            dist/Quantum_WB_Release.exe
+            dist/ARTIFACT_INSPECTION.txt
           if-no-files-found: error
