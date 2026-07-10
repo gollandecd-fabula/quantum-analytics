@@ -1,0 +1,37 @@
+{
+  "evidence_id": "QRT-P2.2-R1-2026-07-03",
+  "unit_id": "P2.2",
+  "stacked_base_sha": "85fd7089196deda52f3893c7cad23fff7a99c95e",
+  "state": "LOCAL_PASS_CI_PENDING",
+  "implementation": "src/quantum/pilot/persistence.py",
+  "tests": {
+    "module": "tests/test_persistent_identity_repository.py",
+    "run": 24,
+    "failures": 0,
+    "errors": 0,
+    "resource_warnings": 0,
+    "compilation": "PASS"
+  },
+  "verified_properties": [
+    "CANONICAL_CHECKPOINT_DIGEST",
+    "EXTERNAL_RECEIPT_REQUIRED",
+    "APPEND_ONLY_ROWS",
+    "TYPED_CORRUPTION_FAILURE",
+    "TENANT_REFERENCE_VALIDATION",
+    "SESSION_DIGEST_UNIQUENESS",
+    "PLAINTEXT_BEARER_ABSENT",
+    "RESOURCE_LIMITS",
+    "CONCURRENT_CHECKPOINT_SERIALIZATION",
+    "POSIX_0600",
+    "BACKUP_RESTORE_ROUND_TRIP"
+  ],
+  "production_ready": false,
+  "encryption_at_rest": false,
+  "real_data_allowed": false,
+  "next_required": [
+    "EXACT_HEAD_FOUNDATION_CI_SUCCESS",
+    "EXACT_HEAD_OSS_ADMISSION_CI_SUCCESS",
+    "ZERO_UNRESOLVED_REVIEW_THREADS",
+    "INTERNAL_EXACT_HEAD_REVIEW_PASS"
+  ]
+}
