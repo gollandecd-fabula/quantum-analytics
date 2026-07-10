@@ -26,7 +26,7 @@ jobs:
       - name: Checkout selected ref
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || github.event.pull_request.head.sha }}
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || 'fix/quantum-one-click-stable-release' }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -34,10 +34,29 @@ jobs:
           python-version: '3.13'
 
       - name: Run tests
+        id: foundation
+        continue-on-error: true
         shell: pwsh
         run: |
+          New-Item -ItemType Directory -Force 'dist' | Out-Null
           $env:PYTHONPATH = 'src'
-          python -m quantum.scripts.ci
+          & python -m quantum.scripts.ci 2>&1 | Tee-Object -FilePath 'dist\FOUNDATION_WINDOWS.log'
+          exit $LASTEXITCODE
+
+      - name: Upload test diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Quantum_Windows_Test_Diagnostics
+          path: dist/FOUNDATION_WINDOWS.log
+          if-no-files-found: error
+
+      - name: Enforce test result
+        if: steps.foundation.outcome != 'success'
+        shell: pwsh
+        run: |
+          Get-Content 'dist\FOUNDATION_WINDOWS.log' -Tail 100
+          throw 'Windows foundation checks failed'
 
       - name: Red Team builder self-check
         shell: pwsh
