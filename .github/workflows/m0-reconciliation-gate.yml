@@ -1,0 +1,160 @@
+name: M0 Reconciliation Red Team Gate
+
+on:
+  pull_request:
+    branches:
+      - automation/m0-reconciliation-gate-base
+
+permissions:
+  contents: write
+
+concurrency:
+  group: m0-reconciliation-redteam
+  cancel-in-progress: false
+
+env:
+  CANONICAL_SHA: 1edf62167253e56c1e7f81fd2d6911d4b599720a
+  OLD_FIX_SHA: cf99012f95188f45bd7b1bc71f1e0aaa31211c40
+  TARGET_BRANCH: fix/quantum-one-click-stable-release
+  ARCHIVE_SHA256: 9ebfdccae0149fcc10be3c79b4e22a5de3bf40081474eb355673f8141237fb07
+
+jobs:
+  linux-red-team:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact pull request head
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TARGET_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          git init .
+          git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git fetch --depth=400 origin "${TARGET_SHA}" "${CANONICAL_SHA}" "${OLD_FIX_SHA}"
+          git checkout --detach "${TARGET_SHA}"
+          test "$(git rev-parse HEAD)" = "${TARGET_SHA}"
+          git merge-base --is-ancestor "${CANONICAL_SHA}" HEAD
+          git remote set-url origin "https://github.com/${GITHUB_REPOSITORY}.git"
+
+      - name: Reconstruct exact audited files and R34 manifest overlay
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat .m0-staging/m0stage.part.* | base64 --decode > /tmp/m0_remaining_files.tar.gz
+          echo "${ARCHIVE_SHA256}  /tmp/m0_remaining_files.tar.gz" | sha256sum --check -
+          tar -xzf /tmp/m0_remaining_files.tar.gz
+          rm -rf .m0-staging
+          rm -f .github/workflows/m0-reconciliation-gate.yml
+          python3 .m0-tools/finalize_m0_patch.py
+          rm -rf .m0-tools
+          git add -A
+          git diff --cached --check
+          git status --short
+
+      - name: Run targeted Red Team three times
+        shell: bash
+        run: |
+          set -euo pipefail
+          for run in 1 2 3; do
+            echo "M0_TARGETED_RED_TEAM_RUN=${run}"
+            PYTHONPATH=src python3 -m unittest tests.test_m0_attestation_redteam
+          done
+
+      - name: Run complete Foundation gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH=src python3 -m quantum.scripts.ci
+
+  windows-red-team-and-publish:
+    needs: linux-red-team
+    runs-on: windows-2022
+    timeout-minutes: 45
+    steps:
+      - name: Checkout exact pull request head
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TARGET_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          git init .
+          git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git fetch --depth=400 origin "${TARGET_SHA}" "${CANONICAL_SHA}" "${OLD_FIX_SHA}" "refs/heads/${TARGET_BRANCH}:refs/remotes/origin/${TARGET_BRANCH}"
+          git checkout --detach "${TARGET_SHA}"
+          test "$(git rev-parse HEAD)" = "${TARGET_SHA}"
+
+      - name: Reconstruct exact audited files and R34 manifest overlay
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat .m0-staging/m0stage.part.* | base64 --decode > m0_remaining_files.tar.gz
+          echo "${ARCHIVE_SHA256}  m0_remaining_files.tar.gz" | sha256sum --check -
+          tar -xzf m0_remaining_files.tar.gz
+          rm -f m0_remaining_files.tar.gz
+          rm -rf .m0-staging
+          rm -f .github/workflows/m0-reconciliation-gate.yml
+          python .m0-tools/finalize_m0_patch.py
+          rm -rf .m0-tools
+          git add -A
+          git diff --cached --check
+
+      - name: Windows parser and focused regression gates
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $files = @(
+            "scripts/windows/configure_home_local.ps1",
+            "scripts/windows/import_source.ps1",
+            "scripts/windows/one_click_home_local.ps1",
+            "src/quantum/pilot/import_xlsx_source.ps1"
+          )
+          foreach ($file in $files) {
+            $tokens = $null
+            $errors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile(
+              (Resolve-Path $file), [ref]$tokens, [ref]$errors
+            ) | Out-Null
+            if ($errors.Count -ne 0) { throw "PowerShell parse failed for $file: $errors" }
+          }
+          $env:PYTHONPATH = "src"
+          python -m unittest tests.test_m0_attestation_redteam
+          python -m unittest tests.test_windows_one_click_installer_r1 tests.test_windows_source_package_launchers_r1 tests.test_windows_redteam_hardening
+
+      - name: Build HOME_LOCAL package and verify package manifest
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          & scripts/windows/build_local_production.ps1 -OutputDirectory dist-m0
+          if ($LASTEXITCODE -ne 0) { throw "HOME_LOCAL package build failed" }
+          $archive = Resolve-Path "dist-m0/QuantumLocalProduction_HOME_LOCAL.zip"
+          $extract = Join-Path $env:RUNNER_TEMP "quantum-m0-package"
+          if (Test-Path $extract) { Remove-Item $extract -Recurse -Force }
+          Expand-Archive -LiteralPath $archive -DestinationPath $extract
+          python -c "import hashlib,json,pathlib,sys; r=pathlib.Path(sys.argv[1]); m=json.loads((r/'manifest.sha256.json').read_text(encoding='utf-8-sig')); bad=[]; [(bad.append(x['path']) if (not (r/x['path']).is_file() or (r/x['path']).stat().st_size!=x['size_bytes'] or hashlib.sha256((r/x['path']).read_bytes()).hexdigest()!=x['sha256']) else None) for x in m['files']]; print('PACKAGE_ENTRIES',len(m['files'])); print('BAD',bad); raise SystemExit(1 if bad else 0)" $extract
+
+      - name: Create clean reconciliation merge commit and publish with lease
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          tree="$(git write-tree)"
+          commit="$(printf '%s\n' 'M0: reconcile canonical HOME_LOCAL and fail-close attestations' | git commit-tree "${tree}" -p "${CANONICAL_SHA}" -p "${OLD_FIX_SHA}")"
+          git show --stat --oneline "${commit}"
+          git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git push origin "${commit}:refs/heads/${TARGET_BRANCH}" --force-with-lease="refs/heads/${TARGET_BRANCH}:${OLD_FIX_SHA}"
+          echo "M0_FINAL_COMMIT=${commit}" | tee -a "$GITHUB_ENV"
+          echo "${commit}" > m0-final-commit.txt
+
+      - name: Verify published branch exact head
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin "refs/heads/${TARGET_BRANCH}:refs/remotes/origin/${TARGET_BRANCH}"
+          test "$(git rev-parse refs/remotes/origin/${TARGET_BRANCH})" = "${M0_FINAL_COMMIT}"
+          git diff --check "${CANONICAL_SHA}..${M0_FINAL_COMMIT}"
