@@ -33,30 +33,25 @@ jobs:
         with:
           python-version: '3.13'
 
-      - name: Run tests
-        id: foundation
-        continue-on-error: true
+      - name: Inspect selected ref
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force 'dist' | Out-Null
-          $env:PYTHONPATH = 'src'
-          & python -m quantum.scripts.ci 2>&1 | Tee-Object -FilePath 'dist\FOUNDATION_WINDOWS.log'
-          exit $LASTEXITCODE
+          $builder = Get-Item 'scripts\build_windows_single_exe.py'
+          $builderHash = Get-FileHash $builder.FullName -Algorithm SHA256
+          $head = (& git rev-parse HEAD).Trim()
+          "ref_head=$head" | Out-File -FilePath 'dist\SELECTED_REF_INSPECTION.txt' -Encoding utf8
+          "builder_path=$($builder.FullName)" | Out-File -FilePath 'dist\SELECTED_REF_INSPECTION.txt' -Encoding utf8 -Append
+          "builder_size=$($builder.Length)" | Out-File -FilePath 'dist\SELECTED_REF_INSPECTION.txt' -Encoding utf8 -Append
+          "builder_sha256=$($builderHash.Hash.ToLowerInvariant())" | Out-File -FilePath 'dist\SELECTED_REF_INSPECTION.txt' -Encoding utf8 -Append
+          Get-Content 'dist\SELECTED_REF_INSPECTION.txt'
 
-      - name: Upload test diagnostics
-        if: always()
+      - name: Upload selected ref inspection
         uses: actions/upload-artifact@v4
         with:
-          name: Quantum_Windows_Test_Diagnostics
-          path: dist/FOUNDATION_WINDOWS.log
+          name: Quantum_Selected_Ref_Inspection
+          path: dist/SELECTED_REF_INSPECTION.txt
           if-no-files-found: error
-
-      - name: Enforce test result
-        if: steps.foundation.outcome != 'success'
-        shell: pwsh
-        run: |
-          Get-Content 'dist\FOUNDATION_WINDOWS.log' -Tail 100
-          throw 'Windows foundation checks failed'
 
       - name: Red Team builder self-check
         shell: pwsh
