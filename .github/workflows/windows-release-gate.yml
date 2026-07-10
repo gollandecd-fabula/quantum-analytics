@@ -32,11 +32,16 @@ jobs:
           $env:PYTHONPATH = 'src'
           python -m quantum.scripts.ci
 
+      - name: Install admitted release packager
+        shell: pwsh
+        run: |
+          $lockFile = 'requirements\windows-release-packager.txt'
+          if (-not (Test-Path $lockFile)) { throw 'missing admitted release packager lock file' }
+          python -m pip install --require-hashes --only-binary :all: -r $lockFile
+
       - name: Build executable
         shell: pwsh
         run: |
-          python -m pip install --upgrade pip
-          python -m pip install pyinstaller
           python -m PyInstaller --clean --noconfirm --onefile --name Quantum_WB_Release --paths src scripts/quantum_windows_exe_entry.py
           if (-not (Test-Path 'dist\Quantum_WB_Release.exe')) { throw 'missing executable' }
 
