@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import hashlib
 import http.client
 import json
 import os
+import socket
 import tempfile
 import threading
 import unittest
@@ -12,14 +14,21 @@ from pathlib import Path
 
 from quantum.api.local_pilot import (
     analyze_uploaded_report,
+    analyze_wb_rows,
     analysis_to_xlsx_bytes,
     calculate_unit,
+    ensure_runtime_layout,
     local_pilot_health,
     save_analysis_export,
     save_cost_table,
     upload_local_file,
 )
-from quantum.api.local_pilot_server import LocalPilotHandler
+from quantum.api.local_pilot_server import (
+    LocalPilotHandler,
+    create_local_server,
+    parse_content_length,
+    validate_loopback_host,
+)
 from scripts.build_local_pilot_package import build_package
 
 
@@ -83,6 +92,13 @@ class LocalPilotOneClickTests(unittest.TestCase):
         self.assertTrue(payload["no_hidden_defaults"])
         self.assertFalse(payload["marketplace_write_enabled"])
 
+    def test_negative_financial_input_is_blocked(self) -> None:
+        payload = self.calculation_payload()
+        payload["product_cost"] = "-1"
+        status, result = calculate_unit(payload)
+        self.assertEqual(status, 400)
+        self.assertEqual(result["reason"], "negative_not_allowed:product_cost")
+
     def test_upload_receipt_and_duplicate_detection(self) -> None:
         body = b"barcode,price\n123,1000\n"
         first_status, first = upload_local_file("wb-report.csv", body, "text/csv")
@@ -93,6 +109,21 @@ class LocalPilotOneClickTests(unittest.TestCase):
         self.assertTrue(second["duplicate"])
         self.assertEqual(first["sha256"], second["sha256"])
         self.assertEqual(first["data_status"], "UPLOADED")
+
+    def test_legacy_xls_is_rejected_before_storage(self) -> None:
+        status, payload = upload_local_file("legacy.xls", b"legacy")
+        self.assertEqual(status, 400)
+        self.assertEqual(payload["reason"], "unsupported_file_type")
+
+    def test_corrupt_receipt_is_recovered_without_exception(self) -> None:
+        body = b"barcode,price\n123,1000\n"
+        digest = hashlib.sha256(body).hexdigest()
+        receipt = Path(ensure_runtime_layout()["receipts"]) / f"{digest}.json"
+        receipt.write_text("{broken", encoding="utf-8")
+        status, payload = upload_local_file("wb-report.csv", body, "text/csv")
+        self.assertEqual(status, 201)
+        self.assertEqual(payload["sha256"], digest)
+        json.loads(receipt.read_text(encoding="utf-8"))
 
     def test_wb_analysis_uses_uploaded_cost_table_dashboard_and_recommendations(self) -> None:
         cost_status, cost_payload = save_cost_table(
@@ -116,6 +147,7 @@ class LocalPilotOneClickTests(unittest.TestCase):
         status, analysis = analyze_uploaded_report(upload_payload["sha256"], self.analysis_settings())
         self.assertEqual(status, 200)
         self.assertEqual(analysis["status"], "analyzed")
+        self.assertTrue(analysis["confirmed_calculation"])
         self.assertEqual(analysis["dashboard"]["rows_calculated"], 2)
         self.assertEqual(analysis["dashboard"]["rows_blocked"], 0)
         self.assertEqual(analysis["dashboard"]["negative_items"], 1)
@@ -123,6 +155,19 @@ class LocalPilotOneClickTests(unittest.TestCase):
         self.assertEqual(analysis["rows"][0]["recommendation"], "PROMOTE_CANDIDATE")
         self.assertEqual(analysis["rows"][1]["recommendation"], "STOP_LOSS_REVIEW")
         self.assertFalse(analysis["marketplace_write_enabled"])
+
+    def test_partial_analysis_is_blocked_and_unconfirmed(self) -> None:
+        rows = [
+            {"article": "A-1", "quantity": "1", "sale_price": "1000"},
+            {"article": "", "quantity": "1", "sale_price": "1000"},
+        ]
+        settings = self.analysis_settings() | {"product_cost": "400"}
+        status, analysis = analyze_wb_rows(rows, settings)
+        self.assertEqual(status, 400)
+        self.assertEqual(analysis["status"], "blocked")
+        self.assertFalse(analysis["confirmed_calculation"])
+        self.assertEqual(analysis["partial_results_status"], "UNCONFIRMED_PARTIAL_PREVIEW")
+        self.assertEqual(analysis["dashboard"]["rows_blocked"], 1)
 
     def test_wb_analysis_blocks_missing_required_settings(self) -> None:
         report = "article,quantity,sale_price\nA-1,1,1000\n".encode()
@@ -133,7 +178,15 @@ class LocalPilotOneClickTests(unittest.TestCase):
         self.assertEqual(analysis["reason"], "missing_required_settings")
         self.assertTrue(analysis["no_hidden_defaults"])
 
-    def test_xlsx_export_is_real_zip_package(self) -> None:
+    def test_tax_rate_above_100_is_blocked(self) -> None:
+        settings = self.analysis_settings() | {"product_cost": "400", "tax_rate_percent": "101"}
+        status, analysis = analyze_wb_rows(
+            [{"article": "A-1", "quantity": "1", "sale_price": "1000"}], settings
+        )
+        self.assertEqual(status, 400)
+        self.assertEqual(analysis["reason"], "percent_out_of_range:tax_rate_percent")
+
+    def test_xlsx_export_is_real_zip_package_and_requires_evidence(self) -> None:
         analysis = {
             "status": "analyzed",
             "dashboard": {"rows_calculated": 1, "net_profit": "335.00"},
@@ -145,17 +198,65 @@ class LocalPilotOneClickTests(unittest.TestCase):
         self.assertIn("xl/workbook.xml", names)
         self.assertIn("xl/worksheets/sheet1.xml", names)
 
-        status, payload = save_analysis_export(analysis)
-        self.assertEqual(status, 201)
+        forged_status, forged = save_analysis_export(analysis)
+        self.assertEqual(forged_status, 400)
+        self.assertEqual(forged["reason"], "analysis_evidence_id_required")
+
+        report = "article,quantity,sale_price\nA-1,1,1000\n".encode()
+        _, upload = upload_local_file("wb.csv", report, "text/csv")
+        status, verified = analyze_uploaded_report(
+            upload["sha256"], self.analysis_settings() | {"product_cost": "400"}
+        )
+        self.assertEqual(status, 200)
+        export_status, payload = save_analysis_export(verified["analysis_sha256"])
+        self.assertEqual(export_status, 201)
         self.assertEqual(payload["status"], "exported")
         self.assertTrue(Path(payload["path"]).exists())
 
-    def test_health_declares_ready_capabilities(self) -> None:
+    def test_tampered_evidence_cannot_be_exported(self) -> None:
+        report = "article,quantity,sale_price\nA-1,1,1000\n".encode()
+        _, upload = upload_local_file("wb.csv", report, "text/csv")
+        status, analysis = analyze_uploaded_report(
+            upload["sha256"], self.analysis_settings() | {"product_cost": "400"}
+        )
+        self.assertEqual(status, 200)
+        evidence = Path(ensure_runtime_layout()["evidence"]) / f"analysis-{analysis['analysis_sha256']}.json"
+        payload = json.loads(evidence.read_text(encoding="utf-8"))
+        payload["dashboard"]["net_profit"] = "999999.00"
+        evidence.write_text(json.dumps(payload), encoding="utf-8")
+        export_status, result = save_analysis_export(analysis["analysis_sha256"])
+        self.assertEqual(export_status, 409)
+        self.assertEqual(result["reason"], "analysis_evidence_integrity_failed")
+
+    def test_health_declares_scoped_ready_capabilities(self) -> None:
         health = local_pilot_health()
         self.assertEqual(health["status"], "READY")
+        self.assertEqual(health["scope_status"], "LOCAL_PILOT_READY")
+        self.assertEqual(health["release_status"], "RELEASE_BLOCKED")
         self.assertIn("dashboard", health["ready_capabilities"])
         self.assertIn("xlsx_export", health["ready_capabilities"])
         self.assertFalse(health["marketplace_write_enabled"])
+
+    def test_loopback_only_and_occupied_port_fallback(self) -> None:
+        with self.assertRaises(ValueError):
+            validate_loopback_host("0.0.0.0")
+        self.assertEqual(validate_loopback_host("127.0.0.1"), "127.0.0.1")
+        blocker = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        blocker.bind(("127.0.0.1", 0))
+        blocker.listen(1)
+        occupied = blocker.getsockname()[1]
+        try:
+            server, actual = create_local_server("127.0.0.1", occupied, attempts=3)
+            try:
+                self.assertEqual(actual, occupied + 1)
+            finally:
+                server.server_close()
+        finally:
+            blocker.close()
+
+    def test_negative_content_length_is_rejected(self) -> None:
+        with self.assertRaises(ValueError):
+            parse_content_length("-1")
 
     def test_http_smoke_upload_cost_table_analyze_export_and_calculate(self) -> None:
         server = ThreadingHTTPServer(("127.0.0.1", 0), LocalPilotHandler)
@@ -169,6 +270,7 @@ class LocalPilotOneClickTests(unittest.TestCase):
             self.assertEqual(health.status, 200)
             health_payload = json.loads(health.read())
             self.assertEqual(health_payload["status"], "READY")
+            self.assertEqual(health_payload["release_status"], "RELEASE_BLOCKED")
             self.assertFalse(health_payload["marketplace_write_enabled"])
 
             conn.request("POST", "/api/local-pilot/cost-table?filename=costs.csv", body=b"article,product_cost\nA-1,400\n")
@@ -198,7 +300,7 @@ class LocalPilotOneClickTests(unittest.TestCase):
             conn.request(
                 "POST",
                 "/api/local-pilot/export",
-                body=json.dumps(analysis).encode("utf-8"),
+                body=json.dumps({"analysis_sha256": analysis["analysis_sha256"]}).encode("utf-8"),
                 headers={"Content-Type": "application/json"},
             )
             exported = conn.getresponse()
