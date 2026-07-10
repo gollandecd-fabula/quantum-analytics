@@ -1,0 +1,75 @@
+name: Windows Release Gate
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Git ref to build'
+        required: true
+        default: 'fix/quantum-one-click-stable-release'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-2022
+    timeout-minutes: 25
+    steps:
+      - name: Checkout selected ref
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Run tests
+        shell: pwsh
+        run: |
+          $env:PYTHONPATH = 'src'
+          python -m quantum.scripts.ci
+
+      - name: Install admitted release packager
+        shell: pwsh
+        run: |
+          $lockFile = 'requirements\windows-release-packager.txt'
+          if (-not (Test-Path $lockFile)) { throw 'missing admitted release packager lock file' }
+          python -m pip install --require-hashes --only-binary :all: -r $lockFile
+
+      - name: Build executable
+        shell: pwsh
+        run: |
+          python -m PyInstaller --clean --noconfirm --onefile --name Quantum_WB_Release --paths src scripts/quantum_windows_exe_entry.py
+          if (-not (Test-Path 'dist\Quantum_WB_Release.exe')) { throw 'missing executable' }
+
+      - name: Smoke test executable
+        shell: pwsh
+        run: |
+          $env:QUANTUM_NO_BROWSER = '1'
+          $env:QUANTUM_PORT = '8099'
+          $env:QUANTUM_RUNTIME_DIR = Join-Path $env:RUNNER_TEMP 'quantum-runtime'
+          $p = Start-Process -FilePath 'dist\Quantum_WB_Release.exe' -PassThru
+          try {
+            $ok = $false
+            for ($i = 0; $i -lt 40; $i++) {
+              try {
+                $r = Invoke-WebRequest -UseBasicParsing 'http://127.0.0.1:8099/api/local-pilot/health'
+                if ($r.StatusCode -eq 200 -and $r.Content -like '*READY*') { $ok = $true; break }
+              } catch {
+                Start-Sleep -Seconds 1
+              }
+            }
+            if (-not $ok) { throw 'health check failed' }
+          } finally {
+            if (-not $p.HasExited) { Stop-Process -Id $p.Id -Force }
+          }
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Quantum_WB_RELEASE_EXE
+          path: dist/Quantum_WB_Release.exe
+          if-no-files-found: error
