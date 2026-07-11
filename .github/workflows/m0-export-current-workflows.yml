@@ -1,0 +1,27 @@
+name: M0 Export Current Workflow Sources
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    if: github.head_ref == 'automation/m0-reconciliation-v4'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Export exact workflow sources
+        uses: actions/upload-artifact@v4
+        with:
+          name: m0-current-workflow-sources-${{ github.event.pull_request.head.sha }}
+          path: |
+            .github/workflows/windows-local-production.yml
+            .github/workflows/build-one-button-redteam-r3.yml
+          if-no-files-found: error
+          retention-days: 7
