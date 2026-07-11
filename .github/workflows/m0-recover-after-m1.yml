@@ -1,0 +1,64 @@
+name: M0 Recover After M1 Red Team
+
+on:
+  push:
+    branches:
+      - fix/quantum-one-click-stable-release
+    paths:
+      - "tools/m0_recover_after_m1.py"
+      - ".github/workflows/m0-recover-after-m1.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: m0-recover-after-m1
+  cancel-in-progress: false
+
+jobs:
+  recover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout exact recovery branch
+        uses: actions/checkout@v4
+        with:
+          ref: fix/quantum-one-click-stable-release
+          fetch-depth: 0
+
+      - name: Assert exact recovery anchor
+        shell: bash
+        run: |
+          test "$(git rev-parse HEAD)" = "${{ github.sha }}"
+          test "$(git rev-parse HEAD)" = "d2e82e68eaa282ee5e873fe26be8ec7567cad5e1"
+
+      - name: Apply exact-anchor recovery and remove temporary files
+        shell: bash
+        run: python tools/m0_recover_after_m1.py
+
+      - name: Run recovery and repository tests
+        shell: bash
+        env:
+          PYTHONPATH: src
+          PYTHONUTF8: "1"
+          PYTHONDONTWRITEBYTECODE: "1"
+        run: |
+          python -m unittest tests.test_m0_recovery_after_m1 -v
+          python -m unittest tests.test_a0_manifest_diagnostic tests.test_b1a_artifact_manifest -v
+          python -m quantum.scripts.ci
+
+      - name: Verify recovery scope and publish clean commit
+        shell: bash
+        run: |
+          test ! -e tools/m0_recover_after_m1.py
+          test ! -e .github/workflows/m0-recover-after-m1.yml
+          git status --short
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Recovery produced no changes."
+            exit 1
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "M0 recovery: persist config and restore truthful gates"
+          git push origin HEAD:fix/quantum-one-click-stable-release
