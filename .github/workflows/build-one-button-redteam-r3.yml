@@ -10,7 +10,7 @@ on:
       - "scripts/ci/native_one_button_r37.ps1"
       - "src/**"
       - "requirements/windows-home-local.txt"
-      - "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R40.json"
+      - "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R41.json"
   pull_request:
     paths:
       - ".github/workflows/build-one-button-redteam-r3.yml"
@@ -18,7 +18,7 @@ on:
       - "scripts/ci/native_one_button_r37.ps1"
       - "src/**"
       - "requirements/windows-home-local.txt"
-      - "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R40.json"
+      - "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R41.json"
 
 permissions:
   contents: read
@@ -51,6 +51,7 @@ jobs:
             $_ | Out-String | Tee-Object -FilePath native-one-button-r37.log -Append
             throw
           }
+          exit 0
 
       - name: Upload native Red Team diagnostics
         if: failure()
