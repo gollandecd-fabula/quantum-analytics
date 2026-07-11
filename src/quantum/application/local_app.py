@@ -242,9 +242,6 @@ def run_import(source_path: Path, root: Path | None = None) -> ImportRow:
         str(root / "data"),
         "-Output",
         str(output_path),
-        "-NonInteractive",
-        "-AuthorityAttested",
-        "-SchemaReviewed",
     ]
     config = _find_ready_config(root)
     if config is not None:
@@ -254,13 +251,12 @@ def run_import(source_path: Path, root: Path | None = None) -> ImportRow:
         command,
         cwd=str(root),
         text=True,
-        capture_output=True,
-        encoding="utf-8",
-        errors="replace",
+        capture_output=False,
         check=False,
+        creationflags=getattr(subprocess, "CREATE_NEW_CONSOLE", 0),
     )
-    row.stdout = completed.stdout or ""
-    row.stderr = completed.stderr or ""
+    row.stdout = "Interactive authorization and schema review were executed in the Quantum console."
+    row.stderr = ""
     report = _safe_json_load(output_path)
     row.report = report
     row.status, row.detected_format, row.raw_status, row.comment = summarize_report(
