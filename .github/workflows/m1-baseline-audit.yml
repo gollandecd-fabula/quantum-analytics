@@ -9,13 +9,13 @@ on:
       - "tools/m1_baseline_audit.py"
       - ".github/workflows/m1-baseline-audit.yml"
       - "tests/integration_manifest_support.py"
-      - "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R44.json"
+      - "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R45.json"
   pull_request:
     paths:
       - "tools/m1_baseline_audit.py"
       - ".github/workflows/m1-baseline-audit.yml"
       - "tests/integration_manifest_support.py"
-      - "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R44.json"
+      - "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R45.json"
 
 permissions:
   contents: read
@@ -32,7 +32,7 @@ env:
 
 jobs:
   manifest-reconcile:
-    name: Reconcile immutable manifest R44
+    name: Reconcile immutable manifest R45
     if: github.event_name == 'push' && github.ref_name == 'fix/quantum-one-click-stable-release'
     runs-on: ubuntu-latest
     timeout-minutes: 12
@@ -53,7 +53,7 @@ jobs:
           test "$(git rev-parse HEAD)" = "$TARGET_SHA"
           git cat-file -e "$BASELINE_SHA^{commit}"
 
-      - name: Generate immutable R44 overlay
+      - name: Generate immutable R45 overlay
         id: reconcile
         shell: bash
         run: |
@@ -66,8 +66,8 @@ jobs:
           root = Path.cwd()
           support_path = root / "tests/integration_manifest_support.py"
           support = support_path.read_text(encoding="utf-8")
-          old = "for n in range(1, 44)"
-          new = "for n in range(1, 45)"
+          old = "for n in range(1, 45)"
+          new = "for n in range(1, 46)"
           if old in support:
               support_path.write_text(support.replace(old, new, 1), encoding="utf-8")
           elif new not in support:
@@ -80,19 +80,19 @@ jobs:
               data = (root / path).read_bytes()
               return [path, hashlib.sha256(data).hexdigest(), len(data)]
 
-          r43 = (root / "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R43.json").read_bytes()
+          r44 = (root / "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R44.json").read_bytes()
           overlay = {
-              "base_pilot_integration_r43_overlay_git_blob_sha": git_blob_sha(r43),
+              "base_pilot_integration_r44_overlay_git_blob_sha": git_blob_sha(r44),
               "entries": [
                   entry(".github/workflows/m1-baseline-audit.yml"),
                   entry("tests/integration_manifest_support.py"),
               ],
               "hash_encoding": "sha256-hex",
-              "overlay_version": 44,
-              "reason": "MILESTONE 1 Windows baseline reproducibility: disable Git CRLF conversion before checkout so immutable manifest blob anchors remain byte-exact",
+              "overlay_version": 45,
+              "reason": "MILESTONE 1 reproduction semantics: preserve Native and production evidence after an expected baseline defect instead of skipping downstream scenarios",
               "remove_paths": [],
           }
-          target = root / "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R44.json"
+          target = root / "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R45.json"
           target.write_text(json.dumps(overlay, indent=2) + "\n", encoding="utf-8")
           PY
 
@@ -102,7 +102,7 @@ jobs:
 
           git add \
             tests/integration_manifest_support.py \
-            docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R44.json
+            docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R45.json
           if git diff --cached --quiet; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
             exit 0
@@ -110,7 +110,7 @@ jobs:
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "M1: register baseline audit manifest R44"
+          git commit -m "M1: register baseline audit manifest R45"
           git push origin HEAD:fix/quantum-one-click-stable-release
           echo "changed=true" >> "$GITHUB_OUTPUT"
 
@@ -202,6 +202,7 @@ jobs:
 
       - name: Reproduce production one-click, persistence, restart and UI path
         id: production
+        continue-on-error: true
         shell: pwsh
         run: |
           & .\scripts\ci\windows_local_production_r37.ps1 2>&1 |
@@ -209,6 +210,8 @@ jobs:
 
       - name: Reproduce native packaged Red Team path
         id: native
+        if: always()
+        continue-on-error: true
         shell: pwsh
         run: |
           & .\scripts\ci\native_one_button_r37.ps1 2>&1 |
@@ -233,6 +236,7 @@ jobs:
             ui_smoke_functional = $env:NATIVE_OUTCOME
             visual_browser_render = "NOT_EXECUTED"
             marketplace_write_enabled = $false
+            expected_baseline_defects_are_evidence = $true
           }
           [IO.File]::WriteAllText(
             "m1-artifacts\windows\m1-windows-e2e.json",
