@@ -1,0 +1,174 @@
+name: M1 Baseline and Reproduction Audit
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - fix/quantum-one-click-stable-release
+    paths:
+      - "tools/m1_baseline_audit.py"
+      - ".github/workflows/m1-baseline-audit.yml"
+  pull_request:
+    paths:
+      - "tools/m1_baseline_audit.py"
+      - ".github/workflows/m1-baseline-audit.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: m1-baseline-${{ github.event.pull_request.head.sha || github.sha }}
+  cancel-in-progress: false
+
+env:
+  BASELINE_SHA: 4c3449278d41a40d7ebb3bddcd9585347cc30586
+  TARGET_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+  PYTHONUTF8: "1"
+  PYTHONDONTWRITEBYTECODE: "1"
+
+jobs:
+  linux-baseline:
+    name: Linux baseline inventory
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Checkout exact head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TARGET_SHA }}
+          fetch-depth: 0
+
+      - name: Assert exact head
+        shell: bash
+        run: |
+          test "$(git rev-parse HEAD)" = "$TARGET_SHA"
+          git cat-file -e "$BASELINE_SHA^{commit}"
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run Linux functional inventory and baseline
+        shell: bash
+        run: |
+          python tools/m1_baseline_audit.py \
+            --platform-label linux \
+            --baseline-sha "$BASELINE_SHA" 2>&1 | tee m1-linux-console.log
+
+      - name: Upload Linux M1 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: M1-Baseline-Linux-${{ env.TARGET_SHA }}
+          path: |
+            m1-artifacts/linux/**
+            m1-linux-console.log
+          if-no-files-found: error
+          retention-days: 14
+
+  windows-baseline:
+    name: Windows baseline and one-click reproduction
+    runs-on: windows-latest
+    timeout-minutes: 55
+    steps:
+      - name: Checkout exact head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TARGET_SHA }}
+          fetch-depth: 0
+
+      - name: Assert exact head
+        shell: pwsh
+        run: |
+          $actual = (& git rev-parse HEAD).Trim()
+          if ($actual -ne $env:TARGET_SHA) {
+            throw "Exact-head mismatch: expected $env:TARGET_SHA, got $actual"
+          }
+          git cat-file -e "$env:BASELINE_SHA`^{commit}"
+          if ($LASTEXITCODE -ne 0) {
+            throw "Baseline commit is unavailable."
+          }
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run Windows functional inventory and baseline
+        shell: pwsh
+        run: |
+          python tools/m1_baseline_audit.py `
+            --platform-label windows `
+            --baseline-sha $env:BASELINE_SHA 2>&1 | Tee-Object m1-windows-console.log
+          if ($LASTEXITCODE -ne 0) {
+            throw "Windows baseline audit reported a hard failure."
+          }
+
+      - name: Reproduce production one-click, persistence, restart and UI path
+        id: production
+        shell: pwsh
+        run: |
+          & .\scripts\ci\windows_local_production_r37.ps1 2>&1 |
+            Tee-Object m1-windows-production.log
+
+      - name: Reproduce native packaged Red Team path
+        id: native
+        shell: pwsh
+        run: |
+          & .\scripts\ci\native_one_button_r37.ps1 2>&1 |
+            Tee-Object m1-windows-native.log
+
+      - name: Write Windows E2E evidence index
+        if: always()
+        shell: pwsh
+        env:
+          PRODUCTION_OUTCOME: ${{ steps.production.outcome }}
+          NATIVE_OUTCOME: ${{ steps.native.outcome }}
+        run: |
+          New-Item -ItemType Directory -Path m1-artifacts\windows -Force | Out-Null
+          $payload = [ordered]@{
+            baseline_sha = $env:BASELINE_SHA
+            exact_head = $env:TARGET_SHA
+            production_one_click = $env:PRODUCTION_OUTCOME
+            native_red_team = $env:NATIVE_OUTCOME
+            settings_persistence = $env:PRODUCTION_OUTCOME
+            restart = $env:PRODUCTION_OUTCOME
+            one_click_startup = $env:PRODUCTION_OUTCOME
+            ui_smoke_functional = $env:NATIVE_OUTCOME
+            visual_browser_render = "NOT_EXECUTED"
+            marketplace_write_enabled = $false
+          }
+          [IO.File]::WriteAllText(
+            "m1-artifacts\windows\m1-windows-e2e.json",
+            ($payload | ConvertTo-Json -Depth 8),
+            [Text.UTF8Encoding]::new($false)
+          )
+
+      - name: Upload Windows M1 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: M1-Baseline-Windows-${{ env.TARGET_SHA }}
+          path: |
+            m1-artifacts/windows/**
+            m1-windows-console.log
+            m1-windows-production.log
+            m1-windows-native.log
+            windows-repair-tests.log
+            existing-local-pilot-tests.log
+            windows-verification-error.log
+            tamper-rejection.log
+            configurator.log
+            installed-import.log
+            one-click-pilot.log
+            native-test-error.log
+            native-install-1.log
+            native-install-2.log
+            native-full.log
+            native-gui-path.log
+            contamination.log
+            repository-ci.log
+            dist/one-button-redteam-r3/**
+          if-no-files-found: warn
+          retention-days: 14
