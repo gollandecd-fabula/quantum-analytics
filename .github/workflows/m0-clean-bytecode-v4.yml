@@ -30,7 +30,6 @@ jobs:
           set -euo pipefail
           test "$(git branch --show-current)" = "automation/m0-reconciliation-v4"
           python - <<'PY'
-          from pathlib import Path
           import subprocess
           tracked = subprocess.check_output(["git", "ls-files", "-z"]).decode().split("\0")
           targets = [p for p in tracked if p and ("/__pycache__/" in f"/{p}" or p.endswith(".pyc"))]
@@ -42,15 +41,47 @@ jobs:
           git rm -f .github/workflows/m0-clean-bytecode-v4.yml
 
       - name: Re-run exact tests without writing bytecode
+        id: exact_tests
         shell: bash
         env:
           PYTHONDONTWRITEBYTECODE: "1"
         run: |
-          set -euo pipefail
-          PYTHONPATH=src python -B -m unittest -v tests.test_m0_attestation_redteam
-          PYTHONPATH=src python -B -m unittest discover -s tests -p 'test_*.py'
-          git diff --check
-          test -z "$(git ls-files | grep -E '(^|/)__pycache__/|\.pyc$' || true)"
+          set +e
+          {
+            PYTHONPATH=src python -B -m unittest -v tests.test_m0_attestation_redteam
+            first=$?
+            if [ "$first" -eq 0 ]; then
+              PYTHONPATH=src python -B -m unittest discover -s tests -p 'test_*.py'
+              second=$?
+            else
+              second=0
+            fi
+            git diff --check
+            third=$?
+            tracked_bytecode="$(git ls-files | grep -E '(^|/)__pycache__/|\.pyc$' || true)"
+            if [ -n "$tracked_bytecode" ]; then
+              echo "TRACKED_BYTECODE_REMAINS"
+              printf '%s\n' "$tracked_bytecode"
+              fourth=1
+            else
+              fourth=0
+            fi
+            exit_code=$(( first || second || third || fourth ))
+            echo "M0_CLEAN_EXIT_CODE=${exit_code}"
+            exit "$exit_code"
+          } > m0-clean-suite.log 2>&1
+          status=$?
+          tail -n 220 m0-clean-suite.log
+          exit "$status"
+
+      - name: Upload cleanup diagnostic
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: m0-clean-suite-diagnostic-${{ github.event.pull_request.head.sha }}
+          path: m0-clean-suite.log
+          if-no-files-found: error
+          retention-days: 7
 
       - name: Commit clean candidate
         shell: bash
