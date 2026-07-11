@@ -1,0 +1,24 @@
+{
+  "base_pilot_integration_r38_overlay_git_blob_sha": "ecf93756079b1a8d0a567d05474daecd31025113",
+  "entries": [
+    [
+      ".github/workflows/build-one-button-redteam-r3.yml",
+      "b94e20ad4990080a1d11d6f6ddccf377e3fbde245d3253e45a5b04c404f758f7",
+      2570
+    ],
+    [
+      ".github/workflows/windows-local-production.yml",
+      "d9e8bb67c0f4fc23bd797b471995b133c5bd4b673ceeffb15449229c4cdd4327",
+      3246
+    ],
+    [
+      "tests/integration_manifest_support.py",
+      "62b3279c34b9b43fff83c13670a9d163dda23d4d8fccc7d5fb5cda111a2b0889",
+      7845
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 39,
+  "reason": "MILESTONE 0 Windows runner correction: execute versioned production and native Red Team scripts directly in pwsh, matching the original workflow runtime, while retaining complete failure transcripts and exact-head binding",
+  "remove_paths": []
+}
