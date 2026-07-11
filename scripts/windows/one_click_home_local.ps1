@@ -305,7 +305,10 @@ $importArguments = @{
     Output = $outputPath
 }
 if ($File) { $importArguments["File"] = $File }
-if ($NonInteractive -or ($AuthorityAttested -and $SchemaReviewed)) {
+if ($NonInteractive) {
+    if (-not $AuthorityAttested -or -not $SchemaReviewed) {
+        throw "Non-interactive mode requires explicit AuthorityAttested and SchemaReviewed switches."
+    }
     $importArguments["NonInteractive"] = $true
 }
 if ($AuthorityAttested) { $importArguments["AuthorityAttested"] = $true }
@@ -313,11 +316,11 @@ if ($SchemaReviewed) { $importArguments["SchemaReviewed"] = $true }
 if ($SkipDefenderScan) { $importArguments["SkipDefenderScan"] = $true }
 
 Write-Host "[4/4] Select the authorized XLSX report." -ForegroundColor Cyan
-if ($AuthorityAttested -and $SchemaReviewed) {
-    Write-Host "One-click authorization is active. No AUTHORIZE or REVIEWED console input is required." -ForegroundColor Green
+if ($NonInteractive) {
+    Write-Host "Explicit non-interactive attestations were supplied by the invoking operator." -ForegroundColor Green
 }
 else {
-    Write-Host "Manual authorization confirmations are enabled for this advanced launch mode." -ForegroundColor Yellow
+    Write-Host "Quantum will require AUTHORIZE and REVIEWED confirmations; launchers never attest on your behalf." -ForegroundColor Yellow
 }
 & $importer @importArguments
 if (-not (Test-Path -LiteralPath $outputPath -PathType Leaf)) {
