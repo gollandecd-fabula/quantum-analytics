@@ -44,12 +44,32 @@ jobs:
           test ! -e tools/m0_finalize_r36.py
           test ! -e .github/workflows/m0-finalize-r36.yml
 
-      - name: Commit clean R36 candidate
+      - name: Commit and publish clean R36 candidate with exact lease
         shell: bash
+        env:
+          EXPECTED_HEAD: ${{ github.event.pull_request.head.sha }}
         run: |
-          set -euo pipefail
-          git config user.name "quantum-m0-redteam-bot"
-          git config user.email "quantum-m0-redteam-bot@users.noreply.github.com"
-          git add -A
-          git commit -m "M0: register explicit equivalent-scan contract in immutable R36"
-          git push origin HEAD:automation/m0-reconciliation-v4
+          set -o pipefail
+          log="$RUNNER_TEMP/m0-r36-publish.log"
+          {
+            set -euo pipefail
+            test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
+            git config user.name "quantum-m0-redteam-bot"
+            git config user.email "quantum-m0-redteam-bot@users.noreply.github.com"
+            git status --short
+            git add -A
+            git diff --cached --stat
+            git commit -m "M0: register explicit equivalent-scan contract in immutable R36"
+            git push \
+              --force-with-lease=refs/heads/automation/m0-reconciliation-v4:"$EXPECTED_HEAD" \
+              origin HEAD:automation/m0-reconciliation-v4
+          } 2>&1 | tee "$log"
+
+      - name: Upload R36 publication diagnostic
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: m0-r36-publication-${{ github.event.pull_request.head.sha }}
+          path: ${{ runner.temp }}/m0-r36-publish.log
+          if-no-files-found: warn
+          retention-days: 7
