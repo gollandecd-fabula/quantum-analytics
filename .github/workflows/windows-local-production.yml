@@ -61,9 +61,11 @@ jobs:
           TARGET_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: |
           powershell.exe -NoProfile -ExecutionPolicy Bypass `
-            -File .\scripts\ci\windows_local_production_r37.ps1
-          if ($LASTEXITCODE -ne 0) {
-            throw "Versioned Windows production gate failed with exit code $LASTEXITCODE"
+            -File .\scripts\ci\windows_local_production_r37.ps1 2>&1 |
+            Tee-Object -FilePath windows-production-r37.log
+          $gateExitCode = $LASTEXITCODE
+          if ($gateExitCode -ne 0) {
+            throw "Versioned Windows production gate failed with exit code $gateExitCode"
           }
 
       - name: Upload Windows production diagnostics
@@ -72,6 +74,7 @@ jobs:
         with:
           name: windows-local-production-r37-diagnostics
           path: |
+            windows-production-r37.log
             windows-repair-tests.log
             existing-local-pilot-tests.log
             windows-verification-error.log
