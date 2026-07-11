@@ -1,0 +1,74 @@
+name: M0 Finalize Reconciliation V4
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+concurrency:
+  group: m0-finalize-reconciliation-v4
+  cancel-in-progress: false
+
+jobs:
+  finalize:
+    if: github.head_ref == 'automation/m0-reconciliation-v4'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact candidate branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Assert exact candidate branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git branch --show-current)" = "automation/m0-reconciliation-v4"
+          git merge-base --is-ancestor 1edf62167253e56c1e7f81fd2d6911d4b599720a HEAD
+          git status --short
+
+      - name: Apply exact-anchor M0 finalizer
+        shell: bash
+        run: |
+          set -euo pipefail
+          python tools/m0_finalize_reconciliation_v4.py
+
+      - name: Compile and run targeted Red Team three times
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH=src python -m compileall -q src tests
+          for attempt in 1 2 3; do
+            echo "M0 Red Team attempt ${attempt}"
+            PYTHONPATH=src python -m unittest -v tests.test_m0_attestation_redteam
+          done
+
+      - name: Run complete repository test suite
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH=src python -m unittest discover -s tests -p 'test_*.py'
+
+      - name: Verify clean final scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --check
+          test ! -e tools/m0_finalize_reconciliation_v4.py
+          test ! -e .github/workflows/m0-finalize-reconciliation-v4.yml
+          git status --short
+
+      - name: Commit finalized candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "quantum-m0-redteam-bot"
+          git config user.email "quantum-m0-redteam-bot@users.noreply.github.com"
+          git add -A
+          git commit -m "M0: reconcile HOME_LOCAL with fail-closed attestations"
+          git push origin HEAD:automation/m0-reconciliation-v4
