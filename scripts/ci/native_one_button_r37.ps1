@@ -152,3 +152,6 @@ $out="dist\one-button-redteam-r3";$r=Get-Content "$out\result.json" -Raw|Convert
 $qa=[ordered]@{source_commit=$r.source_commit;status="NATIVE_WINDOWS_REDTEAM_PASS";native_install_runs=2;repair_preservation="PASS";contamination_rejection="PASS";full_xlsx_workflow="PASS";gui_selected_file_path="PASS";operator_attestation_boundary="PASS";explicit_ci_equivalent_scan="PASS";python_hash_and_signature="PASS";repository_ci="PASS";normal_defender_scan_enabled=$true;release_state="RELEASE_BLOCKED";archive_sha256=$r.sha256;archive_size_bytes=$r.size_bytes}
 [IO.File]::WriteAllText("$out\qa.json",($qa|ConvertTo-Json),[Text.UTF8Encoding]::new($false))
 }
+
+# Explicit script contract: successful completion resets the process exit code.
+exit 0

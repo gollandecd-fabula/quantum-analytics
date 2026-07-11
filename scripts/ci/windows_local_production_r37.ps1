@@ -309,3 +309,6 @@ if ($null -ne $pilotReport.calculation) {
   throw "One-click ADMISSION_ONLY unexpectedly produced a calculation."
 }
 }
+
+# Explicit script contract: successful completion resets the process exit code.
+exit 0

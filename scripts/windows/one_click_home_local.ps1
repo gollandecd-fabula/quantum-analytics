@@ -275,6 +275,34 @@ if (-not [string]::IsNullOrWhiteSpace($Config)) {
     if (-not (Test-ReadyConfig -Path $Config)) {
         throw "The supplied configuration is not ready: $Config"
     }
+
+    $managedConfig = Join-Path $TargetRoot "config\default-home-local.json"
+    if (-not (Test-PathWithin -Child $Config -Parent $TargetRoot)) {
+        $managedConfigDirectory = Split-Path -Parent $managedConfig
+        New-Item -ItemType Directory -Path $managedConfigDirectory -Force | Out-Null
+        if (Test-Path -LiteralPath $managedConfig -PathType Leaf) {
+            $sourceHash = (Get-FileHash -LiteralPath $Config -Algorithm SHA256).Hash
+            $managedHash = (Get-FileHash -LiteralPath $managedConfig -Algorithm SHA256).Hash
+            if ($sourceHash -ne $managedHash) {
+                throw "The supplied configuration conflicts with the existing managed configuration: $managedConfig"
+            }
+        }
+        else {
+            $temporaryConfig = Join-Path $managedConfigDirectory (".default-home-local.{0}.tmp" -f [guid]::NewGuid().ToString("N"))
+            try {
+                Copy-Item -LiteralPath $Config -Destination $temporaryConfig -Force
+                if (-not (Test-ReadyConfig -Path $temporaryConfig)) {
+                    throw "The copied configuration is not ready: $temporaryConfig"
+                }
+                Move-Item -LiteralPath $temporaryConfig -Destination $managedConfig -Force
+            }
+            finally {
+                Remove-Item -LiteralPath $temporaryConfig -Force -ErrorAction SilentlyContinue
+            }
+        }
+        $Config = Resolve-FullPath -Path $managedConfig -MustExist
+        Write-Host "[3/4] Supplied configuration persisted inside HOME_LOCAL: $Config" -ForegroundColor Green
+    }
 }
 else {
     $Config = Find-ReadyConfig -Root $TargetRoot
