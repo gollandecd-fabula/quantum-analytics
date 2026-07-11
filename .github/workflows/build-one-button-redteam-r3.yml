@@ -10,7 +10,7 @@ on:
       - "scripts/ci/native_one_button_r37.ps1"
       - "src/**"
       - "requirements/windows-home-local.txt"
-      - "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R37.json"
+      - "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R39.json"
   pull_request:
     paths:
       - ".github/workflows/build-one-button-redteam-r3.yml"
@@ -18,7 +18,7 @@ on:
       - "scripts/ci/native_one_button_r37.ps1"
       - "src/**"
       - "requirements/windows-home-local.txt"
-      - "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R37.json"
+      - "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R39.json"
 
 permissions:
   contents: read
@@ -43,10 +43,11 @@ jobs:
         env:
           TARGET_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: |
-          powershell.exe -NoProfile -ExecutionPolicy Bypass `
-            -File .\scripts\ci\native_one_button_r37.ps1
-          if ($LASTEXITCODE -ne 0) {
-            throw "Versioned native one-button Red Team gate failed with exit code $LASTEXITCODE"
+          & .\scripts\ci\native_one_button_r37.ps1 2>&1 |
+            Tee-Object -FilePath native-one-button-r37.log
+          $gateExitCode = $LASTEXITCODE
+          if ($gateExitCode -ne 0) {
+            throw "Versioned native one-button Red Team gate failed with exit code $gateExitCode"
           }
 
       - name: Upload native Red Team diagnostics
@@ -55,6 +56,7 @@ jobs:
         with:
           name: Quantum-One-Button-R37-Failure
           path: |
+            native-one-button-r37.log
             native-test-error.log
             native-install-1.log
             native-install-2.log
