@@ -41,7 +41,9 @@ jobs:
 
       - name: Apply exact-anchor recovery and remove temporary files
         shell: bash
-        run: python tools/m0_recover_after_m1.py
+        run: |
+          python tools/m0_recover_after_m1.py
+          git add -A
 
       - name: Run recovery and repository tests
         shell: bash
@@ -75,7 +77,6 @@ jobs:
           test ! -e tools/m0_recover_after_m1.py
           test ! -e .github/workflows/m0-recover-after-m1.yml
           git status --short
-          git add -A
           if git diff --cached --quiet; then
             echo "Recovery produced no changes."
             exit 1
