@@ -4,14 +4,17 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 # === Assert exact head ===
+& {
 $expected = "$env:TARGET_SHA"
 $actual = (& git rev-parse HEAD).Trim()
 if ($actual -ne $expected) {
   throw "Exact-head checkout failed. Expected $expected, got $actual"
 }
 Write-Host "Validated exact head: $actual"
+}
 
 # === Install hash-pinned Windows timezone data ===
+& {
 python -m pip install `
   --disable-pip-version-check `
   --no-deps `
@@ -22,15 +25,19 @@ if ($LASTEXITCODE -ne 0) {
   throw "Pinned Windows dependency installation failed with exit code $LASTEXITCODE"
 }
 python -c "from zoneinfo import ZoneInfo; assert str(ZoneInfo('Europe/Moscow')) == 'Europe/Moscow'"
+}
 
 # === Compile repaired runner ===
+& {
 $env:PYTHONPATH = "src"
 python -m py_compile `
   src/quantum/pilot/local_runner.py `
   src/quantum/pilot/windows_runner.py `
   src/quantum/pilot/windows_storage_compat.py
+}
 
 # === Run Windows red-team regression suite ===
+& {
 $env:PYTHONPATH = "src"
 python -m unittest `
   tests.test_windows_local_runner `
@@ -42,16 +49,20 @@ python -m unittest `
 if ($LASTEXITCODE -ne 0) {
   throw "Windows red-team regression suite failed with exit code $LASTEXITCODE"
 }
+}
 
 # === Re-run existing local pilot tests ===
+& {
 $env:PYTHONPATH = "src"
 python -m unittest tests.test_local_pilot_runner -v 2>&1 |
   Tee-Object -FilePath existing-local-pilot-tests.log
 if ($LASTEXITCODE -ne 0) {
   throw "Existing local pilot tests failed with exit code $LASTEXITCODE"
 }
+}
 
 # === Parse PowerShell scripts ===
+& {
 $files = @(
   "scripts/windows/import_source.ps1",
   "scripts/windows/install_home_local.ps1",
@@ -72,8 +83,10 @@ foreach ($file in $files) {
     throw "PowerShell parse failed: $file"
   }
 }
+}
 
 # === Build HOME_LOCAL package with Windows PowerShell ===
+& {
 powershell.exe -NoProfile -ExecutionPolicy Bypass `
   -File .\scripts\windows\build_local_production.ps1 2>&1 |
   Tee-Object -FilePath package-build.log
@@ -81,8 +94,10 @@ $buildExitCode = $LASTEXITCODE
 if ($buildExitCode -ne 0) {
   throw "Package build failed with exit code $buildExitCode"
 }
+}
 
 # === Verify archive, manifest, tamper rejection and user workflow ===
+& {
 $verificationErrorLog = "windows-verification-error.log"
 trap {
   $_ | Format-List * -Force | Out-String | Set-Content -LiteralPath $verificationErrorLog -Encoding UTF8
@@ -292,4 +307,5 @@ if ([string]$pilotReport.status -ne "ADMISSION_COMPLETE") {
 }
 if ($null -ne $pilotReport.calculation) {
   throw "One-click ADMISSION_ONLY unexpectedly produced a calculation."
+}
 }

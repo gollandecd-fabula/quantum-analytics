@@ -4,12 +4,15 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 # === Build base offline package ===
+& {
 $expected = "$env:TARGET_SHA"
 if ((& git rev-parse HEAD).Trim() -ne $expected) { throw "Exact-head checkout failed." }
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\windows\build_two_installer_bundles.ps1
 if ($LASTEXITCODE -ne 0) { throw "Base package build failed: $LASTEXITCODE" }
+}
 
 # === Assemble isolated one-button package ===
+& {
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 $sourceZip = "dist\installer-bundles-r2\2_QUANTUM_FULL_OFFLINE_INSTALLER.zip"
@@ -87,8 +90,10 @@ $manifest=[ordered]@{package="QUANTUM_ONE_BUTTON_REDTEAM_R3";source_commit="$env
 $archive="$out\QUANTUM_ONE_BUTTON_REDTEAM_R3.zip";Compress-Archive "$root\*" $archive -CompressionLevel Optimal
 $result=[ordered]@{source_commit=$manifest.source_commit;sha256=(Get-FileHash $archive -Algorithm SHA256).Hash.ToLowerInvariant();size_bytes=(Get-Item $archive).Length;python_sha256=$pythonHash;quantum_sha256=$quantumHash;release_state="RELEASE_BLOCKED";normal_defender_scan_enabled=$true}
 [IO.File]::WriteAllText("$out\result.json",($result|ConvertTo-Json),[Text.UTF8Encoding]::new($false))
+}
 
 # === Native install repair contamination and full XLSX tests ===
+& {
 $ErrorActionPreference="Stop"
 trap { $_ | Format-List * -Force | Out-String | Tee-Object native-test-error.log; exit 1 }
 $out="dist\one-button-redteam-r3";$extract=Join-Path $env:RUNNER_TEMP "q-test";Remove-Item $extract -Recurse -Force -ErrorAction SilentlyContinue;Expand-Archive "$out\QUANTUM_ONE_BUTTON_REDTEAM_R3.zip" $extract
@@ -114,8 +119,10 @@ $guiReports=@(Get-ChildItem "$full\output" -Filter "pilot_*.json")
 if($guiReports.Count-ne($before+1)){throw "GUI-selected-file result count mismatch."}
 $guiResult=Get-Content ($guiReports|Sort-Object LastWriteTime -Descending|Select-Object -First 1).FullName -Raw|ConvertFrom-Json
 if($guiResult.status-ne"ADMISSION_COMPLETE"-or$null-ne$guiResult.calculation){throw "GUI-selected-file admission result invalid."}
+}
 
 # === Complete repository CI ===
+& {
 $ciRoot=Join-Path $env:RUNNER_TEMP "quantum-exact-head-ci"
 $ciLog=Join-Path $env:GITHUB_WORKSPACE "repository-ci.log"
 Remove-Item $ciRoot -Recurse -Force -ErrorAction SilentlyContinue
@@ -137,8 +144,11 @@ finally {
   Pop-Location -ErrorAction SilentlyContinue
   git worktree remove --force $ciRoot 2>$null
 }
+}
 
 # === Write QA evidence ===
+& {
 $out="dist\one-button-redteam-r3";$r=Get-Content "$out\result.json" -Raw|ConvertFrom-Json
 $qa=[ordered]@{source_commit=$r.source_commit;status="NATIVE_WINDOWS_REDTEAM_PASS";native_install_runs=2;repair_preservation="PASS";contamination_rejection="PASS";full_xlsx_workflow="PASS";gui_selected_file_path="PASS";operator_attestation_boundary="PASS";explicit_ci_equivalent_scan="PASS";python_hash_and_signature="PASS";repository_ci="PASS";normal_defender_scan_enabled=$true;release_state="RELEASE_BLOCKED";archive_sha256=$r.sha256;archive_size_bytes=$r.size_bytes}
 [IO.File]::WriteAllText("$out\qa.json",($qa|ConvertTo-Json),[Text.UTF8Encoding]::new($false))
+}
