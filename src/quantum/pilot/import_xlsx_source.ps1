@@ -234,10 +234,12 @@ function Resolve-ScanReceipt {
 function New-RuntimeConfig {
     param(
         [Parameter(Mandatory = $true)][string]$SourceConfig,
-        [Parameter(Mandatory = $true)][string]$MalwareEvidenceSha256
+        [Parameter(Mandatory = $true)][string]$MalwareEvidenceSha256,
+        [Parameter(Mandatory = $true)][string]$MalwareScanOutcome
     )
     $raw = Get-Content -LiteralPath $SourceConfig -Raw -Encoding UTF8 | ConvertFrom-Json
     $raw.malware_scan_evidence_sha256 = $MalwareEvidenceSha256
+    $raw | Add-Member -NotePropertyName malware_scan_outcome -NotePropertyValue $MalwareScanOutcome -Force
     return $raw
 }
 
@@ -287,7 +289,10 @@ $runtimeConfig = Join-Path ([IO.Path]::GetTempPath()) ("quantum-runtime-config-{
 $previewOutput = Join-Path ([IO.Path]::GetTempPath()) ("quantum-schema-preview-{0}.json" -f [guid]::NewGuid().ToString("N"))
 
 try {
-    $runtimeConfigObject = New-RuntimeConfig -SourceConfig $Config -MalwareEvidenceSha256 ([string]$scanReceipt.evidence_sha256)
+    $runtimeConfigObject = New-RuntimeConfig `
+        -SourceConfig $Config `
+        -MalwareEvidenceSha256 ([string]$scanReceipt.evidence_sha256) `
+        -MalwareScanOutcome ([string]$scanReceipt.receipt.outcome)
     $runtimeConfigJson = $runtimeConfigObject | ConvertTo-Json -Depth 16
     [IO.File]::WriteAllText($runtimeConfig, $runtimeConfigJson, ([System.Text.UTF8Encoding]::new($false)))
 
@@ -338,8 +343,9 @@ try {
     Write-Host "Columns: $($schema.column_count)"
     Write-Host "Data rows: $($schema.data_row_count)"
     Write-Host "Headers: $(@($schema.headers) -join ' | ')"
+    Write-Host "Configured reporting period: $($runtimeConfigObject.reporting_period_start) through $($runtimeConfigObject.reporting_period_end)"
     Write-Host "File SHA-256: $reviewedFileHash"
-    Confirm-Literal -Expected "REVIEWED" -Prompt "Review the displayed schema and type REVIEWED to continue" -AlreadyAttested ([bool]$SchemaReviewed)
+    Confirm-Literal -Expected "REVIEWED" -Prompt "Review the displayed schema and reporting period, then type REVIEWED to continue" -AlreadyAttested ([bool]$SchemaReviewed)
 
     $currentFileHash = (Get-FileHash -LiteralPath $File -Algorithm SHA256).Hash.ToLowerInvariant()
     if ($currentFileHash -ne $reviewedFileHash) {
