@@ -102,7 +102,7 @@ $startCommand = @'
 @echo off
 setlocal
 title Quantum HOME_LOCAL
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\one_click_home_local.ps1" -PackageRoot "%~dp0" -AuthorityAttested -SchemaReviewed
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\one_click_home_local.ps1" -PackageRoot "%~dp0"
 set "quantum_exit=%errorlevel%"
 if not "%quantum_exit%"=="0" pause
 exit /b %quantum_exit%
@@ -111,7 +111,7 @@ Set-Content -LiteralPath (Join-Path $stageRoot "START_QUANTUM.cmd") -Value $star
 
 $importCommand = @'
 @echo off
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\import_source.ps1" -AuthorityAttested -SchemaReviewed
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\import_source.ps1"
 if errorlevel 1 pause
 '@
 Set-Content -LiteralPath (Join-Path $stageRoot "IMPORT_XLSX.cmd") -Value $importCommand -Encoding ASCII
@@ -137,11 +137,11 @@ PRIMARY ACTION
 1. Extract the ZIP outside OneDrive, Dropbox, Google Drive and other synchronized folders.
 2. Double-click START_QUANTUM.cmd.
 3. On the first run, the same window verifies and installs the package, creates a safe ADMISSION_ONLY configuration when required, opens XLSX selection, performs the local scan and continues automatically.
-4. No AUTHORIZE or REVIEWED console input is required in the one-click launch path.
+4. Type AUTHORIZE to confirm lawful authority, then review the displayed schema and reporting period and type REVIEWED.
 5. After a successful run, Quantum opens the local dashboard/output directory.
 
 SAFETY
-- The one-click launchers carry explicit local authority and schema-review attestations. Use them only for reports you are lawfully authorized to process and have selected for review.
+- Launchers never attest on your behalf. Processing continues only after explicit AUTHORIZE and REVIEWED confirmations.
 - Microsoft Defender scanning remains enabled during normal use.
 - The installer verifies every packaged file against manifest.sha256.json before changing the installation.
 - Existing config, data and output directories are preserved.
@@ -152,7 +152,7 @@ SAFETY
 RECOVERY TOOLS
 - INSTALL_HOME_LOCAL.cmd - installation/repair only.
 - CONFIGURE_HOME_LOCAL.cmd - configuration only.
-- IMPORT_XLSX.cmd - authorized import only; no AUTHORIZE or REVIEWED console input is required.
+- IMPORT_XLSX.cmd - import with explicit AUTHORIZE and REVIEWED confirmations.
 
 DEFAULT INSTALLATION
 %LOCALAPPDATA%\QuantumLocalProduction
