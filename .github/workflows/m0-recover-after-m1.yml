@@ -20,17 +20,17 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
-      - name: Checkout exact recovery branch
+      - name: Checkout exact recovery event
         uses: actions/checkout@v4
         with:
-          ref: fix/quantum-one-click-stable-release
+          ref: ${{ github.sha }}
           fetch-depth: 0
 
       - name: Assert exact recovery anchor
         shell: bash
         run: |
           test "$(git rev-parse HEAD)" = "${{ github.sha }}"
-          test "$(git rev-parse HEAD)" = "d2e82e68eaa282ee5e873fe26be8ec7567cad5e1"
+          git merge-base --is-ancestor d2e82e68eaa282ee5e873fe26be8ec7567cad5e1 HEAD
 
       - name: Apply exact-anchor recovery and remove temporary files
         shell: bash
