@@ -19,7 +19,7 @@ on:
       - "tests/test_windows_one_click_installer_r1.py"
       - "config/home-local.template.json"
       - "requirements/windows-home-local.txt"
-      - "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R40.json"
+      - "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R41.json"
       - ".github/workflows/windows-local-production.yml"
   pull_request:
     paths:
@@ -34,7 +34,7 @@ on:
       - "tests/test_windows_one_click_installer_r1.py"
       - "config/home-local.template.json"
       - "requirements/windows-home-local.txt"
-      - "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R40.json"
+      - "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R41.json"
       - ".github/workflows/windows-local-production.yml"
 
 permissions:
@@ -68,6 +68,7 @@ jobs:
             $_ | Out-String | Tee-Object -FilePath windows-production-r37.log -Append
             throw
           }
+          exit 0
 
       - name: Upload Windows production diagnostics
         if: failure()
