@@ -10,7 +10,7 @@ on:
       - "scripts/windows/import_source.ps1"
       - "scripts/windows/one_click_home_local.ps1"
       - "tests/test_windows_source_package_launchers_r1.py"
-      - "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R33.json"
+      - "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R35.json"
   pull_request:
     paths:
       - ".github/workflows/windows-source-package-launchers-r1.yml"
@@ -18,7 +18,7 @@ on:
       - "scripts/windows/import_source.ps1"
       - "scripts/windows/one_click_home_local.ps1"
       - "tests/test_windows_source_package_launchers_r1.py"
-      - "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R33.json"
+      - "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R35.json"
 
 permissions:
   contents: read
@@ -64,17 +64,26 @@ jobs:
           $import = Get-Content -LiteralPath (Join-Path $extract "IMPORT_XLSX.cmd") -Raw
           $readme = Get-Content -LiteralPath (Join-Path $extract "README_FIRST.txt") -Raw
 
-          if ($start -notmatch '-PackageRoot\s+"%~dp0"\s+-AuthorityAttested\s+-SchemaReviewed') {
-            throw "Source START_QUANTUM.cmd does not propagate attestations."
+          if ($start -notmatch '-PackageRoot\s+"%~dp0"') {
+            throw "Source START_QUANTUM.cmd does not preserve the package-root launch contract."
           }
-          if ($import -notmatch 'import_source\.ps1"\s+-AuthorityAttested\s+-SchemaReviewed') {
-            throw "Source IMPORT_XLSX.cmd does not propagate attestations."
+          if ($start -match '-AuthorityAttested|-SchemaReviewed') {
+            throw "Source START_QUANTUM.cmd must not attest for the operator."
           }
-          if ($readme -notmatch 'No AUTHORIZE or REVIEWED console input is required') {
-            throw "Source README does not describe the one-click behavior."
+          if ($import -match '-AuthorityAttested|-SchemaReviewed') {
+            throw "Source IMPORT_XLSX.cmd must not attest for the operator."
           }
-          if ($readme -match 'Type AUTHORIZE only|Type REVIEWED only') {
-            throw "Source README still contains obsolete manual prompt instructions."
+          if ($readme -notmatch 'Type AUTHORIZE') {
+            throw "Source README does not require explicit authority confirmation."
+          }
+          if ($readme -notmatch 'type REVIEWED') {
+            throw "Source README does not require explicit schema and reporting-period review."
+          }
+          if ($readme -notmatch 'Launchers never attest on your behalf') {
+            throw "Source README does not describe the fail-closed launcher boundary."
+          }
+          if ($readme -match 'No AUTHORIZE or REVIEWED console input is required') {
+            throw "Source README still claims automatic operator attestations."
           }
           if ($readme -notmatch 'Microsoft Defender scanning remains enabled') {
             throw "Source README does not preserve Defender safety."
