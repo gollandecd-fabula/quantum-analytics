@@ -107,11 +107,11 @@ $config = [ordered]@{
     retention_deadline = "${RetentionDeadline}T00:00:00Z"
     malware_scan_evidence_sha256 = "0000000000000000000000000000000000000000000000000000000000000000"
     attestations = [ordered]@{
-        source_authority_verified = $true
-        report_period_verified = $true
-        control_totals_verified = $true
-        direct_identifiers_absent_or_approved = $true
-        malware_scan_clean = $true
+        source_authority_verified = $false
+        report_period_verified = $false
+        control_totals_verified = $false
+        direct_identifiers_absent_or_approved = $false
+        malware_scan_clean = $false
     }
     inspection_policy = [ordered]@{
         policy_id = "wb-home-local-discovery"
