@@ -40,14 +40,16 @@ class WindowsOneClickInstallerR1Tests(unittest.TestCase):
 
     def test_one_click_attestations_are_explicit_and_defender_remains_enabled(self):
         script = self.one_click
-        self.assertIn(
+        self.assertNotIn(
             'if ($NonInteractive -or ($AuthorityAttested -and $SchemaReviewed))',
             script,
         )
+        self.assertIn('if ($NonInteractive)', script)
+        self.assertIn('-not $AuthorityAttested -or -not $SchemaReviewed', script)
         self.assertIn('if ($AuthorityAttested) { $importArguments["AuthorityAttested"] = $true }', script)
         self.assertIn('if ($SchemaReviewed) { $importArguments["SchemaReviewed"] = $true }', script)
         self.assertIn('if ($SkipDefenderScan) { $importArguments["SkipDefenderScan"] = $true }', script)
-        self.assertIn('No AUTHORIZE or REVIEWED console input is required.', script)
+        self.assertIn('launchers never attest on your behalf', script)
         self.assertNotIn('SkipDefenderScan = $true', script)
         self.assertNotIn('finance_request =', script)
 
@@ -108,8 +110,9 @@ class WindowsOneClickInstallerR1Tests(unittest.TestCase):
         self.assertIn('START_QUANTUM.cmd', script)
         self.assertIn('$sourceOneClick', script)
         self.assertIn('$oneClickTarget', script)
-        self.assertIn('-InstalledRoot "%~dp0" -SkipInstall -AuthorityAttested -SchemaReviewed', script)
-        self.assertIn('import_source.ps1" -AuthorityAttested -SchemaReviewed', script)
+        self.assertIn('-InstalledRoot "%~dp0" -SkipInstall', script)
+        self.assertNotIn('-InstalledRoot "%~dp0" -SkipInstall -AuthorityAttested', script)
+        self.assertNotIn('import_source.ps1" -AuthorityAttested', script)
         self.assertIn('New-QuantumShortcut', script)
         self.assertIn('Existing config, data and output directories were preserved.', script)
 

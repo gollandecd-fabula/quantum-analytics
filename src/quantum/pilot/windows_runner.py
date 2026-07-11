@@ -524,6 +524,7 @@ def main() -> int:
                 min_columns=args.min_header_columns,
             )
             config = apply_discovered_schema(config, candidate)
+            config["schema_reviewed"] = True
         else:
             candidate = None
         report = _engine.run_local_pilot(

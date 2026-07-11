@@ -14,6 +14,7 @@ from uuid import uuid4
 from quantum.access import TenantContext
 from quantum.finance import calculate
 from quantum.ingestion import (
+    AdmissionError,
     DatasetAdmissionState,
     DatasetControlEvidence,
     DatasetDeclaration,
@@ -356,9 +357,9 @@ def run_local_pilot(
         config.get("attestations"), "LOCAL_PILOT_ATTESTATIONS_INVALID"
     )
     if set(attestations) != _REQUIRED_ATTESTATIONS or any(
-        attestations[name] is not True for name in _REQUIRED_ATTESTATIONS
+        not isinstance(attestations[name], bool) for name in _REQUIRED_ATTESTATIONS
     ):
-        raise LocalPilotError("LOCAL_PILOT_ATTESTATIONS_INCOMPLETE")
+        raise LocalPilotError("LOCAL_PILOT_ATTESTATIONS_INVALID")
     inspection = record.inspection
     assert inspection is not None
     verified_at = now + timedelta(seconds=2)
@@ -380,11 +381,23 @@ def run_local_pilot(
         matched_schema_authority_reference=(
             inspection.matched_schema_authority_reference or ""
         ),
-        source_authority_verified=True,
-        report_period_verified=True,
-        control_totals_verified=True,
-        direct_identifiers_absent_or_approved=True,
-        malware_scan_clean=True,
+        source_authority_verified=(config.get("lawful_authority_attested") is True),
+        report_period_verified=(
+            config.get("schema_reviewed") is True
+            or attestations["report_period_verified"] is True
+        ),
+        control_totals_verified=(
+            declaration.control_totals_sha256 is None
+            or attestations["control_totals_verified"] is True
+        ),
+        direct_identifiers_absent_or_approved=(inspection.prohibited_header_count == 0),
+        malware_scan_clean=(
+            config.get("malware_scan_outcome") == "CLEAN"
+            or (
+                config.get("malware_scan_outcome") is None
+                and attestations["malware_scan_clean"] is True
+            )
+        ),
         malware_scan_evidence_sha256=_required_sha(
             config.get("malware_scan_evidence_sha256"),
             "LOCAL_PILOT_MALWARE_EVIDENCE_INVALID",
@@ -411,13 +424,23 @@ def run_local_pilot(
         storage_environment=StorageEnvironment.LOCAL_SINGLE_USER,
         loopback_only=True,
     )
-    record = registry.admit(
-        tenant=tenant,
-        dataset_id=dataset_id,
-        dataset_control_evidence=dataset_evidence,
-        storage_evidence=storage_evidence,
-        admitted_at=now + timedelta(seconds=3),
-    )
+    try:
+        record = registry.admit(
+            tenant=tenant,
+            dataset_id=dataset_id,
+            dataset_control_evidence=dataset_evidence,
+            storage_evidence=storage_evidence,
+            admitted_at=now + timedelta(seconds=3),
+        )
+    except AdmissionError as exc:
+        report = _base_report(
+            dataset_id=dataset_id, receipt=receipt, record=record,
+            policy=policy, zone_state="QUARANTINED",
+        )
+        report["status"] = "ADMISSION_BLOCKED"
+        report["reason"] = str(exc)
+        report["limitations"] = ["CALCULATION_NOT_EXECUTED", "CONTROL_EVIDENCE_INCOMPLETE"]
+        return report
     if record.state is not DatasetAdmissionState.ADMITTED:
         report = _base_report(
             dataset_id=dataset_id, receipt=receipt, record=record,
@@ -449,6 +472,7 @@ def run_local_pilot(
             "PILOT_READY_NOT_ASSERTED",
             "FINANCE_CALCULATION_NOT_REQUESTED",
             "FINANCE_CONFIGURATION_REQUIRED",
+            *(["CONTROL_TOTALS_NOT_PROVIDED"] if declaration.control_totals_sha256 is None else []),
             "DURABLE_AUTHENTICATION_NOT_INCLUDED",
             "BACKUP_RESTORE_TEST_NOT_INCLUDED",
             "DELETION_REHEARSAL_NOT_INCLUDED",

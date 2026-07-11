@@ -9,25 +9,27 @@ BUILDER = (ROOT / "scripts" / "windows" / "build_local_production.ps1").read_tex
 
 
 class WindowsSourcePackageLaunchersR1Tests(unittest.TestCase):
-    def test_source_start_launcher_propagates_attestations(self):
-        self.assertIn(
+    def test_source_start_launcher_never_attests_for_operator(self):
+        self.assertIn('-PackageRoot "%~dp0"', BUILDER)
+        self.assertNotIn(
             '-PackageRoot "%~dp0" -AuthorityAttested -SchemaReviewed',
             BUILDER,
         )
 
-    def test_source_import_launcher_propagates_attestations(self):
-        self.assertIn(
+    def test_source_import_launcher_never_attests_for_operator(self):
+        self.assertNotIn(
             'import_source.ps1" -AuthorityAttested -SchemaReviewed',
             BUILDER,
         )
 
-    def test_source_readme_matches_one_click_behavior(self):
-        self.assertIn(
+    def test_source_readme_matches_fail_closed_one_click_behavior(self):
+        self.assertNotIn(
             'No AUTHORIZE or REVIEWED console input is required',
             BUILDER,
         )
-        self.assertNotIn('Type AUTHORIZE only', BUILDER)
-        self.assertNotIn('Type REVIEWED only', BUILDER)
+        self.assertIn('Type AUTHORIZE', BUILDER)
+        self.assertIn('type REVIEWED', BUILDER)
+        self.assertIn('Launchers never attest on your behalf', BUILDER)
         self.assertIn('Microsoft Defender scanning remains enabled', BUILDER)
         self.assertIn('Marketplace writes', BUILDER)
 
