@@ -192,7 +192,7 @@ try {
     $stagedImportCommand = Join-Path $fileStageRoot "IMPORT_XLSX.cmd"
     @'
 @echo off
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\import_source.ps1" -AuthorityAttested -SchemaReviewed
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\import_source.ps1"
 if errorlevel 1 pause
 '@ | Set-Content -LiteralPath $stagedImportCommand -Encoding ASCII
 
@@ -207,7 +207,7 @@ if errorlevel 1 pause
     @'
 @echo off
 setlocal
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\one_click_home_local.ps1" -InstalledRoot "%~dp0" -SkipInstall -AuthorityAttested -SchemaReviewed
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\one_click_home_local.ps1" -InstalledRoot "%~dp0" -SkipInstall
 set "quantum_exit=%errorlevel%"
 if not "%quantum_exit%"=="0" pause
 exit /b %quantum_exit%
