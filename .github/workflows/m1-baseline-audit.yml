@@ -9,13 +9,13 @@ on:
       - "tools/m1_baseline_audit.py"
       - ".github/workflows/m1-baseline-audit.yml"
       - "tests/integration_manifest_support.py"
-      - "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R42.json"
+      - "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R43.json"
   pull_request:
     paths:
       - "tools/m1_baseline_audit.py"
       - ".github/workflows/m1-baseline-audit.yml"
       - "tests/integration_manifest_support.py"
-      - "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R42.json"
+      - "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R43.json"
 
 permissions:
   contents: read
@@ -32,7 +32,7 @@ env:
 
 jobs:
   manifest-reconcile:
-    name: Reconcile immutable manifest R42
+    name: Reconcile immutable manifest R43
     if: github.event_name == 'push' && github.ref_name == 'fix/quantum-one-click-stable-release'
     runs-on: ubuntu-latest
     timeout-minutes: 12
@@ -53,7 +53,7 @@ jobs:
           test "$(git rev-parse HEAD)" = "$TARGET_SHA"
           git cat-file -e "$BASELINE_SHA^{commit}"
 
-      - name: Generate immutable R42 overlay
+      - name: Generate immutable R43 overlay
         id: reconcile
         shell: bash
         run: |
@@ -61,14 +61,13 @@ jobs:
           from __future__ import annotations
           import hashlib
           import json
-          import os
           from pathlib import Path
 
           root = Path.cwd()
           support_path = root / "tests/integration_manifest_support.py"
           support = support_path.read_text(encoding="utf-8")
-          old = "for n in range(1, 42)"
-          new = "for n in range(1, 43)"
+          old = "for n in range(1, 43)"
+          new = "for n in range(1, 44)"
           if old in support:
               support_path.write_text(support.replace(old, new, 1), encoding="utf-8")
           elif new not in support:
@@ -81,20 +80,19 @@ jobs:
               data = (root / path).read_bytes()
               return [path, hashlib.sha256(data).hexdigest(), len(data)]
 
-          r41 = (root / "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R41.json").read_bytes()
+          r42 = (root / "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R42.json").read_bytes()
           overlay = {
-              "base_pilot_integration_r41_overlay_git_blob_sha": git_blob_sha(r41),
+              "base_pilot_integration_r42_overlay_git_blob_sha": git_blob_sha(r42),
               "entries": [
                   entry(".github/workflows/m1-baseline-audit.yml"),
                   entry("tests/integration_manifest_support.py"),
-                  entry("tools/m1_baseline_audit.py"),
               ],
               "hash_encoding": "sha256-hex",
-              "overlay_version": 42,
-              "reason": "MILESTONE 1 reproducible functional inventory and baseline audit; evidence-only workflow and audit script",
+              "overlay_version": 43,
+              "reason": "MILESTONE 1 orchestration correction: execute exact-head baseline jobs on PR events after push-only manifest reconciliation",
               "remove_paths": [],
           }
-          target = root / "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R42.json"
+          target = root / "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R43.json"
           target.write_text(json.dumps(overlay, indent=2) + "\n", encoding="utf-8")
           PY
 
@@ -104,7 +102,7 @@ jobs:
 
           git add \
             tests/integration_manifest_support.py \
-            docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R42.json
+            docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R43.json
           if git diff --cached --quiet; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
             exit 0
@@ -112,14 +110,14 @@ jobs:
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "M1: register baseline audit manifest R42"
+          git commit -m "M1: register baseline audit manifest R43"
           git push origin HEAD:fix/quantum-one-click-stable-release
           echo "changed=true" >> "$GITHUB_OUTPUT"
 
   linux-baseline:
     name: Linux baseline inventory
     needs: manifest-reconcile
-    if: needs.manifest-reconcile.outputs.changed == 'false'
+    if: ${{ always() && (github.event_name == 'pull_request' || needs.manifest-reconcile.outputs.changed == 'false') }}
     runs-on: ubuntu-latest
     timeout-minutes: 35
     steps:
@@ -161,7 +159,7 @@ jobs:
   windows-baseline:
     name: Windows baseline and one-click reproduction
     needs: manifest-reconcile
-    if: needs.manifest-reconcile.outputs.changed == 'false'
+    if: ${{ always() && (github.event_name == 'pull_request' || needs.manifest-reconcile.outputs.changed == 'false') }}
     runs-on: windows-latest
     timeout-minutes: 55
     steps:
