@@ -394,7 +394,8 @@ def run_local_pilot(
         malware_scan_clean=(
             config.get("malware_scan_outcome") == "CLEAN"
             or (
-                config.get("malware_scan_outcome") is None
+                config.get("malware_scan_outcome")
+                in {None, "SKIPPED_BY_EXPLICIT_SWITCH"}
                 and attestations["malware_scan_clean"] is True
             )
         ),

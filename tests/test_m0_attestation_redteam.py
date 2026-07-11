@@ -130,7 +130,12 @@ class M0AttestationRedTeamTests(unittest.TestCase):
                 archive.writestr(name, payload)
         return buffer.getvalue()
 
-    def run_admission(self, malware_outcome: str) -> dict:
+    def run_admission(
+        self,
+        malware_outcome: str,
+        *,
+        malware_attested: bool = False,
+    ) -> dict:
         import hashlib
         import tempfile
 
@@ -151,6 +156,7 @@ class M0AttestationRedTeamTests(unittest.TestCase):
             config["schema_reviewed"] = True
             config["malware_scan_evidence_sha256"] = hashlib.sha256(malware_outcome.encode()).hexdigest()
             config["malware_scan_outcome"] = malware_outcome
+            config["attestations"]["malware_scan_clean"] = malware_attested
             return run_local_pilot(file_path=source, config=config, storage_root=temp / "storage")
 
     def test_clean_scan_and_explicit_review_can_admit(self):
@@ -160,11 +166,27 @@ class M0AttestationRedTeamTests(unittest.TestCase):
         self.assertIn("CONTROL_TOTALS_NOT_PROVIDED", report["limitations"])
 
     def test_defender_unavailable_fallback_cannot_claim_clean_admission(self):
-        report = self.run_admission("DEFENDER_UNAVAILABLE_STRUCTURAL_FALLBACK")
+        report = self.run_admission(
+            "DEFENDER_UNAVAILABLE_STRUCTURAL_FALLBACK",
+            malware_attested=True,
+        )
         self.assertEqual(report["status"], "ADMISSION_BLOCKED")
         self.assertEqual(report["admission_state"], "VALIDATED")
         self.assertEqual(report["reason"], "DATASET_CONTROLS_INCOMPLETE")
         self.assertIn("CONTROL_EVIDENCE_INCOMPLETE", report["limitations"])
+
+    def test_explicit_equivalent_scan_attestation_can_admit(self):
+        report = self.run_admission(
+            "SKIPPED_BY_EXPLICIT_SWITCH",
+            malware_attested=True,
+        )
+        self.assertEqual(report["status"], "ADMISSION_COMPLETE")
+        self.assertEqual(report["admission_state"], "ADMITTED")
+
+    def test_skipped_scan_without_equivalent_attestation_is_blocked(self):
+        report = self.run_admission("SKIPPED_BY_EXPLICIT_SWITCH")
+        self.assertEqual(report["status"], "ADMISSION_BLOCKED")
+        self.assertEqual(report["admission_state"], "VALIDATED")
 
 
 if __name__ == "__main__":

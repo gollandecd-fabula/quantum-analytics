@@ -1,0 +1,24 @@
+{
+  "base_pilot_integration_r35_overlay_git_blob_sha": "bb94341c452df1dea1d59ec35d9d4a6e165899c9",
+  "entries": [
+    [
+      "src/quantum/pilot/local_runner.py",
+      "747a493aaa101e071c580154e8443b350135d27e0b1aa98277c0b31059cd6c21",
+      20659
+    ],
+    [
+      "tests/integration_manifest_support.py",
+      "2591ded17ad1ee871ddc55fb955b58640a26c6c23cf9609cb8d14cb989af93a4",
+      7845
+    ],
+    [
+      "tests/test_m0_attestation_redteam.py",
+      "b20a0cddf3b9fcbcda38c67e083516cf9761220450856809216e95437776003d",
+      10952
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 36,
+  "reason": "MILESTONE 0 runtime evidence contract: allow an explicitly attested equivalent malware scan only for SKIPPED_BY_EXPLICIT_SWITCH, while keeping Defender-unavailable fallback and unattested skips fail-closed",
+  "remove_paths": []
+}
