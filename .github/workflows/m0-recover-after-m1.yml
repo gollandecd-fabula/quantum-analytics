@@ -7,6 +7,10 @@ on:
     paths:
       - "tools/m0_recover_after_m1.py"
       - ".github/workflows/m0-recover-after-m1.yml"
+  pull_request:
+    paths:
+      - "tools/m0_recover_after_m1.py"
+      - ".github/workflows/m0-recover-after-m1.yml"
 
 permissions:
   contents: write
@@ -14,6 +18,9 @@ permissions:
 concurrency:
   group: m0-recover-after-m1
   cancel-in-progress: false
+
+env:
+  TARGET_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
 
 jobs:
   recover:
@@ -23,13 +30,13 @@ jobs:
       - name: Checkout exact recovery event
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.sha }}
+          ref: ${{ env.TARGET_SHA }}
           fetch-depth: 0
 
       - name: Assert exact recovery anchor
         shell: bash
         run: |
-          test "$(git rev-parse HEAD)" = "${{ github.sha }}"
+          test "$(git rev-parse HEAD)" = "$TARGET_SHA"
           git merge-base --is-ancestor d2e82e68eaa282ee5e873fe26be8ec7567cad5e1 HEAD
 
       - name: Apply exact-anchor recovery and remove temporary files
