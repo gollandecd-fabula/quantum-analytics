@@ -50,9 +50,24 @@ jobs:
           PYTHONUTF8: "1"
           PYTHONDONTWRITEBYTECODE: "1"
         run: |
-          python -m unittest tests.test_m0_recovery_after_m1 -v
-          python -m unittest tests.test_a0_manifest_diagnostic tests.test_b1a_artifact_manifest -v
-          python -m quantum.scripts.ci
+          set -o pipefail
+          python -m unittest tests.test_m0_recovery_after_m1 -v 2>&1 | tee m0-recovery-targeted.log
+          python -m unittest tests.test_a0_manifest_diagnostic tests.test_b1a_artifact_manifest -v 2>&1 | tee m0-recovery-manifest.log
+          python -m quantum.scripts.ci 2>&1 | tee m0-recovery-full-ci.log
+
+      - name: Upload recovery failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: M0-Recovery-After-M1-Failure-${{ env.TARGET_SHA }}
+          path: |
+            m0-recovery-targeted.log
+            m0-recovery-manifest.log
+            m0-recovery-full-ci.log
+            tests/test_m0_recovery_after_m1.py
+            docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R46.json
+          if-no-files-found: warn
+          retention-days: 7
 
       - name: Verify recovery scope and publish clean commit
         shell: bash
