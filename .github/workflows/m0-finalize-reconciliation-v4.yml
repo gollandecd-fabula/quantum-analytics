@@ -49,10 +49,24 @@ jobs:
           done
 
       - name: Run complete repository test suite
+        id: full_suite
         shell: bash
         run: |
-          set -euo pipefail
-          PYTHONPATH=src python -m unittest discover -s tests -p 'test_*.py'
+          set +e
+          PYTHONPATH=src python -m unittest discover -s tests -p 'test_*.py' > m0-full-suite.log 2>&1
+          status=$?
+          echo "exit_code=${status}" >> "$GITHUB_OUTPUT"
+          tail -n 160 m0-full-suite.log
+          exit "$status"
+
+      - name: Upload full-suite diagnostic
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: m0-full-suite-diagnostic-${{ github.event.pull_request.head.sha }}
+          path: m0-full-suite.log
+          if-no-files-found: error
+          retention-days: 7
 
       - name: Verify clean final scope
         shell: bash
