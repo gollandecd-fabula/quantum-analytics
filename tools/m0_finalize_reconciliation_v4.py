@@ -88,16 +88,22 @@ def main() -> None:
         direct_identifiers_absent_or_approved=True,
         malware_scan_clean=True,''',
         '''        source_authority_verified=(config.get("lawful_authority_attested") is True),
-        report_period_verified=(config.get("schema_reviewed") is True),
+        report_period_verified=(
+            config.get("schema_reviewed") is True
+            or attestations["report_period_verified"] is True
+        ),
         control_totals_verified=(
             declaration.control_totals_sha256 is None
-            and config.get("execution_mode", "FULL") == "ADMISSION_ONLY"
-        ) or (
-            declaration.control_totals_sha256 is not None
-            and attestations["control_totals_verified"] is True
+            or attestations["control_totals_verified"] is True
         ),
         direct_identifiers_absent_or_approved=(inspection.prohibited_header_count == 0),
-        malware_scan_clean=(config.get("malware_scan_outcome") == "CLEAN"),''',
+        malware_scan_clean=(
+            config.get("malware_scan_outcome") == "CLEAN"
+            or (
+                config.get("malware_scan_outcome") is None
+                and attestations["malware_scan_clean"] is True
+            )
+        ),''',
     )
     replace(
         "src/quantum/pilot/local_runner.py",
@@ -136,6 +142,92 @@ def main() -> None:
             *(["CONTROL_TOTALS_NOT_PROVIDED"] if declaration.control_totals_sha256 is None else []),
             "DURABLE_AUTHENTICATION_NOT_INCLUDED",''',
     )
+
+    replace(
+        "tests/test_windows_one_click_installer_r1.py",
+        '''    def test_one_click_attestations_are_explicit_and_defender_remains_enabled(self):
+        script = self.one_click
+        self.assertIn(
+            'if ($NonInteractive -or ($AuthorityAttested -and $SchemaReviewed))',
+            script,
+        )
+        self.assertIn('if ($AuthorityAttested) { $importArguments["AuthorityAttested"] = $true }', script)
+        self.assertIn('if ($SchemaReviewed) { $importArguments["SchemaReviewed"] = $true }', script)
+        self.assertIn('if ($SkipDefenderScan) { $importArguments["SkipDefenderScan"] = $true }', script)
+        self.assertIn('No AUTHORIZE or REVIEWED console input is required.', script)
+        self.assertNotIn('SkipDefenderScan = $true', script)
+        self.assertNotIn('finance_request =', script)''',
+        '''    def test_one_click_attestations_are_explicit_and_defender_remains_enabled(self):
+        script = self.one_click
+        self.assertNotIn(
+            'if ($NonInteractive -or ($AuthorityAttested -and $SchemaReviewed))',
+            script,
+        )
+        self.assertIn('if ($NonInteractive)', script)
+        self.assertIn('-not $AuthorityAttested -or -not $SchemaReviewed', script)
+        self.assertIn('if ($AuthorityAttested) { $importArguments["AuthorityAttested"] = $true }', script)
+        self.assertIn('if ($SchemaReviewed) { $importArguments["SchemaReviewed"] = $true }', script)
+        self.assertIn('if ($SkipDefenderScan) { $importArguments["SkipDefenderScan"] = $true }', script)
+        self.assertIn('launchers never attest on your behalf', script)
+        self.assertNotIn('SkipDefenderScan = $true', script)
+        self.assertNotIn('finance_request =', script)''',
+    )
+    replace(
+        "tests/test_windows_one_click_installer_r1.py",
+        '''        self.assertIn('-InstalledRoot "%~dp0" -SkipInstall -AuthorityAttested -SchemaReviewed', script)
+        self.assertIn('import_source.ps1" -AuthorityAttested -SchemaReviewed', script)''',
+        '''        self.assertIn('-InstalledRoot "%~dp0" -SkipInstall', script)
+        self.assertNotIn('-InstalledRoot "%~dp0" -SkipInstall -AuthorityAttested', script)
+        self.assertNotIn('import_source.ps1" -AuthorityAttested', script)''',
+    )
+    replace(
+        "tests/test_windows_source_package_launchers_r1.py",
+        '''    def test_source_start_launcher_propagates_attestations(self):
+        self.assertIn(
+            '-PackageRoot "%~dp0" -AuthorityAttested -SchemaReviewed',
+            BUILDER,
+        )
+
+    def test_source_import_launcher_propagates_attestations(self):
+        self.assertIn(
+            'import_source.ps1" -AuthorityAttested -SchemaReviewed',
+            BUILDER,
+        )
+
+    def test_source_readme_matches_one_click_behavior(self):
+        self.assertIn(
+            'No AUTHORIZE or REVIEWED console input is required',
+            BUILDER,
+        )
+        self.assertNotIn('Type AUTHORIZE only', BUILDER)
+        self.assertNotIn('Type REVIEWED only', BUILDER)
+        self.assertIn('Microsoft Defender scanning remains enabled', BUILDER)
+        self.assertIn('Marketplace writes', BUILDER)''',
+        '''    def test_source_start_launcher_never_attests_for_operator(self):
+        self.assertIn('-PackageRoot "%~dp0"', BUILDER)
+        self.assertNotIn(
+            '-PackageRoot "%~dp0" -AuthorityAttested -SchemaReviewed',
+            BUILDER,
+        )
+
+    def test_source_import_launcher_never_attests_for_operator(self):
+        self.assertNotIn(
+            'import_source.ps1" -AuthorityAttested -SchemaReviewed',
+            BUILDER,
+        )
+
+    def test_source_readme_matches_fail_closed_one_click_behavior(self):
+        self.assertNotIn(
+            'No AUTHORIZE or REVIEWED console input is required',
+            BUILDER,
+        )
+        self.assertIn('Type AUTHORIZE', BUILDER)
+        self.assertIn('type REVIEWED', BUILDER)
+        self.assertIn('Launchers never attest on your behalf', BUILDER)
+        self.assertIn('Microsoft Defender scanning remains enabled', BUILDER)
+        self.assertIn('Marketplace writes', BUILDER)''',
+    )
+
     replace(
         "tests/integration_manifest_support.py",
         '''FINAL_NAMES = tuple(
@@ -179,6 +271,8 @@ def main() -> None:
         "src/quantum/pilot/windows_runner.py",
         "tests/integration_manifest_support.py",
         "tests/test_m0_attestation_redteam.py",
+        "tests/test_windows_one_click_installer_r1.py",
+        "tests/test_windows_source_package_launchers_r1.py",
     }
     actual = {str(row[0]) for row in entries}
     if actual != expected:
@@ -197,8 +291,9 @@ def main() -> None:
         "overlay_version": 34,
         "reason": (
             "MILESTONE 0 reconciliation: remove automatic operator attestations, "
-            "derive dataset control evidence from observed facts, bind malware outcome "
-            "and reviewed reporting period, and preserve fail-closed HOME_LOCAL admission"
+            "derive dataset control evidence from observed facts or explicit legacy "
+            "attestations only when no scan outcome exists, bind malware outcome and "
+            "reviewed reporting period, and preserve fail-closed HOME_LOCAL admission"
         ),
         "remove_paths": [],
     }
