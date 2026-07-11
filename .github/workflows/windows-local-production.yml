@@ -19,7 +19,7 @@ on:
       - "tests/test_windows_one_click_installer_r1.py"
       - "config/home-local.template.json"
       - "requirements/windows-home-local.txt"
-      - "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R37.json"
+      - "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R39.json"
       - ".github/workflows/windows-local-production.yml"
   pull_request:
     paths:
@@ -34,7 +34,7 @@ on:
       - "tests/test_windows_one_click_installer_r1.py"
       - "config/home-local.template.json"
       - "requirements/windows-home-local.txt"
-      - "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R37.json"
+      - "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R39.json"
       - ".github/workflows/windows-local-production.yml"
 
 permissions:
@@ -60,8 +60,7 @@ jobs:
         env:
           TARGET_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: |
-          powershell.exe -NoProfile -ExecutionPolicy Bypass `
-            -File .\scripts\ci\windows_local_production_r37.ps1 2>&1 |
+          & .\scripts\ci\windows_local_production_r37.ps1 2>&1 |
             Tee-Object -FilePath windows-production-r37.log
           $gateExitCode = $LASTEXITCODE
           if ($gateExitCode -ne 0) {
