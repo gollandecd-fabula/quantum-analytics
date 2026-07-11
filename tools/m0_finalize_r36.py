@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Create immutable M0 overlay R36 for explicit equivalent-scan attestation."""
+"""Create immutable M0 overlay R36 for explicit equivalent-scan runtime evidence."""
 from __future__ import annotations
 
 import hashlib
@@ -61,35 +61,6 @@ def main() -> None:
                 and attestations["malware_scan_clean"] is True
             )
         ),''',
-    )
-
-    replace(
-        ".github/workflows/windows-local-production.yml",
-        '''          if ([string]$configured.execution_mode -ne "ADMISSION_ONLY") {
-            throw "Configurator did not create ADMISSION_ONLY config."
-          }
-
-          $syntheticXlsx''',
-        '''          if ([string]$configured.execution_mode -ne "ADMISSION_ONLY") {
-            throw "Configurator did not create ADMISSION_ONLY config."
-          }
-          $configured.attestations.malware_scan_clean = $true
-          $configuredJson = $configured | ConvertTo-Json -Depth 16
-          [IO.File]::WriteAllText(
-            $configPath,
-            $configuredJson,
-            ([Text.UTF8Encoding]::new($false))
-          )
-
-          $syntheticXlsx''',
-    )
-    replace(
-        ".github/workflows/windows-local-production.yml",
-        '''            -TargetRoot $oneClickInstall `
-            -File $syntheticXlsx `''',
-        '''            -TargetRoot $oneClickInstall `
-            -Config $configPath `
-            -File $syntheticXlsx `''',
     )
 
     replace(
@@ -161,7 +132,6 @@ def main() -> None:
     subprocess.run(["git", "rm", "-f", SELF, TEMP_WORKFLOW], cwd=ROOT, check=True)
 
     expected = {
-        ".github/workflows/windows-local-production.yml",
         "src/quantum/pilot/local_runner.py",
         "tests/integration_manifest_support.py",
         "tests/test_m0_attestation_redteam.py",
@@ -187,7 +157,7 @@ def main() -> None:
         "hash_encoding": "sha256-hex",
         "overlay_version": 36,
         "reason": (
-            "MILESTONE 0 Windows verification contract: allow an explicitly attested "
+            "MILESTONE 0 runtime evidence contract: allow an explicitly attested "
             "equivalent malware scan only for SKIPPED_BY_EXPLICIT_SWITCH, while keeping "
             "Defender-unavailable fallback and unattested skips fail-closed"
         ),
