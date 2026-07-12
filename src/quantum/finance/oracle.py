@@ -87,24 +87,33 @@ def reference_calculate(
         "product_cost_amount": cost,
         "other_expense_amount": other,
     }
-    tax = bases[case["tax_base_metric_id"]] * Decimal(case["tax_rate"])
-    profit = marketplace - cost - other - tax
+    tax_base = bases[case["tax_base_metric_id"]]
 
     def valid(value: Decimal) -> dict[str, str | None]:
         return {"state": "VALID", "value": _text(_q(value, scale, mode), scale)}
 
-    ppu = (
-        {"state": "BLOCKED", "value": None}
-        if net_units <= 0
-        else valid(profit / Decimal(net_units))
-    )
+    blocked = {"state": "BLOCKED", "value": None}
+    if tax_base < 0:
+        tax_result = blocked.copy()
+        profit_result = blocked.copy()
+        ppu = blocked.copy()
+    else:
+        tax = tax_base * Decimal(case["tax_rate"])
+        profit = marketplace - cost - other - tax
+        tax_result = valid(tax)
+        profit_result = valid(profit)
+        ppu = (
+            blocked.copy()
+            if net_units <= 0
+            else valid(profit / Decimal(net_units))
+        )
     return {
         "net_sold_units": {"state": "VALID", "value": str(net_units)},
         "product_cost_amount": valid(cost),
         "other_expense_amount": valid(other),
-        "tax_amount": valid(tax),
+        "tax_amount": tax_result,
         "net_marketplace_income_amount": valid(marketplace),
-        "net_profit_amount": valid(profit),
+        "net_profit_amount": profit_result,
         "profit_per_sold_unit": ppu,
-        "profitability_of_costs": {"state": "BLOCKED", "value": None},
+        "profitability_of_costs": blocked.copy(),
     }
