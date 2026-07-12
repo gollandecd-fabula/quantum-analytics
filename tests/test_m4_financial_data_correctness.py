@@ -164,6 +164,15 @@ def control_totals_sha(expected: dict[str, str]) -> str:
 
 
 class M4FinancialDataCorrectnessTests(unittest.TestCase):
+    def test_reconciliation_guard_is_installed_on_engine_module(self) -> None:
+        import quantum.pilot.local_runner as engine
+
+        self.assertTrue(engine._m4_reconciliation_guard_installed)
+        self.assertEqual(
+            "quantum.pilot.reconciliation_guard",
+            engine._reconcile.__module__,
+        )
+
     def test_full_financial_formula_and_return_treatment(self) -> None:
         calculation = calculate(request())
         results = calculation["results"]
