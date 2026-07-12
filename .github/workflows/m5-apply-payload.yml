@@ -1,0 +1,50 @@
+name: M5 Apply Payload
+
+on:
+  push:
+    branches:
+      - fix/quantum-one-click-stable-release
+    paths:
+      - .github/workflows/m5-apply-payload.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact staging head
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          git init .
+          git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git fetch --depth=1 origin "${GITHUB_SHA}"
+          git checkout -B fix/quantum-one-click-stable-release FETCH_HEAD
+      - name: Verify and apply M5 payload
+        run: |
+          set -euo pipefail
+          cat scripts/m5-payload-*.b64 | base64 -d > /tmp/m5-payload.zip
+          echo "396938c463de9c08cfe4bd68fab3ad3ace068e859c3941ac114ea2bc4e642db5  /tmp/m5-payload.zip" | sha256sum -c -
+          python3 - <<'PY'
+          from pathlib import Path
+          from zipfile import ZipFile
+          root = Path.cwd().resolve()
+          with ZipFile("/tmp/m5-payload.zip") as archive:
+              for info in archive.infolist():
+                  if info.is_dir():
+                      continue
+                  target = (root / info.filename).resolve()
+                  if root not in target.parents:
+                      raise SystemExit(f"unsafe payload path: {info.filename}")
+              archive.extractall(root)
+          PY
+          rm -f scripts/m5-payload-*.b64
+          rm -f .github/workflows/m5-apply-payload.yml
+          git add -A
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "M5: deliver color Decision Center and graph quality"
+          git push origin HEAD:fix/quantum-one-click-stable-release
