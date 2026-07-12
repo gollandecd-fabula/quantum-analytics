@@ -16,7 +16,7 @@ function filteredRecommendations(){
 }
 function effectCell(label,effect){ const cell=el('div','effect-cell'); append(cell,el('span','effect-label',label),el('span','effect-value',effectText(effect))); return cell; }
 function recommendationCard(item){
-  const card=el('article','recommendation-card');
+  const card=el('article',`recommendation-card rec-${String(item.severity||'LOW').toLowerCase()}`);
   const head=el('div','rec-head'), badges=el('div','rec-badges'); append(badges,badge(item.severity,severityLabel(item)),badge(item.priority_dimension,priorityLabel(item)),badge(item.category,categoryLabel(item)));
   const detail=el('button','button button-quiet button-small','Подробнее'); detail.type='button'; detail.addEventListener('click',()=>openRecommendation(item,detail)); append(head,badges,detail);
   const foot=el('div','rec-foot'); append(foot,el('span','',`Уверенность: ${text(item.confidence_level||item.confidence?.state)}`),el('span','',`Evidence: ${(item.evidence_refs||[]).length}`));

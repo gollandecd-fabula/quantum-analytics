@@ -6,7 +6,7 @@ DASHBOARD_BODY = r"""
   <div class="topbar-inner">
     <div class="brand-row">
       <div class="brand">
-        <p class="eyebrow">HOME_LOCAL · OFFLINE</p>
+        <p class="eyebrow">HOME_LOCAL · OFFLINE · READ ONLY</p>
         <h1>Quantum Analytics</h1>
         <div class="brand-meta">
           <span id="header-dataset"></span>
@@ -16,12 +16,13 @@ DASHBOARD_BODY = r"""
         </div>
       </div>
       <div class="header-actions" aria-label="Действия отчёта">
+        <span class="header-state" id="decision-state">Проверка данных</span>
         <button class="button button-secondary" id="reload-button" type="button">Обновить</button>
         <button class="button button-secondary" id="print-button" type="button">Печать</button>
       </div>
     </div>
     <nav class="nav-tabs" aria-label="Разделы отчёта" role="tablist">
-      <button class="nav-tab" role="tab" aria-selected="true" aria-controls="view-overview" id="tab-overview" data-view="overview">Обзор</button>
+      <button class="nav-tab" role="tab" aria-selected="true" aria-controls="view-overview" id="tab-overview" data-view="overview">Центр решений</button>
       <button class="nav-tab" role="tab" aria-selected="false" aria-controls="view-recommendations" id="tab-recommendations" data-view="recommendations">Рекомендации <span class="nav-count" id="nav-rec-count">0</span></button>
       <button class="nav-tab" role="tab" aria-selected="false" aria-controls="view-metrics" id="tab-metrics" data-view="metrics">Метрики <span class="nav-count" id="nav-metric-count">0</span></button>
       <button class="nav-tab" role="tab" aria-selected="false" aria-controls="view-quality" id="tab-quality" data-view="quality">Качество и контроль</button>
@@ -30,27 +31,66 @@ DASHBOARD_BODY = r"""
 </header>
 <main id="dashboard-main" tabindex="-1">
   <section class="view" id="view-overview" role="tabpanel" aria-labelledby="tab-overview">
-    <div class="view-header"><div><h2>Управленческий обзор</h2><p>Ключевые результаты, финансовая структура и приоритетные действия.</p></div></div>
+    <div class="view-header" id="decision-center"><div><p class="section-kicker">ПРИБЫЛЬ → УСТОЙЧИВЫЙ РОСТ → ОБОРОТ</p><h2>Центр решений</h2><p>Сначала показаны проблемы с максимальным влиянием на результат. Quantum только рекомендует действия и не изменяет маркетплейс.</p></div></div>
+
+    <section class="decision-banner" id="decision-banner" aria-labelledby="decision-banner-title">
+      <div class="decision-banner-copy">
+        <p class="eyebrow">ГЛАВНЫЙ СИГНАЛ</p>
+        <h3 id="decision-banner-title">Проверка управленческого сигнала</h3>
+        <p id="decision-banner-text">Данные анализируются локально.</p>
+        <div class="decision-banner-badges" id="decision-banner-badges"></div>
+      </div>
+      <button class="button button-light" type="button" data-go-view="recommendations">Открыть все решения</button>
+    </section>
+
     <div class="grid kpi-grid" id="kpi-grid"></div>
+
     <div class="grid summary-grid">
-      <section class="panel" aria-labelledby="financial-title">
-        <div class="panel-header"><div><h3 id="financial-title">Финансовая структура</h3><p>Суммы из source bridge и governed calculation. Расходы не интерпретируются как положительный результат.</p></div></div>
-        <div class="chart-list" id="financial-chart"></div>
-        <div class="chart-legend"><span><i class="legend-dot chart-income"></i>Доход</span><span><i class="legend-dot chart-expense"></i>Расход</span><span><i class="legend-dot chart-result-negative"></i>Отрицательный результат</span></div>
-      </section>
-      <section class="panel" aria-labelledby="priority-title">
-        <div class="panel-header"><div><h3 id="priority-title">Приоритетные действия</h3><p>Наиболее срочные рекомендации текущего расчёта.</p></div><button class="button button-quiet button-small" type="button" data-go-view="recommendations">Все</button></div>
+      <section class="panel priority-panel" aria-labelledby="priority-title">
+        <div class="panel-header"><div><p class="panel-kicker">СЛЕДУЮЩИЕ ДЕЙСТВИЯ</p><h3 id="priority-title">Приоритетные решения</h3><p>Ранжирование по срочности; прогноз и evidence доступны в деталях.</p></div><button class="button button-quiet button-small" type="button" data-go-view="recommendations">Все решения</button></div>
         <div class="rec-summary" id="priority-actions"></div>
       </section>
+      <section class="panel readiness-panel" aria-labelledby="readiness-title">
+        <div class="panel-header"><div><p class="panel-kicker">НАДЁЖНОСТЬ</p><h3 id="readiness-title">Готовность решения</h3><p>Оценка полноты обязательных evidence-gates, а не качества бизнеса.</p></div></div>
+        <div id="decision-readiness" class="decision-readiness" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-labelledby="readiness-title decision-readiness-label">
+          <div class="readiness-ring"><strong id="decision-readiness-value">0%</strong><span>evidence</span></div>
+          <div class="readiness-copy"><div id="decision-readiness-label">Расчёт готовности</div><div class="progress-track" aria-hidden="true"><div class="progress-fill" id="decision-readiness-bar"></div></div><ul class="readiness-checks" id="decision-readiness-checks"></ul></div>
+        </div>
+      </section>
     </div>
+
+    <div class="grid insight-grid">
+      <section class="panel chart-panel chart-panel-wide" aria-labelledby="financial-title">
+        <div class="panel-header"><div><p class="panel-kicker">ФИНАНСОВЫЙ МОСТ</p><h3 id="financial-title">Влияние доходов и расходов</h3><p>Доходы расположены справа от нуля, расходы — слева. Длина полосы сравнима в общей шкале.</p></div></div>
+        <div class="diverging-scale" aria-hidden="true"><span>Расходы</span><span>0</span><span>Доходы</span></div>
+        <div class="chart-list" id="financial-chart"></div>
+        <div class="chart-legend"><span><i class="legend-dot chart-income"></i>Доход +</span><span><i class="legend-dot chart-expense"></i>Расход −</span><span><i class="legend-dot chart-result-positive"></i>Положительный результат</span><span><i class="legend-dot chart-result-negative"></i>Отрицательный результат</span></div>
+      </section>
+
+      <section class="panel chart-panel" aria-labelledby="cost-title">
+        <div class="panel-header"><div><p class="panel-kicker">СТРУКТУРА ЗАТРАТ</p><h3 id="cost-title">Из чего состоят расходы</h3><p>Доли рассчитаны только по доступным подтверждённым метрикам.</p></div></div>
+        <div id="cost-composition-chart" class="donut-layout"></div>
+      </section>
+
+      <section class="panel chart-panel" aria-labelledby="priority-chart-title">
+        <div class="panel-header"><div><p class="panel-kicker">ФОКУС РЕШЕНИЙ</p><h3 id="priority-chart-title">Рекомендации по целям</h3><p>Количество активных рекомендаций: прибыль, устойчивый рост и оборот.</p></div></div>
+        <div id="priority-chart" class="priority-chart" role="img" aria-label="Распределение рекомендаций по управленческим целям"></div>
+      </section>
+
+      <section class="panel chart-panel" aria-labelledby="history-title">
+        <div class="panel-header"><div><p class="panel-kicker">ДИНАМИКА</p><h3 id="history-title">История чистой прибыли</h3><p>График строится только при наличии минимум двух подтверждённых периодов.</p></div></div>
+        <div id="history-chart" class="history-chart"></div>
+      </section>
+    </div>
+
     <section class="panel" aria-labelledby="status-title">
-      <div class="panel-header"><div><h3 id="status-title">Состояние расчёта</h3><p>Admission, source bridge, reconciliation и публикационные ограничения.</p></div></div>
+      <div class="panel-header"><div><p class="panel-kicker">ТЕХНИЧЕСКИЙ КОНТУР</p><h3 id="status-title">Состояние расчёта</h3><p>Admission, source bridge, reconciliation и публикационные ограничения.</p></div></div>
       <div class="grid status-grid" id="overview-status"></div>
     </section>
   </section>
 
   <section class="view" id="view-recommendations" role="tabpanel" aria-labelledby="tab-recommendations" hidden>
-    <div class="view-header"><div><h2>Рекомендации</h2><p>Фильтрация, сортировка и детальный просмотр evidence/limitations.</p></div></div>
+    <div class="view-header"><div><h2>Рекомендации</h2><p>Фильтрация, сортировка и детальный просмотр evidence, confidence и ограничений.</p></div></div>
     <section class="panel" aria-label="Фильтры рекомендаций">
       <div class="filters">
         <div class="filter-field"><label for="rec-search">Поиск</label><input id="rec-search" type="search" autocomplete="off" placeholder="Действие, причина, evidence"></div>

@@ -12,7 +12,7 @@ from .dashboard_style import DASHBOARD_CSS
 from .local_bundle import validate_local_output_bundle
 
 
-INTERACTIVE_DASHBOARD_SCHEMA_VERSION = "quantum-interactive-dashboard-v1"
+INTERACTIVE_DASHBOARD_SCHEMA_VERSION = "quantum-interactive-dashboard-v2"
 
 
 def _embedded_json(value: Any) -> str:
