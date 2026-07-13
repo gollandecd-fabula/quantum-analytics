@@ -1,0 +1,8 @@
+{
+  "base_pilot_integration_r68_overlay_git_blob_sha": "1bacd9b99d31cd3affa83ea88c0b044c4940858c",
+  "entries": [],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 69,
+  "reason": "Hash-bound EXE native-test request protocol pending exact manifest diff registration",
+  "remove_paths": []
+}
