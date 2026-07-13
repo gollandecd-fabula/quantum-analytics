@@ -19,6 +19,11 @@ def self_test(root: Path, config: Path) -> dict[str, object]:
             "status": "FINANCE_CENTER_SELF_TEST_FAILED",
             "detail": type(exc).__name__,
         }
+    try:
+        from quantum.application.shortcut_repair import repair_legacy_shortcuts
+        shortcut_repair_available = callable(repair_legacy_shortcuts)
+    except Exception:
+        shortcut_repair_available = False
     return {
         "status": "DESKTOP_CENTER_SELF_TEST_PASS",
         "root_exists": root.resolve().is_dir(),
@@ -26,6 +31,7 @@ def self_test(root: Path, config: Path) -> dict[str, object]:
         "tkinter_available": version is not None,
         "tkinter_version": version,
         "finance_center": finance_center,
+        "shortcut_repair_available": shortcut_repair_available,
         "release_scope": "WB_ONLY",
         "marketplace_write_enabled": False,
     }
@@ -45,8 +51,10 @@ def main() -> int:
         print(json.dumps(self_test(args.root, args.config), ensure_ascii=False))
         return 0
 
+    from quantum.application.shortcut_repair import repair_legacy_shortcuts
     from quantum.application.local_runtime import main as finance_center_main
 
+    repair_legacy_shortcuts(args.root)
     return finance_center_main(root=args.root, config=args.config)
 
 
