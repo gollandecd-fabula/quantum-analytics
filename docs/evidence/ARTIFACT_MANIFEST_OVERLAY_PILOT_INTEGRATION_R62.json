@@ -1,0 +1,39 @@
+{
+  "base_pilot_integration_r61_overlay_git_blob_sha": "af2feef37565a4d83d7249ee7d016957361d3b6a",
+  "entries": [
+    [
+      ".github/workflows/m8-clean-environment-reproduction.yml",
+      "aeb6d8b40212cef8a6789646f4c5a57ff9b6a536a5597202118398e8f20e1ab1",
+      12209
+    ],
+    [
+      "docs/evidence/M8_CLEAN_ENVIRONMENT_REPRODUCTION.json",
+      "1604bc473a2816c2c31b2e9d3c674cfd3a9c1f3c1ff94ab5a46dc097dfac5df5",
+      3075
+    ],
+    [
+      "tests/integration_manifest_support_m8.py",
+      "e218a62de2a44f880869a0ba6b6d3832c1bf2108b80d2f4219f05904736c5c04",
+      1085
+    ],
+    [
+      "tests/test_b1a_artifact_manifest.py",
+      "4d507537b5427bd8d4b25d8b3e930189731cfe0a9ff9d7bd7b729c0bfdfbef1f",
+      1014
+    ],
+    [
+      "tests/test_m8_clean_environment_reproduction.py",
+      "c7045686092daba1a637748431dad615ae89ff58f5a9e87b48840cd9f7565222",
+      4347
+    ],
+    [
+      "tools/m8_clean_environment_reproduction.py",
+      "059c0cf87aaaccf74c85d3ba0ce719f716f4e1cea9e935003cf99304ac2cb526",
+      7864
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 62,
+  "reason": "MILESTONE 8 clean-environment reproduction: add two independent Linux exact-head runs, an explicitly isolated Windows profile and cache boundary, native one-button replay, fail-closed environment evidence, and append-only manifest coverage",
+  "remove_paths": []
+}
