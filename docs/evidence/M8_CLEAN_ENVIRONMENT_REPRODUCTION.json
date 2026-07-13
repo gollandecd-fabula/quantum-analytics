@@ -2,7 +2,20 @@
   "milestone": "M8",
   "title": "Clean Environment Reproduction",
   "baseline_head": "f9ed450a68d519e9d2c744234276d2ecc68da809",
-  "verdict": "PASS_LOCAL_PENDING_EXACT_HEAD_CI",
+  "verified_implementation_head": "19f0b0f8f458d5f28e2b93e9256a0127a7617b47",
+  "verdict": "PASS_WITH_LIMITATIONS",
+  "verification": {
+    "staging_m8_run": 29236811263,
+    "branch_m8_run": 29236964788,
+    "branch_m7_run": 29236964878,
+    "branch_m1_run": 29236964831,
+    "foundation_run": 29236964800,
+    "oss_admission_run": 29236964850,
+    "linux_artifact_id": 8273838765,
+    "linux_artifact_sha256": "cb422ff974266cc6cade5faafc5963fdc8f5f613c59a1263e3efc0b71eda66ef",
+    "windows_artifact_id": 8273860092,
+    "windows_artifact_sha256": "dd374b67f7198f70d3ba8b0b9ea9ea8c3100ff6879dbb6a2694728c825016707"
+  },
   "scope": {
     "linux_independent_checkouts": 2,
     "windows_ephemeral_profile": true,
@@ -18,43 +31,55 @@
     {
       "id": "M8-D001",
       "severity": "P1",
-      "status": "CLOSED_LOCAL_PENDING_EXACT_HEAD_CI",
+      "status": "CLOSED_VERIFIED",
       "finding": "No dedicated gate proved that the exact candidate could reproduce from clean checkouts without inherited repository artifacts.",
       "closure": "Added two independent Linux exact-head checkouts, fail-closed residue inspection and a complete repository CI run in each isolated home."
     },
     {
       "id": "M8-D002",
       "severity": "P1",
-      "status": "CLOSED_LOCAL_PENDING_EXACT_HEAD_CI",
+      "status": "CLOSED_VERIFIED",
       "finding": "Environment evidence did not explicitly reject user-site packages, external cache paths or pre-existing sandbox files.",
       "closure": "Added a standard-library preflight that requires isolated profile, temp and cache paths, disables user-site and bytecode writes, rejects generated checkout residue and emits machine-readable evidence."
     },
     {
       "id": "M8-D003",
       "severity": "P1",
-      "status": "CLOSED_LOCAL_PENDING_EXACT_HEAD_CI",
+      "status": "CLOSED_VERIFIED",
       "finding": "Windows reproduction relied on hosted-runner freshness without binding HOME, USERPROFILE, LOCALAPPDATA, APPDATA, TEMP, TMP and pip cache to one explicit clean-room root.",
       "closure": "The M8 Windows job now creates an empty ephemeral profile tree, binds every relevant path to it, installs the hash-locked Windows dependency without cache reuse and records preflight evidence."
     },
     {
       "id": "M8-D004",
       "severity": "P1",
-      "status": "CLOSED_LOCAL_PENDING_EXACT_HEAD_CI",
+      "status": "CLOSED_VERIFIED",
       "finding": "Clean-source reproduction and the native one-button Windows path were not enforced together by one milestone gate.",
       "closure": "The exact-head Windows clean-room job runs M8 contracts and the existing native one-button Red Team, which includes installer build, fresh install, repair, contamination rejection, complete XLSX path and full repository CI."
     },
     {
       "id": "M8-D005",
       "severity": "P1",
-      "status": "CLOSED_LOCAL_PENDING_EXACT_HEAD_CI",
+      "status": "CLOSED_VERIFIED",
       "finding": "A clean-environment result could be misattributed if checkout identity and post-run source immutability were not asserted.",
       "closure": "Every job asserts the event exact head; Linux runs require a clean checkout after CI, and Windows requires no tracked-file modification after native execution."
+    },
+    {
+      "id": "M8-D006",
+      "severity": "P2",
+      "status": "CLOSED_VERIFIED",
+      "finding": "The first clean-room orchestration treated expected compileall bytecode residue as source contamination, and its first cleanup revision used an invalid indented Bash heredoc.",
+      "closure": "The gate now removes only explicitly recognized generated residue through a syntax-validated command, then requires a clean Git status. Both defects were confined to the M8 workflow and did not change product runtime behavior."
     }
+  ],
+  "limitations": [
+    "Hosted clean runners are reproducible CI environments, not a physical end-user workstation certification.",
+    "Browser-render screenshot evidence is outside M8 scope.",
+    "Production release, marketplace writes and final scoring remain blocked."
   ],
   "open_reproduction_p0_p1": 0,
   "release_authorized": false,
   "marketplace_writes_authorized": false,
   "merge_to_main_authorized": false,
   "final_score_authorized": false,
-  "exact_head_ci_pending": true
+  "exact_head_ci_pending": false
 }
