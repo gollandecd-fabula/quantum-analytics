@@ -1,0 +1,49 @@
+{
+  "milestone": "M7",
+  "title": "Security, Performance and One-Click",
+  "baseline_head": "0972d02312bdee3aae3583dc6d9caf369622a57d",
+  "verdict": "PASS_LOCAL_PENDING_EXACT_HEAD_CI",
+  "defects": [
+    {
+      "id": "M7-D001",
+      "severity": "P1",
+      "status": "CLOSED_LOCAL_PENDING_EXACT_HEAD_CI",
+      "finding": "Security invariants were distributed across runtime, launchers and package scripts without one fail-closed M7 gate.",
+      "closure": "Added a repository audit that blocks implicit attestations, marketplace writes, shell=True, unapproved network-write primitives and missing package/Defender/path controls."
+    },
+    {
+      "id": "M7-D002",
+      "severity": "P1",
+      "status": "CLOSED_LOCAL_PENDING_EXACT_HEAD_CI",
+      "finding": "No candidate-versus-baseline performance comparison was pinned to the M6 exact head.",
+      "closure": "Added a median-based adapter normalization and registry-resolution probe against immutable M6 head 0972d02312bdee3aae3583dc6d9caf369622a57d with ratio and absolute-slack gates."
+    },
+    {
+      "id": "M7-D003",
+      "severity": "P1",
+      "status": "CLOSED_LOCAL_PENDING_EXACT_HEAD_CI",
+      "finding": "One-click security, error and reproducibility evidence was spread across earlier workflows rather than enforced by one M7 exact-head workflow.",
+      "closure": "Added a dedicated Windows M7 job that parses PowerShell, runs focused contracts and executes the existing native one-button Red Team on the exact PR head."
+    },
+    {
+      "id": "M7-D004",
+      "severity": "P2",
+      "status": "CLOSED_VERIFIED",
+      "finding": "User-facing one-click failures had no explicit regression contract for actionable messages.",
+      "closure": "The M7 audit requires concrete messages for missing Python, missing non-interactive source, invalid configuration, cancelled selection and missing result output."
+    },
+    {
+      "id": "M7-D005",
+      "severity": "P1",
+      "status": "CLOSED_LOCAL_PENDING_EXACT_HEAD_CI",
+      "finding": "A security or one-click gate could produce evidence for a commit other than the current PR head.",
+      "closure": "Every M7 job checks out and asserts the exact candidate SHA; the performance job separately asserts the immutable M6 baseline SHA."
+    }
+  ],
+  "open_security_p0_p1": 0,
+  "release_authorized": false,
+  "marketplace_writes_authorized": false,
+  "merge_to_main_authorized": false,
+  "final_score_authorized": false,
+  "recovery_head_pending": true
+}
