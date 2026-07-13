@@ -1,0 +1,8 @@
+{
+  "base_pilot_integration_r65_overlay_git_blob_sha": "6e9bb4102f5219da163725f802371f2e07d98641",
+  "entries": [],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 66,
+  "reason": "MILESTONE 9 WB-only performance gate compatibility correction pending exact manifest diff registration",
+  "remove_paths": []
+}
