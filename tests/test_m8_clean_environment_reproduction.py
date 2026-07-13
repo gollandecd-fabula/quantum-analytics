@@ -28,7 +28,7 @@ class M8CleanEnvironmentTests(unittest.TestCase):
             (root / "src" / "__pycache__").mkdir()
             (root / "src" / "__pycache__" / "module.pyc").write_bytes(b"cache")
             self.assertEqual(
-                m8.collect_repo_residue(root), ["src/__pycache__/" ]
+                m8.collect_repo_residue(root), ["src/__pycache__/"]
             )
 
     def test_environment_rejects_external_cache_and_profile_paths(self) -> None:
