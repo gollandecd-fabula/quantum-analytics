@@ -256,13 +256,18 @@ jobs:
             if ($process.ExitCode -ne 0) {
               throw "EXE native test failed with exit code $($process.ExitCode)."
             }
+            $deadline = (Get-Date).AddSeconds(120)
+            while (-not (Test-Path -LiteralPath $testResultPath -PathType Leaf) -and (Get-Date) -lt $deadline) {
+              Start-Sleep -Milliseconds 500
+            }
           }
           finally {
             Remove-Item Env:QUANTUM_EXE_TEST_ONLY -ErrorAction SilentlyContinue
             Remove-Item Env:QUANTUM_EXE_TEST_RESULT -ErrorAction SilentlyContinue
           }
           if (-not (Test-Path -LiteralPath $testResultPath -PathType Leaf)) {
-            throw "EXE native test result was not produced."
+            Get-Process | Where-Object { $_.ProcessName -match "iexpress|cmd|powershell" } | Select-Object ProcessName, Id | Format-Table | Out-String | Write-Host
+            throw "EXE native test result was not produced within 120 seconds."
           }
           $native = Get-Content -LiteralPath $testResultPath -Raw -Encoding UTF8 | ConvertFrom-Json
           if ([string]$native.status -ne "PASS") {
