@@ -7,11 +7,12 @@ on:
       - ".github/workflows/m7-security-performance-one-click.yml"
       - "docs/evidence/M7_*.json"
       - "docs/evidence/M7_*.md"
-      - "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R55.json"
+      - "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R*.json"
       - "tools/m7_security_performance_one_click.py"
       - "tests/integration_manifest_support_m7.py"
       - "tests/test_b1a_artifact_manifest.py"
       - "tests/test_m7_security_performance_one_click.py"
+      - "tests/test_m7_security_audit_precision.py"
       - "scripts/windows/**"
       - "scripts/ci/native_one_button_r37.ps1"
       - "src/quantum/**"
@@ -49,6 +50,7 @@ jobs:
         run: |
           python -m unittest \
             tests.test_m7_security_performance_one_click \
+            tests.test_m7_security_audit_precision \
             tests.test_b1a_artifact_manifest -v
 
       - name: Run fail-closed security and one-click audit
@@ -159,17 +161,13 @@ jobs:
             }
           }
 
-      - name: Run focused M7 and one-click contracts
+      - name: Run exact-head repository contracts
         shell: pwsh
         run: |
           $env:PYTHONPATH = (Resolve-Path "src").Path
-          python -m unittest `
-            tests.test_m7_security_performance_one_click `
-            tests.test_windows_one_click_installer_r1 `
-            tests.test_windows_redteam_hardening `
-            tests.test_m0_recovery_after_m1 -v
+          python -m quantum.scripts.ci
           if ($LASTEXITCODE -ne 0) {
-            throw "Focused M7 Windows contracts failed with exit code $LASTEXITCODE"
+            throw "M7 Windows repository contracts failed with exit code $LASTEXITCODE"
           }
 
       - name: Run native one-button exact-head Red Team
