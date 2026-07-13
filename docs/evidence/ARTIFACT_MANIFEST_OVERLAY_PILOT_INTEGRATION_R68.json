@@ -1,0 +1,8 @@
+{
+  "base_pilot_integration_r67_overlay_git_blob_sha": "78ca1e70eff485e63a6a16feba738a17e74bd640",
+  "entries": [],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 68,
+  "reason": "Windows EXE native-test synchronization correction pending exact manifest diff registration",
+  "remove_paths": []
+}
