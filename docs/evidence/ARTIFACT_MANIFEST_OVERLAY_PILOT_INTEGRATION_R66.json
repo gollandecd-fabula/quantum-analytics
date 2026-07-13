@@ -1,8 +1,29 @@
 {
   "base_pilot_integration_r65_overlay_git_blob_sha": "6e9bb4102f5219da163725f802371f2e07d98641",
-  "entries": [],
+  "entries": [
+    [
+      ".github/workflows/m7-security-performance-one-click.yml",
+      "16258179b602a57c558d848d34ab35ad4b66838fc27bec81ade006de4393fac7",
+      7309
+    ],
+    [
+      "tests/integration_manifest_support_m8.py",
+      "547cc51de2b1f19c9378263e5cbdb8c3a4ab9e31a9f778c0ba5133570c9aa2a2",
+      1085
+    ],
+    [
+      "tests/test_m7_security_performance_one_click.py",
+      "613b4aec352cb66018d1ab3d071e313b9d90a2ea544fb1b994aea23ed5f21233",
+      8428
+    ],
+    [
+      "tools/m9_wb_only_performance.py",
+      "35125cf1f1ccc380f88497b6f3fddf50e1c82ef1dd73724f220d1d71703f2984",
+      5818
+    ]
+  ],
   "hash_encoding": "sha256-hex",
   "overlay_version": 66,
-  "reason": "MILESTONE 9 WB-only performance gate compatibility correction pending exact manifest diff registration",
+  "reason": "MILESTONE 9 correction: replace the stale Ozon-resolving M7 performance workload with an exact-head WB-only comparison that exercises identical Wildberries registry operations on baseline and candidate while preserving all security, write and release blocks",
   "remove_paths": []
 }
