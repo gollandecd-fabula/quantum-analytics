@@ -26,6 +26,15 @@ class WindowsOneClickInstallerR1Tests(unittest.TestCase):
         self.assertIn('Double-click START_QUANTUM.cmd', self.builder)
         self.assertIn('package_version = "R3_ONE_CLICK"', self.builder)
 
+    def test_package_is_wb_only_and_excludes_ozon_payload(self):
+        self.assertIn('$deferredOzonAdapter', self.builder)
+        self.assertIn('src\\quantum\\adapters\\ozon', self.builder)
+        self.assertIn('Remove-Item -LiteralPath $deferredOzonAdapter -Recurse -Force', self.builder)
+        self.assertIn('release_scope = "WB_ONLY"', self.builder)
+        self.assertIn('enabled_marketplaces = @("WILDBERRIES")', self.builder)
+        self.assertIn('deferred_marketplaces = @("OZON")', self.builder)
+        self.assertIn('This local release supports WILDBERRIES only.', self.builder)
+
     def test_one_click_sequence_installs_configures_and_imports(self):
         script = self.one_click
         install = script.index('& $installer -SourceRoot $PackageRoot -TargetRoot $TargetRoot')
