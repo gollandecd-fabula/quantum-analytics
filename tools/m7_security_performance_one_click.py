@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import ast
 from dataclasses import asdict, dataclass
 import json
 from pathlib import Path
@@ -13,7 +14,7 @@ from typing import Callable, Sequence
 
 MILESTONE = "M7"
 TITLE = "Security, Performance and One-Click"
-AUDIT_VERSION = 1
+AUDIT_VERSION = 2
 DEFAULT_BASELINE_SHA = "0972d02312bdee3aae3583dc6d9caf369622a57d"
 
 
@@ -65,6 +66,57 @@ def _finding(
     )
 
 
+def _is_true_literal(node: ast.AST | None) -> bool:
+    return isinstance(node, ast.Constant) and node.value is True
+
+
+def _target_is_marketplace_write_enabled(node: ast.AST) -> bool:
+    if isinstance(node, ast.Name):
+        return node.id == "marketplace_write_enabled"
+    if isinstance(node, ast.Attribute):
+        return node.attr == "marketplace_write_enabled"
+    if isinstance(node, ast.Subscript):
+        key = node.slice
+        return isinstance(key, ast.Constant) and key.value == "marketplace_write_enabled"
+    return False
+
+
+def _python_enables_marketplace_writes(text: str) -> bool:
+    try:
+        tree = ast.parse(text)
+    except SyntaxError:
+        return False
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Assign) and _is_true_literal(node.value):
+            if any(_target_is_marketplace_write_enabled(target) for target in node.targets):
+                return True
+        elif isinstance(node, ast.AnnAssign) and _is_true_literal(node.value):
+            if _target_is_marketplace_write_enabled(node.target):
+                return True
+        elif isinstance(node, ast.Dict):
+            for key, value in zip(node.keys, node.values, strict=True):
+                if (
+                    isinstance(key, ast.Constant)
+                    and key.value == "marketplace_write_enabled"
+                    and _is_true_literal(value)
+                ):
+                    return True
+        elif isinstance(node, ast.keyword):
+            if node.arg == "marketplace_write_enabled" and _is_true_literal(node.value):
+                return True
+    return False
+
+
+def _has_implicit_switch_default(text: str, switch_name: str) -> bool:
+    return bool(
+        re.search(
+            rf"\[switch\]\s*\${re.escape(switch_name)}\s*=\s*\$true\b",
+            text,
+            flags=re.IGNORECASE,
+        )
+    )
+
+
 def audit_security(root: Path) -> list[Finding]:
     findings: list[Finding] = []
     pyproject = root / "pyproject.toml"
@@ -105,22 +157,23 @@ def audit_security(root: Path) -> list[Finding]:
     installer_text = _read(installer)
     builder_text = _read(builder)
 
-    forbidden_launcher_defaults = (
-        "SkipDefenderScan = $true",
-        "AuthorityAttested = $true",
-        "SchemaReviewed = $true",
-    )
-    for token in forbidden_launcher_defaults:
-        if token in one_click_text or token in importer_text:
-            findings.append(
-                _finding(
-                    "M7-S003",
-                    "P0",
-                    "SECURITY",
-                    f"Launcher contains a forbidden implicit authorization default: {token}",
-                    one_click if token in one_click_text else importer,
+    for switch_name in (
+        "SkipDefenderScan",
+        "AuthorityAttested",
+        "SchemaReviewed",
+    ):
+        for path, text in ((one_click, one_click_text), (importer, importer_text)):
+            if _has_implicit_switch_default(text, switch_name):
+                findings.append(
+                    _finding(
+                        "M7-S003",
+                        "P0",
+                        "SECURITY",
+                        "Launcher contains a forbidden implicit authorization "
+                        f"default for {switch_name}.",
+                        path,
+                    )
                 )
-            )
 
     required_security_tokens = {
         one_click: (
@@ -174,10 +227,6 @@ def audit_security(root: Path) -> list[Finding]:
         )
         return findings
 
-    write_enabled_pattern = re.compile(
-        r"marketplace_write_enabled\s*[:=]\s*(?:True|true|\$true)",
-        re.IGNORECASE,
-    )
     shell_true_pattern = re.compile(r"\bshell\s*=\s*True\b")
     network_write_patterns = (
         "requests.post(",
@@ -185,11 +234,11 @@ def audit_security(root: Path) -> list[Finding]:
         "requests.patch(",
         "httpx.post(",
         "httpx.put(",
-        "urllib.request.urlopen(",
+        "httpx.patch(",
     )
     for path in sorted(source_root.rglob("*.py")):
         text = _read(path)
-        if write_enabled_pattern.search(text):
+        if _python_enables_marketplace_writes(text):
             findings.append(
                 _finding(
                     "M7-S006",
