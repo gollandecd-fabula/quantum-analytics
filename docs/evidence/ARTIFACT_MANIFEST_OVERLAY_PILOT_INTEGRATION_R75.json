@@ -1,0 +1,19 @@
+{
+  "base_pilot_integration_r74_overlay_git_blob_sha": "1ad057eee7cba6446b74e6f18c1d7009bceb9608",
+  "entries": [
+    [
+      "scripts/windows/one_click_home_local.ps1",
+      "28a20d2a8a10b955eec062bc81b84386bf7f1a05f74f7240406476c62ae80a89",
+      20314
+    ],
+    [
+      "tests/integration_manifest_support_m8.py",
+      "f7fbc65ac34f03a72e4f004b5e32dc6f73f56e80461529c76248650847a4315c",
+      1090
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 75,
+  "reason": "Keep the repaired first-run route active while satisfying the historical launcher contract with an explicit regression note; extend the append-only manifest loader through R75 without changing queue, cancellation, single-instance, Defender, AUTHORIZE/REVIEWED, WB_ONLY or read-only marketplace behavior",
+  "remove_paths": []
+}

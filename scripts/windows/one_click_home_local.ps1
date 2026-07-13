@@ -337,6 +337,7 @@ else {
     }
 }
 
+# Regression note: obsolete "$SkipInstall -and -not $NonInteractive" gate must not control desktop startup.
 if (-not $NonInteractive -and [string]::IsNullOrWhiteSpace($File)) {
     $pythonCommand = Resolve-PythonCommand
     $pythonArguments = @()
