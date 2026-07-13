@@ -38,6 +38,17 @@
       "status": "CLOSED_LOCAL_PENDING_EXACT_HEAD_CI",
       "finding": "A security or one-click gate could produce evidence for a commit other than the current PR head.",
       "closure": "Every M7 job checks out and asserts the exact candidate SHA; the performance job separately asserts the immutable M6 baseline SHA."
+    },
+    {
+      "id": "M7-D006",
+      "severity": "P1",
+      "status": "CLOSED_LOCAL_PENDING_EXACT_HEAD_CI",
+      "finding": "The first exact-head M7 audit classified a forwarded, already confirmed attestation, a CI forbidden-marker string and OSS admission URL reading as runtime authorization or marketplace/network writes.",
+      "closure": "Replaced substring classification with PowerShell switch-default detection and Python AST assignment analysis; narrowed network findings to explicit HTTP write verbs. Added precision regression tests. Production runtime and launcher behavior were not changed.",
+      "evidence": [
+        "M7 workflow run 29233050545",
+        "Foundation CI run 29233050498"
+      ]
     }
   ],
   "open_security_p0_p1": 0,
