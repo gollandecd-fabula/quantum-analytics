@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import ast
+import base64
 from dataclasses import asdict, dataclass
 import json
 from pathlib import Path
@@ -48,6 +49,25 @@ class PerformanceComparison:
 
 def _read(path: Path) -> str:
     return path.read_text(encoding="utf-8")
+
+
+_POWERSHELL_BASE64_RE = re.compile(
+    r'-Encoded\s+["\']([A-Za-z0-9+/=]{16,})["\']'
+)
+
+
+def _powershell_surface_text(text: str) -> str:
+    decoded: list[str] = []
+    for encoded in _POWERSHELL_BASE64_RE.findall(text):
+        try:
+            decoded.append(base64.b64decode(encoded, validate=True).decode("utf-8"))
+        except (ValueError, UnicodeDecodeError):
+            continue
+    return text + "\n" + "\n".join(decoded)
+
+
+def _contains_any(text: str, alternatives: Sequence[str]) -> bool:
+    return any(token in text for token in alternatives)
 
 
 def _finding(
@@ -175,41 +195,55 @@ def audit_security(root: Path) -> list[Finding]:
                     )
                 )
 
-    required_security_tokens = {
+    required_security_tokens: dict[Path, tuple[tuple[str, ...], ...]] = {
         one_click: (
-            "Assert-LocalPathSafety -Path $PackageRoot",
-            "Assert-LocalPathSafety -Path $TargetRoot",
-            "-not $AuthorityAttested -or -not $SchemaReviewed",
-            "launchers never attest on your behalf",
-            "Test-PathWithin -Child $directory -Parent $Root",
+            ("Assert-LocalPathSafety -Path $PackageRoot",),
+            ("Assert-LocalPathSafety -Path $TargetRoot",),
+            ("-not $AuthorityAttested -or -not $SchemaReviewed",),
+            (
+                "launchers never attest on your behalf",
+                "Программы запуска никогда не подтверждают",
+                "программы запуска никогда не подтверждают",
+            ),
+            ("Test-PathWithin -Child $directory -Parent $Root",),
         ),
         importer: (
-            "Microsoft Defender scan failed or reported a threat.",
-            "Non-interactive mode requires explicit $Expected attestation switch.",
-            "ExpectedFileSha256",
-            "PreScannedEvidenceSha256",
+            (
+                "Microsoft Defender scan failed or reported a threat.",
+                "Проверка Microsoft Defender завершилась ошибкой или обнаружила угрозу.",
+            ),
+            (
+                "Non-interactive mode requires explicit $Expected attestation switch.",
+                "В неинтерактивном режиме необходимо явно передать подтверждение {0}.",
+            ),
+            ("ExpectedFileSha256",),
+            ("PreScannedEvidenceSha256",),
         ),
         installer: (
-            'release_state -ne "RELEASE_BLOCKED"',
-            "marketplace_write_enabled -ne $false",
-            "Assert-PackageManifest -Root $SourceRoot",
-            "Manifest hash mismatch",
+            ('release_state -ne "RELEASE_BLOCKED"',),
+            ("marketplace_write_enabled -ne $false",),
+            ("Assert-PackageManifest -Root $SourceRoot",),
+            (
+                "Manifest hash mismatch",
+                "Хеш файла не совпадает с манифестом",
+            ),
         ),
         builder: (
-            'release_state = "RELEASE_BLOCKED"',
-            "marketplace_write_enabled = $false",
+            ('release_state = "RELEASE_BLOCKED"',),
+            ("marketplace_write_enabled = $false",),
         ),
     }
-    for path, tokens in required_security_tokens.items():
-        text = _read(path)
-        for token in tokens:
-            if token not in text:
+    for path, contracts in required_security_tokens.items():
+        surface = _powershell_surface_text(_read(path))
+        for alternatives in contracts:
+            if not _contains_any(surface, alternatives):
                 findings.append(
                     _finding(
                         "M7-S004",
                         "P1",
                         "SECURITY",
-                        f"Required fail-closed control is missing: {token}",
+                        "Required fail-closed control is missing: "
+                        + " | ".join(alternatives),
                         path,
                     )
                 )
@@ -320,41 +354,64 @@ def audit_one_click(root: Path) -> list[Finding]:
             )
         )
 
-    user_error_tokens = (
-        "Python 3.12 or newer was not found.",
-        "File is required in non-interactive mode.",
-        "The supplied configuration is not ready:",
-        "Quantum did not create the expected pilot result:",
-        "Source selection cancelled.",
+    user_error_contracts = (
+        (
+            "Python 3.12 or newer was not found.",
+            "Python 3.12 или новее не найден.",
+        ),
+        (
+            "File is required in non-interactive mode.",
+            "В неинтерактивном режиме необходимо явно указать файл.",
+        ),
+        (
+            "The supplied configuration is not ready:",
+            "Переданная конфигурация не готова:",
+        ),
+        (
+            "Quantum did not create the expected pilot result:",
+            "Quantum не создал ожидаемый результат пилотного запуска:",
+        ),
+        (
+            "Source selection cancelled.",
+            "Выбор файла отменён.",
+        ),
     )
-    combined = one_click_text + "\n" + _read(root / "scripts/windows/import_source.ps1")
-    for token in user_error_tokens:
-        if token not in combined:
+    combined = _powershell_surface_text(
+        one_click_text + "\n" + _read(root / "scripts/windows/import_source.ps1")
+    )
+    for alternatives in user_error_contracts:
+        if not _contains_any(combined, alternatives):
             findings.append(
                 _finding(
                     "M7-O004",
                     "P1",
                     "ONE_CLICK",
-                    f"Actionable user-facing error contract is missing: {token}",
+                    "Actionable user-facing error contract is missing: "
+                    + " | ".join(alternatives),
                     one_click,
                 )
             )
 
     installer_checks = (
-        'set "quantum_exit=%errorlevel%"',
-        'exit /b %quantum_exit%',
-        "Existing config, data and output directories were preserved.",
-        "$packageManifest = Assert-PackageManifest -Root $SourceRoot",
-        "New-Item -ItemType Directory -Path $TargetRoot",
+        ('set "quantum_exit=%errorlevel%"',),
+        ('exit /b %quantum_exit%',),
+        (
+            "Existing config, data and output directories were preserved.",
+            "Существующие папки config, data и output сохранены.",
+        ),
+        ("$packageManifest = Assert-PackageManifest -Root $SourceRoot",),
+        ("New-Item -ItemType Directory -Path $TargetRoot",),
     )
-    for token in installer_checks:
-        if token not in installer_text:
+    installer_surface = _powershell_surface_text(installer_text)
+    for alternatives in installer_checks:
+        if not _contains_any(installer_surface, alternatives):
             findings.append(
                 _finding(
                     "M7-O005",
                     "P1",
                     "ONE_CLICK",
-                    f"Installer reproducibility contract is missing: {token}",
+                    "Installer reproducibility contract is missing: "
+                    + " | ".join(alternatives),
                     installer,
                 )
             )

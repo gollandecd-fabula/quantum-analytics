@@ -6,8 +6,8 @@ DASHBOARD_BODY = r"""
   <div class="topbar-inner">
     <div class="brand-row">
       <div class="brand">
-        <p class="eyebrow">HOME_LOCAL · OFFLINE · READ ONLY</p>
-        <h1>Quantum Analytics</h1>
+        <p class="eyebrow">HOME_LOCAL · АВТОНОМНО · ТОЛЬКО ЧТЕНИЕ</p>
+        <h1>Центр решений Quantum</h1>
         <div class="brand-meta">
           <span id="header-dataset"></span>
           <span id="header-generated"></span>
@@ -47,13 +47,13 @@ DASHBOARD_BODY = r"""
 
     <div class="grid summary-grid">
       <section class="panel priority-panel" aria-labelledby="priority-title">
-        <div class="panel-header"><div><p class="panel-kicker">СЛЕДУЮЩИЕ ДЕЙСТВИЯ</p><h3 id="priority-title">Приоритетные решения</h3><p>Ранжирование по срочности; прогноз и evidence доступны в деталях.</p></div><button class="button button-quiet button-small" type="button" data-go-view="recommendations">Все решения</button></div>
+        <div class="panel-header"><div><p class="panel-kicker">СЛЕДУЮЩИЕ ДЕЙСТВИЯ</p><h3 id="priority-title">Приоритетные решения</h3><p>Ранжирование по срочности; прогноз и основания доступны в деталях.</p></div><button class="button button-quiet button-small" type="button" data-go-view="recommendations">Все решения</button></div>
         <div class="rec-summary" id="priority-actions"></div>
       </section>
       <section class="panel readiness-panel" aria-labelledby="readiness-title">
-        <div class="panel-header"><div><p class="panel-kicker">НАДЁЖНОСТЬ</p><h3 id="readiness-title">Готовность решения</h3><p>Оценка полноты обязательных evidence-gates, а не качества бизнеса.</p></div></div>
+        <div class="panel-header"><div><p class="panel-kicker">НАДЁЖНОСТЬ</p><h3 id="readiness-title">Готовность решения</h3><p>Оценка полноты обязательных контрольных оснований, а не качества бизнеса.</p></div></div>
         <div id="decision-readiness" class="decision-readiness" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-labelledby="readiness-title decision-readiness-label">
-          <div class="readiness-ring"><strong id="decision-readiness-value">0%</strong><span>evidence</span></div>
+          <div class="readiness-ring"><strong id="decision-readiness-value">0%</strong><span>основания</span></div>
           <div class="readiness-copy"><div id="decision-readiness-label">Расчёт готовности</div><div class="progress-track" aria-hidden="true"><div class="progress-fill" id="decision-readiness-bar"></div></div><ul class="readiness-checks" id="decision-readiness-checks"></ul></div>
         </div>
       </section>
@@ -84,23 +84,23 @@ DASHBOARD_BODY = r"""
     </div>
 
     <section class="panel" aria-labelledby="status-title">
-      <div class="panel-header"><div><p class="panel-kicker">ТЕХНИЧЕСКИЙ КОНТУР</p><h3 id="status-title">Состояние расчёта</h3><p>Admission, source bridge, reconciliation и публикационные ограничения.</p></div></div>
+      <div class="panel-header"><div><p class="panel-kicker">ТЕХНИЧЕСКИЙ КОНТУР</p><h3 id="status-title">Состояние расчёта</h3><p>Допуск, связь с источником, сверка и ограничения публикации.</p></div></div>
       <div class="grid status-grid" id="overview-status"></div>
     </section>
   </section>
 
   <section class="view" id="view-recommendations" role="tabpanel" aria-labelledby="tab-recommendations" hidden>
-    <div class="view-header"><div><h2>Рекомендации</h2><p>Фильтрация, сортировка и детальный просмотр evidence, confidence и ограничений.</p></div></div>
+    <div class="view-header"><div><h2>Рекомендации</h2><p>Фильтрация, сортировка и детальный просмотр оснований, уверенности и ограничений.</p></div></div>
     <section class="panel" aria-label="Фильтры рекомендаций">
       <div class="filters">
-        <div class="filter-field"><label for="rec-search">Поиск</label><input id="rec-search" type="search" autocomplete="off" placeholder="Действие, причина, evidence"></div>
+        <div class="filter-field"><label for="rec-search">Поиск</label><input id="rec-search" type="search" autocomplete="off" placeholder="Действие, причина, основания"></div>
         <div class="filter-field"><label for="severity">Срочность</label><select id="severity"><option value="">Все</option><option value="CRITICAL">Критическая</option><option value="HIGH">Высокая</option><option value="MEDIUM">Средняя</option><option value="LOW">Низкая</option></select></div>
         <div class="filter-field"><label for="priority">Цель</label><select id="priority"><option value="">Все</option><option value="PROFIT">Прибыль</option><option value="SUSTAINABLE_GROWTH">Устойчивый рост</option><option value="TURNOVER">Оборот</option></select></div>
         <div class="filter-field"><label for="category">Категория</label><select id="category"><option value="">Все</option></select></div>
         <div class="filter-field"><label for="rec-sort">Сортировка</label><select id="rec-sort"><option value="severity">По срочности</option><option value="priority">По цели</option><option value="category">По категории</option><option value="action">По действию</option></select></div>
         <div class="filter-actions"><button class="button button-quiet" id="rec-reset" type="button">Сбросить</button><button class="button button-light" id="rec-export" type="button">CSV</button></div>
       </div>
-      <div class="result-meta"><span id="rec-result-count"></span><span>CSV защищён от spreadsheet-formula injection.</span></div>
+      <div class="result-meta"><span id="rec-result-count"></span><span>CSV защищён от внедрения формул электронных таблиц.</span></div>
       <div class="recommendation-grid" id="recommendation-grid"></div>
       <div class="empty-state" id="rec-empty" hidden>По текущим фильтрам рекомендации не найдены.</div>
     </section>
@@ -117,19 +117,19 @@ DASHBOARD_BODY = r"""
         <div class="filter-field"><label for="metric-sort">Сортировка</label><select id="metric-sort"><option value="id">По ID</option><option value="scope">По контуру</option><option value="state">По состоянию</option><option value="value-desc">По значению ↓</option><option value="value-asc">По значению ↑</option></select></div>
         <div class="filter-actions"><button class="button button-quiet" id="metric-reset" type="button">Сбросить</button></div>
       </div>
-      <div class="result-meta"><span id="metric-result-count"></span><span>Клик по метрике открывает provenance и accounting boundary.</span></div>
+      <div class="result-meta"><span id="metric-result-count"></span><span>Нажатие на метрику открывает происхождение данных и границы учёта.</span></div>
       <div class="table-wrap"><table><thead><tr><th>Контур</th><th>Метрика</th><th>Состояние</th><th class="numeric">Значение</th><th>Единица</th><th>Валюта</th><th>Причина</th><th></th></tr></thead><tbody id="metric-table-body"></tbody></table></div>
       <div class="empty-state" id="metric-empty" hidden>По текущим фильтрам метрики не найдены.</div>
     </section>
   </section>
 
   <section class="view" id="view-quality" role="tabpanel" aria-labelledby="tab-quality" hidden>
-    <div class="view-header"><div><h2>Качество, ограничения и происхождение</h2><p>Проверяемые состояния, reconciliation и SHA-256 связность результата.</p></div></div>
-    <section class="panel"><div class="panel-header"><div><h3>Качество данных</h3><p>Admission и блокирующие причины.</p></div></div><div class="grid quality-grid" id="quality-grid"></div></section>
-    <section class="panel"><div class="panel-header"><div><h3>Сверка</h3><p>Состояние reconciliation и зарегистрированные различия.</p></div></div><div id="reconciliation-panel"></div></section>
+    <div class="view-header"><div><h2>Качество, ограничения и происхождение</h2><p>Проверяемые состояния, сверка и связь результата по SHA-256.</p></div></div>
+    <section class="panel"><div class="panel-header"><div><h3>Качество данных</h3><p>Допуск и блокирующие причины.</p></div></div><div class="grid quality-grid" id="quality-grid"></div></section>
+    <section class="panel"><div class="panel-header"><div><h3>Сверка</h3><p>Состояние сверки и зарегистрированные различия.</p></div></div><div id="reconciliation-panel"></div></section>
     <section class="panel"><div class="panel-header"><div><h3>Ограничения</h3><p>Явные ограничения текущего результата.</p></div></div><ul class="list-clean" id="limitations-list"></ul></section>
-    <section class="panel"><div class="panel-header"><div><h3>Контрольные суммы</h3><p>Bundle, source, calculation и recommendation hashes.</p></div></div><div class="grid hash-grid" id="hash-grid"></div></section>
-    <section class="panel"><div class="panel-header"><div><h3>Параметры и runtime</h3><p>Ссылки на профили, rounding policy и локальный runtime.</p></div></div><dl class="definition-list" id="parameters-list"></dl></section>
+    <section class="panel"><div class="panel-header"><div><h3>Контрольные суммы</h3><p>Контрольные суммы пакета, источника, расчёта и рекомендаций.</p></div></div><div class="grid hash-grid" id="hash-grid"></div></section>
+    <section class="panel"><div class="panel-header"><div><h3>Параметры и среда выполнения</h3><p>Ссылки на профили, политику округления и локальную среду выполнения.</p></div></div><dl class="definition-list" id="parameters-list"></dl></section>
   </section>
 </main>
 <div class="drawer-overlay" id="drawer-overlay" aria-hidden="true"></div>

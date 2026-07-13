@@ -320,7 +320,7 @@ def _summary_control_rows(bundle: Mapping[str, Any]) -> list[tuple[str, object, 
         ("Рекомендации", bundle["recommendations"].get("recommendation_count", 0), "integer"),
         ("Блокирующие метрики", len(bundle["data_quality"].get("blocked_metrics", [])), "integer"),
         ("Статус публикации", publication or "NOT_AVAILABLE", _state_style(publication)),
-        ("Marketplace writes", bundle["provenance"].get("runtime", {}).get("marketplace_write_enabled", False), "boolean"),
+        ("Запись на маркетплейс", bundle["provenance"].get("runtime", {}).get("marketplace_write_enabled", False), "boolean"),
     ]
 
 
@@ -412,8 +412,8 @@ def _recommendation_headers() -> list[Cell]:
         Cell("Действие", "header"),
         Cell("Причина", "header"),
         Cell("Текущий эффект", "header"),
-        Cell("Прогноз min", "header"),
-        Cell("Прогноз max", "header"),
+        Cell("Минимальный прогноз", "header"),
+        Cell("Максимальный прогноз", "header"),
         Cell("Уверенность", "header"),
         Cell("Ссылки на доказательства", "header"),
         Cell("Ограничения", "header"),
@@ -421,8 +421,8 @@ def _recommendation_headers() -> list[Cell]:
         Cell("Код действия", "header"),
         Cell("Текущий статус", "header"),
         Cell("Валюта", "header"),
-        Cell("Статус min", "header"),
-        Cell("Валюта min", "header"),
-        Cell("Статус max", "header"),
-        Cell("Валюта max", "header"),
+        Cell("Статус минимума", "header"),
+        Cell("Валюта минимума", "header"),
+        Cell("Статус максимума", "header"),
+        Cell("Валюта максимума", "header"),
     ]

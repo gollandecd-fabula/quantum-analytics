@@ -14,6 +14,18 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
+function Get-QuantumRussianText {
+    param(
+        [Parameter(Mandatory = $true)][string]$Encoded,
+        [object[]]$Arguments = @()
+    )
+    $text = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($Encoded))
+    if ($Arguments.Count -gt 0) {
+        return [string]::Format([Globalization.CultureInfo]::InvariantCulture, $text, $Arguments)
+    }
+    return $text
+}
+
 function Resolve-ProjectRoot {
     $candidates = @(
         (Join-Path $PSScriptRoot ".."),
@@ -35,17 +47,17 @@ function Resolve-ProjectRoot {
             return $resolved
         }
     }
-    throw "Quantum project root was not found from launcher location: $PSScriptRoot"
+    throw (Get-QuantumRussianText -Encoded "0J3QtSDRg9C00LDQu9C+0YHRjCDQvtC/0YDQtdC00LXQu9C40YLRjCDQutC+0YDQvdC10LLRg9GOINC/0LDQv9C60YMg0L/RgNC+0LXQutGC0LAgUXVhbnR1bSDQuNC3INGA0LDRgdC/0L7Qu9C+0LbQtdC90LjRjyDQv9GA0L7Qs9GA0LDQvNC80Ysg0LfQsNC/0YPRgdC60LA6IHswfQ==" -Arguments @($PSScriptRoot))
 }
 
 function Select-SourceFile {
     Add-Type -AssemblyName System.Windows.Forms
     $dialog = New-Object System.Windows.Forms.OpenFileDialog
-    $dialog.Title = "Select an authorized local file for Quantum"
-    $dialog.Filter = "All files (*.*)|*.*"
+    $dialog.Title = (Get-QuantumRussianText -Encoded "0JLRi9Cx0LXRgNC40YLQtSDQu9C+0LrQsNC70YzQvdGL0Lkg0YTQsNC50LssINGA0LDQt9GA0LXRiNGR0L3QvdGL0Lkg0Log0L7QsdGA0LDQsdC+0YLQutC1INCyIFF1YW50dW0=")
+    $dialog.Filter = (Get-QuantumRussianText -Encoded "0JLRgdC1INGE0LDQudC70YsgKCouKil8Ki4q")
     $dialog.Multiselect = $false
     if ($dialog.ShowDialog() -ne [System.Windows.Forms.DialogResult]::OK) {
-        throw "Source selection cancelled."
+        throw (Get-QuantumRussianText -Encoded "0JLRi9Cx0L7RgCDRhNCw0LnQu9CwINC+0YLQvNC10L3RkdC9Lg==")
     }
     return $dialog.FileName
 }
@@ -71,7 +83,7 @@ function Resolve-PythonCommand {
     if ($py -and (Test-PythonVersion -Executable $py.Source -Prefix @("-3.12"))) {
         return [pscustomobject]@{ Executable = $py.Source; Prefix = @("-3.12") }
     }
-    throw "Python 3.12 or newer was not found."
+    throw (Get-QuantumRussianText -Encoded "UHl0aG9uIDMuMTIg0LjQu9C4INC90L7QstC10LUg0L3QtSDQvdCw0LnQtNC10L0u")
 }
 
 function Confirm-Literal {
@@ -84,11 +96,11 @@ function Confirm-Literal {
         return
     }
     if ($NonInteractive) {
-        throw "Non-interactive mode requires explicit $Expected attestation switch."
+        throw (Get-QuantumRussianText -Encoded "0JIg0L3QtdC40L3RgtC10YDQsNC60YLQuNCy0L3QvtC8INGA0LXQttC40LzQtSDQvdC10L7QsdGF0L7QtNC40LzQviDRj9Cy0L3QviDQv9C10YDQtdC00LDRgtGMINC/0L7QtNGC0LLQtdGA0LbQtNC10L3QuNC1IHswfS4=" -Arguments @($Expected))
     }
     $answer = Read-Host $Prompt
     if ($answer -cne $Expected) {
-        throw "Required attestation $Expected was not supplied."
+        throw (Get-QuantumRussianText -Encoded "0J7QsdGP0LfQsNGC0LXQu9GM0L3QvtC1INC/0L7QtNGC0LLQtdGA0LbQtNC10L3QuNC1IHswfSDQvdC1INC/0YDQtdC00L7RgdGC0LDQstC70LXQvdC+Lg==" -Arguments @($Expected))
     }
 }
 
@@ -137,22 +149,22 @@ function New-StructuralFallbackScanResult {
         [Parameter(Mandatory = $true)][string]$Reason,
         [string]$Scanner = "MICROSOFT_DEFENDER_UNAVAILABLE"
     )
-    Write-Host "Microsoft Defender is unavailable: $Reason" -ForegroundColor Yellow
-    Write-Host "Continuing with Quantum local structural intake. Active content and corrupted archives remain blocked." -ForegroundColor Yellow
+    Write-Host (Get-QuantumRussianText -Encoded "TWljcm9zb2Z0IERlZmVuZGVyINC90LXQtNC+0YHRgtGD0L/QtdC9OiB7MH0=" -Arguments @($Reason)) -ForegroundColor Yellow
+    Write-Host (Get-QuantumRussianText -Encoded "UXVhbnR1bSDQv9GA0L7QtNC+0LvQttC40YIg0LvQvtC60LDQu9GM0L3Rg9GOINGB0YLRgNGD0LrRgtGD0YDQvdGD0Y4g0L/RgNC+0LLQtdGA0LrRgy4g0JDQutGC0LjQstC90L7QtSDRgdC+0LTQtdGA0LbQuNC80L7QtSDQuCDQv9C+0LLRgNC10LbQtNGR0L3QvdGL0LUg0LDRgNGF0LjQstGLINC/0L4t0L/RgNC10LbQvdC10LzRgyDQsdC70L7QutC40YDRg9GO0YLRgdGPLg==") -ForegroundColor Yellow
     return New-ScanResult -Scanner $Scanner -Outcome "DEFENDER_UNAVAILABLE_STRUCTURAL_FALLBACK" -FallbackReason $Reason
 }
 
 function Invoke-DefenderScan {
     param([Parameter(Mandatory = $true)][string]$Path)
     if ($SkipDefenderScan) {
-        Write-Host "Defender scan skipped by explicit switch." -ForegroundColor Yellow
+        Write-Host (Get-QuantumRussianText -Encoded "0J/RgNC+0LLQtdGA0LrQsCBNaWNyb3NvZnQgRGVmZW5kZXIg0L/RgNC+0L/Rg9GJ0LXQvdCwINC/0L4g0Y/QstC90L4g0L/QtdGA0LXQtNCw0L3QvdC+0LzRgyDQv9Cw0YDQsNC80LXRgtGA0YMu") -ForegroundColor Yellow
         return New-ScanResult -Scanner "EXPLICIT_EQUIVALENT_SCAN_ATTESTED" -Outcome "SKIPPED_BY_EXPLICIT_SWITCH"
     }
     $scanner = Resolve-DefenderScanner
     if (-not $scanner) {
         return New-StructuralFallbackScanResult -Reason "MPCmdRun scanner was not found."
     }
-    Write-Host "Scanning source file with Microsoft Defender..."
+    Write-Host (Get-QuantumRussianText -Encoded "0J/RgNC+0LLQtdGA0LrQsCDQuNGB0YXQvtC00L3QvtCz0L4g0YTQsNC50LvQsCDRgSDQv9C+0LzQvtGJ0YzRjiBNaWNyb3NvZnQgRGVmZW5kZXIuLi4=")
     $scanOutput = @(& $scanner -Scan -ScanType 3 -File $Path 2>&1)
     $exitCode = $LASTEXITCODE
     $scanOutput | Out-Host
@@ -163,7 +175,7 @@ function Invoke-DefenderScan {
     if (Test-DefenderUnavailableOutput -Text $outputText) {
         return New-StructuralFallbackScanResult -Reason ("MpCmdRun unavailable or service failure. Exit code: {0}" -f $exitCode) -Scanner $scanner
     }
-    throw "Microsoft Defender scan failed or reported a threat. Exit code: $exitCode"
+    throw (Get-QuantumRussianText -Encoded "0J/RgNC+0LLQtdGA0LrQsCBNaWNyb3NvZnQgRGVmZW5kZXIg0LfQsNCy0LXRgNGI0LjQu9Cw0YHRjCDQvtGI0LjQsdC60L7QuSDQuNC70Lgg0L7QsdC90LDRgNGD0LbQuNC70LAg0YPQs9GA0L7Qt9GDLiDQmtC+0LQg0LLRi9GF0L7QtNCwOiB7MH0=" -Arguments @($exitCode))
 }
 
 function New-ScanReceipt {
@@ -197,7 +209,7 @@ function New-ScanReceipt {
 $projectRoot = Resolve-ProjectRoot
 $hashCompat = Join-Path $projectRoot "src\quantum\pilot\hash_compat.ps1"
 if (-not (Test-Path -LiteralPath $hashCompat -PathType Leaf)) {
-    throw "Quantum SHA-256 compatibility shim was not found: $hashCompat"
+    throw (Get-QuantumRussianText -Encoded "0JzQvtC00YPQu9GMINGB0L7QstC80LXRgdGC0LjQvNC+0YHRgtC4IFNIQS0yNTYgUXVhbnR1bSDQvdC1INC90LDQudC00LXQvTogezB9" -Arguments @($hashCompat))
 }
 . $hashCompat
 
@@ -221,7 +233,7 @@ $gatewayOutput = Join-Path $outputDirectory (".quantum-intake-{0}.json" -f [guid
 $scanResult = Invoke-DefenderScan -Path $File
 $scanReceipt = New-ScanReceipt -SourcePath $File -ScanResult $scanResult
 $reviewedFileHash = [string]$scanReceipt.source_sha256
-Confirm-Literal -Expected "AUTHORIZE" -Prompt "Type AUTHORIZE to attest lawful authority to process this file" -AlreadyAttested ([bool]$AuthorityAttested)
+Confirm-Literal -Expected "AUTHORIZE" -Prompt (Get-QuantumRussianText -Encoded "0JLQstC10LTQuNGC0LUgQVVUSE9SSVpFLCDRh9GC0L7QsdGLINC/0L7QtNGC0LLQtdGA0LTQuNGC0Ywg0LfQsNC60L7QvdC90YvQtSDQv9C+0LvQvdC+0LzQvtGH0LjRjyDQvdCwINC+0LHRgNCw0LHQvtGC0LrRgyDRhNCw0LnQu9Cw") -AlreadyAttested ([bool]$AuthorityAttested)
 
 $pythonCommand = Resolve-PythonCommand
 $env:PYTHONPATH = Join-Path $projectRoot "src"
@@ -241,7 +253,7 @@ try {
     & $pythonCommand.Executable @arguments
     $gatewayExitCode = $LASTEXITCODE
     if (-not (Test-Path -LiteralPath $gatewayOutput -PathType Leaf)) {
-        throw "Universal intake did not produce a report: $gatewayOutput"
+        throw (Get-QuantumRussianText -Encoded "0KPQvdC40LLQtdGA0YHQsNC70YzQvdGL0Lkg0LjQvNC/0L7RgNGCINC90LUg0YHQvtC30LTQsNC7INC+0YLRh9GR0YI6IHswfQ==" -Arguments @($gatewayOutput))
     }
     $report = Get-Content -LiteralPath $gatewayOutput -Raw -Encoding UTF8 | ConvertFrom-Json
     $status = [string]$report.status
@@ -251,12 +263,12 @@ try {
         -not [string]::IsNullOrWhiteSpace([string]$hashProperty.Value) -and
         [string]$hashProperty.Value -ne $reviewedFileHash
     ) {
-        throw "Universal intake file hash does not match the scanned file."
+        throw (Get-QuantumRussianText -Encoded "0KXQtdGIINGE0LDQudC70LAg0YPQvdC40LLQtdGA0YHQsNC70YzQvdC+0LPQviDQuNC80L/QvtGA0YLQsCDQvdC1INGB0L7QstC/0LDQtNCw0LXRgiDRgSDQv9GA0L7QstC10YDQtdC90L3Ri9C8INGE0LDQudC70L7QvC4=")
     }
 
     if ($status -eq "ROUTE_XLSX") {
         if ($gatewayExitCode -ne 0) {
-            throw "Universal intake routed XLSX with non-zero exit code $gatewayExitCode."
+            throw (Get-QuantumRussianText -Encoded "0JzQsNGA0YjRgNGD0YLQuNC30LDRhtC40Y8gWExTWCDQt9Cw0LLQtdGA0YjQuNC70LDRgdGMINC90LXQvdGD0LvQtdCy0YvQvCDQutC+0LTQvtC8OiB7MH0u" -Arguments @($gatewayExitCode))
         }
         $helper = Join-Path $projectRoot "src\quantum\pilot\import_xlsx_source.ps1"
         $helperArguments = @{
@@ -283,20 +295,20 @@ try {
     }
 
     Move-Item -LiteralPath $gatewayOutput -Destination $Output -Force
-    Write-Host "Universal intake completed." -ForegroundColor Cyan
-    Write-Host "Status: $status"
-    Write-Host "Detected format: $([string]$report.detected_format)"
-    Write-Host "Report: $Output"
+    Write-Host (Get-QuantumRussianText -Encoded "0KPQvdC40LLQtdGA0YHQsNC70YzQvdGL0Lkg0LjQvNC/0L7RgNGCINC30LDQstC10YDRiNGR0L0u") -ForegroundColor Cyan
+    Write-Host (Get-QuantumRussianText -Encoded "0KHRgtCw0YLRg9GBOiB7MH0=" -Arguments @($status))
+    Write-Host (Get-QuantumRussianText -Encoded "0J7Qv9GA0LXQtNC10LvRkdC90L3Ri9C5INGE0L7RgNC80LDRgjogezB9" -Arguments @($([string]$report.detected_format)))
+    Write-Host (Get-QuantumRussianText -Encoded "0J7RgtGH0ZHRgjogezB9" -Arguments @($Output))
     if ($status -like "QUARANTINED*") {
-        Write-Host "The file was isolated and was not used for calculations." -ForegroundColor Red
+        Write-Host (Get-QuantumRussianText -Encoded "0KTQsNC50Lsg0LjQt9C+0LvQuNGA0L7QstCw0L0g0Lgg0L3QtSDQuNGB0L/QvtC70YzQt9C+0LLQsNC70YHRjyDQsiDRgNCw0YHRh9GR0YLQsNGFLg==") -ForegroundColor Red
         $finalExitCode = 2
     }
     elseif ($status -eq "ERROR" -or $gatewayExitCode -ne 0) {
-        Write-Host "The file could not be processed. Review reason_codes in the report." -ForegroundColor Red
+        Write-Host (Get-QuantumRussianText -Encoded "0KTQsNC50Lsg0L3QtSDRg9C00LDQu9C+0YHRjCDQvtCx0YDQsNCx0L7RgtCw0YLRjC4g0J/RgNC+0LLQtdGA0YzRgtC1IHJlYXNvbl9jb2RlcyDQsiDQvtGC0YfRkdGC0LUu") -ForegroundColor Red
         $finalExitCode = 2
     }
     else {
-        Write-Host "No financial calculation was performed for this file." -ForegroundColor Green
+        Write-Host (Get-QuantumRussianText -Encoded "0JTQu9GPINGN0YLQvtCz0L4g0YTQsNC50LvQsCDRhNC40L3QsNC90YHQvtCy0YvQuSDRgNCw0YHRh9GR0YIg0L3QtSDQstGL0L/QvtC70L3Rj9C70YHRjy4=") -ForegroundColor Green
     }
 }
 finally {

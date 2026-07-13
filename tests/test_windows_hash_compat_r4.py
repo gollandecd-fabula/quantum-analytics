@@ -1,10 +1,20 @@
 from __future__ import annotations
 
+import base64
 from pathlib import Path
+import re
 import unittest
 
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def _surface(text: str) -> str:
+    decoded = [
+        base64.b64decode(value, validate=True).decode("utf-8")
+        for value in re.findall(r'-Encoded\s+["\']([A-Za-z0-9+/=]{16,})["\']', text)
+    ]
+    return text + "\n" + "\n".join(decoded)
 PILOT = ROOT / "src" / "quantum" / "pilot"
 WINDOWS = ROOT / "scripts" / "windows"
 
@@ -24,7 +34,7 @@ class WindowsHashCompatR4Tests(unittest.TestCase):
         execution = script.index("$scanReceipt = New-ScanReceipt", load)
         self.assertLess(load, execution)
         self.assertIn("Get-FileHash", script)
-        self.assertIn("Quantum SHA-256 compatibility shim was not found", script)
+        self.assertIn("Модуль совместимости SHA-256 Quantum не найден", _surface(script))
 
     def test_xlsx_helper_loads_shim_before_scan_receipt_execution(self):
         script = (PILOT / "import_xlsx_source.ps1").read_text(encoding="utf-8")
@@ -32,7 +42,7 @@ class WindowsHashCompatR4Tests(unittest.TestCase):
         execution = script.index("$scanReceipt = Resolve-ScanReceipt", load)
         self.assertLess(load, execution)
         self.assertIn("Get-FileHash", script)
-        self.assertIn("Quantum SHA-256 compatibility shim was not found", script)
+        self.assertIn("Модуль совместимости SHA-256 Quantum не найден", _surface(script))
 
     def test_compatibility_scripts_are_ascii_for_windows_powershell(self):
         for path in (

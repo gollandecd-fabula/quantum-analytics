@@ -18,6 +18,8 @@ const ACTION_LABELS = {COMPLETE_REQUIRED_INPUTS:'Заполнить обязат
 const CATEGORY_LABELS = {DATA_QUALITY:'Качество данных',SALES:'Продажи',INVENTORY:'Остатки',RETURNS:'Возвраты',COST:'Расходы',LOGISTICS:'Логистика',RECONCILIATION:'Сверка',FINANCIAL:'Финансы',ADVERTISING:'Реклама',STORAGE:'Хранение'};
 const PRIORITY_LABELS = {PROFIT:'Прибыль',SUSTAINABLE_GROWTH:'Устойчивый рост',TURNOVER:'Оборот'};
 const SEVERITY_LABELS = {CRITICAL:'Критическая',HIGH:'Высокая',MEDIUM:'Средняя',LOW:'Низкая'};
+const STATE_LABELS = {NOT_AVAILABLE:'Нет данных',VALID:'Доступно',READY:'Готово',RECONCILED:'Сверено',ADMITTED:'Допущено',COMPLETE:'Завершено',PILOT_RUN_COMPLETE:'Пилотный запуск завершён',PENDING:'Ожидает',WARNING:'Предупреждение',PARTIAL:'Частично',BLOCKED:'Заблокировано',INVALID:'Некорректно',ERROR:'Ошибка',REJECTED:'Отклонено',CONFLICT:'Конфликт',NOT_REQUESTED:'Не запрошено',ENABLED:'Включено',DISABLED:'Отключено',CHECK:'Проверить',FORBIDDEN:'Запрещено'};
+const stateLabel = value => { const raw=text(value); return STATE_LABELS[String(value||'').toUpperCase()] || raw; };
 const FINANCIAL = [
   ['gross_sales_amount','Валовые продажи','income'],
   ['payout_amount','Выплата маркетплейса','income'],
@@ -61,7 +63,7 @@ const badgeClass = value => {
   if(['VALID','READY','RECONCILED','ADMITTED','COMPLETE','PILOT_RUN_COMPLETE'].includes(v)) return 'badge badge-good';
   return 'badge badge-neutral';
 };
-const badge = (value,label) => { const shown=label!==undefined&&label!==null&&label!==''?label:(value!==undefined&&value!==null&&value!==''?value:'NOT_AVAILABLE'); return el('span',badgeClass(value),shown); };
+const badge = (value,label) => { const shown=label!==undefined&&label!==null&&label!==''?label:stateLabel(value); return el('span',badgeClass(value),shown); };
 const actionLabel = item => ACTION_LABELS[item.action_code] || item.action || item.action_code || 'Без действия';
 const categoryLabel = item => CATEGORY_LABELS[item.category] || item.category || 'Без категории';
 const priorityLabel = item => PRIORITY_LABELS[item.priority_dimension] || item.priority_dimension || 'Без цели';
@@ -111,7 +113,7 @@ function decisionSignal(profit){
   const high=RECOMMENDATIONS.filter(item=>item.severity==='HIGH').length;
   if(blocked>0 || critical>0) return {state:'critical',title:`Требуют устранения: ${blocked+critical}`,text:'Есть блокирующие метрики или критические рекомендации. Финансовые выводы необходимо проверить до управленческого решения.'};
   if(profit!==null && profit<0) return {state:'critical',title:'Прибыль отрицательная — восстановите безубыточность',text:'Начните с крупнейших подтверждённых расходов и рекомендаций с приоритетом «Прибыль».'};
-  if(high>0) return {state:'warning',title:`Высокий приоритет: ${high}`,text:'Критических блокеров нет, но есть действия с высоким приоритетом. Проверьте evidence и прогноз перед подтверждением сценария.'};
+  if(high>0) return {state:'warning',title:`Высокий приоритет: ${high}`,text:'Критических блокеров нет, но есть действия с высоким приоритетом. Проверьте основания и прогноз перед подтверждением сценария.'};
   return {state:'good',title:'Расчёт готов к управленческой проверке',text:'Обязательные контуры не сообщают о критических блокерах. Quantum по-прежнему не выполняет действия автоматически.'};
 }
 function renderDecisionBanner(profit){
@@ -119,24 +121,24 @@ function renderDecisionBanner(profit){
   banner.className=`decision-banner state-${signal.state}`;
   $('decision-banner-title').textContent=signal.title; $('decision-banner-text').textContent=signal.text;
   const badges=$('decision-banner-badges'); clear(badges);
-  append(badges,badge(B.run_status||'NOT_AVAILABLE'),badge(B.reconciliation?.state||'NOT_AVAILABLE'),badge(C.publication_state||'NOT_AVAILABLE'),badge(P.runtime?.marketplace_write_enabled===true?'ENABLED':'DISABLED','Marketplace writes: disabled'));
+  append(badges,badge(B.run_status||'NOT_AVAILABLE'),badge(B.reconciliation?.state||'NOT_AVAILABLE'),badge(C.publication_state||'NOT_AVAILABLE'),badge(P.runtime?.marketplace_write_enabled===true?'ENABLED':'DISABLED','Запись на маркетплейс: отключена'));
   const header=$('decision-state'); header.className=`header-state state-${signal.state}`; header.textContent=signal.state==='critical'?'Требуется внимание':signal.state==='warning'?'Высокий приоритет':'Данные готовы';
 }
 function renderReadiness(){
   const checks=[
-    ['Admission',Q.admission_state==='ADMITTED'],
-    ['Finance request',Q.finance_request_state==='READY'],
-    ['Reconciliation',B.reconciliation?.state==='RECONCILED'],
-    ['Нет blocked metrics',(Q.blocked_metrics||[]).length===0],
-    ['Marketplace writes disabled',P.runtime?.marketplace_write_enabled!==true]
+    ['Допуск данных',Q.admission_state==='ADMITTED'],
+    ['Финансовый профиль',Q.finance_request_state==='READY'],
+    ['Сверка',B.reconciliation?.state==='RECONCILED'],
+    ['Нет заблокированных метрик',(Q.blocked_metrics||[]).length===0],
+    ['Запись на маркетплейс отключена',P.runtime?.marketplace_write_enabled!==true]
   ];
   const passed=checks.filter(item=>item[1]).length;
   const score=Math.round(passed/checks.length*100);
   const root=$('decision-readiness'); root.setAttribute('aria-valuenow',String(score)); root.style.setProperty('--readiness',`${score}%`);
   $('decision-readiness-value').textContent=`${score}%`; $('decision-readiness-bar').style.width=`${score}%`;
-  $('decision-readiness-label').textContent=score===100?'Все обязательные evidence-gates пройдены':`Пройдено ${passed} из ${checks.length} gates`;
+  $('decision-readiness-label').textContent=score===100?'Все обязательные контрольные проверки пройдены':`Пройдено ${passed} из ${checks.length} проверок`;
   const list=$('decision-readiness-checks'); clear(list);
-  checks.forEach(([label,ok])=>{const item=el('li',ok?'check-pass':'',`${label}: ${ok?'PASS':'CHECK'}`);list.appendChild(item);});
+  checks.forEach(([label,ok])=>{const item=el('li',ok?'check-pass':'',`${label}: ${ok?'ПРОЙДЕНО':'ПРОВЕРИТЬ'}`);list.appendChild(item);});
 }
 function renderFinancialChart(){
   const combined={...OBSERVED,...RESULTS};
@@ -204,9 +206,9 @@ function renderPriorityActions(){
 }
 function renderOverviewStatus(){
   const statusItems=[
-    ['Статус запуска',B.run_status],['Admission',Q.admission_state],['Source bridge',Q.source_bridge_status],
-    ['Finance request',Q.finance_request_state],['Reconciliation',B.reconciliation?.state],['Publication',C.publication_state||'NOT_AVAILABLE'],
-    ['Blocked metrics',(Q.blocked_metrics||[]).length],['Marketplace writes',P.runtime?.marketplace_write_enabled===true?'ENABLED':'DISABLED'],['Bundle',text(B.bundle_hash).slice(0,16)+'…']
+    ['Статус запуска',B.run_status],['Допуск',Q.admission_state],['Связь с источником',Q.source_bridge_status],
+    ['Финансовый профиль',Q.finance_request_state],['Сверка',B.reconciliation?.state],['Публикация',C.publication_state||'NOT_AVAILABLE'],
+    ['Заблокированные метрики',(Q.blocked_metrics||[]).length],['Запись на маркетплейс',P.runtime?.marketplace_write_enabled===true?'ВКЛЮЧЕНА':'ОТКЛЮЧЕНА'],['Пакет',text(B.bundle_hash).slice(0,16)+'…']
   ];
   const grid=$('overview-status'); clear(grid);
   statusItems.forEach(([label,value])=>{const card=el('article','status-card');append(card,el('div','status-label',label),append(el('div','status-value'),badge(value)));grid.appendChild(card);});

@@ -21,7 +21,7 @@ except ImportError:  # pragma: no cover - handled by CLI/self-test callers
     ttk = None  # type: ignore[assignment]
 
 
-APP_TITLE = "Quantum Analytics — загрузка отчётов"
+APP_TITLE = "Центр решений Quantum — загрузка отчётов"
 READY_CONFIG_NAMES = (
     "config/default-home-local.json",
     "config/production.local.json",
@@ -109,7 +109,7 @@ def _import_script(root: Path) -> Path:
     source_tree = root / "scripts" / "windows" / "import_source.ps1"
     if source_tree.is_file():
         return source_tree
-    raise FileNotFoundError(f"import_source.ps1 not found under {root}")
+    raise FileNotFoundError(f"Сценарий import_source.ps1 не найден в папке {root}")
 
 
 def _is_ready_config(path: Path) -> bool:
@@ -175,7 +175,7 @@ def _source_bridge(report: dict[str, Any] | None) -> dict[str, Any]:
 
 def summarize_report(report: dict[str, Any] | None, return_code: int) -> tuple[str, str, str, str]:
     if not isinstance(report, dict):
-        return "Ошибка", "—", "—", "Importer не создал JSON-результат."
+        return "Ошибка", "—", "—", "Импорт не создал JSON-результат."
 
     bridge = _source_bridge(report)
     raw_status = _first_text(bridge.get("status"), report.get("status")) or "UNKNOWN"
@@ -255,7 +255,7 @@ def run_import(source_path: Path, root: Path | None = None) -> ImportRow:
         check=False,
         creationflags=getattr(subprocess, "CREATE_NEW_CONSOLE", 0),
     )
-    row.stdout = "Interactive authorization and schema review were executed in the Quantum console."
+    row.stdout = "Интерактивное подтверждение полномочий и проверка схемы выполнены в консоли Quantum."
     row.stderr = ""
     report = _safe_json_load(output_path)
     row.report = report
@@ -291,11 +291,11 @@ class QuantumLocalApp:
         frame = ttk.Frame(self.root_widget, padding=10)
         frame.pack(fill=tk.BOTH, expand=True)
 
-        title = ttk.Label(frame, text="Quantum Analytics", font=("Segoe UI", 18, "bold"))
+        title = ttk.Label(frame, text="Центр решений Quantum", font=("Segoe UI", 18, "bold"))
         title.pack(anchor=tk.W)
         subtitle = ttk.Label(
             frame,
-            text="HOME_LOCAL · OFFLINE · отчёты выбираются и обрабатываются внутри проекта",
+            text="HOME_LOCAL · АВТОНОМНО · отчёты выбираются и обрабатываются внутри проекта",
         )
         subtitle.pack(anchor=tk.W, pady=(0, 8))
 

@@ -97,7 +97,7 @@ class InteractiveDashboardR1Tests(unittest.TestCase):
             "metric-sort",
         }
         self.assertEqual(required_ids - parser.ids, set())
-        self.assertIn("CSV защищён от spreadsheet-formula injection", html)
+        self.assertIn("CSV защищён от внедрения формул электронных таблиц.", html)
         self.assertIn('aria-modal="true"', html)
 
     def test_source_content_is_escaped_and_dom_sinks_are_forbidden(self):

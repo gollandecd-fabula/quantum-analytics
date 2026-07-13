@@ -108,7 +108,7 @@ namespace QuantumOfflineSetup
                 string actualBundleHash = HashFile(bundlePath);
                 if (!String.Equals(actualBundleHash, ExpectedBundleSha256, StringComparison.OrdinalIgnoreCase))
                 {
-                    throw new InvalidDataException("Embedded Quantum offline bundle SHA-256 mismatch.");
+                    throw new InvalidDataException("SHA-256 \u0432\u0441\u0442\u0440\u043e\u0435\u043d\u043d\u043e\u0433\u043e \u0430\u0432\u0442\u043e\u043d\u043e\u043c\u043d\u043e\u0433\u043e \u043f\u0430\u043a\u0435\u0442\u0430 Quantum \u043d\u0435 \u0441\u043e\u0432\u043f\u0430\u0434\u0430\u0435\u0442 \u0441 \u043e\u0436\u0438\u0434\u0430\u0435\u043c\u044b\u043c \u0437\u043d\u0430\u0447\u0435\u043d\u0438\u0435\u043c.");
                 }
 
                 string expandedRoot = Path.Combine(temporaryRoot, "expanded");
@@ -127,18 +127,18 @@ namespace QuantumOfflineSetup
                     File.ReadAllText(manifestPath, Encoding.UTF8)) as Dictionary<string, object>;
                 if (manifest == null)
                 {
-                    throw new InvalidDataException("Embedded installer manifest is invalid.");
+                    throw new InvalidDataException("\u0412\u0441\u0442\u0440\u043e\u0435\u043d\u043d\u044b\u0439 \u043c\u0430\u043d\u0438\u0444\u0435\u0441\u0442 \u0443\u0441\u0442\u0430\u043d\u043e\u0432\u0449\u0438\u043a\u0430 \u043d\u0435\u043a\u043e\u0440\u0440\u0435\u043a\u0442\u0435\u043d.");
                 }
                 string manifestCommit = ReadManifestString(manifest, "source_commit");
                 string expectedQuantumHash = ReadManifestString(manifest, "quantum_package_sha256");
                 if (!String.Equals(manifestCommit, ExpectedSourceCommit, StringComparison.OrdinalIgnoreCase))
                 {
-                    throw new InvalidDataException("Embedded installer source commit mismatch.");
+                    throw new InvalidDataException("Commit \u0438\u0441\u0445\u043e\u0434\u043d\u043e\u0433\u043e \u043a\u043e\u0434\u0430 \u0432\u0441\u0442\u0440\u043e\u0435\u043d\u043d\u043e\u0433\u043e \u0443\u0441\u0442\u0430\u043d\u043e\u0432\u0449\u0438\u043a\u0430 \u043d\u0435 \u0441\u043e\u0432\u043f\u0430\u0434\u0430\u0435\u0442 \u0441 \u043e\u0436\u0438\u0434\u0430\u0435\u043c\u044b\u043c.");
                 }
                 string actualQuantumHash = HashFile(quantumPackagePath);
                 if (!String.Equals(actualQuantumHash, expectedQuantumHash, StringComparison.OrdinalIgnoreCase))
                 {
-                    throw new InvalidDataException("Embedded Quantum package hash does not match its bundle manifest.");
+                    throw new InvalidDataException("\u0425\u0435\u0448 \u0432\u0441\u0442\u0440\u043e\u0435\u043d\u043d\u043e\u0433\u043e \u043f\u0430\u043a\u0435\u0442\u0430 Quantum \u043d\u0435 \u0441\u043e\u0432\u043f\u0430\u0434\u0430\u0435\u0442 \u0441 \u043c\u0430\u043d\u0438\u0444\u0435\u0441\u0442\u043e\u043c.");
                 }
 
                 if (args.Length == 2 && String.Equals(args[0], "--self-test", StringComparison.Ordinal))
@@ -148,7 +148,7 @@ namespace QuantumOfflineSetup
                 }
                 if (args.Length != 0)
                 {
-                    throw new ArgumentException("Unsupported Quantum setup arguments.");
+                    throw new ArgumentException("\u041f\u0435\u0440\u0435\u0434\u0430\u043d\u044b \u043d\u0435\u043f\u043e\u0434\u0434\u0435\u0440\u0436\u0438\u0432\u0430\u0435\u043c\u044b\u0435 \u0430\u0440\u0433\u0443\u043c\u0435\u043d\u0442\u044b \u0443\u0441\u0442\u0430\u043d\u043e\u0432\u0449\u0438\u043a\u0430 Quantum.");
                 }
 
                 ProcessStartInfo startInfo = new ProcessStartInfo();
@@ -159,7 +159,7 @@ namespace QuantumOfflineSetup
                 {
                     if (process == null)
                     {
-                        throw new InvalidOperationException("Quantum offline installer did not start.");
+                        throw new InvalidOperationException("\u0410\u0432\u0442\u043e\u043d\u043e\u043c\u043d\u044b\u0439 \u0443\u0441\u0442\u0430\u043d\u043e\u0432\u0449\u0438\u043a Quantum \u043d\u0435 \u0437\u0430\u043f\u0443\u0441\u0442\u0438\u043b\u0441\u044f.");
                     }
                     process.WaitForExit();
                     return process.ExitCode;
@@ -193,7 +193,7 @@ namespace QuantumOfflineSetup
             {
                 if (resource == null)
                 {
-                    throw new InvalidDataException("Embedded Quantum offline bundle is missing.");
+                    throw new InvalidDataException("\u0412\u0441\u0442\u0440\u043e\u0435\u043d\u043d\u044b\u0439 \u0430\u0432\u0442\u043e\u043d\u043e\u043c\u043d\u044b\u0439 \u043f\u0430\u043a\u0435\u0442 Quantum \u043e\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0443\u0435\u0442.");
                 }
                 using (FileStream destination = new FileStream(destinationPath, FileMode.CreateNew, FileAccess.Write, FileShare.None))
                 {
@@ -206,7 +206,7 @@ namespace QuantumOfflineSetup
         {
             if (!File.Exists(path))
             {
-                throw new FileNotFoundException("Required embedded installer file is missing.", path);
+                throw new FileNotFoundException("\u041e\u0431\u044f\u0437\u0430\u0442\u0435\u043b\u044c\u043d\u044b\u0439 \u0432\u0441\u0442\u0440\u043e\u0435\u043d\u043d\u044b\u0439 \u0444\u0430\u0439\u043b \u0443\u0441\u0442\u0430\u043d\u043e\u0432\u0449\u0438\u043a\u0430 \u043e\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0443\u0435\u0442.", path);
             }
         }
 
@@ -215,12 +215,12 @@ namespace QuantumOfflineSetup
             object value;
             if (!manifest.TryGetValue(key, out value) || value == null)
             {
-                throw new InvalidDataException("Embedded installer manifest field is missing: " + key);
+                throw new InvalidDataException("\u0412 \u043c\u0430\u043d\u0438\u0444\u0435\u0441\u0442\u0435 \u0432\u0441\u0442\u0440\u043e\u0435\u043d\u043d\u043e\u0433\u043e \u0443\u0441\u0442\u0430\u043d\u043e\u0432\u0449\u0438\u043a\u0430 \u043e\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0443\u0435\u0442 \u043f\u043e\u043b\u0435: " + key);
             }
             string text = Convert.ToString(value, CultureInfo.InvariantCulture);
             if (String.IsNullOrWhiteSpace(text))
             {
-                throw new InvalidDataException("Embedded installer manifest field is empty: " + key);
+                throw new InvalidDataException("\u041f\u043e\u043b\u0435 \u043c\u0430\u043d\u0438\u0444\u0435\u0441\u0442\u0430 \u0432\u0441\u0442\u0440\u043e\u0435\u043d\u043d\u043e\u0433\u043e \u0443\u0441\u0442\u0430\u043d\u043e\u0432\u0449\u0438\u043a\u0430 \u043f\u0443\u0441\u0442\u043e: " + key);
             }
             return text.Trim();
         }
@@ -247,7 +247,7 @@ namespace QuantumOfflineSetup
         {
             if (String.IsNullOrWhiteSpace(resultPath))
             {
-                throw new ArgumentException("Self-test result path is required.");
+                throw new ArgumentException("\u041d\u0435\u043e\u0431\u0445\u043e\u0434\u0438\u043c\u043e \u0443\u043a\u0430\u0437\u0430\u0442\u044c \u043f\u0443\u0442\u044c \u0434\u043b\u044f \u0440\u0435\u0437\u0443\u043b\u044c\u0442\u0430\u0442\u0430 \u0441\u0430\u043c\u043e\u043f\u0440\u043e\u0432\u0435\u0440\u043a\u0438.");
             }
             string fullResultPath = Path.GetFullPath(resultPath);
             string directory = Path.GetDirectoryName(fullResultPath);

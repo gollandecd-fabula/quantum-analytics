@@ -19,8 +19,8 @@ function recommendationCard(item){
   const card=el('article',`recommendation-card rec-${String(item.severity||'LOW').toLowerCase()}`);
   const head=el('div','rec-head'), badges=el('div','rec-badges'); append(badges,badge(item.severity,severityLabel(item)),badge(item.priority_dimension,priorityLabel(item)),badge(item.category,categoryLabel(item)));
   const detail=el('button','button button-quiet button-small','Подробнее'); detail.type='button'; detail.addEventListener('click',()=>openRecommendation(item,detail)); append(head,badges,detail);
-  const foot=el('div','rec-foot'); append(foot,el('span','',`Уверенность: ${text(item.confidence_level||item.confidence?.state)}`),el('span','',`Evidence: ${(item.evidence_refs||[]).length}`));
-  append(card,head,el('h3','rec-title',actionLabel(item)),el('div','rec-reason',reasonLabel(item)),append(el('div','effect-grid'),effectCell('Текущий эффект',item.current_effect),effectCell('Прогноз min',item.forecast_effect_min||item.forecast_effect),effectCell('Прогноз max',item.forecast_effect_max||item.forecast_effect)),foot);
+  const foot=el('div','rec-foot'); append(foot,el('span','',`Уверенность: ${text(item.confidence_level||item.confidence?.state)}`),el('span','',`Основания: ${(item.evidence_refs||[]).length}`));
+  append(card,head,el('h3','rec-title',actionLabel(item)),el('div','rec-reason',reasonLabel(item)),append(el('div','effect-grid'),effectCell('Текущий эффект',item.current_effect),effectCell('Минимальный прогноз',item.forecast_effect_min||item.forecast_effect),effectCell('Максимальный прогноз',item.forecast_effect_max||item.forecast_effect)),foot);
   return card;
 }
 function renderRecommendations(){
@@ -37,7 +37,7 @@ function bindRecFilters(){
 }
 function exportRecommendations(){
   const rows=filteredRecommendations();
-  const header=['severity','priority','category','action','reason','current_effect','forecast_min','forecast_max','confidence','evidence','limitations'];
+  const header=['срочность','приоритет','категория','действие','причина','текущий_эффект','минимальный_прогноз','максимальный_прогноз','уверенность','основания','ограничения'];
   const data=[header,...rows.map(item=>[item.severity,item.priority_dimension,item.category,actionLabel(item),reasonLabel(item),effectText(item.current_effect),effectText(item.forecast_effect_min||item.forecast_effect),effectText(item.forecast_effect_max||item.forecast_effect),item.confidence_level||item.confidence?.state,(item.evidence_refs||[]).join(' | '),(item.limitations||[]).join(' | ')])];
   const csv='\uFEFF'+data.map(row=>row.map(safeCsv).join(';')).join('\r\n');
   const blob=new Blob([csv],{type:'text/csv;charset=utf-8'}); const url=URL.createObjectURL(blob); const link=document.createElement('a');

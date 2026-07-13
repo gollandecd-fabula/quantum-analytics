@@ -149,10 +149,9 @@ class WindowsPowerShellCompatibilityTests(unittest.TestCase):
             '$preview.PSObject.Properties["schema_discovery"]',
             helper,
         )
-        self.assertIn(
-            'throw "Schema preview does not contain schema_discovery."',
-            helper,
-        )
+        self.assertIn('schema_discovery', helper)
+        self.assertIn('Get-QuantumRussianText', helper)
+        self.assertNotIn('Schema preview does not contain schema_discovery.', helper)
         self.assertNotIn("$preview.schema.", helper)
 
     def test_real_office_namespace_regression_suite(self):

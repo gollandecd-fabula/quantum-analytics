@@ -1,10 +1,27 @@
 from __future__ import annotations
 
 from pathlib import Path
+import base64
+import re
 import unittest
 
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def _decoded_user_text(script: str) -> str:
+    decoded: list[str] = []
+    for token in re.findall(r'"([A-Za-z0-9+/]{16,}={0,2})"', script):
+        try:
+            value = base64.b64decode(token, validate=True).decode("utf-8")
+        except (ValueError, UnicodeDecodeError):
+            continue
+        decoded.append(value)
+    return "\n".join(decoded)
+
+
+def _decode_csharp_unicode(script: str) -> str:
+    return re.sub(r"\\u([0-9a-fA-F]{4})", lambda match: chr(int(match.group(1), 16)), script)
 
 
 class TzCorrectionAndExeInstallerTests(unittest.TestCase):
@@ -44,10 +61,7 @@ class TzCorrectionAndExeInstallerTests(unittest.TestCase):
     def test_wb_only_policy_lives_in_home_local_release_layer(self) -> None:
         self.assertIn('release_scope = "WB_ONLY"', self.configurator)
         self.assertIn('deferred_marketplaces = @("OZON")', self.configurator)
-        self.assertIn(
-            'This HOME_LOCAL release supports only WILDBERRIES. Ozon is deferred.',
-            self.configurator,
-        )
+        self.assertIn('Эта версия HOME_LOCAL поддерживает только WILDBERRIES.', _decoded_user_text(self.configurator))
         self.assertIn('"WB_ONLY": frozenset({"WILDBERRIES"})', self.bridge)
         self.assertIn("MARKETPLACE_OUTSIDE_RELEASE_SCOPE", self.bridge)
 
@@ -56,8 +70,10 @@ class TzCorrectionAndExeInstallerTests(unittest.TestCase):
         self.assertIn("QuantumOfflineBundle.zip", self.exe_builder)
         self.assertIn("ExpectedBundleSha256", self.exe_builder)
         self.assertIn("ExpectedSourceCommit", self.exe_builder)
-        self.assertIn("Embedded Quantum offline bundle SHA-256 mismatch.", self.exe_builder)
-        self.assertIn("Embedded installer source commit mismatch.", self.exe_builder)
+        decoded_exe = _decode_csharp_unicode(self.exe_builder)
+        self.assertIn("SHA-256 встроенного автономного пакета Quantum", decoded_exe)
+        self.assertIn("Commit исходного кода встроенного установщика", decoded_exe)
+        self.assertNotIn("Embedded Quantum offline bundle SHA-256 mismatch.", self.exe_builder)
         self.assertIn('String.Equals(args[0], "--self-test"', self.exe_builder)
         self.assertIn('result["native_self_test"] = true', self.exe_builder)
         self.assertIn('release_scope = "WB_ONLY"', self.exe_builder)

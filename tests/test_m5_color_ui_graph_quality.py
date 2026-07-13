@@ -125,12 +125,13 @@ class M5ColorUiGraphQualityTests(unittest.TestCase):
         self.assertIn("@media (max-width: 520px)", DASHBOARD_CSS)
 
     def test_zero_counts_remain_zero_instead_of_not_available(self) -> None:
-        self.assertIn("value!==undefined&&value!==null&&value!==''", DASHBOARD_JS_CORE)
+        self.assertIn("label!==undefined&&label!==null&&label!==''", DASHBOARD_JS_CORE)
+        self.assertIn("stateLabel(value)", DASHBOARD_JS_CORE)
         self.assertNotIn("label||value||'NOT_AVAILABLE'", DASHBOARD_JS_CORE)
 
     def test_marketplace_write_boundary_remains_visible_and_disabled(self) -> None:
-        self.assertIn("Marketplace writes: disabled", DASHBOARD_JS_CORE)
-        self.assertIn("READ ONLY", DASHBOARD_BODY)
+        self.assertIn("Запись на маркетплейс: отключена", DASHBOARD_JS_CORE)
+        self.assertIn("ТОЛЬКО ЧТЕНИЕ", DASHBOARD_BODY)
         self.assertNotIn("CONFIRM_AND_EXECUTE", DASHBOARD_JS)
         self.assertNotIn("marketplace_write_enabled=true", DASHBOARD_JS)
 

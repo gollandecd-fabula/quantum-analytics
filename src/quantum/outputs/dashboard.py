@@ -43,7 +43,7 @@ def render_dashboard_html(bundle: Mapping[str, Any]) -> bytes:
 <meta name="color-scheme" content="light">
 <meta name="referrer" content="no-referrer">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:; connect-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'">
-<title>Quantum Analytics — локальный интерактивный отчёт</title>
+<title>Центр решений Quantum — локальный интерактивный отчёт</title>
 <style>__DASHBOARD_CSS__</style>
 </head>
 <body data-dashboard-schema="__DASHBOARD_SCHEMA__">

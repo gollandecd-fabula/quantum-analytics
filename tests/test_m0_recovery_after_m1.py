@@ -1,18 +1,29 @@
 from __future__ import annotations
 
+import base64
+import re
 import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def _surface(text: str) -> str:
+    decoded = [
+        base64.b64decode(value, validate=True).decode("utf-8")
+        for value in re.findall(r'-Encoded\s+["\']([A-Za-z0-9+/=]{16,})["\']', text)
+    ]
+    return text + "\n" + "\n".join(decoded)
+
+
 class M0RecoveryAfterM1Tests(unittest.TestCase):
     def test_external_ready_config_is_persisted_fail_closed(self) -> None:
         text = (ROOT / "scripts/windows/one_click_home_local.ps1").read_text(encoding="utf-8")
         self.assertIn('Join-Path $TargetRoot "config\\default-home-local.json"', text)
-        self.assertIn("The supplied configuration conflicts with the existing managed configuration", text)
+        surface = _surface(text)
+        self.assertIn("Переданная конфигурация конфликтует с существующей управляемой конфигурацией", surface)
         self.assertIn("Move-Item -LiteralPath $temporaryConfig -Destination $managedConfig -Force", text)
-        self.assertIn("Supplied configuration persisted inside HOME_LOCAL", text)
+        self.assertIn("Переданная конфигурация сохранена в HOME_LOCAL", surface)
 
     def test_versioned_gate_scripts_publish_explicit_exit_contract(self) -> None:
         for relative in (

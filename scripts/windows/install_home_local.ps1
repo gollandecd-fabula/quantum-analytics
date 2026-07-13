@@ -7,11 +7,23 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
+function Get-QuantumRussianText {
+    param(
+        [Parameter(Mandatory = $true)][string]$Encoded,
+        [object[]]$Arguments = @()
+    )
+    $text = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($Encoded))
+    if ($Arguments.Count -gt 0) {
+        return [string]::Format([Globalization.CultureInfo]::InvariantCulture, $text, $Arguments)
+    }
+    return $text
+}
+
 function Invoke-Icacls {
     param([string]$Path, [string[]]$Arguments, [string]$Operation)
     & icacls.exe $Path @Arguments | Out-Host
     if ($LASTEXITCODE -ne 0) {
-        throw "$Operation failed for $Path with exit code $LASTEXITCODE"
+        throw (Get-QuantumRussianText -Encoded "0J7Qv9C10YDQsNGG0LjRjyB7MH0g0LTQu9GPIHsxfSDQt9Cw0LLQtdGA0YjQuNC70LDRgdGMINC+0YjQuNCx0LrQvtC5LiDQmtC+0LQg0LLRi9GF0L7QtNCwOiB7Mn0u" -Arguments @($Operation, $Path, $LASTEXITCODE))
     }
 }
 
@@ -30,25 +42,25 @@ function New-QuantumShortcut {
     try {
         $desktop = [Environment]::GetFolderPath("Desktop")
         if ([string]::IsNullOrWhiteSpace($desktop)) { return }
-        $path = Join-Path $desktop "Quantum HOME_LOCAL.lnk"
+        $path = Join-Path $desktop (Get-QuantumRussianText -Encoded "0KbQtdC90YLRgCDRgNC10YjQtdC90LjQuSBRdWFudHVtLmxuaw==")
         $shell = New-Object -ComObject WScript.Shell
         $shortcut = $shell.CreateShortcut($path)
         $shortcut.TargetPath = $Launcher
         $shortcut.WorkingDirectory = $WorkingDirectory
-        $shortcut.Description = "Quantum HOME_LOCAL - local pilot launcher"
+        $shortcut.Description = Get-QuantumRussianText -Encoded "0KbQtdC90YLRgCDRgNC10YjQtdC90LjQuSBRdWFudHVtIOKAlCDQu9C+0LrQsNC70YzQvdGL0Lkg0LfQsNC/0YPRgdC6"
         $shortcut.IconLocation = "$env:SystemRoot\System32\shell32.dll,167"
         $shortcut.Save()
-        Write-Host "Desktop shortcut created: $path"
+        Write-Host (Get-QuantumRussianText -Encoded "0K/RgNC70YvQuiDQvdCwINGA0LDQsdC+0YfQtdC8INGB0YLQvtC70LUg0YHQvtC30LTQsNC9OiB7MH0=" -Arguments @($path))
     }
     catch {
-        Write-Warning "Desktop shortcut could not be created: $($_.Exception.GetType().Name)"
+        Write-Warning (Get-QuantumRussianText -Encoded "0J3QtSDRg9C00LDQu9C+0YHRjCDRgdC+0LfQtNCw0YLRjCDRj9GA0LvRi9C6INC90LAg0YDQsNCx0L7Rh9C10Lwg0YHRgtC+0LvQtTogezB9" -Arguments @($($_.Exception.GetType().Name)))
     }
 }
 
 function Get-PortablePath {
     param([string]$FullPath, [string]$RootPrefix)
     if (-not $FullPath.StartsWith($RootPrefix, [StringComparison]::OrdinalIgnoreCase)) {
-        throw "Package path escaped the package root: $FullPath"
+        throw (Get-QuantumRussianText -Encoded "0J/Rg9GC0Ywg0L/QsNC60LXRgtCwINCy0YvRhdC+0LTQuNGCINC30LAg0L/RgNC10LTQtdC70Ysg0LrQvtGA0L3QtdCy0L7QuSDQv9Cw0L/QutC4OiB7MH0=" -Arguments @($FullPath))
     }
     return $FullPath.Substring($RootPrefix.Length).Replace("\", "/")
 }
@@ -57,19 +69,19 @@ function Assert-PackageManifest {
     param([string]$Root)
     $manifestPath = Join-Path $Root "manifest.sha256.json"
     if (-not (Test-Path -LiteralPath $manifestPath -PathType Leaf)) {
-        throw "Package manifest is missing: $manifestPath"
+        throw (Get-QuantumRussianText -Encoded "0JzQsNC90LjRhNC10YHRgiDQv9Cw0LrQtdGC0LAg0L7RgtGB0YPRgtGB0YLQstGD0LXRgjogezB9" -Arguments @($manifestPath))
     }
     try { $manifest = Get-Content -LiteralPath $manifestPath -Raw -Encoding UTF8 | ConvertFrom-Json }
-    catch { throw "Package manifest is not valid JSON: $manifestPath" }
+    catch { throw (Get-QuantumRussianText -Encoded "0JzQsNC90LjRhNC10YHRgiDQv9Cw0LrQtdGC0LAg0L3QtSDRj9Cy0LvRj9C10YLRgdGPINC60L7RgNGA0LXQutGC0L3Ri9C8IEpTT046IHswfQ==" -Arguments @($manifestPath)) }
 
-    if ([string]$manifest.package -ne "QuantumLocalProduction_HOME_LOCAL") { throw "Unexpected package identity in manifest." }
-    if ([string]$manifest.release_state -ne "RELEASE_BLOCKED") { throw "Unexpected package release state." }
-    if ($manifest.marketplace_write_enabled -ne $false) { throw "Marketplace writes must remain disabled in HOME_LOCAL." }
-    if ($manifest.manifest_excludes_self -ne $true) { throw "Package manifest self-exclusion contract is invalid." }
-    if ([string]$manifest.source_commit -notmatch "^[0-9a-fA-F]{40}$") { throw "Package source commit is missing or malformed." }
+    if ([string]$manifest.package -ne "QuantumLocalProduction_HOME_LOCAL") { throw (Get-QuantumRussianText -Encoded "0JIg0LzQsNC90LjRhNC10YHRgtC1INGD0LrQsNC30LDQvdCwINC90LXQvtC20LjQtNCw0L3QvdCw0Y8g0LjQtNC10L3RgtC40YTQuNC60LDRhtC40Y8g0L/QsNC60LXRgtCwLg==") }
+    if ([string]$manifest.release_state -ne "RELEASE_BLOCKED") { throw (Get-QuantumRussianText -Encoded "0JIg0LzQsNC90LjRhNC10YHRgtC1INGD0LrQsNC30LDQvdC+INC90LXQvtC20LjQtNCw0L3QvdC+0LUg0YHQvtGB0YLQvtGP0L3QuNC1INCy0LXRgNGB0LjQuC4=") }
+    if ($manifest.marketplace_write_enabled -ne $false) { throw (Get-QuantumRussianText -Encoded "0JfQsNC/0LjRgdGMINC90LAg0LzQsNGA0LrQtdGC0L/Qu9C10LnRgSDQtNC+0LvQttC90LAg0L7RgdGC0LDQstCw0YLRjNGB0Y8g0L7RgtC60LvRjtGH0ZHQvdC90L7QuSDQsiBIT01FX0xPQ0FMLg==") }
+    if ($manifest.manifest_excludes_self -ne $true) { throw (Get-QuantumRussianText -Encoded "0JrQvtC90YLRgNCw0LrRgiDRgdCw0LzQvtC40YHQutC70Y7Rh9C10L3QuNGPINC80LDQvdC40YTQtdGB0YLQsCDQv9Cw0LrQtdGC0LAg0L3QtdC60L7RgNGA0LXQutGC0LXQvS4=") }
+    if ([string]$manifest.source_commit -notmatch "^[0-9a-fA-F]{40}$") { throw (Get-QuantumRussianText -Encoded "Q29tbWl0INC40YHRhdC+0LTQvdC+0LPQviDQutC+0LTQsCDQv9Cw0LrQtdGC0LAg0L7RgtGB0YPRgtGB0YLQstGD0LXRgiDQuNC70Lgg0LjQvNC10LXRgiDQvdC10LLQtdGA0L3Ri9C5INGE0L7RgNC80LDRgi4=") }
 
     $entries = @($manifest.files)
-    if ($entries.Count -lt 1) { throw "Package manifest contains no files." }
+    if ($entries.Count -lt 1) { throw (Get-QuantumRussianText -Encoded "0JzQsNC90LjRhNC10YHRgiDQv9Cw0LrQtdGC0LAg0L3QtSDRgdC+0LTQtdGA0LbQuNGCINGE0LDQudC70L7Qsi4=") }
     $rootFull = (Get-Item -LiteralPath $Root).FullName.TrimEnd([char[]]"\/")
     $prefix = $rootFull + [IO.Path]::DirectorySeparatorChar
     $manifestFull = (Get-Item -LiteralPath $manifestPath).FullName
@@ -77,21 +89,21 @@ function Assert-PackageManifest {
 
     foreach ($entry in $entries) {
         $relative = [string]$entry.path
-        if ([string]::IsNullOrWhiteSpace($relative)) { throw "Package manifest contains an empty path." }
+        if ([string]::IsNullOrWhiteSpace($relative)) { throw (Get-QuantumRussianText -Encoded "0JzQsNC90LjRhNC10YHRgiDQv9Cw0LrQtdGC0LAg0YHQvtC00LXRgNC20LjRgiDQv9GD0YHRgtC+0Lkg0L/Rg9GC0Ywu") }
         $normalized = $relative.Replace("/", "\")
-        if ([IO.Path]::IsPathRooted($normalized)) { throw "Package manifest contains a rooted path: $relative" }
+        if ([IO.Path]::IsPathRooted($normalized)) { throw (Get-QuantumRussianText -Encoded "0JzQsNC90LjRhNC10YHRgiDQv9Cw0LrQtdGC0LAg0YHQvtC00LXRgNC20LjRgiDQsNCx0YHQvtC70Y7RgtC90YvQuSDQv9GD0YLRjDogezB9" -Arguments @($relative)) }
         $parts = @($normalized.Split("\"))
         if (@($parts | Where-Object { [string]::IsNullOrWhiteSpace($_) -or $_ -in @(".", "..") }).Count -gt 0) {
-            throw "Package manifest contains an unsafe path: $relative"
+            throw (Get-QuantumRussianText -Encoded "0JzQsNC90LjRhNC10YHRgiDQv9Cw0LrQtdGC0LAg0YHQvtC00LXRgNC20LjRgiDQvdC10LHQtdC30L7Qv9Cw0YHQvdGL0Lkg0L/Rg9GC0Yw6IHswfQ==" -Arguments @($relative))
         }
         $full = [IO.Path]::GetFullPath((Join-Path $rootFull $normalized))
         $portable = Get-PortablePath -FullPath $full -RootPrefix $prefix
-        if (-not $declared.Add($portable)) { throw "Package manifest contains a duplicate path: $portable" }
-        if (-not (Test-Path -LiteralPath $full -PathType Leaf)) { throw "Manifest file is missing: $portable" }
+        if (-not $declared.Add($portable)) { throw (Get-QuantumRussianText -Encoded "0JzQsNC90LjRhNC10YHRgiDQv9Cw0LrQtdGC0LAg0YHQvtC00LXRgNC20LjRgiDQv9C+0LLRgtC+0YDRj9GO0YnQuNC50YHRjyDQv9GD0YLRjDogezB9" -Arguments @($portable)) }
+        if (-not (Test-Path -LiteralPath $full -PathType Leaf)) { throw (Get-QuantumRussianText -Encoded "0KTQsNC50LssINGD0LrQsNC30LDQvdC90YvQuSDQsiDQvNCw0L3QuNGE0LXRgdGC0LUsINC+0YLRgdGD0YLRgdGC0LLRg9C10YI6IHswfQ==" -Arguments @($portable)) }
         $item = Get-Item -LiteralPath $full
-        if ([int64]$entry.size_bytes -ne [int64]$item.Length) { throw "Manifest size mismatch: $portable" }
+        if ([int64]$entry.size_bytes -ne [int64]$item.Length) { throw (Get-QuantumRussianText -Encoded "0KDQsNC30LzQtdGAINGE0LDQudC70LAg0L3QtSDRgdC+0LLQv9Cw0LTQsNC10YIg0YEg0LzQsNC90LjRhNC10YHRgtC+0Lw6IHswfQ==" -Arguments @($portable)) }
         $hash = (Get-FileHash -LiteralPath $full -Algorithm SHA256).Hash.ToLowerInvariant()
-        if ($hash -ne ([string]$entry.sha256).ToLowerInvariant()) { throw "Manifest hash mismatch: $portable" }
+        if ($hash -ne ([string]$entry.sha256).ToLowerInvariant()) { throw (Get-QuantumRussianText -Encoded "0KXQtdGIINGE0LDQudC70LAg0L3QtSDRgdC+0LLQv9Cw0LTQsNC10YIg0YEg0LzQsNC90LjRhNC10YHRgtC+0Lw6IHswfQ==" -Arguments @($portable)) }
     }
 
     $actual = [Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
@@ -99,14 +111,14 @@ function Assert-PackageManifest {
         $full = [IO.Path]::GetFullPath($item.FullName)
         if ($full.Equals($manifestFull, [StringComparison]::OrdinalIgnoreCase)) { continue }
         $portable = Get-PortablePath -FullPath $full -RootPrefix $prefix
-        if (-not $actual.Add($portable)) { throw "Package contains a duplicate filesystem path: $portable" }
-        if (-not $declared.Contains($portable)) { throw "Package contains an unmanifested file: $portable" }
+        if (-not $actual.Add($portable)) { throw (Get-QuantumRussianText -Encoded "0J/QsNC60LXRgiDRgdC+0LTQtdGA0LbQuNGCINC/0L7QstGC0L7RgNGP0Y7RidC40LnRgdGPINC/0YPRgtGMINGE0LDQudC70L7QstC+0Lkg0YHQuNGB0YLQtdC80Ys6IHswfQ==" -Arguments @($portable)) }
+        if (-not $declared.Contains($portable)) { throw (Get-QuantumRussianText -Encoded "0J/QsNC60LXRgiDRgdC+0LTQtdGA0LbQuNGCINGE0LDQudC7LCDQvtGC0YHRg9GC0YHRgtCy0YPRjtGJ0LjQuSDQsiDQvNCw0L3QuNGE0LXRgdGC0LU6IHswfQ==" -Arguments @($portable)) }
     }
     foreach ($portable in $declared) {
-        if (-not $actual.Contains($portable)) { throw "Manifest-covered package file was not enumerated: $portable" }
+        if (-not $actual.Contains($portable)) { throw (Get-QuantumRussianText -Encoded "0KTQsNC50Lsg0LjQtyDQvNCw0L3QuNGE0LXRgdGC0LAg0L3QtSDQvdCw0LnQtNC10L0g0L/RgNC4INC/0YDQvtCy0LXRgNC60LUg0L/QsNC60LXRgtCwOiB7MH0=" -Arguments @($portable)) }
     }
     if ($actual.Count -ne $declared.Count) {
-        throw "Package inventory count mismatch after exact path comparison: actual=$($actual.Count), manifest=$($declared.Count)."
+        throw (Get-QuantumRussianText -Encoded "0J/QvtGB0LvQtSDRgtC+0YfQvdC+0LPQviDRgdGA0LDQstC90LXQvdC40Y8g0L/Rg9GC0LXQuSDRh9C40YHQu9C+INGE0LDQudC70L7QsiDQvdC1INGB0L7QstC/0LDQu9C+OiDRhNCw0LrRgtC40YfQtdGB0LrQuD17MH0sINCyINC80LDQvdC40YTQtdGB0YLQtT17MX0u" -Arguments @($($actual.Count), $($declared.Count)))
     }
     foreach ($required in @(
         "src/quantum/pilot/windows_runner.py",
@@ -117,7 +129,7 @@ function Assert-PackageManifest {
         "CONFIGURE_HOME_LOCAL.cmd",
         "START_QUANTUM.cmd"
     )) {
-        if (-not $declared.Contains($required)) { throw "Required package entry is not covered by the manifest: $required" }
+        if (-not $declared.Contains($required)) { throw (Get-QuantumRussianText -Encoded "0J7QsdGP0LfQsNGC0LXQu9GM0L3Ri9C5INGE0LDQudC7INC/0LDQutC10YLQsCDQvdC1INC/0L7QutGA0YvRgiDQvNCw0L3QuNGE0LXRgdGC0L7QvDogezB9" -Arguments @($required)) }
     }
     return $manifest
 }
@@ -134,13 +146,13 @@ $sourceLauncher = Join-Path $SourceRoot "scripts\import_source.ps1"
 $sourceConfigurator = Join-Path $SourceRoot "scripts\configure_home_local.ps1"
 $sourceOneClick = Join-Path $SourceRoot "scripts\one_click_home_local.ps1"
 foreach ($required in @($sourceLauncher, $sourceConfigurator, $sourceOneClick)) {
-    if (-not (Test-Path -LiteralPath $required -PathType Leaf)) { throw "Package script is missing: $required" }
+    if (-not (Test-Path -LiteralPath $required -PathType Leaf)) { throw (Get-QuantumRussianText -Encoded "0KHRhtC10L3QsNGA0LjQuSDQv9Cw0LrQtdGC0LAg0L7RgtGB0YPRgtGB0YLQstGD0LXRgjogezB9" -Arguments @($required)) }
 }
-if (-not (Test-Path -LiteralPath $sourceRuntime -PathType Container)) { throw "Package runtime directory is missing: $sourceRuntime" }
+if (-not (Test-Path -LiteralPath $sourceRuntime -PathType Container)) { throw (Get-QuantumRussianText -Encoded "0J/QsNC/0LrQsCDRgdGA0LXQtNGLINC/0LDQutC10YLQsCDQvtGC0YHRg9GC0YHRgtCy0YPQtdGCOiB7MH0=" -Arguments @($sourceRuntime)) }
 
 $runtimeTarget = [IO.Path]::GetFullPath((Join-Path $TargetRoot "src"))
 if ($sourceRuntime.TrimEnd("\", "/") -ieq $runtimeTarget.TrimEnd("\", "/")) {
-    throw "Installer must be run from an extracted package, not from the already installed runtime."
+    throw (Get-QuantumRussianText -Encoded "0KPRgdGC0LDQvdC+0LLRidC40Log0L3Rg9C20L3QviDQt9Cw0L/Rg9GB0LrQsNGC0Ywg0LjQtyDRgNCw0YHQv9Cw0LrQvtCy0LDQvdC90L7Qs9C+INC/0LDQutC10YLQsCwg0LAg0L3QtSDQuNC3INGD0LbQtSDRg9GB0YLQsNC90L7QstC70LXQvdC90L7QuSDRgdGA0LXQtNGLLg==")
 }
 
 New-Item -ItemType Directory -Path $TargetRoot -Force | Out-Null
@@ -179,7 +191,7 @@ try {
     New-Item -ItemType Directory -Path $fileStageRoot,$fileRollbackRoot -Force | Out-Null
     Copy-Item -LiteralPath $sourceRuntime -Destination $runtimeStage -Recurse -Force
     if (-not (Test-Path -LiteralPath (Join-Path $runtimeStage "quantum\pilot\windows_runner.py") -PathType Leaf)) {
-        throw "Staged runtime verification failed."
+        throw (Get-QuantumRussianText -Encoded "0J/RgNC+0LLQtdGA0LrQsCDQv9C+0LTQs9C+0YLQvtCy0LvQtdC90L3QvtC5INGB0YDQtdC00Ysg0LfQsNCy0LXRgNGI0LjQu9Cw0YHRjCDQvtGI0LjQsdC60L7QuS4=")
     }
 
     $stagedLauncher = Join-Path $fileStageRoot "import_source.ps1"
@@ -235,10 +247,10 @@ exit /b %quantum_exit%
 
     foreach ($replacement in $replacements) {
         if (-not (Test-Path -LiteralPath $replacement.Stage -PathType Leaf)) {
-            throw "Staged managed file is missing: $($replacement.Stage)"
+            throw (Get-QuantumRussianText -Encoded "0J/QvtC00LPQvtGC0L7QstC70LXQvdC90YvQuSDRg9C/0YDQsNCy0LvRj9C10LzRi9C5INGE0LDQudC7INC+0YLRgdGD0YLRgdGC0LLRg9C10YI6IHswfQ==" -Arguments @($($replacement.Stage)))
         }
         if ((Test-Path -LiteralPath $replacement.Target) -and -not (Test-Path -LiteralPath $replacement.Target -PathType Leaf)) {
-            throw "Managed installation target is not a file: $($replacement.Target)"
+            throw (Get-QuantumRussianText -Encoded "0KbQtdC70LXQstC+0Lkg0YPQv9GA0LDQstC70Y/QtdC80YvQuSDQvtCx0YrQtdC60YIg0YPRgdGC0LDQvdC+0LLQutC4INC90LUg0Y/QstC70Y/QtdGC0YHRjyDRhNCw0LnQu9C+0Lw6IHswfQ==" -Arguments @($($replacement.Target)))
         }
     }
 
@@ -287,11 +299,11 @@ exit /b %quantum_exit%
         $configureCommandTarget,
         $startCommandTarget
     )) {
-        if (-not (Test-Path -LiteralPath $required -PathType Leaf)) { throw "Installation verification failed: $required" }
+        if (-not (Test-Path -LiteralPath $required -PathType Leaf)) { throw (Get-QuantumRussianText -Encoded "0J/RgNC+0LLQtdGA0LrQsCDRg9GB0YLQsNC90L7QstC60Lgg0LfQsNCy0LXRgNGI0LjQu9Cw0YHRjCDQvtGI0LjQsdC60L7QuTogezB9" -Arguments @($required)) }
         $stream = [IO.File]::Open($required, [IO.FileMode]::Open, [IO.FileAccess]::Read, [IO.FileShare]::ReadWrite)
         $stream.Dispose()
     }
-    if (Test-Path -LiteralPath $obsoleteCommon) { throw "Obsolete managed script was not removed: $obsoleteCommon" }
+    if (Test-Path -LiteralPath $obsoleteCommon) { throw (Get-QuantumRussianText -Encoded "0KPRgdGC0LDRgNC10LLRiNC40Lkg0YPQv9GA0LDQstC70Y/QtdC80YvQuSDRgdGG0LXQvdCw0YDQuNC5INC90LUg0LHRi9C7INGD0LTQsNC70ZHQvTogezB9" -Arguments @($obsoleteCommon)) }
 }
 catch {
     $failure = $_
@@ -322,15 +334,15 @@ catch {
 
     Remove-Item -LiteralPath $transactionRoot -Recurse -Force -ErrorAction SilentlyContinue
     if ($rollbackErrors.Count -gt 0) {
-        throw "Installation failed: $($failure.Exception.Message). Rollback also failed: $($rollbackErrors -join '; ')"
+        throw (Get-QuantumRussianText -Encoded "0KPRgdGC0LDQvdC+0LLQutCwINC30LDQstC10YDRiNC40LvQsNGB0Ywg0L7RiNC40LHQutC+0Lk6IHswfS4g0J7RgtC60LDRgiDRgtCw0LrQttC1INC30LDQstC10YDRiNC40LvRgdGPINC+0YjQuNCx0LrQvtC5OiB7MX0=" -Arguments @($($failure.Exception.Message), $($rollbackErrors -join '; ')))
     }
     throw $failure
 }
 
 Remove-Item -LiteralPath $transactionRoot -Recurse -Force -ErrorAction SilentlyContinue
 New-QuantumShortcut -Launcher $startCommandTarget -WorkingDirectory $TargetRoot
-Write-Host "Quantum HOME_LOCAL runtime installed." -ForegroundColor Green
-Write-Host "Target: $TargetRoot"
-Write-Host "Existing config, data and output directories were preserved."
-Write-Host "One-click launch: $startCommandTarget"
-Write-Host "Recovery import launcher: $commandTarget"
+Write-Host (Get-QuantumRussianText -Encoded "0KHRgNC10LTQsCBRdWFudHVtIEhPTUVfTE9DQUwg0YPRgdGC0LDQvdC+0LLQu9C10L3QsC4=") -ForegroundColor Green
+Write-Host (Get-QuantumRussianText -Encoded "0J/QsNC/0LrQsCDRg9GB0YLQsNC90L7QstC60Lg6IHswfQ==" -Arguments @($TargetRoot))
+Write-Host (Get-QuantumRussianText -Encoded "0KHRg9GJ0LXRgdGC0LLRg9GO0YnQuNC1INC/0LDQv9C60LggY29uZmlnLCBkYXRhINC4IG91dHB1dCDRgdC+0YXRgNCw0L3QtdC90Ysu")
+Write-Host (Get-QuantumRussianText -Encoded "0JfQsNC/0YPRgdC6INC+0LTQvdC+0Lkg0LrQvdC+0L/QutC+0Lk6IHswfQ==" -Arguments @($startCommandTarget))
+Write-Host (Get-QuantumRussianText -Encoded "0J/RgNC+0LPRgNCw0LzQvNCwINCy0L7RgdGB0YLQsNC90L7QstC70LXQvdC40Y8g0LjQvNC/0L7RgNGC0LA6IHswfQ==" -Arguments @($commandTarget))

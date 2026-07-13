@@ -1,11 +1,22 @@
 from __future__ import annotations
 
 import ast
+import base64
 import json
+import re
 from pathlib import Path
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def _decoded_powershell_text(text: str) -> str:
+    decoded: list[str] = []
+    for encoded in re.findall(r'-Encoded\s+["\']([A-Za-z0-9+/=]{16,})["\']', text):
+        decoded.append(base64.b64decode(encoded, validate=True).decode("utf-8"))
+    for encoded in re.findall(r'FromBase64String\("([A-Za-z0-9+/=]{16,})"\)', text):
+        decoded.append(base64.b64decode(encoded, validate=True).decode("utf-8"))
+    return text + "\n" + "\n".join(decoded)
 
 
 class M0AttestationRedTeamTests(unittest.TestCase):
@@ -33,7 +44,7 @@ class M0AttestationRedTeamTests(unittest.TestCase):
         self.assertNotIn("if ($NonInteractive -or ($AuthorityAttested -and $SchemaReviewed))", script)
         self.assertIn("if ($NonInteractive)", script)
         self.assertIn("-not $AuthorityAttested -or -not $SchemaReviewed", script)
-        self.assertIn("Non-interactive mode requires explicit AuthorityAttested and SchemaReviewed switches.", script)
+        self.assertIn("В неинтерактивном режиме необходимо явно подтвердить AuthorityAttested и SchemaReviewed.", _decoded_powershell_text(script))
 
     def test_gui_uses_visible_interactive_console_without_auto_attestation(self):
         source = self.read("src/quantum/application/local_app.py")
@@ -59,8 +70,9 @@ class M0AttestationRedTeamTests(unittest.TestCase):
         self.assertIn("MalwareScanOutcome", helper)
         self.assertIn("malware_scan_outcome", helper)
         self.assertIn("$scanReceipt.receipt.outcome", helper)
-        self.assertIn("Configured reporting period", helper)
-        self.assertIn("schema and reporting period", helper)
+        decoded = _decoded_powershell_text(helper)
+        self.assertIn("Настроенный отчётный период", decoded)
+        self.assertIn("схему и отчётный период", decoded)
 
     def test_schema_review_is_bound_only_after_reviewed_execution_path(self):
         runner = self.read("src/quantum/pilot/windows_runner.py")
@@ -106,10 +118,10 @@ class M0AttestationRedTeamTests(unittest.TestCase):
 
     def test_readme_requires_real_operator_confirmations(self):
         builder = self.read("scripts/windows/build_local_production.ps1")
-        readme = builder.split("$readme = @'", 1)[1].split("'@", 1)[0]
-        self.assertIn("Type AUTHORIZE", readme)
-        self.assertIn("type REVIEWED", readme)
-        self.assertIn("Launchers never attest on your behalf", readme)
+        readme = _decoded_powershell_text(builder)
+        self.assertIn("Введите AUTHORIZE", readme)
+        self.assertIn("введите REVIEWED", readme)
+        self.assertIn("Программы запуска никогда не подтверждают AUTHORIZE или REVIEWED за пользователя", readme)
         self.assertNotIn("No AUTHORIZE or REVIEWED", readme)
 
     @staticmethod

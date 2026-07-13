@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import base64
 import re
 import unittest
 
@@ -8,6 +9,18 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 WINDOWS = ROOT / "scripts" / "windows"
 PILOT = ROOT / "src" / "quantum" / "pilot"
+
+
+def _decoded_user_text(script: str) -> str:
+    decoded: list[str] = []
+    for token in re.findall(r'"([A-Za-z0-9+/]{16,}={0,2})"', script):
+        try:
+            value = base64.b64decode(token, validate=True).decode("utf-8")
+        except (ValueError, UnicodeDecodeError):
+            continue
+        if any("А" <= character <= "я" or character in "Ёё" for character in value):
+            decoded.append(value)
+    return "\n".join(decoded)
 
 
 class WindowsOneClickInstallerR1Tests(unittest.TestCase):
@@ -18,12 +31,17 @@ class WindowsOneClickInstallerR1Tests(unittest.TestCase):
         cls.xlsx_helper = (PILOT / "import_xlsx_source.ps1").read_text(encoding="utf-8")
         cls.installer = (WINDOWS / "install_home_local.ps1").read_text(encoding="utf-8")
         cls.builder = (WINDOWS / "build_local_production.ps1").read_text(encoding="utf-8")
+        cls.one_click_ru = _decoded_user_text(cls.one_click)
+        cls.importer_ru = _decoded_user_text(cls.importer)
+        cls.xlsx_helper_ru = _decoded_user_text(cls.xlsx_helper)
+        cls.installer_ru = _decoded_user_text(cls.installer)
+        cls.builder_ru = _decoded_user_text(cls.builder)
 
     def test_package_exposes_one_primary_start_command(self):
         self.assertIn('START_QUANTUM.cmd', self.builder)
         self.assertIn('scripts\\one_click_home_local.ps1', self.builder)
         self.assertIn('-PackageRoot "%~dp0"', self.builder)
-        self.assertIn('Double-click START_QUANTUM.cmd', self.builder)
+        self.assertIn('Дважды нажмите START_QUANTUM.cmd.', self.builder_ru)
         self.assertIn('package_version = "R3_ONE_CLICK"', self.builder)
 
     def test_package_is_wb_only_and_excludes_ozon_payload(self):
@@ -33,7 +51,7 @@ class WindowsOneClickInstallerR1Tests(unittest.TestCase):
         self.assertIn('release_scope = "WB_ONLY"', self.builder)
         self.assertIn('enabled_marketplaces = @("WILDBERRIES")', self.builder)
         self.assertIn('deferred_marketplaces = @("OZON")', self.builder)
-        self.assertIn('This local release supports WILDBERRIES only.', self.builder)
+        self.assertIn('Текущая локальная версия поддерживает только WILDBERRIES.', self.builder_ru)
 
     def test_one_click_sequence_installs_configures_and_imports(self):
         script = self.one_click
@@ -58,7 +76,7 @@ class WindowsOneClickInstallerR1Tests(unittest.TestCase):
         self.assertIn('if ($AuthorityAttested) { $importArguments["AuthorityAttested"] = $true }', script)
         self.assertIn('if ($SchemaReviewed) { $importArguments["SchemaReviewed"] = $true }', script)
         self.assertIn('if ($SkipDefenderScan) { $importArguments["SkipDefenderScan"] = $true }', script)
-        self.assertIn('launchers never attest on your behalf', script)
+        self.assertIn('программы запуска никогда не подтверждают их за пользователя', self.one_click_ru.lower())
         self.assertNotIn('SkipDefenderScan = $true', script)
         self.assertNotIn('finance_request =', script)
 
@@ -69,8 +87,8 @@ class WindowsOneClickInstallerR1Tests(unittest.TestCase):
         read_host = script.index('$answer = Read-Host $Prompt', noninteractive)
         self.assertLess(attested, noninteractive)
         self.assertLess(noninteractive, read_host)
-        self.assertIn('Non-interactive mode requires explicit $Expected attestation switch.', script)
-        self.assertIn('All files (*.*)|*.*', script)
+        self.assertIn('В неинтерактивном режиме необходимо явно передать подтверждение {0}.', self.importer_ru)
+        self.assertIn('Все файлы (*.*)|*.*', self.importer_ru)
         self.assertIn('from quantum.pilot.universal_import import main; raise SystemExit(main())', script)
         self.assertIn('if ($status -eq "ROUTE_XLSX")', script)
         self.assertIn('PreScannedEvidenceSha256', script)
@@ -86,8 +104,8 @@ class WindowsOneClickInstallerR1Tests(unittest.TestCase):
         ):
             self.assertIn("Test-DefenderUnavailableOutput", script, name)
             self.assertIn("DEFENDER_UNAVAILABLE_STRUCTURAL_FALLBACK", script, name)
-            self.assertIn("Active content and corrupted archives remain blocked.", script, name)
-            self.assertIn("Microsoft Defender scan failed or reported a threat.", script, name)
+            self.assertIn("Активное содержимое и повреждённые архивы по-прежнему блокируются.", _decoded_user_text(script), name)
+            self.assertIn("Проверка Microsoft Defender завершилась ошибкой или обнаружила угрозу.", _decoded_user_text(script), name)
             self.assertIn("$scanOutput = @(& $scanner -Scan -ScanType 3 -File $Path 2>&1)", script, name)
             self.assertIn("MpScanStart.*Failed", script, name)
             self.assertNotIn("DISABLE_DEFENDER", script, name)
@@ -99,9 +117,9 @@ class WindowsOneClickInstallerR1Tests(unittest.TestCase):
         self.assertIn('--discover-only', script)
         self.assertIn('--discover-schema', script)
         self.assertIn('--expected-file-sha256', script)
-        self.assertIn('Source file changed after schema review.', script)
+        self.assertIn('Исходный файл изменился после проверки схемы.', self.xlsx_helper_ru)
         self.assertIn('PreScannedEvidenceSha256', script)
-        self.assertIn('XLSX helper source hash does not match the reviewed file.', script)
+        self.assertIn('Хеш исходного XLSX не совпадает с проверенным файлом.', self.xlsx_helper_ru)
 
     def test_cloud_sync_paths_and_unmanaged_outputs_are_blocked(self):
         script = self.one_click
@@ -110,7 +128,7 @@ class WindowsOneClickInstallerR1Tests(unittest.TestCase):
         self.assertIn('$env:OneDrive', script)
         self.assertIn('\\Dropbox\\', script)
         self.assertIn('Test-PathWithin -Child $directory -Parent $Root', script)
-        self.assertIn('will not be opened automatically', script)
+        self.assertIn('автоматическое открытие заблокировано', self.one_click_ru)
 
     def test_installer_preserves_data_and_installs_reusable_launcher(self):
         script = self.installer
@@ -123,7 +141,7 @@ class WindowsOneClickInstallerR1Tests(unittest.TestCase):
         self.assertNotIn('-InstalledRoot "%~dp0" -SkipInstall -AuthorityAttested', script)
         self.assertNotIn('import_source.ps1" -AuthorityAttested', script)
         self.assertIn('New-QuantumShortcut', script)
-        self.assertIn('Existing config, data and output directories were preserved.', script)
+        self.assertIn('Существующие папки config, data и output сохранены.', self.installer_ru)
 
     def test_package_manifest_is_verified_before_target_mutation(self):
         script = self.installer
@@ -140,7 +158,7 @@ class WindowsOneClickInstallerR1Tests(unittest.TestCase):
 
     def test_noninteractive_mode_requires_explicit_file_and_attestations(self):
         script = self.one_click
-        self.assertIn('File is required in non-interactive mode.', script)
+        self.assertIn('В неинтерактивном режиме необходимо явно указать файл.', self.one_click_ru)
         self.assertRegex(script, re.compile(r'if \(\$AuthorityAttested\).*AuthorityAttested', re.DOTALL))
         self.assertRegex(script, re.compile(r'if \(\$SchemaReviewed\).*SchemaReviewed', re.DOTALL))
 
