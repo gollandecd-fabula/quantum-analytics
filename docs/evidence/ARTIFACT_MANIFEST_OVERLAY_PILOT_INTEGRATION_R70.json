@@ -1,0 +1,8 @@
+{
+  "base_pilot_integration_r69_overlay_git_blob_sha": "099713cf9c044fc1d3d600230f9d07e6816f18e5",
+  "entries": [],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 70,
+  "reason": "Deterministic .NET Framework EXE bootstrap pending exact manifest diff registration",
+  "remove_paths": []
+}
