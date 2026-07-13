@@ -60,6 +60,13 @@ foreach ($directory in @("scripts", "config", "docs", "requirements")) {
 }
 
 Copy-Item -LiteralPath (Join-Path $repositoryRoot "src") -Destination (Join-Path $stageRoot "src") -Recurse -Force
+$deferredOzonAdapter = Join-Path $stageRoot "src\quantum\adapters\ozon"
+if (Test-Path -LiteralPath $deferredOzonAdapter) {
+    Remove-Item -LiteralPath $deferredOzonAdapter -Recurse -Force
+}
+if (Test-Path -LiteralPath $deferredOzonAdapter) {
+    throw "Deferred Ozon adapter remained in the WB-only release package."
+}
 Copy-Item -LiteralPath (Join-Path $repositoryRoot "scripts\windows\import_source.ps1") -Destination (Join-Path $stageRoot "scripts\import_source.ps1") -Force
 Copy-Item -LiteralPath (Join-Path $repositoryRoot "scripts\windows\install_home_local.ps1") -Destination (Join-Path $stageRoot "scripts\install_home_local.ps1") -Force
 Copy-Item -LiteralPath (Join-Path $repositoryRoot "scripts\windows\configure_home_local.ps1") -Destination (Join-Path $stageRoot "scripts\configure_home_local.ps1") -Force
@@ -160,6 +167,10 @@ Set-Content -LiteralPath (Join-Path $stageRoot "INSTALL_HOME_LOCAL.cmd") -Value 
 
 $readme = @'
 QUANTUM HOME_LOCAL WINDOWS PACKAGE - ONE-CLICK LOCAL PILOT
+
+RELEASE SCOPE
+- This local release supports WILDBERRIES only.
+- Ozon is deferred and is not included in the default registry or user package.
 
 PRIMARY ACTION
 1. Extract the ZIP outside OneDrive, Dropbox, Google Drive and other synchronized folders.
@@ -267,6 +278,9 @@ $manifest = [ordered]@{
     package_version = "R3_ONE_CLICK"
     source_branch = $sourceBranch
     source_commit = $sourceCommit
+    release_scope = "WB_ONLY"
+    enabled_marketplaces = @("WILDBERRIES")
+    deferred_marketplaces = @("OZON")
     release_state = "RELEASE_BLOCKED"
     marketplace_write_enabled = $false
     tzdata_version = "2026.2"
