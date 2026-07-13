@@ -1,0 +1,39 @@
+{
+  "base_pilot_integration_r76_overlay_git_blob_sha": "173e6725864bbb99d5d2fb8d9d8f4398f39f4f6f",
+  "entries": [
+    [
+      "src/quantum/application/finance_profile.py",
+      "3587a94c4b41333e67607ceb7d9e14a56026d0ff3c10d35f5c795e84ee0551af",
+      4011
+    ],
+    [
+      "src/quantum/application/finance_center.py",
+      "ed3e833eae723f052d776af187ac9d770e0955a932362103f8fefabe3708d61d",
+      3187
+    ],
+    [
+      "src/quantum/application/shortcut_repair.py",
+      "7aad42736e388219a313e5bc09fcf467e75956dd32a756ea5ebf882b67b5db33",
+      5659
+    ],
+    [
+      "src/quantum/application/desktop_center.py",
+      "2f41a47c1d69c6cbd211ada38635e0431a1370c2b3b0ec4e92e177e0b28d1508",
+      2139
+    ],
+    [
+      "tests/test_profile_save_and_shortcut_hotfix.py",
+      "640b7b01e795ea2b9f2957d626b4581e37b27628781f7123f09df4503a11911f",
+      6374
+    ],
+    [
+      "tests/integration_manifest_support_m8.py",
+      "c800c64193637f13e73b5dc8522af8a891d4a14daf1bba930cf54eadd8033cf0",
+      1090
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 77,
+  "reason": "Fix the Windows finance-profile save path by closing and fsyncing staged files before atomic replacement, retrying transient replace locks, preserving both the previous file and unconfirmed in-memory state on failure, and surfacing actionable GUI errors; repair legacy desktop shortcuts that target localhost:8000 or obsolete Quantum launchers during the first current desktop start while preserving HOME_LOCAL, WB_ONLY, read-only marketplace, single-instance and user-data boundaries",
+  "remove_paths": []
+}
