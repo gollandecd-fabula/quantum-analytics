@@ -1,0 +1,8 @@
+{
+  "base_pilot_integration_r66_overlay_git_blob_sha": "6862f03a6567816f09ac899ce0f9b81c1fb1f613",
+  "entries": [],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 67,
+  "reason": "TZ correction and Windows EXE installer build pending exact manifest diff registration",
+  "remove_paths": []
+}
