@@ -165,9 +165,11 @@ jobs:
         shell: pwsh
         run: |
           $env:PYTHONPATH = (Resolve-Path "src").Path
-          python -m quantum.scripts.ci
-          if ($LASTEXITCODE -ne 0) {
-            throw "M7 Windows repository contracts failed with exit code $LASTEXITCODE"
+          $contractOutput = @(& python -m quantum.scripts.ci 2>&1)
+          $contractExitCode = $LASTEXITCODE
+          $contractOutput | Tee-Object -FilePath m7-windows-repository-contracts.log
+          if ($contractExitCode -ne 0) {
+            throw "M7 Windows repository contracts failed with exit code $contractExitCode"
           }
 
       - name: Run native one-button exact-head Red Team
@@ -188,6 +190,7 @@ jobs:
         with:
           name: M7-Native-One-Click-Red-Team
           path: |
+            m7-windows-repository-contracts.log
             m7-native-one-button.log
             dist/one-button-redteam-r3/result.json
             dist/one-button-redteam-r3/qa.json
