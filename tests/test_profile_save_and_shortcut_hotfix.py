@@ -141,9 +141,11 @@ class ShortcutRepairHotfixTests(unittest.TestCase):
                 getattr(shortcut_repair.subprocess, "CREATE_NO_WINDOW", 0),
             )
             environment = run.call_args.kwargs["env"]
-            self.assertEqual(
-                Path(environment["QUANTUM_SHORTCUT_LAUNCHER"]),
-                launcher,
+            self.assertTrue(
+                os.path.samefile(
+                    environment["QUANTUM_SHORTCUT_LAUNCHER"],
+                    launcher,
+                )
             )
             report = json.loads(
                 (root / "output" / "shortcut_repair_latest.json").read_text(
