@@ -5,7 +5,7 @@ from tests import integration_manifest_support_m6 as _base
 
 FINAL_NAMES = tuple(
     f"ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R{number}.json"
-    for number in range(1, 59)
+    for number in range(1, 60)
 )
 FINAL_OVERLAY_R1 = FINAL_NAMES[0]
 FINAL_OVERLAYS = _base._base._linear(FINAL_NAMES, "unused")[1:]
