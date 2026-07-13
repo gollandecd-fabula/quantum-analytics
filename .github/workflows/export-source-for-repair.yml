@@ -18,6 +18,7 @@ jobs:
       - name: Checkout exact branch head
         uses: actions/checkout@v4
         with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 0
       - name: Record exact head
         run: git rev-parse HEAD > EXACT_HEAD.txt
