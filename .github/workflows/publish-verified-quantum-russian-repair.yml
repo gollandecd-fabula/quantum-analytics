@@ -28,7 +28,7 @@ jobs:
         id: gate
         shell: bash
         run: |
-          if [ "$(git log -1 --pretty=%s)" = "Run chunked verified Quantum Russian repair publisher" ]; then
+          if [ "$(git log -1 --pretty=%s)" = "Retest verified repair without staging artifacts" ]; then
             echo 'run=true' >> "$GITHUB_OUTPUT"
           else
             echo 'run=false' >> "$GITHUB_OUTPUT"
@@ -131,14 +131,20 @@ jobs:
               ).splitlines()
           )
           if staged != expected_paths:
-              raise SystemExit(
-                  f'STAGED_PATH_SET_MISMATCH:{staged!r}'
-              )
+              raise SystemExit(f'STAGED_PATH_SET_MISMATCH:{staged!r}')
           print(
               f'PATCH_VERIFIED files={len(staged)} '
               f'sha256={actual_compressed_sha}'
           )
           PY
+
+      - name: Remove staging artifacts from tested tree
+        if: steps.gate.outputs.run == 'true'
+        shell: bash
+        run: |
+          git rm -r .github/quantum-russian-repair-patch
+          git rm .github/quantum-russian-repair.patch.gz.b64
+          git rm .github/workflows/publish-verified-quantum-russian-repair.yml
 
       - name: Run complete Quantum CI
         if: steps.gate.outputs.run == 'true'
@@ -147,15 +153,12 @@ jobs:
           PYTHONPATH: src
         run: python -m quantum.scripts.ci
 
-      - name: Commit verified repair and remove publisher
+      - name: Commit verified repair
         if: steps.gate.outputs.run == 'true'
         shell: bash
         run: |
           find . -type d -name __pycache__ -prune -exec rm -rf {} +
           find . -type f \( -name '*.pyc' -o -name '*.pyo' \) -delete
-          git rm -r .github/quantum-russian-repair-patch
-          git rm .github/quantum-russian-repair.patch.gz.b64
-          git rm .github/workflows/publish-verified-quantum-russian-repair.yml
           git diff --cached --check
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
