@@ -1,8 +1,24 @@
 {
   "base_pilot_integration_r68_overlay_git_blob_sha": "1bacd9b99d31cd3affa83ea88c0b044c4940858c",
-  "entries": [],
+  "entries": [
+    [
+      "scripts/windows/build_exe_installer.ps1",
+      "3caab2a7391f06b36913bbdbc63a1f21dd5afdce8e1f2cedeb9ae4ac21f3f6d0",
+      12339
+    ],
+    [
+      "tests/integration_manifest_support_m8.py",
+      "7e9b84388fd31d8f10f88fef4bf087d3b2218cd804c06ba6f2247f948a0235ab",
+      1085
+    ],
+    [
+      "tests/test_tz_correction_and_exe_installer.py",
+      "7d22c610260f145e8b96a8ee4d54d4bb990a5477f0c53eef73388bfcbc901906",
+      3984
+    ]
+  ],
   "hash_encoding": "sha256-hex",
   "overlay_version": 69,
-  "reason": "Hash-bound EXE native-test request protocol pending exact manifest diff registration",
+  "reason": "Replace environment-only EXE native-test activation with a one-time JSON request bound to the exact source commit, verified offline payload SHA-256 and explicit result path, while preserving the normal user installation path and all release/write blocks",
   "remove_paths": []
 }
