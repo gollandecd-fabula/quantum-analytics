@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - fix/quantum-one-click-stable-release
+  pull_request:
+    branches:
+      - main
 
 permissions:
   contents: read
