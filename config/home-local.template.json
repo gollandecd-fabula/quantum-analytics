@@ -4,7 +4,11 @@
   "account_id": "operator-home-local",
   "verifier_account_id": "verifier-home-local",
   "source_internal_id": "replace-with-local-source-id",
+  "release_scope": "WB_ONLY",
   "marketplace": "WILDBERRIES",
+  "deferred_marketplaces": [
+    "OZON"
+  ],
   "report_type": "SALES_REPORT",
   "reporting_period_start": "2026-01-01",
   "reporting_period_end": "2026-01-31",
