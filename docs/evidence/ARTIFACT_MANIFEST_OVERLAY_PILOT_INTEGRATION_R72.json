@@ -1,0 +1,24 @@
+{
+  "base_pilot_integration_r71_overlay_git_blob_sha": "6612a344aece76437500762ccbec9d4b9929a0d1",
+  "entries": [
+    [
+      ".github/workflows/windows-source-package-launchers-r1.yml",
+      "51ece11590a12ba7e0722177d10a08ea22814f7cd54c352b5242536ff32ba9f1",
+      4349
+    ],
+    [
+      "tests/integration_manifest_support_m8.py",
+      "c196e7315b34aaf83b3bd8e056f478ebb1d996e6b1df55f46868241c9a173522",
+      1090
+    ],
+    [
+      "tests/test_windows_source_package_launchers_r1.py",
+      "9c3f3f77327c4d7b898b5fec2145b9da887d6ba5538a217b19d7bdeae92f8847",
+      2619
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 72,
+  "reason": "Align the native Windows source-package launcher audit with the verified Russian README contract, preserve explicit AUTHORIZE/REVIEWED operator gates, Microsoft Defender protection and the read-only marketplace boundary, register R72 in the byte-verified append-only manifest loader, and prevent obsolete English workflow assertions from returning",
+  "remove_paths": []
+}

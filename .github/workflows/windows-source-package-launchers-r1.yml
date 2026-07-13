@@ -10,7 +10,7 @@ on:
       - "scripts/windows/import_source.ps1"
       - "scripts/windows/one_click_home_local.ps1"
       - "tests/test_windows_source_package_launchers_r1.py"
-      - "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R35.json"
+      - "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R72.json"
   pull_request:
     paths:
       - ".github/workflows/windows-source-package-launchers-r1.yml"
@@ -18,7 +18,7 @@ on:
       - "scripts/windows/import_source.ps1"
       - "scripts/windows/one_click_home_local.ps1"
       - "tests/test_windows_source_package_launchers_r1.py"
-      - "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R35.json"
+      - "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R72.json"
 
 permissions:
   contents: read
@@ -73,20 +73,23 @@ jobs:
           if ($import -match '-AuthorityAttested|-SchemaReviewed') {
             throw "Source IMPORT_XLSX.cmd must not attest for the operator."
           }
-          if ($readme -notmatch 'Type AUTHORIZE') {
+          if ($readme -notmatch 'Введите AUTHORIZE') {
             throw "Source README does not require explicit authority confirmation."
           }
-          if ($readme -notmatch 'type REVIEWED') {
+          if ($readme -notmatch 'введите REVIEWED') {
             throw "Source README does not require explicit schema and reporting-period review."
           }
-          if ($readme -notmatch 'Launchers never attest on your behalf') {
+          if ($readme -notmatch 'Программы запуска никогда не подтверждают AUTHORIZE или REVIEWED за пользователя') {
             throw "Source README does not describe the fail-closed launcher boundary."
           }
           if ($readme -match 'No AUTHORIZE or REVIEWED console input is required') {
             throw "Source README still claims automatic operator attestations."
           }
-          if ($readme -notmatch 'Microsoft Defender scanning remains enabled') {
+          if ($readme -notmatch 'Microsoft Defender остаётся включённым') {
             throw "Source README does not preserve Defender safety."
+          }
+          if ($readme -notmatch 'Запись на маркетплейс отключена') {
+            throw "Source README does not preserve the read-only marketplace boundary."
           }
 
           Write-Host "SOURCE_PACKAGE_LAUNCHERS_PASS" -ForegroundColor Green
