@@ -96,6 +96,45 @@ class RunImportCancellationTests(unittest.TestCase):
         def kill(self):
             self.terminated = True
 
+    class CompletedProcess(FakeProcess):
+        def poll(self):
+            return 0
+
+        def wait(self, timeout=None):
+            self.returncode = 0
+            return 0
+
+    def test_hidden_batch_import_uses_one_click_attestations_and_keeps_defender(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            (root / "scripts").mkdir()
+            (root / "scripts" / "import_source.ps1").write_text("# test", encoding="utf-8")
+            source = root / "report.xlsx"
+            source.write_bytes(b"xlsx")
+            fake = self.CompletedProcess()
+            with mock.patch.object(import_runtime.subprocess, "Popen", return_value=fake) as popen, mock.patch.object(
+                import_runtime, "_safe_json_load", return_value={"status": "ADMISSION_COMPLETE"}
+            ), mock.patch.object(
+                import_runtime, "summarize_report", return_value=("Готово", "WB_XLSX", "ADMISSION_COMPLETE", "Импорт завершён.")
+            ):
+                row = import_runtime.run_import(source, root)
+
+            command = popen.call_args.args[0]
+            for flag in ("-NonInteractive", "-AuthorityAttested", "-SchemaReviewed"):
+                self.assertIn(flag, command)
+            self.assertNotIn("-SkipDefenderScan", command)
+            self.assertEqual(
+                popen.call_args.kwargs["creationflags"],
+                getattr(import_runtime.subprocess, "CREATE_NO_WINDOW", 0),
+            )
+            self.assertEqual(popen.call_args.kwargs["stdout"], import_runtime.subprocess.DEVNULL)
+            self.assertEqual(popen.call_args.kwargs["stderr"], import_runtime.subprocess.DEVNULL)
+            self.assertEqual(row.status, "Готово")
+            self.assertTrue(row.details["batch_authority_attested"])
+            self.assertTrue(row.details["batch_schema_reviewed"])
+            self.assertFalse(row.details["interactive_prompts"])
+            self.assertFalse(row.details["defender_scan_skipped"])
+
     def test_cancelled_import_returns_cancelled_row_and_clears_callback(self) -> None:
         with tempfile.TemporaryDirectory() as raw:
             root = Path(raw)
@@ -107,7 +146,7 @@ class RunImportCancellationTests(unittest.TestCase):
             event.set()
             fake = self.FakeProcess()
             seen = []
-            with mock.patch.object(import_runtime.subprocess, "Popen", return_value=fake), mock.patch.object(
+            with mock.patch.object(import_runtime.subprocess, "Popen", return_value=fake) as popen, mock.patch.object(
                 import_runtime, "_terminate_process_tree", side_effect=lambda process: process.terminate()
             ):
                 row = import_runtime.run_import(
@@ -119,6 +158,16 @@ class RunImportCancellationTests(unittest.TestCase):
             self.assertEqual(row.status, "Отменено")
             self.assertEqual(row.error, "CANCELLED_BY_USER")
             self.assertEqual(seen, [fake, None])
+            command = popen.call_args.args[0]
+            for flag in ("-NonInteractive", "-AuthorityAttested", "-SchemaReviewed"):
+                self.assertIn(flag, command)
+            self.assertNotIn("-SkipDefenderScan", command)
+            self.assertEqual(
+                popen.call_args.kwargs["creationflags"],
+                getattr(import_runtime.subprocess, "CREATE_NO_WINDOW", 0),
+            )
+            self.assertEqual(popen.call_args.kwargs["stdout"], import_runtime.subprocess.DEVNULL)
+            self.assertEqual(popen.call_args.kwargs["stderr"], import_runtime.subprocess.DEVNULL)
 
 
 class RuntimeRoutingTests(unittest.TestCase):
@@ -141,6 +190,8 @@ class RuntimeRoutingTests(unittest.TestCase):
         self.assertIn("def cancel_queue", queue_runtime)
         self.assertIn("self.import_queue.start_next()", queue_runtime)
         self.assertIn("Остановить очередь", pages)
+        self.assertIn("Выбрать и запустить отчёты", pages)
+        self.assertIn("Партия подтверждена выбором файлов", queue_runtime)
 
 
 if __name__ == "__main__":

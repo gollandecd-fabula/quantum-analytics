@@ -50,7 +50,7 @@ class FinanceCenterQueueRuntimeMixin:
         if duplicates:
             self.set_status(f"Пропущено дубликатов: {duplicates}.", "warning")
         if added:
-            self.set_status(f"В очередь добавлено файлов: {added}.", "info")
+            self.set_status(f"Партия подтверждена выбором файлов. В очередь добавлено: {added}.", "info")
             self._start_next_if_idle()
         self._refresh_queue_controls()
 

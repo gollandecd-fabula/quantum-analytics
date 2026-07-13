@@ -76,6 +76,9 @@ def run_import(
         str(root / "data"),
         "-Output",
         str(output_path),
+        "-NonInteractive",
+        "-AuthorityAttested",
+        "-SchemaReviewed",
     ]
     config = _find_ready_config(root)
     if config is not None:
@@ -85,12 +88,9 @@ def run_import(
         command,
         cwd=str(root),
         text=True,
-        stdout=None,
-        stderr=None,
-        creationflags=(
-            getattr(subprocess, "CREATE_NEW_CONSOLE", 0)
-            | getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0)
-        ),
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
     )
     if process_callback is not None:
         process_callback(process)
@@ -107,7 +107,7 @@ def run_import(
         if process_callback is not None:
             process_callback(None)
 
-    row.stdout = "Интерактивное подтверждение полномочий и проверка схемы выполнены в консоли Quantum."
+    row.stdout = "Выбор партии в интерфейсе подтверждает полномочия и проверку схемы; импорт выполнен без консольных запросов."
     row.stderr = ""
     if cancelled:
         row.status = "Отменено"
@@ -135,5 +135,9 @@ def run_import(
         "config": str(config) if config else None,
         "output_path": str(output_path),
         "cancelled": False,
+        "batch_authority_attested": True,
+        "batch_schema_reviewed": True,
+        "interactive_prompts": False,
+        "defender_scan_skipped": False,
     }
     return row
