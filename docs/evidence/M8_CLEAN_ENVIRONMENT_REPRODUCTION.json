@@ -1,0 +1,60 @@
+{
+  "milestone": "M8",
+  "title": "Clean Environment Reproduction",
+  "baseline_head": "f9ed450a68d519e9d2c744234276d2ecc68da809",
+  "verdict": "PASS_LOCAL_PENDING_EXACT_HEAD_CI",
+  "scope": {
+    "linux_independent_checkouts": 2,
+    "windows_ephemeral_profile": true,
+    "python_version": "3.12",
+    "user_site_disabled": true,
+    "bytecode_writes_disabled": true,
+    "pip_cache_isolated": true,
+    "full_repository_ci": true,
+    "native_one_button_red_team": true,
+    "exact_head_asserted": true
+  },
+  "defects": [
+    {
+      "id": "M8-D001",
+      "severity": "P1",
+      "status": "CLOSED_LOCAL_PENDING_EXACT_HEAD_CI",
+      "finding": "No dedicated gate proved that the exact candidate could reproduce from clean checkouts without inherited repository artifacts.",
+      "closure": "Added two independent Linux exact-head checkouts, fail-closed residue inspection and a complete repository CI run in each isolated home."
+    },
+    {
+      "id": "M8-D002",
+      "severity": "P1",
+      "status": "CLOSED_LOCAL_PENDING_EXACT_HEAD_CI",
+      "finding": "Environment evidence did not explicitly reject user-site packages, external cache paths or pre-existing sandbox files.",
+      "closure": "Added a standard-library preflight that requires isolated profile, temp and cache paths, disables user-site and bytecode writes, rejects generated checkout residue and emits machine-readable evidence."
+    },
+    {
+      "id": "M8-D003",
+      "severity": "P1",
+      "status": "CLOSED_LOCAL_PENDING_EXACT_HEAD_CI",
+      "finding": "Windows reproduction relied on hosted-runner freshness without binding HOME, USERPROFILE, LOCALAPPDATA, APPDATA, TEMP, TMP and pip cache to one explicit clean-room root.",
+      "closure": "The M8 Windows job now creates an empty ephemeral profile tree, binds every relevant path to it, installs the hash-locked Windows dependency without cache reuse and records preflight evidence."
+    },
+    {
+      "id": "M8-D004",
+      "severity": "P1",
+      "status": "CLOSED_LOCAL_PENDING_EXACT_HEAD_CI",
+      "finding": "Clean-source reproduction and the native one-button Windows path were not enforced together by one milestone gate.",
+      "closure": "The exact-head Windows clean-room job runs M8 contracts and the existing native one-button Red Team, which includes installer build, fresh install, repair, contamination rejection, complete XLSX path and full repository CI."
+    },
+    {
+      "id": "M8-D005",
+      "severity": "P1",
+      "status": "CLOSED_LOCAL_PENDING_EXACT_HEAD_CI",
+      "finding": "A clean-environment result could be misattributed if checkout identity and post-run source immutability were not asserted.",
+      "closure": "Every job asserts the event exact head; Linux runs require a clean checkout after CI, and Windows requires no tracked-file modification after native execution."
+    }
+  ],
+  "open_reproduction_p0_p1": 0,
+  "release_authorized": false,
+  "marketplace_writes_authorized": false,
+  "merge_to_main_authorized": false,
+  "final_score_authorized": false,
+  "exact_head_ci_pending": true
+}
