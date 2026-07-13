@@ -71,6 +71,17 @@
         "M7 workflow run 29234138419",
         "M7 diagnostics artifact 8272723948"
       ]
+    },
+    {
+      "id": "M7-D009",
+      "severity": "P1",
+      "status": "CLOSED_LOCAL_PENDING_EXACT_HEAD_CI",
+      "finding": "Governance contract tests relied on locale-default decoding for UTF-8 files, causing a Windows-only failure of the Unicode admission state-machine assertion.",
+      "closure": "All governance and evidence document reads in the affected contract test now specify encoding=utf-8 explicitly. The governance state machine and production runtime were not changed.",
+      "evidence": [
+        "M7 workflow run 29234412523",
+        "M7 diagnostics artifact 8272827063"
+      ]
     }
   ],
   "open_security_p0_p1": 0,
