@@ -57,6 +57,19 @@
         "Foundation CI run 29229496302",
         "OSS Admission CI run 29229496306"
       ]
+    },
+    {
+      "id": "M6-D008",
+      "severity": "P1",
+      "status": "CLOSED_LOCAL_PENDING_EXACT_HEAD_CI",
+      "finding": "The first R53 recovery blob contained two misspelled historical B1B overlay names, causing manifest loader FileNotFoundError before admission checks.",
+      "closure": "Restored integration_manifest_support.py to the byte-verified R52 blob, moved R53/R54 chain extension into a compact bootstrap module, added a misspelled-control-path regression test, and retained Git blob SHA verification.",
+      "evidence": [
+        "Foundation CI run 29229927899",
+        "OSS Admission CI run 29229927926",
+        "M1 Baseline and Reproduction Audit run 29229927923",
+        "Quantum One Button R3 Native Red Team run 29229927948"
+      ]
     }
   ],
   "release_authorized": false,
