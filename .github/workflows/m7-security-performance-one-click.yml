@@ -1,0 +1,197 @@
+name: M7 Security Performance and One-Click
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/m7-security-performance-one-click.yml"
+      - "docs/evidence/M7_*.json"
+      - "docs/evidence/M7_*.md"
+      - "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R55.json"
+      - "tools/m7_security_performance_one_click.py"
+      - "tests/integration_manifest_support_m7.py"
+      - "tests/test_b1a_artifact_manifest.py"
+      - "tests/test_m7_security_performance_one_click.py"
+      - "scripts/windows/**"
+      - "scripts/ci/native_one_button_r37.ps1"
+      - "src/quantum/**"
+      - "pyproject.toml"
+      - "config/home-local.template.json"
+
+permissions:
+  contents: read
+
+jobs:
+  security-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Assert exact head
+        shell: bash
+        run: |
+          expected="${{ github.event.pull_request.head.sha || github.sha }}"
+          actual="$(git rev-parse HEAD)"
+          test "$actual" = "$expected"
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run M7 contract tests
+        env:
+          PYTHONPATH: src
+        run: |
+          python -m unittest \
+            tests.test_m7_security_performance_one_click \
+            tests.test_b1a_artifact_manifest -v
+
+      - name: Run fail-closed security and one-click audit
+        run: |
+          python tools/m7_security_performance_one_click.py audit \
+            --root . \
+            --output dist/m7/m7-security-one-click-audit.json
+
+      - name: Upload M7 audit evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: M7-Security-One-Click-Audit
+          path: dist/m7/m7-security-one-click-audit.json
+          if-no-files-found: error
+          retention-days: 14
+
+  performance-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout immutable M6 baseline
+        uses: actions/checkout@v4
+        with:
+          ref: 0972d02312bdee3aae3583dc6d9caf369622a57d
+          path: baseline
+
+      - name: Checkout exact candidate head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          path: candidate
+
+      - name: Assert candidate exact head
+        shell: bash
+        run: |
+          expected="${{ github.event.pull_request.head.sha || github.sha }}"
+          actual="$(git -C candidate rev-parse HEAD)"
+          test "$actual" = "$expected"
+          test "$(git -C baseline rev-parse HEAD)" = "0972d02312bdee3aae3583dc6d9caf369622a57d"
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Compare candidate performance with M6 baseline
+        run: |
+          python candidate/tools/m7_security_performance_one_click.py compare \
+            --baseline baseline \
+            --candidate candidate \
+            --iterations 50000 \
+            --repeats 5 \
+            --max-ratio 1.75 \
+            --absolute-slack-seconds 0.25 \
+            --output candidate/dist/m7/m7-performance-comparison.json
+
+      - name: Upload M7 performance evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: M7-Performance-Comparison
+          path: candidate/dist/m7/m7-performance-comparison.json
+          if-no-files-found: error
+          retention-days: 14
+
+  one-click-windows-red-team:
+    runs-on: windows-latest
+    timeout-minutes: 55
+    steps:
+      - name: Checkout exact head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Assert exact head
+        shell: pwsh
+        run: |
+          $expected = "${{ github.event.pull_request.head.sha || github.sha }}"
+          $actual = (& git rev-parse HEAD).Trim()
+          if ($actual -ne $expected) {
+            throw "Exact-head checkout failed. Expected $expected, got $actual"
+          }
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Parse one-click PowerShell surfaces
+        shell: pwsh
+        run: |
+          foreach ($path in @(
+            "scripts/windows/one_click_home_local.ps1",
+            "scripts/windows/import_source.ps1",
+            "scripts/windows/install_home_local.ps1",
+            "scripts/windows/build_local_production.ps1",
+            "scripts/ci/native_one_button_r37.ps1"
+          )) {
+            $tokens = $null
+            $errors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile(
+              (Resolve-Path $path),
+              [ref]$tokens,
+              [ref]$errors
+            ) | Out-Null
+            if ($errors.Count -gt 0) {
+              $errors | Format-List | Out-String | Write-Error
+              throw "PowerShell parse failed: $path"
+            }
+          }
+
+      - name: Run focused M7 and one-click contracts
+        shell: pwsh
+        run: |
+          $env:PYTHONPATH = (Resolve-Path "src").Path
+          python -m unittest `
+            tests.test_m7_security_performance_one_click `
+            tests.test_windows_one_click_installer_r1 `
+            tests.test_windows_redteam_hardening `
+            tests.test_m0_recovery_after_m1 -v
+          if ($LASTEXITCODE -ne 0) {
+            throw "Focused M7 Windows contracts failed with exit code $LASTEXITCODE"
+          }
+
+      - name: Run native one-button exact-head Red Team
+        shell: pwsh
+        env:
+          TARGET_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          & .\scripts\ci\native_one_button_r37.ps1 2>&1 |
+            Tee-Object -FilePath m7-native-one-button.log
+          $gateExitCode = $LASTEXITCODE
+          if ($gateExitCode -ne 0) {
+            throw "M7 native one-button Red Team failed with exit code $gateExitCode"
+          }
+
+      - name: Upload M7 native diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: M7-Native-One-Click-Red-Team
+          path: |
+            m7-native-one-button.log
+            dist/one-button-redteam-r3/result.json
+            dist/one-button-redteam-r3/qa.json
+          if-no-files-found: warn
+          retention-days: 14
