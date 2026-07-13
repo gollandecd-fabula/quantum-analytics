@@ -7,6 +7,7 @@ on:
       - local-installer-bundles-r2
     paths:
       - "scripts/windows/build_two_installer_bundles.ps1"
+      - "scripts/windows/build_exe_installer.ps1"
       - "scripts/windows/build_local_production.ps1"
       - "scripts/windows/install_home_local.ps1"
       - "scripts/windows/one_click_home_local.ps1"
@@ -14,10 +15,12 @@ on:
       - "scripts/windows/configure_home_local.ps1"
       - "src/**"
       - "requirements/windows-home-local.txt"
+      - "tests/test_tz_correction_and_exe_installer.py"
       - ".github/workflows/build-two-installer-bundles-r2.yml"
   pull_request:
     paths:
       - "scripts/windows/build_two_installer_bundles.ps1"
+      - "scripts/windows/build_exe_installer.ps1"
       - "scripts/windows/build_local_production.ps1"
       - "scripts/windows/install_home_local.ps1"
       - "scripts/windows/one_click_home_local.ps1"
@@ -25,6 +28,7 @@ on:
       - "scripts/windows/configure_home_local.ps1"
       - "src/**"
       - "requirements/windows-home-local.txt"
+      - "tests/test_tz_correction_and_exe_installer.py"
       - ".github/workflows/build-two-installer-bundles-r2.yml"
 
 permissions:
@@ -33,7 +37,7 @@ permissions:
 jobs:
   build-and-verify:
     runs-on: windows-latest
-    timeout-minutes: 35
+    timeout-minutes: 45
     steps:
       - name: Checkout exact head
         uses: actions/checkout@v4
@@ -54,19 +58,33 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Parse bundle builder
+      - name: Parse installer builders
         shell: pwsh
         run: |
-          $tokens = $null
-          $errors = $null
-          [System.Management.Automation.Language.Parser]::ParseFile(
-            (Resolve-Path "scripts/windows/build_two_installer_bundles.ps1"),
-            [ref]$tokens,
-            [ref]$errors
-          ) | Out-Null
-          if ($errors.Count -gt 0) {
-            $errors | Format-List | Out-String | Write-Error
-            throw "Bundle builder PowerShell parse failed."
+          foreach ($path in @(
+            "scripts/windows/build_two_installer_bundles.ps1",
+            "scripts/windows/build_exe_installer.ps1"
+          )) {
+            $tokens = $null
+            $errors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile(
+              (Resolve-Path $path),
+              [ref]$tokens,
+              [ref]$errors
+            ) | Out-Null
+            if ($errors.Count -gt 0) {
+              $errors | Format-List | Out-String | Write-Error
+              throw "Installer builder PowerShell parse failed: $path"
+            }
+          }
+
+      - name: Run TZ correction and EXE contracts
+        shell: pwsh
+        run: |
+          $env:PYTHONPATH = (Resolve-Path "src").Path
+          python -m unittest tests.test_tz_correction_and_exe_installer -v
+          if ($LASTEXITCODE -ne 0) {
+            throw "TZ correction and EXE contracts failed with exit code $LASTEXITCODE"
           }
 
       - name: Build two installer bundles
@@ -79,6 +97,20 @@ jobs:
             Tee-Object -FilePath installer-bundle-build.log
           if ($LASTEXITCODE -ne 0) {
             throw "Installer bundle build failed with exit code $LASTEXITCODE"
+          }
+
+      - name: Build EXE installer
+        shell: pwsh
+        env:
+          TARGET_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          powershell.exe -NoProfile -ExecutionPolicy Bypass `
+            -File .\scripts\windows\build_exe_installer.ps1 `
+            -BundleZip .\dist\installer-bundles-r2\2_QUANTUM_FULL_OFFLINE_INSTALLER.zip `
+            -OutputDirectory .\dist\installer-bundles-r2 2>&1 |
+            Tee-Object -FilePath exe-installer-build.log
+          if ($LASTEXITCODE -ne 0) {
+            throw "EXE installer build failed with exit code $LASTEXITCODE"
           }
 
       - name: Verify bundle contents, hashes and signatures
@@ -182,6 +214,73 @@ jobs:
           Write-Host "Full offline bundle SHA-256: $($result.full_offline_bundle.sha256)"
           Write-Host "Python signature: $($signature.SignerCertificate.Subject)"
 
+      - name: Verify EXE hash and native test extraction
+        shell: pwsh
+        run: |
+          Set-StrictMode -Version Latest
+          $ErrorActionPreference = "Stop"
+          $expectedHead = "${{ github.event.pull_request.head.sha || github.sha }}"
+          $output = Resolve-Path "dist/installer-bundles-r2"
+          $bundleResult = Get-Content -LiteralPath (Join-Path $output "installer-bundles-result.json") -Raw -Encoding UTF8 | ConvertFrom-Json
+          $exeResult = Get-Content -LiteralPath (Join-Path $output "exe-installer-result.json") -Raw -Encoding UTF8 | ConvertFrom-Json
+          $exe = Join-Path $output "Quantum_WB_Offline_Setup.exe"
+          if (-not (Test-Path -LiteralPath $exe -PathType Leaf)) {
+            throw "Quantum EXE installer is missing."
+          }
+          if ([string]$exeResult.source_commit -ne $expectedHead) {
+            throw "EXE source commit mismatch."
+          }
+          if ([string]$exeResult.release_scope -ne "WB_ONLY") {
+            throw "EXE release scope is not WB_ONLY."
+          }
+          if ([bool]$exeResult.marketplace_write_enabled) {
+            throw "EXE unexpectedly enables marketplace writes."
+          }
+          $actualExeHash = (Get-FileHash -LiteralPath $exe -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($actualExeHash -ne [string]$exeResult.exe.sha256) {
+            throw "EXE SHA-256 mismatch."
+          }
+          if ([string]$exeResult.payload_bundle.sha256 -ne [string]$bundleResult.full_offline_bundle.sha256) {
+            throw "EXE payload is not the verified full offline bundle."
+          }
+          if ([string]$exeResult.exe.authenticode_status -eq "HashMismatch") {
+            throw "EXE Authenticode hash mismatch."
+          }
+
+          $testResultPath = Join-Path $env:RUNNER_TEMP "quantum-exe-native-test.json"
+          Remove-Item -LiteralPath $testResultPath -Force -ErrorAction SilentlyContinue
+          $env:QUANTUM_EXE_TEST_ONLY = "1"
+          $env:QUANTUM_EXE_TEST_RESULT = $testResultPath
+          try {
+            $process = Start-Process -FilePath $exe -Wait -PassThru
+            if ($process.ExitCode -ne 0) {
+              throw "EXE native test failed with exit code $($process.ExitCode)."
+            }
+          }
+          finally {
+            Remove-Item Env:QUANTUM_EXE_TEST_ONLY -ErrorAction SilentlyContinue
+            Remove-Item Env:QUANTUM_EXE_TEST_RESULT -ErrorAction SilentlyContinue
+          }
+          if (-not (Test-Path -LiteralPath $testResultPath -PathType Leaf)) {
+            throw "EXE native test result was not produced."
+          }
+          $native = Get-Content -LiteralPath $testResultPath -Raw -Encoding UTF8 | ConvertFrom-Json
+          if ([string]$native.status -ne "PASS") {
+            throw "EXE native test did not pass."
+          }
+          if ([string]$native.source_commit -ne $expectedHead) {
+            throw "EXE native test source commit mismatch."
+          }
+          if ([string]$native.payload_sha256 -ne [string]$bundleResult.full_offline_bundle.sha256) {
+            throw "EXE native test payload mismatch."
+          }
+          if ([string]$native.release_scope -ne "WB_ONLY" -or [bool]$native.marketplace_write_enabled) {
+            throw "EXE native test violated release boundaries."
+          }
+          Copy-Item -LiteralPath $testResultPath -Destination (Join-Path $output "exe-native-test-result.json") -Force
+          Write-Host "EXE SHA-256: $actualExeHash"
+          Write-Host "EXE Authenticode status: $($exeResult.exe.authenticode_status)"
+
       - name: Upload build diagnostics on failure
         if: failure()
         uses: actions/upload-artifact@v4
@@ -189,7 +288,10 @@ jobs:
           name: installer-bundles-r2-diagnostics
           path: |
             installer-bundle-build.log
+            exe-installer-build.log
             dist/installer-bundles-r2/installer-bundles-result.json
+            dist/installer-bundles-r2/exe-installer-result.json
+            dist/installer-bundles-r2/exe-native-test-result.json
           if-no-files-found: warn
           retention-days: 7
 
@@ -201,5 +303,16 @@ jobs:
             dist/installer-bundles-r2/1_QUANTUM_CONTINUE_AND_FINISH.zip
             dist/installer-bundles-r2/2_QUANTUM_FULL_OFFLINE_INSTALLER.zip
             dist/installer-bundles-r2/installer-bundles-result.json
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload EXE installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: Quantum-WB-Offline-Setup-EXE
+          path: |
+            dist/installer-bundles-r2/Quantum_WB_Offline_Setup.exe
+            dist/installer-bundles-r2/exe-installer-result.json
+            dist/installer-bundles-r2/exe-native-test-result.json
           if-no-files-found: error
           retention-days: 14
