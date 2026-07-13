@@ -1,5 +1,5 @@
 {
-  "base_pilot_integration_r64_overlay_git_blob_sha": "743e4a069e9935f07fd143d8032e3148b7ba16a5",
+  "base_pilot_integration_r64_overlay_git_blob_sha": "89a52353b6b647c0de726baa653affbc49a1d7b4",
   "entries": [
     [
       "config/home-local.template.json",
