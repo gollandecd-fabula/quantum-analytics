@@ -110,20 +110,7 @@ jobs:
 
             (
               cd "$root"
-              python - <<'PY_CLEAN'
-              from __future__ import annotations
-              import shutil
-              from pathlib import Path
-              from tools.m8_clean_environment_reproduction import collect_repo_residue
-
-              root = Path.cwd()
-              for relative in collect_repo_residue(root):
-                  target = root / relative.rstrip("/")
-                  if target.is_dir():
-                      shutil.rmtree(target)
-                  elif target.exists():
-                      target.unlink()
-              PY_CLEAN
+              python -c 'import shutil; from pathlib import Path; from tools.m8_clean_environment_reproduction import collect_repo_residue; root = Path.cwd(); targets = [root / relative.rstrip("/") for relative in collect_repo_residue(root)]; [shutil.rmtree(target) if target.is_dir() else target.unlink() for target in targets if target.exists()]'
             )
             status="$(git -C "$root" status --porcelain=v1 --untracked-files=all)"
             if [ -n "$status" ]; then
