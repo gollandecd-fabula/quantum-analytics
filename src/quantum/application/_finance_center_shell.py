@@ -12,6 +12,12 @@ class FinanceCenterShellMixin:
             self.reports: dict[str, ReportState] = {}
             self.products: dict[str, ProductRecord] = {}
             self.events: queue.Queue[tuple[str, str, Any]] = queue.Queue()
+            self.import_queue = SequentialImportQueue()
+            self.cancel_event = threading.Event()
+            self.process_lock = threading.Lock()
+            self.active_process: subprocess.Popen[object] | None = None
+            self.profile_changed_pending = False
+            self.closing = False
             self.counter = 0
             self.pages: dict[str, ttk.Frame] = {}
             self.nav_buttons: dict[str, tk.Button] = {}
@@ -22,8 +28,10 @@ class FinanceCenterShellMixin:
             self.root_widget.minsize(1080, 680)
             self._configure_style()
             self._build_shell()
+            self.root_widget.protocol("WM_DELETE_WINDOW", self.request_close)
             self.show_page("decision")
             self.refresh_finance_summary()
+            self._refresh_queue_controls()
             self.root_widget.after(150, self._drain_events)
 
         def _configure_style(self) -> None:

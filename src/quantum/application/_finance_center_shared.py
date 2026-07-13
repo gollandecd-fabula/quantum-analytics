@@ -44,7 +44,9 @@ from quantum.application.finance_profile import (
     write_run_dashboard,
     write_run_result_xlsx,
 )
-from quantum.application.local_app import ImportRow, run_import
+from quantum.application.local_app import ImportRow
+from quantum.application._finance_center_import import run_import
+from quantum.application._finance_center_queue import SequentialImportQueue
 
 
 APP_TITLE = "Центр решений Quantum"

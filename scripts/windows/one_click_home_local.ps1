@@ -243,6 +243,16 @@ function Open-PilotResult {
     }
 }
 
+if (-not $SkipInstall -and [string]::IsNullOrWhiteSpace($PackageRoot) -and [string]::IsNullOrWhiteSpace($InstalledRoot)) {
+    $installedCandidate = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot "..")).Path
+    $installedRuntime = Join-Path $installedCandidate "src\quantum\application\desktop_center.py"
+    $packageInstaller = Join-Path $installedCandidate "scripts\install_home_local.ps1"
+    if ((Test-Path -LiteralPath $installedRuntime -PathType Leaf) -and -not (Test-Path -LiteralPath $packageInstaller -PathType Leaf)) {
+        $SkipInstall = $true
+        $InstalledRoot = $installedCandidate
+    }
+}
+
 if ($SkipInstall) {
     if ([string]::IsNullOrWhiteSpace($InstalledRoot)) {
         $InstalledRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot "..")).Path
@@ -327,7 +337,7 @@ else {
     }
 }
 
-if ($SkipInstall -and -not $NonInteractive -and [string]::IsNullOrWhiteSpace($File)) {
+if (-not $NonInteractive -and [string]::IsNullOrWhiteSpace($File)) {
     $pythonCommand = Resolve-PythonCommand
     $pythonArguments = @()
     $pythonArguments += $pythonCommand.Prefix
