@@ -5,7 +5,12 @@ from pathlib import Path
 import re
 from typing import Any
 
-from quantum.adapters.wildberries import bridge_reviewed_wb_source
+from quantum.adapters import (
+    MarketplaceAdapterRegistry,
+    ReviewedSourceRequest,
+    build_default_marketplace_registry,
+    normalize_marketplace_id,
+)
 from quantum.ingestion import XlsxInspectionLimits
 from quantum.insights import (
     RECOMMENDATION_BUNDLE_SCHEMA_VERSION,
@@ -14,6 +19,7 @@ from quantum.insights import (
 
 
 WINDOWS_SOURCE_BRIDGE_SCHEMA_VERSION = "quantum-windows-source-bridge-v1"
+_DEFAULT_MARKETPLACE_ADAPTER_REGISTRY = build_default_marketplace_registry()
 _REPORT_NUMBER = re.compile(
     r"(?:№\s*|report[_\s-]*)([0-9]{6,})",
     re.IGNORECASE,
@@ -97,6 +103,7 @@ def _blocked(
         "finance_request": None,
         "finance_request_state": "BLOCKED",
         "finance_request_reason_codes": [reason_code],
+        "marketplace_write_enabled": False,
         "raw_rows_in_report": False,
     }
     if detail is not None:
@@ -126,12 +133,14 @@ def _recommendation_scope(config: Mapping[str, Any]) -> dict[str, str]:
     scope: dict[str, str] = {}
     for source, target in (
         ("tenant_id", "organization_id"),
-        ("marketplace", "marketplace"),
         ("source_internal_id", "source_internal_id"),
     ):
         value = config.get(source)
         if isinstance(value, str) and value.strip():
             scope[target] = value.strip()
+    marketplace = config.get("marketplace")
+    if marketplace is not None:
+        scope["marketplace"] = normalize_marketplace_id(marketplace)
     return scope
 
 
@@ -143,8 +152,9 @@ def attach_reviewed_source_bridge(
     limits: XlsxInspectionLimits,
     config: Mapping[str, Any],
     source_path: Path,
+    registry: MarketplaceAdapterRegistry | None = None,
 ) -> dict[str, Any] | None:
-    """Attach source analytics after admission without changing admission state."""
+    """Attach marketplace analytics after admission without changing admission."""
     if schema_discovery is None:
         return None
     if report.get("storage_zone_state") != "ADMITTED":
@@ -159,13 +169,24 @@ def attach_reviewed_source_bridge(
             reason_code="ADMITTED_DATASET_ID_REQUIRED",
         )
     try:
+        marketplace_id = normalize_marketplace_id(config.get("marketplace"))
         context = build_source_context(config, source_path)
-        result = bridge_reviewed_wb_source(
+        request = ReviewedSourceRequest(
             payload=payload,
             schema_discovery=schema_discovery,
-            limits=limits,
+            inspection_limits=limits,
             source_id="dataset:" + dataset_id,
             source_context=context,
+            source_format="XLSX",
+        )
+        selected_registry = (
+            registry
+            if registry is not None
+            else _DEFAULT_MARKETPLACE_ADAPTER_REGISTRY
+        )
+        result = selected_registry.bridge_reviewed_source(
+            marketplace_id,
+            request,
         )
     except Exception as exc:
         return _blocked(

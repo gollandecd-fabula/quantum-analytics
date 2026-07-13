@@ -1,7 +1,8 @@
 import unittest
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import Mock
 
+from quantum.adapters import MarketplaceAdapterRegistry
 from quantum.ingestion import XlsxInspectionLimits
 from quantum.pilot.windows_source_bridge import (
     attach_reviewed_source_bridge,
@@ -50,21 +51,20 @@ class WindowsSourceBridgeTests(unittest.TestCase):
         self.assertEqual(context, {"report_id": "123456789"})
 
     def test_not_admitted_source_is_not_dispatched(self):
-        with patch(
-            "quantum.pilot.windows_source_bridge.bridge_reviewed_wb_source"
-        ) as dispatcher:
-            result = attach_reviewed_source_bridge(
-                report={
-                    "dataset_id": "dataset-1",
-                    "storage_zone_state": "QUARANTINED",
-                },
-                payload=b"payload",
-                schema_discovery={"headers": ["A"]},
-                limits=limits(),
-                config={},
-                source_path=Path("report.xlsx"),
-            )
-        dispatcher.assert_not_called()
+        registry = Mock(spec=MarketplaceAdapterRegistry)
+        result = attach_reviewed_source_bridge(
+            report={
+                "dataset_id": "dataset-1",
+                "storage_zone_state": "QUARANTINED",
+            },
+            payload=b"payload",
+            schema_discovery={"headers": ["A"]},
+            limits=limits(),
+            config={"marketplace": "WILDBERRIES"},
+            source_path=Path("report.xlsx"),
+            registry=registry,
+        )
+        registry.bridge_reviewed_source.assert_not_called()
         self.assertEqual(result["status"], "SOURCE_BRIDGE_SKIPPED")
         self.assertEqual(
             result["finance_request_reason_codes"],
@@ -77,49 +77,76 @@ class WindowsSourceBridgeTests(unittest.TestCase):
             "finance_request": None,
             "finance_request_state": "BLOCKED",
             "finance_request_reason_codes": ["WB_SCHEMA_NOT_MAPPED"],
+            "marketplace_write_enabled": False,
             "raw_rows_in_report": False,
         }
-        with patch(
-            "quantum.pilot.windows_source_bridge.bridge_reviewed_wb_source",
-            return_value=dispatch_result,
-        ) as dispatcher:
-            result = attach_reviewed_source_bridge(
-                report={
-                    "dataset_id": "dataset-1",
-                    "storage_zone_state": "ADMITTED",
-                },
-                payload=b"payload",
-                schema_discovery={"headers": ["A"]},
-                limits=limits(),
-                config={"source_currency": "RUB"},
-                source_path=Path("report-706623362.xlsx"),
-            )
-        dispatcher.assert_called_once()
-        call = dispatcher.call_args.kwargs
-        self.assertEqual(call["source_id"], "dataset:dataset-1")
-        self.assertEqual(call["source_context"]["report_id"], "706623362")
-        self.assertEqual(call["source_context"]["currency"], "RUB")
+        registry = Mock(spec=MarketplaceAdapterRegistry)
+        registry.bridge_reviewed_source.return_value = dispatch_result
+        result = attach_reviewed_source_bridge(
+            report={
+                "dataset_id": "dataset-1",
+                "storage_zone_state": "ADMITTED",
+            },
+            payload=b"payload",
+            schema_discovery={"headers": ["A"]},
+            limits=limits(),
+            config={
+                "marketplace": "wb",
+                "source_currency": "RUB",
+            },
+            source_path=Path("report-706623362.xlsx"),
+            registry=registry,
+        )
+        registry.bridge_reviewed_source.assert_called_once()
+        marketplace_id, request = registry.bridge_reviewed_source.call_args.args
+        self.assertEqual(marketplace_id, "WILDBERRIES")
+        self.assertEqual(request.source_id, "dataset:dataset-1")
+        self.assertEqual(request.source_context["report_id"], "706623362")
+        self.assertEqual(request.source_context["currency"], "RUB")
         self.assertEqual(
             result["windows_integration_schema_version"],
             "quantum-windows-source-bridge-v1",
         )
 
+    def test_missing_marketplace_fails_closed_without_dispatch(self):
+        registry = Mock(spec=MarketplaceAdapterRegistry)
+        result = attach_reviewed_source_bridge(
+            report={
+                "dataset_id": "dataset-1",
+                "storage_zone_state": "ADMITTED",
+            },
+            payload=b"payload",
+            schema_discovery={"headers": ["A"]},
+            limits=limits(),
+            config={},
+            source_path=Path("report.xlsx"),
+            registry=registry,
+        )
+        registry.bridge_reviewed_source.assert_not_called()
+        self.assertEqual(result["status"], "SOURCE_BRIDGE_ERROR")
+        self.assertEqual(
+            result["finance_request_reason_codes"],
+            ["MARKETPLACE_ID_REQUIRED"],
+        )
+        self.assertFalse(result["marketplace_write_enabled"])
+
     def test_unexpected_bridge_error_is_isolated_from_admission(self):
-        with patch(
-            "quantum.pilot.windows_source_bridge.bridge_reviewed_wb_source",
-            side_effect=RuntimeError("sensitive detail"),
-        ):
-            result = attach_reviewed_source_bridge(
-                report={
-                    "dataset_id": "dataset-1",
-                    "storage_zone_state": "ADMITTED",
-                },
-                payload=b"payload",
-                schema_discovery={"headers": ["A"]},
-                limits=limits(),
-                config={},
-                source_path=Path("report.xlsx"),
-            )
+        registry = Mock(spec=MarketplaceAdapterRegistry)
+        registry.bridge_reviewed_source.side_effect = RuntimeError(
+            "sensitive detail"
+        )
+        result = attach_reviewed_source_bridge(
+            report={
+                "dataset_id": "dataset-1",
+                "storage_zone_state": "ADMITTED",
+            },
+            payload=b"payload",
+            schema_discovery={"headers": ["A"]},
+            limits=limits(),
+            config={"marketplace": "WILDBERRIES"},
+            source_path=Path("report.xlsx"),
+            registry=registry,
+        )
         self.assertEqual(result["status"], "SOURCE_BRIDGE_ERROR")
         self.assertEqual(result["detail"], "RuntimeError")
         self.assertNotIn("sensitive detail", str(result))
