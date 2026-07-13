@@ -77,6 +77,15 @@ $SourceInternalId = Read-RequiredValue `
     -Prompt "Local source identifier (for example wb-sales-main)" `
     -Name "SourceInternalId"
 
+$normalizedMarketplace = $Marketplace.Trim().ToUpperInvariant()
+if ($normalizedMarketplace -eq "WB") {
+    $normalizedMarketplace = "WILDBERRIES"
+}
+if ($normalizedMarketplace -ne "WILDBERRIES") {
+    throw "This HOME_LOCAL release supports only WILDBERRIES. Ozon is deferred."
+}
+$Marketplace = $normalizedMarketplace
+
 if ([DateTime]::ParseExact($ReportingPeriodEnd, "yyyy-MM-dd", [Globalization.CultureInfo]::InvariantCulture) -lt [DateTime]::ParseExact($ReportingPeriodStart, "yyyy-MM-dd", [Globalization.CultureInfo]::InvariantCulture)) {
     throw "ReportingPeriodEnd must not be earlier than ReportingPeriodStart."
 }
@@ -94,7 +103,9 @@ $config = [ordered]@{
     account_id = "operator-home-local"
     verifier_account_id = "verifier-home-local"
     source_internal_id = $SourceInternalId
+    release_scope = "WB_ONLY"
     marketplace = $Marketplace
+    deferred_marketplaces = @("OZON")
     report_type = $ReportType
     reporting_period_start = $ReportingPeriodStart
     reporting_period_end = $ReportingPeriodEnd
@@ -165,4 +176,5 @@ $utf8NoBom = New-Object System.Text.UTF8Encoding
 [IO.File]::WriteAllText($ConfigPath, $configJson, $utf8NoBom)
 Write-Host "HOME_LOCAL configuration created." -ForegroundColor Green
 Write-Host "Path: $ConfigPath"
+Write-Host "Release scope: WB_ONLY (Ozon deferred)." -ForegroundColor Cyan
 Write-Host "Mode: ADMISSION_ONLY (financial calculation remains disabled until a reviewed finance profile is supplied)." -ForegroundColor Yellow
