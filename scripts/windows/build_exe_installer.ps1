@@ -109,11 +109,26 @@ $expectedSourceCommit = "__SOURCE_COMMIT__"
 $nativeTestRequestPath = Join-Path $env:TEMP ("QuantumExeNativeTest_{0}.request" -f $expectedSourceCommit)
 $defaultTestResultPath = Join-Path $env:TEMP ("QuantumExeNativeTest_{0}.json" -f $expectedSourceCommit)
 $nativeTestRequested = $false
+$requestedTestResultPath = $null
 if (Test-Path -LiteralPath $nativeTestRequestPath -PathType Leaf) {
-    $requestValue = (Get-Content -LiteralPath $nativeTestRequestPath -Raw -Encoding ASCII).Trim().ToLowerInvariant()
-    if ($requestValue -eq $expectedBundleHash) {
-        $nativeTestRequested = $true
-        Remove-Item -LiteralPath $nativeTestRequestPath -Force
+    try {
+        $request = Get-Content -LiteralPath $nativeTestRequestPath -Raw -Encoding UTF8 | ConvertFrom-Json
+        $requestHash = ([string]$request.payload_sha256).Trim().ToLowerInvariant()
+        $requestCommit = ([string]$request.source_commit).Trim().ToLowerInvariant()
+        $requestResultPath = [string]$request.result_path
+        if (
+            $requestHash -eq $expectedBundleHash -and
+            $requestCommit -eq $expectedSourceCommit -and
+            -not [string]::IsNullOrWhiteSpace($requestResultPath)
+        ) {
+            $nativeTestRequested = $true
+            $requestedTestResultPath = [IO.Path]::GetFullPath($requestResultPath)
+            Remove-Item -LiteralPath $nativeTestRequestPath -Force
+        }
+    }
+    catch {
+        $nativeTestRequested = $false
+        $requestedTestResultPath = $null
     }
 }
 if (-not (Test-Path -LiteralPath $bundle -PathType Leaf)) {
@@ -150,6 +165,9 @@ try {
     $testOnly = $nativeTestRequested -or $env:QUANTUM_EXE_TEST_ONLY -eq "1"
     if ($testOnly) {
         $testResultPath = $env:QUANTUM_EXE_TEST_RESULT
+        if ([string]::IsNullOrWhiteSpace($testResultPath)) {
+            $testResultPath = $requestedTestResultPath
+        }
         if ([string]::IsNullOrWhiteSpace($testResultPath)) {
             $testResultPath = $defaultTestResultPath
         }
@@ -266,8 +284,15 @@ SourceFiles0=$sourceDirectory
     }
 
     $nativeTestRequestPath = Join-Path $env:TEMP ("QuantumExeNativeTest_{0}.request" -f $sourceCommit)
+    $nativeTestResultPath = Join-Path $env:RUNNER_TEMP "quantum-exe-native-test.json"
     if ($env:GITHUB_ACTIONS -eq "true") {
-        Write-AsciiFile -Path $nativeTestRequestPath -Content $bundleHash
+        $request = [ordered]@{
+            payload_sha256 = $bundleHash
+            source_commit = $sourceCommit
+            result_path = $nativeTestResultPath
+        }
+        $requestJson = $request | ConvertTo-Json -Depth 3
+        [IO.File]::WriteAllText($nativeTestRequestPath, $requestJson, [Text.UTF8Encoding]::new($false))
     }
 
     $result = [ordered]@{
@@ -285,7 +310,7 @@ SourceFiles0=$sourceDirectory
         }
         native_test = [ordered]@{
             request_path = $nativeTestRequestPath
-            result_file_name = "QuantumExeNativeTest_${sourceCommit}.json"
+            result_path = $nativeTestResultPath
             request_value = $bundleHash
             prepared = ($env:GITHUB_ACTIONS -eq "true")
         }
