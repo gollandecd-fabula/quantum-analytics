@@ -91,6 +91,7 @@ class WindowsSourceBridgeTests(unittest.TestCase):
             schema_discovery={"headers": ["A"]},
             limits=limits(),
             config={
+                "release_scope": "WB_ONLY",
                 "marketplace": "wb",
                 "source_currency": "RUB",
             },
@@ -106,6 +107,55 @@ class WindowsSourceBridgeTests(unittest.TestCase):
         self.assertEqual(
             result["windows_integration_schema_version"],
             "quantum-windows-source-bridge-v1",
+        )
+
+    def test_wb_only_release_scope_blocks_ozon_before_dispatch(self):
+        registry = Mock(spec=MarketplaceAdapterRegistry)
+        result = attach_reviewed_source_bridge(
+            report={
+                "dataset_id": "dataset-1",
+                "storage_zone_state": "ADMITTED",
+            },
+            payload=b"payload",
+            schema_discovery={"headers": ["A"]},
+            limits=limits(),
+            config={
+                "release_scope": "WB_ONLY",
+                "marketplace": "OZON",
+            },
+            source_path=Path("report.xlsx"),
+            registry=registry,
+        )
+        registry.bridge_reviewed_source.assert_not_called()
+        self.assertEqual(result["status"], "SOURCE_BRIDGE_BLOCKED")
+        self.assertEqual(
+            result["finance_request_reason_codes"],
+            ["MARKETPLACE_OUTSIDE_RELEASE_SCOPE"],
+        )
+        self.assertFalse(result["marketplace_write_enabled"])
+
+    def test_unknown_release_scope_fails_closed_without_dispatch(self):
+        registry = Mock(spec=MarketplaceAdapterRegistry)
+        result = attach_reviewed_source_bridge(
+            report={
+                "dataset_id": "dataset-1",
+                "storage_zone_state": "ADMITTED",
+            },
+            payload=b"payload",
+            schema_discovery={"headers": ["A"]},
+            limits=limits(),
+            config={
+                "release_scope": "UNKNOWN_SCOPE",
+                "marketplace": "WILDBERRIES",
+            },
+            source_path=Path("report.xlsx"),
+            registry=registry,
+        )
+        registry.bridge_reviewed_source.assert_not_called()
+        self.assertEqual(result["status"], "SOURCE_BRIDGE_ERROR")
+        self.assertEqual(
+            result["finance_request_reason_codes"],
+            ["RELEASE_SCOPE_UNSUPPORTED"],
         )
 
     def test_missing_marketplace_fails_closed_without_dispatch(self):
