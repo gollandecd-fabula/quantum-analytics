@@ -327,6 +327,33 @@ else {
     }
 }
 
+if ($SkipInstall -and -not $NonInteractive -and [string]::IsNullOrWhiteSpace($File)) {
+    $pythonCommand = Resolve-PythonCommand
+    $pythonArguments = @()
+    $pythonArguments += $pythonCommand.Prefix
+    $pythonArguments += @(
+        "-m",
+        "quantum.application.desktop_center",
+        "--root",
+        $TargetRoot,
+        "--config",
+        $Config
+    )
+    $previousPythonPath = $env:PYTHONPATH
+    try {
+        $env:PYTHONPATH = Join-Path $TargetRoot "src"
+        & $pythonCommand.Executable @pythonArguments
+        $desktopExitCode = $LASTEXITCODE
+    }
+    finally {
+        $env:PYTHONPATH = $previousPythonPath
+    }
+    if ($desktopExitCode -ne 0) {
+        throw (Get-QuantumRussianText -Encoded "0KbQtdC90YLRgCDRgNC10YjQtdC90LjQuSBRdWFudHVtINC30LDQstC10YDRiNC40LvRgdGPINGBINC+0YjQuNCx0LrQvtC5LiDQmtC+0LQg0LLRi9GF0L7QtNCwOiB7MH0u" -Arguments @($desktopExitCode))
+    }
+    return
+}
+
 if ($NonInteractive -and [string]::IsNullOrWhiteSpace($File)) {
     throw (Get-QuantumRussianText -Encoded "0JIg0L3QtdC40L3RgtC10YDQsNC60YLQuNCy0L3QvtC8INGA0LXQttC40LzQtSDQvdC10L7QsdGF0L7QtNC40LzQviDRj9Cy0L3QviDRg9C60LDQt9Cw0YLRjCDRhNCw0LnQuy4=")
 }
