@@ -46,10 +46,22 @@
       "status": "CLOSED_VERIFIED",
       "finding": "No regression gate prevented concrete marketplace dependencies from returning to core layers.",
       "closure": "Added architecture source-boundary tests for finance, insights, recommendations, pilot and adapter layers."
+    },
+    {
+      "id": "M6-D007",
+      "severity": "P1",
+      "status": "CLOSED_LOCAL_PENDING_EXACT_HEAD_CI",
+      "finding": "Four legacy recommendation tests patched the removed Wildberries module seam and failed before exercising the neutral registry boundary.",
+      "closure": "Tests now inject a MarketplaceAdapterRegistry mock and provide explicit marketplace identity; production code remains marketplace-neutral.",
+      "evidence": [
+        "Foundation CI run 29229496302",
+        "OSS Admission CI run 29229496306"
+      ]
     }
   ],
   "release_authorized": false,
   "marketplace_writes_authorized": false,
   "merge_to_main_authorized": false,
-  "final_score_authorized": false
+  "final_score_authorized": false,
+  "recovery_head_pending": true
 }

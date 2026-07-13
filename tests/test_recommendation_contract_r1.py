@@ -1,8 +1,9 @@
 import copy
 import unittest
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import Mock
 
+from quantum.adapters import MarketplaceAdapterRegistry
 from quantum.insights import build_recommendations
 from quantum.pilot.windows_source_bridge import attach_reviewed_source_bridge
 from tests.test_recommendation_engine_r1 import (
@@ -122,23 +123,23 @@ class RecommendationContractTests(unittest.TestCase):
         bridged = supplier_result()
         bridged["source_id"] = "dataset:dataset-1"
         bridged["source_sha256"] = "e" * 64
-        with patch(
-            "quantum.pilot.windows_source_bridge.bridge_reviewed_wb_source",
-            return_value=bridged,
-        ):
-            result = attach_reviewed_source_bridge(
-                report=report,
-                payload=b"payload",
-                schema_discovery={"headers": ["A"]},
-                limits=limits(),
-                config={
-                    "recommendation_policy": policy(),
-                    "tenant_id": "tenant-one",
-                    "marketplace": "WILDBERRIES",
-                    "source_internal_id": "source-one",
-                },
-                source_path=Path("supplier-goods.xlsx"),
-            )
+        registry = Mock(spec=MarketplaceAdapterRegistry)
+        registry.bridge_reviewed_source.return_value = bridged
+        result = attach_reviewed_source_bridge(
+            report=report,
+            payload=b"payload",
+            schema_discovery={"headers": ["A"]},
+            limits=limits(),
+            config={
+                "recommendation_policy": policy(),
+                "tenant_id": "tenant-one",
+                "marketplace": "WILDBERRIES",
+                "source_internal_id": "source-one",
+            },
+            source_path=Path("supplier-goods.xlsx"),
+            registry=registry,
+        )
+        registry.bridge_reviewed_source.assert_called_once()
         self.assertIs(report["recommendations"], result["recommendations"])
         self.assertEqual(
             report["recommendations"]["priority_order"],

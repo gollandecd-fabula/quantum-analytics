@@ -1,7 +1,8 @@
 import unittest
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import Mock
 
+from quantum.adapters import MarketplaceAdapterRegistry
 from quantum.ingestion import XlsxInspectionLimits
 from quantum.pilot.windows_source_bridge import attach_reviewed_source_bridge
 from tests.test_recommendation_engine_r1 import policy
@@ -58,21 +59,26 @@ def supplier_result():
 
 class WindowsRecommendationAttachmentTests(unittest.TestCase):
     def _attach(self, config):
-        with patch(
-            "quantum.pilot.windows_source_bridge.bridge_reviewed_wb_source",
-            return_value=supplier_result(),
-        ):
-            return attach_reviewed_source_bridge(
-                report={
-                    "dataset_id": "dataset-1",
-                    "storage_zone_state": "ADMITTED",
-                },
-                payload=b"payload",
-                schema_discovery={"headers": ["A"]},
-                limits=limits(),
-                config=config,
-                source_path=Path("supplier-goods.xlsx"),
-            )
+        registry = Mock(spec=MarketplaceAdapterRegistry)
+        registry.bridge_reviewed_source.return_value = supplier_result()
+        reviewed_config = {
+            "marketplace": "WILDBERRIES",
+            **config,
+        }
+        result = attach_reviewed_source_bridge(
+            report={
+                "dataset_id": "dataset-1",
+                "storage_zone_state": "ADMITTED",
+            },
+            payload=b"payload",
+            schema_discovery={"headers": ["A"]},
+            limits=limits(),
+            config=reviewed_config,
+            source_path=Path("supplier-goods.xlsx"),
+            registry=registry,
+        )
+        registry.bridge_reviewed_source.assert_called_once()
+        return result
 
     def test_missing_policy_attaches_blocked_bundle(self):
         result = self._attach({})
