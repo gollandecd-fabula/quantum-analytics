@@ -1,0 +1,37 @@
+{
+  "milestone": "M9",
+  "title": "Independent Final Red Team",
+  "baseline_head": "22aaa99c9301b4d4896c80d32ad10f5ca4c20873",
+  "release_scope": "WB_ONLY",
+  "enabled_marketplaces": ["WILDBERRIES"],
+  "deferred_marketplaces": ["OZON"],
+  "target_state": "PILOT_READY",
+  "current_verdict": "BLOCKED_PENDING_EXTERNAL_EVIDENCE",
+  "required_gates": {
+    "open_p0": 0,
+    "open_p1": 0,
+    "foundation_ci": "PASS",
+    "oss_admission_ci": "PASS",
+    "financial_golden_oracle": "PASS",
+    "actual_scenario_isolation": "PASS",
+    "cross_tenant_access": "IMPOSSIBLE",
+    "marketplace_write_capability": "ABSENT",
+    "unresolved_review_threads": 0,
+    "rollback_bundle": "VERIFIED",
+    "physical_windows_pilot": "PASS",
+    "real_wb_dataset_admission": "RECONCILED",
+    "independent_red_team_report": "COMPLETE"
+  },
+  "external_evidence_blockers": [
+    "Physical Windows clean-install, restart, repair and rollback evidence has not been supplied.",
+    "Authorized real Wildberries reports have not completed local admission and financial reconciliation."
+  ],
+  "hard_boundaries": {
+    "marketplace_writes_authorized": false,
+    "ozon_release_authorized": false,
+    "merge_to_main_authorized": false,
+    "production_release_authorized": false,
+    "final_score_authorized_before_m9_pass": false,
+    "raw_commercial_data_in_repository": false
+  }
+}
