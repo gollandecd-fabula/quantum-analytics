@@ -81,6 +81,7 @@ $pipArguments += @(
     "--no-deps",
     "--only-binary=:all:",
     "--require-hashes",
+    "--no-compile",
     "--target", (Join-Path $stageRoot "src"),
     "-r", $requirementsPath
 )
@@ -88,6 +89,33 @@ $pipArguments += @(
 if ($LASTEXITCODE -ne 0) {
     throw "Failed to vendor hash-pinned Windows dependencies. Exit code: $LASTEXITCODE"
 }
+
+$bytecodeFiles = @(
+    Get-ChildItem -LiteralPath $stageRoot -Recurse -File -Force |
+        Where-Object { $_.Extension -in @(".pyc", ".pyo") }
+)
+foreach ($file in $bytecodeFiles) {
+    Remove-Item -LiteralPath $file.FullName -Force
+}
+$bytecodeDirectories = @(
+    Get-ChildItem -LiteralPath $stageRoot -Recurse -Directory -Force |
+        Where-Object { $_.Name -eq "__pycache__" } |
+        Sort-Object { $_.FullName.Length } -Descending
+)
+foreach ($directory in $bytecodeDirectories) {
+    Remove-Item -LiteralPath $directory.FullName -Recurse -Force
+}
+$remainingBytecode = @(
+    Get-ChildItem -LiteralPath $stageRoot -Recurse -Force |
+        Where-Object {
+            ($_.PSIsContainer -and $_.Name -eq "__pycache__") -or
+            (-not $_.PSIsContainer -and $_.Extension -in @(".pyc", ".pyo"))
+        }
+)
+if ($remainingBytecode.Count -ne 0) {
+    throw "Python bytecode contamination remained in the staged package."
+}
+
 $moscowZone = Join-Path $stageRoot "src\tzdata\zoneinfo\Europe\Moscow"
 if (-not (Test-Path -LiteralPath $moscowZone -PathType Leaf)) {
     throw "Vendored timezone database is incomplete: $moscowZone"
