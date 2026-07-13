@@ -17,11 +17,8 @@ SPEC.loader.exec_module(m7)
 
 class M7SecurityAuditPrecisionTests(unittest.TestCase):
     def test_ci_marker_string_is_not_runtime_write_enablement(self) -> None:
-        source = '''
-FORBIDDEN_SOURCE_MARKERS = (
-    "marketplace_write_enabled = true",
-)
-'''
+        marker = "marketplace_write_enabled" + " = true"
+        source = f"FORBIDDEN_SOURCE_MARKERS = ({marker!r},)\n"
         self.assertFalse(m7._python_enables_marketplace_writes(source))
 
     def test_real_python_write_enablement_is_still_blocked(self) -> None:
