@@ -60,6 +60,17 @@
         "M7 workflow run 29233679252",
         "M1 Windows baseline run 29233679262"
       ]
+    },
+    {
+      "id": "M7-D008",
+      "severity": "P1",
+      "status": "CLOSED_LOCAL_PENDING_EXACT_HEAD_CI",
+      "finding": "The dedicated M7 Windows job did not reproduce the canonical Windows baseline environment: Git CRLF conversion changed immutable bytes and the pinned tzdata dependency was absent.",
+      "closure": "The job now disables core.autocrlf before checkout, installs exactly tzdata 2026.2 as declared by pyproject.toml, preserves the full contract log and then runs the native one-button Red Team.",
+      "evidence": [
+        "M7 workflow run 29234138419",
+        "M7 diagnostics artifact 8272723948"
+      ]
     }
   ],
   "open_security_p0_p1": 0,
