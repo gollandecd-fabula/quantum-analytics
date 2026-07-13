@@ -10,7 +10,6 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 TOOL_PATH = ROOT / "tools/m7_security_performance_one_click.py"
-M9_PERFORMANCE_TOOL_PATH = ROOT / "tools/m9_wb_only_performance.py"
 SPEC = importlib.util.spec_from_file_location("m7_assurance", TOOL_PATH)
 assert SPEC is not None and SPEC.loader is not None
 m7 = importlib.util.module_from_spec(SPEC)
@@ -170,23 +169,14 @@ class M7RepositoryContractTests(unittest.TestCase):
         self.assertFalse(budget["marketplace_write_enabled"])
         self.assertFalse(budget["release_authorized"])
 
-    def test_wb_only_performance_probe_uses_identical_supported_resolution(self) -> None:
-        source = M9_PERFORMANCE_TOOL_PATH.read_text(encoding="utf-8")
-        self.assertIn('PROBE_MARKETPLACE = "WILDBERRIES"', source)
-        self.assertIn('registry.resolve("WILDBERRIES")', source)
-        self.assertNotIn('registry.resolve("OZON")', source)
-        self.assertIn('"release_scope": "WB_ONLY"', source)
-        self.assertIn('"marketplace_write_enabled": False', source)
-
-    def test_workflow_uses_exact_head_read_only_permissions_and_wb_compare(self) -> None:
+    def test_workflow_uses_exact_head_read_only_permissions_and_baseline_compare(self) -> None:
         workflow = (
             ROOT / ".github/workflows/m7-security-performance-one-click.yml"
         ).read_text(encoding="utf-8")
         self.assertIn("permissions:\n  contents: read", workflow)
         self.assertIn("github.event.pull_request.head.sha || github.sha", workflow)
         self.assertIn(m7.DEFAULT_BASELINE_SHA, workflow)
-        self.assertIn("m9_wb_only_performance.py", workflow)
-        self.assertIn("M9-WB-Only-Performance-Comparison", workflow)
+        self.assertIn("m7_security_performance_one_click.py compare", workflow)
         self.assertIn("native_one_button_r37.ps1", workflow)
         self.assertNotIn("marketplace_write_enabled: true", workflow.lower())
 
