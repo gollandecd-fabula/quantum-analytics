@@ -106,6 +106,16 @@ function Write-TestResult {
 $bundle = Join-Path $PSScriptRoot "2_QUANTUM_FULL_OFFLINE_INSTALLER.zip"
 $expectedBundleHash = "__BUNDLE_HASH__"
 $expectedSourceCommit = "__SOURCE_COMMIT__"
+$nativeTestRequestPath = Join-Path $env:TEMP ("QuantumExeNativeTest_{0}.request" -f $expectedSourceCommit)
+$defaultTestResultPath = Join-Path $env:TEMP ("QuantumExeNativeTest_{0}.json" -f $expectedSourceCommit)
+$nativeTestRequested = $false
+if (Test-Path -LiteralPath $nativeTestRequestPath -PathType Leaf) {
+    $requestValue = (Get-Content -LiteralPath $nativeTestRequestPath -Raw -Encoding ASCII).Trim().ToLowerInvariant()
+    if ($requestValue -eq $expectedBundleHash) {
+        $nativeTestRequested = $true
+        Remove-Item -LiteralPath $nativeTestRequestPath -Force
+    }
+}
 if (-not (Test-Path -LiteralPath $bundle -PathType Leaf)) {
     throw "Embedded Quantum offline bundle is missing."
 }
@@ -137,11 +147,13 @@ try {
         throw "Embedded Quantum package hash does not match its bundle manifest."
     }
 
-    if ($env:QUANTUM_EXE_TEST_ONLY -eq "1") {
-        if ([string]::IsNullOrWhiteSpace($env:QUANTUM_EXE_TEST_RESULT)) {
-            throw "QUANTUM_EXE_TEST_RESULT is required in test mode."
+    $testOnly = $nativeTestRequested -or $env:QUANTUM_EXE_TEST_ONLY -eq "1"
+    if ($testOnly) {
+        $testResultPath = $env:QUANTUM_EXE_TEST_RESULT
+        if ([string]::IsNullOrWhiteSpace($testResultPath)) {
+            $testResultPath = $defaultTestResultPath
         }
-        Write-TestResult -Path $env:QUANTUM_EXE_TEST_RESULT -Payload ([ordered]@{
+        Write-TestResult -Path $testResultPath -Payload ([ordered]@{
             status = "PASS"
             source_commit = $expectedSourceCommit
             payload_sha256 = $actualBundleHash
@@ -151,6 +163,7 @@ try {
             marketplace_write_enabled = $false
             installer_present = $true
             quantum_package_sha256 = $quantumHash
+            native_test_request_consumed = $nativeTestRequested
         })
         exit 0
     }
@@ -264,6 +277,11 @@ SourceFiles0=$sourceDirectory
             path = $BundleZip
             sha256 = $bundleHash
             size_bytes = (Get-Item -LiteralPath $BundleZip).Length
+        }
+        native_test = [ordered]@{
+            request_file_name = "QuantumExeNativeTest_${sourceCommit}.request"
+            result_file_name = "QuantumExeNativeTest_${sourceCommit}.json"
+            request_value = $bundleHash
         }
         exe = [ordered]@{
             path = $exePath
