@@ -20,6 +20,9 @@ from quantum.insights import (
 
 WINDOWS_SOURCE_BRIDGE_SCHEMA_VERSION = "quantum-windows-source-bridge-v1"
 _DEFAULT_MARKETPLACE_ADAPTER_REGISTRY = build_default_marketplace_registry()
+_RELEASE_SCOPE_MARKETPLACES = {
+    "WB_ONLY": frozenset({"WILDBERRIES"}),
+}
 _REPORT_NUMBER = re.compile(
     r"(?:№\s*|report[_\s-]*)([0-9]{6,})",
     re.IGNORECASE,
@@ -111,6 +114,28 @@ def _blocked(
     return result
 
 
+def _release_scope_block(
+    config: Mapping[str, Any],
+    marketplace_id: str,
+) -> dict[str, Any] | None:
+    release_scope = config.get("release_scope")
+    if release_scope is None:
+        return None
+    normalized_scope = _text(
+        release_scope,
+        "RELEASE_SCOPE_INVALID",
+    ).upper()
+    allowed_marketplaces = _RELEASE_SCOPE_MARKETPLACES.get(normalized_scope)
+    if allowed_marketplaces is None:
+        raise WindowsSourceBridgeError("RELEASE_SCOPE_UNSUPPORTED")
+    if marketplace_id not in allowed_marketplaces:
+        return _blocked(
+            status="SOURCE_BRIDGE_BLOCKED",
+            reason_code="MARKETPLACE_OUTSIDE_RELEASE_SCOPE",
+        )
+    return None
+
+
 def _recommendation_error(exc: Exception) -> dict[str, Any]:
     return {
         "schema_version": RECOMMENDATION_BUNDLE_SCHEMA_VERSION,
@@ -170,6 +195,9 @@ def attach_reviewed_source_bridge(
         )
     try:
         marketplace_id = normalize_marketplace_id(config.get("marketplace"))
+        release_scope_block = _release_scope_block(config, marketplace_id)
+        if release_scope_block is not None:
+            return release_scope_block
         context = build_source_context(config, source_path)
         request = ReviewedSourceRequest(
             payload=payload,
