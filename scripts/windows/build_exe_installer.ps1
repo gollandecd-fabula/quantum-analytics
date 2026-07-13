@@ -265,6 +265,11 @@ SourceFiles0=$sourceDirectory
         throw "Quantum EXE Authenticode hash verification failed."
     }
 
+    $nativeTestRequestPath = Join-Path $env:TEMP ("QuantumExeNativeTest_{0}.request" -f $sourceCommit)
+    if ($env:GITHUB_ACTIONS -eq "true") {
+        Write-AsciiFile -Path $nativeTestRequestPath -Content $bundleHash
+    }
+
     $result = [ordered]@{
         installer = "Quantum_WB_Offline_Setup"
         installer_version = "R1"
@@ -279,9 +284,10 @@ SourceFiles0=$sourceDirectory
             size_bytes = (Get-Item -LiteralPath $BundleZip).Length
         }
         native_test = [ordered]@{
-            request_file_name = "QuantumExeNativeTest_${sourceCommit}.request"
+            request_path = $nativeTestRequestPath
             result_file_name = "QuantumExeNativeTest_${sourceCommit}.json"
             request_value = $bundleHash
+            prepared = ($env:GITHUB_ACTIONS -eq "true")
         }
         exe = [ordered]@{
             path = $exePath
