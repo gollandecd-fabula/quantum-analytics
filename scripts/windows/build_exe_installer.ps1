@@ -14,20 +14,25 @@ function Get-Sha256 {
     return (Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash.ToLowerInvariant()
 }
 
-function Write-AsciiFile {
-    param(
-        [Parameter(Mandatory = $true)][string]$Path,
-        [Parameter(Mandatory = $true)][string]$Content
-    )
-    [IO.File]::WriteAllText($Path, $Content, [Text.Encoding]::ASCII)
-}
-
 function Test-CommitSha {
     param([AllowNull()][object]$Value)
     if ($null -eq $Value) {
         return $false
     }
     return ([string]$Value).Trim() -match "^[0-9a-fA-F]{40}$"
+}
+
+function Resolve-CSharpCompiler {
+    $candidates = @(
+        (Join-Path $env:WINDIR "Microsoft.NET\Framework64\v4.0.30319\csc.exe"),
+        (Join-Path $env:WINDIR "Microsoft.NET\Framework\v4.0.30319\csc.exe")
+    )
+    foreach ($candidate in $candidates) {
+        if (Test-Path -LiteralPath $candidate -PathType Leaf) {
+            return $candidate
+        }
+    }
+    throw "Microsoft .NET Framework C# compiler was not found."
 }
 
 if ($env:OS -ne "Windows_NT") {
@@ -49,15 +54,6 @@ if (-not (Test-Path -LiteralPath $BundleZip -PathType Leaf)) {
     throw "Full offline installer bundle is missing: $BundleZip"
 }
 
-$iexpress = Join-Path $env:SystemRoot "System32\iexpress.exe"
-if (-not (Test-Path -LiteralPath $iexpress -PathType Leaf)) {
-    $iexpressCommand = Get-Command iexpress.exe -ErrorAction SilentlyContinue
-    if (-not $iexpressCommand) {
-        throw "Windows IExpress was not found."
-    }
-    $iexpress = $iexpressCommand.Source
-}
-
 $sourceCommit = (& git -C $repositoryRoot rev-parse HEAD).Trim()
 if (-not (Test-CommitSha $sourceCommit)) {
     throw "A valid exact source commit is required for EXE build."
@@ -75,200 +71,229 @@ Remove-Item -LiteralPath $exePath -Force -ErrorAction SilentlyContinue
 Remove-Item -LiteralPath $resultPath -Force -ErrorAction SilentlyContinue
 
 $workRoot = Join-Path $env:RUNNER_TEMP ("quantum-exe-builder-{0}" -f [guid]::NewGuid().ToString("N"))
-$payloadRoot = Join-Path $workRoot "payload"
-New-Item -ItemType Directory -Path $payloadRoot -Force | Out-Null
+New-Item -ItemType Directory -Path $workRoot -Force | Out-Null
 
 try {
-    $payloadBundleName = "2_QUANTUM_FULL_OFFLINE_INSTALLER.zip"
-    Copy-Item -LiteralPath $BundleZip -Destination (Join-Path $payloadRoot $payloadBundleName) -Force
+    $sourcePath = Join-Path $workRoot "QuantumSetup.cs"
+    $csharp = @'
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
+using System.IO;
+using System.IO.Compression;
+using System.Reflection;
+using System.Security.Cryptography;
+using System.Text;
+using System.Web.Script.Serialization;
 
-    $bootstrapPs1 = @'
-[CmdletBinding()]
-param()
+namespace QuantumOfflineSetup
+{
+    internal static class Program
+    {
+        private const string ResourceName = "QuantumOfflineBundle.zip";
+        private const string ExpectedBundleSha256 = "__BUNDLE_HASH__";
+        private const string ExpectedSourceCommit = "__SOURCE_COMMIT__";
 
-Set-StrictMode -Version Latest
-$ErrorActionPreference = "Stop"
-$ProgressPreference = "SilentlyContinue"
+        private static int Main(string[] args)
+        {
+            string temporaryRoot = Path.Combine(
+                Path.GetTempPath(),
+                "QuantumExeInstall_" + Guid.NewGuid().ToString("N"));
+            try
+            {
+                Directory.CreateDirectory(temporaryRoot);
+                string bundlePath = Path.Combine(temporaryRoot, "2_QUANTUM_FULL_OFFLINE_INSTALLER.zip");
+                ExtractEmbeddedBundle(bundlePath);
+                string actualBundleHash = HashFile(bundlePath);
+                if (!String.Equals(actualBundleHash, ExpectedBundleSha256, StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new InvalidDataException("Embedded Quantum offline bundle SHA-256 mismatch.");
+                }
 
-function Write-TestResult {
-    param(
-        [Parameter(Mandatory = $true)][string]$Path,
-        [Parameter(Mandatory = $true)][object]$Payload
+                string expandedRoot = Path.Combine(temporaryRoot, "expanded");
+                Directory.CreateDirectory(expandedRoot);
+                ZipFile.ExtractToDirectory(bundlePath, expandedRoot);
+
+                string manifestPath = Path.Combine(expandedRoot, "BUNDLE_MANIFEST.json");
+                string installerPath = Path.Combine(expandedRoot, "INSTALL_QUANTUM_FULL_OFFLINE.ps1");
+                string quantumPackagePath = Path.Combine(expandedRoot, "QuantumLocalProduction_HOME_LOCAL.zip");
+                RequireFile(manifestPath);
+                RequireFile(installerPath);
+                RequireFile(quantumPackagePath);
+
+                JavaScriptSerializer serializer = new JavaScriptSerializer();
+                Dictionary<string, object> manifest = serializer.DeserializeObject(
+                    File.ReadAllText(manifestPath, Encoding.UTF8)) as Dictionary<string, object>;
+                if (manifest == null)
+                {
+                    throw new InvalidDataException("Embedded installer manifest is invalid.");
+                }
+                string manifestCommit = ReadManifestString(manifest, "source_commit");
+                string expectedQuantumHash = ReadManifestString(manifest, "quantum_package_sha256");
+                if (!String.Equals(manifestCommit, ExpectedSourceCommit, StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new InvalidDataException("Embedded installer source commit mismatch.");
+                }
+                string actualQuantumHash = HashFile(quantumPackagePath);
+                if (!String.Equals(actualQuantumHash, expectedQuantumHash, StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new InvalidDataException("Embedded Quantum package hash does not match its bundle manifest.");
+                }
+
+                if (args.Length == 2 && String.Equals(args[0], "--self-test", StringComparison.Ordinal))
+                {
+                    WriteSelfTestResult(args[1], actualBundleHash, actualQuantumHash);
+                    return 0;
+                }
+                if (args.Length != 0)
+                {
+                    throw new ArgumentException("Unsupported Quantum setup arguments.");
+                }
+
+                ProcessStartInfo startInfo = new ProcessStartInfo();
+                startInfo.FileName = "powershell.exe";
+                startInfo.Arguments = "-NoProfile -ExecutionPolicy Bypass -File \"" + installerPath.Replace("\"", "\\\"") + "\"";
+                startInfo.UseShellExecute = false;
+                using (Process process = Process.Start(startInfo))
+                {
+                    if (process == null)
+                    {
+                        throw new InvalidOperationException("Quantum offline installer did not start.");
+                    }
+                    process.WaitForExit();
+                    return process.ExitCode;
+                }
+            }
+            catch (Exception exception)
+            {
+                Console.Error.WriteLine(
+                    "QUANTUM_EXE_ERROR: " + exception.GetType().Name + ": " + exception.Message);
+                return 1;
+            }
+            finally
+            {
+                try
+                {
+                    if (Directory.Exists(temporaryRoot))
+                    {
+                        Directory.Delete(temporaryRoot, true);
+                    }
+                }
+                catch
+                {
+                }
+            }
+        }
+
+        private static void ExtractEmbeddedBundle(string destinationPath)
+        {
+            Assembly assembly = Assembly.GetExecutingAssembly();
+            using (Stream resource = assembly.GetManifestResourceStream(ResourceName))
+            {
+                if (resource == null)
+                {
+                    throw new InvalidDataException("Embedded Quantum offline bundle is missing.");
+                }
+                using (FileStream destination = new FileStream(destinationPath, FileMode.CreateNew, FileAccess.Write, FileShare.None))
+                {
+                    resource.CopyTo(destination);
+                }
+            }
+        }
+
+        private static void RequireFile(string path)
+        {
+            if (!File.Exists(path))
+            {
+                throw new FileNotFoundException("Required embedded installer file is missing.", path);
+            }
+        }
+
+        private static string ReadManifestString(Dictionary<string, object> manifest, string key)
+        {
+            object value;
+            if (!manifest.TryGetValue(key, out value) || value == null)
+            {
+                throw new InvalidDataException("Embedded installer manifest field is missing: " + key);
+            }
+            string text = Convert.ToString(value, CultureInfo.InvariantCulture);
+            if (String.IsNullOrWhiteSpace(text))
+            {
+                throw new InvalidDataException("Embedded installer manifest field is empty: " + key);
+            }
+            return text.Trim();
+        }
+
+        private static string HashFile(string path)
+        {
+            using (SHA256 sha256 = SHA256.Create())
+            using (FileStream stream = File.OpenRead(path))
+            {
+                byte[] digest = sha256.ComputeHash(stream);
+                StringBuilder builder = new StringBuilder(digest.Length * 2);
+                foreach (byte value in digest)
+                {
+                    builder.Append(value.ToString("x2", CultureInfo.InvariantCulture));
+                }
+                return builder.ToString();
+            }
+        }
+
+        private static void WriteSelfTestResult(
+            string resultPath,
+            string payloadHash,
+            string quantumPackageHash)
+        {
+            if (String.IsNullOrWhiteSpace(resultPath))
+            {
+                throw new ArgumentException("Self-test result path is required.");
+            }
+            string fullResultPath = Path.GetFullPath(resultPath);
+            string directory = Path.GetDirectoryName(fullResultPath);
+            if (!String.IsNullOrWhiteSpace(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+            Dictionary<string, object> result = new Dictionary<string, object>();
+            result["status"] = "PASS";
+            result["source_commit"] = ExpectedSourceCommit;
+            result["payload_sha256"] = payloadHash;
+            result["release_scope"] = "WB_ONLY";
+            result["enabled_marketplaces"] = new string[] { "WILDBERRIES" };
+            result["deferred_marketplaces"] = new string[] { "OZON" };
+            result["marketplace_write_enabled"] = false;
+            result["installer_present"] = true;
+            result["quantum_package_sha256"] = quantumPackageHash;
+            result["native_self_test"] = true;
+            JavaScriptSerializer serializer = new JavaScriptSerializer();
+            File.WriteAllText(fullResultPath, serializer.Serialize(result), new UTF8Encoding(false));
+        }
+    }
+}
+'@
+    $csharp = $csharp.Replace("__BUNDLE_HASH__", $bundleHash)
+    $csharp = $csharp.Replace("__SOURCE_COMMIT__", $sourceCommit)
+    [IO.File]::WriteAllText($sourcePath, $csharp, [Text.Encoding]::ASCII)
+
+    $compiler = Resolve-CSharpCompiler
+    $compilerArguments = @(
+        "/nologo",
+        "/target:exe",
+        "/platform:anycpu",
+        "/optimize+",
+        "/out:$exePath",
+        "/resource:$BundleZip,QuantumOfflineBundle.zip",
+        "/reference:System.IO.Compression.dll",
+        "/reference:System.IO.Compression.FileSystem.dll",
+        "/reference:System.Web.Extensions.dll",
+        $sourcePath
     )
-    $directory = Split-Path -Parent ([IO.Path]::GetFullPath($Path))
-    if (-not [string]::IsNullOrWhiteSpace($directory)) {
-        New-Item -ItemType Directory -Path $directory -Force | Out-Null
-    }
-    $json = $Payload | ConvertTo-Json -Depth 6
-    [IO.File]::WriteAllText($Path, $json, [Text.UTF8Encoding]::new($false))
-}
-
-$bundle = Join-Path $PSScriptRoot "2_QUANTUM_FULL_OFFLINE_INSTALLER.zip"
-$expectedBundleHash = "__BUNDLE_HASH__"
-$expectedSourceCommit = "__SOURCE_COMMIT__"
-$nativeTestRequestPath = Join-Path $env:TEMP ("QuantumExeNativeTest_{0}.request" -f $expectedSourceCommit)
-$defaultTestResultPath = Join-Path $env:TEMP ("QuantumExeNativeTest_{0}.json" -f $expectedSourceCommit)
-$nativeTestRequested = $false
-$requestedTestResultPath = $null
-if (Test-Path -LiteralPath $nativeTestRequestPath -PathType Leaf) {
-    try {
-        $request = Get-Content -LiteralPath $nativeTestRequestPath -Raw -Encoding UTF8 | ConvertFrom-Json
-        $requestHash = ([string]$request.payload_sha256).Trim().ToLowerInvariant()
-        $requestCommit = ([string]$request.source_commit).Trim().ToLowerInvariant()
-        $requestResultPath = [string]$request.result_path
-        if (
-            $requestHash -eq $expectedBundleHash -and
-            $requestCommit -eq $expectedSourceCommit -and
-            -not [string]::IsNullOrWhiteSpace($requestResultPath)
-        ) {
-            $nativeTestRequested = $true
-            $requestedTestResultPath = [IO.Path]::GetFullPath($requestResultPath)
-            Remove-Item -LiteralPath $nativeTestRequestPath -Force
-        }
-    }
-    catch {
-        $nativeTestRequested = $false
-        $requestedTestResultPath = $null
-    }
-}
-if (-not (Test-Path -LiteralPath $bundle -PathType Leaf)) {
-    throw "Embedded Quantum offline bundle is missing."
-}
-$actualBundleHash = (Get-FileHash -LiteralPath $bundle -Algorithm SHA256).Hash.ToLowerInvariant()
-if ($actualBundleHash -ne $expectedBundleHash) {
-    throw "Embedded Quantum offline bundle SHA-256 mismatch."
-}
-
-$temporaryRoot = Join-Path $env:TEMP ("QuantumExeInstall_{0}" -f [guid]::NewGuid().ToString("N"))
-try {
-    New-Item -ItemType Directory -Path $temporaryRoot -Force | Out-Null
-    Expand-Archive -LiteralPath $bundle -DestinationPath $temporaryRoot -Force
-
-    $manifestPath = Join-Path $temporaryRoot "BUNDLE_MANIFEST.json"
-    $installerPath = Join-Path $temporaryRoot "INSTALL_QUANTUM_FULL_OFFLINE.ps1"
-    $quantumPackagePath = Join-Path $temporaryRoot "QuantumLocalProduction_HOME_LOCAL.zip"
-    foreach ($required in @($manifestPath, $installerPath, $quantumPackagePath)) {
-        if (-not (Test-Path -LiteralPath $required -PathType Leaf)) {
-            throw "Required embedded installer file is missing: $required"
-        }
-    }
-
-    $manifest = Get-Content -LiteralPath $manifestPath -Raw -Encoding UTF8 | ConvertFrom-Json
-    if ([string]$manifest.source_commit -ne $expectedSourceCommit) {
-        throw "Embedded installer source commit mismatch."
-    }
-    $quantumHash = (Get-FileHash -LiteralPath $quantumPackagePath -Algorithm SHA256).Hash.ToLowerInvariant()
-    if ($quantumHash -ne [string]$manifest.quantum_package_sha256) {
-        throw "Embedded Quantum package hash does not match its bundle manifest."
-    }
-
-    $testOnly = $nativeTestRequested -or $env:QUANTUM_EXE_TEST_ONLY -eq "1"
-    if ($testOnly) {
-        $testResultPath = $env:QUANTUM_EXE_TEST_RESULT
-        if ([string]::IsNullOrWhiteSpace($testResultPath)) {
-            $testResultPath = $requestedTestResultPath
-        }
-        if ([string]::IsNullOrWhiteSpace($testResultPath)) {
-            $testResultPath = $defaultTestResultPath
-        }
-        Write-TestResult -Path $testResultPath -Payload ([ordered]@{
-            status = "PASS"
-            source_commit = $expectedSourceCommit
-            payload_sha256 = $actualBundleHash
-            release_scope = "WB_ONLY"
-            enabled_marketplaces = @("WILDBERRIES")
-            deferred_marketplaces = @("OZON")
-            marketplace_write_enabled = $false
-            installer_present = $true
-            quantum_package_sha256 = $quantumHash
-            native_test_request_consumed = $nativeTestRequested
-        })
-        exit 0
-    }
-
-    & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $installerPath
-    $installerExitCode = $LASTEXITCODE
-    if ($installerExitCode -ne 0) {
-        throw "Quantum offline installer failed with exit code $installerExitCode."
-    }
-}
-finally {
-    Remove-Item -LiteralPath $temporaryRoot -Recurse -Force -ErrorAction SilentlyContinue
-}
-'@
-    $bootstrapPs1 = $bootstrapPs1.Replace("__BUNDLE_HASH__", $bundleHash)
-    $bootstrapPs1 = $bootstrapPs1.Replace("__SOURCE_COMMIT__", $sourceCommit)
-    Write-AsciiFile -Path (Join-Path $payloadRoot "INSTALL_QUANTUM_EXE.ps1") -Content $bootstrapPs1
-
-    $bootstrapCmd = @'
-@echo off
-setlocal EnableExtensions
-title Quantum WB Offline Setup
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0INSTALL_QUANTUM_EXE.ps1"
-set "Q_EXIT=%ERRORLEVEL%"
-if not "%Q_EXIT%"=="0" (
-  echo.
-  echo Quantum installation did not complete. Error code: %Q_EXIT%
-  if not "%QUANTUM_EXE_TEST_ONLY%"=="1" pause
-)
-exit /b %Q_EXIT%
-'@
-    Write-AsciiFile -Path (Join-Path $payloadRoot "INSTALL_QUANTUM_EXE.cmd") -Content $bootstrapCmd
-
-    $sedPath = Join-Path $workRoot "Quantum_WB_Offline_Setup.sed"
-    $sourceDirectory = $payloadRoot.TrimEnd([char[]]"\/") + "\"
-    $sed = @"
-[Version]
-Class=IEXPRESS
-SEDVersion=3
-
-[Options]
-PackagePurpose=InstallApp
-ShowInstallProgramWindow=0
-HideExtractAnimation=1
-UseLongFileName=1
-InsideCompressed=0
-CAB_FixedSize=0
-CAB_ResvCodeSigning=0
-RebootMode=N
-InstallPrompt=%InstallPrompt%
-DisplayLicense=%DisplayLicense%
-FinishMessage=%FinishMessage%
-TargetName=%TargetName%
-FriendlyName=%FriendlyName%
-AppLaunched=%AppLaunched%
-PostInstallCmd=%PostInstallCmd%
-AdminQuietInstCmd=%AdminQuietInstCmd%
-UserQuietInstCmd=%UserQuietInstCmd%
-SourceFiles=SourceFiles
-
-[Strings]
-InstallPrompt=
-DisplayLicense=
-FinishMessage=
-TargetName=$exePath
-FriendlyName=Quantum WB Offline Setup
-AppLaunched=cmd.exe /c INSTALL_QUANTUM_EXE.cmd
-PostInstallCmd=<None>
-AdminQuietInstCmd=
-UserQuietInstCmd=
-FILE0="$payloadBundleName"
-FILE1="INSTALL_QUANTUM_EXE.cmd"
-FILE2="INSTALL_QUANTUM_EXE.ps1"
-
-[SourceFiles]
-SourceFiles0=$sourceDirectory
-
-[SourceFiles0]
-%FILE0%=
-%FILE1%=
-%FILE2%=
-"@
-    Write-AsciiFile -Path $sedPath -Content $sed
-
-    $process = Start-Process -FilePath $iexpress -ArgumentList @("/N", $sedPath) -Wait -PassThru
-    if ($process.ExitCode -ne 0) {
-        throw "IExpress failed with exit code $($process.ExitCode)."
+    $compilerOutput = @(& $compiler @compilerArguments 2>&1)
+    $compilerExitCode = $LASTEXITCODE
+    $compilerOutput | ForEach-Object { Write-Host $_ }
+    if ($compilerExitCode -ne 0) {
+        throw "Quantum EXE compilation failed with exit code $compilerExitCode."
     }
     if (-not (Test-Path -LiteralPath $exePath -PathType Leaf)) {
         throw "Quantum EXE installer was not produced: $exePath"
@@ -283,21 +308,9 @@ SourceFiles0=$sourceDirectory
         throw "Quantum EXE Authenticode hash verification failed."
     }
 
-    $nativeTestRequestPath = Join-Path $env:TEMP ("QuantumExeNativeTest_{0}.request" -f $sourceCommit)
-    $nativeTestResultPath = Join-Path $env:RUNNER_TEMP "quantum-exe-native-test.json"
-    if ($env:GITHUB_ACTIONS -eq "true") {
-        $request = [ordered]@{
-            payload_sha256 = $bundleHash
-            source_commit = $sourceCommit
-            result_path = $nativeTestResultPath
-        }
-        $requestJson = $request | ConvertTo-Json -Depth 3
-        [IO.File]::WriteAllText($nativeTestRequestPath, $requestJson, [Text.UTF8Encoding]::new($false))
-    }
-
     $result = [ordered]@{
         installer = "Quantum_WB_Offline_Setup"
-        installer_version = "R1"
+        installer_version = "R2_DOTNET_BOOTSTRAP"
         source_commit = $sourceCommit
         release_scope = "WB_ONLY"
         enabled_marketplaces = @("WILDBERRIES")
@@ -308,20 +321,15 @@ SourceFiles0=$sourceDirectory
             sha256 = $bundleHash
             size_bytes = (Get-Item -LiteralPath $BundleZip).Length
         }
-        native_test = [ordered]@{
-            request_path = $nativeTestRequestPath
-            result_path = $nativeTestResultPath
-            request_value = $bundleHash
-            prepared = ($env:GITHUB_ACTIONS -eq "true")
-        }
         exe = [ordered]@{
             path = $exePath
             sha256 = Get-Sha256 -Path $exePath
             size_bytes = $exeItem.Length
             authenticode_status = [string]$signature.Status
             code_signed = ([string]$signature.Status -eq "Valid")
+            self_test_argument = "--self-test"
         }
-        builder = "WINDOWS_IEXPRESS_SYSTEM_COMPONENT"
+        builder = "WINDOWS_DOTNET_FRAMEWORK_CSC"
         production_release_authorized = $false
     }
     $result | ConvertTo-Json -Depth 7 | Set-Content -LiteralPath $resultPath -Encoding UTF8
