@@ -1,9 +1,10 @@
 name: Publish Verified Quantum Russian Repair
 
 on:
-  push:
+  pull_request:
     branches:
-      - fix/quantum-one-click-stable-release
+      - main
+    types: [opened, reopened, synchronize]
 
 permissions:
   contents: write
@@ -14,19 +15,30 @@ concurrency:
 
 jobs:
   publish:
-    if: github.event.head_commit.message == 'Stage verified Quantum Russian repair payload'
+    if: github.event.pull_request.head.ref == 'fix/quantum-one-click-stable-release'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout exact staging commit
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.sha }}
+          ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
+      - name: Gate exact staging commit
+        id: gate
+        shell: bash
+        run: |
+          if [ "$(git log -1 --pretty=%s)" = "Stage verified Quantum Russian repair payload" ] || [ "$(git log -1 --pretty=%s)" = "Enable PR publisher for verified Quantum Russian repair" ]; then
+            echo 'run=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'run=false' >> "$GITHUB_OUTPUT"
+          fi
       - name: Set up Python 3.12
+        if: steps.gate.outputs.run == 'true'
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
       - name: Verify and apply exact patch
+        if: steps.gate.outputs.run == 'true'
         shell: bash
         run: |
           python - <<'PY'
@@ -57,11 +69,13 @@ jobs:
           print(json.dumps({'status':'PATCH_VERIFIED','files':len(staged),'compressed_sha256':actual_compressed_sha},sort_keys=True))
           PY
       - name: Run complete CI on patched tree
+        if: steps.gate.outputs.run == 'true'
         env:
           PYTHONDONTWRITEBYTECODE: '1'
           PYTHONPATH: src
         run: python -m quantum.scripts.ci
       - name: Commit exact verified repair
+        if: steps.gate.outputs.run == 'true'
         shell: bash
         run: |
           find . -type d -name __pycache__ -prune -exec rm -rf {} +
