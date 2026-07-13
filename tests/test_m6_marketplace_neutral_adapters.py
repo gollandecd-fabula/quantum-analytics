@@ -5,9 +5,6 @@ from pathlib import Path
 import unittest
 
 from quantum.adapters import (
-    DEFERRED_MARKETPLACES,
-    LOCAL_RELEASE_MARKETPLACES,
-    LOCAL_RELEASE_SCOPE,
     MARKETPLACE_ADAPTER_CONTRACT_VERSION,
     MarketplaceAdapterError,
     MarketplaceAdapterRegistry,
@@ -15,7 +12,6 @@ from quantum.adapters import (
     build_default_marketplace_registry,
     normalize_marketplace_id,
 )
-from quantum.adapters.ozon import OzonSourceAdapter
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -115,25 +111,19 @@ class M6MarketplaceNeutralAdapterTests(unittest.TestCase):
         ):
             registry.bridge_reviewed_source("TEST_MARKET", request())
 
-    def test_default_registry_exposes_only_wildberries_for_local_release(self):
-        self.assertEqual(LOCAL_RELEASE_SCOPE, "WB_ONLY")
-        self.assertEqual(LOCAL_RELEASE_MARKETPLACES, ("WILDBERRIES",))
-        self.assertEqual(DEFERRED_MARKETPLACES, ("OZON",))
+    def test_default_registry_exposes_wb_and_ozon_as_separate_adapters(self):
         registry = build_default_marketplace_registry()
         self.assertEqual(
             registry.registered_marketplaces(),
-            ("WILDBERRIES",),
+            ("OZON", "WILDBERRIES"),
         )
-        with self.assertRaisesRegex(
-            MarketplaceAdapterError,
-            "MARKETPLACE_ADAPTER_NOT_REGISTERED",
-        ):
-            registry.resolve("OZON")
+        self.assertNotEqual(
+            registry.resolve("OZON").adapter_id,
+            registry.resolve("WILDBERRIES").adapter_id,
+        )
 
-    def test_deferred_ozon_adapter_remains_fail_closed_when_explicitly_loaded(self):
-        registry = MarketplaceAdapterRegistry()
-        registry.register(OzonSourceAdapter())
-        registry.freeze()
+    def test_ozon_adapter_is_honest_fail_closed_until_schema_is_approved(self):
+        registry = build_default_marketplace_registry()
         result = registry.bridge_reviewed_source("OZON", request())
         self.assertEqual(result["status"], "SOURCE_BRIDGE_BLOCKED")
         self.assertEqual(result["marketplace_id"], "OZON")
