@@ -214,7 +214,7 @@ jobs:
           Write-Host "Full offline bundle SHA-256: $($result.full_offline_bundle.sha256)"
           Write-Host "Python signature: $($signature.SignerCertificate.Subject)"
 
-      - name: Verify EXE hash and native test extraction
+      - name: Verify EXE hash and native self-test
         shell: pwsh
         run: |
           Set-StrictMode -Version Latest
@@ -236,6 +236,9 @@ jobs:
           if ([bool]$exeResult.marketplace_write_enabled) {
             throw "EXE unexpectedly enables marketplace writes."
           }
+          if ([string]$exeResult.builder -ne "WINDOWS_DOTNET_FRAMEWORK_CSC") {
+            throw "Unexpected EXE builder: $($exeResult.builder)"
+          }
           $actualExeHash = (Get-FileHash -LiteralPath $exe -Algorithm SHA256).Hash.ToLowerInvariant()
           if ($actualExeHash -ne [string]$exeResult.exe.sha256) {
             throw "EXE SHA-256 mismatch."
@@ -249,38 +252,26 @@ jobs:
 
           $testResultPath = Join-Path $env:RUNNER_TEMP "quantum-exe-native-test.json"
           Remove-Item -LiteralPath $testResultPath -Force -ErrorAction SilentlyContinue
-          $env:QUANTUM_EXE_TEST_ONLY = "1"
-          $env:QUANTUM_EXE_TEST_RESULT = $testResultPath
-          try {
-            $process = Start-Process -FilePath $exe -Wait -PassThru
-            if ($process.ExitCode -ne 0) {
-              throw "EXE native test failed with exit code $($process.ExitCode)."
-            }
-            $deadline = (Get-Date).AddSeconds(120)
-            while (-not (Test-Path -LiteralPath $testResultPath -PathType Leaf) -and (Get-Date) -lt $deadline) {
-              Start-Sleep -Milliseconds 500
-            }
-          }
-          finally {
-            Remove-Item Env:QUANTUM_EXE_TEST_ONLY -ErrorAction SilentlyContinue
-            Remove-Item Env:QUANTUM_EXE_TEST_RESULT -ErrorAction SilentlyContinue
+          & $exe --self-test $testResultPath
+          $nativeExitCode = $LASTEXITCODE
+          if ($nativeExitCode -ne 0) {
+            throw "EXE native self-test failed with exit code $nativeExitCode."
           }
           if (-not (Test-Path -LiteralPath $testResultPath -PathType Leaf)) {
-            Get-Process | Where-Object { $_.ProcessName -match "iexpress|cmd|powershell" } | Select-Object ProcessName, Id | Format-Table | Out-String | Write-Host
-            throw "EXE native test result was not produced within 120 seconds."
+            throw "EXE native self-test result was not produced."
           }
           $native = Get-Content -LiteralPath $testResultPath -Raw -Encoding UTF8 | ConvertFrom-Json
-          if ([string]$native.status -ne "PASS") {
-            throw "EXE native test did not pass."
+          if ([string]$native.status -ne "PASS" -or -not [bool]$native.native_self_test) {
+            throw "EXE native self-test did not pass."
           }
           if ([string]$native.source_commit -ne $expectedHead) {
-            throw "EXE native test source commit mismatch."
+            throw "EXE native self-test source commit mismatch."
           }
           if ([string]$native.payload_sha256 -ne [string]$bundleResult.full_offline_bundle.sha256) {
-            throw "EXE native test payload mismatch."
+            throw "EXE native self-test payload mismatch."
           }
           if ([string]$native.release_scope -ne "WB_ONLY" -or [bool]$native.marketplace_write_enabled) {
-            throw "EXE native test violated release boundaries."
+            throw "EXE native self-test violated release boundaries."
           }
           Copy-Item -LiteralPath $testResultPath -Destination (Join-Path $output "exe-native-test-result.json") -Force
           Write-Host "EXE SHA-256: $actualExeHash"
