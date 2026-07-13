@@ -17,7 +17,29 @@ class QuantumFinanceCenter(
     FinanceCenterPagesMixin,
     FinanceCenterShellMixin,
 ):
-    pass
+    def describe_error(self, exc: FinanceProfileError) -> str:
+        messages = {
+            "FINANCE_PROFILE_WRITE_FAILED": (
+                "Не удалось сохранить финансовый профиль. "
+                "Закройте программы, которые могли открыть файл профиля, "
+                "и повторите сохранение."
+            ),
+            "FINANCE_PROFILE_SERIALIZATION_FAILED": (
+                "Не удалось подготовить финансовый профиль к сохранению."
+            ),
+            "FINANCE_PROFILE_STAGED_VALIDATION_FAILED": (
+                "Проверка профиля перед сохранением завершилась ошибкой. "
+                "Предыдущая версия файла не изменена."
+            ),
+        }
+        if exc.code in messages:
+            message = messages[exc.code]
+            if exc.details:
+                message += "\n\nТехнические сведения:\n" + "\n".join(
+                    f"• {item}" for item in exc.details
+                )
+            return message
+        return super().describe_error(exc)
 
 
 def main(root: Path | None = None, config: Path | None = None) -> int:
