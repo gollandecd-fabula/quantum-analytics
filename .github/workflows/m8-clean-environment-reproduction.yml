@@ -108,6 +108,23 @@ jobs:
                 tee "$sandbox/evidence/repository-ci.log"
             )
 
+            (
+              cd "$root"
+              python - <<'PY_CLEAN'
+              from __future__ import annotations
+              import shutil
+              from pathlib import Path
+              from tools.m8_clean_environment_reproduction import collect_repo_residue
+
+              root = Path.cwd()
+              for relative in collect_repo_residue(root):
+                  target = root / relative.rstrip("/")
+                  if target.is_dir():
+                      shutil.rmtree(target)
+                  elif target.exists():
+                      target.unlink()
+              PY_CLEAN
+            )
             status="$(git -C "$root" status --porcelain=v1 --untracked-files=all)"
             if [ -n "$status" ]; then
               printf '%s\n' "$status" >&2
