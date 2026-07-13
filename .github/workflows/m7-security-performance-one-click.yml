@@ -7,15 +7,12 @@ on:
       - ".github/workflows/m7-security-performance-one-click.yml"
       - "docs/evidence/M7_*.json"
       - "docs/evidence/M7_*.md"
-      - "docs/evidence/M9_*.json"
       - "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R*.json"
       - "tools/m7_security_performance_one_click.py"
-      - "tools/m9_wb_only_performance.py"
       - "tests/integration_manifest_support_m7.py"
       - "tests/test_b1a_artifact_manifest.py"
       - "tests/test_m7_security_performance_one_click.py"
       - "tests/test_m7_security_audit_precision.py"
-      - "tests/test_m9_independent_final_red_team.py"
       - "scripts/windows/**"
       - "scripts/ci/native_one_button_r37.ps1"
       - "src/quantum/**"
@@ -47,14 +44,13 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Run M7 and M9 contract tests
+      - name: Run M7 contract tests
         env:
           PYTHONPATH: src
         run: |
           python -m unittest \
             tests.test_m7_security_performance_one_click \
             tests.test_m7_security_audit_precision \
-            tests.test_m9_independent_final_red_team \
             tests.test_b1a_artifact_manifest -v
 
       - name: Run fail-closed security and one-click audit
@@ -100,22 +96,22 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Compare WB-only candidate performance with M6 baseline
+      - name: Compare candidate performance with M6 baseline
         run: |
-          python candidate/tools/m9_wb_only_performance.py \
+          python candidate/tools/m7_security_performance_one_click.py compare \
             --baseline baseline \
             --candidate candidate \
             --iterations 50000 \
             --repeats 5 \
             --max-ratio 1.75 \
             --absolute-slack-seconds 0.25 \
-            --output candidate/dist/m9/m9-wb-only-performance-comparison.json
+            --output candidate/dist/m7/m7-performance-comparison.json
 
-      - name: Upload WB-only performance evidence
+      - name: Upload M7 performance evidence
         uses: actions/upload-artifact@v4
         with:
-          name: M9-WB-Only-Performance-Comparison
-          path: candidate/dist/m9/m9-wb-only-performance-comparison.json
+          name: M7-Performance-Comparison
+          path: candidate/dist/m7/m7-performance-comparison.json
           if-no-files-found: error
           retention-days: 14
 
