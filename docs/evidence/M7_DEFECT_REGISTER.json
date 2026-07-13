@@ -23,7 +23,7 @@
       "severity": "P1",
       "status": "CLOSED_LOCAL_PENDING_EXACT_HEAD_CI",
       "finding": "One-click security, error and reproducibility evidence was spread across earlier workflows rather than enforced by one M7 exact-head workflow.",
-      "closure": "Added a dedicated Windows M7 job that parses PowerShell, runs focused contracts and executes the existing native one-button Red Team on the exact PR head."
+      "closure": "Added a dedicated Windows M7 job that parses PowerShell, runs repository contracts and executes the existing native one-button Red Team on the exact PR head."
     },
     {
       "id": "M7-D004",
@@ -48,6 +48,17 @@
       "evidence": [
         "M7 workflow run 29233050545",
         "Foundation CI run 29233050498"
+      ]
+    },
+    {
+      "id": "M7-D007",
+      "severity": "P1",
+      "status": "CLOSED_LOCAL_PENDING_EXACT_HEAD_CI",
+      "finding": "The duplicated Windows focused-test orchestration failed while the canonical full Windows baseline on the same exact head passed.",
+      "closure": "Removed the divergent hand-selected module invocation from the M7 Windows job and delegated to the repository-owned quantum.scripts.ci entry point before the native one-button Red Team.",
+      "evidence": [
+        "M7 workflow run 29233679252",
+        "M1 Windows baseline run 29233679262"
       ]
     }
   ],
