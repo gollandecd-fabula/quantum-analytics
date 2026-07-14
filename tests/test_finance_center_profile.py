@@ -7,12 +7,12 @@ from xml.sax.saxutils import escape
 from zipfile import ZIP_DEFLATED, ZipFile
 
 from quantum.application.local_processing import (
-    FinanceProfile,
     FinanceRunResult,
     GroupCalculation,
     ProductRecord,
     apply_costs,
     build_profile,
+    calculate_by_group,
     confirm_profile,
     detect_products_from_xlsx,
     parse_cost_workbook,
@@ -46,45 +46,63 @@ def _column(index: int) -> str:
 
 def _row(index: int, values: list[object]) -> str:
     cells = "".join(
-        f'<c r="{_column(column)}{index}" t="inlineStr"><is><t>{escape(str(value))}</t></is></c>'
+        f'<c r="{_column(column)}{index}" t="inlineStr">'
+        f"<is><t>{escape(str(value))}</t></is></c>"
         for column, value in enumerate(values, start=1)
     )
     return f'<row r="{index}">{cells}</row>'
 
 
-def _workbook(path: Path, headers: list[object], rows: list[list[object]], *, title: str = "Отчёт") -> None:
+def _workbook(
+    path: Path,
+    headers: list[object],
+    rows: list[list[object]],
+    *,
+    title: str = "Отчёт",
+) -> None:
     sheet_rows = [_row(1, [title]), _row(2, headers)]
-    sheet_rows.extend(_row(index, values) for index, values in enumerate(rows, start=3))
+    sheet_rows.extend(
+        _row(index, values)
+        for index, values in enumerate(rows, start=3)
+    )
     worksheet = (
         '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
-        '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
-        '<sheetData>' + "".join(sheet_rows) + '</sheetData></worksheet>'
+        '<worksheet xmlns="http://schemas.openxmlformats.org/'
+        'spreadsheetml/2006/main"><sheetData>'
+        + "".join(sheet_rows)
+        + "</sheetData></worksheet>"
     )
     workbook_xml = (
         '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
-        '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" '
-        'xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'
-        '<sheets><sheet name="Sheet1" sheetId="1" r:id="rId1"/></sheets></workbook>'
+        '<workbook xmlns="http://schemas.openxmlformats.org/'
+        'spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/'
+        'officeDocument/2006/relationships"><sheets><sheet name="Sheet1" '
+        'sheetId="1" r:id="rId1"/></sheets></workbook>'
     )
     relationships = (
         '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
-        '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
-        '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" '
+        '<Relationships xmlns="http://schemas.openxmlformats.org/package/'
+        '2006/relationships"><Relationship Id="rId1" Type="http://schemas.'
+        'openxmlformats.org/officeDocument/2006/relationships/worksheet" '
         'Target="worksheets/sheet1.xml"/></Relationships>'
     )
     content_types = (
         '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
-        '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
-        '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'
-        '<Default Extension="xml" ContentType="application/xml"/>'
-        '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>'
-        '<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>'
-        '</Types>'
+        '<Types xmlns="http://schemas.openxmlformats.org/package/2006/'
+        'content-types"><Default Extension="rels" ContentType="application/'
+        'vnd.openxmlformats-package.relationships+xml"/><Default '
+        'Extension="xml" ContentType="application/xml"/><Override '
+        'PartName="/xl/workbook.xml" ContentType="application/vnd.'
+        'openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>'
+        '<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/'
+        'vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>'
+        "</Types>"
     )
     root_relationships = (
         '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
-        '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
-        '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" '
+        '<Relationships xmlns="http://schemas.openxmlformats.org/package/'
+        '2006/relationships"><Relationship Id="rId1" Type="http://schemas.'
+        'openxmlformats.org/officeDocument/2006/relationships/officeDocument" '
         'Target="xl/workbook.xml"/></Relationships>'
     )
     with ZipFile(path, "w", ZIP_DEFLATED) as archive:
@@ -95,6 +113,28 @@ def _workbook(path: Path, headers: list[object], rows: list[list[object]], *, ti
         archive.writestr("xl/worksheets/sheet1.xml", worksheet)
 
 
+def _confirmed_profile(
+    product_id: str = "KNOWN",
+    group_name: str = "Футболка",
+):
+    profile = build_profile(
+        (ProductRecord(product_id, "Товар", group_name, "one.xlsx"),)
+    )
+    profile.tax_rate_percent = "6"
+    profile.tax_base_metric_id = "gross_sales_amount"
+    profile.other_expense_per_unit = "40"
+    group = profile.groups[group_name]
+    group.cost_per_unit = "400"
+    group.resalable_returned_units = "0"
+    group.compensated_returned_units = "0"
+    group.return_compensation_amount = "0"
+    group.discounts_amount = "0"
+    group.subsidies_amount = "0"
+    group.advertising_amount = "0"
+    confirm_profile(profile)
+    return profile
+
+
 class FinanceCenterProfileTests(unittest.TestCase):
     def test_standard_wb_identifiers_use_seller_article_priority(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -103,13 +143,33 @@ class FinanceCenterProfileTests(unittest.TestCase):
                 path,
                 SUPPLIER_HEADERS,
                 [
-                    ["LarannA", "Футболка", "Модель 1", "SELLER-1", "10001", "46001"],
-                    ["LarannA", "Лонгслив", "Модель 2", "SELLER-2", "10002", "46002"],
+                    [
+                        "LarannA",
+                        "Футболка",
+                        "Модель 1",
+                        "SELLER-1",
+                        "10001",
+                        "46001",
+                    ],
+                    [
+                        "LarannA",
+                        "Лонгслив",
+                        "Модель 2",
+                        "SELLER-2",
+                        "10002",
+                        "46002",
+                    ],
                 ],
             )
             products = detect_products_from_xlsx(path)
-        self.assertEqual([item.product_id for item in products], ["SELLER-1", "SELLER-2"])
-        self.assertEqual([item.detected_group for item in products], ["Футболка", "Лонгслив"])
+        self.assertEqual(
+            [item.product_id for item in products],
+            ["SELLER-1", "SELLER-2"],
+        )
+        self.assertEqual(
+            [item.detected_group for item in products],
+            ["Футболка", "Лонгслив"],
+        )
 
     def test_manual_group_mapping_is_preserved_and_editable(self) -> None:
         products = (
@@ -120,26 +180,45 @@ class FinanceCenterProfileTests(unittest.TestCase):
         reassign_product(profile, "B", "Футболка")
         rename_group(profile, "Футболка", "Верх")
         profile.tax_rate_percent = "6"
+        profile.tax_base_metric_id = "gross_sales_amount"
         profile.other_expense_per_unit = "40"
         profile.groups["Верх"].cost_per_unit = "400"
         confirm_profile(profile)
         rebuilt = build_profile(products, profile)
-        self.assertEqual(rebuilt.product_to_group, {"A": "Верх", "B": "Верх"})
+        self.assertEqual(
+            rebuilt.product_to_group,
+            {"A": "Верх", "B": "Верх"},
+        )
         self.assertEqual(rebuilt.groups["Верх"].product_ids, ["A", "B"])
         self.assertTrue(rebuilt.confirmed)
+        self.assertEqual(
+            rebuilt.tax_base_metric_id,
+            "gross_sales_amount",
+        )
 
     def test_missing_values_block_but_explicit_zero_is_valid(self) -> None:
-        profile = build_profile((ProductRecord("A", "Товар", "Футболка", "one.xlsx"),))
+        profile = build_profile(
+            (ProductRecord("A", "Товар", "Футболка", "one.xlsx"),)
+        )
         self.assertEqual(
             validate_profile(profile),
-            ("Налоговая ставка", "Прочие расходы на единицу", "Себестоимость: Футболка"),
+            (
+                "Налоговая ставка",
+                "Налоговая база",
+                "Прочие расходы на единицу",
+                "Себестоимость: Футболка",
+            ),
         )
         profile.tax_rate_percent = "0"
+        profile.tax_base_metric_id = "gross_sales_amount"
         profile.other_expense_per_unit = "0"
         profile.groups["Футболка"].cost_per_unit = "0"
         confirm_profile(profile)
         self.assertTrue(profile.confirmed)
-        self.assertEqual(profile.groups["Футболка"].cost_per_unit, "0.00")
+        self.assertEqual(
+            profile.groups["Футболка"].cost_per_unit,
+            "0.00",
+        )
         self.assertEqual(profile.other_expense_per_unit, "0.00")
 
     def test_cost_excel_import_maps_one_value_per_group(self) -> None:
@@ -159,9 +238,14 @@ class FinanceCenterProfileTests(unittest.TestCase):
             )
         )
         self.assertEqual(apply_costs(profile, costs), ())
-        self.assertEqual(profile.groups["Футболка"].cost_per_unit, "400.00")
-        self.assertEqual(profile.groups["Лонгслив"].cost_per_unit, "500.50")
-
+        self.assertEqual(
+            profile.groups["Футболка"].cost_per_unit,
+            "400.00",
+        )
+        self.assertEqual(
+            profile.groups["Лонгслив"].cost_per_unit,
+            "500.50",
+        )
 
     def test_group_merge_conflict_requires_cost_reconfirmation(self) -> None:
         profile = build_profile(
@@ -174,7 +258,10 @@ class FinanceCenterProfileTests(unittest.TestCase):
         profile.groups["Лонгслив"].cost_per_unit = "500"
         rename_group(profile, "Лонгслив", "Футболка")
         self.assertIsNone(profile.groups["Футболка"].cost_per_unit)
-        self.assertIn("Себестоимость: Футболка", validate_profile(profile))
+        self.assertIn(
+            "Себестоимость: Футболка",
+            validate_profile(profile),
+        )
 
     def test_duplicate_cost_group_is_blocked_even_when_values_match(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -185,7 +272,10 @@ class FinanceCenterProfileTests(unittest.TestCase):
                 [["Футболка", "400"], ["Футболка", "400"]],
                 title="Себестоимость",
             )
-            with self.assertRaisesRegex(ValueError, "COST_GROUP_DUPLICATE"):
+            with self.assertRaisesRegex(
+                ValueError,
+                "COST_GROUP_DUPLICATE",
+            ):
                 parse_cost_workbook(path)
 
     def test_generated_cost_template_is_valid_xlsx_package(self) -> None:
@@ -194,7 +284,9 @@ class FinanceCenterProfileTests(unittest.TestCase):
             write_cost_template(path, ["Футболка", "Лонгслив"])
             with ZipFile(path) as archive:
                 names = set(archive.namelist())
-                worksheet = archive.read("xl/worksheets/sheet1.xml").decode("utf-8")
+                worksheet = archive.read(
+                    "xl/worksheets/sheet1.xml"
+                ).decode("utf-8")
         self.assertIn("[Content_Types].xml", names)
         self.assertIn("xl/workbook.xml", names)
         self.assertIn("Футболка", worksheet)
@@ -214,33 +306,31 @@ class FinanceCenterProfileTests(unittest.TestCase):
         report = {
             "source_bridge": {
                 "report_ids": ["77"],
-                "report_periods": {"77": {"date_from": "2026-07-01", "date_to": "2026-07-07"}},
+                "report_periods": {
+                    "77": {
+                        "date_from": "2026-07-01",
+                        "date_to": "2026-07-07",
+                    }
+                },
             }
         }
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "detailed.xlsx"
-            _workbook(path, headers, [["", "", "", "", "Продажа", "1", "1000", "800"]])
+            _workbook(
+                path,
+                headers,
+                [["", "", "", "", "Продажа", "1", "1000", "800"]],
+            )
             rows = read_detailed_financial_rows(path, report)
         self.assertEqual(rows[0]["№ отчёта"], "77")
         self.assertEqual(rows[0]["Начало периода"], "2026-07-01")
         self.assertEqual(rows[0]["Конец периода"], "2026-07-07")
         self.assertEqual(rows[0]["Валюта"], "RUB")
 
-    def test_confirmed_group_calculation_matches_known_financial_result(self) -> None:
-        from quantum.application.local_processing import calculate_by_group
-
-        profile = build_profile((ProductRecord("KNOWN", "Товар", "Футболка", "one.xlsx"),))
-        profile.tax_rate_percent = "6"
-        profile.other_expense_per_unit = "40"
-        group = profile.groups["Футболка"]
-        group.cost_per_unit = "400"
-        group.resalable_returned_units = "0"
-        group.compensated_returned_units = "0"
-        group.return_compensation_amount = "0"
-        group.discounts_amount = "0"
-        group.subsidies_amount = "0"
-        group.advertising_amount = "0"
-        confirm_profile(profile)
+    def test_confirmed_group_calculation_matches_known_financial_result(
+        self,
+    ) -> None:
+        profile = _confirmed_profile()
         row = {
             "reportId": "77",
             "rrdId": "1",
@@ -285,25 +375,21 @@ class FinanceCenterProfileTests(unittest.TestCase):
         self.assertEqual(result.totals["tax_amount"], "120.00")
         self.assertEqual(result.totals["net_profit_amount"], "680.00")
 
-
-    def test_unattributed_financial_rows_block_entire_calculation(self) -> None:
-        from quantum.application.local_processing import calculate_by_group
-
-        profile = build_profile((ProductRecord("KNOWN", "Товар", "Футболка", "one.xlsx"),))
-        profile.tax_rate_percent = "6"
-        profile.other_expense_per_unit = "40"
-        profile.groups["Футболка"].cost_per_unit = "400"
-        confirm_profile(profile)
+    def test_unattributed_financial_rows_block_entire_calculation(
+        self,
+    ) -> None:
         result = calculate_by_group(
             detailed_rows=({"vendorCode": "UNKNOWN"},),
-            profile=profile,
+            profile=_confirmed_profile(),
             organization_id="tenant-home-local",
             source_id="dataset:test",
             source_sha256="a" * 64,
         )
         self.assertEqual(result.status, "CALCULATION_BLOCKED")
-        self.assertEqual(result.missing_inputs, ("UNATTRIBUTED_FINANCIAL_ROWS:1",))
-
+        self.assertEqual(
+            result.missing_inputs,
+            ("UNKNOWN_PRODUCT_FINANCIAL_ROWS:1",),
+        )
 
     def test_offline_result_exports_are_created(self) -> None:
         result = FinanceRunResult(
@@ -313,7 +399,11 @@ class FinanceCenterProfileTests(unittest.TestCase):
                     group_name="Футболка",
                     state="VALID",
                     reason_codes=(),
-                    calculation={"results": {"net_profit_amount": {"value": "1234.50"}}},
+                    calculation={
+                        "results": {
+                            "net_profit_amount": {"value": "1234.50"}
+                        }
+                    },
                     observed_metrics={},
                 ),
             ),
@@ -346,7 +436,11 @@ class FinanceCenterProfileTests(unittest.TestCase):
         root = Path(__file__).resolve().parents[1]
         ui = "\n".join(
             path.read_text(encoding="utf-8")
-            for path in sorted((root / "src/quantum/application").glob("_finance_center_*.py"))
+            for path in sorted(
+                (root / "src/quantum/application").glob(
+                    "_finance_center_*.py"
+                )
+            )
         )
         for token in (
             "Центр решений",
@@ -359,11 +453,16 @@ class FinanceCenterProfileTests(unittest.TestCase):
             "#E97824",
         ):
             self.assertIn(token, ui)
-        launcher = (root / "scripts/windows/one_click_home_local.ps1").read_text(encoding="ascii")
+        launcher = (
+            root / "scripts/windows/one_click_home_local.ps1"
+        ).read_text(encoding="ascii")
         self.assertIn("quantum.application.desktop_center", launcher)
         self.assertIn("$SkipInstall -and -not $NonInteractive", launcher)
-        self.assertIn('if ($File) { $importArguments["File"] = $File }', launcher)
-        self.assertNotIn('-AuthorityAttested -SchemaReviewed', launcher)
+        self.assertIn(
+            'if ($File) { $importArguments["File"] = $File }',
+            launcher,
+        )
+        self.assertNotIn("-AuthorityAttested -SchemaReviewed", launcher)
         self.assertNotIn("marketplace_write_enabled = True", ui)
 
 
