@@ -1,0 +1,53 @@
+{
+  "milestone": "M9",
+  "title": "Maximum-Assurance v3 Fail-Closed Control Plane",
+  "protocol_version": "3.0",
+  "baseline_head": "7f7240aef05065aaf1dc396a54c7aed7f8eff6ae",
+  "status": "IMPLEMENTED_PENDING_EXACT_HEAD_CI",
+  "scope": [
+    "machine-readable Requirements Traceability Matrix validation",
+    "claim ledger evidence-level and exact-head integrity",
+    "mandatory final-artifact presence and JSON validity",
+    "P0 user claim L5 enforcement",
+    "plateau and release fail-closed criteria",
+    "marketplace-write hard disable",
+    "five harness negative controls",
+    "Linux and Windows L2 source-runtime gates"
+  ],
+  "required_generated_artifacts": [
+    "REQUIREMENTS_TRACEABILITY_MATRIX.json",
+    "CLAIM_LEDGER.json",
+    "DEFECT_REGISTER.json",
+    "STATE_TRANSITION_COVERAGE.json",
+    "PARAMETER_COMBINATION_COVERAGE.json",
+    "MUTATION_REPORT.json",
+    "FUZZ_CORPUS_INDEX.json",
+    "FAULT_INJECTION_REPORT.json",
+    "SECURITY_REPORT.json",
+    "SBOM.json",
+    "LICENSE_REPORT.json",
+    "BUILD_PROVENANCE.json",
+    "INSTALLED_FILE_MANIFEST.json",
+    "PHYSICAL_PILOT_REPORT.json",
+    "RESIDUAL_RISK_REGISTER.json",
+    "FINAL_RELEASE_DECISION.md"
+  ],
+  "negative_controls": [
+    "missing claim status",
+    "exact-head mismatch",
+    "marketplace writes enabled",
+    "release authorization with open P0/P1",
+    "missing mandatory assurance artifact"
+  ],
+  "maximum_claim_before_physical_pass": "AUTOMATED_VERIFICATION_PASS",
+  "limitations": [
+    "M9 does not claim installed-runtime L4 or physical-user-path L5 evidence.",
+    "M9 does not authorize technical plateau, merge, deployment or production release.",
+    "M9 does not replace RUN A, independent adversarial RUN B or the same-artifact physical pilot.",
+    "Overall mutation, fuzzing, state-transition and launcher-combination coverage remain future milestones."
+  ],
+  "release_state": "RELEASE_BLOCKED",
+  "marketplace_write_enabled": false,
+  "merge_to_main_authorized": false,
+  "production_release_authorized": false
+}
