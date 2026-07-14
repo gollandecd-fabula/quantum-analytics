@@ -2,6 +2,12 @@ from __future__ import annotations
 
 from quantum.application._finance_center_shared import *
 from quantum.application._finance_center_dialog import FinanceProfileDialog
+from quantum.application._finance_center_persistence import (
+    managed_source_path,
+    restore_reports,
+    save_report_index,
+)
+
 
 class FinanceCenterReportsMixin:
         def _set_text(self, widget: tk.Text, value: str) -> None:
@@ -23,14 +29,82 @@ class FinanceCenterReportsMixin:
                 base += "\n\n" + "\n".join(f"• {item}" for item in exc.details)
             return base
 
+        def restore_persisted_reports(self) -> None:
+            restored = restore_reports(self.project_root, self.config_path)
+            if not restored:
+                return
+            collections: list[tuple[ProductRecord, ...]] = []
+            for item in restored:
+                row = item.row
+                self.reports[row.row_id] = ReportState(row, item.product_records)
+                self._update_report_row(row)
+                if item.product_records:
+                    collections.append(item.product_records)
+                    for record in item.product_records:
+                        self.products[record.product_id] = record
+            self.counter = max(self.counter, len(self.reports))
+            if collections:
+                try:
+                    merged = merge_detected_products(collections)
+                    self.profile = build_profile(merged, self.profile)
+                except FinanceProfileError as exc:
+                    self.set_status(self.describe_error(exc), "error")
+            self._persist_report_index()
+            available = sum(
+                state.row.source_path.is_file()
+                for state in self.reports.values()
+            )
+            self.set_status(
+                f"Восстановлено отчётов: {len(self.reports)}; "
+                f"исходники доступны: {available}.",
+                "success" if available else "warning",
+            )
+
+        def _persist_report_index(self) -> None:
+            try:
+                save_report_index(
+                    self.project_root,
+                    (state.row for state in self.reports.values()),
+                )
+            except (OSError, TypeError, ValueError) as exc:
+                self.set_status(
+                    "Не удалось сохранить индекс загруженных отчётов: "
+                    + type(exc).__name__,
+                    "warning",
+                )
+
+        def _loaded_digest(self, digest: str) -> bool:
+            for state in self.reports.values():
+                report = state.row.report
+                if not isinstance(report, dict):
+                    continue
+                if str(report.get("file_sha256") or "").strip().lower() != digest:
+                    continue
+                if state.row.source_path.is_file() and state.row.status not in {
+                    "Ошибка",
+                    "Недоступен",
+                    "Отменено",
+                }:
+                    return True
+            return False
+
         def add_reports(self) -> None:
             selected = filedialog.askopenfilenames(
                 title="Выберите один или несколько отчётов Wildberries",
                 filetypes=[("Excel и ZIP", "*.xlsx *.xlsm *.zip"), ("Все файлы", "*.*")],
             )
+            added = 0
+            skipped = 0
             for raw_path in selected:
                 path = Path(raw_path)
                 if not path.is_file():
+                    continue
+                try:
+                    digest = sha256(path.read_bytes()).hexdigest()
+                except OSError:
+                    continue
+                if self._loaded_digest(digest):
+                    skipped += 1
                     continue
                 self.counter += 1
                 row = ImportRow(
@@ -39,12 +113,27 @@ class FinanceCenterReportsMixin:
                     size_text=str(path.stat().st_size),
                     status="Ожидает",
                     progress="0%",
+                    details={
+                        "original_source_name": path.name,
+                        "selected_file_sha256": digest,
+                    },
                 )
                 self.reports[row.row_id] = ReportState(row)
                 self._update_report_row(row)
                 self._start_worker(row)
+                added += 1
             if selected:
                 self.show_page("reports")
+            if skipped and not added:
+                self.set_status(
+                    "Выбранный отчёт уже загружен и доступен для расчёта.",
+                    "success",
+                )
+            elif skipped:
+                self.set_status(
+                    f"Добавлено: {added}; уже были загружены: {skipped}.",
+                    "info",
+                )
 
         def _start_worker(self, row: ImportRow) -> None:
             row.status = "В обработке"
@@ -58,6 +147,10 @@ class FinanceCenterReportsMixin:
             try:
                 result = run_import(row.source_path, self.project_root)
                 result.row_id = row.row_id
+                result.details["original_source_name"] = (
+                    row.details.get("original_source_name")
+                    or row.source_path.name
+                )
                 products: tuple[ProductRecord, ...] = ()
                 try:
                     products = detect_products_from_xlsx(row.source_path)
@@ -73,6 +166,7 @@ class FinanceCenterReportsMixin:
 
         def _drain_events(self) -> None:
             changed_profile = False
+            changed_reports = False
             while True:
                 try:
                     event, row_id, payload = self.events.get_nowait()
@@ -84,9 +178,22 @@ class FinanceCenterReportsMixin:
                 state = self.reports.get(row_id)
                 if state is None:
                     continue
+                original_source = row.source_path
+                if isinstance(row.report, dict):
+                    managed = managed_source_path(
+                        self.project_root,
+                        self.config_path,
+                        row.report,
+                        original_source,
+                    )
+                    if managed is not None:
+                        row.details["original_source_path"] = str(original_source)
+                        row.details["managed_source_path"] = str(managed)
+                        row.source_path = managed
                 state.row = row
                 state.product_records = products
                 self._update_report_row(row)
+                changed_reports = True
                 if products:
                     for record in products:
                         self.products[record.product_id] = record
@@ -98,6 +205,8 @@ class FinanceCenterReportsMixin:
                     except FinanceProfileError as exc:
                         self.set_status(self.describe_error(exc), "error")
                 self.set_status(f"Последний результат: {row.status} · {row.source_path.name}", "success" if row.status == "Готово" else "warning")
+            if changed_reports:
+                self._persist_report_index()
             if changed_profile:
                 self.refresh_finance_summary()
                 self.open_finance_profile()
@@ -106,7 +215,16 @@ class FinanceCenterReportsMixin:
             self.root_widget.after(150, self._drain_events)
 
         def _update_report_row(self, row: ImportRow) -> None:
-            values = (str(row.source_path), row.status, row.detected_format, row.progress, row.comment)
+            display_name = str(
+                row.details.get("original_source_name")
+                or (
+                    row.report.get("sanitized_filename")
+                    if isinstance(row.report, dict)
+                    else None
+                )
+                or row.source_path
+            )
+            values = (display_name, row.status, row.detected_format, row.progress, row.comment)
             if self.report_tree.exists(row.row_id):
                 self.report_tree.item(row.row_id, values=values)
             else:
@@ -123,6 +241,12 @@ class FinanceCenterReportsMixin:
         def repeat_selected(self) -> None:
             row = self._selected_report()
             if row is not None:
+                if not row.source_path.is_file():
+                    messagebox.showwarning(
+                        APP_TITLE,
+                        "Сохранённый исходник отчёта недоступен. Выберите файл заново.",
+                    )
+                    return
                 self._start_worker(row)
 
         def open_selected_result(self) -> None:
@@ -177,4 +301,6 @@ class FinanceCenterReportsMixin:
                 lines.append("Обязательные поля профиля заполнены. Дополнительные данные проверяются при расчёте по фактическому отчёту WB.")
             self._set_text(self.finance_summary, "\n".join(lines))
             self.refresh_cards()
+
+
 __all__ = [name for name in globals() if not name.startswith("__")]
