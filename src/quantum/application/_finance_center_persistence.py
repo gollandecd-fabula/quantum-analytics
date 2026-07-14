@@ -13,7 +13,12 @@ from quantum.application.finance_profile import (
     ProductRecord,
     detect_products_from_xlsx,
 )
-from quantum.application.local_app import ImportRow, _human_size, summarize_report
+from quantum.application.local_app import (
+    ImportRow,
+    SUCCESS_STATUSES,
+    _human_size,
+    summarize_report,
+)
 
 
 REPORT_INDEX_SCHEMA_VERSION = "quantum-finance-center-report-index-v1"
@@ -24,6 +29,35 @@ REPORT_INDEX_RELATIVE_PATH = Path("data") / "finance-center-reports.json"
 class RestoredReport:
     row: ImportRow
     product_records: tuple[ProductRecord, ...]
+
+
+def finance_center_summary(
+    report: Mapping[str, Any] | None,
+    return_code: int,
+) -> tuple[str, str, str, str]:
+    status, detected_format, raw_status, comment = summarize_report(
+        report if isinstance(report, dict) else None,
+        return_code,
+    )
+    if not isinstance(report, Mapping):
+        return status, detected_format, raw_status, comment
+    top_status = report.get("status")
+    bridge = report.get("source_bridge")
+    bridge_status = bridge.get("status") if isinstance(bridge, Mapping) else None
+    finance_state = (
+        bridge.get("finance_request_state")
+        if isinstance(bridge, Mapping)
+        else None
+    )
+    if (
+        isinstance(top_status, str)
+        and top_status in SUCCESS_STATUSES
+        and bridge_status == "SOURCE_BRIDGE_COMPLETE"
+        and finance_state != "BLOCKED"
+        and return_code == 0
+    ):
+        return "Готово", detected_format, top_status, "Импорт завершён."
+    return status, detected_format, raw_status, comment
 
 
 def _safe_json(path: Path) -> dict[str, Any]:
@@ -281,7 +315,7 @@ def restore_reports(
             or (indexed_source.name if indexed_source is not None else digest)
         )
         display_path = source_path or indexed_source or (root / "data" / "missing" / source_name)
-        status, detected_format, raw_status, comment = summarize_report(report, 0)
+        status, detected_format, raw_status, comment = finance_center_summary(report, 0)
         size_raw = report.get("file_size_bytes")
         try:
             size_text = _human_size(int(size_raw))
@@ -335,6 +369,7 @@ __all__ = [
     "REPORT_INDEX_RELATIVE_PATH",
     "REPORT_INDEX_SCHEMA_VERSION",
     "RestoredReport",
+    "finance_center_summary",
     "managed_source_path",
     "restore_reports",
     "save_report_index",
