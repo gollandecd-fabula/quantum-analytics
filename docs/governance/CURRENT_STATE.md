@@ -7,6 +7,8 @@ Working branch: `fix/quantum-plateau-redteam`
 Pull request: `#102`
 Base branch: `main`
 Marketplace writes: `DISABLED`
+Current unit: `M6 — Build, documentation and release metadata`
+Live execution state: `docs/evidence/STAGE_B_EXECUTION_STATE.yaml`
 
 ## Current product
 
