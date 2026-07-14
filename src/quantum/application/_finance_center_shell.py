@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from quantum.application._finance_center_shared import *
 
+
 class FinanceCenterShellMixin:
         def __init__(self, root_widget: tk.Tk, project_root: Path, config_path: Path) -> None:
             self.root_widget = root_widget
@@ -29,6 +30,7 @@ class FinanceCenterShellMixin:
             self._configure_style()
             self._build_shell()
             self.root_widget.protocol("WM_DELETE_WINDOW", self.request_close)
+            self.restore_persisted_reports()
             self.show_page("decision")
             self.refresh_finance_summary()
             self._refresh_queue_controls()
@@ -110,4 +112,6 @@ class FinanceCenterShellMixin:
             footer.pack(fill=tk.X)
             self.status_text = tk.Label(footer, text="Готово. Файлы обрабатываются локально.", font=("Segoe UI", 9), fg=PALETTE["muted"], bg=PALETTE["surface"])
             self.status_text.pack(side=tk.LEFT, padx=18, pady=8)
+
+
 __all__ = [name for name in globals() if not name.startswith("__")]
