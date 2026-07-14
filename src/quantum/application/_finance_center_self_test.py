@@ -126,7 +126,7 @@ def _persistence_round_trip() -> tuple[bool, dict[str, Any]]:
     )
 
     with tempfile.TemporaryDirectory() as directory:
-        root = Path(directory)
+        root = Path(directory).resolve()
         config = root / "config" / "default-home-local.json"
         config.parent.mkdir(parents=True)
         config.write_text(
@@ -179,7 +179,8 @@ def _persistence_round_trip() -> tuple[bool, dict[str, Any]]:
             report=report,
             details={"original_source_name": "self-test.xlsx"},
         )
-        index_path = save_report_index(root, (row,))
+        index_path = save_report_index(root, (row,)).resolve()
+        expected_index = (root / REPORT_INDEX_RELATIVE_PATH).resolve()
         index = json.loads(index_path.read_text(encoding="utf-8"))
         restored = restore_reports(root, config)
         serialized = json.dumps(index, ensure_ascii=False)
@@ -187,13 +188,16 @@ def _persistence_round_trip() -> tuple[bool, dict[str, Any]]:
             "schema_version": index.get("schema_version"),
             "restored_count": len(restored),
             "contains_external_absolute_path": str(root) in serialized,
-            "index_path": str(index_path.relative_to(root)),
+            "index_path": REPORT_INDEX_RELATIVE_PATH.as_posix(),
         }
+        restored_source_matches = (
+            len(restored) == 1
+            and restored[0].row.source_path.resolve() == managed.resolve()
+        )
         passed = (
             index.get("schema_version") == REPORT_INDEX_SCHEMA_VERSION
-            and index_path == root / REPORT_INDEX_RELATIVE_PATH
-            and len(restored) == 1
-            and restored[0].row.source_path == managed.resolve()
+            and index_path == expected_index
+            and restored_source_matches
             and not details["contains_external_absolute_path"]
         )
         return passed, details
