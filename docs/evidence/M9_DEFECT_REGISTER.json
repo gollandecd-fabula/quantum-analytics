@@ -1,0 +1,42 @@
+{
+  "register_id": "QUANTUM-M9-PLATEAU-DEFECT-REGISTER-v1",
+  "date": "2026-07-14",
+  "scope": "local Windows desktop Wildberries analytics release candidate",
+  "status": "TECHNICAL_PLATEAU_CANDIDATE",
+  "open_software_findings": {
+    "P0": 0,
+    "P1": 0
+  },
+  "resolved_findings": [
+    {"id":"RT-001","severity":"P0","title":"Live UI methods were shadowed by a different MRO implementation","status":"RESOLVED","milestone":"M1"},
+    {"id":"RT-002","severity":"P0","title":"Imported reports were forgotten after restart","status":"RESOLVED","milestone":"M1/M3"},
+    {"id":"RT-003","severity":"P0","title":"Desktop fabricated authority and schema attestations","status":"RESOLVED","milestone":"M4"},
+    {"id":"RT-004","severity":"P0","title":"Desktop self-test could return PASS after nested failure","status":"RESOLVED","milestone":"M5"},
+    {"id":"RT-005","severity":"P0","title":"Tax base was an undeclared hardcoded assumption","status":"RESOLVED","milestone":"M2"},
+    {"id":"RT-006","severity":"P0","title":"WB service rows without SKU blocked or disappeared from economics","status":"RESOLVED","milestone":"M2"},
+    {"id":"RT-007","severity":"P1","title":"Zero-activity groups blocked a valid period","status":"RESOLVED","milestone":"M2"},
+    {"id":"RT-008","severity":"P1","title":"Report index persisted external absolute user paths","status":"RESOLVED","milestone":"M3"},
+    {"id":"RT-009","severity":"P1","title":"XLSX was hashed and parsed from separate reads","status":"RESOLVED","milestone":"M3"},
+    {"id":"RT-010","severity":"P1","title":"Atomic report index publication lacked complete Windows retry and validation","status":"RESOLVED","milestone":"M3"},
+    {"id":"RT-011","severity":"P1","title":"Standard wheel and source build surfaces were disabled","status":"RESOLVED","milestone":"M6"},
+    {"id":"RT-012","severity":"P1","title":"Package metadata described an obsolete Foundation skeleton","status":"RESOLVED","milestone":"M6"},
+    {"id":"RT-013","severity":"P1","title":"Public entry points advertised inactive API and worker runtimes","status":"RESOLVED","milestone":"M6"},
+    {"id":"RT-014","severity":"P1","title":"Primary documentation described an obsolete hosted product","status":"RESOLVED","milestone":"M6"},
+    {"id":"RT-015","severity":"P1","title":"Release branch had no current main ancestry","status":"RESOLVED","milestone":"M7"},
+    {"id":"RT-016","severity":"P1","title":"Release workflow tested the retired localhost HTTP runtime","status":"RESOLVED","milestone":"M7"},
+    {"id":"RT-017","severity":"P0","title":"Installed launcher could request a package-only installer absent from the installed copy","status":"RESOLVED","milestone":"M7"},
+    {"id":"RT-018","severity":"P1","title":"Wheel test depended on globally preinstalled setuptools","status":"RESOLVED","milestone":"M8"},
+    {"id":"RT-019","severity":"P1","title":"Persistence self-test failed on equivalent Windows long and 8.3 paths","status":"RESOLVED","milestone":"M8"}
+  ],
+  "external_release_boundaries": [
+    {"id":"EXT-001","title":"Authenticode signing certificate","status":"PENDING_EXTERNAL_INPUT","software_defect":false},
+    {"id":"EXT-002","title":"Physical installation and real-report pilot on target computer","status":"PENDING_USER_PILOT","software_defect":false},
+    {"id":"EXT-003","title":"Applicable tax regime and tax base confirmation","status":"PENDING_USER_OR_ACCOUNTANT_CONFIRMATION","software_defect":false},
+    {"id":"EXT-004","title":"Explicit decision to merge PR #102 into main","status":"NOT_AUTHORIZED","software_defect":false}
+  ],
+  "immutable_boundaries": {
+    "marketplace_write_capability": "DISABLED",
+    "release_scope": "WB_ONLY",
+    "production_release": "BLOCKED_PENDING_EXTERNAL_BOUNDARIES"
+  }
+}
