@@ -16,7 +16,9 @@ from quantum.application.local_app import (
     _safe_json_load,
     summarize_report,
 )
-from quantum.application._finance_center_persistence import finance_center_summary
+from quantum.application._finance_center_persistence import (
+    finance_center_summary,
+)
 
 
 def _terminate_process_tree(process: subprocess.Popen[object]) -> None:
@@ -49,8 +51,14 @@ def run_import(
     source_path: Path,
     root: Path | None = None,
     *,
+    authority_attested: bool = False,
+    schema_reviewed: bool = False,
     cancel_event: threading.Event | None = None,
-    process_callback: Callable[[subprocess.Popen[object] | None], None] | None = None,
+    process_callback: Callable[
+        [subprocess.Popen[object] | None],
+        None,
+    ]
+    | None = None,
 ) -> ImportRow:
     root = (root or _find_project_root()).resolve()
     row = ImportRow(
@@ -62,7 +70,11 @@ def run_import(
     output_dir.mkdir(parents=True, exist_ok=True)
     from datetime import datetime
 
-    output_path = output_dir / f"pilot_gui_{datetime.now().strftime('%Y%m%d_%H%M%S_%f')}.json"
+    output_path = output_dir / (
+        "pilot_gui_"
+        + datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+        + ".json"
+    )
     row.output_path = output_path
     command = [
         "powershell.exe",
@@ -78,9 +90,11 @@ def run_import(
         "-Output",
         str(output_path),
         "-NonInteractive",
-        "-AuthorityAttested",
-        "-SchemaReviewed",
     ]
+    if authority_attested:
+        command.append("-AuthorityAttested")
+    if schema_reviewed:
+        command.append("-SchemaReviewed")
     config = _find_ready_config(root)
     if config is not None:
         command.extend(["-Config", str(config)])
@@ -108,7 +122,10 @@ def run_import(
         if process_callback is not None:
             process_callback(None)
 
-    row.stdout = "Выбор партии в интерфейсе подтверждает полномочия и проверку схемы; импорт выполнен без консольных запросов."
+    row.stdout = (
+        "Полномочия и проверка схемы передаются только после отдельных "
+        "подтверждений в интерфейсе Quantum."
+    )
     row.stderr = ""
     if cancelled:
         row.status = "Отменено"
@@ -121,13 +138,20 @@ def run_import(
             "config": str(config) if config else None,
             "output_path": str(output_path),
             "cancelled": True,
+            "batch_authority_attested": authority_attested,
+            "batch_schema_reviewed": schema_reviewed,
         }
         return row
 
     report = _safe_json_load(output_path)
     row.report = report
     base_summary = summarize_report(report, return_code)
-    row.status, row.detected_format, row.raw_status, row.comment = finance_center_summary(
+    (
+        row.status,
+        row.detected_format,
+        row.raw_status,
+        row.comment,
+    ) = finance_center_summary(
         report,
         return_code,
         summary=base_summary,
@@ -141,8 +165,8 @@ def run_import(
         "config": str(config) if config else None,
         "output_path": str(output_path),
         "cancelled": False,
-        "batch_authority_attested": True,
-        "batch_schema_reviewed": True,
+        "batch_authority_attested": authority_attested,
+        "batch_schema_reviewed": schema_reviewed,
         "interactive_prompts": False,
         "defender_scan_skipped": False,
     }
