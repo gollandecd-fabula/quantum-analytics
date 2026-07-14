@@ -3,6 +3,8 @@ from __future__ import annotations
 import os
 from pathlib import Path
 import shutil
+import subprocess
+import sys
 import tempfile
 import tomllib
 import unittest
@@ -19,6 +21,10 @@ class PlateauM6BuildMetadataTests(unittest.TestCase):
             "setuptools.build_meta",
             config["build-system"]["build-backend"],
         )
+        self.assertEqual(
+            ["setuptools==80.9.0"],
+            config["build-system"]["requires"],
+        )
         project = config["project"]
         self.assertNotEqual("0.0.1", project["version"])
         self.assertIn("desktop", project["description"].casefold())
@@ -32,20 +38,45 @@ class PlateauM6BuildMetadataTests(unittest.TestCase):
         self.assertFalse(config["tool"]["quantum"]["marketplace_write_enabled"])
 
     def test_standard_backend_builds_installable_desktop_wheel(self) -> None:
-        from setuptools import build_meta
-
-        original = Path.cwd()
         generated = (
             ROOT / "build",
             ROOT / "src" / "quantum_analytics.egg-info",
         )
         try:
             with tempfile.TemporaryDirectory() as directory:
-                os.chdir(ROOT)
-                wheel_name = build_meta.build_wheel(directory)
-                wheel = Path(directory) / wheel_name
-                self.assertTrue(wheel.is_file())
-                with ZipFile(wheel) as archive:
+                environment = os.environ.copy()
+                environment.update(
+                    {
+                        "PIP_DISABLE_PIP_VERSION_CHECK": "1",
+                        "PIP_NO_INPUT": "1",
+                    }
+                )
+                completed = subprocess.run(
+                    [
+                        sys.executable,
+                        "-m",
+                        "pip",
+                        "wheel",
+                        "--no-deps",
+                        "--no-cache-dir",
+                        "--wheel-dir",
+                        directory,
+                        str(ROOT),
+                    ],
+                    cwd=ROOT,
+                    env=environment,
+                    text=True,
+                    capture_output=True,
+                    check=False,
+                )
+                self.assertEqual(
+                    0,
+                    completed.returncode,
+                    completed.stdout + "\n" + completed.stderr,
+                )
+                wheels = tuple(Path(directory).glob("quantum_analytics-*.whl"))
+                self.assertEqual(1, len(wheels), completed.stdout)
+                with ZipFile(wheels[0]) as archive:
                     names = set(archive.namelist())
                     entry_name = next(
                         name
@@ -68,7 +99,6 @@ class PlateauM6BuildMetadataTests(unittest.TestCase):
                 self.assertNotIn("quantum-worker", entries)
                 self.assertIn("Version: 0.9.0rc1", metadata)
         finally:
-            os.chdir(original)
             for path in generated:
                 if path.exists():
                     shutil.rmtree(path)
