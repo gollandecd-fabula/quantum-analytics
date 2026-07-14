@@ -33,7 +33,9 @@ class FinanceCenterReportsMixin:
         }
         base = messages.get(exc.code, exc.code)
         if exc.details:
-            base += "\n\n" + "\n".join(f"• {item}" for item in exc.details)
+            base += "\n\n" + "\n".join(
+                f"• {item}" for item in exc.details
+            )
         return base
 
     def restore_persisted_reports(self) -> None:
@@ -43,7 +45,10 @@ class FinanceCenterReportsMixin:
         collections: list[tuple[ProductRecord, ...]] = []
         for item in restored:
             row = item.row
-            self.reports[row.row_id] = ReportState(row, item.product_records)
+            self.reports[row.row_id] = ReportState(
+                row,
+                item.product_records,
+            )
             self._update_report_row(row)
             if item.product_records:
                 collections.append(item.product_records)
@@ -85,7 +90,12 @@ class FinanceCenterReportsMixin:
             report = state.row.report
             if not isinstance(report, dict):
                 continue
-            if str(report.get("file_sha256") or "").strip().lower() != digest:
+            if (
+                str(report.get("file_sha256") or "")
+                .strip()
+                .lower()
+                != digest
+            ):
                 continue
             if state.row.source_path.is_file() and state.row.status not in {
                 "Ошибка",
@@ -115,7 +125,12 @@ class FinanceCenterReportsMixin:
         if self.report_tree.exists(row.row_id):
             self.report_tree.item(row.row_id, values=values)
         else:
-            self.report_tree.insert("", tk.END, iid=row.row_id, values=values)
+            self.report_tree.insert(
+                "",
+                tk.END,
+                iid=row.row_id,
+                values=values,
+            )
 
     def _selected_report(self) -> ImportRow | None:
         selection = self.report_tree.selection()
@@ -127,7 +142,11 @@ class FinanceCenterReportsMixin:
 
     def open_selected_result(self) -> None:
         row = self._selected_report()
-        if row is None or row.output_path is None or not row.output_path.exists():
+        if (
+            row is None
+            or row.output_path is None
+            or not row.output_path.exists()
+        ):
             return
         _open_path(row.output_path)
 
@@ -146,14 +165,21 @@ class FinanceCenterReportsMixin:
             "raw_status": row.raw_status,
             "format": row.detected_format,
             "comment": row.comment,
-            "output_path": str(row.output_path) if row.output_path else None,
+            "output_path": (
+                str(row.output_path) if row.output_path else None
+            ),
             "error": row.error,
             "details": row.details,
             "report": row.report,
         }
         text.insert(
             "1.0",
-            json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True),
+            json.dumps(
+                payload,
+                ensure_ascii=False,
+                indent=2,
+                sort_keys=True,
+            ),
         )
         text.configure(state=tk.DISABLED)
 
@@ -171,8 +197,15 @@ class FinanceCenterReportsMixin:
         lines = ["ФИНАНСОВЫЙ ПРОФИЛЬ", ""]
         lines.append(f"Групп: {len(self.profile.groups)}")
         lines.append(
-            f"Налоговая ставка: "
+            "Налоговая ставка: "
             f"{self.profile.tax_rate_percent or 'не заполнена'}"
+        )
+        lines.append(
+            "Налоговая база: "
+            + TAX_BASE_OPTIONS.get(
+                self.profile.tax_base_metric_id or "",
+                "не выбрана",
+            )
         )
         lines.append(
             "Прочие расходы на единицу: "
