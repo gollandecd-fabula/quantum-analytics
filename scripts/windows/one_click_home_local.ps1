@@ -245,9 +245,21 @@ function Open-PilotResult {
 
 if (-not $SkipInstall -and [string]::IsNullOrWhiteSpace($PackageRoot) -and [string]::IsNullOrWhiteSpace($InstalledRoot)) {
     $installedCandidate = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot "..")).Path
-    $installedRuntime = Join-Path $installedCandidate "src\quantum\application\desktop_center.py"
     $packageInstaller = Join-Path $installedCandidate "scripts\install_home_local.ps1"
-    if ((Test-Path -LiteralPath $installedRuntime -PathType Leaf) -and -not (Test-Path -LiteralPath $packageInstaller -PathType Leaf)) {
+    $installedMarkers = @(
+        (Join-Path $installedCandidate "START_QUANTUM.cmd"),
+        (Join-Path $installedCandidate "scripts\import_source.ps1"),
+        (Join-Path $installedCandidate "scripts\configure_home_local.ps1"),
+        (Join-Path $installedCandidate "src\quantum\pilot\windows_runner.py")
+    )
+    $hasInstalledMarker = $false
+    foreach ($marker in $installedMarkers) {
+        if (Test-Path -LiteralPath $marker -PathType Leaf) {
+            $hasInstalledMarker = $true
+            break
+        }
+    }
+    if ($hasInstalledMarker -and -not (Test-Path -LiteralPath $packageInstaller -PathType Leaf)) {
         $SkipInstall = $true
         $InstalledRoot = $installedCandidate
     }
