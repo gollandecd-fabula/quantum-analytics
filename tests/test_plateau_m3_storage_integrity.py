@@ -55,7 +55,7 @@ class PlateauM3StorageIntegrityTests(unittest.TestCase):
                 rows = read_detailed_financial_rows(path, report)
 
             self.assertEqual([path], calls)
-            self.assertEqual("77", rows[0]["№ отчёта"])
+            self.assertEqual("77", rows[0]["reportId"])
             self.assertEqual("Продажа", rows[0]["Обоснование"])
 
     def test_verified_reader_rejects_changed_source(self) -> None:
