@@ -1,0 +1,19 @@
+{
+  "base_pilot_integration_r80_overlay_git_blob_sha": "e537746c836ac9e7ca73c885d0741a7357297631",
+  "entries": [
+    [
+      "docs/evidence/M9_MAXIMUM_ASSURANCE_CONTROL_PLANE.json",
+      "0a1128585b8cc15ad26c2a927e73b1a8a8fdbb64103c44be81aab0138552e837",
+      2609
+    ],
+    [
+      "tests/integration_manifest_support_m8.py",
+      "d2b8eea8f6a11c23e31219cb614efac9e4430e31b268aab1c6a694b36aa95f51",
+      1090
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 81,
+  "reason": "Record the verified M9 Linux and Windows L2 source-runtime evidence, six passing unit tests, five passing harness negative controls, evidence artifact identities, and the explicit release-blocked limitations without elevating claims above the executed evidence level",
+  "remove_paths": []
+}
