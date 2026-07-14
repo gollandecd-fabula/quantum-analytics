@@ -34,8 +34,9 @@ class RestoredReport:
 def finance_center_summary(
     report: Mapping[str, Any] | None,
     return_code: int,
+    summary: tuple[str, str, str, str] | None = None,
 ) -> tuple[str, str, str, str]:
-    status, detected_format, raw_status, comment = summarize_report(
+    status, detected_format, raw_status, comment = summary or summarize_report(
         report if isinstance(report, dict) else None,
         return_code,
     )
