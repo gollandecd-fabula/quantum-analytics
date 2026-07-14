@@ -103,8 +103,12 @@ def _atomic_profile_json(path: _Path, payload: _Mapping[str, _Any]) -> None:
                 pass
 
 
-def _commit_saved_profile(target: FinanceProfile, staged: FinanceProfile) -> None:
+def _commit_saved_profile(
+    target: FinanceProfile,
+    staged: FinanceProfile,
+) -> None:
     target.tax_rate_percent = staged.tax_rate_percent
+    target.tax_base_metric_id = staged.tax_base_metric_id
     target.other_expense_per_unit = staged.other_expense_per_unit
     target.groups = staged.groups
     target.product_to_group = staged.product_to_group
