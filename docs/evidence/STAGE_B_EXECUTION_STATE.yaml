@@ -1,12 +1,12 @@
-execution_state_id: STAGE-B-EXECUTION-STATE-v3
+execution_state_id: STAGE-B-EXECUTION-STATE-v4
 stage_contract_id: STAGE-B-BUILD-v1
-updated_on: 2026-07-02
+updated_on: 2026-07-14
 source_of_truth_for_live_unit_state: true
 macro_stage: B
 status: ACTIVE
-current_unit: R3D1
-tracking_issue: 41
-working_branch: r3-real-commercial-data-pilot-v1
+current_unit: M6
+tracking_issue: 102
+working_branch: fix/quantum-plateau-redteam
 
 units:
   B0:
@@ -110,8 +110,48 @@ units:
   B8:
     state: PLANNED
     risk: R2
+  M0:
+    state: COMPLETE
+    risk: R3
+    evidence: pull-request-102
+  M1:
+    state: COMPLETE
+    risk: R3
+    evidence: docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R80.json
+  M2:
+    state: COMPLETE
+    risk: R3
+    exact_head_12_of_12_pass: 2b04b2e295ce966cf3559f9d2d17ab3d557b9338
+    evidence: docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R80.json
+  M3:
+    state: COMPLETE
+    risk: R3
+    evidence: docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R81.json
+  M4:
+    state: COMPLETE
+    risk: R3
+    evidence: docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R81.json
+  M5:
+    state: COMPLETE
+    risk: R3
+    evidence: docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R81.json
+  M6:
+    state: IN_PROGRESS
+    risk: R3
+    pull_request: 102
 
 cross_cutting_units:
+  PLATEAU_RED_TEAM:
+    state: IN_PROGRESS
+    risk: R3
+    required_for_release_candidate: true
+    pull_request: 102
+    branch: fix/quantum-plateau-redteam
+    marketplace_mode: READ_ONLY
+    authority_review: EXPLICIT_UI_CONFIRMATION_REQUIRED
+    schema_review: EXPLICIT_UI_CONFIRMATION_REQUIRED
+    report_index_external_paths: PROHIBITED
+    self_test: FAIL_CLOSED
   R3_REAL_DATA_PILOT_ADMISSION:
     state: AUTHORIZED_PENDING_CONTROLS
     risk: R3
