@@ -37,10 +37,23 @@ class WindowsFirstRunFinanceCenterR74Tests(unittest.TestCase):
         script = self.script
         recovery = script.index('$installedCandidate =')
         branch = script.index('if ($SkipInstall) {', recovery)
+        recovery_block = script[recovery:branch]
         self.assertLess(recovery, branch)
-        self.assertIn('$SkipInstall = $true', script[recovery:branch])
-        self.assertIn('desktop_center.py', script[recovery:branch])
-        self.assertIn('install_home_local.ps1', script[recovery:branch])
+        self.assertIn('$installedMarkers = @(', recovery_block)
+        self.assertIn('$hasInstalledMarker = $false', recovery_block)
+        self.assertIn('$SkipInstall = $true', recovery_block)
+        self.assertIn('install_home_local.ps1', recovery_block)
+        for marker in (
+            'START_QUANTUM.cmd',
+            'scripts\\import_source.ps1',
+            'scripts\\configure_home_local.ps1',
+            'src\\quantum\\pilot\\windows_runner.py',
+        ):
+            self.assertIn(marker, recovery_block)
+        self.assertIn(
+            '$hasInstalledMarker -and -not (Test-Path -LiteralPath $packageInstaller',
+            recovery_block,
+        )
 
     def test_installed_launcher_always_uses_skip_install(self) -> None:
         installer = self.installer
