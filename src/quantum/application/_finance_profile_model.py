@@ -26,7 +26,12 @@ from quantum.finance import FinanceError, calculate, canonical_hash
 from quantum.ingestion import XlsxInspectionLimits
 from quantum.ingestion._xlsx_archive import _extract_workbook
 
-PROFILE_SCHEMA_VERSION = "quantum-home-local-finance-profile-v1"
+LEGACY_PROFILE_SCHEMA_VERSION = "quantum-home-local-finance-profile-v1"
+PROFILE_SCHEMA_VERSION = "quantum-home-local-finance-profile-v2"
+TAX_BASE_OPTIONS = {
+    "gross_sales_amount": "Продажи/возвраты до удержаний Wildberries",
+    "net_marketplace_income_amount": "Доход после расходов Wildberries",
+}
 GROUP_RESULT_SCHEMA_VERSION = "quantum-home-local-group-finance-result-v1"
 UNASSIGNED_GROUP = "Не определено"
 
@@ -88,7 +93,6 @@ _HEADER_ALIASES: dict[str, frozenset[str]] = {
     ),
 }
 
-
 _PRODUCT_ID_PRIORITY = (
     "артикулпродавца",
     "vendorcode",
@@ -115,7 +119,12 @@ _DETAILED_REQUIRED_HEADERS = {
         {"продаживозвраты", "продаживозвратыруб", "retailamount"}
     ),
     "for_pay": frozenset(
-        {"кперечислениюпродавцу", "кперечислениюпродавцуруб", "forpay", "ppvzforpay"}
+        {
+            "кперечислениюпродавцу",
+            "кперечислениюпродавцуруб",
+            "forpay",
+            "ppvzforpay",
+        }
     ),
 }
 
@@ -151,6 +160,7 @@ class GroupInput:
 @dataclass(slots=True)
 class FinanceProfile:
     tax_rate_percent: str | None = None
+    tax_base_metric_id: str | None = None
     other_expense_per_unit: str | None = None
     groups: dict[str, GroupInput] = field(default_factory=dict)
     product_to_group: dict[str, str] = field(default_factory=dict)
@@ -164,16 +174,26 @@ class FinanceProfile:
             name: asdict(group)
             for name, group in sorted(self.groups.items())
         }
-        payload["product_to_group"] = dict(sorted(self.product_to_group.items()))
+        payload["product_to_group"] = dict(
+            sorted(self.product_to_group.items())
+        )
         return payload
 
     @classmethod
     def from_dict(cls, raw: Mapping[str, Any]) -> "FinanceProfile":
-        if raw.get("schema_version") != PROFILE_SCHEMA_VERSION:
+        schema_version = raw.get("schema_version")
+        if schema_version not in {
+            LEGACY_PROFILE_SCHEMA_VERSION,
+            PROFILE_SCHEMA_VERSION,
+        }:
             raise FinanceProfileError("FINANCE_PROFILE_SCHEMA_UNSUPPORTED")
+        legacy = schema_version == LEGACY_PROFILE_SCHEMA_VERSION
         groups_raw = raw.get("groups")
         mapping_raw = raw.get("product_to_group")
-        if not isinstance(groups_raw, Mapping) or not isinstance(mapping_raw, Mapping):
+        if not isinstance(groups_raw, Mapping) or not isinstance(
+            mapping_raw,
+            Mapping,
+        ):
             raise FinanceProfileError("FINANCE_PROFILE_INVALID")
         groups: dict[str, GroupInput] = {}
         for name, value in groups_raw.items():
@@ -197,17 +217,33 @@ class FinanceProfile:
                 advertising_amount=_optional_text(value.get("advertising_amount")),
             )
         product_to_group = {
-            _required_text(product_id, "FINANCE_PROFILE_PRODUCT_ID_INVALID"):
-            _required_text(group_name, "FINANCE_PROFILE_GROUP_INVALID")
+            _required_text(
+                product_id,
+                "FINANCE_PROFILE_PRODUCT_ID_INVALID",
+            ): _required_text(
+                group_name,
+                "FINANCE_PROFILE_GROUP_INVALID",
+            )
             for product_id, group_name in mapping_raw.items()
         }
+        tax_base = (
+            None
+            if legacy
+            else _optional_text(raw.get("tax_base_metric_id"))
+        )
         return cls(
             tax_rate_percent=_optional_text(raw.get("tax_rate_percent")),
-            other_expense_per_unit=_optional_text(raw.get("other_expense_per_unit")),
+            tax_base_metric_id=tax_base,
+            other_expense_per_unit=_optional_text(
+                raw.get("other_expense_per_unit")
+            ),
             groups=groups,
             product_to_group=product_to_group,
-            confirmed=raw.get("confirmed") is True,
-            updated_at=_optional_text(raw.get("updated_at")),
+            confirmed=(not legacy and raw.get("confirmed") is True),
+            updated_at=(
+                None if legacy else _optional_text(raw.get("updated_at"))
+            ),
+            schema_version=PROFILE_SCHEMA_VERSION,
         )
 
 
@@ -273,7 +309,9 @@ def _string_list(value: object) -> list[str]:
 
 
 def _header_token(value: object) -> str:
-    text = " ".join(str(value).replace("\u00a0", " ").split()).casefold()
+    text = " ".join(
+        str(value).replace("\u00a0", " ").split()
+    ).casefold()
     return "".join(character for character in text if character.isalnum())
 
 
@@ -310,5 +348,6 @@ def _money(value: Decimal) -> str:
 def _rate(value: Decimal) -> str:
     normalized = value.normalize()
     return format(normalized, "f")
+
 
 __all__ = [name for name in globals() if not name.startswith("__")]
