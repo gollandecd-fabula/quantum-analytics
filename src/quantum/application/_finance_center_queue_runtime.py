@@ -2,6 +2,10 @@ from __future__ import annotations
 
 from quantum.application._finance_center_shared import *
 from quantum.application._finance_center_persistence import managed_source_path
+from quantum.application._finance_schema_review import (
+    SchemaReviewPreview,
+    build_schema_review_preview,
+)
 
 
 class FinanceCenterQueueRuntimeMixin:
@@ -28,11 +32,49 @@ class FinanceCenterQueueRuntimeMixin:
                 digest.update(chunk)
         return digest.hexdigest()
 
+    def _confirm_authority(self, count: int) -> bool:
+        return messagebox.askyesno(
+            APP_TITLE,
+            "Подтверждение полномочий\n\n"
+            f"Выбрано файлов: {count}.\n\n"
+            "Подтвердите, что вы имеете право обрабатывать эти отчёты "
+            "и содержащиеся в них коммерческие данные.\n\n"
+            "Выбор файла сам по себе не считается подтверждением.",
+        )
+
+    def _review_source(
+        self,
+        path: Path,
+        *,
+        authority_attested: bool,
+    ) -> SchemaReviewPreview | None:
+        if not authority_attested:
+            return None
+        try:
+            preview = build_schema_review_preview(path, self.config_path)
+        except FinanceProfileError as exc:
+            messagebox.showerror(
+                APP_TITLE,
+                "Файл не добавлен: предварительная проверка схемы "
+                "завершилась ошибкой.\n\n"
+                + self.describe_error(exc),
+            )
+            return None
+        if preview.requires_schema_review and not messagebox.askyesno(
+            APP_TITLE,
+            "Проверка схемы отчёта\n\n"
+            + preview.confirmation_text()
+            + "\n\nПодтвердить эту схему?",
+        ):
+            return None
+        return preview
+
     def add_reports(self) -> None:
         if self.import_queue.is_busy:
             messagebox.showwarning(
                 APP_TITLE,
-                "Дождитесь завершения текущей очереди или нажмите «Остановить очередь».",
+                "Дождитесь завершения текущей очереди или нажмите "
+                "«Остановить очередь».",
             )
             return
         selected = filedialog.askopenfilenames(
@@ -42,20 +84,28 @@ class FinanceCenterQueueRuntimeMixin:
                 ("Все файлы", "*.*"),
             ],
         )
+        if not selected:
+            return
+        if not self._confirm_authority(len(selected)):
+            self.set_status(
+                "Партия не добавлена: полномочия не подтверждены.",
+                "warning",
+            )
+            return
+
         added = 0
         duplicates = 0
-        unreadable = 0
+        rejected = 0
         for raw_path in selected:
             path = Path(raw_path)
-            if not path.is_file():
-                unreadable += 1
+            preview = self._review_source(
+                path,
+                authority_attested=True,
+            )
+            if preview is None:
+                rejected += 1
                 continue
-            try:
-                digest = self._source_digest(path)
-                size = path.stat().st_size
-            except OSError:
-                unreadable += 1
-                continue
+            digest = preview.file_sha256
             if self._loaded_digest(digest):
                 duplicates += 1
                 continue
@@ -67,24 +117,31 @@ class FinanceCenterQueueRuntimeMixin:
             row = ImportRow(
                 row_id=row_id,
                 source_path=path,
-                size_text=str(size),
+                size_text=str(preview.file_size_bytes),
                 status="В очереди",
                 progress="0%",
-                comment="Ожидает последовательной обработки.",
+                comment=(
+                    "Полномочия подтверждены; схема проверена. "
+                    "Ожидает последовательной обработки."
+                    if preview.requires_schema_review
+                    else "Полномочия подтверждены; ожидает обработки."
+                ),
                 details={
                     "original_source_name": path.name,
-                    "original_source_path": str(path),
                     "selected_file_sha256": digest,
+                    "authority_attested": True,
+                    "schema_reviewed": preview.requires_schema_review,
+                    "schema_preview": preview.to_dict(),
                 },
             )
             self.reports[row_id] = ReportState(row)
             self._update_report_row(row)
             added += 1
-        if selected:
-            self.show_page("reports")
-        if unreadable:
+
+        self.show_page("reports")
+        if rejected:
             self.set_status(
-                f"Не удалось прочитать выбранных файлов: {unreadable}.",
+                f"Не добавлено после проверки: {rejected}.",
                 "warning",
             )
         elif duplicates:
@@ -94,7 +151,7 @@ class FinanceCenterQueueRuntimeMixin:
             )
         if added:
             self.set_status(
-                f"Партия подтверждена выбором файлов. В очередь добавлено: {added}.",
+                f"После явной проверки в очередь добавлено: {added}.",
                 "info",
             )
             self._start_next_if_idle()
@@ -127,7 +184,11 @@ class FinanceCenterQueueRuntimeMixin:
             "info",
         )
         self._refresh_queue_controls()
-        threading.Thread(target=self._worker, args=(row,), daemon=True).start()
+        threading.Thread(
+            target=self._worker,
+            args=(row,),
+            daemon=True,
+        ).start()
 
     def _register_active_process(
         self,
@@ -141,10 +202,14 @@ class FinanceCenterQueueRuntimeMixin:
         selected_digest = str(
             row.details.get("selected_file_sha256") or ""
         ).strip().lower()
+        authority_attested = row.details.get("authority_attested") is True
+        schema_reviewed = row.details.get("schema_reviewed") is True
         try:
             result = run_import(
                 original_source,
                 self.project_root,
+                authority_attested=authority_attested,
+                schema_reviewed=schema_reviewed,
                 cancel_event=self.cancel_event,
                 process_callback=self._register_active_process,
             )
@@ -155,8 +220,10 @@ class FinanceCenterQueueRuntimeMixin:
                         "original_source_name",
                         original_source.name,
                     ),
-                    "original_source_path": str(original_source),
                     "selected_file_sha256": selected_digest or None,
+                    "authority_attested": authority_attested,
+                    "schema_reviewed": schema_reviewed,
+                    "schema_preview": row.details.get("schema_preview"),
                 }
             )
             products: tuple[ProductRecord, ...] = ()
@@ -171,8 +238,8 @@ class FinanceCenterQueueRuntimeMixin:
                     result.progress = "Сбой"
                     result.error = "SOURCE_FILE_CHANGED_DURING_IMPORT"
                     result.comment = (
-                        "Файл изменился между выбором и завершением импорта. "
-                        "Результат отклонён; выберите исходный отчёт заново."
+                        "Файл изменился между preview и завершением импорта. "
+                        "Результат отклонён; выберите отчёт заново."
                     )
                 elif not isinstance(result.report, dict):
                     result.status = "Ошибка"
@@ -201,10 +268,12 @@ class FinanceCenterQueueRuntimeMixin:
                             products = detect_products_from_xlsx(managed)
                         except FinanceProfileError as exc:
                             result.details["product_detection_error"] = exc.code
-                        except Exception as exc:  # defensive metadata boundary
-                            result.details["product_detection_error"] = type(exc).__name__
+                        except Exception as exc:
+                            result.details["product_detection_error"] = (
+                                type(exc).__name__
+                            )
             self.events.put(("done", row.row_id, (result, products)))
-        except Exception as exc:  # pragma: no cover - defensive desktop boundary
+        except Exception as exc:
             row.status = "Ошибка"
             row.progress = "Сбой"
             row.comment = str(exc)
@@ -247,7 +316,8 @@ class FinanceCenterQueueRuntimeMixin:
                     self.set_status(self.describe_error(exc), "error")
             kind = "success" if row.status == "Готово" else "warning"
             display_name = str(
-                row.details.get("original_source_name") or row.source_path.name
+                row.details.get("original_source_name")
+                or row.source_path.name
             )
             self.set_status(
                 f"Последний результат: {row.status} · {display_name}",
@@ -284,7 +354,9 @@ class FinanceCenterQueueRuntimeMixin:
             self._update_report_row(row)
         active_id = self.import_queue.active
         if active_id is not None and active_id in self.reports:
-            self.reports[active_id].row.comment = "Остановка активного процесса…"
+            self.reports[active_id].row.comment = (
+                "Остановка активного процесса…"
+            )
             self._update_report_row(self.reports[active_id].row)
         if not silent:
             self.set_status(
@@ -302,7 +374,10 @@ class FinanceCenterQueueRuntimeMixin:
         self.closing = True
         if self.import_queue.is_busy:
             self.cancel_queue(silent=True)
-            self.set_status("Quantum завершает активный процесс…", "warning")
+            self.set_status(
+                "Quantum завершает активный процесс…",
+                "warning",
+            )
             return
         self.root_widget.destroy()
 
@@ -322,15 +397,44 @@ class FinanceCenterQueueRuntimeMixin:
                 "Сохранённый исходник отчёта недоступен. Выберите файл заново.",
             )
             return
-        if not self.import_queue.enqueue_existing(row.row_id, row.source_path):
+        if not self._confirm_authority(1):
+            self.set_status(
+                "Повторный запуск отменён: полномочия не подтверждены.",
+                "warning",
+            )
+            return
+        preview = self._review_source(
+            row.source_path,
+            authority_attested=True,
+        )
+        if preview is None:
+            self.set_status(
+                "Повторный запуск отменён на этапе проверки схемы.",
+                "warning",
+            )
+            return
+        if not self.import_queue.enqueue_existing(
+            row.row_id,
+            row.source_path,
+        ):
             messagebox.showwarning(
                 APP_TITLE,
                 "Этот отчёт уже находится в обработке или очереди.",
             )
             return
+        row.details.update(
+            {
+                "selected_file_sha256": preview.file_sha256,
+                "authority_attested": True,
+                "schema_reviewed": preview.requires_schema_review,
+                "schema_preview": preview.to_dict(),
+            }
+        )
         row.status = "В очереди"
         row.progress = "0%"
-        row.comment = "Ожидает повторной последовательной обработки."
+        row.comment = (
+            "Полномочия и схема повторно подтверждены; ожидает обработки."
+        )
         row.error = None
         self._update_report_row(row)
         self._start_next_if_idle()
