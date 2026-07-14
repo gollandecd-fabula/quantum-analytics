@@ -24,11 +24,14 @@ class FinanceProfileSaveHotfixTests(unittest.TestCase):
             (ProductRecord("SKU-1", "Товар", "Группа", "report.xlsx"),)
         )
         profile.tax_rate_percent = "6"
+        profile.tax_base_metric_id = "gross_sales_amount"
         profile.other_expense_per_unit = "40"
         profile.groups["Группа"].cost_per_unit = "400"
         return profile
 
-    def test_save_profile_round_trips_and_commits_only_after_replace(self) -> None:
+    def test_save_profile_round_trips_and_commits_only_after_replace(
+        self,
+    ) -> None:
         with tempfile.TemporaryDirectory() as raw:
             path = Path(raw) / "config" / "finance-profile.json"
             profile = self._profile()
@@ -38,12 +41,21 @@ class FinanceProfileSaveHotfixTests(unittest.TestCase):
         self.assertIsNotNone(loaded)
         self.assertTrue(profile.confirmed)
         self.assertEqual(profile.tax_rate_percent, "6")
+        self.assertEqual(
+            profile.tax_base_metric_id,
+            "gross_sales_amount",
+        )
         self.assertEqual(profile.other_expense_per_unit, "40.00")
-        self.assertEqual(profile.groups["Группа"].cost_per_unit, "400.00")
+        self.assertEqual(
+            profile.groups["Группа"].cost_per_unit,
+            "400.00",
+        )
         self.assertTrue(loaded.confirmed)
         self.assertEqual(loaded.to_dict(), profile.to_dict())
 
-    def test_failed_replace_preserves_previous_file_and_unconfirmed_memory(self) -> None:
+    def test_failed_replace_preserves_previous_file_and_unconfirmed_memory(
+        self,
+    ) -> None:
         with tempfile.TemporaryDirectory() as raw:
             path = Path(raw) / "finance-profile.json"
             original = {"sentinel": "preserve"}
@@ -58,15 +70,25 @@ class FinanceProfileSaveHotfixTests(unittest.TestCase):
                 with self.assertRaises(FinanceProfileError) as raised:
                     save_profile(path, profile)
 
-            self.assertEqual(raised.exception.code, "FINANCE_PROFILE_WRITE_FAILED")
+            self.assertEqual(
+                raised.exception.code,
+                "FINANCE_PROFILE_WRITE_FAILED",
+            )
             self.assertEqual(
                 json.loads(path.read_text(encoding="utf-8")),
                 original,
             )
             self.assertFalse(profile.confirmed)
             self.assertEqual(profile.tax_rate_percent, "6")
+            self.assertEqual(
+                profile.tax_base_metric_id,
+                "gross_sales_amount",
+            )
             self.assertEqual(profile.other_expense_per_unit, "40")
-            self.assertEqual(profile.groups["Группа"].cost_per_unit, "400")
+            self.assertEqual(
+                profile.groups["Группа"].cost_per_unit,
+                "400",
+            )
             self.assertEqual(list(path.parent.glob("*.tmp")), [])
 
     def test_transient_windows_replace_lock_is_retried(self) -> None:
@@ -111,7 +133,9 @@ class ShortcutRepairHotfixTests(unittest.TestCase):
         )
         run.assert_not_called()
 
-    def test_windows_repair_runs_hidden_and_targets_current_launcher(self) -> None:
+    def test_windows_repair_runs_hidden_and_targets_current_launcher(
+        self,
+    ) -> None:
         with tempfile.TemporaryDirectory() as raw:
             root = Path(raw)
             launcher = root / "START_QUANTUM.cmd"
@@ -138,7 +162,11 @@ class ShortcutRepairHotfixTests(unittest.TestCase):
             self.assertIn("-EncodedCommand", arguments)
             self.assertEqual(
                 run.call_args.kwargs["creationflags"],
-                getattr(shortcut_repair.subprocess, "CREATE_NO_WINDOW", 0),
+                getattr(
+                    shortcut_repair.subprocess,
+                    "CREATE_NO_WINDOW",
+                    0,
+                ),
             )
             environment = run.call_args.kwargs["env"]
             self.assertTrue(
@@ -148,13 +176,17 @@ class ShortcutRepairHotfixTests(unittest.TestCase):
                 )
             )
             report = json.loads(
-                (root / "output" / "shortcut_repair_latest.json").read_text(
-                    encoding="utf-8"
-                )
+                (
+                    root
+                    / "output"
+                    / "shortcut_repair_latest.json"
+                ).read_text(encoding="utf-8")
             )
             self.assertEqual(report["status"], "SHORTCUT_REPAIR_PASS")
 
-    def test_repair_contract_covers_stale_localhost_and_url_shortcuts(self) -> None:
+    def test_repair_contract_covers_stale_localhost_and_url_shortcuts(
+        self,
+    ) -> None:
         script = shortcut_repair._POWERSHELL_SCRIPT
         self.assertIn("localhost:8000", script)
         self.assertIn('Filter "*.lnk"', script)
