@@ -4,14 +4,13 @@ from hashlib import sha256
 import json
 from pathlib import Path
 import tempfile
-import traceback
 import unittest
 
 from quantum.application._finance_center_persistence import restore_reports
 
 
 class PlateauM3RestoreProbe(unittest.TestCase):
-    def test_emit_restore_traceback(self) -> None:
+    def test_emit_restore_exception(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             config = root / "config" / "default-home-local.json"
@@ -57,8 +56,13 @@ class PlateauM3RestoreProbe(unittest.TestCase):
             output.write_text(json.dumps(report), encoding="utf-8")
             try:
                 restored = restore_reports(root, config)
-            except Exception:
-                self.fail("M3_RESTORE_TRACE=" + traceback.format_exc())
+            except Exception as exc:
+                self.fail(
+                    "M3_RESTORE_EXCEPTION="
+                    + type(exc).__name__
+                    + ":"
+                    + repr(exc)
+                )
             self.assertEqual(1, len(restored))
 
 
