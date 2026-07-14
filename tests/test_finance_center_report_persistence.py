@@ -2,12 +2,18 @@ from __future__ import annotations
 
 from hashlib import sha256
 import json
+import os
 from pathlib import Path
 import tempfile
 import unittest
+from unittest import mock
 
-from quantum.application._finance_center_calculation import FinanceCenterCalculationMixin
+from quantum.application._finance_center_calculation import (
+    FinanceCenterCalculationMixin,
+)
+from quantum.application import _finance_center_persistence as persistence
 from quantum.application._finance_center_persistence import (
+    LEGACY_REPORT_INDEX_SCHEMA_VERSION,
     REPORT_INDEX_RELATIVE_PATH,
     REPORT_INDEX_SCHEMA_VERSION,
     managed_source_path,
@@ -34,7 +40,11 @@ class FinanceCenterReportPersistenceTests(unittest.TestCase):
         )
         return path
 
-    def _persisted_report(self, root: Path, config: Path) -> tuple[Path, Path, dict[str, object]]:
+    def _persisted_report(
+        self,
+        root: Path,
+        config: Path,
+    ) -> tuple[Path, Path, dict[str, object]]:
         payload = b"not-a-real-xlsx-but-immutable"
         digest = sha256(payload).hexdigest()
         dataset_id = "dataset-persistence-test"
@@ -67,7 +77,30 @@ class FinanceCenterReportPersistenceTests(unittest.TestCase):
         output.write_text(json.dumps(report), encoding="utf-8")
         return source, output, report
 
-    def test_managed_source_is_recovered_without_original_upload_path(self) -> None:
+    def _row(
+        self,
+        source: Path,
+        output: Path,
+        report: dict[str, object],
+    ) -> ImportRow:
+        return ImportRow(
+            row_id="one",
+            source_path=source,
+            size_text="28 Б",
+            output_path=output,
+            status="Готово",
+            detected_format="WB_DETAILED_FINANCIAL",
+            progress="100%",
+            report=report,
+            details={
+                "original_source_name": "wb-detailed.xlsx",
+                "original_source_path": "C:/Users/private/secret/report.xlsx",
+            },
+        )
+
+    def test_managed_source_is_recovered_without_original_upload_path(
+        self,
+    ) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             config = self._config(root)
@@ -80,7 +113,21 @@ class FinanceCenterReportPersistenceTests(unittest.TestCase):
             )
             self.assertEqual(source.resolve(), restored)
 
-    def test_report_history_is_restored_after_application_restart(self) -> None:
+    def test_external_original_path_is_never_a_durable_source(self) -> None:
+        with tempfile.TemporaryDirectory() as project, tempfile.TemporaryDirectory() as external:
+            root = Path(project)
+            config = self._config(root)
+            payload = b"external"
+            outside = Path(external) / "private.xlsx"
+            outside.write_bytes(payload)
+            report = {"file_sha256": sha256(payload).hexdigest()}
+            self.assertIsNone(
+                managed_source_path(root, config, report, outside)
+            )
+
+    def test_report_history_is_restored_after_application_restart(
+        self,
+    ) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             config = self._config(root)
@@ -95,36 +142,134 @@ class FinanceCenterReportPersistenceTests(unittest.TestCase):
             self.assertTrue(row.details["restored"])
             self.assertTrue(row.details["managed_source_available"])
 
-    def test_report_index_uses_portable_paths_and_valid_schema(self) -> None:
+    def test_report_index_v2_contains_only_portable_internal_paths(
+        self,
+    ) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             config = self._config(root)
             source, output, report = self._persisted_report(root, config)
-            row = ImportRow(
-                row_id="one",
-                source_path=source,
-                size_text="28 Б",
-                output_path=output,
-                status="Готово",
-                detected_format="WB_DETAILED_FINANCIAL",
-                progress="100%",
-                report=report,
-                details={"original_source_name": "wb-detailed.xlsx"},
+            path = save_report_index(
+                root,
+                (self._row(source, output, report),),
             )
-            path = save_report_index(root, (row,))
             payload = json.loads(path.read_text(encoding="utf-8"))
-            self.assertEqual(REPORT_INDEX_SCHEMA_VERSION, payload["schema_version"])
-            self.assertTrue(path.samefile(root / REPORT_INDEX_RELATIVE_PATH))
-            self.assertFalse(Path(payload["reports"][0]["source_path"]).is_absolute())
-            self.assertFalse(Path(payload["reports"][0]["output_path"]).is_absolute())
+            item = payload["reports"][0]
+            self.assertEqual(
+                REPORT_INDEX_SCHEMA_VERSION,
+                payload["schema_version"],
+            )
+            self.assertTrue(
+                path.samefile(root / REPORT_INDEX_RELATIVE_PATH)
+            )
+            self.assertNotIn("source_path", item)
+            self.assertNotIn("original_source_path", json.dumps(payload))
+            self.assertFalse(Path(item["managed_source_path"]).is_absolute())
+            self.assertFalse(Path(item["output_path"]).is_absolute())
+            self.assertNotIn("private", json.dumps(payload).casefold())
 
-    def test_detailed_report_uses_restored_managed_source_and_ignores_missing(self) -> None:
+    def test_legacy_absolute_source_path_is_ignored(self) -> None:
+        with tempfile.TemporaryDirectory() as directory, tempfile.TemporaryDirectory() as external:
+            root = Path(directory)
+            config = self._config(root)
+            source, output, report = self._persisted_report(root, config)
+            source.unlink()
+            outside = Path(external) / "legacy.xlsx"
+            outside.write_bytes(b"not-a-real-xlsx-but-immutable")
+            index = root / REPORT_INDEX_RELATIVE_PATH
+            index.write_text(
+                json.dumps(
+                    {
+                        "schema_version": LEGACY_REPORT_INDEX_SCHEMA_VERSION,
+                        "reports": [
+                            {
+                                "file_sha256": report["file_sha256"],
+                                "output_path": str(output.relative_to(root)),
+                                "source_path": str(outside),
+                                "source_name": "legacy.xlsx",
+                            }
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            restored = restore_reports(root, config)
+            self.assertEqual(1, len(restored))
+            self.assertEqual("Недоступен", restored[0].row.status)
+            self.assertNotEqual(outside.resolve(), restored[0].row.source_path)
+
+    def test_corrupt_index_falls_back_to_verified_output_scan(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            config = self._config(root)
+            source, _output, _report = self._persisted_report(root, config)
+            index = root / REPORT_INDEX_RELATIVE_PATH
+            index.write_text("{broken", encoding="utf-8")
+            restored = restore_reports(root, config)
+            self.assertEqual(1, len(restored))
+            self.assertEqual(source.resolve(), restored[0].row.source_path)
+
+    def test_transient_replace_lock_is_retried(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            config = self._config(root)
+            source, output, report = self._persisted_report(root, config)
+            real_replace = os.replace
+            calls: list[tuple[object, object]] = []
+
+            def flaky_replace(source_path, target_path):
+                calls.append((source_path, target_path))
+                if len(calls) == 1:
+                    raise PermissionError("transient lock")
+                return real_replace(source_path, target_path)
+
+            with mock.patch.object(
+                persistence.os,
+                "replace",
+                side_effect=flaky_replace,
+            ), mock.patch.object(persistence.time, "sleep") as sleep:
+                save_report_index(
+                    root,
+                    (self._row(source, output, report),),
+                )
+            self.assertEqual(2, len(calls))
+            sleep.assert_called_once()
+
+    def test_failed_replace_preserves_previous_index(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            config = self._config(root)
+            source, output, report = self._persisted_report(root, config)
+            target = root / REPORT_INDEX_RELATIVE_PATH
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text('{"sentinel":"preserve"}', encoding="utf-8")
+            with mock.patch.object(
+                persistence.os,
+                "replace",
+                side_effect=PermissionError("locked"),
+            ), mock.patch.object(persistence.time, "sleep"):
+                with self.assertRaises(PermissionError):
+                    save_report_index(
+                        root,
+                        (self._row(source, output, report),),
+                    )
+            self.assertEqual(
+                {"sentinel": "preserve"},
+                json.loads(target.read_text(encoding="utf-8")),
+            )
+            self.assertEqual([], list(target.parent.glob("*.tmp")))
+
+    def test_detailed_report_uses_restored_managed_source_and_ignores_missing(
+        self,
+    ) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             available = root / "available.xlsx"
             available.write_bytes(b"x")
             report = {
-                "source_bridge": {"source_type": "WB_DETAILED_FINANCIAL"}
+                "source_bridge": {
+                    "source_type": "WB_DETAILED_FINANCIAL"
+                }
             }
             missing_row = ImportRow(
                 row_id="missing",
@@ -152,7 +297,11 @@ class FinanceCenterReportPersistenceTests(unittest.TestCase):
     def test_shell_restores_reports_before_first_finance_refresh(self) -> None:
         root = Path(__file__).resolve().parents[1]
         shell = (
-            root / "src" / "quantum" / "application" / "_finance_center_shell.py"
+            root
+            / "src"
+            / "quantum"
+            / "application"
+            / "_finance_center_shell.py"
         ).read_text(encoding="utf-8")
         restore = shell.index("self.restore_persisted_reports()")
         refresh = shell.index("self.refresh_finance_summary()")
