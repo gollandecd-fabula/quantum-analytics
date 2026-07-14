@@ -324,8 +324,9 @@ def restore_reports(
         else:
             try:
                 products = detect_products_from_xlsx(source_path)
-            except FinanceProfileError:
+            except Exception as exc:  # defensive restore boundary
                 products = ()
+                row.details["product_restore_error"] = type(exc).__name__
         restored.append(RestoredReport(row=row, product_records=products))
     return tuple(restored)
 
