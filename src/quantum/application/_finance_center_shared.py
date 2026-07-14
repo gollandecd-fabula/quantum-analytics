@@ -114,15 +114,21 @@ def _open_path(path: Path) -> None:
 
 
 def self_test(root: Path, config: Path) -> dict[str, object]:
-    return {
-        "status": "FINANCE_CENTER_SELF_TEST_PASS",
-        "root_exists": root.resolve().is_dir(),
-        "config_exists": config.resolve().is_file(),
-        "tkinter_available": tk is not None,
-        "profile_module_available": True,
-        "marketplace_write_enabled": False,
-        "release_scope": "WB_ONLY",
-    }
+    from quantum.application._finance_center_self_test import (
+        run_finance_center_self_test,
+    )
+
+    result = run_finance_center_self_test(root, config)
+    checks = result.get("checks")
+    if isinstance(checks, dict):
+        checks["tkinter_available"] = tk is not None
+        passed = all(value is True for value in checks.values())
+        result["status"] = (
+            "FINANCE_CENTER_SELF_TEST_PASS"
+            if passed
+            else "FINANCE_CENTER_SELF_TEST_FAILED"
+        )
+    return result
 
 
 __all__ = [name for name in globals() if not name.startswith("__")]
