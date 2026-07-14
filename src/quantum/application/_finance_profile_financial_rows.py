@@ -1,20 +1,11 @@
 from __future__ import annotations
 
 from collections import defaultdict
-from collections.abc import Iterable, Mapping, Sequence
-from dataclasses import asdict, dataclass, field
+from collections.abc import Mapping, Sequence
 from datetime import UTC, datetime
-from decimal import Decimal, InvalidOperation
-from hashlib import sha256
-from io import BytesIO
-import json
-import os
+from decimal import Decimal
 from pathlib import Path
-import re
-import tempfile
 from typing import Any
-from xml.etree import ElementTree
-from zipfile import ZIP_DEFLATED, ZipFile
 
 from quantum.adapters.wildberries.detailed_financial import (
     WbDetailedFinancialError,
@@ -22,12 +13,11 @@ from quantum.adapters.wildberries.detailed_financial import (
     normalize_detailed_financial_rows,
 )
 from quantum.adapters.wildberries.source_bridge import _sheet_rows
-from quantum.finance import FinanceError, calculate, canonical_hash
-from quantum.ingestion import XlsxInspectionLimits
-from quantum.ingestion._xlsx_archive import _extract_workbook
+from quantum.finance import canonical_hash
 
 from quantum.application._finance_profile_model import *
 from quantum.application._finance_profile_groups import *
+from quantum.application._finance_profile_xlsx import _first_sheet_name
 
 
 UNALLOCATED_SERVICE_GROUP = "Расходы Wildberries без артикула"
@@ -207,11 +197,10 @@ def _source_context_from_report(
     }
 
 
-def read_detailed_financial_rows(
-    path: Path,
-    report: Mapping[str, Any] | None = None,
+def _prepare_detailed_financial_rows(
+    rows: Sequence[tuple[int, tuple[str, ...]]],
+    report: Mapping[str, Any] | None,
 ) -> list[dict[str, Any]]:
-    rows = read_first_sheet(path)
     header_index, headers, _positions = _find_header(
         rows,
         ("operation", "quantity", "retail_amount", "for_pay"),
@@ -259,6 +248,42 @@ def read_detailed_financial_rows(
     if not prepared:
         raise FinanceProfileError("DETAILED_ROWS_NOT_FOUND")
     return prepared
+
+
+def read_detailed_financial_rows_payload(
+    payload: bytes,
+    report: Mapping[str, Any] | None = None,
+) -> list[dict[str, Any]]:
+    if not isinstance(payload, bytes) or not payload:
+        raise FinanceProfileError("XLSX_BYTES_REQUIRED")
+    sheet_name = _first_sheet_name(payload)
+    try:
+        rows = _sheet_rows(
+            payload,
+            sheet_name=sheet_name,
+            limits=_SAFE_LIMITS,
+        )
+    except FinanceProfileError:
+        raise
+    except Exception as exc:
+        raise FinanceProfileError(
+            "XLSX_PARSE_FAILED",
+            (type(exc).__name__,),
+        ) from exc
+    return _prepare_detailed_financial_rows(rows, report)
+
+
+def read_detailed_financial_rows(
+    path: Path,
+    report: Mapping[str, Any] | None = None,
+) -> list[dict[str, Any]]:
+    if not isinstance(path, Path) or not path.is_file():
+        raise FinanceProfileError("XLSX_FILE_NOT_FOUND")
+    try:
+        payload = path.read_bytes()
+    except OSError as exc:
+        raise FinanceProfileError("XLSX_FILE_READ_FAILED") from exc
+    return read_detailed_financial_rows_payload(payload, report)
 
 
 def _fill_blocked_kernel_inputs(
