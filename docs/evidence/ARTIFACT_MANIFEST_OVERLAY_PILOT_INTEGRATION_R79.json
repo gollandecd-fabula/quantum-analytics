@@ -28,8 +28,8 @@
     ],
     [
       "tests/test_finance_center_report_persistence.py",
-      "b5cd36578c1aa1164765dd506768674c23d7666e84d4df77ec0f0283174d864c",
-      6558
+      "a19b8ba807cd3dff2c75dcd8747a95f9401884b7f4356a72b41f6c93fd9ce927",
+      6566
     ],
     [
       "tests/integration_manifest_support_m8.py",
@@ -39,6 +39,6 @@
   ],
   "hash_encoding": "sha256-hex",
   "overlay_version": 79,
-  "reason": "Restore imported Wildberries reports from verified durable local storage after application restart, deduplicate already-loaded files by SHA-256, isolate product metadata recovery failures, normalize successful source-bridge status while preserving compatibility seams, and execute finance calculations from the managed immutable source instead of requiring the user to select the report again",
+  "reason": "Restore imported Wildberries reports from verified durable local storage after application restart, deduplicate already-loaded files by SHA-256, isolate product metadata recovery failures, normalize successful source-bridge status while preserving compatibility seams, compare Windows path aliases by file identity, and execute finance calculations from the managed immutable source instead of requiring the user to select the report again",
   "remove_paths": []
 }
