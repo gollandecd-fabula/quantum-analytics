@@ -51,7 +51,7 @@ def _known_answer_finance() -> tuple[bool, dict[str, str]]:
     group.advertising_amount = "0"
     confirm_profile(profile)
     row = {
-        "reportId": "self-test-report",
+        "reportId": "77",
         "rrdId": "1",
         "dateFrom": "2026-07-01",
         "dateTo": "2026-07-07",
