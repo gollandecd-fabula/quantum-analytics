@@ -2,11 +2,16 @@ from __future__ import annotations
 
 from quantum.application._finance_center_shared import *
 
+
 class FinanceCenterCalculationMixin:
         def _detailed_report(self) -> ImportRow | None:
             candidates: list[ImportRow] = []
             for state in self.reports.values():
                 row = state.row
+                if row.status in {"Ошибка", "Недоступен", "Отменено"}:
+                    continue
+                if not row.source_path.is_file():
+                    continue
                 bridge = row.report.get("source_bridge") if isinstance(row.report, dict) else None
                 source_type = bridge.get("source_type") if isinstance(bridge, dict) else None
                 if row.detected_format == "WB_DETAILED_FINANCIAL" or source_type == "WB_DETAILED_FINANCIAL":
@@ -24,7 +29,12 @@ class FinanceCenterCalculationMixin:
                 return
             detailed = self._detailed_report()
             if detailed is None:
-                messagebox.showwarning(APP_TITLE, "Для расчёта нужен детализированный финансовый отчёт Wildberries.")
+                messagebox.showwarning(
+                    APP_TITLE,
+                    "Для расчёта нужен детализированный финансовый отчёт Wildberries. "
+                    "Если он был загружен ранее, проверьте раздел «Контроль данных»: "
+                    "Quantum должен восстановить сохранённый исходник автоматически.",
+                )
                 return
             config = _safe_json(self.config_path)
             organization_id = str(config.get("tenant_id") or "").strip()
@@ -33,16 +43,33 @@ class FinanceCenterCalculationMixin:
                 return
             self.set_status("Финансовый расчёт выполняется по подтверждённым группам.", "info")
             try:
+                source_payload = detailed.source_path.read_bytes()
+                source_hash = sha256(source_payload).hexdigest()
+                expected_hash = (
+                    str(detailed.report.get("file_sha256") or "").strip().lower()
+                    if isinstance(detailed.report, dict)
+                    else ""
+                )
+                if expected_hash and source_hash != expected_hash:
+                    raise FinanceProfileError(
+                        "SOURCE_FILE_HASH_MISMATCH",
+                        (str(detailed.source_path),),
+                    )
                 rows = read_detailed_financial_rows(detailed.source_path, detailed.report)
-                source_hash = sha256(detailed.source_path.read_bytes()).hexdigest()
                 result = calculate_by_group(
                     detailed_rows=rows,
                     profile=self.profile,
                     organization_id=organization_id,
-                    source_id="home-local:" + detailed.source_path.name,
+                    source_id="home-local:" + (
+                        str(
+                            detailed.details.get("original_source_name")
+                            or detailed.source_path.name
+                        )
+                    ),
                     source_sha256=source_hash,
                 )
                 output_dir = self.project_root / "output"
+                output_dir.mkdir(parents=True, exist_ok=True)
                 stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
                 json_path = output_dir / f"Quantum_Finance_{stamp}.json"
                 xlsx_path = output_dir / f"Quantum_Report_{stamp}.xlsx"
@@ -53,6 +80,14 @@ class FinanceCenterCalculationMixin:
             except FinanceProfileError as exc:
                 messagebox.showerror(APP_TITLE, self.describe_error(exc))
                 self.set_status("Финансовый расчёт заблокирован.", "error")
+                return
+            except OSError as exc:
+                messagebox.showerror(
+                    APP_TITLE,
+                    "Не удалось прочитать сохранённый отчёт или записать результат.\n\n"
+                    f"Технические сведения: {type(exc).__name__}",
+                )
+                self.set_status("Ошибка доступа к файлам финансового расчёта.", "error")
                 return
             self.current_result = result
             self.current_outputs = {"JSON": json_path, "Excel": xlsx_path, "Dashboard": dashboard_path}
@@ -147,6 +182,10 @@ class FinanceCenterCalculationMixin:
         def refresh_quality(self) -> None:
             lines = ["КОНТРОЛЬ ДАННЫХ", ""]
             lines.append(f"Отчётов загружено: {len(self.reports)}")
+            lines.append(
+                "Сохранённых исходников доступно: "
+                + str(sum(state.row.source_path.is_file() for state in self.reports.values()))
+            )
             lines.append(f"Товаров определено: {len(self.products)}")
             lines.append(f"Товарных групп: {len(self.profile.groups)}")
             missing = validate_profile(self.profile)
@@ -163,4 +202,6 @@ class FinanceCenterCalculationMixin:
             lines.extend(("", "Marketplace: WILDBERRIES", "Режим: WB_ONLY", "Запись на маркетплейс: отключена"))
             if hasattr(self, "quality_text"):
                 self._set_text(self.quality_text, "\n".join(lines))
+
+
 __all__ = [name for name in globals() if not name.startswith("__")]
