@@ -3,8 +3,8 @@
   "entries": [
     [
       "src/quantum/application/_finance_center_persistence.py",
-      "f3191b4753ac9ce3f08578099facf304fff15a434f2e4a2a2e8fa8565cc440ad",
-      11163
+      "c4f86df654dd13616cab41a20b01b9ffb9791dbd0721e0343e900c1dd9d00b07",
+      11264
     ],
     [
       "src/quantum/application/_finance_center_reports.py",
@@ -34,6 +34,6 @@
   ],
   "hash_encoding": "sha256-hex",
   "overlay_version": 79,
-  "reason": "Restore imported Wildberries reports from verified durable local storage after application restart, deduplicate already-loaded files by SHA-256, and execute finance calculations from the managed immutable source instead of requiring the user to select the report again",
+  "reason": "Restore imported Wildberries reports from verified durable local storage after application restart, deduplicate already-loaded files by SHA-256, isolate product metadata recovery failures, and execute finance calculations from the managed immutable source instead of requiring the user to select the report again",
   "remove_paths": []
 }
