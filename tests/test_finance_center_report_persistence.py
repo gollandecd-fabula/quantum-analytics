@@ -114,7 +114,7 @@ class FinanceCenterReportPersistenceTests(unittest.TestCase):
             path = save_report_index(root, (row,))
             payload = json.loads(path.read_text(encoding="utf-8"))
             self.assertEqual(REPORT_INDEX_SCHEMA_VERSION, payload["schema_version"])
-            self.assertEqual(root / REPORT_INDEX_RELATIVE_PATH, path)
+            self.assertTrue(path.samefile(root / REPORT_INDEX_RELATIVE_PATH))
             self.assertFalse(Path(payload["reports"][0]["source_path"]).is_absolute())
             self.assertFalse(Path(payload["reports"][0]["output_path"]).is_absolute())
 
