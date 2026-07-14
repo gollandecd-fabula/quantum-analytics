@@ -29,22 +29,37 @@ from quantum.ingestion._xlsx_archive import _extract_workbook
 from quantum.application._finance_profile_model import *
 from quantum.application._finance_profile_groups import *
 
-_FINANCE_KERNEL_INPUT_NAMES = frozenset({
-    "gross_sales_units",
-    "returned_units",
-    "resalable_returned_units",
-    "compensated_returned_units",
-    "return_compensation_amount",
-    "gross_sales_amount",
-    "discounts_amount",
-    "subsidies_excluding_return_compensation_amount",
-    "marketplace_commission_amount",
-    "forward_logistics_amount",
-    "reverse_logistics_amount",
-    "storage_amount",
-    "advertising_amount",
-    "fines_withholdings_amount",
-})
+
+UNALLOCATED_SERVICE_GROUP = "Расходы Wildberries без артикула"
+UNATTRIBUTED_PHYSICAL_GROUP = "Продажи/возвраты без артикула"
+PERIOD_TAX_GROUP = "Налог периода"
+
+
+def _row_alias_text(row: Mapping[str, Any], field_name: str) -> str:
+    for alias in _WB_DETAILED_ALIASES[field_name]:
+        if alias in row and str(row[alias]).strip():
+            return str(row[alias]).strip()
+    return ""
+
+
+_FINANCE_KERNEL_INPUT_NAMES = frozenset(
+    {
+        "gross_sales_units",
+        "returned_units",
+        "resalable_returned_units",
+        "compensated_returned_units",
+        "return_compensation_amount",
+        "gross_sales_amount",
+        "discounts_amount",
+        "subsidies_excluding_return_compensation_amount",
+        "marketplace_commission_amount",
+        "forward_logistics_amount",
+        "reverse_logistics_amount",
+        "storage_amount",
+        "advertising_amount",
+        "fines_withholdings_amount",
+    }
+)
 
 
 def _typed(
@@ -67,7 +82,10 @@ def _typed(
     }
 
 
-def _valid_money(value: object, source_ids: Sequence[str]) -> dict[str, Any]:
+def _valid_money(
+    value: object,
+    source_ids: Sequence[str],
+) -> dict[str, Any]:
     return _typed(
         "VALID",
         _money(_decimal(value, "FINANCE_VALUE_INVALID")),
@@ -78,7 +96,10 @@ def _valid_money(value: object, source_ids: Sequence[str]) -> dict[str, Any]:
     )
 
 
-def _valid_integer(value: object, source_ids: Sequence[str]) -> dict[str, Any]:
+def _valid_integer(
+    value: object,
+    source_ids: Sequence[str],
+) -> dict[str, Any]:
     parsed = _decimal(value, "FINANCE_VALUE_INVALID", integer=True)
     return _typed(
         "VALID",
@@ -126,7 +147,11 @@ def _rounding_policy() -> dict[str, Any]:
 def _metric_value(metric: Mapping[str, Any]) -> Decimal:
     if metric.get("state") != "VALID" or metric.get("value") is None:
         raise FinanceProfileError("METRIC_BLOCKED")
-    return _decimal(metric.get("value"), "METRIC_INVALID", minimum=Decimal("-1E100"))
+    return _decimal(
+        metric.get("value"),
+        "METRIC_INVALID",
+        minimum=Decimal("-1E100"),
+    )
 
 
 def _group_rows(
@@ -135,17 +160,26 @@ def _group_rows(
 ) -> dict[str, list[Mapping[str, Any]]]:
     result: dict[str, list[Mapping[str, Any]]] = defaultdict(list)
     for row in raw_rows:
-        vendor_code = ""
-        for key in ("vendorCode", "sa_name", "Артикул", "Артикул продавца"):
-            if key in row and str(row[key]).strip():
-                vendor_code = str(row[key]).strip()
-                break
-        group_name = product_to_group.get(vendor_code, UNASSIGNED_GROUP)
+        vendor_code = _row_alias_text(row, "vendor_code")
+        if vendor_code:
+            group_name = product_to_group.get(
+                vendor_code,
+                UNASSIGNED_GROUP,
+            )
+        else:
+            operation = _row_alias_text(row, "operation")
+            group_name = (
+                UNATTRIBUTED_PHYSICAL_GROUP
+                if operation in {"Продажа", "Возврат"}
+                else UNALLOCATED_SERVICE_GROUP
+            )
         result[group_name].append(row)
     return dict(result)
 
 
-def _source_context_from_report(report: Mapping[str, Any] | None) -> dict[str, str]:
+def _source_context_from_report(
+    report: Mapping[str, Any] | None,
+) -> dict[str, str]:
     if not isinstance(report, Mapping):
         return {}
     bridge = report.get("source_bridge")
@@ -186,7 +220,9 @@ def read_detailed_financial_rows(
     context = _source_context_from_report(report)
     prepared: list[dict[str, Any]] = []
     for row_index, values in rows:
-        if row_index <= header_index or not any(value.strip() for value in values):
+        if row_index <= header_index or not any(
+            value.strip() for value in values
+        ):
             continue
         padded = values + ("",) * (len(headers) - len(values))
         if len(padded) != len(headers):
@@ -196,10 +232,16 @@ def read_detailed_financial_rows(
         def fill_aliases(field_name: str, fallback: str) -> None:
             aliases = _WB_DETAILED_ALIASES[field_name]
             present = [alias for alias in aliases if alias in raw]
-            nonblank = [str(raw[alias]).strip() for alias in present if str(raw[alias]).strip()]
+            nonblank = [
+                str(raw[alias]).strip()
+                for alias in present
+                if str(raw[alias]).strip()
+            ]
             canonical = nonblank[0] if nonblank else fallback
             if any(value != canonical for value in nonblank[1:]):
-                raise FinanceProfileError("DETAILED_ALIAS_CONFLICT:" + field_name)
+                raise FinanceProfileError(
+                    "DETAILED_ALIAS_CONFLICT:" + field_name
+                )
             if present:
                 for alias in present:
                     if not str(raw[alias]).strip():
@@ -233,9 +275,18 @@ def _fill_blocked_kernel_inputs(
     )
     evidence = tuple(dict.fromkeys(evidence))
     user_fields = {
-        "resalable_returned_units": (group.resalable_returned_units, "INTEGER"),
-        "compensated_returned_units": (group.compensated_returned_units, "INTEGER"),
-        "return_compensation_amount": (group.return_compensation_amount, "MONEY"),
+        "resalable_returned_units": (
+            group.resalable_returned_units,
+            "INTEGER",
+        ),
+        "compensated_returned_units": (
+            group.compensated_returned_units,
+            "INTEGER",
+        ),
+        "return_compensation_amount": (
+            group.return_compensation_amount,
+            "MONEY",
+        ),
         "discounts_amount": (group.discounts_amount, "MONEY"),
         "subsidies_excluding_return_compensation_amount": (
             group.subsidies_amount,
@@ -246,10 +297,17 @@ def _fill_blocked_kernel_inputs(
     missing: list[str] = []
     for metric_id, (raw_value, value_type) in user_fields.items():
         existing = inputs.get(metric_id)
-        if isinstance(existing, Mapping) and existing.get("state") == "VALID":
+        if (
+            isinstance(existing, Mapping)
+            and existing.get("state") == "VALID"
+        ):
             continue
         if _optional_text(raw_value) is None:
-            reason = existing.get("reason_code") if isinstance(existing, Mapping) else None
+            reason = (
+                existing.get("reason_code")
+                if isinstance(existing, Mapping)
+                else None
+            )
             missing.append(str(reason or metric_id))
             continue
         if value_type == "INTEGER":
@@ -257,5 +315,6 @@ def _fill_blocked_kernel_inputs(
         else:
             inputs[metric_id] = _valid_money(raw_value, evidence)
     return inputs, tuple(sorted(set(missing)))
+
 
 __all__ = [name for name in globals() if not name.startswith("__")]
