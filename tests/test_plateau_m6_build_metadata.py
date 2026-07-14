@@ -118,7 +118,7 @@ class PlateauM6BuildMetadataTests(unittest.TestCase):
         ):
             self.assertNotIn(obsolete, readme + state)
         self.assertIn("RELEASE_BLOCKED", readme)
-        self.assertIn("PLATEAU_RED_TEAM_IN_PROGRESS", state)
+        self.assertIn("TECHNICAL_PLATEAU_CANDIDATE", state)
 
 
 if __name__ == "__main__":
