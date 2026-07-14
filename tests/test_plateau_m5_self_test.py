@@ -37,7 +37,11 @@ class PlateauM5SelfTestTests(unittest.TestCase):
             root = Path(directory)
             config = self._config(root)
             result = run_finance_center_self_test(root, config)
-        self.assertEqual("FINANCE_CENTER_SELF_TEST_PASS", result["status"])
+        self.assertEqual(
+            "FINANCE_CENTER_SELF_TEST_PASS",
+            result["status"],
+            result,
+        )
         self.assertTrue(result["checks"]["known_answer_finance"])
         self.assertTrue(result["checks"]["runtime_mro"])
         self.assertTrue(result["checks"]["persistence_round_trip"])
