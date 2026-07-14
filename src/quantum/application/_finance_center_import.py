@@ -14,8 +14,8 @@ from quantum.application.local_app import (
     _human_size,
     _import_script,
     _safe_json_load,
-    summarize_report,
 )
+from quantum.application._finance_center_persistence import finance_center_summary
 
 
 def _terminate_process_tree(process: subprocess.Popen[object]) -> None:
@@ -125,7 +125,10 @@ def run_import(
 
     report = _safe_json_load(output_path)
     row.report = report
-    row.status, row.detected_format, row.raw_status, row.comment = summarize_report(report, return_code)
+    row.status, row.detected_format, row.raw_status, row.comment = finance_center_summary(
+        report,
+        return_code,
+    )
     row.progress = "100%" if row.status != "Ошибка" else "Сбой"
     if return_code != 0 and row.status != "Частично":
         row.error = f"Код процесса: {return_code}"
