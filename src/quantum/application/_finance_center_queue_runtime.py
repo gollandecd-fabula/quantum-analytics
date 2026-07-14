@@ -1,12 +1,17 @@
 from __future__ import annotations
 
 from quantum.application._finance_center_shared import *
+from quantum.application._finance_center_persistence import managed_source_path
 
 
 class FinanceCenterQueueRuntimeMixin:
     def _refresh_queue_controls(self) -> None:
         busy = self.import_queue.is_busy
-        for name in ("decision_add_button", "reports_add_button", "reports_repeat_button"):
+        for name in (
+            "decision_add_button",
+            "reports_add_button",
+            "reports_repeat_button",
+        ):
             button = getattr(self, name, None)
             if button is not None:
                 button.configure(state=tk.DISABLED if busy else tk.NORMAL)
@@ -15,19 +20,44 @@ class FinanceCenterQueueRuntimeMixin:
             if button is not None:
                 button.configure(state=tk.NORMAL if busy else tk.DISABLED)
 
+    @staticmethod
+    def _source_digest(path: Path) -> str:
+        digest = sha256()
+        with path.open("rb") as handle:
+            while chunk := handle.read(1024 * 1024):
+                digest.update(chunk)
+        return digest.hexdigest()
+
     def add_reports(self) -> None:
         if self.import_queue.is_busy:
-            messagebox.showwarning(APP_TITLE, "Дождитесь завершения текущей очереди или нажмите «Остановить очередь».")
+            messagebox.showwarning(
+                APP_TITLE,
+                "Дождитесь завершения текущей очереди или нажмите «Остановить очередь».",
+            )
             return
         selected = filedialog.askopenfilenames(
             title="Выберите один или несколько отчётов Wildberries",
-            filetypes=[("Excel и ZIP", "*.xlsx *.xlsm *.zip"), ("Все файлы", "*.*")],
+            filetypes=[
+                ("Excel и ZIP", "*.xlsx *.xlsm *.zip"),
+                ("Все файлы", "*.*"),
+            ],
         )
         added = 0
         duplicates = 0
+        unreadable = 0
         for raw_path in selected:
             path = Path(raw_path)
             if not path.is_file():
+                unreadable += 1
+                continue
+            try:
+                digest = self._source_digest(path)
+                size = path.stat().st_size
+            except OSError:
+                unreadable += 1
+                continue
+            if self._loaded_digest(digest):
+                duplicates += 1
                 continue
             row_id = f"report-{self.counter + 1}"
             if not self.import_queue.add(row_id, path):
@@ -37,20 +67,36 @@ class FinanceCenterQueueRuntimeMixin:
             row = ImportRow(
                 row_id=row_id,
                 source_path=path,
-                size_text=str(path.stat().st_size),
+                size_text=str(size),
                 status="В очереди",
                 progress="0%",
                 comment="Ожидает последовательной обработки.",
+                details={
+                    "original_source_name": path.name,
+                    "original_source_path": str(path),
+                    "selected_file_sha256": digest,
+                },
             )
             self.reports[row_id] = ReportState(row)
             self._update_report_row(row)
             added += 1
         if selected:
             self.show_page("reports")
-        if duplicates:
-            self.set_status(f"Пропущено дубликатов: {duplicates}.", "warning")
+        if unreadable:
+            self.set_status(
+                f"Не удалось прочитать выбранных файлов: {unreadable}.",
+                "warning",
+            )
+        elif duplicates:
+            self.set_status(
+                f"Пропущено уже загруженных файлов: {duplicates}.",
+                "info",
+            )
         if added:
-            self.set_status(f"Партия подтверждена выбором файлов. В очередь добавлено: {added}.", "info")
+            self.set_status(
+                f"Партия подтверждена выбором файлов. В очередь добавлено: {added}.",
+                "info",
+            )
             self._start_next_if_idle()
         self._refresh_queue_controls()
 
@@ -70,34 +116,93 @@ class FinanceCenterQueueRuntimeMixin:
         self.cancel_event.clear()
         row.status = "В обработке"
         row.progress = "10%"
-        row.comment = "Проверка и локальный импорт запущены. Остальные файлы ожидают в очереди."
+        row.comment = (
+            "Проверка и локальный импорт запущены. "
+            "Остальные файлы ожидают в очереди."
+        )
         self._update_report_row(row)
         self.set_status(
-            f"Обрабатывается: {row.source_path.name} · ожидает: {self.import_queue.pending_count}",
+            f"Обрабатывается: {row.source_path.name} · "
+            f"ожидает: {self.import_queue.pending_count}",
             "info",
         )
         self._refresh_queue_controls()
         threading.Thread(target=self._worker, args=(row,), daemon=True).start()
 
-    def _register_active_process(self, process: subprocess.Popen[object] | None) -> None:
+    def _register_active_process(
+        self,
+        process: subprocess.Popen[object] | None,
+    ) -> None:
         with self.process_lock:
             self.active_process = process
 
     def _worker(self, row: ImportRow) -> None:
+        original_source = row.source_path
+        selected_digest = str(
+            row.details.get("selected_file_sha256") or ""
+        ).strip().lower()
         try:
             result = run_import(
-                row.source_path,
+                original_source,
                 self.project_root,
                 cancel_event=self.cancel_event,
                 process_callback=self._register_active_process,
             )
             result.row_id = row.row_id
+            result.details.update(
+                {
+                    "original_source_name": row.details.get(
+                        "original_source_name",
+                        original_source.name,
+                    ),
+                    "original_source_path": str(original_source),
+                    "selected_file_sha256": selected_digest or None,
+                }
+            )
             products: tuple[ProductRecord, ...] = ()
             if result.status not in {"Отменено", "Ошибка"}:
-                try:
-                    products = detect_products_from_xlsx(row.source_path)
-                except FinanceProfileError:
-                    products = ()
+                report_digest = ""
+                if isinstance(result.report, dict):
+                    report_digest = str(
+                        result.report.get("file_sha256") or ""
+                    ).strip().lower()
+                if not selected_digest or report_digest != selected_digest:
+                    result.status = "Ошибка"
+                    result.progress = "Сбой"
+                    result.error = "SOURCE_FILE_CHANGED_DURING_IMPORT"
+                    result.comment = (
+                        "Файл изменился между выбором и завершением импорта. "
+                        "Результат отклонён; выберите исходный отчёт заново."
+                    )
+                elif not isinstance(result.report, dict):
+                    result.status = "Ошибка"
+                    result.progress = "Сбой"
+                    result.error = "IMPORT_REPORT_MISSING"
+                    result.comment = "Импорт не вернул проверяемый результат."
+                else:
+                    managed = managed_source_path(
+                        self.project_root,
+                        self.config_path,
+                        result.report,
+                        None,
+                    )
+                    if managed is None:
+                        result.status = "Ошибка"
+                        result.progress = "Сбой"
+                        result.error = "MANAGED_SOURCE_UNAVAILABLE"
+                        result.comment = (
+                            "Импорт завершён, но проверенная локальная копия "
+                            "исходного отчёта не найдена."
+                        )
+                    else:
+                        result.source_path = managed
+                        result.details["managed_source_path"] = str(managed)
+                        try:
+                            products = detect_products_from_xlsx(managed)
+                        except FinanceProfileError as exc:
+                            result.details["product_detection_error"] = exc.code
+                        except Exception as exc:  # defensive metadata boundary
+                            result.details["product_detection_error"] = type(exc).__name__
             self.events.put(("done", row.row_id, (result, products)))
         except Exception as exc:  # pragma: no cover - defensive desktop boundary
             row.status = "Ошибка"
@@ -123,17 +228,31 @@ class FinanceCenterQueueRuntimeMixin:
             state.row = row
             state.product_records = products
             self._update_report_row(row)
+            self._persist_report_index()
             if products:
                 for record in products:
                     self.products[record.product_id] = record
-                collections = [item.product_records for item in self.reports.values() if item.product_records]
+                collections = [
+                    item.product_records
+                    for item in self.reports.values()
+                    if item.product_records
+                ]
                 try:
-                    self.profile = build_profile(merge_detected_products(collections), self.profile)
+                    self.profile = build_profile(
+                        merge_detected_products(collections),
+                        self.profile,
+                    )
                     self.profile_changed_pending = True
                 except FinanceProfileError as exc:
                     self.set_status(self.describe_error(exc), "error")
             kind = "success" if row.status == "Готово" else "warning"
-            self.set_status(f"Последний результат: {row.status} · {row.source_path.name}", kind)
+            display_name = str(
+                row.details.get("original_source_name") or row.source_path.name
+            )
+            self.set_status(
+                f"Последний результат: {row.status} · {display_name}",
+                kind,
+            )
             self._start_next_if_idle()
 
         if not self.import_queue.is_busy and self.profile_changed_pending:
@@ -168,7 +287,10 @@ class FinanceCenterQueueRuntimeMixin:
             self.reports[active_id].row.comment = "Остановка активного процесса…"
             self._update_report_row(self.reports[active_id].row)
         if not silent:
-            self.set_status("Очередь остановлена. Активный процесс завершается безопасно.", "warning")
+            self.set_status(
+                "Очередь остановлена. Активный процесс завершается безопасно.",
+                "warning",
+            )
         self._refresh_queue_controls()
 
     def request_close(self) -> None:
@@ -189,10 +311,22 @@ class FinanceCenterQueueRuntimeMixin:
         if row is None:
             return
         if self.import_queue.is_busy:
-            messagebox.showwarning(APP_TITLE, "Повторный запуск заблокирован до завершения текущей очереди.")
+            messagebox.showwarning(
+                APP_TITLE,
+                "Повторный запуск заблокирован до завершения текущей очереди.",
+            )
             return
-        if not self.import_queue.requeue(row.row_id):
-            messagebox.showwarning(APP_TITLE, "Этот отчёт уже находится в обработке или очереди.")
+        if not row.source_path.is_file():
+            messagebox.showwarning(
+                APP_TITLE,
+                "Сохранённый исходник отчёта недоступен. Выберите файл заново.",
+            )
+            return
+        if not self.import_queue.enqueue_existing(row.row_id, row.source_path):
+            messagebox.showwarning(
+                APP_TITLE,
+                "Этот отчёт уже находится в обработке или очереди.",
+            )
             return
         row.status = "В очереди"
         row.progress = "0%"
