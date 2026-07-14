@@ -36,8 +36,8 @@ class PlateauM7ReleaseIntegrationTests(unittest.TestCase):
         ).read_text(encoding="utf-8")
         self.assertIn("name: Windows Desktop Release Gate", text)
         self.assertIn("workflow_dispatch:", text)
-        self.assertNotIn("localhost:8000", text)
         self.assertNotIn("api/local-pilot/health", text)
+        self.assertNotIn("Invoke-WebRequest", text)
         self.assertIn("quantum.application.desktop_center", text)
         self.assertIn("DESKTOP_CENTER_SELF_TEST_PASS", text)
         self.assertIn("FINANCE_CENTER_SELF_TEST_PASS", text)
@@ -45,6 +45,8 @@ class PlateauM7ReleaseIntegrationTests(unittest.TestCase):
         self.assertIn("build_two_installer_bundles.ps1", text)
         self.assertIn("build_exe_installer.ps1", text)
         self.assertIn("Quantum_WB_Offline_Setup.exe", text)
+        self.assertIn("launcherText -match 'localhost:8000'", text)
+        self.assertIn("legacy localhost runtime", text)
 
     def test_release_gate_freezes_and_verifies_exact_head(self) -> None:
         text = (
