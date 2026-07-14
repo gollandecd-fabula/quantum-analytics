@@ -14,6 +14,7 @@ from quantum.application.local_app import (
     _human_size,
     _import_script,
     _safe_json_load,
+    summarize_report,
 )
 from quantum.application._finance_center_persistence import finance_center_summary
 
@@ -125,9 +126,11 @@ def run_import(
 
     report = _safe_json_load(output_path)
     row.report = report
+    base_summary = summarize_report(report, return_code)
     row.status, row.detected_format, row.raw_status, row.comment = finance_center_summary(
         report,
         return_code,
+        summary=base_summary,
     )
     row.progress = "100%" if row.status != "Ошибка" else "Сбой"
     if return_code != 0 and row.status != "Частично":
