@@ -34,7 +34,6 @@ from quantum.application.finance_profile import (
     load_profile,
     merge_detected_products,
     parse_cost_workbook,
-    read_detailed_financial_rows,
     reassign_product,
     rename_group,
     save_profile,
@@ -43,6 +42,9 @@ from quantum.application.finance_profile import (
     write_cost_template,
     write_run_dashboard,
     write_run_result_xlsx,
+)
+from quantum.application._finance_verified_rows import (
+    read_detailed_financial_rows,
 )
 from quantum.application.local_app import ImportRow
 from quantum.application._finance_center_import import run_import
@@ -76,7 +78,10 @@ NAV_ITEMS = (
 )
 
 _ADVANCED_FIELDS = (
-    ("resalable_returned_units", "Возвраты, пригодные к повторной продаже, шт."),
+    (
+        "resalable_returned_units",
+        "Возвраты, пригодные к повторной продаже, шт.",
+    ),
     ("compensated_returned_units", "Компенсированные возвраты, шт."),
     ("return_compensation_amount", "Компенсации возвратов, ₽"),
     ("discounts_amount", "Скидки вне отчёта, ₽"),
@@ -103,7 +108,9 @@ def _open_path(path: Path) -> None:
     if sys.platform.startswith("win"):
         os.startfile(str(path))  # type: ignore[attr-defined]
     else:
-        subprocess.Popen(["open" if sys.platform == "darwin" else "xdg-open", str(path)])
+        subprocess.Popen(
+            ["open" if sys.platform == "darwin" else "xdg-open", str(path)]
+        )
 
 
 def self_test(root: Path, config: Path) -> dict[str, object]:
@@ -116,4 +123,6 @@ def self_test(root: Path, config: Path) -> dict[str, object]:
         "marketplace_write_enabled": False,
         "release_scope": "WB_ONLY",
     }
+
+
 __all__ = [name for name in globals() if not name.startswith("__")]
