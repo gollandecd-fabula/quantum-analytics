@@ -1,0 +1,84 @@
+{
+  "base_pilot_integration_r79_overlay_git_blob_sha": "fd1ad0d03d342d63803ac0404346744806d8ec31",
+  "entries": [
+    [
+      "src/quantum/application/_finance_center_queue.py",
+      "d9b4aa495cf205cb708e824fa50765cbb8ac2e025ece7b62e216e5aea96d08c9",
+      2605
+    ],
+    [
+      "src/quantum/application/_finance_center_queue_runtime.py",
+      "ce07f01d11a9fc6f845347bc954bd9b889d097f570dac097d0a40132c8fc6dbf",
+      14016
+    ],
+    [
+      "src/quantum/application/_finance_center_reports.py",
+      "daaf36b7cd68ef83bc707d6afd7e04fc4c7f99789dbcf065c8d5921ea93d6099",
+      8622
+    ],
+    [
+      "src/quantum/application/_finance_profile_model.py",
+      "2139192f7e4170a22cbd3365f3d2fcd1147c6f0ca7d970407a0424e1ad8bf767",
+      11075
+    ],
+    [
+      "src/quantum/application/_finance_profile_groups.py",
+      "c55d49ef4d0367eb1cf1422a591b72dab102de9cf63f974d2cd532e7493ffd6a",
+      12147
+    ],
+    [
+      "src/quantum/application/finance_profile.py",
+      "9a3c48d7688876843067854ef5c19888f95f297cdedff17d92425481154dc391",
+      4080
+    ],
+    [
+      "src/quantum/application/_finance_center_dialog.py",
+      "5692c509eb932181de87692f05c52deb257be67a8c5191178ff85b27d00179d7",
+      17206
+    ],
+    [
+      "src/quantum/application/_finance_profile_financial_rows.py",
+      "14fdc7cbb45de43db07d73bda3db5d014513cce3866c0ccf76215f8dec9e87be",
+      10174
+    ],
+    [
+      "src/quantum/application/_finance_profile_engine.py",
+      "d412b3d1b8f9a2f494c2b3fdc6c78618e5192e8d3327a6bcf95fd51b18b9f5cb",
+      13867
+    ],
+    [
+      "src/quantum/application/_finance_center_calculation.py",
+      "954feef43f842fd43b02d279527bd86dd4e666ac089ebeaec94d0796aa5de0e6",
+      15932
+    ],
+    [
+      "tests/test_plateau_m1_runtime_integration.py",
+      "f7a098035fbfb23c284095e87371569fd486344f7af7293ae0c490ff76e6a75b",
+      6102
+    ],
+    [
+      "tests/test_plateau_m2_financial_integration.py",
+      "24507df61c132c3875a434e46a16b55df2298b32b3a95bce8770bf88dd37141c",
+      6376
+    ],
+    [
+      "tests/test_finance_center_profile.py",
+      "814d461ed5e18944cf1d2f8fd6647221b4e3c04f8fb3dc739086a64c2eca0fdb",
+      17757
+    ],
+    [
+      "tests/test_profile_save_and_shortcut_hotfix.py",
+      "0465415b371c2a3873820c272019219bd059031ac18112d2fec7f3e683e6fbcf",
+      7029
+    ],
+    [
+      "tests/integration_manifest_support_m8.py",
+      "0409de4b68493bec6c11f7ff7e8c4e3afd38b3112127421b710fd213007a599a",
+      1090
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 80,
+  "reason": "Bind durable report persistence to the live desktop MRO path, verify selected and managed sources by SHA-256, require explicit user-confirmed tax base profile v2, distinguish unknown products from unattributed marketplace service rows, include WB expenses without inventing SKU allocation, treat zero-activity groups as valid, calculate tax once at period level, and add exact runtime and financial red-team regressions.",
+  "remove_paths": []
+}
