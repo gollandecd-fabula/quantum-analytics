@@ -45,6 +45,25 @@ class SequentialImportQueue:
         self._pending.append(row_id)
         return True
 
+    def enqueue_existing(self, row_id: str, source_path: Path) -> bool:
+        """Queue a restored row while preserving duplicate-source protection."""
+        if row_id == self._active or row_id in self._pending:
+            return False
+        key = self.source_key(source_path)
+        owner = next(
+            (
+                known_id
+                for known_id, known_key in self._source_keys.items()
+                if known_key == key
+            ),
+            None,
+        )
+        if owner is not None and owner != row_id:
+            return False
+        self._source_keys[row_id] = key
+        self._pending.append(row_id)
+        return True
+
     def start_next(self) -> str | None:
         if self._active is not None or not self._pending:
             return None
