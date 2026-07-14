@@ -1,0 +1,89 @@
+name: Quantum One Button R3 Native Red Team
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [local-one-button-redteam-r3]
+    paths:
+      - ".github/workflows/build-one-button-redteam-r3.yml"
+      - "scripts/windows/**"
+      - "scripts/ci/native_one_button_r37.ps1"
+      - "tests/test_m0_recovery_after_m1.py"
+      - "src/**"
+      - "requirements/windows-home-local.txt"
+      - "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R46.json"
+  pull_request:
+    paths:
+      - ".github/workflows/build-one-button-redteam-r3.yml"
+      - "scripts/windows/**"
+      - "scripts/ci/native_one_button_r37.ps1"
+      - "tests/test_m0_recovery_after_m1.py"
+      - "src/**"
+      - "requirements/windows-home-local.txt"
+      - "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R46.json"
+
+permissions:
+  contents: read
+
+jobs:
+  native-redteam:
+    runs-on: windows-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout exact head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run versioned native one-button Red Team gate
+        shell: pwsh
+        env:
+          TARGET_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          try {
+            & .\scripts\ci\native_one_button_r37.ps1 2>&1 |
+              Tee-Object -FilePath native-one-button-r37.log
+            $gateExitCode = $LASTEXITCODE
+            if ($gateExitCode -ne 0) {
+              throw "Versioned native one-button Red Team gate failed with exit code $gateExitCode"
+            }
+          }
+          catch {
+            $_ | Out-String | Tee-Object -FilePath native-one-button-r37.log -Append
+            throw
+          }
+
+      - name: Upload native Red Team diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Quantum-One-Button-R37-Failure
+          path: |
+            native-one-button-r37.log
+            native-test-error.log
+            native-install-1.log
+            native-install-2.log
+            native-full.log
+            native-gui-path.log
+            contamination.log
+            repository-ci.log
+            dist/one-button-redteam-r3/**
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Upload verified native package
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Quantum-One-Button-RedTeam-R3
+          path: |
+            dist/one-button-redteam-r3/QUANTUM_ONE_BUTTON_REDTEAM_R3.zip
+            dist/one-button-redteam-r3/result.json
+            dist/one-button-redteam-r3/qa.json
+          if-no-files-found: error
+          retention-days: 14

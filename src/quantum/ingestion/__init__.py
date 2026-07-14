@@ -8,6 +8,7 @@ from .admission import (
     DatasetSensitivity,
     RealDatasetAdmissionRegistry,
     StorageControlEvidence,
+    StorageEnvironment,
 )
 from .fingerprints import semantic_fingerprint, structural_fingerprint
 from .receipts import ImmutableUploadReceipt, IngestionError, UploadReceiptRegistry
@@ -49,6 +50,7 @@ __all__ = [
     "SchemaDetection",
     "SchemaGateResult",
     "StorageControlEvidence",
+    "StorageEnvironment",
     "UploadReceiptRegistry",
     "XlsxInspectionError",
     "XlsxInspectionLimits",

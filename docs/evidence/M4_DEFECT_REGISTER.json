@@ -1,0 +1,60 @@
+{
+  "milestone": "M4_FINANCIAL_AND_DATA_CORRECTNESS",
+  "baseline_commit": "2016929fa6ed58dcf6c950b33afdaf75d1468a60",
+  "verdict_before_exact_head_ci": "CANDIDATE",
+  "defects": [
+    {
+      "id": "M4-D001",
+      "priority": "P1",
+      "category": "Financial reconciliation / false confirmation",
+      "status": "CLOSED_LOCALLY_PENDING_EXACT_HEAD_CI",
+      "root_cause": "The local pilot reconciled only the expected metrics supplied by the caller. An empty set or a single matching metric could produce RECONCILED and PILOT_RUN_COMPLETE.",
+      "risk": "Cost, tax, other expenses, marketplace income, net profit or profit per unit could remain unverified while the pilot claimed completion.",
+      "pre_patch_evidence": {
+        "partial_expected_metric": "RECONCILED",
+        "empty_expected_metrics": "RECONCILED",
+        "failing_test_log_sha256": "7bd3fe13b2724a02a729b90bf4c1686fea80a971e4a6b0f8ce32f16d53ee70fa"
+      },
+      "fix": [
+        "Require exactly the seven mandatory finance metrics for a reconciled pilot.",
+        "Bind the expected metric set to the declared control_totals_sha256 using canonical JSON and SHA-256.",
+        "Keep matching metrics without a declared hash in PENDING state.",
+        "Return CONFLICT on missing, unsupported, non-VALID or mismatched metrics."
+      ],
+      "post_patch_evidence": {
+        "partial_set": "RECONCILIATION_METRIC_SET_MISMATCH",
+        "missing_hash": "CONTROL_TOTALS_HASH_REQUIRED",
+        "tampered_hash": "CONTROL_TOTALS_HASH_MISMATCH",
+        "complete_bound_match": "RECONCILED"
+      }
+    },
+    {
+      "id": "M4-D002",
+      "priority": "P1",
+      "category": "Independent financial oracle / tax policy divergence",
+      "status": "CLOSED_LOCALLY_PENDING_EXACT_HEAD_CI",
+      "root_cause": "The independent oracle calculated a negative tax when the selected tax base was negative, while the approved kernel correctly required an explicit negative-tax-base policy and returned BLOCKED.",
+      "risk": "The independent evidence path could endorse an unapproved negative tax and create a false kernel mismatch or an incorrect expected profit.",
+      "pre_patch_evidence": {
+        "deterministic_cases": 500,
+        "mismatches": 41,
+        "kernel_reason_code": "TAX_BASE_NEGATIVE_POLICY_REQUIRED"
+      },
+      "fix": [
+        "Make the independent oracle fail closed when the selected tax base is negative.",
+        "Block tax, net profit and profit per sold unit until a negative-tax-base policy exists.",
+        "Add a permanent regression test for kernel/oracle agreement on this boundary."
+      ],
+      "post_patch_evidence": {
+        "deterministic_seed": 20260712,
+        "deterministic_cases": 500,
+        "mismatches": 0,
+        "oracle_log_sha256": "0e81834ee2a12a1d3a06c1ff5649ae3ded75a2d810861aaaea46ca963078f6d6"
+      }
+    }
+  ],
+  "open_p0": 0,
+  "open_p1_after_local_patch": 0,
+  "release_state": "RELEASE_BLOCKED",
+  "marketplace_write_enabled": false
+}

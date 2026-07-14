@@ -1,0 +1,19 @@
+{
+  "base_pilot_integration_r34_overlay_git_blob_sha": "f46234d677900df621aa1d9d95f502aab5950323",
+  "entries": [
+    [
+      ".github/workflows/windows-source-package-launchers-r1.yml",
+      "2065e46dcbb07cb6111a839cfbbd24b24825ae91d05259140a92e82a21aabfec",
+      4022
+    ],
+    [
+      "tests/integration_manifest_support.py",
+      "c3859a7febd83f3ed7e8bf48ce5c436e28de4a0fec267db827b416db43099dd5",
+      7845
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 35,
+  "reason": "MILESTONE 0 CI contract correction: verify fail-closed source launchers that require explicit AUTHORIZE and REVIEWED confirmations and never attest for the operator",
+  "remove_paths": []
+}

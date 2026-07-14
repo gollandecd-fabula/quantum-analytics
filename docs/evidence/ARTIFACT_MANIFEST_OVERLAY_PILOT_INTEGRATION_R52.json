@@ -1,0 +1,74 @@
+{
+  "base_pilot_integration_r51_overlay_git_blob_sha": "9f20c684d5d3445c12f6dca54c4bd8d27db2599e",
+  "entries": [
+    [
+      "docs/evidence/M6_DEFECT_REGISTER.json",
+      "4574a08cd67433f235c99ab4401fdb43b8a9ae015c44e77550527383eabdd05e",
+      2219
+    ],
+    [
+      "docs/evidence/M6_MARKETPLACE_NEUTRAL_CORE_ADAPTERS_REPORT.md",
+      "5aa74b45236fe3fd7c6c9ff99057e423cbdbe5d074381e912474a40833230da3",
+      4229
+    ],
+    [
+      "src/quantum/adapters/__init__.py",
+      "0e59100d769d4982696a2bb0cb4162d19d94fbd6c41bb3eddfe68492092dd2db",
+      610
+    ],
+    [
+      "src/quantum/adapters/contracts.py",
+      "ff8a38c782c2df3d6ca011c391e7836814a66422691a2d1809139ecc45118afa",
+      3538
+    ],
+    [
+      "src/quantum/adapters/defaults.py",
+      "7e6e6a3352c5593c0a7e14d74e94380e6a1776814b57ce5461bbf5e363910acd",
+      474
+    ],
+    [
+      "src/quantum/adapters/ozon/__init__.py",
+      "b1b2f2e84c4104bcf42091654afd0b8ca41e125d90399ae12b3ae207bb7a15da",
+      143
+    ],
+    [
+      "src/quantum/adapters/ozon/adapter.py",
+      "596ad2ec5f01002ef06c56fdc9552cf65e6a1bc5ca2834d1e64bb586931f10bb",
+      2112
+    ],
+    [
+      "src/quantum/adapters/registry.py",
+      "2d3fc9e9d28961c491fca38d512c5317f276b17168575cc0ab43cd00a06a9dcf",
+      2590
+    ],
+    [
+      "src/quantum/adapters/wildberries/adapter.py",
+      "08d220d49d71a14148afc364c914077ee5f729af6c6687bc8b8d170a8e3bc47c",
+      966
+    ],
+    [
+      "src/quantum/pilot/windows_source_bridge.py",
+      "b013a67ff29da317be0bdce21bbcb1a2906241e819fc063cac1b43fe3034bf27",
+      7234
+    ],
+    [
+      "tests/integration_manifest_support.py",
+      "8a8a003476fc1137ba831ea2dce55374bebde748c5d07cf77a3185f290f4e333",
+      7845
+    ],
+    [
+      "tests/test_m6_marketplace_neutral_adapters.py",
+      "1e496375ce2bccec43b49239c4930bb95d367eff655a6fdeac1de6ab86f76400",
+      6301
+    ],
+    [
+      "tests/test_windows_source_bridge_r1.py",
+      "2234a77739ef5f2edcde8d3e18273902a06f4c93b11832fa669e37413f8b1093",
+      5720
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 52,
+  "reason": "MILESTONE 6 marketplace-neutral core and adapters: add an explicit adapter contract, frozen registry, isolated Wildberries wrapper, fail-closed Ozon boundary, marketplace-neutral Windows dispatch, architecture regression tests, and Red Team evidence while preserving read-only execution",
+  "remove_paths": []
+}

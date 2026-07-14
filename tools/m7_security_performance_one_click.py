@@ -1,0 +1,630 @@
+from __future__ import annotations
+
+import argparse
+import ast
+import base64
+from dataclasses import asdict, dataclass
+import json
+from pathlib import Path
+import re
+import statistics
+import subprocess
+import sys
+import tempfile
+from typing import Callable, Sequence
+
+MILESTONE = "M7"
+TITLE = "Security, Performance and One-Click"
+AUDIT_VERSION = 2
+DEFAULT_BASELINE_SHA = "0972d02312bdee3aae3583dc6d9caf369622a57d"
+
+
+@dataclass(frozen=True)
+class Finding:
+    finding_id: str
+    severity: str
+    gate: str
+    message: str
+    path: str | None = None
+
+
+@dataclass(frozen=True)
+class ProbeResult:
+    root: str
+    iterations: int
+    samples_seconds: tuple[float, ...]
+    median_seconds: float
+
+
+@dataclass(frozen=True)
+class PerformanceComparison:
+    status: str
+    baseline: ProbeResult
+    candidate: ProbeResult
+    max_ratio: float
+    absolute_slack_seconds: float
+    allowed_seconds: float
+    observed_ratio: float
+
+
+def _read(path: Path) -> str:
+    return path.read_text(encoding="utf-8")
+
+
+_POWERSHELL_BASE64_RE = re.compile(
+    r'-Encoded\s+["\']([A-Za-z0-9+/=]{16,})["\']'
+)
+
+
+def _powershell_surface_text(text: str) -> str:
+    decoded: list[str] = []
+    for encoded in _POWERSHELL_BASE64_RE.findall(text):
+        try:
+            decoded.append(base64.b64decode(encoded, validate=True).decode("utf-8"))
+        except (ValueError, UnicodeDecodeError):
+            continue
+    return text + "\n" + "\n".join(decoded)
+
+
+def _contains_any(text: str, alternatives: Sequence[str]) -> bool:
+    return any(token in text for token in alternatives)
+
+
+def _finding(
+    finding_id: str,
+    severity: str,
+    gate: str,
+    message: str,
+    path: Path | None = None,
+) -> Finding:
+    return Finding(
+        finding_id=finding_id,
+        severity=severity,
+        gate=gate,
+        message=message,
+        path=None if path is None else path.as_posix(),
+    )
+
+
+def _is_true_literal(node: ast.AST | None) -> bool:
+    return isinstance(node, ast.Constant) and node.value is True
+
+
+def _target_is_marketplace_write_enabled(node: ast.AST) -> bool:
+    if isinstance(node, ast.Name):
+        return node.id == "marketplace_write_enabled"
+    if isinstance(node, ast.Attribute):
+        return node.attr == "marketplace_write_enabled"
+    if isinstance(node, ast.Subscript):
+        key = node.slice
+        return isinstance(key, ast.Constant) and key.value == "marketplace_write_enabled"
+    return False
+
+
+def _python_enables_marketplace_writes(text: str) -> bool:
+    try:
+        tree = ast.parse(text)
+    except SyntaxError:
+        return False
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Assign) and _is_true_literal(node.value):
+            if any(_target_is_marketplace_write_enabled(target) for target in node.targets):
+                return True
+        elif isinstance(node, ast.AnnAssign) and _is_true_literal(node.value):
+            if _target_is_marketplace_write_enabled(node.target):
+                return True
+        elif isinstance(node, ast.Dict):
+            for key, value in zip(node.keys, node.values, strict=True):
+                if (
+                    isinstance(key, ast.Constant)
+                    and key.value == "marketplace_write_enabled"
+                    and _is_true_literal(value)
+                ):
+                    return True
+        elif isinstance(node, ast.keyword):
+            if node.arg == "marketplace_write_enabled" and _is_true_literal(node.value):
+                return True
+    return False
+
+
+def _has_implicit_switch_default(text: str, switch_name: str) -> bool:
+    return bool(
+        re.search(
+            rf"\[switch\]\s*\${re.escape(switch_name)}\s*=\s*\$true\b",
+            text,
+            flags=re.IGNORECASE,
+        )
+    )
+
+
+def audit_security(root: Path) -> list[Finding]:
+    findings: list[Finding] = []
+    pyproject = root / "pyproject.toml"
+    one_click = root / "scripts/windows/one_click_home_local.ps1"
+    importer = root / "scripts/windows/import_source.ps1"
+    installer = root / "scripts/windows/install_home_local.ps1"
+    builder = root / "scripts/windows/build_local_production.ps1"
+
+    required_files = (pyproject, one_click, importer, installer, builder)
+    for path in required_files:
+        if not path.is_file():
+            findings.append(
+                _finding(
+                    "M7-S001",
+                    "P1",
+                    "SECURITY",
+                    "Required one-click security surface is missing.",
+                    path,
+                )
+            )
+    if findings:
+        return findings
+
+    pyproject_text = _read(pyproject)
+    if "marketplace_write_enabled = false" not in pyproject_text:
+        findings.append(
+            _finding(
+                "M7-S002",
+                "P0",
+                "SECURITY",
+                "Repository policy no longer proves that marketplace writes are disabled.",
+                pyproject,
+            )
+        )
+
+    one_click_text = _read(one_click)
+    importer_text = _read(importer)
+    installer_text = _read(installer)
+    builder_text = _read(builder)
+
+    for switch_name in (
+        "SkipDefenderScan",
+        "AuthorityAttested",
+        "SchemaReviewed",
+    ):
+        for path, text in ((one_click, one_click_text), (importer, importer_text)):
+            if _has_implicit_switch_default(text, switch_name):
+                findings.append(
+                    _finding(
+                        "M7-S003",
+                        "P0",
+                        "SECURITY",
+                        "Launcher contains a forbidden implicit authorization "
+                        f"default for {switch_name}.",
+                        path,
+                    )
+                )
+
+    required_security_tokens: dict[Path, tuple[tuple[str, ...], ...]] = {
+        one_click: (
+            ("Assert-LocalPathSafety -Path $PackageRoot",),
+            ("Assert-LocalPathSafety -Path $TargetRoot",),
+            ("-not $AuthorityAttested -or -not $SchemaReviewed",),
+            (
+                "launchers never attest on your behalf",
+                "Программы запуска никогда не подтверждают",
+                "программы запуска никогда не подтверждают",
+            ),
+            ("Test-PathWithin -Child $directory -Parent $Root",),
+        ),
+        importer: (
+            (
+                "Microsoft Defender scan failed or reported a threat.",
+                "Проверка Microsoft Defender завершилась ошибкой или обнаружила угрозу.",
+            ),
+            (
+                "Non-interactive mode requires explicit $Expected attestation switch.",
+                "В неинтерактивном режиме необходимо явно передать подтверждение {0}.",
+            ),
+            ("ExpectedFileSha256",),
+            ("PreScannedEvidenceSha256",),
+        ),
+        installer: (
+            ('release_state -ne "RELEASE_BLOCKED"',),
+            ("marketplace_write_enabled -ne $false",),
+            ("Assert-PackageManifest -Root $SourceRoot",),
+            (
+                "Manifest hash mismatch",
+                "Хеш файла не совпадает с манифестом",
+            ),
+        ),
+        builder: (
+            ('release_state = "RELEASE_BLOCKED"',),
+            ("marketplace_write_enabled = $false",),
+        ),
+    }
+    for path, contracts in required_security_tokens.items():
+        surface = _powershell_surface_text(_read(path))
+        for alternatives in contracts:
+            if not _contains_any(surface, alternatives):
+                findings.append(
+                    _finding(
+                        "M7-S004",
+                        "P1",
+                        "SECURITY",
+                        "Required fail-closed control is missing: "
+                        + " | ".join(alternatives),
+                        path,
+                    )
+                )
+
+    source_root = root / "src/quantum"
+    if not source_root.is_dir():
+        findings.append(
+            _finding(
+                "M7-S005",
+                "P1",
+                "SECURITY",
+                "Quantum runtime source directory is missing.",
+                source_root,
+            )
+        )
+        return findings
+
+    shell_true_pattern = re.compile(r"\bshell\s*=\s*True\b")
+    network_write_patterns = (
+        "requests.post(",
+        "requests.put(",
+        "requests.patch(",
+        "httpx.post(",
+        "httpx.put(",
+        "httpx.patch(",
+    )
+    for path in sorted(source_root.rglob("*.py")):
+        text = _read(path)
+        if _python_enables_marketplace_writes(text):
+            findings.append(
+                _finding(
+                    "M7-S006",
+                    "P0",
+                    "SECURITY",
+                    "Runtime source contains a write-enabled marketplace value.",
+                    path,
+                )
+            )
+        if shell_true_pattern.search(text):
+            findings.append(
+                _finding(
+                    "M7-S007",
+                    "P1",
+                    "SECURITY",
+                    "Runtime source enables shell=True.",
+                    path,
+                )
+            )
+        for token in network_write_patterns:
+            if token in text:
+                findings.append(
+                    _finding(
+                        "M7-S008",
+                        "P1",
+                        "SECURITY",
+                        f"Runtime source contains an unapproved network-write primitive: {token}",
+                        path,
+                    )
+                )
+
+    return findings
+
+
+def audit_one_click(root: Path) -> list[Finding]:
+    findings: list[Finding] = []
+    one_click = root / "scripts/windows/one_click_home_local.ps1"
+    installer = root / "scripts/windows/install_home_local.ps1"
+    if not one_click.is_file() or not installer.is_file():
+        return [
+            _finding(
+                "M7-O001",
+                "P1",
+                "ONE_CLICK",
+                "One-click launcher or installer is missing.",
+                one_click if not one_click.is_file() else installer,
+            )
+        ]
+
+    one_click_text = _read(one_click)
+    installer_text = _read(installer)
+    ordered_tokens = (
+        "& $installer -SourceRoot $PackageRoot -TargetRoot $TargetRoot",
+        "$Config = Invoke-ConfigurationWizard",
+        "& $importer @importArguments",
+    )
+    positions: list[int] = []
+    for token in ordered_tokens:
+        position = one_click_text.find(token)
+        if position < 0:
+            findings.append(
+                _finding(
+                    "M7-O002",
+                    "P1",
+                    "ONE_CLICK",
+                    f"One-click sequence token is missing: {token}",
+                    one_click,
+                )
+            )
+        positions.append(position)
+    if all(position >= 0 for position in positions) and positions != sorted(positions):
+        findings.append(
+            _finding(
+                "M7-O003",
+                "P1",
+                "ONE_CLICK",
+                "One-click install/configure/import sequence is not deterministic.",
+                one_click,
+            )
+        )
+
+    user_error_contracts = (
+        (
+            "Python 3.12 or newer was not found.",
+            "Python 3.12 или новее не найден.",
+        ),
+        (
+            "File is required in non-interactive mode.",
+            "В неинтерактивном режиме необходимо явно указать файл.",
+        ),
+        (
+            "The supplied configuration is not ready:",
+            "Переданная конфигурация не готова:",
+        ),
+        (
+            "Quantum did not create the expected pilot result:",
+            "Quantum не создал ожидаемый результат пилотного запуска:",
+        ),
+        (
+            "Source selection cancelled.",
+            "Выбор файла отменён.",
+        ),
+    )
+    combined = _powershell_surface_text(
+        one_click_text + "\n" + _read(root / "scripts/windows/import_source.ps1")
+    )
+    for alternatives in user_error_contracts:
+        if not _contains_any(combined, alternatives):
+            findings.append(
+                _finding(
+                    "M7-O004",
+                    "P1",
+                    "ONE_CLICK",
+                    "Actionable user-facing error contract is missing: "
+                    + " | ".join(alternatives),
+                    one_click,
+                )
+            )
+
+    installer_checks = (
+        ('set "quantum_exit=%errorlevel%"',),
+        ('exit /b %quantum_exit%',),
+        (
+            "Existing config, data and output directories were preserved.",
+            "Существующие папки config, data и output сохранены.",
+        ),
+        ("$packageManifest = Assert-PackageManifest -Root $SourceRoot",),
+        ("New-Item -ItemType Directory -Path $TargetRoot",),
+    )
+    installer_surface = _powershell_surface_text(installer_text)
+    for alternatives in installer_checks:
+        if not _contains_any(installer_surface, alternatives):
+            findings.append(
+                _finding(
+                    "M7-O005",
+                    "P1",
+                    "ONE_CLICK",
+                    "Installer reproducibility contract is missing: "
+                    + " | ".join(alternatives),
+                    installer,
+                )
+            )
+    manifest_position = installer_text.find(
+        "$packageManifest = Assert-PackageManifest -Root $SourceRoot"
+    )
+    mutation_position = installer_text.find("New-Item -ItemType Directory -Path $TargetRoot")
+    if (
+        manifest_position >= 0
+        and mutation_position >= 0
+        and manifest_position >= mutation_position
+    ):
+        findings.append(
+            _finding(
+                "M7-O006",
+                "P1",
+                "ONE_CLICK",
+                "Package verification occurs after target mutation.",
+                installer,
+            )
+        )
+
+    return findings
+
+
+def audit_repository(root: Path) -> dict[str, object]:
+    root = root.resolve()
+    findings = [*audit_security(root), *audit_one_click(root)]
+    blocking = [finding for finding in findings if finding.severity in {"P0", "P1"}]
+    return {
+        "audit_version": AUDIT_VERSION,
+        "milestone": MILESTONE,
+        "title": TITLE,
+        "root": str(root),
+        "status": "PASS" if not blocking else "FAIL",
+        "blocking_findings": [asdict(finding) for finding in blocking],
+        "all_findings": [asdict(finding) for finding in findings],
+        "security_p0_p1_open": len(blocking),
+        "marketplace_write_enabled": False,
+        "release_authorized": False,
+    }
+
+
+def _probe_once(root: Path, iterations: int) -> float:
+    code = """
+import json
+from pathlib import Path
+import sys
+import time
+
+root = Path(sys.argv[1]).resolve()
+iterations = int(sys.argv[2])
+sys.path.insert(0, str(root / "src"))
+from quantum.adapters import build_default_marketplace_registry, normalize_marketplace_id
+
+registry = build_default_marketplace_registry()
+values = ("wb", "Wildberries", "ozon", "future-market")
+started = time.perf_counter()
+for index in range(iterations):
+    normalize_marketplace_id(values[index % len(values)])
+    registry.resolve("WILDBERRIES" if index % 2 == 0 else "OZON")
+elapsed = time.perf_counter() - started
+print(json.dumps({"elapsed_seconds": elapsed}, sort_keys=True))
+"""
+    completed = subprocess.run(
+        [sys.executable, "-c", code, str(root), str(iterations)],
+        cwd=root,
+        check=False,
+        capture_output=True,
+        text=True,
+        timeout=60,
+    )
+    if completed.returncode != 0:
+        raise RuntimeError(
+            f"Performance probe failed for {root}: "
+            f"{completed.stderr.strip() or completed.stdout.strip()}"
+        )
+    payload = json.loads(completed.stdout)
+    return float(payload["elapsed_seconds"])
+
+
+def run_probe(
+    root: Path,
+    *,
+    iterations: int = 50_000,
+    repeats: int = 5,
+    probe_once: Callable[[Path, int], float] = _probe_once,
+) -> ProbeResult:
+    samples = tuple(probe_once(root.resolve(), iterations) for _ in range(repeats))
+    return ProbeResult(
+        root=str(root.resolve()),
+        iterations=iterations,
+        samples_seconds=samples,
+        median_seconds=float(statistics.median(samples)),
+    )
+
+
+def compare_performance(
+    baseline_root: Path,
+    candidate_root: Path,
+    *,
+    iterations: int = 50_000,
+    repeats: int = 5,
+    max_ratio: float = 1.75,
+    absolute_slack_seconds: float = 0.25,
+    probe_once: Callable[[Path, int], float] = _probe_once,
+) -> PerformanceComparison:
+    baseline = run_probe(
+        baseline_root,
+        iterations=iterations,
+        repeats=repeats,
+        probe_once=probe_once,
+    )
+    candidate = run_probe(
+        candidate_root,
+        iterations=iterations,
+        repeats=repeats,
+        probe_once=probe_once,
+    )
+    allowed = max(
+        baseline.median_seconds * max_ratio,
+        baseline.median_seconds + absolute_slack_seconds,
+    )
+    ratio = (
+        candidate.median_seconds / baseline.median_seconds
+        if baseline.median_seconds > 0
+        else float("inf")
+    )
+    status = "PASS" if candidate.median_seconds <= allowed else "FAIL"
+    return PerformanceComparison(
+        status=status,
+        baseline=baseline,
+        candidate=candidate,
+        max_ratio=max_ratio,
+        absolute_slack_seconds=absolute_slack_seconds,
+        allowed_seconds=allowed,
+        observed_ratio=ratio,
+    )
+
+
+def _atomic_json(path: Path, payload: object) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    encoded = json.dumps(payload, indent=2, sort_keys=True) + "\n"
+    with tempfile.NamedTemporaryFile(
+        mode="w",
+        encoding="utf-8",
+        dir=path.parent,
+        prefix=f".{path.name}.",
+        suffix=".tmp",
+        delete=False,
+    ) as handle:
+        handle.write(encoded)
+        temporary = Path(handle.name)
+    temporary.replace(path)
+
+
+def _performance_payload(comparison: PerformanceComparison) -> dict[str, object]:
+    return {
+        "milestone": MILESTONE,
+        "title": TITLE,
+        "status": comparison.status,
+        "baseline": asdict(comparison.baseline),
+        "candidate": asdict(comparison.candidate),
+        "max_ratio": comparison.max_ratio,
+        "absolute_slack_seconds": comparison.absolute_slack_seconds,
+        "allowed_seconds": comparison.allowed_seconds,
+        "observed_ratio": comparison.observed_ratio,
+        "marketplace_write_enabled": False,
+        "release_authorized": False,
+    }
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description=TITLE)
+    subparsers = parser.add_subparsers(dest="command", required=True)
+
+    audit = subparsers.add_parser("audit")
+    audit.add_argument("--root", type=Path, required=True)
+    audit.add_argument("--output", type=Path, required=True)
+
+    compare = subparsers.add_parser("compare")
+    compare.add_argument("--baseline", type=Path, required=True)
+    compare.add_argument("--candidate", type=Path, required=True)
+    compare.add_argument("--output", type=Path, required=True)
+    compare.add_argument("--iterations", type=int, default=50_000)
+    compare.add_argument("--repeats", type=int, default=5)
+    compare.add_argument("--max-ratio", type=float, default=1.75)
+    compare.add_argument("--absolute-slack-seconds", type=float, default=0.25)
+
+    return parser
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    args = build_parser().parse_args(argv)
+    if args.command == "audit":
+        payload = audit_repository(args.root)
+        _atomic_json(args.output, payload)
+        print(json.dumps(payload, sort_keys=True))
+        return 0 if payload["status"] == "PASS" else 1
+
+    comparison = compare_performance(
+        args.baseline,
+        args.candidate,
+        iterations=args.iterations,
+        repeats=args.repeats,
+        max_ratio=args.max_ratio,
+        absolute_slack_seconds=args.absolute_slack_seconds,
+    )
+    payload = _performance_payload(comparison)
+    _atomic_json(args.output, payload)
+    print(json.dumps(payload, sort_keys=True))
+    return 0 if comparison.status == "PASS" else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -1,0 +1,73 @@
+{
+  "base_pilot_integration_r66_overlay_git_blob_sha": "6862f03a6567816f09ac899ce0f9b81c1fb1f613",
+  "entries": [
+    [
+      ".github/workflows/build-two-installer-bundles-r2.yml",
+      "d113fd26e3a5c2e4d64fa518ed692430a08071fd463abbcbce4c4faced5368d7",
+      14580
+    ],
+    [
+      ".github/workflows/m7-security-performance-one-click.yml",
+      "fb179b4996a17cc68d3dfdaa480ffab2bcde52bc6b57982875cb00104a87aa11",
+      7099
+    ],
+    [
+      "scripts/windows/build_exe_installer.ps1",
+      "f115bf36083ee224cae917046d18572aa4f7ec1c2fcea3a512c104db7af7026e",
+      10085
+    ],
+    [
+      "scripts/windows/configure_home_local.ps1",
+      "2a4ac30dada0c602af9d873818a274396c596175bb5b10f7ff9b41b86f5a9542",
+      6993
+    ],
+    [
+      "src/quantum/adapters/__init__.py",
+      "0e59100d769d4982696a2bb0cb4162d19d94fbd6c41bb3eddfe68492092dd2db",
+      610
+    ],
+    [
+      "src/quantum/adapters/defaults.py",
+      "b03eaa04ffe4238eb770a82ba3ad325a9b6928d2f1a49b526fee30088a7873be",
+      1135
+    ],
+    [
+      "src/quantum/pilot/windows_source_bridge.py",
+      "68e841779d84fa3933afc1a3a4eddca3aad63dd789d7f61eace5d871b5fed906",
+      8168
+    ],
+    [
+      "tests/integration_manifest_support_m8.py",
+      "f92f88f40f3444d6b97bb99a3807cab31c80be3c9f3c3bc67bd1f3030d039412",
+      1085
+    ],
+    [
+      "tests/test_m6_marketplace_neutral_adapters.py",
+      "1e496375ce2bccec43b49239c4930bb95d367eff655a6fdeac1de6ab86f76400",
+      6301
+    ],
+    [
+      "tests/test_m7_security_performance_one_click.py",
+      "76b50acd71bd4232b1c38bf46ef37f1d00beff49a9f2016e62bdf82ef299108f",
+      7834
+    ],
+    [
+      "tests/test_tz_correction_and_exe_installer.py",
+      "a3e77b776dc05e1535294851701aea07644a71f1c84309b902fa7775d7d9b549",
+      3543
+    ],
+    [
+      "tests/test_windows_source_bridge_r1.py",
+      "b47bb21f9e63fb8974adeaa0e4c62d9df01e22da866b0b78f543ecacf0f1aaa7",
+      7605
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 67,
+  "reason": "Correct the unauthorized global WB-only registry change by restoring the marketplace-neutral WB/Ozon adapter contract, confine WB_ONLY enforcement to the HOME_LOCAL pilot and package layers, restore canonical M7 performance gates, remove unauthorized M9 artifacts, and add an exact-head hash-bound Windows IExpress EXE installer without enabling marketplace writes or production release",
+  "remove_paths": [
+    "docs/evidence/M9_INDEPENDENT_FINAL_RED_TEAM_PLAN.json",
+    "tests/test_m9_independent_final_red_team.py",
+    "tools/m9_wb_only_performance.py"
+  ]
+}

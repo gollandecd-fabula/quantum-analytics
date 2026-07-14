@@ -15,6 +15,7 @@ from ._xlsx_contracts import (
     normalized_header_sha256,
 )
 from ._xlsx_package_parts import validate_modeled_package_parts
+from ._xlsx_passive_auxiliary_compat import hash_passive_auxiliary_parts
 from ._xlsx_r19_hardening import (
     validate_archive_extra_fields,
     validate_workbook_r19_hardening,
@@ -25,6 +26,15 @@ from ._xlsx_workbook_content import validate_workbook_xml_content
 from ._xlsx_worksheet_attributes import validate_worksheet_structural_attributes
 from ._xlsx_xml_lexical import validate_xml_lexical_content
 from ._xlsx_zip_coverage import validate_zip_record_coverage
+
+
+_HOME_LOCAL_COMPAT_POLICY = "wb-home-local-discovery"
+_PASSIVE_AUXILIARY_CODES = frozenset(
+    {
+        "XLSX_AUXILIARY_CONTENT_UNMODELED",
+        "XLSX_AUXILIARY_PART_UNMODELED",
+    }
+)
 
 
 class XlsxPackageInspector:
@@ -53,7 +63,21 @@ class XlsxPackageInspector:
         )
         validate_xml_lexical_content(workbook, policy.limits)
         workbook_part = validate_workbook_xml_content(workbook, policy.limits)
-        auxiliary_parts = validate_modeled_xml_content(workbook, policy.limits)
+        try:
+            auxiliary_parts = validate_modeled_xml_content(
+                workbook,
+                policy.limits,
+            )
+        except XlsxInspectionError as exc:
+            if (
+                policy.policy_id != _HOME_LOCAL_COMPAT_POLICY
+                or exc.code not in _PASSIVE_AUXILIARY_CODES
+            ):
+                raise
+            auxiliary_parts = hash_passive_auxiliary_parts(
+                workbook,
+                policy.limits,
+            )
         worksheet_parts = validate_worksheet_structural_attributes(
             workbook,
             policy.limits,

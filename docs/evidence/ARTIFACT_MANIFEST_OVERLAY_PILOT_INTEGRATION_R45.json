@@ -1,0 +1,19 @@
+{
+  "base_pilot_integration_r44_overlay_git_blob_sha": "1bd3e9fc08f42282a9c1e351d5c38bf0123615be",
+  "entries": [
+    [
+      ".github/workflows/m1-baseline-audit.yml",
+      "69efffe58887470aee827fe6e648e108294e689546e51133251986668029f1c9",
+      9606
+    ],
+    [
+      "tests/integration_manifest_support.py",
+      "c07eb519ad2477adb3bc95807326e015024a4b024c9766d0566bed752c432886",
+      7845
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 45,
+  "reason": "MILESTONE 1 reproduction semantics: preserve Native and production evidence after an expected baseline defect instead of skipping downstream scenarios",
+  "remove_paths": []
+}

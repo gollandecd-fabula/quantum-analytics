@@ -1,0 +1,24 @@
+{
+  "base_pilot_integration_r59_overlay_git_blob_sha": "eb4c340bf69fded56df286fc09f95d0af6e97b17",
+  "entries": [
+    [
+      ".github/workflows/m7-security-performance-one-click.yml",
+      "fb179b4996a17cc68d3dfdaa480ffab2bcde52bc6b57982875cb00104a87aa11",
+      7099
+    ],
+    [
+      "docs/evidence/M7_DEFECT_REGISTER.json",
+      "f3036c91e60e5779ec8b2d595ae8c630d95f475bdb87c05d249ea92e2a15182d",
+      4432
+    ],
+    [
+      "tests/integration_manifest_support_m7.py",
+      "70a7c931adfae876afb3d08b33bed7b19d703cfefbf1e04c4b1ad2d2606964c6",
+      1144
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 60,
+  "reason": "MILESTONE 7 Windows environment recovery: disable Git CRLF conversion before checkout, install the exact Windows tzdata dependency declared by pyproject.toml, retain full diagnostics, and preserve the native one-button execution gate",
+  "remove_paths": []
+}

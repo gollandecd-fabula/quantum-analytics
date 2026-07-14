@@ -1,0 +1,19 @@
+{
+  "base_pilot_integration_r77_overlay_git_blob_sha": "092f369a1a1d763cf6199680aff1fb919916250a",
+  "entries": [
+    [
+      "tests/test_profile_save_and_shortcut_hotfix.py",
+      "530f8d4a1d84cd19861d7ed5087ab5e83aa40ac98853567999bff8414633cb57",
+      6427
+    ],
+    [
+      "tests/integration_manifest_support_m8.py",
+      "92e31f286dc31c3473e62510e05a14748067be4ebe34475c497f511fae8337c1",
+      1090
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 78,
+  "reason": "Normalize the shortcut target assertion by file identity so Windows long-path and 8.3 aliases are treated as the same launcher without weakening the production shortcut-repair contract",
+  "remove_paths": []
+}

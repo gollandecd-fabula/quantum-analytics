@@ -1,0 +1,8 @@
+{
+  "base_pilot_integration_r55_overlay_git_blob_sha": "f2873c06b65ea559ded7cdbe4e7a333e7c40af61",
+  "entries": [],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 56,
+  "reason": "MILESTONE 7 same-stage audit-classifier recovery checkpoint. This immutable checkpoint records the R55 parent before exact tracked-tree hashes for the recovery patch are sealed in the next overlay.",
+  "remove_paths": []
+}
