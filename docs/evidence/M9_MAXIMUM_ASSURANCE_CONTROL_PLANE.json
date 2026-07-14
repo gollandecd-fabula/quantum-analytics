@@ -3,7 +3,19 @@
   "title": "Maximum-Assurance v3 Fail-Closed Control Plane",
   "protocol_version": "3.0",
   "baseline_head": "7f7240aef05065aaf1dc396a54c7aed7f8eff6ae",
-  "status": "IMPLEMENTED_PENDING_EXACT_HEAD_CI",
+  "verified_implementation_head": "7f69b138c9eeba308fbb23fa170db358c871cfec",
+  "status": "PASS_WITH_LIMITATIONS",
+  "verification": {
+    "workflow_run": 29329197468,
+    "linux_job": 87072821093,
+    "linux_artifact_id": 8309227435,
+    "linux_artifact_sha256": "46e0ba50bfbf33e4590b302c0db0994668eb8f03815c656c0f4a10f76b420402",
+    "windows_job": 87072821122,
+    "windows_artifact_id": 8309231109,
+    "windows_artifact_sha256": "a422f442c5b78c8d7e2cc85b68cef0f288b149c8904a9b160f18a731f594d4f5",
+    "unit_tests": "6/6 PASS",
+    "harness_negative_controls": "5/5 PASS"
+  },
   "scope": [
     "machine-readable Requirements Traceability Matrix validation",
     "claim ledger evidence-level and exact-head integrity",
@@ -39,6 +51,7 @@
     "release authorization with open P0/P1",
     "missing mandatory assurance artifact"
   ],
+  "maximum_verified_level": "L2_SOURCE_RUNTIME",
   "maximum_claim_before_physical_pass": "AUTOMATED_VERIFICATION_PASS",
   "limitations": [
     "M9 does not claim installed-runtime L4 or physical-user-path L5 evidence.",
