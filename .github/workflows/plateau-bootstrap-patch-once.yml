@@ -1,0 +1,80 @@
+name: Plateau Bootstrap Patch Once
+
+on:
+  push:
+    branches:
+      - fix/quantum-plateau-redteam
+
+permissions:
+  contents: write
+
+concurrency:
+  group: plateau-bootstrap-patch-once
+  cancel-in-progress: false
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout plateau branch
+        uses: actions/checkout@v4
+        with:
+          ref: fix/quantum-plateau-redteam
+          fetch-depth: 0
+
+      - name: Patch installed-copy detection and remove this workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('scripts/windows/one_click_home_local.ps1')
+          text = path.read_text(encoding='ascii')
+          old = '''if (-not $SkipInstall -and [string]::IsNullOrWhiteSpace($PackageRoot) -and [string]::IsNullOrWhiteSpace($InstalledRoot)) {
+              $installedCandidate = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot "..")).Path
+              $installedRuntime = Join-Path $installedCandidate "src\\quantum\\application\\desktop_center.py"
+              $packageInstaller = Join-Path $installedCandidate "scripts\\install_home_local.ps1"
+              if ((Test-Path -LiteralPath $installedRuntime -PathType Leaf) -and -not (Test-Path -LiteralPath $packageInstaller -PathType Leaf)) {
+                  $SkipInstall = $true
+                  $InstalledRoot = $installedCandidate
+              }
+          }
+          '''
+          new = '''if (-not $SkipInstall -and [string]::IsNullOrWhiteSpace($PackageRoot) -and [string]::IsNullOrWhiteSpace($InstalledRoot)) {
+              $installedCandidate = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot "..")).Path
+              $packageInstaller = Join-Path $installedCandidate "scripts\\install_home_local.ps1"
+              $installedMarkers = @(
+                  (Join-Path $installedCandidate "START_QUANTUM.cmd"),
+                  (Join-Path $installedCandidate "scripts\\import_source.ps1"),
+                  (Join-Path $installedCandidate "scripts\\configure_home_local.ps1"),
+                  (Join-Path $installedCandidate "src\\quantum\\pilot\\windows_runner.py")
+              )
+              $hasInstalledMarker = $false
+              foreach ($marker in $installedMarkers) {
+                  if (Test-Path -LiteralPath $marker -PathType Leaf) {
+                      $hasInstalledMarker = $true
+                      break
+                  }
+              }
+              if ($hasInstalledMarker -and -not (Test-Path -LiteralPath $packageInstaller -PathType Leaf)) {
+                  $SkipInstall = $true
+                  $InstalledRoot = $installedCandidate
+              }
+          }
+          '''
+          if old not in text:
+              if '$installedMarkers = @(' in text and '$hasInstalledMarker = $false' in text:
+                  raise SystemExit('bootstrap already patched')
+              raise SystemExit('expected bootstrap block not found')
+          path.write_text(text.replace(old, new, 1), encoding='ascii', newline='\r\n')
+          PY
+          git config user.name "quantum-plateau-bot"
+          git config user.email "quantum-plateau-bot@users.noreply.github.com"
+          git add scripts/windows/one_click_home_local.ps1
+          git commit -m "fix(bootstrap): detect partial installed copies without package installer"
+          git rm .github/workflows/plateau-bootstrap-patch-once.yml
+          git commit -m "chore(bootstrap): remove one-time patch workflow"
+          git push origin HEAD:fix/quantum-plateau-redteam
