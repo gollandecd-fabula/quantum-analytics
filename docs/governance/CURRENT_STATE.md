@@ -109,6 +109,16 @@ In progress:
 - exact-head manifest evidence for M6;
 - complete mandatory CI rerun.
 
+## Real commercial data boundary
+
+Pilot authorization remains
+`AUTHORIZED_FOR_CLOSED_PILOT_PENDING_ADMISSION_CONTROLS`.
+Only data that passes the declared admission controls may be used. Raw real
+commercial data remains prohibited in external model prompts. Local disk
+encryption is not a pilot gate under the recorded local-storage amendment;
+hosted external storage encryption and approved non-loopback TLS remain
+mandatory. Production release and marketplace writes remain blocked.
+
 ## Open release boundaries
 
 The following are not software defects that can be truthfully closed by CI:
