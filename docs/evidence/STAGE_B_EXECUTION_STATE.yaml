@@ -1,10 +1,10 @@
-execution_state_id: STAGE-B-EXECUTION-STATE-v4
+execution_state_id: STAGE-B-EXECUTION-STATE-v5
 stage_contract_id: STAGE-B-BUILD-v1
 updated_on: 2026-07-14
 source_of_truth_for_live_unit_state: true
 macro_stage: B
-status: ACTIVE
-current_unit: M6
+status: TECHNICAL_PLATEAU_CANDIDATE
+current_unit: M9
 tracking_issue: 102
 working_branch: fix/quantum-plateau-redteam
 
@@ -81,10 +81,7 @@ units:
     risk: R2
     evidence: docs/evidence/STAGE_P1_5_EXECUTION_STATE.yaml
     test_method_count: 64
-    codex_findings_received: 6
-    codex_findings_remediated: 6
-    internal_audit_findings_received: 2
-    internal_audit_findings_remediated: 2
+    resolved_findings: 8
     unresolved_threads: 0
     requirements: [Q-BLD-007, Q-BLD-014, Q-BLD-015]
     acceptance_controls: [BLD-029, BLD-030, BLD-031, BLD-032]
@@ -136,13 +133,28 @@ units:
     risk: R3
     evidence: docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R81.json
   M6:
+    state: COMPLETE
+    risk: R3
+    evidence: docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R82.json
+  M7:
+    state: COMPLETE
+    risk: R3
+    evidence: docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R83.json
+    main_ancestry: VERIFIED
+    desktop_release_gate: ACTIVE
+  M8:
     state: IN_PROGRESS
     risk: R3
-    pull_request: 102
+    requirement: TWO_CONSECUTIVE_EXACT_HEAD_PASSES
+  M9:
+    state: IN_PROGRESS
+    risk: R3
+    defect_register: docs/evidence/M9_DEFECT_REGISTER.json
+    report: docs/evidence/M9_PLATEAU_RED_TEAM_REPORT.md
 
 cross_cutting_units:
   PLATEAU_RED_TEAM:
-    state: IN_PROGRESS
+    state: CANDIDATE
     risk: R3
     required_for_release_candidate: true
     pull_request: 102
@@ -152,6 +164,8 @@ cross_cutting_units:
     schema_review: EXPLICIT_UI_CONFIRMATION_REQUIRED
     report_index_external_paths: PROHIBITED
     self_test: FAIL_CLOSED
+    remaining_software_findings_p0: 0
+    remaining_software_findings_p1: 0
   R3_REAL_DATA_PILOT_ADMISSION:
     state: AUTHORIZED_PENDING_CONTROLS
     risk: R3
