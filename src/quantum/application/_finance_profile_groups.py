@@ -29,6 +29,7 @@ from quantum.ingestion._xlsx_archive import _extract_workbook
 from quantum.application._finance_profile_model import *
 from quantum.application._finance_profile_xlsx import *
 
+
 def merge_detected_products(
     collections: Iterable[Sequence[ProductRecord]],
 ) -> tuple[ProductRecord, ...]:
@@ -48,7 +49,11 @@ def merge_detected_products(
             ):
                 raise FinanceProfileError(
                     "PRODUCT_GROUP_CONFLICT",
-                    (record.product_id, previous.detected_group, record.detected_group),
+                    (
+                        record.product_id,
+                        previous.detected_group,
+                        record.detected_group,
+                    ),
                 )
     return tuple(merged[key] for key in sorted(merged))
 
@@ -97,15 +102,26 @@ def build_profile(
     )
     return FinanceProfile(
         tax_rate_percent=previous.tax_rate_percent if previous else None,
-        other_expense_per_unit=(previous.other_expense_per_unit if previous else None),
+        tax_base_metric_id=(
+            previous.tax_base_metric_id if previous else None
+        ),
+        other_expense_per_unit=(
+            previous.other_expense_per_unit if previous else None
+        ),
         groups=groups,
         product_to_group=product_to_group,
         confirmed=bool(previous and previous.confirmed and mapping_unchanged),
-        updated_at=previous.updated_at if previous and mapping_unchanged else None,
+        updated_at=(
+            previous.updated_at if previous and mapping_unchanged else None
+        ),
     )
 
 
-def reassign_product(profile: FinanceProfile, product_id: str, group_name: str) -> None:
+def reassign_product(
+    profile: FinanceProfile,
+    product_id: str,
+    group_name: str,
+) -> None:
     product_id = _required_text(product_id, "PRODUCT_ID_REQUIRED")
     group_name = _required_text(group_name, "GROUP_NAME_REQUIRED")
     old_group = profile.product_to_group.get(product_id)
@@ -115,11 +131,16 @@ def reassign_product(profile: FinanceProfile, product_id: str, group_name: str) 
         return
     if old_group in profile.groups:
         profile.groups[old_group].product_ids = [
-            value for value in profile.groups[old_group].product_ids if value != product_id
+            value
+            for value in profile.groups[old_group].product_ids
+            if value != product_id
         ]
         if not profile.groups[old_group].product_ids:
             profile.groups.pop(old_group)
-    target = profile.groups.setdefault(group_name, GroupInput(name=group_name))
+    target = profile.groups.setdefault(
+        group_name,
+        GroupInput(name=group_name),
+    )
     if product_id not in target.product_ids:
         target.product_ids.append(product_id)
         target.product_ids.sort()
@@ -140,7 +161,9 @@ def rename_group(profile: FinanceProfile, old_name: str, new_name: str) -> None:
         source.name = new_name
         profile.groups[new_name] = source
     else:
-        target.product_ids = sorted(set(target.product_ids + source.product_ids))
+        target.product_ids = sorted(
+            set(target.product_ids + source.product_ids)
+        )
         for field_name in (
             "cost_per_unit",
             "resalable_returned_units",
@@ -164,19 +187,35 @@ def rename_group(profile: FinanceProfile, old_name: str, new_name: str) -> None:
 
 def parse_cost_workbook(path: Path) -> dict[str, str]:
     rows = read_first_sheet(path)
-    header_index, _headers, positions = _find_header(rows, ("group", "cost"))
+    header_index, _headers, positions = _find_header(
+        rows,
+        ("group", "cost"),
+    )
     group_position = positions["group"]
     cost_position = positions["cost"]
     costs: dict[str, str] = {}
     for row_index, values in rows:
-        if row_index <= header_index or not any(value.strip() for value in values):
+        if row_index <= header_index or not any(
+            value.strip() for value in values
+        ):
             continue
-        group_name = values[group_position].strip() if group_position < len(values) else ""
-        cost_raw = values[cost_position].strip() if cost_position < len(values) else ""
+        group_name = (
+            values[group_position].strip()
+            if group_position < len(values)
+            else ""
+        )
+        cost_raw = (
+            values[cost_position].strip()
+            if cost_position < len(values)
+            else ""
+        )
         if not group_name and not cost_raw:
             continue
         if not group_name:
-            raise FinanceProfileError("COST_GROUP_REQUIRED", (str(row_index),))
+            raise FinanceProfileError(
+                "COST_GROUP_REQUIRED",
+                (str(row_index),),
+            )
         cost = _decimal(cost_raw, "COST_INVALID:" + group_name)
         normalized = _money(cost)
         if group_name in costs:
@@ -187,7 +226,10 @@ def parse_cost_workbook(path: Path) -> dict[str, str]:
     return costs
 
 
-def apply_costs(profile: FinanceProfile, costs: Mapping[str, object]) -> tuple[str, ...]:
+def apply_costs(
+    profile: FinanceProfile,
+    costs: Mapping[str, object],
+) -> tuple[str, ...]:
     unknown: list[str] = []
     for group_name, raw_value in costs.items():
         if group_name not in profile.groups:
@@ -207,11 +249,20 @@ def validate_profile(profile: FinanceProfile) -> tuple[str, ...]:
     if any(name == UNASSIGNED_GROUP for name in profile.groups):
         missing.append("Есть товары без подтверждённой группы")
     try:
-        _decimal(profile.tax_rate_percent, "TAX_RATE_REQUIRED", maximum=Decimal("100"))
+        _decimal(
+            profile.tax_rate_percent,
+            "TAX_RATE_REQUIRED",
+            maximum=Decimal("100"),
+        )
     except FinanceProfileError:
         missing.append("Налоговая ставка")
+    if profile.tax_base_metric_id not in TAX_BASE_OPTIONS:
+        missing.append("Налоговая база")
     try:
-        _decimal(profile.other_expense_per_unit, "OTHER_EXPENSE_REQUIRED")
+        _decimal(
+            profile.other_expense_per_unit,
+            "OTHER_EXPENSE_REQUIRED",
+        )
     except FinanceProfileError:
         missing.append("Прочие расходы на единицу")
     for name, group in sorted(profile.groups.items()):
@@ -227,10 +278,19 @@ def confirm_profile(profile: FinanceProfile) -> None:
     if missing:
         raise FinanceProfileError("FINANCE_PROFILE_INCOMPLETE", missing)
     profile.tax_rate_percent = _rate(
-        _decimal(profile.tax_rate_percent, "TAX_RATE_REQUIRED", maximum=Decimal("100"))
+        _decimal(
+            profile.tax_rate_percent,
+            "TAX_RATE_REQUIRED",
+            maximum=Decimal("100"),
+        )
     )
+    if profile.tax_base_metric_id not in TAX_BASE_OPTIONS:
+        raise FinanceProfileError("TAX_BASE_REQUIRED")
     profile.other_expense_per_unit = _money(
-        _decimal(profile.other_expense_per_unit, "OTHER_EXPENSE_REQUIRED")
+        _decimal(
+            profile.other_expense_per_unit,
+            "OTHER_EXPENSE_REQUIRED",
+        )
     )
     for name, group in profile.groups.items():
         group.cost_per_unit = _money(
@@ -249,7 +309,10 @@ def _atomic_json(path: Path, payload: Mapping[str, Any]) -> None:
         indent=2,
         allow_nan=False,
     ).encode("utf-8")
-    with tempfile.NamedTemporaryFile(dir=path.parent, delete=False) as handle:
+    with tempfile.NamedTemporaryFile(
+        dir=path.parent,
+        delete=False,
+    ) as handle:
         temporary = Path(handle.name)
         try:
             handle.write(encoded)
@@ -276,5 +339,6 @@ def load_profile(path: Path) -> FinanceProfile | None:
     if not isinstance(raw, Mapping):
         raise FinanceProfileError("FINANCE_PROFILE_INVALID")
     return FinanceProfile.from_dict(raw)
+
 
 __all__ = [name for name in globals() if not name.startswith("__")]
