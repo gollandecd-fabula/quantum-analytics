@@ -1,0 +1,53 @@
+{
+  "milestone": "M3_P0_P1_STABILIZATION",
+  "baseline_head": "d5f95b9668f5d788df11ccab6efd49c73d71de1f",
+  "status_before_exact_head_ci": "CANDIDATE_PASS_WITH_LIMITATIONS",
+  "marketplace_write_enabled": false,
+  "runtime_files_changed": 0,
+  "open_p0": [],
+  "open_p1": [],
+  "closed_or_revalidated": [
+    {
+      "id": "M1-D001",
+      "priority": "P1",
+      "status": "CLOSED_VERIFIED",
+      "boundary": "one-click managed config persistence"
+    },
+    {
+      "id": "M1-D002",
+      "priority": "P1",
+      "status": "CLOSED_VERIFIED",
+      "boundary": "truthful workflow exit-code propagation"
+    }
+  ],
+  "new_red_team_cases": [
+    {"id": "M3-RT01", "case": "missing cost_per_unit", "result": "BLOCKED", "code": "KERNEL_REQUEST_INVALID"},
+    {"id": "M3-RT02", "case": "missing tax_rate", "result": "BLOCKED", "code": "KERNEL_REQUEST_INVALID"},
+    {"id": "M3-RT03", "case": "missing other_expense_components", "result": "BLOCKED", "code": "KERNEL_REQUEST_INVALID"},
+    {"id": "M3-RT04", "case": "unknown financial input", "result": "BLOCKED", "code": "KERNEL_INPUTS_INVALID"},
+    {"id": "M3-RT05", "case": "explicit zero revenue", "result": "VALID_ZERO"},
+    {"id": "M3-RT06", "case": "division by zero", "result": "BLOCKED", "code": "EXPRESSION_DIVISION_BY_ZERO"},
+    {"id": "M3-RT07", "case": "decimal comma", "result": "SUPPORTED"},
+    {"id": "M3-RT08", "case": "changed WB column order", "result": "REJECTED", "code": "WB_WEEKLY_HEADERS_UNSUPPORTED"},
+    {"id": "M3-RT09", "case": "missing source file", "result": "PRIVACY_SAFE_ERROR", "code": "FILE_NOT_FOUND"}
+  ],
+  "local_validation": {
+    "test_count_per_run": 7,
+    "repetitions": 3,
+    "total_passed": 21,
+    "compileall": "PASS",
+    "log_sha256": "4dca8420fd1ed60c18aebd0ba5a0a1eb10c2bba49e9798a4ebd0f7a215164db2"
+  },
+  "legacy_open_issue_classification": [
+    {
+      "issue": 43,
+      "classification": "LEGACY_IMPLEMENTATION_TRACKER_NOT_ACTIVE_RUNTIME_DEFECT"
+    },
+    {
+      "issue": 48,
+      "classification": "FOUNDATION_IMPLEMENTED_EXTERNAL_REAL_DATA_APPROVAL_PENDING"
+    }
+  ],
+  "release_state": "RELEASE_BLOCKED",
+  "score": "NOT_SCORED"
+}

@@ -1,0 +1,199 @@
+name: Windows Universal Any-File Corpus R4
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/windows-universal-any-file-corpus-r4.yml"
+      - "scripts/windows/import_source.ps1"
+      - "src/quantum/pilot/universal_gateway.py"
+      - "src/quantum/pilot/universal_import.py"
+      - "src/quantum/pilot/universal_intake.py"
+      - "tests/test_universal_any_file_contract_r4.py"
+      - "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R33.json"
+
+permissions:
+  contents: read
+
+jobs:
+  python-corpus:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run deterministic universal corpus
+        shell: pwsh
+        run: |
+          $expected = "${{ github.event.pull_request.head.sha || github.sha }}"
+          if ((& git rev-parse HEAD).Trim() -ne $expected) {
+            throw "Exact-head checkout failed."
+          }
+          $env:PYTHONPATH = Join-Path $PWD "src"
+          python -m unittest tests.test_universal_any_file_contract_r4 -v
+          if ($LASTEXITCODE -ne 0) { throw "Universal Python corpus failed." }
+
+  native-front-door:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - case_id: json-spoofed-xlsx
+            expected_status: ACCEPTED_PARTIAL
+            expected_exit: 0
+          - case_id: cp1251-csv
+            expected_status: ACCEPTED_PARTIAL
+            expected_exit: 0
+          - case_id: passive-pdf
+            expected_status: ACCEPTED_PARTIAL
+            expected_exit: 0
+          - case_id: opaque-binary
+            expected_status: ACCEPTED_UNPARSED
+            expected_exit: 0
+          - case_id: executable-spoofed-text
+            expected_status: QUARANTINED_SECURITY
+            expected_exit: 2
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Execute native case ${{ matrix.case_id }}
+        shell: pwsh
+        run: |
+          Set-StrictMode -Version Latest
+          $ErrorActionPreference = "Stop"
+          $caseId = "${{ matrix.case_id }}"
+          $expectedStatus = "${{ matrix.expected_status }}"
+          $expectedExit = [int]"${{ matrix.expected_exit }}"
+          $root = Join-Path $env:RUNNER_TEMP ("quantum-any-file-" + $caseId)
+          $data = Join-Path $root "data"
+          $output = Join-Path $root "output"
+          $diagnosticPath = Join-Path $root "diagnostic.json"
+          $stdoutPath = Join-Path $root "stdout.txt"
+          $stderrPath = Join-Path $root "stderr.txt"
+          New-Item -ItemType Directory -Path $root,$data,$output -Force | Out-Null
+
+          $diagnostic = [ordered]@{
+            case_id = $caseId
+            exact_head = "${{ github.event.pull_request.head.sha || github.sha }}"
+            expected_exit = $expectedExit
+            actual_exit = $null
+            expected_status = $expectedStatus
+            actual_status = $null
+            report_exists = $false
+            calculation_is_null = $false
+            marketplace_write_enabled = $null
+            stdout = ""
+            stderr = ""
+            exception = $null
+            ok = $false
+          }
+
+          try {
+            if ((& git rev-parse HEAD).Trim() -ne $diagnostic.exact_head) {
+              throw "Exact-head checkout failed."
+            }
+            switch ($caseId) {
+              "json-spoofed-xlsx" {
+                $name = "table.xlsx"
+                $bytes = [Text.Encoding]::UTF8.GetBytes('[{"sku":"A","sales":1}]'.Replace('\',''))
+              }
+              "cp1251-csv" {
+                $name = "table.csv"
+                $bytes = [Convert]::FromBase64String("wPDy6Orz6zvP8O7k4OboDQpTS1UtMTsyDQo=")
+              }
+              "passive-pdf" {
+                $name = "document.pdf"
+                $bytes = [Text.Encoding]::ASCII.GetBytes("%PDF-1.4`n%%EOF")
+              }
+              "opaque-binary" {
+                $name = "opaque.bin"
+                $bytes = [byte[]](0..63)
+              }
+              "executable-spoofed-text" {
+                $name = "payload.txt"
+                $bytes = [byte[]](77,90,48,48,48,48)
+              }
+              default { throw "Unknown corpus case: $caseId" }
+            }
+
+            $source = Join-Path $root $name
+            $report = Join-Path $output ($name + ".json")
+            [IO.File]::WriteAllBytes($source, $bytes)
+            $scriptPath = (Resolve-Path -LiteralPath .\scripts\windows\import_source.ps1).Path
+            $argumentList = @(
+              "-NoProfile",
+              "-ExecutionPolicy", "Bypass",
+              "-File", $scriptPath,
+              "-File", $source,
+              "-StorageRoot", $data,
+              "-Output", $report,
+              "-NonInteractive",
+              "-AuthorityAttested",
+              "-SchemaReviewed",
+              "-SkipDefenderScan"
+            )
+            $process = Start-Process -FilePath powershell.exe -ArgumentList $argumentList `
+              -Wait -PassThru -NoNewWindow `
+              -RedirectStandardOutput $stdoutPath -RedirectStandardError $stderrPath
+            $diagnostic.actual_exit = $process.ExitCode
+            $diagnostic.report_exists = Test-Path -LiteralPath $report -PathType Leaf
+            if ($diagnostic.report_exists) {
+              $payload = Get-Content -LiteralPath $report -Raw -Encoding UTF8 | ConvertFrom-Json
+              $diagnostic.actual_status = [string]$payload.status
+              $diagnostic.calculation_is_null = $null -eq $payload.calculation
+              $diagnostic.marketplace_write_enabled = [bool]$payload.marketplace_write_enabled
+            }
+            if (Test-Path -LiteralPath $stdoutPath -PathType Leaf) {
+              $diagnostic.stdout = Get-Content -LiteralPath $stdoutPath -Raw
+            }
+            if (Test-Path -LiteralPath $stderrPath -PathType Leaf) {
+              $diagnostic.stderr = Get-Content -LiteralPath $stderrPath -Raw
+            }
+            $diagnostic.ok = (
+              $diagnostic.actual_exit -eq $expectedExit -and
+              $diagnostic.report_exists -and
+              $diagnostic.actual_status -eq $expectedStatus -and
+              $diagnostic.calculation_is_null -and
+              -not $diagnostic.marketplace_write_enabled
+            )
+          }
+          catch {
+            $diagnostic.exception = $_.Exception.ToString()
+          }
+
+          $diagnostic | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath $diagnosticPath -Encoding UTF8
+          $diagnostic | ConvertTo-Json -Depth 6 | Write-Host
+          exit 0
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: universal-case-${{ matrix.case_id }}
+          path: ${{ runner.temp }}/quantum-any-file-${{ matrix.case_id }}/diagnostic.json
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Validate native case ${{ matrix.case_id }}
+        shell: pwsh
+        run: |
+          $path = Join-Path $env:RUNNER_TEMP "quantum-any-file-${{ matrix.case_id }}\diagnostic.json"
+          $diagnostic = Get-Content -LiteralPath $path -Raw -Encoding UTF8 | ConvertFrom-Json
+          if (-not [bool]$diagnostic.ok) {
+            $diagnostic | ConvertTo-Json -Depth 6 | Write-Host
+            throw "Universal native case failed: $($diagnostic.case_id)"
+          }
+          Write-Host "WINDOWS_UNIVERSAL_CASE_PASS: $($diagnostic.case_id)" -ForegroundColor Green

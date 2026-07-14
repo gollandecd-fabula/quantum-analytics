@@ -1,0 +1,44 @@
+{
+  "base_pilot_integration_r78_overlay_git_blob_sha": "2eb460df19a092557da9b510dc820bf08762a74e",
+  "entries": [
+    [
+      "src/quantum/application/_finance_center_persistence.py",
+      "6aee56fd9e4638caeeb0faa76f53bc53564a4f4c46a797b696f9720e93c43f40",
+      12432
+    ],
+    [
+      "src/quantum/application/_finance_center_reports.py",
+      "67969907a2d1f02b7b00ae2f7fb5e9cd48c55c4a5f9291f648c29b622d5fc6ae",
+      14359
+    ],
+    [
+      "src/quantum/application/_finance_center_shell.py",
+      "39dffe94ee2a5529af38270607c5ae6d08642cd01aa0c5dc0431a0ba496730fa",
+      6651
+    ],
+    [
+      "src/quantum/application/_finance_center_calculation.py",
+      "a7ebb95c09594abb390460bfa97cf5b36c63c1e51232e8ec14acb3edb4467dc5",
+      12464
+    ],
+    [
+      "src/quantum/application/_finance_center_import.py",
+      "bb00d0543c71453a0ace9b33628b9af58a4cea9d6045b7e5127814c3715a8eed",
+      4698
+    ],
+    [
+      "tests/test_finance_center_report_persistence.py",
+      "a19b8ba807cd3dff2c75dcd8747a95f9401884b7f4356a72b41f6c93fd9ce927",
+      6566
+    ],
+    [
+      "tests/integration_manifest_support_m8.py",
+      "2755f1e29a5a346b5704529e073d5b3b64e161b6f8d250af5c83bb15eccafe26",
+      1090
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 79,
+  "reason": "Restore imported Wildberries reports from verified durable local storage after application restart, deduplicate already-loaded files by SHA-256, isolate product metadata recovery failures, normalize successful source-bridge status while preserving compatibility seams, compare Windows path aliases by file identity, and execute finance calculations from the managed immutable source instead of requiring the user to select the report again",
+  "remove_paths": []
+}

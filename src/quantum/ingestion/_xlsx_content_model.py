@@ -14,6 +14,7 @@ from ._xlsx_formula_validation import validate_formula_element
 _SPREADSHEET_NS = "http://schemas.openxmlformats.org/spreadsheetml/2006/main"
 _XML_NS = "http://www.w3.org/XML/1998/namespace"
 _MC_NS = "http://schemas.openxmlformats.org/markup-compatibility/2006"
+_XR_NS = "http://schemas.microsoft.com/office/spreadsheetml/2014/revision"
 _WORKSHEET = f"{{{_SPREADSHEET_NS}}}worksheet"
 _SHEET_DATA = f"{{{_SPREADSHEET_NS}}}sheetData"
 _ROW = f"{{{_SPREADSHEET_NS}}}row"
@@ -52,7 +53,14 @@ _ALLOWED_WORKSHEET_STRUCTURE_TAGS = frozenset(
     }
 )
 _ALLOWED_TEXT_ATTRIBUTES = frozenset({f"{{{_XML_NS}}}space"})
-_ALLOWED_WORKSHEET_ATTRIBUTES = frozenset({f"{{{_MC_NS}}}Ignorable"})
+_MC_IGNORABLE = f"{{{_MC_NS}}}Ignorable"
+_XR_UID = f"{{{_XR_NS}}}uid"
+_ALLOWED_WORKSHEET_ATTRIBUTES = frozenset({_MC_IGNORABLE, _XR_UID})
+_PREFIX = re.compile(r"[A-Za-z_][A-Za-z0-9_.-]*")
+_GUID = re.compile(
+    r"\{[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-"
+    r"[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}\}"
+)
 _AUXILIARY_PARTS = frozenset(
     {
         "docprops/app.xml",
@@ -227,11 +235,18 @@ def _validate_worksheet_root(root) -> None:
         _ALLOWED_WORKSHEET_ATTRIBUTES,
         "XLSX_WORKSHEET_ATTRIBUTE_UNMODELED",
     )
-    ignorable = root.get(f"{{{_MC_NS}}}Ignorable")
+    ignorable = root.get(_MC_IGNORABLE)
     if ignorable is not None:
         tokens = ignorable.split()
-        if not tokens or any(token != "x14ac" for token in tokens):
+        if (
+            ignorable != ignorable.strip()
+            or not tokens
+            or any(_PREFIX.fullmatch(token) is None for token in tokens)
+        ):
             raise XlsxInspectionError("XLSX_WORKSHEET_ATTRIBUTE_VALUE_INVALID")
+    uid = root.get(_XR_UID)
+    if uid is not None and _GUID.fullmatch(uid) is None:
+        raise XlsxInspectionError("XLSX_WORKSHEET_ATTRIBUTE_VALUE_INVALID")
     sheet_data_nodes = [child for child in root if child.tag == _SHEET_DATA]
     if len(sheet_data_nodes) != 1:
         raise XlsxInspectionError("XLSX_SHEET_DATA_STRUCTURE_INVALID")

@@ -1,187 +1,269 @@
-name: Windows Release Gate
+name: Windows Desktop Release Gate
 
 on:
   workflow_dispatch:
     inputs:
       ref:
-        description: 'Git ref to build'
+        description: "Exact commit SHA or ref to verify"
         required: true
-        default: 'fix/quantum-one-click-stable-release'
+        default: "fix/quantum-plateau-redteam"
 
 permissions:
   contents: read
 
 concurrency:
-  group: windows-release-gate-${{ github.ref }}
-  cancel-in-progress: true
+  group: windows-desktop-release-gate-${{ inputs.ref }}
+  cancel-in-progress: false
 
 jobs:
   verify-release:
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 25
+    outputs:
+      exact_sha: ${{ steps.inspect.outputs.exact_sha }}
     steps:
       - name: Checkout selected ref
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || 'fix/quantum-one-click-stable-release' }}
+          ref: ${{ inputs.ref }}
+          fetch-depth: 1
 
-      - name: Set up Python
+      - name: Set up Python 3.12
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: "3.12"
 
-      - name: Inspect selected ref
+      - name: Inspect and freeze exact head
+        id: inspect
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p dist
-          echo "ref_head=$(git rev-parse HEAD)" | tee dist/RELEASE_REF_INSPECTION.txt
-          cat dist/RELEASE_REF_INSPECTION.txt >> "$GITHUB_STEP_SUMMARY"
+          exact_sha="$(git rev-parse HEAD)"
+          test -n "$exact_sha"
+          echo "exact_sha=$exact_sha" >> "$GITHUB_OUTPUT"
+          printf 'selected_ref=%s\nexact_sha=%s\n' '${{ inputs.ref }}' "$exact_sha" \
+            | tee dist/RELEASE_REF_INSPECTION.txt
 
-      - name: Run Foundation checks
-        id: release_foundation
-        continue-on-error: true
+      - name: Run complete Foundation suite
         shell: bash
         run: |
-          set -o pipefail
-          PYTHONPATH=src python -m quantum.scripts.ci 2>&1 | tee dist/RELEASE_FOUNDATION.log
-
-      - name: Upload release verification diagnostics
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: Quantum_Release_Verification_Diagnostics
-          path: |
-            dist/RELEASE_REF_INSPECTION.txt
-            dist/RELEASE_FOUNDATION.log
-          if-no-files-found: error
-
-      - name: Enforce Foundation result
-        if: steps.release_foundation.outcome != 'success'
-        shell: bash
-        run: |
-          tail -n 120 dist/RELEASE_FOUNDATION.log
-          exit 1
+          set -euo pipefail
+          PYTHONPATH=src python -m quantum.scripts.ci 2>&1 \
+            | tee dist/RELEASE_FOUNDATION.log
 
       - name: Run OSS admission checks
         shell: bash
         run: |
           set -euo pipefail
-          PYTHONPATH=src python -m quantum.scripts.oss_admission_scan
+          PYTHONPATH=src python -m quantum.scripts.oss_admission_scan 2>&1 \
+            | tee dist/RELEASE_OSS_ADMISSION.log
 
-  build:
-    needs: verify-release
-    runs-on: windows-2022
-    timeout-minutes: 35
-    steps:
-      - name: Checkout selected ref
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || 'fix/quantum-one-click-stable-release' }}
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.13'
-
-      - name: Inspect selected ref
-        shell: pwsh
+      - name: Run fail-closed desktop self-test
+        shell: bash
         run: |
-          New-Item -ItemType Directory -Force 'dist' | Out-Null
-          $builder = Get-Item 'scripts\build_windows_single_exe.py'
-          $builderHash = Get-FileHash $builder.FullName -Algorithm SHA256
-          $head = (& git rev-parse HEAD).Trim()
-          "ref_head=$head" | Out-File -FilePath 'dist\SELECTED_REF_INSPECTION.txt' -Encoding utf8
-          "builder_path=$($builder.FullName)" | Out-File -FilePath 'dist\SELECTED_REF_INSPECTION.txt' -Encoding utf8 -Append
-          "builder_size=$($builder.Length)" | Out-File -FilePath 'dist\SELECTED_REF_INSPECTION.txt' -Encoding utf8 -Append
-          "builder_sha256=$($builderHash.Hash.ToLowerInvariant())" | Out-File -FilePath 'dist\SELECTED_REF_INSPECTION.txt' -Encoding utf8 -Append
-          Get-Content 'dist\SELECTED_REF_INSPECTION.txt'
-
-      - name: Upload selected ref inspection
-        uses: actions/upload-artifact@v4
-        with:
-          name: Quantum_Selected_Ref_Inspection
-          path: dist/SELECTED_REF_INSPECTION.txt
-          if-no-files-found: error
-
-      - name: Red Team builder self-check
-        shell: pwsh
-        run: |
-          python scripts/build_windows_single_exe.py --self-check
-
-      - name: Build standalone executable
-        id: package_build
-        continue-on-error: true
-        shell: pwsh
-        run: |
-          & python scripts/build_windows_single_exe.py 2>&1 | Tee-Object -FilePath 'dist\BUILD_WINDOWS.log'
-          $buildExit = $LASTEXITCODE
-          if ($buildExit -eq 0 -and -not (Test-Path 'dist\Quantum_WB_Release.exe')) {
-            'missing executable' | Tee-Object -FilePath 'dist\BUILD_WINDOWS.log' -Append
-            $buildExit = 1
+          set -euo pipefail
+          root="$RUNNER_TEMP/quantum-desktop-self-test"
+          mkdir -p "$root/config" "$root/data" "$root/output"
+          cat > "$root/config/default-home-local.json" <<'JSON'
+          {
+            "configuration_status": "READY",
+            "execution_mode": "ADMISSION_ONLY",
+            "tenant_id": "release-gate-tenant",
+            "marketplace_write_enabled": false
           }
-          exit $buildExit
+          JSON
+          PYTHONPATH=src python -m quantum.application.desktop_center \
+            --self-test \
+            --root "$root" \
+            --config "$root/config/default-home-local.json" \
+            | tee dist/DESKTOP_SELF_TEST.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          result = json.loads(Path("dist/DESKTOP_SELF_TEST.json").read_text(encoding="utf-8"))
+          assert result["status"] == "DESKTOP_CENTER_SELF_TEST_PASS", result
+          assert result["finance_center"]["status"] == "FINANCE_CENTER_SELF_TEST_PASS", result
+          assert result["marketplace_write_enabled"] is False, result
+          PY
 
-      - name: Upload build diagnostics
+      - name: Upload verification evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: Quantum_Windows_Build_Diagnostics
-          path: dist/BUILD_WINDOWS.log
+          name: Quantum-Desktop-Release-Verification
+          path: |
+            dist/RELEASE_REF_INSPECTION.txt
+            dist/RELEASE_FOUNDATION.log
+            dist/RELEASE_OSS_ADMISSION.log
+            dist/DESKTOP_SELF_TEST.json
           if-no-files-found: error
+          retention-days: 30
 
-      - name: Enforce build result
-        if: steps.package_build.outcome != 'success'
+  build-install-and-test:
+    needs: verify-release
+    runs-on: windows-2022
+    timeout-minutes: 60
+    env:
+      TARGET_SHA: ${{ needs.verify-release.outputs.exact_sha }}
+    steps:
+      - name: Checkout frozen exact head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.verify-release.outputs.exact_sha }}
+          fetch-depth: 1
+
+      - name: Assert exact head
         shell: pwsh
         run: |
-          Get-Content 'dist\BUILD_WINDOWS.log' -Tail 100
-          throw 'Windows standalone build failed'
-
-      - name: Smoke test packaged executable
-        shell: pwsh
-        run: |
-          $env:QUANTUM_NO_BROWSER = '1'
-          $env:QUANTUM_PORT = '8099'
-          $env:QUANTUM_RUNTIME_DIR = Join-Path $env:RUNNER_TEMP 'quantum-runtime'
-          $env:QUANTUM_INSTALL_DIR = Join-Path $env:RUNNER_TEMP 'quantum-installed-app'
-          $p = Start-Process -FilePath 'dist\Quantum_WB_Release.exe' -PassThru
-          try {
-            $ok = $false
-            for ($i = 0; $i -lt 60; $i++) {
-              if ($p.HasExited) { throw "packaged executable exited early with code $($p.ExitCode)" }
-              try {
-                $r = Invoke-WebRequest -UseBasicParsing 'http://127.0.0.1:8099/api/local-pilot/health'
-                if ($r.StatusCode -eq 200 -and $r.Content -like '*READY*') { $ok = $true; break }
-              } catch {
-                Start-Sleep -Seconds 1
-              }
-            }
-            if (-not $ok) { throw 'health check failed' }
-            if (-not (Test-Path (Join-Path $env:QUANTUM_INSTALL_DIR '.installed'))) {
-              throw 'embedded application was not installed by packaged output'
-            }
-          } finally {
-            if (-not $p.HasExited) {
-              & taskkill.exe /PID $p.Id /T /F | Out-Null
-            }
+          $actual = (& git rev-parse HEAD).Trim()
+          if ($actual -ne $env:TARGET_SHA) {
+            throw "Exact-head checkout mismatch: expected $env:TARGET_SHA, got $actual"
           }
 
-      - name: Inspect artifact
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run complete Windows production gate
         shell: pwsh
         run: |
-          $file = Get-Item 'dist\Quantum_WB_Release.exe'
-          if ($file.Length -lt 1000000) { throw 'artifact is unexpectedly small' }
-          $hash = Get-FileHash $file.FullName -Algorithm SHA256
-          "artifact=$($file.Name)" | Out-File -FilePath 'dist\ARTIFACT_INSPECTION.txt' -Encoding utf8
-          "size=$($file.Length)" | Out-File -FilePath 'dist\ARTIFACT_INSPECTION.txt' -Encoding utf8 -Append
-          "sha256=$($hash.Hash.ToLowerInvariant())" | Out-File -FilePath 'dist\ARTIFACT_INSPECTION.txt' -Encoding utf8 -Append
-          Get-Content 'dist\ARTIFACT_INSPECTION.txt'
+          & .\scripts\ci\windows_local_production_r37.ps1 2>&1 |
+            Tee-Object -FilePath windows-production-release.log
+          if ($LASTEXITCODE -ne 0) {
+            throw "Windows production gate failed with exit code $LASTEXITCODE"
+          }
 
-      - name: Upload artifact
+      - name: Verify installed launcher and desktop runtime
+        shell: pwsh
+        run: |
+          Set-StrictMode -Version Latest
+          $ErrorActionPreference = "Stop"
+          $root = Join-Path $env:RUNNER_TEMP "quantum-installed"
+          $launcher = Join-Path $root "START_QUANTUM.cmd"
+          $oneClick = Join-Path $root "scripts\one_click_home_local.ps1"
+          $config = Join-Path $root "config\default-home-local.json"
+          foreach ($required in @($launcher, $oneClick, $config)) {
+            if (-not (Test-Path -LiteralPath $required -PathType Leaf)) {
+              throw "Installed release file is missing: $required"
+            }
+          }
+          $launcherText = Get-Content -LiteralPath $launcher -Raw
+          if ($launcherText -notmatch '-InstalledRoot' -or $launcherText -notmatch '-SkipInstall') {
+            throw "Installed launcher does not force installed-mode startup."
+          }
+          if ($launcherText -match 'localhost:8000') {
+            throw "Installed launcher still references the legacy localhost runtime."
+          }
+          $oneClickText = Get-Content -LiteralPath $oneClick -Raw
+          if ($oneClickText -notmatch '\$installedMarkers\s*=\s*@\(') {
+            throw "Installed bootstrap does not contain resilient installed-copy markers."
+          }
+          $env:PYTHONPATH = Join-Path $root "src"
+          python -m quantum.application.desktop_center `
+            --self-test `
+            --root $root `
+            --config $config 2>&1 |
+            Tee-Object -FilePath installed-desktop-self-test.json
+          if ($LASTEXITCODE -ne 0) {
+            throw "Installed desktop self-test failed with exit code $LASTEXITCODE"
+          }
+          $selfTest = Get-Content -LiteralPath installed-desktop-self-test.json -Raw -Encoding UTF8 | ConvertFrom-Json
+          if ([string]$selfTest.status -ne "DESKTOP_CENTER_SELF_TEST_PASS") {
+            throw "Installed desktop self-test did not return PASS."
+          }
+          if ([bool]$selfTest.marketplace_write_enabled) {
+            throw "Installed desktop self-test enabled marketplace writes."
+          }
+
+      - name: Build full offline installer bundles
+        shell: pwsh
+        run: |
+          powershell.exe -NoProfile -ExecutionPolicy Bypass `
+            -File .\scripts\windows\build_two_installer_bundles.ps1 2>&1 |
+            Tee-Object -FilePath installer-bundle-build.log
+          if ($LASTEXITCODE -ne 0) {
+            throw "Installer bundle build failed with exit code $LASTEXITCODE"
+          }
+          powershell.exe -NoProfile -ExecutionPolicy Bypass `
+            -File .\scripts\windows\build_exe_installer.ps1 `
+            -BundleZip .\dist\installer-bundles-r2\2_QUANTUM_FULL_OFFLINE_INSTALLER.zip `
+            -OutputDirectory .\dist\installer-bundles-r2 2>&1 |
+            Tee-Object -FilePath exe-installer-build.log
+          if ($LASTEXITCODE -ne 0) {
+            throw "EXE installer build failed with exit code $LASTEXITCODE"
+          }
+
+      - name: Verify EXE integrity and native self-test
+        shell: pwsh
+        run: |
+          Set-StrictMode -Version Latest
+          $ErrorActionPreference = "Stop"
+          $output = Resolve-Path "dist/installer-bundles-r2"
+          $exe = Join-Path $output "Quantum_WB_Offline_Setup.exe"
+          $result = Get-Content -LiteralPath (Join-Path $output "exe-installer-result.json") -Raw -Encoding UTF8 | ConvertFrom-Json
+          if (-not (Test-Path -LiteralPath $exe -PathType Leaf)) {
+            throw "Offline EXE installer is missing."
+          }
+          if ([string]$result.source_commit -ne $env:TARGET_SHA) {
+            throw "EXE source commit does not match frozen exact head."
+          }
+          if ([string]$result.release_scope -ne "WB_ONLY" -or [bool]$result.marketplace_write_enabled) {
+            throw "EXE violates release scope or write boundary."
+          }
+          $actualHash = (Get-FileHash -LiteralPath $exe -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($actualHash -ne [string]$result.exe.sha256) {
+            throw "EXE SHA-256 does not match builder evidence."
+          }
+          $nativePath = Join-Path $output "exe-native-test-result.json"
+          & $exe --self-test $nativePath
+          if ($LASTEXITCODE -ne 0) {
+            throw "EXE native self-test failed with exit code $LASTEXITCODE"
+          }
+          $native = Get-Content -LiteralPath $nativePath -Raw -Encoding UTF8 | ConvertFrom-Json
+          if ([string]$native.status -ne "PASS" -or -not [bool]$native.native_self_test) {
+            throw "EXE native self-test did not pass."
+          }
+          if ([string]$native.source_commit -ne $env:TARGET_SHA) {
+            throw "EXE native self-test source commit mismatch."
+          }
+          "exact_sha=$env:TARGET_SHA" | Out-File -FilePath (Join-Path $output "FINAL_RELEASE_INSPECTION.txt") -Encoding utf8
+          "artifact=$([IO.Path]::GetFileName($exe))" | Out-File -FilePath (Join-Path $output "FINAL_RELEASE_INSPECTION.txt") -Encoding utf8 -Append
+          "size=$((Get-Item -LiteralPath $exe).Length)" | Out-File -FilePath (Join-Path $output "FINAL_RELEASE_INSPECTION.txt") -Encoding utf8 -Append
+          "sha256=$actualHash" | Out-File -FilePath (Join-Path $output "FINAL_RELEASE_INSPECTION.txt") -Encoding utf8 -Append
+          "authenticode_status=$($result.exe.authenticode_status)" | Out-File -FilePath (Join-Path $output "FINAL_RELEASE_INSPECTION.txt") -Encoding utf8 -Append
+
+      - name: Upload final release candidate
         uses: actions/upload-artifact@v4
         with:
-          name: Quantum_WB_RELEASE_EXE
+          name: Quantum-WB-Desktop-Plateau-Installer
           path: |
-            dist/Quantum_WB_Release.exe
-            dist/ARTIFACT_INSPECTION.txt
+            dist/installer-bundles-r2/Quantum_WB_Offline_Setup.exe
+            dist/installer-bundles-r2/exe-installer-result.json
+            dist/installer-bundles-r2/exe-native-test-result.json
+            dist/installer-bundles-r2/FINAL_RELEASE_INSPECTION.txt
+            installed-desktop-self-test.json
           if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload Windows diagnostics on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Quantum-Desktop-Release-Failure-Diagnostics
+          path: |
+            windows-production-release.log
+            windows-production-r37.log
+            windows-repair-tests.log
+            existing-local-pilot-tests.log
+            windows-verification-error.log
+            configurator.log
+            installed-import.log
+            one-click-pilot.log
+            package-build.log
+            installer-bundle-build.log
+            exe-installer-build.log
+            installed-desktop-self-test.json
+          if-no-files-found: warn
+          retention-days: 14

@@ -1,0 +1,74 @@
+{
+  "base_pilot_integration_r33_overlay_git_blob_sha": "e1093257ebc13ffa0e940af137d2f7802e4b9847",
+  "entries": [
+    [
+      "config/home-local.template.json",
+      "c9a4873b652a853539fcff150d12aca27eb7560b17feb85b74c6f6b95cd37540",
+      2256
+    ],
+    [
+      "scripts/windows/build_local_production.ps1",
+      "02b282c60be138e297285461b4009dc15adb65683de88f68959c0a57fa68ff75",
+      11175
+    ],
+    [
+      "scripts/windows/configure_home_local.ps1",
+      "91f1137a1a278abb9796a9341caff27a7757a59995ebc02b29159fc067d6f9c1",
+      6532
+    ],
+    [
+      "scripts/windows/install_home_local.ps1",
+      "00c03ccabebff959c1e30562d359a094d31e82fcfebcfef122355f44071dc30d",
+      16640
+    ],
+    [
+      "scripts/windows/one_click_home_local.ps1",
+      "c7476aa90679beb09069aef464fb2dbb623fc20ce62e48abbdf66e78a7d05c3f",
+      12808
+    ],
+    [
+      "src/quantum/application/local_app.py",
+      "fc6341788afba008fed5978fb68f88cbff85985a5723bd6a1b8a3f24433499ee",
+      17463
+    ],
+    [
+      "src/quantum/pilot/import_xlsx_source.ps1",
+      "8b328cab33bb01d49f71c832c36b4f4cd7bdb9071552fe19d1acead698818565",
+      15519
+    ],
+    [
+      "src/quantum/pilot/local_runner.py",
+      "c87b432c31a6eb138c90388ed6cf9dd5b6cbf7513bc5169596d02602d195327d",
+      20611
+    ],
+    [
+      "src/quantum/pilot/windows_runner.py",
+      "d1e3a58e870ede1074e2223e6a4a298b0d3c75702226b857888c2598a10fb722",
+      21828
+    ],
+    [
+      "tests/integration_manifest_support.py",
+      "ab9f4dfc0a14160e59442b7ee6b336581f2422dcebad1a1d1d617add29b34568",
+      7845
+    ],
+    [
+      "tests/test_m0_attestation_redteam.py",
+      "d1bd0951eeffd5fc42e97b41b83d8e2ac8ecdd5340b36dd11f87cd7e1372eea3",
+      10152
+    ],
+    [
+      "tests/test_windows_one_click_installer_r1.py",
+      "101bf46a9a67aba1f2af9105b425278a4294404036658b18f835e29baff25be3",
+      8056
+    ],
+    [
+      "tests/test_windows_source_package_launchers_r1.py",
+      "b6acd7804452dd91d1973973db8f2c252f266730941d514f1ef3a43d560658e2",
+      1282
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 34,
+  "reason": "MILESTONE 0 reconciliation: remove automatic operator attestations, derive dataset control evidence from observed facts or explicit legacy attestations only when no scan outcome exists, bind malware outcome and reviewed reporting period, and preserve fail-closed HOME_LOCAL admission",
+  "remove_paths": []
+}

@@ -1,72 +1,102 @@
 # Quantum Analytics
 
-Universal read-only marketplace analytics platform.
+Quantum — локальный read-only центр финансовых решений для отчётов Wildberries.
+Текущий пользовательский продукт — Windows desktop-приложение, а не облачный API-сервис.
 
-## Governance status
+## Что делает текущая версия
 
-- Constitution: `docs/governance/CONSTITUTION.md`
-- Runtime protocol: `docs/governance/RUNTIME_PROTOCOL.md`
-- Current state: `docs/governance/CURRENT_STATE.md`
-- Active stage contract: `docs/stage-contracts/STAGE-B-BUILD-v1.md`
-- Assurance execution plan: `docs/governance/ASSURANCE_EXECUTION_PLAN_2026_07_08.md`
-- Machine-readable assurance plan: `docs/governance/ASSURANCE_EXECUTION_PLAN_2026_07_08.yaml`
-- Real-data decision: `docs/decisions/DR-2026-07-01-REAL-COMMERCIAL-DATA-PILOT.md`
-- Real-data admission contract: `docs/security/REAL_COMMERCIAL_DATA_ADMISSION_CONTRACT_2026_07_08.md`
-- Hard pilot target: `2026-07-08`
-- Tracking issue: `#39`
-- Repository: `gollandecd-fabula/quantum-analytics`
-- Default branch: `main`
-- FOUNDATION Pull Request: `#2 — FOUNDATION: import verified bootstrap v5` — merged
-- FOUNDATION merge commit: `4aa2e69cd985879271b44ad3345f73e972add845`
-- Bootstrap import status: `PASS_MERGED_WITH_DOCUMENTED_NORMALIZATION`
-- Repository controls: `Protect main` ruleset — Active
-- Final pre-merge check: `Foundation CI / foundation — PASS (34 tests)`
-- Review remediation: 1 P1 and 3 P2 findings fixed; all review threads resolved before merge
+- загружает и проверяет отчёты локально;
+- показывает пользователю обнаруженную XLSX-схему до импорта;
+- требует отдельного подтверждения полномочий и схемы;
+- сохраняет проверенную immutable-копию исходного отчёта внутри Quantum;
+- восстанавливает отчёты после перезапуска без повторного выбора файла;
+- рассчитывает экономику по подтверждённым товарным группам;
+- требует явного ввода налоговой ставки, налоговой базы, себестоимости и прочих расходов;
+- учитывает расходы Wildberries без артикула отдельно, не создавая фиктивную товарную атрибуцию;
+- формирует локальные JSON, Excel и HTML-результаты;
+- не выполняет запись на Wildberries или другой маркетплейс.
 
-## Assurance model
+## Основной запуск
 
-The July 8 pilot plan uses separated responsibilities:
+Windows release package создаёт ярлык **«Центр решений Quantum»**.
+Для запуска из исходников:
 
-- Development Team;
-- Red Team;
-- Blue Team;
-- Purple Team collaboration loop;
-- Independent Assurance Team with IV&V, AppSec, Financial QA, and Release Audit;
-- separate Formal Validator;
-- independent Release Gatekeeper.
+```powershell
+python -m quantum.application.desktop_center \
+  --root . \
+  --config config/default-home-local.json
+```
 
-OpenAI is the `PRIMARY_EXECUTOR`; DeepSeek is the `INDEPENDENT_AUDITOR`.
-The closed pilot must process authorized real commercial data. Every dataset remains quarantined until
-the Real Commercial Data Admission Contract passes. Raw commercial data is prohibited in GitHub, CI,
-evidence packages, and external model prompts.
+Проверка установленного runtime:
 
-Production release remains blocked unless the separately governed release gates are satisfied.
+```powershell
+python -m quantum.application.desktop_center \
+  --root . \
+  --config config/default-home-local.json \
+  --self-test
+```
 
-## Architecture baseline
+Self-test возвращает ненулевой код, если не прошёл хотя бы один вложенный контроль.
 
-Modular monolith with two runtime entry points:
+## Сборка Python-пакета
 
-- API Service
-- Worker Service
+Проект использует стандартный backend `setuptools.build_meta`.
 
-The Wildberries integration is the first adapter. The core domain remains marketplace-neutral.
+```bash
+python -m pip wheel --no-deps .
+```
 
-## Security posture
+Публичные entry points:
 
-MVP is read-only. External marketplace write tokens, write methods, and production execution controls are excluded.
+- `quantum-desktop`;
+- `quantum-local-pilot`;
+- `quantum-ci`.
 
-## Deployment constraint
+## Финансовая модель
 
-Final hosting is restricted to one approved platform:
+Quantum не подставляет отсутствующие коммерческие значения.
+Профиль считается подтверждённым только после явного выбора:
 
-- Railway;
-- Vercel;
-- Cloudflare.
+- налоговой ставки;
+- налоговой базы;
+- прочих расходов на проданную единицу;
+- себестоимости каждой товарной группы.
 
-The selected platform must pass documented free-tier feasibility and approved-user-only access checks.
+Поддерживаемые налоговые базы текущего профиля:
 
-## Release status
+- продажи/возвраты до удержаний Wildberries;
+- доход после расходов Wildberries.
+
+Выбор зависит от применяемого налогового режима и подтверждается пользователем; Quantum не выбирает его самостоятельно.
+
+## Безопасность и конфиденциальность
+
+- исходные коммерческие данные не отправляются в GitHub или внешние модели;
+- durable report index не сохраняет абсолютные внешние пути пользователя;
+- исходник проверяется по SHA-256;
+- расчёт разбирает те же байты XLSX, которые были хешированы;
+- Microsoft Defender не отключается;
+- marketplace writes отключены.
+
+## Проверки
+
+Release candidate проверяется на одном exact head через Linux и Windows контуры:
+Foundation, OSS admission, baseline/reproduction, security/performance, clean environment,
+ACL recovery, launcher tests, universal file corpus, installer build, package inventory,
+production repair и Native Red Team.
+
+Исторический PASS не переносится автоматически на новый commit.
+
+## Статус релиза
 
 `RELEASE_BLOCKED`
 
-The governed repository baseline is merged into protected `main`. Production release remains blocked until PostgreSQL integration evidence, production object-storage and recovery evidence, representative Wildberries source contracts, approved-user authentication, and free-tier staging proof for Railway, Vercel, or Cloudflare are available.
+Автоматический технический PASS не заменяет:
+
+- Authenticode-подпись установщика;
+- физическую проверку на компьютере пользователя;
+- подтверждение реального налогового режима и налоговой базы;
+- отдельное решение о merge в `main`.
+
+Текущее состояние и открытые ограничения фиксируются в
+`docs/governance/CURRENT_STATE.md` и milestone/red-team evidence files.

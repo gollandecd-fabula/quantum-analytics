@@ -1,81 +1,133 @@
 # CURRENT STATE
 
-Date: 2026-07-02
-Status: `BUILD_P1_5_COMPLETE_R3_REAL_DATA_PILOT_AUTHORIZED_PENDING_CONTROLS`
-Active contract: `STAGE-B-BUILD-v1`
+Date: 2026-07-14
+Status: `TECHNICAL_PLATEAU_CANDIDATE`
+Release status: `RELEASE_BLOCKED`
+Working branch: `fix/quantum-plateau-redteam`
+Pull request: `#102`
+Base branch: `main`
+Marketplace writes: `DISABLED`
+Current unit: `M9 — Final plateau verification and release dossier`
 Live execution state: `docs/evidence/STAGE_B_EXECUTION_STATE.yaml`
-Current unit: `R3D1 — REAL_DATA_PILOT_ADMISSION`
-Tracking issue: `#41`
-Working branch: `r3-real-commercial-data-pilot-v1`
-Decision: `docs/decisions/DR-2026-07-01-REAL-COMMERCIAL-DATA-PILOT.md`
-Local-storage decision: `docs/decisions/DR-2026-07-02-LOCAL-DISK-ENCRYPTION-NOT-REQUIRED.md`
-Admission contract: `docs/security/REAL_COMMERCIAL_DATA_ADMISSION_CONTRACT_2026_07_08.md`
-Assurance-plan amendment: `docs/governance/ASSURANCE_EXECUTION_PLAN_2026_07_08_LOCAL_STORAGE_AMENDMENT.md`
 
-## Completed foundation
+## Current product
 
-P1.5/B5 remains complete and provides a dependency-free, headless UX foundation over B1a, B3, B4,
-and ingestion contracts:
+The active user-facing product is a local Windows desktop decision center for
+Wildberries reports. It installs from one offline EXE, stores reports locally,
+restores admitted reports after restart, calculates economics only from an
+explicitly confirmed finance profile and has no marketplace-write capability.
 
-- explicit preview-only cost, tax-rate, tax-base, and other-expense inputs;
-- no hidden commercial defaults and no missing-to-zero coercion;
-- B1a-aligned RATE tax-base vocabulary;
-- strict RFC3339 timestamps in executable and machine-readable contracts;
-- canonical lowercase-hyphenated raw-file UUID enforcement;
-- text-first accessible typed-state and numeric-zero presentation;
-- preview-safe Evidence Chain drill-down;
-- deterministic Exception Inbox;
-- fail-closed organization, Actual/Scenario, tenant, duplicate, and forged-input boundaries.
+Main runtime:
 
-Prior verification remains valid for its exact historical head:
+- `quantum.application.desktop_center`;
+- local Finance Center UI;
+- local report admission and immutable managed storage;
+- local financial calculation and exports;
+- fail-closed desktop and Finance Center self-tests.
 
-- merged commit: `8a714e5688f3af5872305f8e1fdbdb4f56ee9d9a`;
-- 64 targeted P1.5 tests passed;
-- Foundation CI and OSS Admission passed;
-- artifact-manifest equality passed;
-- unresolved review threads: 0.
+## Plateau acceptance criteria
 
-## New explicit R3 decisions
+Technical plateau requires all of the following on one immutable exact head:
 
-The July 8 closed pilot must operate on real commercial data. Synthetic fixtures remain required for
-testing but are insufficient for `PILOT_READY`.
+1. zero open P0 software defects;
+2. zero open P1 software defects;
+3. manifest equality for the complete tracked tree;
+4. all mandatory Linux and Windows gates pass;
+5. an independent repeated Red Team run finds no new P0/P1 defect;
+6. the repeated gate run passes without production-code changes;
+7. the offline EXE passes native and installed-runtime checks;
+8. marketplace writes remain disabled.
 
-Real data is `AUTHORIZED_FOR_CLOSED_PILOT_PENDING_ADMISSION_CONTROLS`, not yet automatically
-`ADMITTED`. Every dataset must pass the Real Commercial Data Admission Contract.
+Historical PASS results do not transfer to a later commit.
 
-For the local single-user version:
+## Completed milestones
 
-- full-disk encryption is not required;
-- local application-level encryption at rest is not required;
-- absence of local disk encryption is not a pilot blocker;
-- the runtime must remain loopback-only unless separately approved;
-- encryption remains required for hosted, cloud, shared, removable, exported, and backup storage;
-- TLS remains required for separately approved non-loopback transport.
+### M0 — Baseline and release integrity
 
-Required boundaries:
+- Historical evidence was restricted to its exact commit.
+- Work moved from the long-lived release branch to PR #102.
+- The plateau branch now contains current `main` as a real ancestor.
 
-- invitation or approved-request access only;
-- pseudonymous accounts and minimized personal data;
-- tenant- and account-scoped storage and access;
-- immutable source SHA-256 and Evidence Chain;
-- row-level and aggregate source reconciliation;
-- privacy-safe logging;
-- retention, deletion, withdrawal, and revocation controls;
-- no raw commercial data in GitHub, CI, evidence packages, or external model prompts;
-- read-only marketplace behavior and no marketplace write credentials.
+### M1 — Live runtime integration
 
-## Critical path
+- Removed shadowed queue behavior from the active class path.
+- Bound report persistence, managed-source switching and repeat processing to
+  the runtime used by the desktop UI.
 
-B1b, B2, and B6 remain on the financial critical path. The real-data pilot additionally requires
-quarantine, classification, tenant/account isolation, controlled persistence, reconciliation,
-deletion/retention, and recovery controls. External public access remains unauthorized.
+### M2 — Financial orchestration
 
-`PILOT_READY` requires at least one authorized real dataset to complete admission, ingestion, calculation,
-reconciliation, tenant/account-isolation, and deletion/retention verification with zero open P0/P1 findings.
+- Finance profile schema v2 requires explicit tax rate, tax base, cost and
+  other expenses.
+- Unknown products and physical sales or returns without SKU block calculation.
+- Marketplace service expenses without SKU are retained separately.
+- Tax is calculated once at period level.
+- Zero-activity groups are valid.
 
-## Exclusions
+### M3 — Durable state and privacy
 
-No public registration, unrestricted external access, marketplace writes, production marketplace
-credentials, raw-data disclosure to external models, or production release is included.
+- Report index v2 stores portable Quantum-controlled paths only.
+- External source paths are not accepted as durable report sources.
+- Index writes use staged JSON validation, fsync and bounded replace retry.
+- The financial parser processes the same immutable XLSX bytes that were hashed.
 
-`RELEASE_BLOCKED`
+### M4 — Authority and schema review
+
+- The desktop no longer invents authority or schema attestations.
+- Users explicitly confirm authority and inspect the detected XLSX schema.
+- Declined or failed review prevents queue admission.
+
+### M5 — Trustworthy self-test
+
+- Desktop PASS depends on Finance Center PASS.
+- Known-answer finance, configuration, runtime MRO, persistence round-trip,
+  privacy and schema-review controls are checked fail-closed.
+- Windows path canonicalization covers long-path and 8.3 representations.
+
+### M6 — Build and documentation
+
+- Standard PEP 517 wheel build is enabled.
+- The setuptools backend is version-pinned.
+- Package metadata and entry points identify the real desktop product.
+- Primary documentation no longer describes an obsolete hosted API/worker
+  deployment.
+
+### M7 — Desktop release integration
+
+- Current `main` is a real ancestor of the plateau branch.
+- The release gate verifies desktop self-test, installed runtime, offline EXE,
+  exact source commit, SHA-256 and read-only scope.
+- Installed-copy detection survives partial updates and missing package-only
+  installer files.
+- Legacy `localhost:8000` launch behavior is rejected.
+
+## Final milestone
+
+### M8/M9 — Repeated verification and release dossier
+
+The source tree is frozen as a technical plateau candidate. Final acceptance is
+performed by two complete exact-head Linux/Windows runs without production-code
+changes. The final defect register and Red Team dossier are maintained at:
+
+- `docs/evidence/M9_DEFECT_REGISTER.json`;
+- `docs/evidence/M9_PLATEAU_RED_TEAM_REPORT.md`.
+
+## Real commercial data boundary
+
+Pilot authorization remains
+`AUTHORIZED_FOR_CLOSED_PILOT_PENDING_ADMISSION_CONTROLS`.
+Only data that passes the declared admission controls may be used. Raw real
+commercial data remains prohibited in external model prompts. Local disk
+encryption is not a pilot gate under the recorded local-storage amendment;
+hosted external storage encryption and approved non-loopback TLS remain
+mandatory. Production release and marketplace writes remain blocked.
+
+## External release boundaries
+
+The following are not unresolved software defects:
+
+- Authenticode signing requires an approved code-signing certificate;
+- physical user-pilot evidence requires installation on the target computer;
+- the applicable tax regime and tax base require user or accountant confirmation;
+- merge into `main` requires a separate explicit release decision.
+
+Until those boundaries are satisfied, the status remains `RELEASE_BLOCKED`.

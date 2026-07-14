@@ -1,0 +1,89 @@
+{
+  "base_pilot_integration_r80_overlay_git_blob_sha": "d6d6e7dc8ded91bb3d031a16537713480067522e",
+  "entries": [
+    [
+      "src/quantum/application/_finance_center_import.py",
+      "a2a82711ce7e34ac40f8429bca8a9730d9da81713a672880e2ce00aacb6a948e",
+      5106
+    ],
+    [
+      "src/quantum/application/_finance_center_persistence.py",
+      "e56526ee0feb7eee216260ba4129d6672de7f13a4fec2feeb2b1290cd3b09174",
+      15738
+    ],
+    [
+      "src/quantum/application/_finance_center_queue_runtime.py",
+      "84699d61540ee6f3f08d592e926f92f6780414f051b84dce88ba7e4a4805a140",
+      17756
+    ],
+    [
+      "src/quantum/application/_finance_center_self_test.py",
+      "fb95579b8f7f0ba406735f92ebf37c8319a4d04409a9d35cb53a14e0ce1a0401",
+      8642
+    ],
+    [
+      "src/quantum/application/_finance_center_shared.py",
+      "8274be85290b77a21e0369c8fa53250d3f75a90a7fd732b500737b815fbd7dd7",
+      4011
+    ],
+    [
+      "src/quantum/application/_finance_profile_financial_rows.py",
+      "b4e791247d1881f4c239f63309e5f2820f57eeac66b00fdd6577dc5e3c1b05a5",
+      10978
+    ],
+    [
+      "src/quantum/application/_finance_profile_xlsx.py",
+      "f36a6e6afafcf237935b4b1703e77563833d789843794adb8cddad951d1048dd",
+      6888
+    ],
+    [
+      "src/quantum/application/_finance_schema_review.py",
+      "3783ac85fdb0d24a30b5d201eeeb9ac0949da174940506122e27de077a9259a4",
+      5102
+    ],
+    [
+      "src/quantum/application/_finance_verified_rows.py",
+      "2d6bca1886d655fe03e50732c73e7e3093ed8db2fff1f32bb2c2fb41951408e2",
+      1430
+    ],
+    [
+      "src/quantum/application/desktop_center.py",
+      "4799fb7beb30a879229d4524f35e49b3a164fb8c63520dabd4466c643b94855a",
+      2918
+    ],
+    [
+      "tests/test_finance_center_queue_hotfix.py",
+      "94b90197670aa83cbcfe28101ff068716e1e49a57adfb4cb76d2a239bb3f651c",
+      10442
+    ],
+    [
+      "tests/test_finance_center_report_persistence.py",
+      "2f0982a769d67522275e965afe23f7f7844e1b80e9bad65d6cb9098e6fd2edb1",
+      12180
+    ],
+    [
+      "tests/test_plateau_m3_storage_integrity.py",
+      "b14f0ccf4b8b7d08907b9010ef9ca4cffc8655f8e8c1e94646d67dc175ecfafd",
+      2974
+    ],
+    [
+      "tests/test_plateau_m4_schema_review.py",
+      "5fd4e2f0b84d94ed72650cde7934df7c4b6b664cccf9a7c548dbef578edc467f",
+      5765
+    ],
+    [
+      "tests/test_plateau_m5_self_test.py",
+      "13f6b38d38af9d83c55f2c4ef9a42d86d421d56d5c9119c451dd3737a8870a4f",
+      3695
+    ],
+    [
+      "tests/integration_manifest_support_m8.py",
+      "1aaa1d385ded9c6056934367fd3985638859047f0e3a88c889fe7721152eec4a",
+      1090
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 81,
+  "reason": "Harden durable report index privacy and atomic replacement, reject external paths as durable sources, parse the same XLSX bytes that were hashed, normalize application XLSX failures, require explicit authority and visible schema confirmation before import, remove automatic attestations, and make desktop self-test fail closed with known-answer finance, MRO and persistence round-trip checks.",
+  "remove_paths": []
+}

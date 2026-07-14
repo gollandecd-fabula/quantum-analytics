@@ -1,20 +1,32 @@
 [build-system]
-requires = []
-build-backend = "quantum_build_backend"
+requires = ["setuptools==80.9.0"]
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "quantum-analytics"
-version = "0.0.1"
-description = "Foundation skeleton for Quantum Analytics"
+version = "0.9.0rc1"
+description = "Local read-only Wildberries financial desktop decision center"
+readme = "README.md"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+  "tzdata==2026.2; platform_system == 'Windows'",
+]
 
 [project.scripts]
-quantum-api = "quantum.api.main:main"
-quantum-worker = "quantum.worker.main:main"
+quantum-desktop = "quantum.application.desktop_center:main"
 quantum-ci = "quantum.scripts.ci:main"
+quantum-local-pilot = "quantum.pilot.local_runner:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["quantum*"]
 
 [tool.quantum]
-architecture = "modular-monolith"
-runtime_entry_points = ["api", "worker"]
+architecture = "local-desktop-modular-monolith"
+runtime_entry_points = ["desktop", "local-pilot"]
 marketplace_write_enabled = false
+release_channel = "release-candidate"

@@ -51,6 +51,29 @@ def _validated_return_compensation(
     return amount
 
 
+def _block_negative_money_inputs(
+    values: dict[str, _Value],
+    currency: str,
+) -> None:
+    for metric_id, value in values.items():
+        if (
+            value.state == "VALID"
+            and value.value_type == "MONEY"
+            and value.unit == "MONEY"
+            and value.currency == currency
+            and isinstance(value.value, Decimal)
+            and value.value < 0
+        ):
+            values[metric_id] = _make_nonvalid(
+                "BLOCKED",
+                value_type="MONEY",
+                unit="MONEY",
+                currency=currency,
+                reason_code="NEGATIVE_FINANCIAL_MAGNITUDE:" + metric_id,
+                source_ids=value.source_ids,
+            )
+
+
 def calculate_settlement_tax_profit(
     inputs: Mapping[str, _Value],
     tax_rate_raw: Mapping[str, Any],
@@ -82,6 +105,7 @@ def calculate_settlement_tax_profit(
         )
         for metric_id in ids
     }
+    _block_negative_money_inputs(values, currency)
     return_compensation = _validated_return_compensation(inputs, currency)
     if return_compensation.state != "VALID":
         reason = (
@@ -150,6 +174,33 @@ def calculate_settlement_tax_profit(
             unit="MONEY",
             currency=currency,
             reason_code="TAX_RULE_SIGNATURE_MISMATCH",
+            source_ids=rate.source_ids + base.source_ids,
+        )
+    elif (
+        rate.state == "VALID"
+        and isinstance(rate.value, Decimal)
+        and (rate.value < 0 or rate.value > 1)
+    ):
+        tax = _make_nonvalid(
+            "BLOCKED",
+            value_type="MONEY",
+            unit="MONEY",
+            currency=currency,
+            reason_code="TAX_RATE_OUT_OF_RANGE",
+            source_ids=rate.source_ids,
+        )
+    elif (
+        rate.state == "VALID"
+        and base.state == "VALID"
+        and isinstance(base.value, Decimal)
+        and base.value < 0
+    ):
+        tax = _make_nonvalid(
+            "BLOCKED",
+            value_type="MONEY",
+            unit="MONEY",
+            currency=currency,
+            reason_code="TAX_BASE_NEGATIVE_POLICY_REQUIRED",
             source_ids=rate.source_ids + base.source_ids,
         )
     else:

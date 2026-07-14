@@ -1,0 +1,77 @@
+{
+  "configuration_status": "REQUIRES_USER_VALUES",
+  "tenant_id": "tenant-home-local",
+  "account_id": "operator-home-local",
+  "verifier_account_id": "verifier-home-local",
+  "source_internal_id": "replace-with-local-source-id",
+  "release_scope": "WB_ONLY",
+  "marketplace": "WILDBERRIES",
+  "deferred_marketplaces": [
+    "OZON"
+  ],
+  "report_type": "SALES_REPORT",
+  "reporting_period_start": "2026-01-01",
+  "reporting_period_end": "2026-01-31",
+  "timezone": "Europe/Moscow",
+  "expected_row_count": 1,
+  "control_totals_sha256": null,
+  "data_categories": [
+    "FINANCIAL",
+    "SALES"
+  ],
+  "owner_authority_reference": "HOME-LOCAL-OWNER-REVIEW",
+  "lawful_authority_attested": false,
+  "retention_deadline": "2026-12-31T00:00:00Z",
+  "malware_scan_evidence_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "attestations": {
+    "source_authority_verified": false,
+    "report_period_verified": false,
+    "control_totals_verified": false,
+    "direct_identifiers_absent_or_approved": false,
+    "malware_scan_clean": false
+  },
+  "inspection_policy": {
+    "policy_id": "wb-home-local-discovery",
+    "version": 1,
+    "limits": {
+      "max_file_bytes": 104857600,
+      "max_archive_entries": 10000,
+      "max_total_uncompressed_bytes": 536870912,
+      "max_entry_uncompressed_bytes": 134217728,
+      "max_compression_ratio": 100,
+      "max_xml_bytes": 134217728,
+      "max_rows": 1000000,
+      "max_columns": 500
+    },
+    "schemas": [
+      {
+        "schema_id": "WB_REPORT_TEMPLATE",
+        "schema_version": "1",
+        "schema_authority_reference": "HOME_LOCAL_OPERATOR_REVIEW",
+        "direct_identifiers_expected": false,
+        "package_kind": "XLSX",
+        "sheet_name": "DISCOVERY_REQUIRED",
+        "sheet_count": 1,
+        "header_row_index": 1,
+        "header_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+        "column_count": 1,
+        "min_data_rows": 0,
+        "max_data_rows": 1000000,
+        "max_formula_count": 0
+      }
+    ],
+    "prohibited_header_tokens": [
+      "phone",
+      "email",
+      "address",
+      "passport",
+      "телефон",
+      "адрес",
+      "паспорт",
+      "фио"
+    ]
+  },
+  "finance_request": null,
+  "reconciliation": null,
+  "execution_mode": "ADMISSION_ONLY"
+}

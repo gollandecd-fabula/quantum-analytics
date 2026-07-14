@@ -117,7 +117,7 @@ LOCAL_OVERLAY = (
 )
 FINAL_NAMES = tuple(
     f"ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R{n}.json"
-    for n in range(1, 20)
+    for n in range(1, 53)
 )
 FINAL_OVERLAY_R1 = FINAL_NAMES[0]
 FINAL_OVERLAYS = _linear(
