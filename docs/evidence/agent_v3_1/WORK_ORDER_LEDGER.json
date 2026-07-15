@@ -1,10 +1,10 @@
 {
   "branch": "fix/quantum-one-click-stable-release",
-  "current_head_before_ledger_commit": "f2b56e7b222cbb90c59835b271d080bfa599bb3c",
-  "exact_head_before_change": "69ff1888fda7e0f1fe25e3b8f73da652c645aaa3",
-  "generated_at_utc": "2026-07-15T13:42:43.532256+00:00",
+  "current_head_before_ledger_update": "b0997f418de4c0b9c2c7956982008872e7009a68",
+  "exact_head_before_m0_changes": "69ff1888fda7e0f1fe25e3b8f73da652c645aaa3",
+  "generated_at_utc": "2026-07-15T13:56:00Z",
   "repository": "gollandecd-fabula/quantum-analytics",
-  "schema_version": "1.0.0",
+  "schema_version": "1.1.0",
   "work_orders": [
     {
       "active_milestone": "M0",
@@ -25,20 +25,24 @@
           "blob_sha": "a43d8310d0b09bd542477eb12c05ff8da7d9b3d1",
           "commit_sha": "0aaaa4588715067b40c8cc8cd984578bf00fe20f",
           "path": "docs/evidence/agent_v3_1/PROTOCOL_CONFLICT_REGISTER.json",
-          "validation": "FETCHED"
+          "validation": "FETCHED_SUPERSEDED_BY_WO-M0-003"
         },
         {
           "blob_sha": "b43f8ce4f49e63dfe43ff3415429e1409092d564",
           "commit_sha": "f2b56e7b222cbb90c59835b271d080bfa599bb3c",
           "path": "docs/evidence/agent_v3_1/AUTONOMOUS_EXECUTION_STATE.json",
-          "validation": "FETCHED"
+          "validation": "FETCHED_SUPERSEDED_BY_WO-M0-003"
+        },
+        {
+          "blob_sha": "ac36746b8292f7da0392d5a231503293ed946289",
+          "commit_sha": "117666570595c4f5ede62e128679f40c78a97fed",
+          "path": "docs/evidence/agent_v3_1/WORK_ORDER_LEDGER.json",
+          "validation": "FETCHED_SUPERSEDED_BY_CURRENT_LEDGER_UPDATE"
         }
       ],
       "actual_evidence_level": "L0",
       "assigned_role": "CONTROL_PLANE",
-      "change_boundary": "Create only the mandatory pre-change control artifacts. No production, test, workflow, existing evidence, or main-branch modification.",
-      "defect_id": "M0-D001",
-      "expected_result": "All structural checks pass; M0 remains incomplete and release remains blocked.",
+      "change_boundary": "Create only mandatory M0 pre-change control artifacts; no product, test, workflow, M9 or main modification.",
       "files_allowed_to_change": [
         "docs/evidence/agent_v3_1/REQUIREMENTS_TRACEABILITY_MATRIX.json",
         "docs/evidence/agent_v3_1/CURRENT_ARCHITECTURE_INVENTORY.json",
@@ -47,52 +51,65 @@
         "docs/evidence/agent_v3_1/AUTONOMOUS_EXECUTION_STATE.json",
         "docs/evidence/agent_v3_1/WORK_ORDER_LEDGER.json"
       ],
-      "files_forbidden_to_change": [
-        "src/**",
-        "tests/**",
-        ".github/workflows/**",
-        "tools/**",
-        "docs/evidence/M9_MAXIMUM_ASSURANCE_CONTROL_PLANE.json",
-        "main"
-      ],
-      "hypothesis": "A complete fail-closed pre-change registry can be added without modifying product behavior or duplicating the M9 control plane.",
-      "next_test": "Parse all six JSON files; validate required fields, 325 literal requirement entries, status-count reconciliation, exact-head binding, allowed-path-only diff, and absence of positive release claims.",
+      "files_forbidden_to_change": ["src/**", "tests/**", ".github/workflows/**", "tools/**", "docs/evidence/M9_MAXIMUM_ASSURANCE_CONTROL_PLANE.json", "main"],
       "pending_artifacts": [
         {
           "path": "docs/evidence/agent_v3_1/REQUIREMENTS_TRACEABILITY_MATRIX.json",
-          "reason": "GitHub connector create-file transport requires full inline content; the validated artifact is retained without substituting a summary or placeholder.",
           "requirement_count": 325,
           "sha256": "d84ae4c8fdf4a861b98b45761ff8820bfdc9e7869e698e7d0a3a22c14b042a36",
           "size_bytes": 417049,
-          "status": "GENERATED_AND_VALIDATED_PENDING_GITHUB_COMMIT"
-        },
-        {
-          "path": "docs/evidence/agent_v3_1/WORK_ORDER_LEDGER.json",
-          "status": "CURRENT_COMMIT"
+          "status": "MASTER_PROMPT_LAYER_GENERATED_PENDING_CANONICAL_COMBINATION"
         }
       ],
       "release_decision": "RELEASE_BLOCKED",
-      "requirement_ids": [
-        "REQ-MP2-0026",
-        "REQ-MP2-0027",
-        "REQ-MP2-0028",
-        "REQ-MP2-0029",
-        "REQ-MP2-0133",
-        "REQ-MP2-0134",
-        "REQ-MP2-0135",
-        "REQ-MP2-0136",
-        "REQ-MP2-0137",
-        "REQ-MP2-0138",
-        "REQ-MP2-0139",
-        "REQ-MP2-0140"
-      ],
       "result": "PARTIAL",
-      "rollback_command": "Revert only the commit created for WO-M0-001; no reset --hard and no force push.",
-      "rollback_condition": "Any invalid JSON, missing original_text, count mismatch, path-scope violation, or accidental positive claim.",
+      "rollback_condition": "Invalid JSON, source-text loss, count mismatch, path-scope violation or positive release claim.",
+      "rollback_command": "Revert only commits created for WO-M0-001; no reset --hard and no force push.",
       "status": "IN_PROGRESS",
       "target_evidence_level": "L0",
       "work_order_id": "WO-M0-001",
       "work_order_sha256": "6cad500f821e635c4cfbe1cc52e17eb4c78ae348fc9efc916375b261db179422"
+    },
+    {
+      "active_milestone": "M0",
+      "actual_commits": [
+        {
+          "blob_sha": "5c0074fb51f8200cb710fb604775047bda70e853",
+          "commit_sha": "d9f80984c7d6c131ce25c492d25e60f5dabce0f2",
+          "path": "docs/evidence/agent_v3_1/PROTOCOL_SOURCE_DISCOVERY.json",
+          "validation": "FETCHED"
+        },
+        {
+          "blob_sha": "bbb66091ad2a3df3f086a3335c8715fd726ca495",
+          "commit_sha": "eb28b6d4b3a3f584d85ea2f3463f659d5e45486f",
+          "path": "docs/evidence/agent_v3_1/PROTOCOL_CONFLICT_REGISTER.json",
+          "validation": "FETCHED"
+        },
+        {
+          "blob_sha": "ef527683d4317a13a4a9638c99bca3fd9bd2b5fe",
+          "commit_sha": "b0997f418de4c0b9c2c7956982008872e7009a68",
+          "path": "docs/evidence/agent_v3_1/AUTONOMOUS_EXECUTION_STATE.json",
+          "validation": "FETCHED"
+        }
+      ],
+      "actual_evidence_level": "L0",
+      "assigned_role": "CONTROL_PLANE",
+      "change_boundary": "Record File Library Protocol/UI source discoveries and refine blockers only; no product or control-plane implementation.",
+      "files_allowed_to_change": [
+        "docs/evidence/agent_v3_1/PROTOCOL_SOURCE_DISCOVERY.json",
+        "docs/evidence/agent_v3_1/PROTOCOL_CONFLICT_REGISTER.json",
+        "docs/evidence/agent_v3_1/AUTONOMOUS_EXECUTION_STATE.json",
+        "docs/evidence/agent_v3_1/WORK_ORDER_LEDGER.json"
+      ],
+      "files_forbidden_to_change": ["src/**", "tests/**", "tools/**", ".github/workflows/**", "docs/evidence/M9_MAXIMUM_ASSURANCE_CONTROL_PLANE.json", "main"],
+      "next_test": "Fetch all changed JSON files, verify exact source IDs/timestamps, separate prior hash attestation from current recomputation, retain UI technical metadata blockers and reject positive release claims.",
+      "release_decision": "RELEASE_BLOCKED",
+      "result": "PARTIAL",
+      "rollback_condition": "Any statement that raw Protocol/UI bytes or hashes were verified in the current session when they were not.",
+      "rollback_command": "Revert only commits created for WO-M0-003; no reset --hard and no force push.",
+      "status": "IN_PROGRESS",
+      "target_evidence_level": "L0",
+      "work_order_id": "WO-M0-003"
     }
   ]
 }
