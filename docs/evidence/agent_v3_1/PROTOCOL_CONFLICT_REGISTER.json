@@ -3,20 +3,23 @@
   "conflicts": [
     {
       "conflict_id": "PCON-001",
-      "decision": "FAIL_CLOSED_CONTINUE_INDEPENDENT_WORK",
-      "observed": "The exact Protocol v3.1 document reference was found in File Library and a prior postchange registry attests SHA-256 be69b8f1f919066c67086d6dd4678acf5e3cb3c4f1db9bc587dc540018601a90, but the raw DOCX bytes are not mounted in the current execution environment and the hash has not been recomputed in this session.",
-      "requirement": "Literal ingestion and byte-level SHA-256 binding of Quantum Maximum-Assurance Protocol v3.1 UI Reference Lock.",
-      "resolution_required": "Mount or upload the exact File Library DOCX bytes, recompute SHA-256, compare to the frozen value, and only then permit canonical protocol binding.",
+      "decision": "SOURCE_FREEZE_ESTABLISHED_NO_IMPLEMENTATION_CLAIM",
+      "evidence": [
+        "PROTOCOL_SOURCE_DISCOVERY.json"
+      ],
+      "observed": "The user uploaded the raw DOCX. Current-session SHA-256 recomputation equals be69b8f1f919066c67086d6dd4678acf5e3cb3c4f1db9bc587dc540018601a90; DOCX ZIP integrity and 15-page render audit were recorded.",
+      "remaining_boundary": "The current M9 production control plane still does not ingest Protocol v3.1 at L2.",
+      "requirement": "Literal ingestion must bind the exact Protocol v3.1 bytes and SHA-256.",
       "severity": "P0",
-      "status": "PARTIAL",
-      "type": "SOURCE_FOUND_HASH_NOT_RECOMPUTED"
+      "status": "RESOLVED_L0",
+      "type": "PROTOCOL_SOURCE_BYTE_IDENTITY"
     },
     {
       "conflict_id": "PCON-002",
-      "decision": "FAIL_CLOSED_CONTINUE_L0_L3_WORK",
-      "observed": "Current work is restricted to GitHub connector access; no interactive installed Windows user session is available.",
+      "decision": "FAIL_CLOSED_CONTINUE_INDEPENDENT_L0_L3_WORK",
+      "observed": "No interactive installed Windows session or physical user-path worker is available in the current GitHub-only execution path.",
       "requirement": "User-visible P0 and UI Reference Lock require interactive Windows L5 physical-user-path evidence.",
-      "resolution_required": "Execute the future Windows L4/L5 worker in an interactive user session on the frozen exact artifact.",
+      "resolution_required": "Execute the future Windows L4/L5 worker on the frozen exact artifact through the installed LNK and preserve actual process/evidence.",
       "severity": "P0",
       "status": "BLOCKED",
       "type": "ENVIRONMENT_CAPABILITY"
@@ -24,32 +27,39 @@
     {
       "conflict_id": "PCON-003",
       "decision": "NO_NEW_DUPLICATE_COMPONENTS",
-      "observed": "The GitHub connector exposes PR changed files and individual file fetches but no recursive tree listing; sandbox cloning failed due DNS restrictions.",
-      "requirement": "Inventory every existing agent/orchestrator/control-plane/release-gate/workflow/evidence component before creating a new equivalent.",
-      "resolution_required": "Obtain a recursive exact-head repository tree through an available GitHub API path before adding new orchestrator/specialist files.",
+      "observed": "The connector supports changed-file lists and individual file/tree writes but exposes no recursive tree reader; complete exact-head inventory has not been independently demonstrated.",
+      "requirement": "Inventory every existing agent/orchestrator/control-plane/release-gate/workflow/evidence component before creating an equivalent.",
+      "resolution_required": "Obtain and validate a recursive exact-head repository tree before adding any new orchestrator or specialist runtime.",
       "severity": "P1",
       "status": "BLOCKED",
       "type": "INVENTORY_COMPLETENESS"
     },
     {
       "conflict_id": "PCON-004",
-      "decision": "NO_UI_CHANGE_UNTIL_REFERENCE_FREEZE",
-      "observed": "The exact UI reference PNG identity and approval timestamp were found, but raw bytes, byte size, SHA-256, resolution and color profile are unavailable in the current execution environment.",
-      "requirement": "Create UI_REFERENCE_MANIFEST.json with the frozen byte identity before any UI modification.",
-      "resolution_required": "Mount or upload the exact PNG bytes and compute the mandatory technical metadata. Do not substitute a description or regenerated image.",
+      "decision": "UI_SPEC_FROZEN_NO_UI_IMPLEMENTATION_CLAIM",
+      "evidence": [
+        "UI_REFERENCE_MANIFEST.json"
+      ],
+      "observed": "Raw PNG bytes were uploaded and frozen: 2,525,544 bytes, SHA-256 2482074aea312b065b4094792c5676445514dd555d50a064a5ae3e189dc60d13, 1024x1536 RGBA, no embedded ICC or DPI metadata.",
+      "remaining_boundary": "Installed visual conformity and L5 physical review remain unverified.",
+      "requirement": "Create UI_REFERENCE_MANIFEST.json from the exact approved PNG before any UI modification.",
       "severity": "P0",
-      "status": "BLOCKED",
+      "status": "RESOLVED_L0",
       "type": "UI_REFERENCE_TECHNICAL_FREEZE"
     },
     {
       "conflict_id": "PCON-005",
-      "decision": "NO_PRODUCTION_CHANGE_UNTIL_FULL_REGISTRY",
-      "observed": "The prior protocol registry contains 387 requirements but lacks fields mandated by Master Prompt v2.0; the local master-prompt RTM contains 325 rows but does not replace the higher-priority protocol registry. A canonical combined GitHub RTM has not been built.",
-      "requirement": "Before implementation changes, create a complete registry preserving both source layers and every mandatory field.",
-      "resolution_required": "Build and commit the canonical full Requirements Traceability Matrix with source-level provenance, dependencies, roles, tests, negative controls, mutations, evidence targets, artifacts, PASS criteria and actual statuses.",
+      "decision": "CANONICAL_REGISTRY_MATERIALIZED_L0",
+      "evidence": [
+        "REQUIREMENTS_TRACEABILITY_MATRIX.json",
+        "rtm/REQUIREMENTS_TRACEABILITY_MATRIX.part-001.json through part-012.json"
+      ],
+      "observed": "Canonical index plus 12 immutable shards materializes 712 unique requirements: Protocol 387 and Master Prompt 325, each with 19 required fields and bound source/shard hashes.",
+      "remaining_boundary": "The deterministic controller has not ingested or enforced this registry at L2 runtime.",
+      "requirement": "Before implementation changes, preserve both source layers and every mandatory RTM field.",
       "severity": "P0",
-      "status": "BLOCKED",
-      "type": "PRECHANGE_REGISTRY_INCOMPLETE"
+      "status": "RESOLVED_L0",
+      "type": "PRECHANGE_REGISTRY_MATERIALIZATION"
     }
   ],
   "current_decision": [
@@ -58,8 +68,20 @@
     "MILESTONE_NOT_COMPLETE",
     "RELEASE_BLOCKED"
   ],
-  "generated_at_utc": "2026-07-15T13:52:00Z",
+  "generated_at_utc": "2026-07-15T15:05:48.410605+00:00",
+  "maximum_evidence_level": "L0_STATIC",
+  "open_conflicts": [
+    "PCON-002",
+    "PCON-003"
+  ],
+  "release_authorized": false,
   "repository": "gollandecd-fabula/quantum-analytics",
-  "schema_version": "1.1.0",
-  "work_order_id": "WO-M0-003"
+  "resolved_conflicts": [
+    "PCON-001",
+    "PCON-004",
+    "PCON-005"
+  ],
+  "schema_version": "1.2.0",
+  "subject_exact_head": "40a84fc3e78639fb6d977bd9f3e7c229ab2fe91a",
+  "work_order_id": "WO-M0-006"
 }
