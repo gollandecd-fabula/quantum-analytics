@@ -1,0 +1,265 @@
+{
+  "actual_status": "PARTIAL",
+  "base_head": "840fc90c8257ee373c81bb84f0c983e0f6c44c3b",
+  "blockers": [
+    "BLK-FULL-TREE-INVENTORY-CONSTRAINED",
+    "BLK-PROTOCOL-V3_1-SOURCE-MISSING",
+    "BLK-NO-INTERACTIVE-WINDOWS-L4_L5-SESSION"
+  ],
+  "branch": "fix/quantum-one-click-stable-release",
+  "branch_divergence": {
+    "ahead_by": 724,
+    "behind_by": 23,
+    "status": "diverged"
+  },
+  "components": [
+    {
+      "component_id": "CMP-001",
+      "current_evidence_level": "L0_CURRENT_HEAD; L2_HISTORICAL_WORKFLOW",
+      "gaps": [
+        "protocol_version hardcoded to 3.0",
+        "three synthetic RTM requirements",
+        "no Protocol v3.1 source/hash ingestion",
+        "no deterministic requirement scheduler",
+        "no work-order locks",
+        "no role permission policy",
+        "no UI reference gate",
+        "no RUN A/RUN B manifests"
+      ],
+      "name": "M9 maximum-assurance control plane and deterministic gate",
+      "owner": "CONTROL_PLANE",
+      "paths": ["tools/m9_maximum_assurance_control_plane.py"],
+      "reuse_decision": "EXTEND",
+      "runtime_status": "EXISTS_SOURCE",
+      "target_components": ["Deterministic Protocol Controller", "Deterministic Release Gate"]
+    },
+    {
+      "component_id": "CMP-002",
+      "current_evidence_level": "L0_CURRENT_HEAD; L2_HISTORICAL_WORKFLOW",
+      "gaps": [
+        "only six unit tests",
+        "only five negative controls",
+        "no protocol-hash swap",
+        "no forged VERIFIED/L5",
+        "no role escalation",
+        "no protected-path mutation",
+        "no UI reference mutation"
+      ],
+      "name": "M9 unit and negative-control suite",
+      "owner": "VERIFIER",
+      "paths": ["tests/test_m9_maximum_assurance_control_plane.py"],
+      "reuse_decision": "EXTEND",
+      "runtime_status": "EXISTS_SOURCE",
+      "target_components": ["Verifier", "Deterministic Release Gate"]
+    },
+    {
+      "component_id": "CMP-003",
+      "current_evidence_level": "L0_CURRENT_HEAD; L2_HISTORICAL_WORKFLOW",
+      "gaps": [
+        "CI is not an interactive Windows L4/L5 session",
+        "no manager-specialist tool runtime",
+        "no immutable verifier checkout boundary",
+        "no independent adversary environment"
+      ],
+      "name": "M9 Linux/Windows source-runtime workflow",
+      "owner": "CONTROL_PLANE",
+      "paths": [".github/workflows/m9-maximum-assurance-control-plane.yml"],
+      "reuse_decision": "EXTEND",
+      "runtime_status": "EXISTS_CI",
+      "target_components": ["Deterministic Execution Layer"]
+    },
+    {
+      "component_id": "CMP-004",
+      "current_evidence_level": "L0",
+      "gaps": [
+        "Protocol 3.0 only",
+        "references earlier heads",
+        "16-artifact set instead of v3.1 set",
+        "PASS_WITH_LIMITATIONS vocabulary is not the final v3.1 fail-closed status model"
+      ],
+      "name": "Persisted M9 evidence summary",
+      "owner": "CONTROL_PLANE",
+      "paths": ["docs/evidence/M9_MAXIMUM_ASSURANCE_CONTROL_PLANE.json"],
+      "reuse_decision": "MIGRATE",
+      "runtime_status": "EXISTS_STALE_SNAPSHOT",
+      "target_components": ["Evidence ingestion"]
+    },
+    {
+      "component_id": "CMP-005",
+      "current_evidence_level": "L0_CURRENT_HEAD; L2_HISTORICAL_PR_CLAIM",
+      "gaps": ["not yet bound to Protocol v3.1 literal RTM and immutable work orders"],
+      "name": "Baseline/security/clean-environment tooling",
+      "owner": "VERIFIER",
+      "paths": [
+        "tools/m1_baseline_audit.py",
+        "tools/m7_security_performance_one_click.py",
+        "tools/m8_clean_environment_reproduction.py",
+        ".github/workflows/m1-baseline-audit.yml",
+        ".github/workflows/m7-security-performance-one-click.yml",
+        ".github/workflows/m8-clean-environment-reproduction.yml"
+      ],
+      "reuse_decision": "REUSE_AND_BIND",
+      "runtime_status": "DISCOVERED_IN_PR_DIFF",
+      "target_components": ["Verifier", "Adversary", "Deterministic Execution Layer"]
+    },
+    {
+      "component_id": "CMP-006",
+      "current_evidence_level": "L0_CURRENT_HEAD; L2_HISTORICAL_PR_CLAIM",
+      "gaps": [
+        "not an isolated specialist runtime",
+        "no context-isolation contract",
+        "no signed WORK_ORDER",
+        "no immutable evidence boundary"
+      ],
+      "name": "Native Red Team tooling",
+      "owner": "ADVERSARY",
+      "paths": [
+        "scripts/ci/native_one_button_r37.ps1",
+        ".github/workflows/build-one-button-redteam-r3.yml",
+        "tests/test_m0_attestation_redteam.py",
+        "tests/test_windows_redteam_hardening.py"
+      ],
+      "reuse_decision": "EXTEND",
+      "runtime_status": "DISCOVERED_IN_PR_DIFF",
+      "target_components": ["Adversary"]
+    },
+    {
+      "component_id": "CMP-007",
+      "current_evidence_level": "L0_CURRENT_HEAD; L2_CI_ONLY",
+      "gaps": [
+        "no demonstrated interactive installed L4/L5 worker",
+        "CI/direct scripts do not establish physical user path",
+        "no same-artifact RUN A/RUN B"
+      ],
+      "name": "Windows packaging/install/launcher paths",
+      "owner": "L4_L5_WORKER",
+      "paths": [
+        "scripts/windows/build_exe_installer.ps1",
+        "scripts/windows/build_local_production.ps1",
+        "scripts/windows/build_two_installer_bundles.ps1",
+        "scripts/windows/install_home_local.ps1",
+        "scripts/windows/one_click_home_local.ps1",
+        ".github/workflows/windows-local-production.yml",
+        ".github/workflows/windows-source-package-launchers-r1.yml"
+      ],
+      "reuse_decision": "EXTEND",
+      "runtime_status": "DISCOVERED_IN_PR_DIFF",
+      "target_components": ["Windows L4/L5 Worker", "Deterministic Execution Layer"]
+    },
+    {
+      "component_id": "CMP-008",
+      "current_evidence_level": "L0_CURRENT_HEAD; L2_HISTORICAL_PR_CLAIM",
+      "gaps": ["not yet traced against the full v3.1 RTM", "UI user path remains below L5"],
+      "name": "Financial oracle and finance-center implementation",
+      "owner": "IMPLEMENTER",
+      "paths": [
+        "src/quantum/finance/oracle.py",
+        "src/quantum/finance/_calculation_core.py",
+        "src/quantum/application/finance_center.py",
+        "tests/test_m4_financial_data_correctness.py"
+      ],
+      "reuse_decision": "REUSE_AND_REVERIFY",
+      "runtime_status": "DISCOVERED_IN_PR_DIFF",
+      "target_components": ["Product implementation under Implementer"]
+    },
+    {
+      "component_id": "CMP-009",
+      "current_evidence_level": "L0_CURRENT_HEAD; L2_HISTORICAL_PR_CLAIM",
+      "gaps": [
+        "not yet traced against literal v3.1 requirements",
+        "marketplace write-disable policy not yet protected-path bound"
+      ],
+      "name": "Marketplace-neutral adapters and recommendation engine",
+      "owner": "IMPLEMENTER",
+      "paths": [
+        "src/quantum/adapters/contracts.py",
+        "src/quantum/adapters/registry.py",
+        "src/quantum/adapters/wildberries/adapter.py",
+        "src/quantum/adapters/ozon/adapter.py",
+        "src/quantum/recommendations/engine.py"
+      ],
+      "reuse_decision": "REUSE_AND_REVERIFY",
+      "runtime_status": "DISCOVERED_IN_PR_DIFF",
+      "target_components": ["Product implementation under Implementer"]
+    },
+    {
+      "component_id": "CMP-010",
+      "current_evidence_level": "L0_CURRENT_HEAD; L2_HISTORICAL_PR_CLAIM",
+      "gaps": [
+        "UI_REFERENCE_MANIFEST.json not found",
+        "UI_DESIGN_TOKENS.json not found",
+        "no L5 screenshot matrix evidence",
+        "main shortcut behavior not physically verified"
+      ],
+      "name": "Decision-center and dashboard UI",
+      "owner": "IMPLEMENTER",
+      "paths": [
+        "src/quantum/application/desktop_center.py",
+        "src/quantum/application/local_app.py",
+        "src/quantum/outputs/dashboard.py",
+        "src/quantum/outputs/dashboard_style.py",
+        "tests/test_m5_color_ui_graph_quality.py"
+      ],
+      "reuse_decision": "REUSE_AND_REVERIFY",
+      "runtime_status": "DISCOVERED_IN_PR_DIFF",
+      "target_components": ["Product implementation under Implementer", "Windows L4/L5 Worker"]
+    },
+    {
+      "component_id": "CMP-011",
+      "current_evidence_level": "L0_SEARCH_ONLY",
+      "gaps": ["no concrete path discovered", "absence not proven because recursive tree listing/local clone unavailable"],
+      "name": "Release Orchestrator runtime",
+      "owner": "CONTROL_PLANE",
+      "paths": [],
+      "reuse_decision": "BLOCKED_PENDING_COMPLETE_TREE_INVENTORY",
+      "runtime_status": "NOT_FOUND_IN_AVAILABLE_INDEX",
+      "target_components": ["Release Orchestrator"]
+    },
+    {
+      "component_id": "CMP-012",
+      "current_evidence_level": "L0_SEARCH_ONLY",
+      "gaps": ["no signed work-order specialist process discovered", "absence not proven"],
+      "name": "Implementer specialist runtime",
+      "owner": "CONTROL_PLANE",
+      "paths": [],
+      "reuse_decision": "BLOCKED_PENDING_COMPLETE_TREE_INVENTORY",
+      "runtime_status": "NOT_FOUND_IN_AVAILABLE_INDEX",
+      "target_components": ["Implementer"]
+    },
+    {
+      "component_id": "CMP-013",
+      "current_evidence_level": "L0_SEARCH_ONLY",
+      "gaps": ["tests/workflows exist but no independent immutable-checkout specialist runtime discovered"],
+      "name": "Verifier specialist runtime",
+      "owner": "CONTROL_PLANE",
+      "paths": [],
+      "reuse_decision": "BLOCKED_PENDING_COMPLETE_TREE_INVENTORY",
+      "runtime_status": "NOT_FOUND_IN_AVAILABLE_INDEX",
+      "target_components": ["Verifier"]
+    },
+    {
+      "component_id": "CMP-014",
+      "current_evidence_level": "L0",
+      "gaps": ["no isolated specialist process with schema-valid output and context isolation"],
+      "name": "Adversary specialist runtime",
+      "owner": "CONTROL_PLANE",
+      "paths": [],
+      "reuse_decision": "EXTEND_EXISTING_REDTEAM_TOOLING",
+      "runtime_status": "PARTIAL_TOOLING_ONLY",
+      "target_components": ["Adversary"]
+    }
+  ],
+  "current_decision": [
+    "FAIL-CLOSED",
+    "PROTOCOL_IMPLEMENTATION_INCOMPLETE",
+    "MILESTONE_NOT_COMPLETE",
+    "RELEASE_BLOCKED"
+  ],
+  "duplicate_creation_policy": "No new orchestrator, RTM, release gate, or specialist runtime may be created until equivalent-path absence is proven through a complete repository-tree inventory.",
+  "exact_head": "69ff1888fda7e0f1fe25e3b8f73da652c645aaa3",
+  "generated_at_utc": "2026-07-15T13:32:28.425892+00:00",
+  "inventory_scope": "Available GitHub connector evidence for PR #85 plus targeted file fetches. Recursive repository tree completeness is not proven.",
+  "merge_base": "2954475609883dce0953a08ce60c11ba517058cf",
+  "repository": "gollandecd-fabula/quantum-analytics",
+  "schema_version": "1.0.0"
+}
