@@ -8,11 +8,13 @@ on:
       - "src/quantum/finance/**"
       - "scripts/windows/**"
       - "scripts/ci/l4_installed_runtime.ps1"
+      - "scripts/ci/l4_installed_runtime_postcheck.ps1"
       - "tests/test_l4_installed_runtime_contract.py"
+      - "tests/test_l4_installed_runtime_postcheck_contract.py"
       - "requirements/windows-home-local.txt"
       - "config/home-local.template.json"
       - "tests/integration_manifest_support_m8.py"
-      - "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R88.json"
+      - "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R89.json"
       - ".github/workflows/l4-installed-runtime.yml"
 
 permissions:
@@ -51,6 +53,25 @@ jobs:
             throw
           }
 
+      - name: Run independent L4 evidence postcheck
+        shell: pwsh
+        env:
+          TARGET_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          try {
+            & .\scripts\ci\l4_installed_runtime_postcheck.ps1 2>&1 |
+              Tee-Object -FilePath l4-installed-runtime-postcheck.log
+            $postcheckExitCode = $LASTEXITCODE
+            if ($postcheckExitCode -ne 0) {
+              throw "L4 independent postcheck failed with exit code $postcheckExitCode"
+            }
+          }
+          catch {
+            $_ | Out-String |
+              Tee-Object -FilePath l4-installed-runtime-postcheck.log -Append
+            throw
+          }
+
       - name: Upload L4 evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
@@ -59,5 +80,6 @@ jobs:
           path: |
             artifacts/l4-installed-runtime/**
             l4-installed-runtime.log
+            l4-installed-runtime-postcheck.log
           if-no-files-found: error
           retention-days: 14
