@@ -1,0 +1,45 @@
+{
+  "branch": "fix/quantum-one-click-stable-release",
+  "conflicts": [
+    {
+      "conflict_id": "PCON-001",
+      "decision": "FAIL_CLOSED_CONTINUE_INDEPENDENT_WORK",
+      "observed": "The uploaded master prompt declares SHA-256 but the separate Protocol v3.1 source file was not found through GitHub search, PR file inventory, or commit search.",
+      "requirement": "Literal ingestion and SHA-256 binding of Quantum Maximum-Assurance Protocol v3.1 UI Reference Lock.",
+      "resolution_required": "Add or identify the exact Protocol v3.1 source file whose bytes hash to the declared SHA-256. Do not substitute the master prompt for that protocol.",
+      "severity": "P0",
+      "status": "BLOCKED",
+      "type": "SOURCE_OF_TRUTH_UNAVAILABLE"
+    },
+    {
+      "conflict_id": "PCON-002",
+      "decision": "FAIL_CLOSED_CONTINUE_L0_L3_WORK",
+      "observed": "Current work is restricted to GitHub connector access; no interactive installed Windows user session is available.",
+      "requirement": "User-visible P0 and UI Reference Lock require interactive Windows L5 physical-user-path evidence.",
+      "resolution_required": "Execute the future Windows L4/L5 worker in an interactive user session on the frozen exact artifact.",
+      "severity": "P0",
+      "status": "BLOCKED",
+      "type": "ENVIRONMENT_CAPABILITY"
+    },
+    {
+      "conflict_id": "PCON-003",
+      "decision": "NO_NEW_DUPLICATE_COMPONENTS",
+      "observed": "The GitHub connector exposes PR changed files and individual file fetches but no recursive tree listing; sandbox cloning failed due DNS restrictions.",
+      "requirement": "Inventory every existing agent/orchestrator/control-plane/release-gate/workflow/evidence component before creating a new equivalent.",
+      "resolution_required": "Obtain a recursive exact-head repository tree through an available GitHub API path before adding new orchestrator/specialist files.",
+      "severity": "P1",
+      "status": "BLOCKED",
+      "type": "INVENTORY_COMPLETENESS"
+    }
+  ],
+  "current_decision": [
+    "FAIL-CLOSED",
+    "PROTOCOL_IMPLEMENTATION_INCOMPLETE",
+    "MILESTONE_NOT_COMPLETE",
+    "RELEASE_BLOCKED"
+  ],
+  "exact_head": "69ff1888fda7e0f1fe25e3b8f73da652c645aaa3",
+  "generated_at_utc": "2026-07-15T13:32:28.425892+00:00",
+  "repository": "gollandecd-fabula/quantum-analytics",
+  "schema_version": "1.0.0"
+}
