@@ -6,7 +6,7 @@ from tests import integration_manifest_support_m7 as _base
 _core = _base._base._base
 FINAL_NAMES = tuple(
     f"ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R{number}.json"
-    for number in range(1, 87)
+    for number in range(1, 88)
 )
 FINAL_OVERLAY_R1 = FINAL_NAMES[0]
 FINAL_OVERLAYS = _core._linear(FINAL_NAMES, "unused")[1:]
@@ -24,7 +24,7 @@ CONTROL_PATHS = {
     *(f"docs/evidence/{name}" for name in ALL_OVERLAY_NAMES),
 }
 
-# Extend the byte-verified M7 loader through the append-only R86 overlay.
+# Extend the byte-verified M7 loader through the append-only R87 overlay.
 _core.FINAL_NAMES = FINAL_NAMES
 _core.FINAL_OVERLAY_R1 = FINAL_OVERLAY_R1
 _core.FINAL_OVERLAYS = FINAL_OVERLAYS
