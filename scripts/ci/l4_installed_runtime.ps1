@@ -24,6 +24,26 @@ function Get-Sha256 {
     return (Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash.ToLowerInvariant()
 }
 
+function Get-Sha256WithRetry {
+    param(
+        [Parameter(Mandatory = $true)][string]$Path,
+        [int]$Attempts = 20,
+        [int]$DelayMilliseconds = 250
+    )
+    for ($attempt = 1; $attempt -le $Attempts; $attempt++) {
+        try {
+            return Get-Sha256 -Path $Path
+        }
+        catch [System.IO.IOException] {
+            if ($attempt -eq $Attempts) {
+                throw
+            }
+            Start-Sleep -Milliseconds $DelayMilliseconds
+        }
+    }
+    throw ("SHA256_RETRY_EXHAUSTED:{0}" -f $Path)
+}
+
 function Write-Json {
     param(
         [Parameter(Mandatory = $true)]$Value,
@@ -370,14 +390,19 @@ function Invoke-RuntimeProbe {
             }
             catch {
             }
+            try {
+                $process.Dispose()
+            }
+            catch {
+            }
         }
         $env:PYTHONPATH = $previous
     }
     if ($null -eq $record) {
         throw "INSTALLED_RUNTIME_RECORD_NOT_CREATED"
     }
-    $record["stdout_sha256"] = Get-Sha256 -Path $stdout
-    $record["stderr_sha256"] = Get-Sha256 -Path $stderr
+    $record["stdout_sha256"] = Get-Sha256WithRetry -Path $stdout
+    $record["stderr_sha256"] = Get-Sha256WithRetry -Path $stderr
     return $record
 }
 
