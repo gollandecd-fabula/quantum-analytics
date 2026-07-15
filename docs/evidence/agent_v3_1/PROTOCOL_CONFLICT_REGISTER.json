@@ -4,12 +4,12 @@
     {
       "conflict_id": "PCON-001",
       "decision": "FAIL_CLOSED_CONTINUE_INDEPENDENT_WORK",
-      "observed": "The uploaded master prompt declares SHA-256 but the separate Protocol v3.1 source file was not found through GitHub search, PR file inventory, or commit search.",
-      "requirement": "Literal ingestion and SHA-256 binding of Quantum Maximum-Assurance Protocol v3.1 UI Reference Lock.",
-      "resolution_required": "Add or identify the exact Protocol v3.1 source file whose bytes hash to the declared SHA-256. Do not substitute the master prompt for that protocol.",
+      "observed": "The exact Protocol v3.1 document reference was found in File Library and a prior postchange registry attests SHA-256 be69b8f1f919066c67086d6dd4678acf5e3cb3c4f1db9bc587dc540018601a90, but the raw DOCX bytes are not mounted in the current execution environment and the hash has not been recomputed in this session.",
+      "requirement": "Literal ingestion and byte-level SHA-256 binding of Quantum Maximum-Assurance Protocol v3.1 UI Reference Lock.",
+      "resolution_required": "Mount or upload the exact File Library DOCX bytes, recompute SHA-256, compare to the frozen value, and only then permit canonical protocol binding.",
       "severity": "P0",
-      "status": "BLOCKED",
-      "type": "SOURCE_OF_TRUTH_UNAVAILABLE"
+      "status": "PARTIAL",
+      "type": "SOURCE_FOUND_HASH_NOT_RECOMPUTED"
     },
     {
       "conflict_id": "PCON-002",
@@ -30,6 +30,26 @@
       "severity": "P1",
       "status": "BLOCKED",
       "type": "INVENTORY_COMPLETENESS"
+    },
+    {
+      "conflict_id": "PCON-004",
+      "decision": "NO_UI_CHANGE_UNTIL_REFERENCE_FREEZE",
+      "observed": "The exact UI reference PNG identity and approval timestamp were found, but raw bytes, byte size, SHA-256, resolution and color profile are unavailable in the current execution environment.",
+      "requirement": "Create UI_REFERENCE_MANIFEST.json with the frozen byte identity before any UI modification.",
+      "resolution_required": "Mount or upload the exact PNG bytes and compute the mandatory technical metadata. Do not substitute a description or regenerated image.",
+      "severity": "P0",
+      "status": "BLOCKED",
+      "type": "UI_REFERENCE_TECHNICAL_FREEZE"
+    },
+    {
+      "conflict_id": "PCON-005",
+      "decision": "NO_PRODUCTION_CHANGE_UNTIL_FULL_REGISTRY",
+      "observed": "The prior protocol registry contains 387 requirements but lacks fields mandated by Master Prompt v2.0; the local master-prompt RTM contains 325 rows but does not replace the higher-priority protocol registry. A canonical combined GitHub RTM has not been built.",
+      "requirement": "Before implementation changes, create a complete registry preserving both source layers and every mandatory field.",
+      "resolution_required": "Build and commit the canonical full Requirements Traceability Matrix with source-level provenance, dependencies, roles, tests, negative controls, mutations, evidence targets, artifacts, PASS criteria and actual statuses.",
+      "severity": "P0",
+      "status": "BLOCKED",
+      "type": "PRECHANGE_REGISTRY_INCOMPLETE"
     }
   ],
   "current_decision": [
@@ -38,8 +58,8 @@
     "MILESTONE_NOT_COMPLETE",
     "RELEASE_BLOCKED"
   ],
-  "exact_head": "69ff1888fda7e0f1fe25e3b8f73da652c645aaa3",
-  "generated_at_utc": "2026-07-15T13:32:28.425892+00:00",
+  "generated_at_utc": "2026-07-15T13:52:00Z",
   "repository": "gollandecd-fabula/quantum-analytics",
-  "schema_version": "1.0.0"
+  "schema_version": "1.1.0",
+  "work_order_id": "WO-M0-003"
 }
