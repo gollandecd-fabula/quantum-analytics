@@ -1,0 +1,112 @@
+{
+  "actual_status": "PARTIAL",
+  "anti_duplication_rule": "Reuse and minimally extend the current M9 control plane and existing Red Team/Windows tooling. No parallel gate or parallel RTM.",
+  "branch": "fix/quantum-one-click-stable-release",
+  "components": [
+    {
+      "blockers": ["BLK-PROTOCOL-V3_1-SOURCE-MISSING"],
+      "decision": "EXTEND",
+      "existing_components": ["CMP-001", "CMP-002", "CMP-003", "CMP-004"],
+      "minimal_migration": [
+        "bind the exact Protocol v3.1 source and SHA-256",
+        "replace synthetic requirements with literal ingestion",
+        "add canonical state ownership",
+        "add deterministic scheduler and exclusive WORK_ORDER locks",
+        "add role-permission and protected-path policies"
+      ],
+      "status": "BLOCKED",
+      "target_component": "Deterministic Protocol Controller"
+    },
+    {
+      "blockers": ["BLK-FULL-TREE-INVENTORY-CONSTRAINED"],
+      "decision": "BLOCKED_PENDING_COMPLETE_INVENTORY",
+      "existing_components": ["CMP-011"],
+      "minimal_migration": [
+        "prove no equivalent exists",
+        "if absent, add one manager-only runtime with no production write and no release decision"
+      ],
+      "status": "UNVERIFIED",
+      "target_component": "Release Orchestrator"
+    },
+    {
+      "blockers": ["BLK-FULL-TREE-INVENTORY-CONSTRAINED"],
+      "decision": "ADAPT_PRODUCT_WRITE_PATHS_BEHIND_SIGNED_WORK_ORDER",
+      "existing_components": ["CMP-012", "CMP-008", "CMP-009", "CMP-010"],
+      "minimal_migration": [
+        "single writer",
+        "one requirement/defect per patch",
+        "write-enabled worktree only",
+        "no gate writes",
+        "schema-valid raw output"
+      ],
+      "status": "UNVERIFIED",
+      "target_component": "Implementer"
+    },
+    {
+      "blockers": ["BLK-FULL-TREE-INVENTORY-CONSTRAINED"],
+      "decision": "EXTEND_EXISTING_TEST_AND_AUDIT_TOOLING",
+      "existing_components": ["CMP-002", "CMP-005", "CMP-013"],
+      "minimal_migration": [
+        "immutable exact-head checkout",
+        "candidate patch application without production write",
+        "independent raw evidence",
+        "no Implementer hidden reasoning"
+      ],
+      "status": "UNVERIFIED",
+      "target_component": "Verifier"
+    },
+    {
+      "blockers": [],
+      "decision": "EXTEND_EXISTING_REDTEAM_TOOLING",
+      "existing_components": ["CMP-006", "CMP-014"],
+      "minimal_migration": [
+        "isolated attack environment",
+        "mutation/fuzz/fault/bypass work orders",
+        "no production fixes",
+        "schema-valid adversarial evidence"
+      ],
+      "status": "PARTIAL",
+      "target_component": "Adversary"
+    },
+    {
+      "blockers": ["BLK-NO-INTERACTIVE-WINDOWS-L4_L5-SESSION"],
+      "decision": "EXTEND",
+      "existing_components": ["CMP-007", "CMP-010"],
+      "minimal_migration": [
+        "interactive user session executor",
+        "real installed LNK launch",
+        "process tree and actual child command line",
+        "screenshot/video evidence",
+        "same-artifact installation and physical user scenario"
+      ],
+      "status": "BLOCKED",
+      "target_component": "Windows L4/L5 Worker"
+    },
+    {
+      "blockers": ["BLK-PROTOCOL-V3_1-SOURCE-MISSING"],
+      "decision": "EXTEND_NO_DUPLICATE",
+      "existing_components": ["CMP-001", "CMP-002", "CMP-003", "CMP-004"],
+      "minimal_migration": [
+        "expand mandatory artifact set",
+        "bind protocol/UI hashes",
+        "validate RUN A/RUN B same artifact",
+        "validate role identities/permissions/protected paths",
+        "accept only immutable schema-valid evidence"
+      ],
+      "status": "PARTIAL",
+      "target_component": "Deterministic Release Gate"
+    }
+  ],
+  "current_decision": [
+    "FAIL-CLOSED",
+    "PROTOCOL_IMPLEMENTATION_INCOMPLETE",
+    "MILESTONE_NOT_COMPLETE",
+    "RELEASE_BLOCKED"
+  ],
+  "exact_head": "69ff1888fda7e0f1fe25e3b8f73da652c645aaa3",
+  "generated_at_utc": "2026-07-15T13:32:28.425892+00:00",
+  "repository": "gollandecd-fabula/quantum-analytics",
+  "schema_version": "1.0.0",
+  "source_architecture": "M9 Protocol v3.0 bootstrap/audit/self-test control plane",
+  "target_architecture": "Deterministic Manager–Specialist Architecture"
+}
