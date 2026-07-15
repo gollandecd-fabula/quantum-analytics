@@ -1,0 +1,29 @@
+{
+  "base_pilot_integration_r85_overlay_git_blob_sha": "c87d143f3dfb34bba1d1fcad2d49771dd40e58fe",
+  "entries": [
+    [
+      ".github/workflows/l4-installed-runtime.yml",
+      "da26ec52e806f1c7e7459ca2b2122b68d8432c10e6b5718a23b84b1f9ed49b2f",
+      1932
+    ],
+    [
+      "scripts/ci/l4_installed_runtime.ps1",
+      "4bbc92ebbd91b3eccaa68c6967f2fcba1c78f40f6f42ee321f5746226724a644",
+      22023
+    ],
+    [
+      "tests/integration_manifest_support_m8.py",
+      "a3b992ca6d0a50029bacd33dc9f5c0f9c476eb30b34b88184b7581d655fd1970",
+      1090
+    ],
+    [
+      "tests/test_l4_installed_runtime_contract.py",
+      "94672bd74ce1f06fca325855629c94ce13cf8f7623216aea609ea8dcfe0af6d8",
+      4592
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 86,
+  "reason": "Add an exact-head automated L4 installed-runtime gate that builds and installs the unchanged Quantum package twice on Windows, binds the source package to the installed managed tree, verifies launcher semantics, preserves user sentinels, executes the installed desktop self-test and tax-base startup probe, performs an installed runtime startup observation, rejects tampering, publishes an installed manifest evidence artifact, and explicitly does not claim physical-user-path L5",
+  "remove_paths": []
+}

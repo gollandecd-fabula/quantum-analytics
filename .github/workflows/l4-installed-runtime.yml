@@ -1,0 +1,44 @@
+name: L4 Repair Log Diagnostic
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/l4-installed-runtime.yml"
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  diagnostic:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - name: Download failed bootstrap log
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          Set-StrictMode -Version Latest
+          $ErrorActionPreference = "Stop"
+          $headers = @{
+            Authorization = "Bearer $env:GH_TOKEN"
+            Accept = "application/vnd.github+json"
+            "X-GitHub-Api-Version" = "2022-11-28"
+          }
+          $uri = "https://api.github.com/repos/${{ github.repository }}/actions/jobs/87329866040/logs"
+          Invoke-WebRequest -Uri $uri -Headers $headers -MaximumRedirection 10 -OutFile bootstrap-failure.log
+          if (-not (Test-Path -LiteralPath bootstrap-failure.log -PathType Leaf)) {
+            throw "Bootstrap failure log was not downloaded."
+          }
+          Get-Content -LiteralPath bootstrap-failure.log -Tail 160 | Set-Content -LiteralPath bootstrap-failure-tail.log -Encoding UTF8
+      - name: Upload diagnostic logs
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: l4-repair-bootstrap-diagnostic
+          path: |
+            bootstrap-failure.log
+            bootstrap-failure-tail.log
+          if-no-files-found: error
+          retention-days: 7

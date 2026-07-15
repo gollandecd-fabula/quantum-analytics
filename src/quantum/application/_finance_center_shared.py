@@ -27,6 +27,7 @@ from quantum.application.finance_profile import (
     FinanceProfileError,
     FinanceRunResult,
     ProductRecord,
+    TAX_BASE_OPTIONS,
     apply_costs,
     build_profile,
     calculate_by_group,
