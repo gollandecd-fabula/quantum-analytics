@@ -1,0 +1,29 @@
+{
+  "base_pilot_integration_r87_overlay_git_blob_sha": "cb844ba02e1e2847a6ab3f939208e74b28b0d350",
+  "entries": [
+    [
+      ".github/workflows/l4-installed-runtime.yml",
+      "cf12bf48c5cd5da9bd6bbbce3e605f4926b0a52e2829d27169cbe26f9c8ba401",
+      2046
+    ],
+    [
+      "scripts/ci/l4_installed_runtime.ps1",
+      "df5669ccb908bd34ea7fd78d1c0518febc8ddd9795a7993e12b7e33523f8c643",
+      22809
+    ],
+    [
+      "tests/integration_manifest_support_m8.py",
+      "09eb72b69d596fb818d2bba7d2b5bbd80d9afe0da5dac16f4dcb2cff49390144",
+      1090
+    ],
+    [
+      "tests/test_l4_installed_runtime_contract.py",
+      "59799ff7230519310f73e4e90d61b3e49a26117fba25c92f2686b7478b1ab5e1",
+      5426
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 88,
+  "reason": "Complete the automated L4 verifier repair by disposing the bounded runtime probe before evidence hashing, retaining a fail-closed bounded file-release retry, pinning all L4 workflow actions to exact 40-character commits, extending the contract tests for supply-chain and retry controls, and preserving all existing application, installer, launcher and evidence-level boundaries",
+  "remove_paths": []
+}
