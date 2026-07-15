@@ -9,6 +9,10 @@ ROOT = Path(__file__).resolve().parents[1]
 WORKFLOW = ROOT / ".github" / "workflows" / "l4-installed-runtime.yml"
 RUNNER = ROOT / "scripts" / "ci" / "l4_installed_runtime.ps1"
 
+CHECKOUT_SHA = "34e114876b0b11c390a56381ad16ebd13914f8d5"
+SETUP_PYTHON_SHA = "a26af69be951a213d495a4c3e4e4022e16d87065"
+UPLOAD_ARTIFACT_SHA = "ea165f8d65b6e75b540449e92b4886f43607fa02"
+
 
 class L4InstalledRuntimeContractTests(unittest.TestCase):
     @classmethod
@@ -24,6 +28,15 @@ class L4InstalledRuntimeContractTests(unittest.TestCase):
         self.assertIn("if: always()", self.workflow)
         self.assertIn("quantum-l4-installed-runtime-evidence", self.workflow)
         self.assertIn("src/quantum/application/**", self.workflow)
+
+    def test_workflow_actions_are_pinned_to_full_commit_shas(self) -> None:
+        self.assertIn(f"actions/checkout@{CHECKOUT_SHA}", self.workflow)
+        self.assertIn(f"actions/setup-python@{SETUP_PYTHON_SHA}", self.workflow)
+        self.assertIn(f"actions/upload-artifact@{UPLOAD_ARTIFACT_SHA}", self.workflow)
+        action_refs = re.findall(r"uses:\s+[^\s@]+@([^\s]+)", self.workflow)
+        self.assertGreaterEqual(len(action_refs), 3)
+        for ref in action_refs:
+            self.assertRegex(ref, r"^[0-9a-f]{40}$")
 
     def test_runner_is_ascii_and_has_no_unsafe_variable_scope_interpolation(self) -> None:
         RUNNER.read_bytes().decode("ascii")
@@ -73,6 +86,8 @@ class L4InstalledRuntimeContractTests(unittest.TestCase):
         self.assertIn("Invoke-RuntimeProbe", self.runner)
         self.assertIn("alive_after_seconds = 8", self.runner)
         self.assertIn("INSTALLED_RUNTIME_EXITED", self.runner)
+        self.assertIn("Get-Sha256WithRetry", self.runner)
+        self.assertIn("$process.Dispose()", self.runner)
 
     def test_runner_has_tamper_negative_control_and_never_claims_l5(self) -> None:
         self.assertIn("Invoke-TamperNegativeControl", self.runner)
