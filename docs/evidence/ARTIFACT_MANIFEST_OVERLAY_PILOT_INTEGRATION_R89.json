@@ -1,0 +1,29 @@
+{
+  "base_pilot_integration_r88_overlay_git_blob_sha": "9df919862ea82e22b8ff83aa202f4053d9d97d4a",
+  "entries": [
+    [
+      ".github/workflows/l4-installed-runtime.yml",
+      "4fc8e6c056aa5bde3c6115f7d1f9038b1eebac77a854347919ddee5ac1d52470",
+      2908
+    ],
+    [
+      "scripts/ci/l4_installed_runtime_postcheck.ps1",
+      "e6b53b8bdace7e1f18f416cc6d66eddf26068794002fbd9a360affb80227c5be",
+      9988
+    ],
+    [
+      "tests/integration_manifest_support_m8.py",
+      "e0298a127da12bc4ba54168e9f58faada425d3afcf24d4d818a025b1a208c642",
+      1090
+    ],
+    [
+      "tests/test_l4_installed_runtime_postcheck_contract.py",
+      "9d32ebef26c4294e06ebc8be4c5706ed3910fd82900f3e6d44a7cdec7e753a65",
+      2939
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 89,
+  "reason": "Add an independently executed L4 postcheck that verifies the primary evidence sidecar and exact head, requires a real installed GUI window and installed-root command binding, performs a same-size one-byte tamper that must fail specifically by SHA-256 identity, rebuilds the evidence bundle manifest, and preserves the explicit boundary that physical-user-path L5, merge, deployment and marketplace writes remain unverified or disabled",
+  "remove_paths": []
+}
