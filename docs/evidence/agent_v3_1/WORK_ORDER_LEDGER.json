@@ -1,115 +1,273 @@
 {
+  "append_only_chain": {
+    "history_preservation": "PREDECESSOR_BLOB_IMMUTABLE_REFERENCE",
+    "previous_ledger_blob_sha": "130736e630b58ea456545ca872c3ed248f11139f",
+    "previous_work_order_ids": [
+      "WO-M0-001",
+      "WO-M0-003"
+    ]
+  },
   "branch": "fix/quantum-one-click-stable-release",
-  "current_head_before_ledger_update": "b0997f418de4c0b9c2c7956982008872e7009a68",
-  "exact_head_before_m0_changes": "69ff1888fda7e0f1fe25e3b8f73da652c645aaa3",
-  "generated_at_utc": "2026-07-15T13:56:00Z",
+  "current_decision": [
+    "FAIL-CLOSED",
+    "PROTOCOL_IMPLEMENTATION_INCOMPLETE",
+    "MILESTONE_NOT_COMPLETE",
+    "RELEASE_BLOCKED"
+  ],
+  "document_type": "WORK_ORDER_LEDGER",
+  "generated_at_utc": "2026-07-15T15:09:15.955323+00:00",
+  "maximum_evidence_level": "L0_STATIC",
+  "release_authorized": false,
   "repository": "gollandecd-fabula/quantum-analytics",
-  "schema_version": "1.1.0",
+  "schema_version": "1.2.0",
+  "subject_exact_head": "717944a75bee86a8a7653f1e66a0b6239f4fe1c3",
   "work_orders": [
     {
       "active_milestone": "M0",
       "actual_commits": [
         {
-          "blob_sha": "41b5f37b48df10bd08d38baa3c61dba4e3120949",
-          "commit_sha": "2ce8bc1ed3d7c867e66628f5c42dc9e9b52f748e",
-          "path": "docs/evidence/agent_v3_1/CURRENT_ARCHITECTURE_INVENTORY.json",
-          "validation": "FETCHED"
+          "blob_sha": "2abd01afe3cee254c6751631264f1dacbd800a6b",
+          "commit_sha": "498d0ce32ee2cb7d04f6924bc8b026237e75a52c",
+          "path": "docs/evidence/agent_v3_1/PROTOCOL_SOURCE_DISCOVERY.json"
         },
         {
-          "blob_sha": "591717dd6e4e5448778ce5427a52e1ed35daad49",
-          "commit_sha": "b19cd5da21175105772308eea396ae5260f02f68",
-          "path": "docs/evidence/agent_v3_1/ARCHITECTURE_MIGRATION_MAP.json",
-          "validation": "FETCHED"
-        },
-        {
-          "blob_sha": "a43d8310d0b09bd542477eb12c05ff8da7d9b3d1",
-          "commit_sha": "0aaaa4588715067b40c8cc8cd984578bf00fe20f",
-          "path": "docs/evidence/agent_v3_1/PROTOCOL_CONFLICT_REGISTER.json",
-          "validation": "FETCHED_SUPERSEDED_BY_WO-M0-003"
-        },
-        {
-          "blob_sha": "b43f8ce4f49e63dfe43ff3415429e1409092d564",
-          "commit_sha": "f2b56e7b222cbb90c59835b271d080bfa599bb3c",
-          "path": "docs/evidence/agent_v3_1/AUTONOMOUS_EXECUTION_STATE.json",
-          "validation": "FETCHED_SUPERSEDED_BY_WO-M0-003"
-        },
-        {
-          "blob_sha": "ac36746b8292f7da0392d5a231503293ed946289",
-          "commit_sha": "117666570595c4f5ede62e128679f40c78a97fed",
-          "path": "docs/evidence/agent_v3_1/WORK_ORDER_LEDGER.json",
-          "validation": "FETCHED_SUPERSEDED_BY_CURRENT_LEDGER_UPDATE"
+          "blob_sha": "7b2a079e6c83a639941f67107c8cee7d9d898f30",
+          "commit_sha": "8665ef43355519868aad3689cec877f5e4ed239a",
+          "path": "docs/evidence/agent_v3_1/UI_REFERENCE_MANIFEST.json"
         }
       ],
-      "actual_evidence_level": "L0",
+      "actual_diff_sha256": "1250c7f38188cf0cb5f444253f8a4cc70998cc6903392fd44acdb8937c6f6cc3",
+      "adversarial_result": "TAMPER_RULE_RECORDED_NOT_RUNTIME_TESTED",
       "assigned_role": "CONTROL_PLANE",
-      "change_boundary": "Create only mandatory M0 pre-change control artifacts; no product, test, workflow, M9 or main modification.",
+      "change_boundary": "Freeze raw Protocol v3.1 and approved UI reference bytes; create only M0 evidence artifacts.",
+      "decision": "RELEASE_BLOCKED",
+      "evidence_ids": [
+        "EVD-M0-PROTOCOL-SHA256",
+        "EVD-M0-UI-REFERENCE-MANIFEST"
+      ],
+      "exit_code": 0,
+      "expected_result": "Source identities frozen at L0; project release remains blocked.",
       "files_allowed_to_change": [
-        "docs/evidence/agent_v3_1/REQUIREMENTS_TRACEABILITY_MATRIX.json",
-        "docs/evidence/agent_v3_1/CURRENT_ARCHITECTURE_INVENTORY.json",
-        "docs/evidence/agent_v3_1/ARCHITECTURE_MIGRATION_MAP.json",
-        "docs/evidence/agent_v3_1/PROTOCOL_CONFLICT_REGISTER.json",
-        "docs/evidence/agent_v3_1/AUTONOMOUS_EXECUTION_STATE.json",
-        "docs/evidence/agent_v3_1/WORK_ORDER_LEDGER.json"
+        "docs/evidence/agent_v3_1/PROTOCOL_SOURCE_DISCOVERY.json",
+        "docs/evidence/agent_v3_1/UI_REFERENCE_MANIFEST.json"
       ],
-      "files_forbidden_to_change": ["src/**", "tests/**", ".github/workflows/**", "tools/**", "docs/evidence/M9_MAXIMUM_ASSURANCE_CONTROL_PLANE.json", "main"],
-      "pending_artifacts": [
-        {
-          "path": "docs/evidence/agent_v3_1/REQUIREMENTS_TRACEABILITY_MATRIX.json",
-          "requirement_count": 325,
-          "sha256": "d84ae4c8fdf4a861b98b45761ff8820bfdc9e7869e698e7d0a3a22c14b042a36",
-          "size_bytes": 417049,
-          "status": "MASTER_PROMPT_LAYER_GENERATED_PENDING_CANONICAL_COMBINATION"
-        }
+      "files_forbidden_to_change": [
+        "src/**",
+        "tests/**",
+        "tools/**",
+        ".github/workflows/**",
+        "docs/evidence/M9_MAXIMUM_ASSURANCE_CONTROL_PLANE.json",
+        "main"
       ],
-      "release_decision": "RELEASE_BLOCKED",
+      "hypothesis": "Exact raw source bytes can resolve source identity without claiming implementation.",
+      "next_test": "Recompute hashes; validate DOCX ZIP/render and PNG metadata; fetch committed blobs.",
+      "raw_output_sha256": "9c749173e288ea102cf3c91dc7778c06de4f7e418f27b14d18b4355e67a0b209",
+      "regression_status": "NOT_APPLICABLE_NO_PRODUCT_CHANGE",
+      "requirement_ids": [
+        "REQ-P31-0364",
+        "REQ-P31-0384",
+        "REQ-MP2-0136"
+      ],
       "result": "PARTIAL",
-      "rollback_condition": "Invalid JSON, source-text loss, count mismatch, path-scope violation or positive release claim.",
-      "rollback_command": "Revert only commits created for WO-M0-001; no reset --hard and no force push.",
-      "status": "IN_PROGRESS",
-      "target_evidence_level": "L0",
-      "work_order_id": "WO-M0-001",
-      "work_order_sha256": "6cad500f821e635c4cfbe1cc52e17eb4c78ae348fc9efc916375b261db179422"
+      "rollback_command": "Revert only the affected WO-M0-004 commit.",
+      "rollback_condition": "Hash mismatch, invalid source, malformed JSON or claim elevation.",
+      "target_evidence_level": "L0_STATIC",
+      "test_command": "Current-session SHA-256 + OOXML ZIP/render audit + PNG structural metadata validation + GitHub fetch_file identity checks",
+      "verifier_result": "L0_SOURCE_IDENTITIES_MATCH",
+      "work_order_id": "WO-M0-004",
+      "work_order_sha256": "37fb4203a1864c5fbf0e3eef81044a8e447ac257e62bed53fa3fea059b7842ec"
     },
     {
       "active_milestone": "M0",
       "actual_commits": [
         {
-          "blob_sha": "5c0074fb51f8200cb710fb604775047bda70e853",
-          "commit_sha": "d9f80984c7d6c131ce25c492d25e60f5dabce0f2",
-          "path": "docs/evidence/agent_v3_1/PROTOCOL_SOURCE_DISCOVERY.json",
-          "validation": "FETCHED"
+          "blob_sha": "5ad4ee8fe68a140080b10b066af6056490a70e3a",
+          "commit_sha": "8c9e36b9de3b697c54bd83106e285ab67d94f335",
+          "path": "docs/evidence/agent_v3_1/rtm/REQUIREMENTS_TRACEABILITY_MATRIX.part-001.json"
         },
         {
-          "blob_sha": "bbb66091ad2a3df3f086a3335c8715fd726ca495",
-          "commit_sha": "eb28b6d4b3a3f584d85ea2f3463f659d5e45486f",
-          "path": "docs/evidence/agent_v3_1/PROTOCOL_CONFLICT_REGISTER.json",
-          "validation": "FETCHED"
+          "blob_sha": "0ff6a0a45c9d1237fdd79d5c03fb8ded85af4779",
+          "commit_sha": "f39e9fa0279772d1e9e8c5302c5d719dbcb097bb",
+          "path": "docs/evidence/agent_v3_1/rtm/REQUIREMENTS_TRACEABILITY_MATRIX.part-002.json"
         },
         {
-          "blob_sha": "ef527683d4317a13a4a9638c99bca3fd9bd2b5fe",
-          "commit_sha": "b0997f418de4c0b9c2c7956982008872e7009a68",
-          "path": "docs/evidence/agent_v3_1/AUTONOMOUS_EXECUTION_STATE.json",
-          "validation": "FETCHED"
+          "blob_sha": "ddfeb5b02e532e2fefcf6e22b780c0ea7a261f57",
+          "commit_sha": "deaef0a36aad815f3afd7e8f679c6a9ac722db21",
+          "path": "docs/evidence/agent_v3_1/rtm/REQUIREMENTS_TRACEABILITY_MATRIX.part-003.json"
+        },
+        {
+          "blob_sha": "596dafcd12c8805cecca244bf28ee3c28c60e5a9",
+          "commit_sha": "bc8c2a2d50fbad6860d67411250c9dd12a436d87",
+          "path": "docs/evidence/agent_v3_1/rtm/REQUIREMENTS_TRACEABILITY_MATRIX.part-004.json"
+        },
+        {
+          "blob_sha": "c17fcb9a50f76a17e6e0087cef3dba134bb59e7e",
+          "commit_sha": "077a709dcfa1633757d1fee211bd22855ac4515e",
+          "path": "docs/evidence/agent_v3_1/rtm/REQUIREMENTS_TRACEABILITY_MATRIX.part-005.json"
+        },
+        {
+          "blob_sha": "6be5e38b6198aa715964745c139ae50b1496f2b7",
+          "commit_sha": "8f5695dbdf67a9e96879669412cd5e123627a6ca",
+          "path": "docs/evidence/agent_v3_1/rtm/REQUIREMENTS_TRACEABILITY_MATRIX.part-006.json"
+        },
+        {
+          "blob_sha": "6bd5239d63a2c282ecf3d42b3f4b60295ed15b65",
+          "commit_sha": "dad23c9d8d4fd6f8fe7f8bd30fbbd215a92b6aef",
+          "path": "docs/evidence/agent_v3_1/rtm/REQUIREMENTS_TRACEABILITY_MATRIX.part-007.json"
+        },
+        {
+          "blob_sha": "31e027fbf955d275ce97b0c4c69fbb25769a3a1b",
+          "commit_sha": "d91e9f9655002974e68012e1f07edde479aa09c4",
+          "path": "docs/evidence/agent_v3_1/rtm/REQUIREMENTS_TRACEABILITY_MATRIX.part-008.json"
+        },
+        {
+          "blob_sha": "ea6e06d34ee9e0ec78c986a03c95746ebebaf4b6",
+          "commit_sha": "25b87233f50e1a7f63c4cf55705d0f15e8686789",
+          "path": "docs/evidence/agent_v3_1/rtm/REQUIREMENTS_TRACEABILITY_MATRIX.part-009.json"
+        },
+        {
+          "blob_sha": "60fc650f76a0fe06352a8b2dfcaeba8b22a413f9",
+          "commit_sha": "822f40639fe154a051a22fd1072821ef69a9a704",
+          "path": "docs/evidence/agent_v3_1/rtm/REQUIREMENTS_TRACEABILITY_MATRIX.part-010.json"
+        },
+        {
+          "blob_sha": "7901badd35fec599471fe2c27e92272f83a9dbe5",
+          "commit_sha": "efb6bb109ec6d0e0621474b19d30aa80708cfb56",
+          "path": "docs/evidence/agent_v3_1/rtm/REQUIREMENTS_TRACEABILITY_MATRIX.part-011.json"
+        },
+        {
+          "blob_sha": "d39aa4f72d1b6db07429957e0189211d52cb433f",
+          "commit_sha": "82653641e265bdb9c9d32969df3e385be8666357",
+          "path": "docs/evidence/agent_v3_1/rtm/REQUIREMENTS_TRACEABILITY_MATRIX.part-012.json"
+        },
+        {
+          "blob_sha": "4c5b368df252936839bb57b8b915a1a15837afb2",
+          "commit_sha": "40a84fc3e78639fb6d977bd9f3e7c229ab2fe91a",
+          "path": "docs/evidence/agent_v3_1/REQUIREMENTS_TRACEABILITY_MATRIX.json"
         }
       ],
-      "actual_evidence_level": "L0",
+      "actual_diff_sha256": "6cc25247d09c9a3a57540bcca7cf3e3ed9d55e4420e1d5051c2591024dc53a34",
+      "adversarial_result": "NO_RUNTIME_ENFORCEMENT_CLAIM",
       "assigned_role": "CONTROL_PLANE",
-      "change_boundary": "Record File Library Protocol/UI source discoveries and refine blockers only; no product or control-plane implementation.",
+      "change_boundary": "Materialize the complete two-layer pre-change RTM only.",
+      "decision": "RELEASE_BLOCKED",
+      "evidence_ids": [
+        "EVD-M0-CANONICAL-RTM"
+      ],
+      "exit_code": 0,
+      "expected_result": "Complete L0 registry materialization; no M0 completion or runtime claim.",
       "files_allowed_to_change": [
-        "docs/evidence/agent_v3_1/PROTOCOL_SOURCE_DISCOVERY.json",
+        "docs/evidence/agent_v3_1/REQUIREMENTS_TRACEABILITY_MATRIX.json",
+        "docs/evidence/agent_v3_1/rtm/REQUIREMENTS_TRACEABILITY_MATRIX.part-*.json"
+      ],
+      "files_forbidden_to_change": [
+        "src/**",
+        "tests/**",
+        "tools/**",
+        ".github/workflows/**",
+        "docs/evidence/M9_MAXIMUM_ASSURANCE_CONTROL_PLANE.json",
+        "main"
+      ],
+      "hypothesis": "A canonical index plus immutable shards can preserve all 712 literal requirements and 19 fields without a placeholder or summary substitution.",
+      "incidents": [
+        {
+          "description": "A capability-probe file was accidentally committed instead of creating only an unreferenced Git tree object.",
+          "incident_commit": "79ddc16b3176d8358930ecb86ed3fb358a0b0584",
+          "incident_id": "INC-M0-005-001",
+          "net_tree_effect": "NONE",
+          "rollback_commit": "9d3cdd5fc698c9a2fafb713489cf04f822b70fdf",
+          "scope": "docs/evidence/agent_v3_1/rtm/.tree-capability-probe",
+          "status": "RESOLVED_WITH_ROLLBACK"
+        }
+      ],
+      "next_test": "Parse/decode every shard; reconcile 387+325=712; check unique IDs, mandatory fields, order and Git blob identities.",
+      "raw_output_sha256": "a5a8ffb3092fd93c87986ec5bba8f6f7940968d7a0eebf6278e1e0901a5cbc5b",
+      "regression_status": "NOT_APPLICABLE_NO_PRODUCT_CHANGE",
+      "requirement_ids": [
+        "REQ-P31-0048",
+        "REQ-P31-0049",
+        "REQ-P31-0050",
+        "REQ-P31-0051",
+        "REQ-P31-0052",
+        "REQ-P31-0053",
+        "REQ-P31-0054",
+        "REQ-MP2-0133",
+        "REQ-MP2-0134",
+        "REQ-MP2-0135",
+        "REQ-MP2-0137",
+        "REQ-MP2-0138",
+        "REQ-MP2-0139",
+        "REQ-MP2-0140"
+      ],
+      "result": "PARTIAL",
+      "rollback_command": "Revert only the defective shard/index commit.",
+      "rollback_condition": "Missing/duplicate row, source-text loss, malformed shard, hash mismatch or positive release claim.",
+      "target_evidence_level": "L0_STATIC",
+      "test_command": "Local Python JSON/gzip/base64/hash/order/field validator plus GitHub fetch_file Git-blob identity checks",
+      "unreferenced_tree_probe": {
+        "branch_ref_changed": false,
+        "tree_sha": "1c405cd6f2f57c863c00ff05dfe6641e09f10fe5"
+      },
+      "verifier_result": "712_ROWS_STRUCTURALLY_IDENTIFIED_AT_L0",
+      "work_order_id": "WO-M0-005",
+      "work_order_sha256": "0f47e024a6fc8c4c9a854fd932921f3ebb462dcd690c3db1a832b7fea85cbcb3"
+    },
+    {
+      "active_milestone": "M0",
+      "actual_commits": [
+        {
+          "blob_sha": "8961dd27d6230bec11f729394c5c96e6ddfe4df5",
+          "commit_sha": "98dde32e5a3fe3e3ccd074ccc62696e55a4bfe1a",
+          "path": "docs/evidence/agent_v3_1/PROTOCOL_CONFLICT_REGISTER.json"
+        },
+        {
+          "blob_sha": "b682132d3cd8c3c47eaddd6a9034ad09b4fed01e",
+          "commit_sha": "717944a75bee86a8a7653f1e66a0b6239f4fe1c3",
+          "path": "docs/evidence/agent_v3_1/AUTONOMOUS_EXECUTION_STATE.json"
+        }
+      ],
+      "actual_diff_sha256": "c791a919d1c3392efb2a56d1016f6cbbea0ce0d97909dbedb184adcb773188cc",
+      "adversarial_result": "OPEN_INVENTORY_AND_L4_L5_BLOCKERS_RETAINED",
+      "assigned_role": "CONTROL_PLANE",
+      "change_boundary": "Reconcile conflict, autonomous-state and work-order evidence only.",
+      "decision": "RELEASE_BLOCKED",
+      "evidence_ids": [
+        "EVD-M0-CONFLICT-RECONCILIATION",
+        "EVD-M0-STATE-RECONCILIATION"
+      ],
+      "exit_code": 0,
+      "expected_result": "State matches facts; M0 remains IN_PROGRESS and release remains blocked.",
+      "files_allowed_to_change": [
         "docs/evidence/agent_v3_1/PROTOCOL_CONFLICT_REGISTER.json",
         "docs/evidence/agent_v3_1/AUTONOMOUS_EXECUTION_STATE.json",
         "docs/evidence/agent_v3_1/WORK_ORDER_LEDGER.json"
       ],
-      "files_forbidden_to_change": ["src/**", "tests/**", "tools/**", ".github/workflows/**", "docs/evidence/M9_MAXIMUM_ASSURANCE_CONTROL_PLANE.json", "main"],
-      "next_test": "Fetch all changed JSON files, verify exact source IDs/timestamps, separate prior hash attestation from current recomputation, retain UI technical metadata blockers and reject positive release claims.",
-      "release_decision": "RELEASE_BLOCKED",
-      "result": "PARTIAL",
-      "rollback_condition": "Any statement that raw Protocol/UI bytes or hashes were verified in the current session when they were not.",
-      "rollback_command": "Revert only commits created for WO-M0-003; no reset --hard and no force push.",
-      "status": "IN_PROGRESS",
-      "target_evidence_level": "L0",
-      "work_order_id": "WO-M0-003"
+      "files_forbidden_to_change": [
+        "src/**",
+        "tests/**",
+        "tools/**",
+        ".github/workflows/**",
+        "docs/evidence/M9_MAXIMUM_ASSURANCE_CONTROL_PLANE.json",
+        "main"
+      ],
+      "hypothesis": "Resolved L0 source/registry blockers can be closed without closing inventory, runtime or physical blockers.",
+      "next_test": "Validate predecessor hashes, resolved/open blocker accuracy, incident record and fail-closed decision.",
+      "raw_output_sha256": "0e7e6e21e430f6af0996198fe1d3478ad11a5c29f578be1a515ba9198e57a9b3",
+      "regression_status": "NOT_APPLICABLE_NO_PRODUCT_CHANGE",
+      "requirement_ids": [
+        "REQ-MP2-0026",
+        "REQ-MP2-0027",
+        "REQ-MP2-0028",
+        "REQ-MP2-0029"
+      ],
+      "result": "IN_PROGRESS",
+      "rollback_command": "Revert only the specific WO-M0-006 reconciliation commit.",
+      "rollback_condition": "History loss, unresolved blocker closed, resolved blocker left stale, malformed JSON or claim elevation.",
+      "target_evidence_level": "L0_STATIC",
+      "test_command": "GitHub fetch_file JSON validation and predecessor-blob/state consistency review",
+      "verifier_result": "FACTUAL_STATUS_RECONCILED",
+      "work_order_id": "WO-M0-006",
+      "work_order_sha256": "9abddc0ed077b8944aad67137a10ffbe4b8810cefe6cb225dfbfe9c4c9dbd2e6"
     }
   ]
 }
