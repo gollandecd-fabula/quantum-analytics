@@ -323,10 +323,11 @@ function Invoke-RuntimeProbe {
     )
     $previous = $env:PYTHONPATH
     $process = $null
+    $record = $null
+    $stdout = Join-Path $EvidenceRoot "installed-runtime.stdout.txt"
+    $stderr = Join-Path $EvidenceRoot "installed-runtime.stderr.txt"
     try {
         $env:PYTHONPATH = Join-Path $Root "src"
-        $stdout = Join-Path $EvidenceRoot "installed-runtime.stdout.txt"
-        $stderr = Join-Path $EvidenceRoot "installed-runtime.stderr.txt"
         $arguments = @(
             "-m",
             "quantum.application.desktop_center",
@@ -349,15 +350,13 @@ function Invoke-RuntimeProbe {
         }
         $cim = Get-CimInstance Win32_Process -Filter ("ProcessId = " + $process.Id)
         $runtime = Get-Process -Id $process.Id
-        return [ordered]@{
+        $record = [ordered]@{
             process_id = [int]$process.Id
             executable_path = [string]$cim.ExecutablePath
             command_line = [string]$cim.CommandLine
             main_window_handle = [int64]$runtime.MainWindowHandle
             main_window_title = [string]$runtime.MainWindowTitle
             alive_after_seconds = 8
-            stdout_sha256 = Get-Sha256 -Path $stdout
-            stderr_sha256 = Get-Sha256 -Path $stderr
         }
     }
     finally {
@@ -374,6 +373,12 @@ function Invoke-RuntimeProbe {
         }
         $env:PYTHONPATH = $previous
     }
+    if ($null -eq $record) {
+        throw "INSTALLED_RUNTIME_RECORD_NOT_CREATED"
+    }
+    $record["stdout_sha256"] = Get-Sha256 -Path $stdout
+    $record["stderr_sha256"] = Get-Sha256 -Path $stderr
+    return $record
 }
 
 function Invoke-TamperNegativeControl {
