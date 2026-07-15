@@ -1,0 +1,63 @@
+name: L4 Installed Runtime Verification
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "src/quantum/application/**"
+      - "src/quantum/finance/**"
+      - "scripts/windows/**"
+      - "scripts/ci/l4_installed_runtime.ps1"
+      - "tests/test_l4_installed_runtime_contract.py"
+      - "requirements/windows-home-local.txt"
+      - "config/home-local.template.json"
+      - "tests/integration_manifest_support_m8.py"
+      - "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R86.json"
+      - ".github/workflows/l4-installed-runtime.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  installed-runtime:
+    runs-on: windows-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout exact head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run exact-head L4 installed-runtime verification
+        shell: pwsh
+        env:
+          TARGET_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          try {
+            & .\scripts\ci\l4_installed_runtime.ps1 2>&1 |
+              Tee-Object -FilePath l4-installed-runtime.log
+            $gateExitCode = $LASTEXITCODE
+            if ($gateExitCode -ne 0) {
+              throw "L4 installed-runtime gate failed with exit code $gateExitCode"
+            }
+          }
+          catch {
+            $_ | Out-String | Tee-Object -FilePath l4-installed-runtime.log -Append
+            throw
+          }
+
+      - name: Upload L4 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: quantum-l4-installed-runtime-evidence
+          path: |
+            artifacts/l4-installed-runtime/**
+            l4-installed-runtime.log
+          if-no-files-found: error
+          retention-days: 14
