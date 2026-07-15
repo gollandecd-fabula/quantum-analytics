@@ -1,0 +1,19 @@
+{
+  "base_pilot_integration_r86_overlay_git_blob_sha": "e6676acd96a35031c0dceef112216cf406c51bec",
+  "entries": [
+    [
+      "scripts/ci/l4_installed_runtime.ps1",
+      "4707d05f943b5a4c857e11db83b12bf7b620add03d2276830f8c508dea6d7f40",
+      22151
+    ],
+    [
+      "tests/integration_manifest_support_m8.py",
+      "db4f1008b7dd06a383c0ad915cf3794de9e0624d8682965e965d066319d789b5",
+      1090
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 87,
+  "reason": "Repair the automated L4 verifier so redirected runtime stdout and stderr are hashed only after the CI probe process releases the files; the runtime must still remain alive for the full observation interval and no application, installer, launcher or expected-result behavior is changed",
+  "remove_paths": []
+}
