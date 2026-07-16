@@ -1,78 +1,89 @@
 {
-  "active_milestone": "M0",
-  "active_work_order_id": "WO-M0-006",
-  "base_head": "840fc90c8257ee373c81bb84f0c983e0f6c44c3b",
+  "schema_version": "1.3.0",
+  "state_version": 5,
+  "repository": "gollandecd-fabula/quantum-analytics",
   "branch": "fix/quantum-one-click-stable-release",
+  "base_head": "840fc90c8257ee373c81bb84f0c983e0f6c44c3b",
+  "merge_base": "2954475609883dce0953a08ce60c11ba517058cf",
+  "active_milestone": "M0",
+  "active_work_order_id": "WO-M0-011",
+  "status": "IN_PROGRESS",
+  "subject_exact_head": "76e66da65aea7ed2d4d79d7715f00027ee219339",
+  "previous_state_blob_sha": "b682132d3cd8c3c47eaddd6a9034ad09b4fed01e",
+  "updated_at_utc": "2026-07-16T07:08:00Z",
+  "protocol": {
+    "version": "3.1",
+    "sha256": "be69b8f1f919066c67086d6dd4678acf5e3cb3c4f1db9bc587dc540018601a90",
+    "raw_bytes_recomputed_current_session": true,
+    "production_control_plane_ingestion": "NOT_IMPLEMENTED"
+  },
+  "ui_reference": {
+    "sha256": "2482074aea312b065b4094792c5676445514dd555d50a064a5ae3e189dc60d13",
+    "technical_freeze_status": "UI_SPEC_FROZEN_L0",
+    "implementation_status": "NOT_STARTED",
+    "physical_l5_status": "UNVERIFIED"
+  },
   "canonical_rtm": {
+    "path": "docs/evidence/agent_v3_1/REQUIREMENTS_TRACEABILITY_MATRIX.json",
     "index_blob_sha": "4c5b368df252936839bb57b8b915a1a15837afb2",
-    "index_path": "docs/evidence/agent_v3_1/REQUIREMENTS_TRACEABILITY_MATRIX.json",
+    "requirement_count": 712,
     "mandatory_field_count": 19,
     "registry_set_sha256": "4cd2561b2da074b73ebe9ac8a3ccec6f2c890f7f7bf7998ac1a0ca698ed1037a",
-    "requirement_count": 712,
-    "runtime_ingestion": "NOT_IMPLEMENTED",
-    "shard_count": 12,
-    "source_layer_counts": {
-      "MASTER_PROMPT_V2_0": 325,
-      "PROTOCOL_V3_1": 387
-    },
-    "status_counts": {
-      "BLOCKED": 0,
-      "FAILED": 0,
-      "IN_PROGRESS": 6,
-      "NOT_STARTED": 216,
-      "PARTIAL": 27,
-      "UNVERIFIED": 460,
-      "VERIFIED": 3
-    },
-    "storage_model": "CANONICAL_INDEX_PLUS_IMMUTABLE_SHARDS",
-    "structural_identity": "VALIDATED_L0",
-    "verified_requirement_ids": [
-      "REQ-P31-0364",
-      "REQ-P31-0384",
-      "REQ-MP2-0136"
-    ]
+    "runtime_ingestion": "NOT_IMPLEMENTED"
+  },
+  "recursive_exact_head_tree": {
+    "target_exact_head": "d5afcf5e4a28a5ce3cc144cf25db649aceda8b1f",
+    "index_path": "docs/evidence/agent_v3_1/RECURSIVE_EXACT_HEAD_TREE.json",
+    "index_blob_sha": "f8d34060a68e2aae6a9c2de08b34f95b918bfd15",
+    "entry_count": 682,
+    "unique_path_count": 682,
+    "linux_windows_entry_equality": true,
+    "canonical_entries_sha256": "44af77d30a2501157b75d13e0c495f8982cdfc1499b57bf8af28fdd6522f76db",
+    "path_list_sha256": "c52894cde474c22fc960b6bd5cb86505874c14ae0ee196a1badac98993732783",
+    "status": "VALIDATED_L0_STATIC"
+  },
+  "duplicate_risk": {
+    "path": "docs/evidence/agent_v3_1/DUPLICATE_RISK_ASSESSMENT.json",
+    "blob_sha": "fab2429958677ab72ef8630bb53c2c75b03d8482",
+    "gate": "RESOLVED_L0_STATIC",
+    "full_tree_inventory_blocker": "RESOLVED_L0_STATIC",
+    "parallel_control_plane_authorized": false,
+    "minimal_migration_authorized": true,
+    "manager_rule": "AT_MOST_ONE_MANAGER_RUNTIME_UNDER_EXISTING_M9_OWNERSHIP",
+    "specialist_rule": "ADAPT_EXISTING_PRODUCT_AUDIT_AND_REDTEAM_PATHS"
   },
   "completed_observations": [
-    "Repository, PR, baseline head, base head and merge-base were recorded.",
-    "Existing M9 v3.0 tool, tests, workflow and evidence were inspected without modification.",
-    "Current architecture inventory and migration map were committed.",
-    "Protocol v3.1 raw DOCX bytes were hashed and visually audited; the declared SHA-256 matched.",
-    "Approved UI reference raw PNG bytes were hashed and technically frozen.",
-    "Canonical two-layer RTM was materialized as one index and twelve immutable shards.",
-    "All 712 IDs are unique, source counts reconcile to 387+325, and every row contains the 19 required fields.",
-    "Remote Git blob identities for all twelve shards were matched to local artifacts.",
-    "Protocol, UI and registry blockers were downgraded only to resolved L0 source/materialization evidence."
-  ],
-  "current_decision": [
-    "FAIL-CLOSED",
-    "PROTOCOL_IMPLEMENTATION_INCOMPLETE",
-    "MILESTONE_NOT_COMPLETE",
-    "RELEASE_BLOCKED"
+    "Protocol v3.1 and approved UI reference source identities were frozen at L0.",
+    "The canonical two-layer 712-row RTM was materialized at L0.",
+    "Two independent Linux and Windows full-depth checkouts produced identical recursive git ls-tree evidence for 682 tracked entries at exact head d5afcf5e4a28a5ce3cc144cf25db649aceda8b1f.",
+    "Temporary tree instrumentation was rolled back to the original tool blob with zero net tree effect.",
+    "Static duplicate-risk analysis found the existing M9 gate, audit, Red Team, Windows, product worker and domain runtimes, and found no tracked executable Release Orchestrator or isolated specialist process.",
+    "Architecture inventory and migration decisions now prohibit parallel components and require minimal in-place extension."
   ],
   "defects": [
     {
       "defect_id": "M0-D001",
       "severity": "P0",
       "status": "RESOLVED_L0",
-      "title": "Protocol v3.1 raw-byte hash verified; runtime ingestion remains a separate M1 blocker."
+      "title": "Protocol v3.1 source identity verified; runtime ingestion remains separate."
     },
     {
       "defect_id": "M0-D002",
       "severity": "P1",
       "status": "OPEN",
-      "title": "PR metadata must be reconciled to the final current head after evidence commits."
+      "title": "PR metadata must be reconciled to the final evidence head."
     },
     {
       "defect_id": "M0-D003",
       "severity": "P1",
-      "status": "BLOCKED",
-      "title": "Recursive exact-head repository inventory is not available through the exposed connector reader functions."
+      "status": "RESOLVED_L0",
+      "title": "Recursive exact-head inventory and static duplicate-risk gate completed for 682 tracked entries."
     },
     {
       "defect_id": "M0-D004",
       "severity": "P0",
       "status": "RESOLVED_L0",
-      "title": "Frozen UI reference technical manifest created; installed and L5 conformity remain unverified."
+      "title": "Frozen UI reference manifest exists; installed and L5 conformity remain unverified."
     },
     {
       "defect_id": "M0-D005",
@@ -82,61 +93,40 @@
     },
     {
       "defect_id": "M0-D006",
-      "incident_commit": "79ddc16b3176d8358930ecb86ed3fb358a0b0584",
-      "net_tree_effect": "NONE",
-      "rollback_commit": "9d3cdd5fc698c9a2fafb713489cf04f822b70fdf",
       "severity": "P1",
       "status": "RESOLVED_WITH_ROLLBACK",
-      "title": "A capability probe was accidentally committed outside its declared unreferenced-object boundary and was immediately removed by targeted rollback."
+      "incident_commit": "79ddc16b3176d8358930ecb86ed3fb358a0b0584",
+      "rollback_commit": "9d3cdd5fc698c9a2fafb713489cf04f822b70fdf",
+      "net_tree_effect": "NONE",
+      "title": "Earlier capability-probe boundary violation."
+    },
+    {
+      "defect_id": "M0-D007",
+      "severity": "P1",
+      "status": "RESOLVED_WITH_ROLLBACK",
+      "instrumentation_commit": "ebf186d6991f2dc5108b69c6693d1e8f5aa8450e",
+      "rollback_commit": "d42a935417a3a335d5b9cc3de41ce72490ba648e",
+      "restored_blob": "ffc87cb1601c1301ff6cc023ab82ce54bcc2e79d",
+      "net_tree_effect": "NONE",
+      "title": "Temporary recursive-tree instrumentation was removed after artifact capture."
     }
   ],
-  "exact_head_before_m0_changes": "69ff1888fda7e0f1fe25e3b8f73da652c645aaa3",
-  "existing_m9_control_plane_changed": false,
-  "marketplace_writes_enabled": false,
-  "maximum_verified_evidence_level": "L0_STATIC_CURRENT_M0; L2_SOURCE_RUNTIME_HISTORICAL_M9_HEAD_69FF188_ONLY",
-  "merge_base": "2954475609883dce0953a08ce60c11ba517058cf",
-  "merge_to_main_authorized": false,
-  "next_scheduler_action": "Obtain a complete recursive exact-head repository inventory and re-run the M0 duplicate-risk/preservation gate. Do not add the M1 controller/runtime or modify production code before that evidence exists.",
   "open_blockers": [
-    "BLK-FULL-TREE-INVENTORY-CONSTRAINED",
     "BLK-DETERMINISTIC-CONTROLLER-RUNTIME-NOT-IMPLEMENTED",
     "BLK-CONTROL-PLANE-L2-INGESTION-NOT-IMPLEMENTED",
     "BLK-NO-INTERACTIVE-WINDOWS-L4_L5-SESSION",
     "BLK-SAME-ARTIFACT-RUN-A-RUN-B-NOT-EXECUTED",
     "BLK-PHYSICAL-PILOT-NOT-EXECUTED"
   ],
-  "previous_state_blob_sha": "ef527683d4317a13a4a9638c99bca3fd9bd2b5fe",
+  "next_scheduler_action": "Reconcile the append-only work-order ledger and PR metadata. A later separately controlled work order may begin minimal M1 controller design only by extending the existing M9 ownership boundary; no parallel gate, RTM, product runtime or specialist stack is permitted.",
   "production_code_changed": false,
-  "protocol": {
-    "production_control_plane_ingestion": "NOT_IMPLEMENTED",
-    "raw_bytes_recomputed_current_session": true,
-    "render_audit": "VALID_L0",
-    "render_pages": 15,
-    "sha256": "be69b8f1f919066c67086d6dd4678acf5e3cb3c4f1db9bc587dc540018601a90",
-    "size_bytes": 53595,
-    "version": "3.1",
-    "zip_integrity": "VALID"
-  },
-  "release_authorized": false,
-  "repository": "gollandecd-fabula/quantum-analytics",
-  "schema_version": "1.2.0",
-  "state_version": 4,
-  "status": "IN_PROGRESS",
-  "subject_exact_head": "98dde32e5a3fe3e3ccd074ccc62696e55a4bfe1a",
   "tests_changed": false,
-  "ui_reference": {
-    "implementation_status": "NOT_STARTED",
-    "mode": "RGBA",
-    "normalized_name": "QUANTUM_UI_REFERENCE_2026-07-11.png",
-    "physical_l5_status": "UNVERIFIED",
-    "resolution_px": [
-      1024,
-      1536
-    ],
-    "sha256": "2482074aea312b065b4094792c5676445514dd555d50a064a5ae3e189dc60d13",
-    "size_bytes": 2525544,
-    "technical_freeze_status": "UI_SPEC_FROZEN_L0"
-  },
-  "updated_at_utc": "2026-07-15T15:07:11.148860+00:00",
-  "workflows_changed": false
+  "workflows_changed": false,
+  "existing_m9_control_plane_changed": false,
+  "marketplace_writes_enabled": false,
+  "merge_to_main_authorized": false,
+  "release_authorized": false,
+  "milestone_complete": false,
+  "maximum_verified_evidence_level": "L0_STATIC_CURRENT_M0; L2_SOURCE_RUNTIME_HISTORICAL_M9_HEAD_69FF188_ONLY",
+  "current_decision": ["FAIL-CLOSED", "PROTOCOL_IMPLEMENTATION_INCOMPLETE", "MILESTONE_NOT_COMPLETE", "RELEASE_BLOCKED"]
 }
