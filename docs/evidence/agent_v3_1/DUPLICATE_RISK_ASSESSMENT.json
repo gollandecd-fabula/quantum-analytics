@@ -1,97 +1,64 @@
 {
-  "schema_version": "1.1.0",
+  "schema_version": "1.2.0",
   "artifact_type": "DUPLICATE_RISK_ASSESSMENT",
   "repository": "gollandecd-fabula/quantum-analytics",
   "branch": "fix/quantum-one-click-stable-release",
-  "historical_tree_target_exact_head": "d5afcf5e4a28a5ce3cc144cf25db649aceda8b1f",
-  "current_pr_head_at_correction_start": "c715d4b4861ad931eb0d1891aeac3f771225ee19",
   "work_order_id": "WO-M0-012",
-  "supersedes_blob_sha": "fab2429958677ab72ef8630bb53c2c75b03d8482",
-  "tree_evidence": {
-    "path": "docs/evidence/agent_v3_1/RECURSIVE_EXACT_HEAD_TREE.json",
-    "target_exact_head": "d5afcf5e4a28a5ce3cc144cf25db649aceda8b1f",
+  "historical_tree_target_exact_head": "d5afcf5e4a28a5ce3cc144cf25db649aceda8b1f",
+  "supersedes_blob_sha": "72bae1609b69a672c499d33f6e74f4406c3aa968",
+  "historical_tree_evidence": {
     "entry_count": 682,
     "unique_path_count": 682,
-    "path_list_sha256": "c52894cde474c22fc960b6bd5cb86505874c14ae0ee196a1badac98993732783",
     "canonical_entries_sha256": "44af77d30a2501157b75d13e0c495f8982cdfc1499b57bf8af28fdd6522f76db",
-    "path_inventory_status": "VALIDATED_L0_FOR_HISTORICAL_HEAD_ONLY",
-    "current_head_tree_status": "NOT_YET_RECONSTRUCTED"
+    "path_list_sha256": "c52894cde474c22fc960b6bd5cb86505874c14ae0ee196a1badac98993732783",
+    "status": "VALIDATED_L0_HISTORICAL_ONLY"
   },
   "semantic_coverage": {
-    "complete_tree_paths_available": 682,
-    "packaged_files_scanned_supplementary": 813,
-    "packaged_python_files_scanned": 185,
-    "repo_only_control_files_inspected_exact_head": [
-      "tools/m1_baseline_audit.py",
-      "tools/m7_security_performance_one_click.py",
-      "tools/m8_clean_environment_reproduction.py",
-      "tools/m9_maximum_assurance_control_plane.py",
-      ".github/workflows/m1-baseline-audit.yml",
-      ".github/workflows/m9-maximum-assurance-control-plane.yml",
-      ".github/workflows/build-one-button-redteam-r3.yml",
-      "scripts/ci/native_one_button_r37.ps1",
-      "src/quantum/worker/main.py",
-      "src/quantum/adapters/wildberries/dispatcher.py"
-    ],
-    "deterministic_runtime_surface_count_at_historical_head": 195,
-    "runtime_surfaces_covered_by_packaged_scan": 165,
-    "repo_only_runtime_surfaces_total": 30,
-    "repo_only_runtime_surfaces_explicitly_inspected": 8,
-    "repo_only_runtime_surfaces_not_yet_explicitly_inspected": 22,
-    "neutral_filename_negative_control_executed": false,
-    "status": "SEMANTIC_ABSENCE_UNVERIFIED",
-    "reason": "The previous assessment combined complete path enumeration with selective content inspection. Filename/path-token absence and selected-file review do not prove semantic absence across every executable surface."
+    "path": "docs/evidence/agent_v3_1/SEMANTIC_DUPLICATE_COVERAGE.json",
+    "blob_sha": "ccd17d969048461bee1937f2042bd2d6d27a1b55",
+    "runtime_surface_count": 195,
+    "covered_surface_count": 195,
+    "missing_surface_count": 0,
+    "package_exact_blob_surfaces": 165,
+    "repo_only_exact_blob_surfaces": 30,
+    "runtime_surface_manifest_sha256": "356c38a4c95c98873bb2d36e63caeac14bdb80e6bbedea85e350d35fcad713da",
+    "runtime_path_list_sha256": "7f189b25ebcfa7400bd75d7c1f012aca7f92db4b896583f3ccdb1805b4d4f55f",
+    "neutral_filename_negative_control": "TRIPPED_AS_REQUIRED",
+    "status": "COMPLETE_L0_AT_HISTORICAL_HEAD"
   },
-  "component_findings_retained_as_partial": [
+  "findings": [
     {
-      "component": "M9 maximum-assurance control plane and release gate",
-      "status": "EXISTS_PARTIAL_V3_0",
-      "paths": [
-        "tools/m9_maximum_assurance_control_plane.py",
-        ".github/workflows/m9-maximum-assurance-control-plane.yml",
-        "tests/test_m9_maximum_assurance_control_plane.py",
-        "docs/evidence/M9_MAXIMUM_ASSURANCE_CONTROL_PLANE.json"
-      ],
-      "decision": "EXTEND_IN_PLACE_IF_AND_ONLY_IF_DUPLICATE_GATE_LATER_PASSES"
+      "component": "M9 v3.0 partial control plane and release gate",
+      "status": "EXISTS",
+      "constraint": "DO_NOT_DUPLICATE"
     },
     {
       "component": "Canonical RTM",
-      "status": "EXISTS_L0",
-      "decision": "DO_NOT_CREATE_SECOND_RTM"
-    },
-    {
-      "component": "M1/M7/M8 verifier tooling",
-      "status": "EXISTS_AUDIT_TOOLS",
-      "decision": "PRESERVE; FUTURE ROLE BINDING UNAUTHORIZED UNTIL GATE PASSES"
-    },
-    {
-      "component": "Native Red Team tooling",
-      "status": "EXISTS_TOOLING_ONLY",
-      "decision": "PRESERVE; FUTURE ROLE BINDING UNAUTHORIZED UNTIL GATE PASSES"
-    },
-    {
-      "component": "Product/background worker and domain runtimes",
       "status": "EXISTS",
-      "decision": "PRESERVE_EXISTING_OWNERSHIP_NO_REIMPLEMENTATION"
+      "constraint": "DO_NOT_CREATE_SECOND_RTM"
     },
     {
-      "component": "Release Orchestrator and isolated specialist processes",
-      "status": "NOT_FOUND_IN_PREVIOUS_SELECTED_SCAN",
-      "decision": "ABSENCE_NOT_PROVEN; CREATION_NOT_AUTHORIZED"
+      "component": "M1/M7/M8 audit and Native Red Team tooling",
+      "status": "EXISTS",
+      "constraint": "PRESERVE; ROLE_ADAPTATION_NOT_AUTHORIZED"
+    },
+    {
+      "component": "Product worker, launchers, queues and domain runtimes",
+      "status": "EXISTS",
+      "constraint": "DO_NOT_REIMPLEMENT"
+    },
+    {
+      "component": "Separate Protocol manager, signed work-order scheduler and isolated specialist processes",
+      "status": "NOT_FOUND_IN_195_TRACKED_RUNTIME_SURFACES_AT_HISTORICAL_HEAD",
+      "constraint": "CREATION_NOT_AUTHORIZED"
     }
   ],
-  "mandatory_anti_duplication_rules": [
-    "Do not create a parallel RTM.",
-    "Do not create a parallel release gate or second M9 control plane.",
-    "Do not duplicate product finance, ingestion, reporting, UX, adapter or worker runtimes.",
-    "Do not create a manager or specialist runtime until semantic coverage and current-head reconciliation pass.",
-    "Any newly discovered equivalent component reopens and fails the gate."
-  ],
   "decision": {
-    "path_inventory_for_d5afcf5": "VALIDATED_L0_STATIC_HISTORICAL_ONLY",
+    "historical_path_inventory": "VALIDATED_L0",
+    "historical_tracked_runtime_semantic_coverage": "COMPLETE_L0",
     "current_head_inventory": "UNVERIFIED",
-    "semantic_duplicate_risk_gate": "PARTIAL_L0_STATIC",
-    "semantic_absence": "UNVERIFIED",
+    "current_head_semantic_transfer": "PENDING",
+    "dynamic_or_external_absence": "UNVERIFIED",
     "full_duplicate_risk_gate": "OPEN",
     "new_parallel_control_plane_authorized": false,
     "minimal_migration_authorized": false,
@@ -101,17 +68,11 @@
     "milestone_complete": false
   },
   "limitations": [
-    "The complete recursive tree is bound only to historical head d5afcf5e4a28a5ce3cc144cf25db649aceda8b1f.",
-    "The previous content review did not inspect all thirty repository-only runtime surfaces.",
-    "A neutral-filename semantic negative control has not been executed.",
-    "Static analysis cannot prove absence in untracked files, external systems or dynamic runtime behavior.",
-    "No migration or new runtime implementation is authorized."
+    "The complete tree and semantic scan are bound to historical head d5afcf5e4a28a5ce3cc144cf25db649aceda8b1f.",
+    "Current-head transfer requires a complete evidence-only diff and reconstruction of the final tracked-file set.",
+    "Static coverage does not prove dynamic equivalence, external-system absence or untracked-file absence.",
+    "No architecture migration or runtime implementation is authorized."
   ],
   "maximum_evidence_level": "L0_STATIC",
-  "current_decision": [
-    "FAIL-CLOSED",
-    "PROTOCOL_IMPLEMENTATION_INCOMPLETE",
-    "MILESTONE_NOT_COMPLETE",
-    "RELEASE_BLOCKED"
-  ]
+  "current_decision": ["FAIL-CLOSED", "PROTOCOL_IMPLEMENTATION_INCOMPLETE", "MILESTONE_NOT_COMPLETE", "RELEASE_BLOCKED"]
 }
