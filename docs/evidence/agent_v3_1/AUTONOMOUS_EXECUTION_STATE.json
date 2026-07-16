@@ -1,94 +1,67 @@
 {
-  "schema_version": "1.4.0",
-  "state_version": 6,
+  "schema_version": "1.5.0",
+  "state_version": 7,
   "repository": "gollandecd-fabula/quantum-analytics",
   "branch": "fix/quantum-one-click-stable-release",
-  "base_head": "840fc90c8257ee373c81bb84f0c983e0f6c44c3b",
-  "merge_base": "2954475609883dce0953a08ce60c11ba517058cf",
   "active_milestone": "M0",
   "active_work_order_id": "WO-M0-012",
   "status": "REMEDIATION_IN_PROGRESS",
-  "subject_head_before_state_update": "04e1ea8cac7a5ed9a5356f8616686e57d99340da",
-  "previous_state_blob_sha": "06516801e670986d0198b77b16ec883aa8ef5b32",
+  "previous_state_blob_sha": "e9bec43f648a2c09454182ae6273c446cd4a2c19",
   "protocol": {
     "version": "3.1",
     "sha256": "be69b8f1f919066c67086d6dd4678acf5e3cb3c4f1db9bc587dc540018601a90",
     "source_identity": "RESOLVED_L0",
-    "production_control_plane_ingestion": "NOT_IMPLEMENTED"
+    "runtime_ingestion": "NOT_IMPLEMENTED"
   },
   "ui_reference": {
     "sha256": "2482074aea312b065b4094792c5676445514dd555d50a064a5ae3e189dc60d13",
-    "technical_freeze_status": "UI_SPEC_FROZEN_L0",
-    "implementation_status": "NOT_STARTED",
-    "physical_l5_status": "UNVERIFIED"
+    "technical_freeze": "RESOLVED_L0",
+    "implementation": "NOT_STARTED",
+    "physical_l5": "UNVERIFIED"
   },
   "canonical_rtm": {
-    "path": "docs/evidence/agent_v3_1/REQUIREMENTS_TRACEABILITY_MATRIX.json",
     "requirement_count": 712,
     "mandatory_field_count": 19,
-    "index_status": "PARTIAL_STALE_HEAD_AND_BLOCKER_SUMMARY",
-    "immutable_rows_rewrite_authorized": false,
+    "row_storage": "IMMUTABLE_SHARDS",
+    "index_status": "RECONCILIATION_REQUIRED",
     "runtime_ingestion": "NOT_IMPLEMENTED"
   },
   "correction_registry": {
-    "path": "docs/evidence/agent_v3_1/M0_CORRECTION_REQUIREMENTS_REGISTRY.json",
+    "path": "M0_CORRECTION_REQUIREMENTS_REGISTRY.json",
     "blob_sha": "dd06a0a60250770a87b08280aff577ca452204e5",
-    "correction_count": 8,
     "verified_count": 0
   },
-  "protocol_violations": {
-    "path": "docs/evidence/agent_v3_1/PROTOCOL_VIOLATION_REGISTER.json",
+  "protocol_violation_register": {
+    "path": "PROTOCOL_VIOLATION_REGISTER.json",
     "blob_sha": "58c7a9b62de379fe0fd72391ae8e491beab42bf9",
-    "rollback_breaches_recorded": 2,
-    "open_remediation_count": 1
+    "historical_boundary_breaches": 2,
+    "open_claim_remediation": 1
   },
-  "recursive_tree": {
-    "historical_target_exact_head": "d5afcf5e4a28a5ce3cc144cf25db649aceda8b1f",
-    "historical_entry_count": 682,
-    "historical_status": "VALIDATED_L0_STATIC_HISTORICAL_ONLY",
-    "current_head_status": "UNVERIFIED"
+  "historical_inventory_and_semantics": {
+    "target_exact_head": "d5afcf5e4a28a5ce3cc144cf25db649aceda8b1f",
+    "tracked_entries": 682,
+    "tracked_runtime_surfaces": 195,
+    "semantic_surfaces_covered": 195,
+    "semantic_coverage_blob_sha": "ccd17d969048461bee1937f2042bd2d6d27a1b55",
+    "status": "COMPLETE_L0_HISTORICAL_ONLY"
+  },
+  "current_head_transfer": {
+    "tracked_set_reconstruction": "PENDING",
+    "runtime_surface_change_check": "PENDING",
+    "dynamic_external_absence": "UNVERIFIED"
   },
   "duplicate_risk": {
-    "path": "docs/evidence/agent_v3_1/DUPLICATE_RISK_ASSESSMENT.json",
-    "blob_sha": "72bae1609b69a672c499d33f6e74f4406c3aa968",
-    "path_inventory_for_historical_head": "VALIDATED_L0",
-    "semantic_gate": "PARTIAL_L0_STATIC",
-    "semantic_absence": "UNVERIFIED",
+    "assessment_blob_sha": "2ad32f24663c6698a26d450460ee2b365be0b6f6",
+    "historical_semantic_coverage": "COMPLETE_L0",
     "full_gate": "OPEN",
-    "minimal_migration_authorized": false,
+    "migration_authorized": false,
     "manager_runtime_authorized": false,
     "specialist_runtime_authorized": false,
     "parallel_control_plane_authorized": false
   },
-  "defects": [
-    {
-      "defect_id": "M0-D003",
-      "severity": "P1",
-      "status": "REOPENED_PARTIAL",
-      "title": "Historical exact-head path inventory exists, but current-head inventory and semantic duplicate absence are unverified."
-    },
-    {
-      "defect_id": "M0-D007",
-      "severity": "P1",
-      "status": "RESOLVED_WITH_ROLLBACK_BUT_PROTOCOL_BREACH_RECORDED",
-      "title": "Temporary tools instrumentation was rolled back but violated the declared M0 path boundary and permission gate."
-    },
-    {
-      "defect_id": "M0-D008",
-      "severity": "P0",
-      "status": "OPEN",
-      "title": "Duplicate-risk and architecture claims exceeded available exact-head and semantic evidence."
-    },
-    {
-      "defect_id": "M0-D009",
-      "severity": "P0",
-      "status": "OPEN",
-      "title": "Canonical RTM index and active evidence artifacts contain stale subject-head or blocker summaries."
-    }
-  ],
   "open_blockers": [
     "BLK-CURRENT-HEAD-RECURSIVE-TREE-UNVERIFIED",
-    "BLK-SEMANTIC-DUPLICATE-ABSENCE-UNVERIFIED",
+    "BLK-CURRENT-HEAD-SEMANTIC-TRANSFER-UNVERIFIED",
     "BLK-CANONICAL-RTM-INDEX-RECONCILIATION",
     "BLK-DETERMINISTIC-CONTROLLER-RUNTIME-NOT-IMPLEMENTED",
     "BLK-CONTROL-PLANE-L2-INGESTION-NOT-IMPLEMENTED",
@@ -96,11 +69,14 @@
     "BLK-SAME-ARTIFACT-RUN-A-RUN-B-NOT-EXECUTED",
     "BLK-PHYSICAL-PILOT-NOT-EXECUTED"
   ],
-  "next_scheduler_action": "Complete deterministic semantic coverage of all runtime surfaces without changing forbidden paths, then reconstruct the final current-head tree from the validated historical tree plus complete evidence-only diffs or another read-only native tree source.",
-  "production_code_changed_in_wo_m0_012": false,
-  "tests_changed_in_wo_m0_012": false,
-  "tools_changed_in_wo_m0_012": false,
-  "workflows_changed_in_wo_m0_012": false,
+  "next_scheduler_action": "Reconcile the canonical RTM index and append-only ledger, then freeze repository evidence commits, reconstruct the resulting current-head tracked set from the historical tree plus complete evidence-only diff, and update PR metadata without changing the repository head.",
+  "wo_m0_012_change_boundary": {
+    "production_changed": false,
+    "tests_changed": false,
+    "tools_changed": false,
+    "workflows_changed": false,
+    "allowed_root": "docs/evidence/agent_v3_1/**"
+  },
   "marketplace_writes_enabled": false,
   "merge_to_main_authorized": false,
   "release_authorized": false,
