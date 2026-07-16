@@ -1,171 +1,43 @@
 {
-  "schema_version": "1.0.0",
-  "artifact_type": "M0_CORRECTION_REQUIREMENTS_REGISTRY",
-  "repository": "gollandecd-fabula/quantum-analytics",
-  "branch": "fix/quantum-one-click-stable-release",
-  "subject_exact_head_before_corrections": "c715d4b4861ad931eb0d1891aeac3f771225ee19",
-  "active_milestone": "M0",
-  "work_order_id": "WO-M0-012",
-  "canonical_registry": {
-    "path": "docs/evidence/agent_v3_1/REQUIREMENTS_TRACEABILITY_MATRIX.json",
-    "blob_sha": "4c5b368df252936839bb57b8b915a1a15837afb2",
-    "requirement_count": 712,
-    "mandatory_field_count": 19,
-    "status": "PARTIAL_STALE_HEAD_AND_STATUS_RECONCILIATION_REQUIRED",
-    "replacement_authorized": false
-  },
-  "registry_fields": [
-    "correction_id",
-    "protocol_point",
-    "milestone",
-    "action",
-    "test",
-    "negative_control",
-    "evidence_level",
-    "artifact",
-    "pass_criteria",
-    "actual_status",
-    "rollback_condition",
-    "residual_risk"
-  ],
-  "corrections": [
+  "schema_version":"1.1.0",
+  "artifact_type":"M0_CORRECTION_REQUIREMENTS_REGISTRY",
+  "repository":"gollandecd-fabula/quantum-analytics",
+  "branch":"fix/quantum-one-click-stable-release",
+  "active_milestone":"M0",
+  "work_order_id":"WO-M0-012",
+  "supersedes_blob_sha":"dd06a0a60250770a87b08280aff577ca452204e5",
+  "canonical_registry":{"path":"REQUIREMENTS_TRACEABILITY_MATRIX.json","blob_sha":"570ae332a6cec5edec4b06c2422ac96f5e19d8e5","requirement_count":712,"mandatory_field_count":19,"immutable_shards_modified":false},
+  "final_head_evidence_policy":{"authority":"PR_85_METADATA_AFTER_LAST_REPOSITORY_EVIDENCE_COMMIT","reason":"Committing a tree artifact changes the head it describes; the stable final head is therefore reconstructed after repository freeze and bound in PR metadata without another repository commit."},
+  "registry_fields":["correction_id","protocol_point","milestone","action","test","negative_control","evidence_level","artifact","pass_criteria","actual_status","rollback_condition","residual_risk"],
+  "corrections":[
     {
-      "correction_id": "M0-COR-001",
-      "protocol_point": "Protocol v3.1 section 2: repository/branch/exact head/base head/merge-base; section 2: results from different commits must not be combined; Protocol Lock pre-change repository-state rule",
-      "milestone": "M0",
-      "action": "Rebind every active M0 evidence claim to the actual current head or explicitly mark it historical and non-transitive.",
-      "test": "Read PR head; compare each artifact subject_exact_head/target_exact_head to current head; reject stale evidence as current-head proof.",
-      "negative_control": "Supply evidence whose target head differs from current PR head and require the gate to remain open.",
-      "evidence_level": "L0_STATIC",
-      "artifact": ["CURRENT_HEAD_EVIDENCE_RECONCILIATION.json", "AUTONOMOUS_EXECUTION_STATE.json", "PR #85 metadata"],
-      "pass_criteria": "No active current-head claim relies on evidence generated for d5afcf5 or another earlier commit without an explicit historical-only boundary.",
-      "actual_status": "NOT_STARTED",
-      "rollback_condition": "Any current-head field remains stale or historical evidence is promoted to current evidence.",
-      "residual_risk": "Future commits invalidate current-head evidence unless regenerated or formally scoped as history."
+      "correction_id":"M0-COR-001","protocol_point":"Protocol v3.1 section 2 exact-head binding and no cross-commit evidence combination","milestone":"M0","action":"Remove stale current-head claims and bind final head after repository freeze.","test":"Compare every current claim to final PR head.","negative_control":"Historical d5afcf5 evidence presented as current proof must fail.","evidence_level":"L0_STATIC","artifact":["PR #85 metadata","AUTONOMOUS_EXECUTION_STATE.json"],"pass_criteria":"Final PR metadata names the exact head and separates historical evidence.","actual_status":"IN_PROGRESS","rollback_condition":"Any active stale-head claim remains.","residual_risk":"Future commits invalidate the final-head binding."
     },
     {
-      "correction_id": "M0-COR-002",
-      "protocol_point": "Protocol Lock: verify active milestone, requirement, change boundary, next test and rollback before every modifying action; M0 forbidden paths included tools/**",
-      "milestone": "M0",
-      "action": "Record the temporary tools/m1_baseline_audit.py modification as a boundary violation, not merely a zero-net-tree incident, and prohibit recurrence.",
-      "test": "Inspect work-order declarations and commits ebf186d/d42a935; verify the incident is classified CHANGE_BOUNDARY_VIOLATION and rollback evidence is retained.",
-      "negative_control": "Treat zero net diff as erasing the violation; the correction gate must reject this interpretation.",
-      "evidence_level": "L0_STATIC",
-      "artifact": ["PROTOCOL_VIOLATION_REGISTER.json", "WORK_ORDER_LEDGER.json", "AUTONOMOUS_EXECUTION_STATE.json"],
-      "pass_criteria": "Violation remains visible, status is RESOLVED_WITH_ROLLBACK_BUT_PROTOCOL_BREACH_RECORDED, and no PASS is inferred from zero net tree effect.",
-      "actual_status": "NOT_STARTED",
-      "rollback_condition": "Incident is hidden, downgraded to harmless, or deleted from history.",
-      "residual_risk": "Audit evidence exists, but the original unauthorized change cannot be retroactively made compliant."
+      "correction_id":"M0-COR-002","protocol_point":"Declared M0 forbidden paths and pre-change boundary control","milestone":"M0","action":"Record the temporary tools modification as a protocol breach despite rollback.","test":"Incident and rollback SHAs remain visible.","negative_control":"Zero net diff interpreted as compliance must fail.","evidence_level":"L0_STATIC","artifact":["PROTOCOL_VIOLATION_REGISTER.json","WORK_ORDER_LEDGER.json"],"pass_criteria":"Breach remains recorded and no PASS is derived.","actual_status":"PARTIAL","rollback_condition":"Violation is hidden or downgraded.","residual_risk":"Historical noncompliance cannot be undone."
     },
     {
-      "correction_id": "M0-COR-003",
-      "protocol_point": "Stage-gated launch rule: forward transition requires explicitly named stage permission; corrections inside the same failed stage may continue automatically",
-      "milestone": "M0",
-      "action": "Classify the earlier instrumentation transition as unauthorized and keep all present work inside M0 remediation until corrected evidence is complete.",
-      "test": "Verify no M1 implementation work, production patch or new architecture is started during WO-M0-012.",
-      "negative_control": "Attempt to label remediation as M1 design or implementation; gate must block it.",
-      "evidence_level": "L0_STATIC",
-      "artifact": ["PROTOCOL_VIOLATION_REGISTER.json", "AUTONOMOUS_EXECUTION_STATE.json"],
-      "pass_criteria": "Active milestone stays M0; only evidence/status remediation occurs; no forward-stage completion claim.",
-      "actual_status": "IN_PROGRESS",
-      "rollback_condition": "Any production, test, workflow or runtime implementation change occurs.",
-      "residual_risk": "Explicit permission history cannot be reconstructed beyond recorded conversation and work-order evidence."
+      "correction_id":"M0-COR-003","protocol_point":"Explicit stage/tool permission before a new modifying mechanism","milestone":"M0","action":"Record missing permission and keep remediation evidence-only.","test":"WO-M0-012 changes no product, test, tool or workflow path.","negative_control":"Any new forbidden-path write fails.","evidence_level":"L0_STATIC","artifact":["PROTOCOL_VIOLATION_REGISTER.json","final diff"],"pass_criteria":"Current remediation remains evidence-only; original breach remains recorded.","actual_status":"PARTIAL","rollback_condition":"Forbidden path changes occur.","residual_risk":"Original permission defect cannot be retroactively cured."
     },
     {
-      "correction_id": "M0-COR-004",
-      "protocol_point": "Claim cannot exceed actual evidence; absence claims require exhaustive proof; missing P0/P1 coverage keeps release blocked",
-      "milestone": "M0",
-      "action": "Reopen duplicate-risk from RESOLVED_L0_STATIC to PARTIAL_L0_STATIC / SEMANTIC_ABSENCE_UNVERIFIED.",
-      "test": "Check complete path inventory separately from semantic content coverage; verify only selected files and packaged source were content-scanned.",
-      "negative_control": "Infer semantic absence solely from filenames/path tokens; gate must reject closure.",
-      "evidence_level": "L0_STATIC",
-      "artifact": ["DUPLICATE_RISK_ASSESSMENT.json", "PROTOCOL_CONFLICT_REGISTER.json", "AUTONOMOUS_EXECUTION_STATE.json"],
-      "pass_criteria": "Duplicate-risk is not closed; path inventory and semantic-equivalence status are reported separately; minimal migration authorization is false.",
-      "actual_status": "NOT_STARTED",
-      "rollback_condition": "RESOLVED, PASS, complete absence or migration authorization remains asserted.",
-      "residual_risk": "An equivalent component may be implemented under a non-obvious name or in uninspected file content."
+      "correction_id":"M0-COR-004","protocol_point":"Claim cannot exceed evidence; exact-head and absence claims are scoped","milestone":"M0","action":"Reopen duplicate risk and revoke migration authorization.","test":"Full gate OPEN; all authorization flags false.","negative_control":"Filename-only absence or historical-head transfer must fail.","evidence_level":"L0_STATIC","artifact":["DUPLICATE_RISK_ASSESSMENT.json","PROTOCOL_CONFLICT_REGISTER.json"],"pass_criteria":"No RESOLVED full-gate claim remains.","actual_status":"PARTIAL","rollback_condition":"Migration or manager/specialist authorization becomes true.","residual_risk":"Current-head transfer and dynamic/external absence remain open."
     },
     {
-      "correction_id": "M0-COR-005",
-      "protocol_point": "Protocol v3.1 section 2 exact-head evidence binding; no combination of different commits/artifacts",
-      "milestone": "M0",
-      "action": "Obtain or derive a complete recursive tree for the final current head after correction commits, without modifying forbidden paths.",
-      "test": "Native full-depth checkout or Git Trees API; record complete path/object set, count, uniqueness and target exact head; cross-check independently where feasible.",
-      "negative_control": "Present the d5afcf5 tree as proof for c715d4b or a later head; gate must block.",
-      "evidence_level": "L0_STATIC",
-      "artifact": ["CURRENT_HEAD_RECURSIVE_TREE.json"],
-      "pass_criteria": "Tree target equals the then-current final evidence head and all tracked paths are reconstructable; no forbidden temporary source modification is used.",
-      "actual_status": "BLOCKED",
-      "rollback_condition": "Tree is truncated, generated for another head, or acquisition changes a forbidden path.",
-      "residual_risk": "Every subsequent commit changes the exact head and requires explicit evidence scoping or regeneration."
+      "correction_id":"M0-COR-005","protocol_point":"Protocol v3.1 exact-head tree evidence","milestone":"M0","action":"Reconstruct final tracked set from d5afcf5 tree plus complete final evidence-only diff.","test":"Final head, changed paths, count, unique paths and canonical hash in PR metadata.","negative_control":"Any runtime path change or truncated compare fails transfer.","evidence_level":"L0_STATIC","artifact":["PR #85 metadata"],"pass_criteria":"Final-head tracked set reconstructed and 195 runtime blobs unchanged.","actual_status":"IN_PROGRESS","rollback_condition":"Diff is incomplete or contains forbidden/runtime paths.","residual_risk":"Static proof does not cover untracked/external state."
     },
     {
-      "correction_id": "M0-COR-006",
-      "protocol_point": "Protocol v3.1 sections 4 and 5: traceability, negative controls and falsification; fail-closed gate",
-      "milestone": "M0",
-      "action": "Perform semantic duplicate analysis over every executable/config/workflow tracked file or retain SEMANTIC_ABSENCE_UNVERIFIED.",
-      "test": "Content classification with deterministic inclusion rules; inspect all candidate ownership and dispatch/control semantics; record inspected count and exclusions.",
-      "negative_control": "Rename an orchestrator-like implementation to a neutral filename; semantic scan must still identify it.",
-      "evidence_level": "L0_STATIC",
-      "artifact": ["SEMANTIC_DUPLICATE_COVERAGE.json", "DUPLICATE_RISK_ASSESSMENT.json"],
-      "pass_criteria": "Every in-scope executable/config/workflow file is content-covered with deterministic criteria, or duplicate-risk remains PARTIAL/UNVERIFIED.",
-      "actual_status": "NOT_STARTED",
-      "rollback_condition": "Coverage count is missing, selected-only scan is called exhaustive, or a neutral-name control is not represented.",
-      "residual_risk": "Static analysis cannot prove dynamic equivalence or external-system absence."
+      "correction_id":"M0-COR-006","protocol_point":"Traceability, negative controls and semantic duplicate coverage","milestone":"M0","action":"Content-cover all 195 tracked runtime surfaces at historical head.","test":"165 package exact blobs + 30 repo-only exact blobs = 195; missing 0.","negative_control":"Neutral alpha.py with work-order semantics must be detected.","evidence_level":"L0_STATIC","artifact":["SEMANTIC_DUPLICATE_COVERAGE.json"],"pass_criteria":"195/195 historical tracked runtime surfaces covered and neutral-name control trips.","actual_status":"VERIFIED","rollback_condition":"Coverage count/hash or negative control fails.","residual_risk":"Current-head transfer and dynamic/external absence are separate requirements."
     },
     {
-      "correction_id": "M0-COR-007",
-      "protocol_point": "Protocol Lock final reconciliation: every protocol point must be matched to factual evidence before final answer",
-      "milestone": "M0",
-      "action": "Reconcile RTM index, conflict register, architecture inventory/map, autonomous state, ledger and PR metadata after corrections.",
-      "test": "Cross-artifact consistency check for head, statuses, blockers, evidence levels and authorization flags.",
-      "negative_control": "Leave one stale RESOLVED or VERIFIED field in any active artifact; reconciliation must fail.",
-      "evidence_level": "L0_STATIC",
-      "artifact": ["REQUIREMENTS_TRACEABILITY_MATRIX.json", "PROTOCOL_CONFLICT_REGISTER.json", "CURRENT_ARCHITECTURE_INVENTORY.json", "ARCHITECTURE_MIGRATION_MAP.json", "AUTONOMOUS_EXECUTION_STATE.json", "WORK_ORDER_LEDGER.json", "PR #85 metadata"],
-      "pass_criteria": "All active artifacts agree: M0 incomplete, duplicate-risk partial/unverified, no migration authorization, no release claim, exact-head scope explicit.",
-      "actual_status": "NOT_STARTED",
-      "rollback_condition": "Any cross-artifact contradiction remains.",
-      "residual_risk": "Historical immutable artifacts may retain prior incorrect claims and must be explicitly superseded rather than erased."
+      "correction_id":"M0-COR-007","protocol_point":"Final cross-artifact reconciliation","milestone":"M0","action":"Reconcile RTM, conflicts, architecture, state, ledger and PR metadata.","test":"No contradictory authorization/head/status fields.","negative_control":"One stale RESOLVED or authorization field fails reconciliation.","evidence_level":"L0_STATIC","artifact":["REQUIREMENTS_TRACEABILITY_MATRIX.json","PROTOCOL_CONFLICT_REGISTER.json","CURRENT_ARCHITECTURE_INVENTORY.json","ARCHITECTURE_MIGRATION_MAP.json","AUTONOMOUS_EXECUTION_STATE.json","WORK_ORDER_LEDGER.json","PR #85 metadata"],"pass_criteria":"All active artifacts remain fail-closed and current-head scope is explicit.","actual_status":"IN_PROGRESS","rollback_condition":"Cross-artifact contradiction remains.","residual_risk":"Historical superseded blobs remain immutable."
     },
     {
-      "correction_id": "M0-COR-008",
-      "protocol_point": "Protocol Lock: PASS/ready/plateau/release forbidden while any mandatory item is NOT_STARTED, UNVERIFIED, PARTIAL, FAILED or BLOCKED",
-      "milestone": "M0",
-      "action": "Keep milestone and release gates closed and prevent any M1 transition until the correction registry has no open mandatory correction.",
-      "test": "Evaluate all correction statuses and canonical RTM status counts before any transition claim.",
-      "negative_control": "Attempt MILESTONE_COMPLETE with one open correction; gate must reject.",
-      "evidence_level": "L0_STATIC",
-      "artifact": ["M0_CORRECTION_REQUIREMENTS_REGISTRY.json", "AUTONOMOUS_EXECUTION_STATE.json", "PR #85 metadata"],
-      "pass_criteria": "No PASS/MILESTONE_COMPLETE/RELEASE_READY is emitted while any correction remains open.",
-      "actual_status": "IN_PROGRESS",
-      "rollback_condition": "Any forbidden completion phrase or authorization appears.",
-      "residual_risk": "None beyond explicitly open corrections; release remains blocked."
+      "correction_id":"M0-COR-008","protocol_point":"No milestone/release completion while any mandatory status is open","milestone":"M0","action":"Keep M0 and release gates closed.","test":"Evaluate all correction and RTM statuses.","negative_control":"Completion with one open correction must fail.","evidence_level":"L0_STATIC","artifact":["M0_CORRECTION_REQUIREMENTS_REGISTRY.json","PR #85 metadata"],"pass_criteria":"No completion or release authorization is emitted.","actual_status":"IN_PROGRESS","rollback_condition":"Any completion/release authorization appears.","residual_risk":"Open implementation and L4/L5 blockers remain."
     }
   ],
-  "status_summary": {
-    "NOT_STARTED": 5,
-    "IN_PROGRESS": 2,
-    "BLOCKED": 1,
-    "VERIFIED": 0
-  },
-  "allowed_paths_for_remediation": [
-    "docs/evidence/agent_v3_1/**",
-    "PR #85 metadata"
-  ],
-  "forbidden_paths_for_remediation": [
-    "src/**",
-    "tests/**",
-    "tools/**",
-    ".github/workflows/**",
-    "docs/evidence/M9_MAXIMUM_ASSURANCE_CONTROL_PLANE.json",
-    "main"
-  ],
-  "current_decision": [
-    "FAIL-CLOSED",
-    "PROTOCOL_IMPLEMENTATION_INCOMPLETE",
-    "MILESTONE_NOT_COMPLETE",
-    "RELEASE_BLOCKED"
-  ],
-  "release_authorized": false,
-  "milestone_complete": false
+  "status_summary":{"VERIFIED":1,"IN_PROGRESS":4,"PARTIAL":3},
+  "allowed_paths_for_remediation":["docs/evidence/agent_v3_1/**","PR #85 metadata"],
+  "forbidden_paths_for_remediation":["src/**","tests/**","tools/**",".github/workflows/**","docs/evidence/M9_MAXIMUM_ASSURANCE_CONTROL_PLANE.json","main"],
+  "milestone_complete":false,"release_authorized":false,
+  "current_decision":["FAIL-CLOSED","PROTOCOL_IMPLEMENTATION_INCOMPLETE","MILESTONE_NOT_COMPLETE","RELEASE_BLOCKED"]
 }
