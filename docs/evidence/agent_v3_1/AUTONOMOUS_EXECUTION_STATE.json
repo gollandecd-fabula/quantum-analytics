@@ -1,86 +1,22 @@
 {
-  "schema_version": "1.5.0",
-  "state_version": 7,
-  "repository": "gollandecd-fabula/quantum-analytics",
-  "branch": "fix/quantum-one-click-stable-release",
-  "active_milestone": "M0",
-  "active_work_order_id": "WO-M0-012",
-  "status": "REMEDIATION_IN_PROGRESS",
-  "previous_state_blob_sha": "e9bec43f648a2c09454182ae6273c446cd4a2c19",
-  "protocol": {
-    "version": "3.1",
-    "sha256": "be69b8f1f919066c67086d6dd4678acf5e3cb3c4f1db9bc587dc540018601a90",
-    "source_identity": "RESOLVED_L0",
-    "runtime_ingestion": "NOT_IMPLEMENTED"
-  },
-  "ui_reference": {
-    "sha256": "2482074aea312b065b4094792c5676445514dd555d50a064a5ae3e189dc60d13",
-    "technical_freeze": "RESOLVED_L0",
-    "implementation": "NOT_STARTED",
-    "physical_l5": "UNVERIFIED"
-  },
-  "canonical_rtm": {
-    "requirement_count": 712,
-    "mandatory_field_count": 19,
-    "row_storage": "IMMUTABLE_SHARDS",
-    "index_status": "RECONCILIATION_REQUIRED",
-    "runtime_ingestion": "NOT_IMPLEMENTED"
-  },
-  "correction_registry": {
-    "path": "M0_CORRECTION_REQUIREMENTS_REGISTRY.json",
-    "blob_sha": "dd06a0a60250770a87b08280aff577ca452204e5",
-    "verified_count": 0
-  },
-  "protocol_violation_register": {
-    "path": "PROTOCOL_VIOLATION_REGISTER.json",
-    "blob_sha": "58c7a9b62de379fe0fd72391ae8e491beab42bf9",
-    "historical_boundary_breaches": 2,
-    "open_claim_remediation": 1
-  },
-  "historical_inventory_and_semantics": {
-    "target_exact_head": "d5afcf5e4a28a5ce3cc144cf25db649aceda8b1f",
-    "tracked_entries": 682,
-    "tracked_runtime_surfaces": 195,
-    "semantic_surfaces_covered": 195,
-    "semantic_coverage_blob_sha": "ccd17d969048461bee1937f2042bd2d6d27a1b55",
-    "status": "COMPLETE_L0_HISTORICAL_ONLY"
-  },
-  "current_head_transfer": {
-    "tracked_set_reconstruction": "PENDING",
-    "runtime_surface_change_check": "PENDING",
-    "dynamic_external_absence": "UNVERIFIED"
-  },
-  "duplicate_risk": {
-    "assessment_blob_sha": "2ad32f24663c6698a26d450460ee2b365be0b6f6",
-    "historical_semantic_coverage": "COMPLETE_L0",
-    "full_gate": "OPEN",
-    "migration_authorized": false,
-    "manager_runtime_authorized": false,
-    "specialist_runtime_authorized": false,
-    "parallel_control_plane_authorized": false
-  },
-  "open_blockers": [
-    "BLK-CURRENT-HEAD-RECURSIVE-TREE-UNVERIFIED",
-    "BLK-CURRENT-HEAD-SEMANTIC-TRANSFER-UNVERIFIED",
-    "BLK-CANONICAL-RTM-INDEX-RECONCILIATION",
-    "BLK-DETERMINISTIC-CONTROLLER-RUNTIME-NOT-IMPLEMENTED",
-    "BLK-CONTROL-PLANE-L2-INGESTION-NOT-IMPLEMENTED",
-    "BLK-NO-INTERACTIVE-WINDOWS-L4_L5-SESSION",
-    "BLK-SAME-ARTIFACT-RUN-A-RUN-B-NOT-EXECUTED",
-    "BLK-PHYSICAL-PILOT-NOT-EXECUTED"
-  ],
-  "next_scheduler_action": "Reconcile the canonical RTM index and append-only ledger, then freeze repository evidence commits, reconstruct the resulting current-head tracked set from the historical tree plus complete evidence-only diff, and update PR metadata without changing the repository head.",
-  "wo_m0_012_change_boundary": {
-    "production_changed": false,
-    "tests_changed": false,
-    "tools_changed": false,
-    "workflows_changed": false,
-    "allowed_root": "docs/evidence/agent_v3_1/**"
-  },
-  "marketplace_writes_enabled": false,
-  "merge_to_main_authorized": false,
-  "release_authorized": false,
-  "milestone_complete": false,
-  "maximum_verified_evidence_level": "L0_STATIC",
-  "current_decision": ["FAIL-CLOSED", "PROTOCOL_IMPLEMENTATION_INCOMPLETE", "MILESTONE_NOT_COMPLETE", "RELEASE_BLOCKED"]
+  "schema_version":"1.6.0",
+  "state_version":8,
+  "repository":"gollandecd-fabula/quantum-analytics",
+  "branch":"fix/quantum-one-click-stable-release",
+  "active_milestone":"M0",
+  "active_work_order_id":"WO-M0-012",
+  "status":"REMEDIATION_IN_PROGRESS",
+  "previous_state_blob_sha":"8cfb26a01ce9baa84e3a2c26a92fcfa9eef4808c",
+  "protocol":{"version":"3.1","sha256":"be69b8f1f919066c67086d6dd4678acf5e3cb3c4f1db9bc587dc540018601a90","source_identity":"RESOLVED_L0","runtime_ingestion":"NOT_IMPLEMENTED"},
+  "ui_reference":{"sha256":"2482074aea312b065b4094792c5676445514dd555d50a064a5ae3e189dc60d13","technical_freeze":"RESOLVED_L0","implementation":"NOT_STARTED","physical_l5":"UNVERIFIED"},
+  "canonical_rtm":{"index_blob_sha":"570ae332a6cec5edec4b06c2422ac96f5e19d8e5","requirement_count":712,"mandatory_field_count":19,"shards":12,"immutable_shards_modified":false,"index_status":"RECONCILED_L0","runtime_ingestion":"NOT_IMPLEMENTED"},
+  "historical_inventory_and_semantics":{"target_exact_head":"d5afcf5e4a28a5ce3cc144cf25db649aceda8b1f","tracked_entries":682,"tracked_runtime_surfaces":195,"semantic_surfaces_covered":195,"semantic_coverage_blob_sha":"ccd17d969048461bee1937f2042bd2d6d27a1b55","status":"COMPLETE_L0_HISTORICAL_ONLY"},
+  "current_head_transfer":{"status":"PENDING_FINAL_PR_METADATA","authority":"PR_85_METADATA_AFTER_REPOSITORY_EVIDENCE_FREEZE","required_proof":["complete compare from d5afcf5 to final head","all resulting changes evidence-only","reconstructed current tracked set","runtime surface blobs unchanged"]},
+  "duplicate_risk":{"assessment_blob_sha":"2ad32f24663c6698a26d450460ee2b365be0b6f6","historical_semantic_coverage":"COMPLETE_L0","full_gate":"OPEN_PENDING_CURRENT_HEAD_TRANSFER","dynamic_external_absence":"UNVERIFIED","migration_authorized":false,"manager_runtime_authorized":false,"specialist_runtime_authorized":false,"parallel_control_plane_authorized":false},
+  "protocol_violations":{"register_blob_sha":"58c7a9b62de379fe0fd72391ae8e491beab42bf9","historical_boundary_breaches":2,"claim_remediation":"PARTIAL_CURRENT_HEAD_PENDING"},
+  "open_blockers":["BLK-CURRENT-HEAD-RECURSIVE-TREE-UNVERIFIED","BLK-CURRENT-HEAD-SEMANTIC-TRANSFER-UNVERIFIED","BLK-DETERMINISTIC-CONTROLLER-RUNTIME-NOT-IMPLEMENTED","BLK-CONTROL-PLANE-L2-INGESTION-NOT-IMPLEMENTED","BLK-NO-INTERACTIVE-WINDOWS-L4_L5-SESSION","BLK-SAME-ARTIFACT-RUN-A-RUN-B-NOT-EXECUTED","BLK-PHYSICAL-PILOT-NOT-EXECUTED"],
+  "next_scheduler_action":"Append WO-M0-012 evidence, update correction/violation status, freeze repository evidence commits, reconstruct the final current-head tree, and update PR metadata without another repository commit.",
+  "wo_m0_012_change_boundary":{"production_changed":false,"tests_changed":false,"tools_changed":false,"workflows_changed":false,"allowed_root":"docs/evidence/agent_v3_1/**"},
+  "marketplace_writes_enabled":false,"merge_to_main_authorized":false,"migration_authorized":false,"release_authorized":false,"milestone_complete":false,"maximum_verified_evidence_level":"L0_STATIC",
+  "current_decision":["FAIL-CLOSED","PROTOCOL_IMPLEMENTATION_INCOMPLETE","MILESTONE_NOT_COMPLETE","RELEASE_BLOCKED"]
 }
