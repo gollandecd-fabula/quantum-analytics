@@ -1,84 +1,100 @@
 {
-  "schema_version": "1.2.0",
+  "schema_version": "1.1.0",
   "artifact_type": "ARCHITECTURE_MIGRATION_MAP",
   "repository": "gollandecd-fabula/quantum-analytics",
   "branch": "fix/quantum-one-click-stable-release",
-  "work_order_id": "WO-M0-012",
-  "supersedes_blob_sha": "a922c9d1282713d0f6aaa7d0bed0cd035ec56b19",
-  "historical_inventory_target_exact_head": "d5afcf5e4a28a5ce3cc144cf25db649aceda8b1f",
-  "tree_and_duplicate_gate": {
-    "historical_path_inventory": "VALIDATED_L0_FOR_D5AFCF5_ONLY",
-    "current_head_inventory": "UNVERIFIED",
-    "semantic_coverage": "PARTIAL_L0_STATIC",
-    "semantic_absence": "UNVERIFIED",
-    "full_gate": "OPEN"
-  },
-  "preservation_rules_active_now": [
-    "Do not create a second RTM.",
-    "Do not create a parallel release gate or control plane.",
-    "Do not modify or duplicate product/domain runtimes during M0 remediation.",
-    "Do not create a manager or specialist process while duplicate risk remains open."
+  "inventory_target_exact_head": "d5afcf5e4a28a5ce3cc144cf25db649aceda8b1f",
+  "previous_migration_map_blob_sha": "591717dd6e4e5448778ce5427a52e1ed35daad49",
+  "generated_at_utc": "2026-07-16T07:05:00Z",
+  "work_order_id": "WO-M0-011",
+  "source_architecture": "Existing M9 Protocol v3.0 bootstrap/audit/self-test gate plus established audit, Red Team, Windows and product runtimes",
+  "target_architecture": "Deterministic Manager-Specialist Architecture under the existing M9 ownership boundary",
+  "anti_duplication_rule": [
+    "Reuse and minimally extend the current M9 control plane.",
+    "Do not create a parallel gate or parallel RTM.",
+    "Do not duplicate product finance, ingestion, reporting, UX, adapter, dispatcher or worker runtimes.",
+    "Add at most one manager runtime under existing M9 ownership.",
+    "Adapt existing product write, audit and Red Team paths behind signed role-specific work orders."
   ],
-  "future_target_components": [
+  "tree_and_duplicate_gate": {
+    "status": "RESOLVED_L0_STATIC",
+    "tree_evidence": "RECURSIVE_EXACT_HEAD_TREE.json",
+    "duplicate_assessment": "DUPLICATE_RISK_ASSESSMENT.json",
+    "entry_count": 682,
+    "canonical_entries_sha256": "44af77d30a2501157b75d13e0c495f8982cdfc1499b57bf8af28fdd6522f76db"
+  },
+  "components": [
     {
       "target_component": "Deterministic Protocol Controller",
-      "existing_ownership_candidate": "M9 control-plane boundary",
-      "status": "DESIGN_NOT_AUTHORIZED",
-      "implementation_authorized": false,
-      "reason": "Current-head inventory and semantic duplicate gate are open."
+      "existing_components": ["CMP-001", "CMP-002", "CMP-003", "CMP-004"],
+      "decision": "EXTEND_IN_PLACE_NO_DUPLICATE",
+      "minimal_migration": [
+        "ingest exact Protocol v3.1 source and SHA-256",
+        "ingest the single canonical 712-row RTM",
+        "add canonical state ownership",
+        "add deterministic requirement scheduler and exclusive work-order locks",
+        "add role-permission and protected-path policies"
+      ],
+      "status": "NOT_IMPLEMENTED",
+      "blockers": ["BLK-DETERMINISTIC-CONTROLLER-RUNTIME-NOT-IMPLEMENTED", "BLK-CONTROL-PLANE-L2-INGESTION-NOT-IMPLEMENTED"]
     },
     {
       "target_component": "Release Orchestrator",
-      "existing_ownership_candidate": "M9 control-plane boundary",
-      "status": "DESIGN_NOT_AUTHORIZED",
-      "implementation_authorized": false,
-      "reason": "Absence of an equivalent manager runtime is unverified."
+      "existing_components": ["CMP-001", "CMP-011"],
+      "decision": "ADD_ONE_MANAGER_ONLY_AS_M9_EXTENSION",
+      "minimal_migration": [
+        "manager has no direct production write",
+        "manager cannot verify its own patch",
+        "manager cannot authorize release",
+        "dispatch signed immutable work orders to role adapters"
+      ],
+      "status": "NOT_IMPLEMENTED",
+      "blockers": ["BLK-DETERMINISTIC-CONTROLLER-RUNTIME-NOT-IMPLEMENTED"]
     },
     {
-      "target_component": "Implementer specialist",
-      "existing_ownership_candidate": "Existing product write paths",
-      "status": "DESIGN_NOT_AUTHORIZED",
-      "implementation_authorized": false
+      "target_component": "Implementer",
+      "existing_components": ["CMP-008", "CMP-009", "CMP-010", "CMP-012"],
+      "decision": "ADAPT_EXISTING_PRODUCT_WRITE_PATHS_BEHIND_SIGNED_WORK_ORDER",
+      "minimal_migration": ["single writer", "one requirement or defect per patch", "write-enabled worktree only", "no gate writes", "schema-valid raw output"],
+      "status": "NOT_IMPLEMENTED_AS_SPECIALIST_PROCESS",
+      "blockers": ["BLK-DETERMINISTIC-CONTROLLER-RUNTIME-NOT-IMPLEMENTED"]
     },
     {
-      "target_component": "Verifier specialist",
-      "existing_ownership_candidate": "M1/M7/M8 audit tooling",
-      "status": "DESIGN_NOT_AUTHORIZED",
-      "implementation_authorized": false
+      "target_component": "Verifier",
+      "existing_components": ["CMP-002", "CMP-005", "CMP-013"],
+      "decision": "ADAPT_EXISTING_TEST_AND_AUDIT_TOOLING",
+      "minimal_migration": ["immutable exact-head checkout", "candidate patch application without production write", "independent raw evidence", "no Implementer hidden reasoning"],
+      "status": "NOT_IMPLEMENTED_AS_SPECIALIST_PROCESS",
+      "blockers": ["BLK-DETERMINISTIC-CONTROLLER-RUNTIME-NOT-IMPLEMENTED"]
     },
     {
-      "target_component": "Adversary specialist",
-      "existing_ownership_candidate": "Native Red Team tooling",
-      "status": "DESIGN_NOT_AUTHORIZED",
-      "implementation_authorized": false
+      "target_component": "Adversary",
+      "existing_components": ["CMP-006", "CMP-014"],
+      "decision": "ADAPT_EXISTING_REDTEAM_TOOLING",
+      "minimal_migration": ["isolated attack environment", "mutation/fuzz/fault/bypass work orders", "no production fixes", "schema-valid adversarial evidence"],
+      "status": "PARTIAL_TOOLING_PROCESS_NOT_IMPLEMENTED",
+      "blockers": ["BLK-DETERMINISTIC-CONTROLLER-RUNTIME-NOT-IMPLEMENTED"]
     },
     {
       "target_component": "Windows L4/L5 Worker",
-      "existing_ownership_candidate": "Existing Windows install/launcher paths",
+      "existing_components": ["CMP-007", "CMP-010"],
+      "decision": "EXTEND_EXISTING_WINDOWS_PATHS",
+      "minimal_migration": ["interactive user-session executor", "real installed LNK launch", "process tree and actual child command line", "screenshot or video evidence", "same-artifact installation and physical scenario"],
       "status": "BLOCKED",
-      "implementation_authorized": false,
       "blockers": ["BLK-NO-INTERACTIVE-WINDOWS-L4_L5-SESSION", "BLK-SAME-ARTIFACT-RUN-A-RUN-B-NOT-EXECUTED", "BLK-PHYSICAL-PILOT-NOT-EXECUTED"]
     },
     {
-      "target_component": "Deterministic Release Gate v3.1",
-      "existing_ownership_candidate": "Existing M9 gate",
-      "status": "DESIGN_NOT_AUTHORIZED",
-      "implementation_authorized": false,
-      "reason": "Parallel gate is forbidden; in-place extension decision is deferred until duplicate-risk closure."
+      "target_component": "Deterministic Release Gate",
+      "existing_components": ["CMP-001", "CMP-002", "CMP-003", "CMP-004"],
+      "decision": "EXTEND_EXISTING_GATE_NO_DUPLICATE",
+      "minimal_migration": ["expand mandatory artifact set", "bind protocol and UI hashes", "validate same-artifact RUN A and RUN B", "validate role identities, permissions and protected paths", "accept only immutable schema-valid evidence"],
+      "status": "PARTIAL_V3_0_ONLY",
+      "blockers": ["BLK-CONTROL-PLANE-L2-INGESTION-NOT-IMPLEMENTED", "BLK-NO-INTERACTIVE-WINDOWS-L4_L5-SESSION"]
     }
   ],
-  "open_blockers": [
-    "BLK-CURRENT-HEAD-RECURSIVE-TREE-UNVERIFIED",
-    "BLK-SEMANTIC-DUPLICATE-ABSENCE-UNVERIFIED",
-    "BLK-DETERMINISTIC-CONTROLLER-RUNTIME-NOT-IMPLEMENTED",
-    "BLK-CONTROL-PLANE-L2-INGESTION-NOT-IMPLEMENTED",
-    "BLK-NO-INTERACTIVE-WINDOWS-L4_L5-SESSION",
-    "BLK-SAME-ARTIFACT-RUN-A-RUN-B-NOT-EXECUTED",
-    "BLK-PHYSICAL-PILOT-NOT-EXECUTED"
-  ],
-  "actual_status": "BLOCKED",
+  "actual_status": "PARTIAL",
   "maximum_evidence_level": "L0_STATIC",
-  "minimal_migration_authorized": false,
+  "minimal_migration_authorized": true,
   "parallel_component_creation_authorized": false,
   "release_authorized": false,
   "milestone_complete": false,
