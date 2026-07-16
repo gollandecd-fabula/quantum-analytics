@@ -1,112 +1,102 @@
 {
-  "actual_status": "PARTIAL",
-  "anti_duplication_rule": "Reuse and minimally extend the current M9 control plane and existing Red Team/Windows tooling. No parallel gate or parallel RTM.",
+  "schema_version": "1.1.0",
+  "artifact_type": "ARCHITECTURE_MIGRATION_MAP",
+  "repository": "gollandecd-fabula/quantum-analytics",
   "branch": "fix/quantum-one-click-stable-release",
+  "inventory_target_exact_head": "d5afcf5e4a28a5ce3cc144cf25db649aceda8b1f",
+  "previous_migration_map_blob_sha": "591717dd6e4e5448778ce5427a52e1ed35daad49",
+  "generated_at_utc": "2026-07-16T07:05:00Z",
+  "work_order_id": "WO-M0-011",
+  "source_architecture": "Existing M9 Protocol v3.0 bootstrap/audit/self-test gate plus established audit, Red Team, Windows and product runtimes",
+  "target_architecture": "Deterministic Manager-Specialist Architecture under the existing M9 ownership boundary",
+  "anti_duplication_rule": [
+    "Reuse and minimally extend the current M9 control plane.",
+    "Do not create a parallel gate or parallel RTM.",
+    "Do not duplicate product finance, ingestion, reporting, UX, adapter, dispatcher or worker runtimes.",
+    "Add at most one manager runtime under existing M9 ownership.",
+    "Adapt existing product write, audit and Red Team paths behind signed role-specific work orders."
+  ],
+  "tree_and_duplicate_gate": {
+    "status": "RESOLVED_L0_STATIC",
+    "tree_evidence": "RECURSIVE_EXACT_HEAD_TREE.json",
+    "duplicate_assessment": "DUPLICATE_RISK_ASSESSMENT.json",
+    "entry_count": 682,
+    "canonical_entries_sha256": "44af77d30a2501157b75d13e0c495f8982cdfc1499b57bf8af28fdd6522f76db"
+  },
   "components": [
     {
-      "blockers": ["BLK-PROTOCOL-V3_1-SOURCE-MISSING"],
-      "decision": "EXTEND",
+      "target_component": "Deterministic Protocol Controller",
       "existing_components": ["CMP-001", "CMP-002", "CMP-003", "CMP-004"],
+      "decision": "EXTEND_IN_PLACE_NO_DUPLICATE",
       "minimal_migration": [
-        "bind the exact Protocol v3.1 source and SHA-256",
-        "replace synthetic requirements with literal ingestion",
+        "ingest exact Protocol v3.1 source and SHA-256",
+        "ingest the single canonical 712-row RTM",
         "add canonical state ownership",
-        "add deterministic scheduler and exclusive WORK_ORDER locks",
+        "add deterministic requirement scheduler and exclusive work-order locks",
         "add role-permission and protected-path policies"
       ],
-      "status": "BLOCKED",
-      "target_component": "Deterministic Protocol Controller"
+      "status": "NOT_IMPLEMENTED",
+      "blockers": ["BLK-DETERMINISTIC-CONTROLLER-RUNTIME-NOT-IMPLEMENTED", "BLK-CONTROL-PLANE-L2-INGESTION-NOT-IMPLEMENTED"]
     },
     {
-      "blockers": ["BLK-FULL-TREE-INVENTORY-CONSTRAINED"],
-      "decision": "BLOCKED_PENDING_COMPLETE_INVENTORY",
-      "existing_components": ["CMP-011"],
+      "target_component": "Release Orchestrator",
+      "existing_components": ["CMP-001", "CMP-011"],
+      "decision": "ADD_ONE_MANAGER_ONLY_AS_M9_EXTENSION",
       "minimal_migration": [
-        "prove no equivalent exists",
-        "if absent, add one manager-only runtime with no production write and no release decision"
+        "manager has no direct production write",
+        "manager cannot verify its own patch",
+        "manager cannot authorize release",
+        "dispatch signed immutable work orders to role adapters"
       ],
-      "status": "UNVERIFIED",
-      "target_component": "Release Orchestrator"
+      "status": "NOT_IMPLEMENTED",
+      "blockers": ["BLK-DETERMINISTIC-CONTROLLER-RUNTIME-NOT-IMPLEMENTED"]
     },
     {
-      "blockers": ["BLK-FULL-TREE-INVENTORY-CONSTRAINED"],
-      "decision": "ADAPT_PRODUCT_WRITE_PATHS_BEHIND_SIGNED_WORK_ORDER",
-      "existing_components": ["CMP-012", "CMP-008", "CMP-009", "CMP-010"],
-      "minimal_migration": [
-        "single writer",
-        "one requirement/defect per patch",
-        "write-enabled worktree only",
-        "no gate writes",
-        "schema-valid raw output"
-      ],
-      "status": "UNVERIFIED",
-      "target_component": "Implementer"
+      "target_component": "Implementer",
+      "existing_components": ["CMP-008", "CMP-009", "CMP-010", "CMP-012"],
+      "decision": "ADAPT_EXISTING_PRODUCT_WRITE_PATHS_BEHIND_SIGNED_WORK_ORDER",
+      "minimal_migration": ["single writer", "one requirement or defect per patch", "write-enabled worktree only", "no gate writes", "schema-valid raw output"],
+      "status": "NOT_IMPLEMENTED_AS_SPECIALIST_PROCESS",
+      "blockers": ["BLK-DETERMINISTIC-CONTROLLER-RUNTIME-NOT-IMPLEMENTED"]
     },
     {
-      "blockers": ["BLK-FULL-TREE-INVENTORY-CONSTRAINED"],
-      "decision": "EXTEND_EXISTING_TEST_AND_AUDIT_TOOLING",
+      "target_component": "Verifier",
       "existing_components": ["CMP-002", "CMP-005", "CMP-013"],
-      "minimal_migration": [
-        "immutable exact-head checkout",
-        "candidate patch application without production write",
-        "independent raw evidence",
-        "no Implementer hidden reasoning"
-      ],
-      "status": "UNVERIFIED",
-      "target_component": "Verifier"
+      "decision": "ADAPT_EXISTING_TEST_AND_AUDIT_TOOLING",
+      "minimal_migration": ["immutable exact-head checkout", "candidate patch application without production write", "independent raw evidence", "no Implementer hidden reasoning"],
+      "status": "NOT_IMPLEMENTED_AS_SPECIALIST_PROCESS",
+      "blockers": ["BLK-DETERMINISTIC-CONTROLLER-RUNTIME-NOT-IMPLEMENTED"]
     },
     {
-      "blockers": [],
-      "decision": "EXTEND_EXISTING_REDTEAM_TOOLING",
+      "target_component": "Adversary",
       "existing_components": ["CMP-006", "CMP-014"],
-      "minimal_migration": [
-        "isolated attack environment",
-        "mutation/fuzz/fault/bypass work orders",
-        "no production fixes",
-        "schema-valid adversarial evidence"
-      ],
-      "status": "PARTIAL",
-      "target_component": "Adversary"
+      "decision": "ADAPT_EXISTING_REDTEAM_TOOLING",
+      "minimal_migration": ["isolated attack environment", "mutation/fuzz/fault/bypass work orders", "no production fixes", "schema-valid adversarial evidence"],
+      "status": "PARTIAL_TOOLING_PROCESS_NOT_IMPLEMENTED",
+      "blockers": ["BLK-DETERMINISTIC-CONTROLLER-RUNTIME-NOT-IMPLEMENTED"]
     },
     {
-      "blockers": ["BLK-NO-INTERACTIVE-WINDOWS-L4_L5-SESSION"],
-      "decision": "EXTEND",
+      "target_component": "Windows L4/L5 Worker",
       "existing_components": ["CMP-007", "CMP-010"],
-      "minimal_migration": [
-        "interactive user session executor",
-        "real installed LNK launch",
-        "process tree and actual child command line",
-        "screenshot/video evidence",
-        "same-artifact installation and physical user scenario"
-      ],
+      "decision": "EXTEND_EXISTING_WINDOWS_PATHS",
+      "minimal_migration": ["interactive user-session executor", "real installed LNK launch", "process tree and actual child command line", "screenshot or video evidence", "same-artifact installation and physical scenario"],
       "status": "BLOCKED",
-      "target_component": "Windows L4/L5 Worker"
+      "blockers": ["BLK-NO-INTERACTIVE-WINDOWS-L4_L5-SESSION", "BLK-SAME-ARTIFACT-RUN-A-RUN-B-NOT-EXECUTED", "BLK-PHYSICAL-PILOT-NOT-EXECUTED"]
     },
     {
-      "blockers": ["BLK-PROTOCOL-V3_1-SOURCE-MISSING"],
-      "decision": "EXTEND_NO_DUPLICATE",
+      "target_component": "Deterministic Release Gate",
       "existing_components": ["CMP-001", "CMP-002", "CMP-003", "CMP-004"],
-      "minimal_migration": [
-        "expand mandatory artifact set",
-        "bind protocol/UI hashes",
-        "validate RUN A/RUN B same artifact",
-        "validate role identities/permissions/protected paths",
-        "accept only immutable schema-valid evidence"
-      ],
-      "status": "PARTIAL",
-      "target_component": "Deterministic Release Gate"
+      "decision": "EXTEND_EXISTING_GATE_NO_DUPLICATE",
+      "minimal_migration": ["expand mandatory artifact set", "bind protocol and UI hashes", "validate same-artifact RUN A and RUN B", "validate role identities, permissions and protected paths", "accept only immutable schema-valid evidence"],
+      "status": "PARTIAL_V3_0_ONLY",
+      "blockers": ["BLK-CONTROL-PLANE-L2-INGESTION-NOT-IMPLEMENTED", "BLK-NO-INTERACTIVE-WINDOWS-L4_L5-SESSION"]
     }
   ],
-  "current_decision": [
-    "FAIL-CLOSED",
-    "PROTOCOL_IMPLEMENTATION_INCOMPLETE",
-    "MILESTONE_NOT_COMPLETE",
-    "RELEASE_BLOCKED"
-  ],
-  "exact_head": "69ff1888fda7e0f1fe25e3b8f73da652c645aaa3",
-  "generated_at_utc": "2026-07-15T13:32:28.425892+00:00",
-  "repository": "gollandecd-fabula/quantum-analytics",
-  "schema_version": "1.0.0",
-  "source_architecture": "M9 Protocol v3.0 bootstrap/audit/self-test control plane",
-  "target_architecture": "Deterministic Manager–Specialist Architecture"
+  "actual_status": "PARTIAL",
+  "maximum_evidence_level": "L0_STATIC",
+  "minimal_migration_authorized": true,
+  "parallel_component_creation_authorized": false,
+  "release_authorized": false,
+  "milestone_complete": false,
+  "current_decision": ["FAIL-CLOSED", "PROTOCOL_IMPLEMENTATION_INCOMPLETE", "MILESTONE_NOT_COMPLETE", "RELEASE_BLOCKED"]
 }
