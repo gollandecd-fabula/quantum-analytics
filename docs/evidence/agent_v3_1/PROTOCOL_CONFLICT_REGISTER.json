@@ -1,68 +1,37 @@
 {
-  "schema_version": "1.5.0",
+  "schema_version": "1.6.0",
   "repository": "gollandecd-fabula/quantum-analytics",
   "branch": "fix/quantum-one-click-stable-release",
   "work_order_id": "WO-M0-012",
-  "supersedes_blob_sha": "ddb3eb1a239f2f5f31f268a70f15f236fa3c664a",
+  "supersedes_blob_sha": "4d9e8aca7c7ef5f1ad2a4328da8b3245b9bfafce",
   "conflicts": [
+    {"conflict_id":"PCON-001","type":"PROTOCOL_SOURCE_BYTE_IDENTITY","severity":"P0","status":"RESOLVED_L0","remaining_boundary":"Protocol v3.1 runtime ingestion and enforcement remain NOT_IMPLEMENTED."},
+    {"conflict_id":"PCON-002","type":"ENVIRONMENT_CAPABILITY","severity":"P0","status":"BLOCKED","resolution_required":"Interactive installed Windows L4/L5 execution through the actual installed LNK."},
     {
-      "conflict_id": "PCON-001",
-      "type": "PROTOCOL_SOURCE_BYTE_IDENTITY",
-      "severity": "P0",
-      "status": "RESOLVED_L0",
-      "remaining_boundary": "Protocol v3.1 runtime ingestion and enforcement remain NOT_IMPLEMENTED."
+      "conflict_id":"PCON-003",
+      "type":"INVENTORY_COMPLETENESS_AND_DUPLICATE_RISK",
+      "severity":"P1",
+      "status":"PARTIAL_L0_STATIC",
+      "historical_head_result":{"target":"d5afcf5e4a28a5ce3cc144cf25db649aceda8b1f","tracked_entries":682,"tracked_runtime_surfaces":195,"semantic_surfaces_covered":195,"status":"COMPLETE_L0_FOR_HISTORICAL_TRACKED_RUNTIME_SURFACES"},
+      "current_head_result":"PENDING_FINAL_PR_METADATA_RECONSTRUCTION",
+      "dynamic_external_absence":"UNVERIFIED",
+      "full_gate":"OPEN"
     },
+    {"conflict_id":"PCON-004","type":"UI_REFERENCE_TECHNICAL_FREEZE","severity":"P0","status":"RESOLVED_L0","remaining_boundary":"Installed visual conformity and L5 physical review remain UNVERIFIED."},
     {
-      "conflict_id": "PCON-002",
-      "type": "ENVIRONMENT_CAPABILITY",
-      "severity": "P0",
-      "status": "BLOCKED",
-      "resolution_required": "Interactive installed Windows L4/L5 execution through the actual installed LNK."
-    },
-    {
-      "conflict_id": "PCON-003",
-      "type": "INVENTORY_COMPLETENESS_AND_DUPLICATE_RISK",
-      "severity": "P1",
-      "status": "PARTIAL_L0_STATIC",
-      "evidence": [
-        "RECURSIVE_EXACT_HEAD_TREE.json",
-        "SEMANTIC_DUPLICATE_COVERAGE.json",
-        "DUPLICATE_RISK_ASSESSMENT.json",
-        "PROTOCOL_VIOLATION_REGISTER.json"
-      ],
-      "historical_head_result": {
-        "target": "d5afcf5e4a28a5ce3cc144cf25db649aceda8b1f",
-        "tracked_entries": 682,
-        "tracked_runtime_surfaces": 195,
-        "semantic_surfaces_covered": 195,
-        "status": "COMPLETE_L0_FOR_HISTORICAL_TRACKED_RUNTIME_SURFACES"
-      },
-      "current_head_result": "PENDING_RECONSTRUCTION_AND_EVIDENCE_ONLY_DIFF",
-      "dynamic_external_absence": "UNVERIFIED",
-      "full_gate": "OPEN",
-      "resolution_required": "Reconstruct the final current-head tracked set and prove no runtime surface changed; retain dynamic/external limitation."
-    },
-    {
-      "conflict_id": "PCON-004",
-      "type": "UI_REFERENCE_TECHNICAL_FREEZE",
-      "severity": "P0",
-      "status": "RESOLVED_L0",
-      "remaining_boundary": "Installed visual conformity and L5 physical review remain UNVERIFIED."
-    },
-    {
-      "conflict_id": "PCON-005",
-      "type": "PRECHANGE_REGISTRY_MATERIALIZATION",
-      "severity": "P0",
-      "status": "PARTIAL_L0",
-      "observed": "The 712-row canonical registry exists, but the index head and blocker summary require reconciliation.",
-      "resolution_required": "Update only the canonical index; immutable requirement shards remain unchanged."
+      "conflict_id":"PCON-005",
+      "type":"PRECHANGE_REGISTRY_MATERIALIZATION",
+      "severity":"P0",
+      "status":"RESOLVED_L0_INDEX_RECONCILED",
+      "evidence":{"index_path":"REQUIREMENTS_TRACEABILITY_MATRIX.json","index_blob_sha":"570ae332a6cec5edec4b06c2422ac96f5e19d8e5","requirement_count":712,"shard_count":12,"immutable_shards_modified":false},
+      "remaining_boundary":"Deterministic L2 runtime ingestion and enforcement remain NOT_IMPLEMENTED."
     }
   ],
-  "open_conflicts": ["PCON-002", "PCON-003", "PCON-005"],
-  "resolved_conflicts": ["PCON-001", "PCON-004"],
-  "maximum_evidence_level": "L0_STATIC",
-  "migration_authorized": false,
-  "release_authorized": false,
-  "milestone_complete": false,
-  "current_decision": ["FAIL-CLOSED", "PROTOCOL_IMPLEMENTATION_INCOMPLETE", "MILESTONE_NOT_COMPLETE", "RELEASE_BLOCKED"]
+  "open_conflicts":["PCON-002","PCON-003"],
+  "resolved_conflicts":["PCON-001","PCON-004","PCON-005"],
+  "maximum_evidence_level":"L0_STATIC",
+  "migration_authorized":false,
+  "release_authorized":false,
+  "milestone_complete":false,
+  "current_decision":["FAIL-CLOSED","PROTOCOL_IMPLEMENTATION_INCOMPLETE","MILESTONE_NOT_COMPLETE","RELEASE_BLOCKED"]
 }
