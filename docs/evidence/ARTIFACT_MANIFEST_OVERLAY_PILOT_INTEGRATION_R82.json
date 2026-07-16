@@ -1,0 +1,34 @@
+{
+  "base_pilot_integration_r81_overlay_git_blob_sha": "423549bc1de8d3020248e2d719dc11dd03fe0254",
+  "entries": [
+    [
+      "docs/evidence/agent_v3_1/M0_R5_CURRENT_HEAD_INVENTORY_AND_DUPLICATE_RISK_AUDIT.json",
+      "fc895813c3150b7474a95893ea72fd4512c231345a8f04859acbfc8a7e6a84c3",
+      8217
+    ],
+    [
+      "docs/evidence/agent_v3_1/AUTONOMOUS_EXECUTION_STATE_M0_R6.json",
+      "3f8849812de6a4d7e1bf0be46ee68b8d35c88378e8184a76fe90491b9d474684",
+      5007
+    ],
+    [
+      "docs/evidence/agent_v3_1/WORK_ORDER_LEDGER_M0_R6.json",
+      "54190402e6036c92b5dfff6801fd1d8804aa08c206831665b051db16ef3db686",
+      5457
+    ],
+    [
+      "docs/evidence/agent_v3_1/PROTOCOL_CONFLICT_REGISTER_M0_R6.json",
+      "75357ef386442eaff94fe224f695878bee09569671269c86458cd14807f1ebea",
+      3444
+    ],
+    [
+      "tests/integration_manifest_support_m8.py",
+      "b35674c14c55df95b2b2030aa96ccd6310053442fb97a81cbca077dcfa34f931",
+      1090
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 82,
+  "reason": "Append immutable current-head M0-R5 inventory and duplicate-risk evidence plus M0-R6 successor state, ledger and conflict records; extend only the manifest support pointer through R82; preserve historical evidence and keep M0 and release blocked",
+  "remove_paths": []
+}

@@ -1,0 +1,233 @@
+{
+  "schema_version": "1.0.0",
+  "artifact_type": "M0_R5_CURRENT_HEAD_INVENTORY_AND_DUPLICATE_RISK_AUDIT",
+  "repository": "gollandecd-fabula/quantum-analytics",
+  "branch": "fix/quantum-one-click-stable-release",
+  "subject_exact_head": "2703d76c199a9b64ff430aeb776bba45094e07a3",
+  "generated_at_utc": "2026-07-16T11:36:45Z",
+  "work_order_id": "WO-M0-013",
+  "authorized_stage": "M0-R5: REPRODUCIBLE_CURRENT_HEAD_INVENTORY_AND_DUPLICATE_RISK_AUDIT",
+  "authorization": {
+    "source": "USER_MESSAGE",
+    "explicit_named_stage": true,
+    "tool_boundary": "READ_ONLY_REPOSITORY_ARTIFACT_AND_LOCAL_TEXT_ANALYSIS",
+    "repository_writes": 0,
+    "pr_writes": 0,
+    "workflow_reruns": 0
+  },
+  "requirement_ids": [
+    "REQ-P31-0002",
+    "REQ-P31-0005",
+    "REQ-P31-0006",
+    "REQ-P31-0010",
+    "REQ-P31-0017",
+    "REQ-P31-0018",
+    "REQ-P31-0028",
+    "REQ-MP2-0003",
+    "REQ-MP2-0004",
+    "REQ-MP2-0006",
+    "REQ-MP2-0009",
+    "REQ-MP2-0017",
+    "REQ-MP2-0116",
+    "REQ-MP2-0135",
+    "REQ-MP2-0140",
+    "REQ-MP2-0141",
+    "REQ-MP2-0317",
+    "REQ-MP2-0319"
+  ],
+  "supersedes_for_current_head_only": {
+    "current_architecture_inventory": {
+      "path": "docs/evidence/agent_v3_1/CURRENT_ARCHITECTURE_INVENTORY.json",
+      "historical_blob_sha": "2e2ece868b5097820f84198206528aaf38287f45",
+      "historical_target_head": "d5afcf5e4a28a5ce3cc144cf25db649aceda8b1f",
+      "preservation": "IMMUTABLE_PREDECESSOR_NOT_MODIFIED"
+    },
+    "duplicate_risk_assessment": {
+      "path": "docs/evidence/agent_v3_1/DUPLICATE_RISK_ASSESSMENT.json",
+      "historical_blob_sha": "fab2429958677ab72ef8630bb53c2c75b03d8482",
+      "historical_target_head": "d5afcf5e4a28a5ce3cc144cf25db649aceda8b1f",
+      "preservation": "IMMUTABLE_PREDECESSOR_NOT_MODIFIED"
+    }
+  },
+  "repository_runtime_scope": {
+    "roots": [
+      "src/**",
+      "tools/**",
+      "scripts/**",
+      "migrations/**",
+      ".github/workflows/**"
+    ],
+    "root_files": [
+      "pyproject.toml",
+      "quantum_build_backend.py"
+    ],
+    "extensions": [
+      ".py",
+      ".ps1",
+      ".psm1",
+      ".bat",
+      ".cmd",
+      ".sh",
+      ".toml",
+      ".yaml",
+      ".yml"
+    ],
+    "tracked_path_count": 195,
+    "content_bound_path_count": 195,
+    "unresolved_tracked_paths": 0,
+    "breakdown": {
+      "src": 167,
+      "github_workflows": 13,
+      "scripts": 9,
+      "tools": 4,
+      "root_build_config": 2
+    },
+    "extension_counts": {
+      ".py": 170,
+      ".yml": 13,
+      ".ps1": 11,
+      ".toml": 1
+    },
+    "path_list_sha256": "faafe43ebaf625d0824e09cccebce4505096a97a5b6c9b17ea349d528e24ecc2",
+    "tuple_manifest_sha256": "9e05c5db692258c44df3593056b3faf66759f1ab1b7378929c4931284e5ae4f2",
+    "tuple_fields": [
+      "path",
+      "git_object_sha",
+      "size_bytes",
+      "mode",
+      "type"
+    ],
+    "evidence_level": "L0_STATIC_CURRENT_HEAD"
+  },
+  "exact_head_package_evidence": {
+    "workflow_run_id": 29488718707,
+    "artifact_id": 8371507926,
+    "artifact_name": "Quantum-One-Button-RedTeam-R3",
+    "artifact_digest_sha256": "1cee43d10386d0ffa65b032b85b1eeae9d08be685033b0834ec9afa889f16812",
+    "outer_archive_integrity": "PASS",
+    "nested_release_archive_sha256": "5d6ae8e17d0c537b7ca13f8fdedce0669d8e1e22d857bf3f95bf0832c1a4905c",
+    "inner_application_archive_sha256": "1b4d0e635d38fc7efb036c065a8a865c2ba57bd7f81b44570607a14aba36fec8",
+    "inner_application_entry_count": 813,
+    "runtime_scope_path_count": 191,
+    "runtime_path_list_sha256": "b65f86890bd56a93b3ce85e14c410f715905ae41e9fa79d809d51a17bfdee15a",
+    "runtime_tuple_manifest_sha256": "7fbeff34e215f605f267d38b0fcff929b9c8ab449f090e59a4dcd84c97300626",
+    "manifest_rows": 812,
+    "manifest_missing_paths": 0,
+    "manifest_extra_paths": 0,
+    "manifest_hash_or_size_mismatches": 0,
+    "release_scope": "WB_ONLY",
+    "enabled_marketplaces": [
+      "WILDBERRIES"
+    ],
+    "deferred_marketplaces": [
+      "OZON"
+    ],
+    "marketplace_write_enabled": false,
+    "release_state": "RELEASE_BLOCKED"
+  },
+  "repository_package_relationship": {
+    "common_paths": 165,
+    "repository_only_paths": 30,
+    "package_only_paths": 26,
+    "repository_only_path_list_sha256": "fb334b0a3673dcba798898159fcbc8bcc61c7003d17ac7709b17284c79213fc8",
+    "package_only_path_list_sha256": "f3c3e4dfbe653a00f5e94ce4b6648160b9c30ac9ca1890af5fb145314e20b92a",
+    "shared_exact_byte_equal": 4,
+    "shared_crlf_to_lf_equal": 161,
+    "shared_unresolved_content_differences": 0,
+    "relocated_launcher_equivalents": 4,
+    "repository_paths_bound_through_package_or_relocation": 169,
+    "repository_only_unique_sources_individually_inspected": 26,
+    "total_content_bound_repository_paths": 195
+  },
+  "content_based_component_decisions": [
+    {
+      "component": "M9 maximum-assurance control plane",
+      "status": "EXISTS_PARTIAL_PROTOCOL_3_0",
+      "decision": "EXTEND_IN_PLACE_TO_PROTOCOL_3_1",
+      "parallel_component_authorized": false
+    },
+    {
+      "component": "Canonical 712-row RTM",
+      "status": "EXISTS_L0_NOT_RUNTIME_INGESTED",
+      "decision": "REUSE_SINGLE_CANONICAL_REGISTRY",
+      "parallel_component_authorized": false
+    },
+    {
+      "component": "M1 M7 M8 and Native Red Team specialists",
+      "status": "EXIST",
+      "decision": "REUSE_BEHIND_FUTURE_SIGNED_WORK_ORDERS",
+      "parallel_component_authorized": false
+    },
+    {
+      "component": "Marketplace adapter registry and Ozon adapter",
+      "status": "EXIST_OZON_FAIL_CLOSED_BRIDGE_ONLY",
+      "decision": "EXTEND_EXISTING_ADAPTER_AND_REGISTRY",
+      "parallel_component_authorized": false
+    },
+    {
+      "component": "HOME_LOCAL ZIP dual-installer and EXE builders",
+      "status": "EXIST",
+      "decision": "REUSE_EXISTING_PACKAGING_STACK",
+      "parallel_component_authorized": false
+    },
+    {
+      "component": "Release Orchestrator manager and signed specialist runtime",
+      "status": "ABSENT_IN_TRACKED_CURRENT_HEAD_SCOPE",
+      "decision": "ADD_AT_MOST_ONE_AS_EXISTING_M9_OWNERSHIP_EXTENSION",
+      "parallel_component_authorized": false
+    }
+  ],
+  "neutral_filename_negative_control": {
+    "status": "PASS",
+    "scanner_filename_input": false,
+    "dangerous_fixture_sha256": "d4eb9dff2aa9e5163dfba82065535d217987e5c6118e3788dbfacf8ec265c5c9",
+    "dangerous_findings": [
+      "PROTOCOL_CONTROLLER",
+      "CANONICAL_RTM_INGESTION",
+      "SIGNED_WORK_ORDER",
+      "MANAGER_SPECIALIST_ORCHESTRATION",
+      "RELEASE_GATE"
+    ],
+    "rename_variants": [
+      "alpha.py",
+      "protocol_controller.py"
+    ],
+    "rename_findings_equal": true,
+    "benign_fixture_sha256": "de92585b1b5e528539f6d90676f764ae9c420dd7ae68d5f61ce00b603e4763a5",
+    "benign_finding_count": 0,
+    "false_positive_control": "PASS",
+    "claim_boundary": "DETECTOR_FILENAME_INDEPENDENCE_ONLY"
+  },
+  "governance_findings": [
+    {
+      "finding_id": "M0-R5-GOV-001",
+      "severity": "P1",
+      "status": "OPEN",
+      "path": ".github/workflows/m1-baseline-audit.yml",
+      "finding": "Push-only manifest-reconcile job has contents:write and can commit and push without Protocol v3.1 signed-stage authorization.",
+      "required_action": "Place the existing write path behind the future Protocol v3.1 authorization and signed work-order gate."
+    }
+  ],
+  "limitations": [
+    "Dynamic generated code, untracked local files, prior installations and external systems were not proven free of equivalent implementations.",
+    "Protocol v3.1 runtime ingestion and enforcement are not implemented.",
+    "Manager-specialist signed work-order runtime is not implemented.",
+    "No L3, L4 or L5 duplicate-absence claim is made.",
+    "M0 completion, release readiness, merge and marketplace writes are not authorized."
+  ],
+  "decision": {
+    "tracked_current_head_inventory": "VERIFIED_L0_195_OF_195",
+    "neutral_filename_control": "PASS",
+    "dynamic_external_duplicate_absence": "UNVERIFIED",
+    "duplicate_creation_authorized": false,
+    "existing_m9_reuse_required": true,
+    "m0_complete": false,
+    "release_authorized": false
+  },
+  "current_decision": [
+    "FAIL-CLOSED",
+    "PROTOCOL_IMPLEMENTATION_INCOMPLETE",
+    "MILESTONE_NOT_COMPLETE",
+    "RELEASE_BLOCKED"
+  ]
+}
