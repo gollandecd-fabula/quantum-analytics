@@ -1,54 +1,52 @@
 {
-  "schema_version": "1.4.0",
+  "schema_version": "1.5.0",
   "repository": "gollandecd-fabula/quantum-analytics",
   "branch": "fix/quantum-one-click-stable-release",
   "work_order_id": "WO-M0-012",
-  "supersedes_blob_sha": "86d546c7c2c1a4b3c8546efdb0af7bda3cebaacf",
+  "supersedes_blob_sha": "ddb3eb1a239f2f5f31f268a70f15f236fa3c664a",
   "conflicts": [
     {
       "conflict_id": "PCON-001",
       "type": "PROTOCOL_SOURCE_BYTE_IDENTITY",
       "severity": "P0",
       "status": "RESOLVED_L0",
-      "decision": "SOURCE_FREEZE_ESTABLISHED_NO_IMPLEMENTATION_CLAIM",
-      "evidence": ["PROTOCOL_SOURCE_DISCOVERY.json"],
-      "remaining_boundary": "Production control-plane ingestion and enforcement remain NOT_IMPLEMENTED."
+      "remaining_boundary": "Protocol v3.1 runtime ingestion and enforcement remain NOT_IMPLEMENTED."
     },
     {
       "conflict_id": "PCON-002",
       "type": "ENVIRONMENT_CAPABILITY",
       "severity": "P0",
       "status": "BLOCKED",
-      "decision": "FAIL_CLOSED_CONTINUE_ONLY_INDEPENDENT_LOWER_LEVEL_WORK",
-      "resolution_required": "Interactive installed Windows L4/L5 execution through the actual installed LNK with physical-path evidence."
+      "resolution_required": "Interactive installed Windows L4/L5 execution through the actual installed LNK."
     },
     {
       "conflict_id": "PCON-003",
       "type": "INVENTORY_COMPLETENESS_AND_DUPLICATE_RISK",
       "severity": "P1",
       "status": "PARTIAL_L0_STATIC",
-      "decision": "OPEN_SEMANTIC_AND_CURRENT_HEAD_RECONCILIATION_REQUIRED",
       "evidence": [
         "RECURSIVE_EXACT_HEAD_TREE.json",
+        "SEMANTIC_DUPLICATE_COVERAGE.json",
         "DUPLICATE_RISK_ASSESSMENT.json",
-        "M0_CORRECTION_REQUIREMENTS_REGISTRY.json",
         "PROTOCOL_VIOLATION_REGISTER.json"
       ],
-      "observed": "The 682-entry recursive tree is complete only for historical head d5afcf5. Previous semantic inspection covered packaged source and selected repository-only control files, not every deterministic runtime surface. The prior RESOLVED_L0 claim was therefore excessive.",
-      "resolution_required": [
-        "Complete deterministic semantic coverage or retain SEMANTIC_ABSENCE_UNVERIFIED.",
-        "Reconstruct the final current-head tree without modifying forbidden paths.",
-        "Keep all migration and manager/specialist creation authorizations false until both conditions pass."
-      ],
-      "remaining_boundary": "Static analysis cannot establish dynamic or external-system absence."
+      "historical_head_result": {
+        "target": "d5afcf5e4a28a5ce3cc144cf25db649aceda8b1f",
+        "tracked_entries": 682,
+        "tracked_runtime_surfaces": 195,
+        "semantic_surfaces_covered": 195,
+        "status": "COMPLETE_L0_FOR_HISTORICAL_TRACKED_RUNTIME_SURFACES"
+      },
+      "current_head_result": "PENDING_RECONSTRUCTION_AND_EVIDENCE_ONLY_DIFF",
+      "dynamic_external_absence": "UNVERIFIED",
+      "full_gate": "OPEN",
+      "resolution_required": "Reconstruct the final current-head tracked set and prove no runtime surface changed; retain dynamic/external limitation."
     },
     {
       "conflict_id": "PCON-004",
       "type": "UI_REFERENCE_TECHNICAL_FREEZE",
       "severity": "P0",
       "status": "RESOLVED_L0",
-      "decision": "UI_SPEC_FROZEN_NO_UI_IMPLEMENTATION_CLAIM",
-      "evidence": ["UI_REFERENCE_MANIFEST.json"],
       "remaining_boundary": "Installed visual conformity and L5 physical review remain UNVERIFIED."
     },
     {
@@ -56,15 +54,14 @@
       "type": "PRECHANGE_REGISTRY_MATERIALIZATION",
       "severity": "P0",
       "status": "PARTIAL_L0",
-      "decision": "CANONICAL_REGISTRY_EXISTS_BUT_HEAD_AND_STATUS_RECONCILIATION_REQUIRED",
-      "evidence": ["REQUIREMENTS_TRACEABILITY_MATRIX.json", "rtm/REQUIREMENTS_TRACEABILITY_MATRIX.part-001.json through part-012.json"],
-      "observed": "The registry materializes 712 rows, but its subject_exact_head and active blocker/status summary are stale.",
-      "resolution_required": "Reconcile the canonical index without rewriting immutable requirement rows. Runtime ingestion remains NOT_IMPLEMENTED."
+      "observed": "The 712-row canonical registry exists, but the index head and blocker summary require reconciliation.",
+      "resolution_required": "Update only the canonical index; immutable requirement shards remain unchanged."
     }
   ],
   "open_conflicts": ["PCON-002", "PCON-003", "PCON-005"],
   "resolved_conflicts": ["PCON-001", "PCON-004"],
   "maximum_evidence_level": "L0_STATIC",
+  "migration_authorized": false,
   "release_authorized": false,
   "milestone_complete": false,
   "current_decision": ["FAIL-CLOSED", "PROTOCOL_IMPLEMENTATION_INCOMPLETE", "MILESTONE_NOT_COMPLETE", "RELEASE_BLOCKED"]
