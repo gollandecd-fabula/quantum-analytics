@@ -1,56 +1,160 @@
 {
-  "schema_version": "1.3.0",
+  "schema_version": "1.1.0",
   "artifact_type": "CURRENT_ARCHITECTURE_INVENTORY",
   "repository": "gollandecd-fabula/quantum-analytics",
   "branch": "fix/quantum-one-click-stable-release",
-  "work_order_id": "WO-M0-012",
-  "supersedes_blob_sha": "9abff511a7d9c33cbaaf7265a099600c4837206b",
-  "historical_inventory": {
-    "target_exact_head": "d5afcf5e4a28a5ce3cc144cf25db649aceda8b1f",
-    "tracked_entry_count": 682,
-    "tracked_runtime_surface_count": 195,
-    "semantic_surface_coverage": "195_OF_195_L0",
-    "semantic_coverage_artifact": "SEMANTIC_DUPLICATE_COVERAGE.json",
-    "semantic_coverage_blob_sha": "ccd17d969048461bee1937f2042bd2d6d27a1b55"
-  },
-  "current_head_inventory": {
-    "status": "PENDING_RECONSTRUCTION",
-    "runtime_surface_transfer": "UNVERIFIED"
+  "inventory_target_exact_head": "d5afcf5e4a28a5ce3cc144cf25db649aceda8b1f",
+  "previous_inventory_blob_sha": "41b5f37b48df10bd08d38baa3c61dba4e3120949",
+  "generated_at_utc": "2026-07-16T07:02:00Z",
+  "work_order_id": "WO-M0-011",
+  "actual_status": "PARTIAL",
+  "inventory_evidence": {
+    "tree_index": "RECURSIVE_EXACT_HEAD_TREE.json",
+    "tree_index_blob_sha": "f8d34060a68e2aae6a9c2de08b34f95b918bfd15",
+    "duplicate_risk_report": "DUPLICATE_RISK_ASSESSMENT.json",
+    "duplicate_risk_blob_sha": "fab2429958677ab72ef8630bb53c2c75b03d8482",
+    "entry_count": 682,
+    "unique_path_count": 682,
+    "canonical_entries_sha256": "44af77d30a2501157b75d13e0c495f8982cdfc1499b57bf8af28fdd6522f76db",
+    "path_list_sha256": "c52894cde474c22fc960b6bd5cb86505874c14ae0ee196a1badac98993732783",
+    "linux_windows_entry_equality": true,
+    "completeness_status": "RESOLVED_L0_STATIC"
   },
   "components": [
-    {"component_id":"CMP-001","name":"M9 v3.0 partial control plane and gate","status":"EXISTS","paths":["tools/m9_maximum_assurance_control_plane.py"],"constraint":"DO_NOT_DUPLICATE; EXTENSION_NOT_AUTHORIZED"},
-    {"component_id":"CMP-002","name":"M9 tests","status":"EXISTS","paths":["tests/test_m9_maximum_assurance_control_plane.py"],"constraint":"PRESERVE"},
-    {"component_id":"CMP-003","name":"M9 workflow","status":"EXISTS","paths":[".github/workflows/m9-maximum-assurance-control-plane.yml"],"constraint":"PRESERVE"},
-    {"component_id":"CMP-004","name":"Historical M9 evidence","status":"EXISTS_HISTORICAL","paths":["docs/evidence/M9_MAXIMUM_ASSURANCE_CONTROL_PLANE.json"],"constraint":"DO_NOT_REWRITE_HISTORY"},
-    {"component_id":"CMP-005","name":"M1/M7/M8 audit tooling","status":"EXISTS","constraint":"PRESERVE; ROLE_BINDING_NOT_AUTHORIZED"},
-    {"component_id":"CMP-006","name":"Native Red Team tooling","status":"EXISTS","constraint":"PRESERVE; ROLE_BINDING_NOT_AUTHORIZED"},
-    {"component_id":"CMP-007","name":"Windows package/install/launcher surfaces","status":"EXISTS","constraint":"PRESERVE; L4_L5_UNVERIFIED"},
-    {"component_id":"CMP-008","name":"Finance/domain implementation","status":"EXISTS","constraint":"DO_NOT_REIMPLEMENT"},
-    {"component_id":"CMP-009","name":"Marketplace adapters/recommendations","status":"EXISTS","constraint":"DO_NOT_REIMPLEMENT"},
-    {"component_id":"CMP-010","name":"Decision-center/dashboard UI","status":"EXISTS","constraint":"DO_NOT_REIMPLEMENT; INSTALLED_CONFORMITY_UNVERIFIED"},
-    {"component_id":"CMP-011","name":"Release Orchestrator manager runtime","status":"NOT_FOUND_IN_195_HISTORICAL_TRACKED_RUNTIME_SURFACES","current_head_status":"UNVERIFIED","creation_authorized":false},
-    {"component_id":"CMP-012","name":"Implementer specialist process","status":"NOT_FOUND_IN_195_HISTORICAL_TRACKED_RUNTIME_SURFACES","current_head_status":"UNVERIFIED","creation_authorized":false},
-    {"component_id":"CMP-013","name":"Verifier specialist process","status":"NOT_FOUND_IN_195_HISTORICAL_TRACKED_RUNTIME_SURFACES","current_head_status":"UNVERIFIED","creation_authorized":false},
-    {"component_id":"CMP-014","name":"Adversary specialist process","status":"NOT_FOUND_AS_ISOLATED_PROCESS_IN_195_HISTORICAL_SURFACES; TOOLING_EXISTS","current_head_status":"UNVERIFIED","creation_authorized":false}
+    {
+      "component_id": "CMP-001",
+      "name": "M9 maximum-assurance control plane and deterministic gate",
+      "owner": "CONTROL_PLANE",
+      "paths": ["tools/m9_maximum_assurance_control_plane.py"],
+      "runtime_status": "EXISTS_SOURCE_PARTIAL_V3_0",
+      "reuse_decision": "EXTEND_IN_PLACE_AND_MIGRATE_TO_V3_1",
+      "remaining_gaps": ["Protocol 3.1 ingestion", "712-row runtime enforcement", "scheduler", "signed work-order locks", "role permissions", "RUN A/RUN B"]
+    },
+    {
+      "component_id": "CMP-002",
+      "name": "M9 unit and negative-control suite",
+      "owner": "VERIFIER",
+      "paths": ["tests/test_m9_maximum_assurance_control_plane.py"],
+      "runtime_status": "EXISTS_SOURCE",
+      "reuse_decision": "EXTEND",
+      "remaining_gaps": ["Protocol-hash swap", "forged L5", "role escalation", "protected-path mutation", "UI reference mutation"]
+    },
+    {
+      "component_id": "CMP-003",
+      "name": "M9 Linux/Windows source-runtime workflow",
+      "owner": "CONTROL_PLANE",
+      "paths": [".github/workflows/m9-maximum-assurance-control-plane.yml"],
+      "runtime_status": "EXISTS_CI",
+      "reuse_decision": "EXTEND",
+      "remaining_gaps": ["manager-specialist execution", "immutable specialist boundaries", "interactive L4/L5"]
+    },
+    {
+      "component_id": "CMP-004",
+      "name": "Persisted M9 evidence summary",
+      "owner": "CONTROL_PLANE",
+      "paths": ["docs/evidence/M9_MAXIMUM_ASSURANCE_CONTROL_PLANE.json"],
+      "runtime_status": "EXISTS_HISTORICAL_V3_0_SNAPSHOT",
+      "reuse_decision": "MIGRATE_WITHOUT_REWRITING_HISTORY"
+    },
+    {
+      "component_id": "CMP-005",
+      "name": "Baseline/security/clean-environment audit tooling",
+      "owner": "VERIFIER",
+      "paths": ["tools/m1_baseline_audit.py", "tools/m7_security_performance_one_click.py", "tools/m8_clean_environment_reproduction.py"],
+      "runtime_status": "EXISTS_AUDIT_TOOLS",
+      "reuse_decision": "REUSE_AND_BIND_BEHIND_VERIFIER_WORK_ORDERS"
+    },
+    {
+      "component_id": "CMP-006",
+      "name": "Native Red Team tooling",
+      "owner": "ADVERSARY",
+      "paths": ["scripts/ci/native_one_button_r37.ps1", ".github/workflows/build-one-button-redteam-r3.yml"],
+      "runtime_status": "EXISTS_TOOLING_ONLY",
+      "reuse_decision": "EXTEND_BEHIND_ISOLATED_ADVERSARY_WORK_ORDERS"
+    },
+    {
+      "component_id": "CMP-007",
+      "name": "Windows packaging/install/launcher paths",
+      "owner": "L4_L5_WORKER",
+      "paths": ["scripts/windows/build_exe_installer.ps1", "scripts/windows/install_home_local.ps1", "scripts/windows/one_click_home_local.ps1"],
+      "runtime_status": "EXISTS_CI_AND_SCRIPTS",
+      "reuse_decision": "EXTEND",
+      "remaining_gaps": ["interactive installed user path", "actual LNK process tree", "same-artifact physical evidence"]
+    },
+    {
+      "component_id": "CMP-008",
+      "name": "Financial oracle and finance-center implementation",
+      "owner": "IMPLEMENTER",
+      "paths": ["src/quantum/finance/oracle.py", "src/quantum/finance/_calculation_core.py", "src/quantum/application/finance_center.py"],
+      "runtime_status": "EXISTS_DOMAIN_LOGIC",
+      "reuse_decision": "REUSE_AND_REVERIFY"
+    },
+    {
+      "component_id": "CMP-009",
+      "name": "Marketplace-neutral adapters and recommendation engine",
+      "owner": "IMPLEMENTER",
+      "paths": ["src/quantum/adapters/registry.py", "src/quantum/adapters/wildberries/adapter.py", "src/quantum/adapters/ozon/adapter.py", "src/quantum/recommendations/engine.py"],
+      "runtime_status": "EXISTS_DOMAIN_LOGIC",
+      "reuse_decision": "REUSE_AND_REVERIFY"
+    },
+    {
+      "component_id": "CMP-010",
+      "name": "Decision-center and dashboard UI",
+      "owner": "IMPLEMENTER",
+      "paths": ["src/quantum/application/desktop_center.py", "src/quantum/application/local_app.py", "src/quantum/outputs/dashboard.py", "src/quantum/outputs/dashboard_style.py"],
+      "runtime_status": "EXISTS_PRODUCT_UI",
+      "reuse_decision": "REUSE_AND_REVERIFY_AGAINST_FROZEN_UI_REFERENCE",
+      "remaining_gaps": ["installed conformity", "L5 screenshot matrix", "physical shortcut path"]
+    },
+    {
+      "component_id": "CMP-011",
+      "name": "Release Orchestrator manager runtime",
+      "owner": "CONTROL_PLANE",
+      "paths": [],
+      "runtime_status": "ABSENT_AT_TARGET_L0",
+      "reuse_decision": "ADD_AT_MOST_ONE_AS_EXISTING_M9_OWNERSHIP_EXTENSION",
+      "duplicate_risk": "NO_EQUIVALENT_TRACKED_COMPONENT_FOUND"
+    },
+    {
+      "component_id": "CMP-012",
+      "name": "Implementer specialist process",
+      "owner": "CONTROL_PLANE",
+      "paths": [],
+      "runtime_status": "ABSENT_AT_TARGET_L0",
+      "reuse_decision": "ADAPT_EXISTING_PRODUCT_WRITE_PATHS_BEHIND_SIGNED_WORK_ORDER"
+    },
+    {
+      "component_id": "CMP-013",
+      "name": "Verifier specialist process",
+      "owner": "CONTROL_PLANE",
+      "paths": [],
+      "runtime_status": "ABSENT_AT_TARGET_L0",
+      "reuse_decision": "ADAPT_EXISTING_AUDIT_TOOLS_BEHIND_IMMUTABLE_WORK_ORDER"
+    },
+    {
+      "component_id": "CMP-014",
+      "name": "Adversary specialist process",
+      "owner": "CONTROL_PLANE",
+      "paths": [],
+      "runtime_status": "ABSENT_PROCESS_PARTIAL_TOOLING_EXISTS",
+      "reuse_decision": "ADAPT_EXISTING_REDTEAM_TOOLING_BEHIND_ISOLATED_WORK_ORDER"
+    }
   ],
   "duplicate_creation_policy": [
-    "No second RTM.",
-    "No parallel release gate or control plane.",
-    "No manager or specialist creation until current-head transfer is proved.",
-    "No product/domain runtime duplication."
+    "No parallel RTM.",
+    "No parallel release gate or second M9 control plane.",
+    "Do not duplicate finance, ingestion, reporting, UX, adapter, dispatcher or product-worker runtimes.",
+    "At most one manager runtime may be added under existing M9 ownership.",
+    "Specialist roles must adapt existing implementation, audit and Red Team capabilities."
   ],
   "open_blockers": [
-    "BLK-CURRENT-HEAD-RECURSIVE-TREE-UNVERIFIED",
-    "BLK-CURRENT-HEAD-SEMANTIC-TRANSFER-UNVERIFIED",
     "BLK-DETERMINISTIC-CONTROLLER-RUNTIME-NOT-IMPLEMENTED",
     "BLK-CONTROL-PLANE-L2-INGESTION-NOT-IMPLEMENTED",
     "BLK-NO-INTERACTIVE-WINDOWS-L4_L5-SESSION",
     "BLK-SAME-ARTIFACT-RUN-A-RUN-B-NOT-EXECUTED",
     "BLK-PHYSICAL-PILOT-NOT-EXECUTED"
   ],
-  "actual_status": "PARTIAL",
-  "maximum_evidence_level": "L0_STATIC",
-  "migration_authorized": false,
+  "maximum_evidence_level": "L0_STATIC_CURRENT_INVENTORY",
   "release_authorized": false,
   "milestone_complete": false,
   "current_decision": ["FAIL-CLOSED", "PROTOCOL_IMPLEMENTATION_INCOMPLETE", "MILESTONE_NOT_COMPLETE", "RELEASE_BLOCKED"]
