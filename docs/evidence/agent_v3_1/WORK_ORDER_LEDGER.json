@@ -1,109 +1,54 @@
 {
-  "schema_version": "1.3.0",
-  "document_type": "WORK_ORDER_LEDGER",
-  "repository": "gollandecd-fabula/quantum-analytics",
-  "branch": "fix/quantum-one-click-stable-release",
-  "generated_at_utc": "2026-07-16T07:12:00Z",
-  "subject_exact_head": "096ca74f54603428bce412280dc6f225e272d582",
-  "append_only_chain": {
-    "history_preservation": "PREDECESSOR_BLOB_IMMUTABLE_REFERENCE",
-    "previous_ledger_blob_sha": "91a1d02b3bdef734337c83cbf0556b84591f520d",
-    "previous_ledger_contains": ["WO-M0-004", "WO-M0-005", "WO-M0-006"],
-    "earlier_history_is_preserved_transitively": true
-  },
-  "work_orders": [
+  "schema_version":"1.4.0",
+  "document_type":"WORK_ORDER_LEDGER",
+  "repository":"gollandecd-fabula/quantum-analytics",
+  "branch":"fix/quantum-one-click-stable-release",
+  "append_only_chain":{"history_preservation":"PREDECESSOR_BLOB_IMMUTABLE_REFERENCE","previous_ledger_blob_sha":"167d96c5ba59f3ebcf6d546622c0ffd9e7c4833f","previous_ledger_contains":["WO-M0-008","WO-M0-009","WO-M0-010","WO-M0-011"],"earlier_history_is_preserved_transitively":true},
+  "work_orders":[
     {
-      "work_order_id": "WO-M0-008",
-      "active_milestone": "M0",
-      "requirement": "Classify every tracked exact-head component and determine duplicate ownership before adding an orchestrator or specialist runtime.",
-      "change_boundary": "Read-only repository and artifact inspection; no production, test, tool or workflow changes.",
-      "target_exact_head": "d5afcf5e4a28a5ce3cc144cf25db649aceda8b1f",
-      "test": "Complete-path token classification plus exact-head inspection of M9, M1, M7, M8, Red Team, worker and dispatcher ownership.",
-      "evidence_level": "L0_STATIC",
-      "artifacts": ["DUPLICATE_RISK_ASSESSMENT.json"],
-      "pass_criteria": "All 682 tracked paths classified; existing overlapping components assigned reuse/extend ownership; no unexamined equivalent manager or specialist path.",
-      "actual_status": "RESOLVED_L0",
-      "actual_evidence": {
-        "duplicate_risk_blob_sha": "fab2429958677ab72ef8630bb53c2c75b03d8482",
-        "complete_tree_paths_scanned": 682,
-        "packaged_files_scanned_supplementary": 813,
-        "packaged_python_files_scanned": 185
-      },
-      "decision": "NO_PARALLEL_CONTROL_PLANE_OR_RTM; EXTEND_EXISTING_M9; ADAPT_EXISTING_ROLE_CAPABILITIES",
-      "rollback_condition": "Any missed tracked equivalent component or wrong exact-head binding reopens the gate.",
-      "residual_risk": "Untracked local files and external systems are outside repository-tree scope."
-    },
-    {
-      "work_order_id": "WO-M0-009",
-      "active_milestone": "M0",
-      "requirement": "Obtain a complete recursive tree for the frozen exact head through a full repository checkout.",
-      "change_boundary": "Temporary change only to tools/m1_baseline_audit.py; mandatory restoration to original blob after artifact capture.",
-      "target_exact_head": "d5afcf5e4a28a5ce3cc144cf25db649aceda8b1f",
-      "instrumentation_commit": "ebf186d6991f2dc5108b69c6693d1e8f5aa8450e",
-      "rollback_commit": "d42a935417a3a335d5b9cc3de41ce72490ba648e",
-      "restored_tool_blob_sha": "ffc87cb1601c1301ff6cc023ab82ce54bcc2e79d",
-      "net_tree_effect_after_rollback": "NONE",
-      "test": "Linux and Windows full-depth checkout; git ls-tree -r --full-tree --long -z HEAD^; compare entry arrays and hashes; verify rollback tree equality.",
-      "evidence_level": "L0_STATIC",
-      "artifacts": [
-        {"platform": "linux", "artifact_id": 8366619203, "digest": "sha256:1a721cc5c25dacce1d17c102e5b64b0e10f503f0096c71ac0b8c30718b8ea84a"},
-        {"platform": "windows", "artifact_id": 8366648754, "digest": "sha256:7a243378c34d2e3c46c0a92e77dbbd9e8b68373d6c7aec7ed2ffdc8798abaa94"}
+      "work_order_id":"WO-M0-012",
+      "active_milestone":"M0",
+      "requirement_ids":["M0-COR-001","M0-COR-002","M0-COR-003","M0-COR-004","M0-COR-005","M0-COR-006","M0-COR-007","M0-COR-008"],
+      "change_boundary":"Evidence/status remediation only under docs/evidence/agent_v3_1/** and PR metadata.",
+      "allowed_paths":["docs/evidence/agent_v3_1/**","PR #85 metadata"],
+      "forbidden_paths":["src/**","tests/**","tools/**",".github/workflows/**","docs/evidence/M9_MAXIMUM_ASSURANCE_CONTROL_PLANE.json","main"],
+      "starting_head":"c715d4b4861ad931eb0d1891aeac3f771225ee19",
+      "commits":[
+        {"commit":"b0d28f776c48878b4033902a6b4ad84f8b20a4d1","path":"M0_CORRECTION_REQUIREMENTS_REGISTRY.json","blob":"dd06a0a60250770a87b08280aff577ca452204e5"},
+        {"commit":"ec98a9856fdf8735fd347ae0060f64404f1573fa","path":"PROTOCOL_VIOLATION_REGISTER.json","blob":"58c7a9b62de379fe0fd72391ae8e491beab42bf9"},
+        {"commit":"ed3779d5dbf5a0b580f1df4c8341e9b4d4971b93","path":"DUPLICATE_RISK_ASSESSMENT.json","blob":"72bae1609b69a672c499d33f6e74f4406c3aa968"},
+        {"commit":"b935fce173e77125015d2427d31af1aea1f87b55","path":"PROTOCOL_CONFLICT_REGISTER.json","blob":"ddb3eb1a239f2f5f31f268a70f15f236fa3c664a"},
+        {"commit":"88b86602b2b77aa45be3c65e50359393e2b2ceff","path":"CURRENT_ARCHITECTURE_INVENTORY.json","blob":"9abff511a7d9c33cbaaf7265a099600c4837206b"},
+        {"commit":"04e1ea8cac7a5ed9a5356f8616686e57d99340da","path":"ARCHITECTURE_MIGRATION_MAP.json","blob":"68f442311e8accd3de71b077f8ca439f0a2d989a"},
+        {"commit":"0bc400990d5642a611b2ca39d0c3bcba90a72741","path":"SEMANTIC_DUPLICATE_COVERAGE.json","blob":"ccd17d969048461bee1937f2042bd2d6d27a1b55"},
+        {"commit":"277bc3706be08023e5b0bf7f9564798183e6ce9e","path":"DUPLICATE_RISK_ASSESSMENT.json","blob":"2ad32f24663c6698a26d450460ee2b365be0b6f6"},
+        {"commit":"d28ba1264d035ace6b7b7ba57ad8909acdea4905","path":"REQUIREMENTS_TRACEABILITY_MATRIX.json","blob":"570ae332a6cec5edec4b06c2422ac96f5e19d8e5"},
+        {"commit":"4b83da935ff1aee19d186d5e6f61ea3e5d05b741","path":"PROTOCOL_CONFLICT_REGISTER.json","blob":"8469bf23a9f6c6241037679831630dca2db19e54"},
+        {"commit":"20a23db6d4c040d9c88c18e7cf05aa63039737d6","path":"AUTONOMOUS_EXECUTION_STATE.json","blob":"e5a85b6a240e800607a66f869477fe554d69d323"},
+        {"commit":"e0801f94f89ea2960d01fd19e5572125752bd2f4","path":"PROTOCOL_VIOLATION_REGISTER.json","blob":"7895b5e923c65ac23c672b049487b2f6ff6497e4"},
+        {"commit":"8b855c2bc520c87556b1b3dc36757d7cb7825d60","path":"M0_CORRECTION_REQUIREMENTS_REGISTRY.json","blob":"b7b0e60b407e915aa9669603de6c0939088f404d"}
       ],
-      "pass_criteria": "Both platforms bind the same parent head and produce identical complete entry arrays; temporary patch leaves zero resulting tree change.",
-      "actual_status": "RESOLVED_WITH_ROLLBACK",
-      "actual_evidence": {
-        "entry_count": 682,
-        "unique_path_count": 682,
-        "raw_ls_tree_sha256": "b11ff768c45e6805fa7b0d18e0262bb627881249a65e496a78284521dbe4bc31",
-        "canonical_entries_sha256": "44af77d30a2501157b75d13e0c495f8982cdfc1499b57bf8af28fdd6522f76db",
-        "path_list_sha256": "c52894cde474c22fc960b6bd5cb86505874c14ae0ee196a1badac98993732783",
-        "linux_windows_entry_equality": true
-      },
-      "rollback_condition": "Target mismatch, platform disagreement, truncation or original-tool blob mismatch.",
-      "residual_risk": "Evidence is static and does not execute the future manager-specialist runtime."
-    },
-    {
-      "work_order_id": "WO-M0-010",
-      "active_milestone": "M0",
-      "requirement": "Persist the recursive-tree identity and duplicate-risk decision as immutable GitHub evidence.",
-      "change_boundary": "Only docs/evidence/agent_v3_1/RECURSIVE_EXACT_HEAD_TREE.json, recursive_tree fragments and DUPLICATE_RISK_ASSESSMENT.json.",
-      "test": "Bind five fragment Git blobs, committed index, artifact digests, entry counts and fail-closed claim boundary.",
-      "evidence_level": "L0_STATIC",
-      "artifacts": [
-        {"path": "recursive_tree/RECURSIVE_EXACT_HEAD_TREE.part-001.json", "blob_sha": "448269b137117142ff6b6ef520176ac044bd1f0a", "commit_sha": "28884b56e53b78c79a9ffa5020225a2d7efd742f"},
-        {"path": "recursive_tree/RECURSIVE_EXACT_HEAD_TREE.part-002.json", "blob_sha": "474104e2533f117ffef984766699e4028696cf7c", "commit_sha": "c0c4d3f06252cbc565937cd8d8ae650be41a934f"},
-        {"path": "recursive_tree/RECURSIVE_EXACT_HEAD_TREE.part-003.json", "blob_sha": "98d90fee4eb5ab1fd96a8b2def43844708b23731", "commit_sha": "78a7e91829daafd22ffe52f3c371ae0645eed043"},
-        {"path": "recursive_tree/RECURSIVE_EXACT_HEAD_TREE.part-004.json", "blob_sha": "c03e1bcbbb968054195b0b4ff3dc56a9e0065a31", "commit_sha": "7b203778e282dd645a6b2a5ae9cffc85e6090892"},
-        {"path": "recursive_tree/RECURSIVE_EXACT_HEAD_TREE.part-005.json", "blob_sha": "485cbd618d9569566a3186a35952feed5dab2ff3", "commit_sha": "1ff511eb908d8c1d74327c924b465ea969d3b5bc"},
-        {"path": "RECURSIVE_EXACT_HEAD_TREE.json", "blob_sha": "f8d34060a68e2aae6a9c2de08b34f95b918bfd15", "commit_sha": "31fbaa205d621453bccc783ada7d2356b5bfb824"},
-        {"path": "DUPLICATE_RISK_ASSESSMENT.json", "blob_sha": "fab2429958677ab72ef8630bb53c2c75b03d8482", "commit_sha": "2afdfd62830deac54c9159831c9812284c4f530a"}
+      "tests":[
+        "Canonical correction registry field/status validation",
+        "Protocol violation and rollback provenance validation",
+        "Historical tree 682-entry cross-platform identity validation",
+        "195/195 tracked runtime surface semantic coverage",
+        "Neutral-filename signed-work-order negative control",
+        "Canonical RTM 712-row/12-shard reconciliation without shard changes",
+        "Authorization flag and fail-closed cross-artifact checks"
       ],
-      "pass_criteria": "Permanent artifacts bind exact head, dual-platform source evidence and duplicate decisions without release or runtime claim.",
-      "actual_status": "RESOLVED_L0",
-      "rollback_condition": "Malformed index, wrong target, missing fragment or claim elevation.",
-      "residual_risk": "Text reader truncates complete reread of long parts 001 and 002; primary completeness remains independently established by dual-platform Actions artifacts."
-    },
-    {
-      "work_order_id": "WO-M0-011",
-      "active_milestone": "M0",
-      "requirement": "Reconcile control state after the recursive inventory and duplicate-risk gate.",
-      "change_boundary": "Existing M0 evidence files and PR metadata only.",
-      "test": "Remove only the inventory blocker; preserve runtime and L4/L5 blockers; enforce no-parallel migration rules.",
-      "evidence_level": "L0_STATIC",
-      "artifacts": [
-        {"path": "PROTOCOL_CONFLICT_REGISTER.json", "blob_sha": "86d546c7c2c1a4b3c8546efdb0af7bda3cebaacf", "commit_sha": "56e9df2e00c6914776d202927a7fe096b7e75ebb"},
-        {"path": "CURRENT_ARCHITECTURE_INVENTORY.json", "blob_sha": "2e2ece868b5097820f84198206528aaf38287f45", "commit_sha": "e2fdf35f19e070f3b882395cb248fce9e02ccf41"},
-        {"path": "ARCHITECTURE_MIGRATION_MAP.json", "blob_sha": "a922c9d1282713d0f6aaa7d0bed0cd035ec56b19", "commit_sha": "76e66da65aea7ed2d4d79d7715f00027ee219339"},
-        {"path": "AUTONOMOUS_EXECUTION_STATE.json", "blob_sha": "06516801e670986d0198b77b16ec883aa8ef5b32", "commit_sha": "096ca74f54603428bce412280dc6f225e272d582"}
-      ],
-      "pass_criteria": "State records inventory and duplicate risk as resolved L0 while controller runtime, L2 ingestion, L4/L5, RUN A/RUN B and physical pilot remain open.",
-      "actual_status": "IN_PROGRESS_PENDING_PR_METADATA",
-      "rollback_condition": "Any false milestone/release completion or parallel-component authorization.",
-      "residual_risk": "PR metadata remains to be bound to the final evidence head."
+      "violations_retained":["PV-M0-001","PV-M0-002","PV-M0-003"],
+      "rollback_condition":"Any forbidden path change, missing violation history, stale RESOLVED claim, authorization true, malformed registry or hash/count mismatch.",
+      "rollback_command":"Revert only the defective WO-M0-012 evidence commit; do not reset, force-push or change main.",
+      "evidence_level":"L0_STATIC",
+      "result":"IN_PROGRESS_FINAL_HEAD_TRANSFER_PENDING",
+      "remaining_actions":["Freeze repository evidence commits","Reconstruct final current-head tracked set","Verify no runtime blob changed","Update PR metadata without another repository commit"],
+      "milestone_complete":false,
+      "release_authorized":false
     }
   ],
-  "maximum_evidence_level": "L0_STATIC",
-  "release_authorized": false,
-  "milestone_complete": false,
-  "current_decision": ["FAIL-CLOSED", "PROTOCOL_IMPLEMENTATION_INCOMPLETE", "MILESTONE_NOT_COMPLETE", "RELEASE_BLOCKED"]
+  "maximum_evidence_level":"L0_STATIC",
+  "release_authorized":false,
+  "milestone_complete":false,
+  "current_decision":["FAIL-CLOSED","PROTOCOL_IMPLEMENTATION_INCOMPLETE","MILESTONE_NOT_COMPLETE","RELEASE_BLOCKED"]
 }
