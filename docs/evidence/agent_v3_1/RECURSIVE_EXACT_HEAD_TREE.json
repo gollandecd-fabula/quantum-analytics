@@ -1,0 +1,153 @@
+{
+  "schema_version": "1.2.0",
+  "artifact_type": "RECURSIVE_EXACT_HEAD_TREE",
+  "storage_model": "INDEX_PLUS_BASE64_FRAGMENT_SHARDS",
+  "repository": "gollandecd-fabula/quantum-analytics",
+  "branch": "fix/quantum-one-click-stable-release",
+  "target_exact_head": "d5afcf5e4a28a5ce3cc144cf25db649aceda8b1f",
+  "generated_at_utc": "2026-07-16T06:45:00Z",
+  "work_order_id": "WO-M0-010",
+  "acquisition": {
+    "method": "GitHub Actions full-depth checkout plus git ls-tree -r --full-tree --long -z",
+    "workflow_run_id": 29476140585,
+    "instrumentation_commit": "ebf186d6991f2dc5108b69c6693d1e8f5aa8450e",
+    "rollback_commit": "d42a935417a3a335d5b9cc3de41ce72490ba648e",
+    "rollback_original_blob": "ffc87cb1601c1301ff6cc023ab82ce54bcc2e79d",
+    "net_tree_effect_after_rollback": "NONE",
+    "linux_artifact": {
+      "id": 8366619203,
+      "digest": "sha256:1a721cc5c25dacce1d17c102e5b64b0e10f503f0096c71ac0b8c30718b8ea84a"
+    },
+    "windows_artifact": {
+      "id": 8366648754,
+      "digest": "sha256:7a243378c34d2e3c46c0a92e77dbbd9e8b68373d6c7aec7ed2ffdc8798abaa94"
+    },
+    "tree_export_work_order_id": "WO-M0-009"
+  },
+  "validation": {
+    "entry_count": 682,
+    "unique_path_count": 682,
+    "object_type_counts": {
+      "blob": 682
+    },
+    "mode_counts": {
+      "100644": 682
+    },
+    "linux_windows_entry_equality": true,
+    "independent_git_ls_files_count": 682,
+    "raw_ls_tree_sha256": "b11ff768c45e6805fa7b0d18e0262bb627881249a65e496a78284521dbe4bc31",
+    "canonical_entries_sha256": "44af77d30a2501157b75d13e0c495f8982cdfc1499b57bf8af28fdd6522f76db",
+    "path_list_sha256": "c52894cde474c22fc960b6bd5cb86505874c14ae0ee196a1badac98993732783",
+    "top_level_counts": {
+      ".github": 21,
+      "README.md": 1,
+      "adapters": 1,
+      "apps": 2,
+      "config": 1,
+      "docs": 275,
+      "migrations": 3,
+      "modules": 1,
+      "proof": 8,
+      "pyproject.toml": 1,
+      "quantum_build_backend.py": 1,
+      "requirements": 1,
+      "schemas": 19,
+      "scripts": 10,
+      "src": 167,
+      "tests": 166,
+      "tools": 4
+    },
+    "status": "VALIDATED_L0_STATIC",
+    "primary_completeness_evidence": "LINUX_WINDOWS_GIT_LS_TREE_ARTIFACTS_ENTRY_EQUALITY",
+    "fragment_remote_binding": "5_OF_5_GIT_BLOB_BOUND; 3_OF_5_EXACT_OUTER_SERIALIZATION_MATCHED; 2_OF_5_HEADER_REREAD_WITH_READER_TRUNCATION_LIMITATION"
+  },
+  "payload": {
+    "entry_schema": [
+      "mode",
+      "type",
+      "object_sha",
+      "size_bytes",
+      "path"
+    ],
+    "encoding": "gzip+base64 split into ordered fragments",
+    "media_type": "application/json",
+    "uncompressed_size_bytes": 109742,
+    "uncompressed_sha256": "44af77d30a2501157b75d13e0c495f8982cdfc1499b57bf8af28fdd6522f76db",
+    "compressed_size_bytes": 27176,
+    "compressed_sha256": "9c5284cdcf8034b0f434779e57991e7dce1f083cde56060931c1a936680a4320",
+    "base64_length": 36236,
+    "base64_sha256": "e10cf98d5fe0b9a4d1fcb5ea30fd077e998290c7cd0f95c0acfd2ab7b4c61e52",
+    "part_count": 5,
+    "parts": [
+      {
+        "part_number": 1,
+        "path": "docs/evidence/agent_v3_1/recursive_tree/RECURSIVE_EXACT_HEAD_TREE.part-001.json",
+        "fragment_length": 7248,
+        "fragment_sha256": "e25f572910d3a5ec8835edbecc5485fb46f5dbcaf2603dc68e51c5631b1b2a1e",
+        "remote_git_blob_sha": "448269b137117142ff6b6ef520176ac044bd1f0a",
+        "remote_outer_file_sha256": null,
+        "remote_size_bytes": null,
+        "remote_verification": "WRITE_INPUT_BOUND_HEADER_REREAD_REMOTE_FULL_VALUE_TRUNCATED"
+      },
+      {
+        "part_number": 2,
+        "path": "docs/evidence/agent_v3_1/recursive_tree/RECURSIVE_EXACT_HEAD_TREE.part-002.json",
+        "fragment_length": 7248,
+        "fragment_sha256": "2d95eb6408892d5dcb25cc6d2184ec52607111773e532dfb6d44f403d70052fe",
+        "remote_git_blob_sha": "474104e2533f117ffef984766699e4028696cf7c",
+        "remote_outer_file_sha256": null,
+        "remote_size_bytes": null,
+        "remote_verification": "WRITE_INPUT_BOUND_HEADER_REREAD_REMOTE_FULL_VALUE_TRUNCATED"
+      },
+      {
+        "part_number": 3,
+        "path": "docs/evidence/agent_v3_1/recursive_tree/RECURSIVE_EXACT_HEAD_TREE.part-003.json",
+        "fragment_length": 7248,
+        "fragment_sha256": "6f006882585776e69813c1cc37256fecb0457b1903656cc9a8045225a694f65a",
+        "remote_git_blob_sha": "98d90fee4eb5ab1fd96a8b2def43844708b23731",
+        "remote_outer_file_sha256": "24e189fcbbd5d984fd115e367bda5b0a41b3ef3eb4eff8e22c907a31b962fe1f",
+        "remote_size_bytes": 7580,
+        "remote_verification": "EXACT_OUTER_SERIALIZATION_MATCHED"
+      },
+      {
+        "part_number": 4,
+        "path": "docs/evidence/agent_v3_1/recursive_tree/RECURSIVE_EXACT_HEAD_TREE.part-004.json",
+        "fragment_length": 7248,
+        "fragment_sha256": "96da780a245f1c7e3191e32f0181b57b8f8c5b2c7d039e4ab27855693fa0fdc0",
+        "remote_git_blob_sha": "c03e1bcbbb968054195b0b4ff3dc56a9e0065a31",
+        "remote_outer_file_sha256": "da3c1ce2405955d959c6c27e5e39395f52171f308cbc27642401bd40b76eca33",
+        "remote_size_bytes": 7580,
+        "remote_verification": "EXACT_OUTER_SERIALIZATION_MATCHED"
+      },
+      {
+        "part_number": 5,
+        "path": "docs/evidence/agent_v3_1/recursive_tree/RECURSIVE_EXACT_HEAD_TREE.part-005.json",
+        "fragment_length": 7244,
+        "fragment_sha256": "596754b6935b399c5ac8d4d8c7e1e38e33dd2c226bafd5726ce322eb1052e9d2",
+        "remote_git_blob_sha": "485cbd618d9569566a3186a35952feed5dab2ff3",
+        "remote_outer_file_sha256": "7aab235f01dd22d294cb5a0c8cf951f3ccce9b928cb1dd409a5b4ae261326790",
+        "remote_size_bytes": 7576,
+        "remote_verification": "EXACT_OUTER_SERIALIZATION_MATCHED"
+      }
+    ]
+  },
+  "reconstruction_rule": "Concatenate fragment fields in ascending part_number, base64-decode, gzip-decompress, parse JSON array, then verify hashes and 682 unique entries.",
+  "claim_boundary": {
+    "maximum_evidence_level": "L0_STATIC",
+    "runtime_behavior_proven": false,
+    "installed_behavior_proven": false,
+    "physical_user_path_proven": false,
+    "release_authorized": false
+  },
+  "current_decision": [
+    "FAIL-CLOSED",
+    "PROTOCOL_IMPLEMENTATION_INCOMPLETE",
+    "MILESTONE_NOT_COMPLETE",
+    "RELEASE_BLOCKED"
+  ],
+  "limitations": [
+    "The complete 682-entry tree is proven by two independent exact-head GitHub Actions git ls-tree artifacts with identical entry arrays and hashes.",
+    "The GitHub text reader truncates the long one-line fragment value for parts 001 and 002; their writes, headers, embedded fragment hashes and Git blob IDs are bound, but a second full remote fragment rehash was not possible through the exposed reader.",
+    "This artifact is L0 static evidence and does not prove controller runtime, installed behavior or physical user path."
+  ]
+}

@@ -1,0 +1,80 @@
+{
+  "milestone": "M6",
+  "title": "Marketplace-Neutral Core & Adapters",
+  "baseline_head": "f7d2860258b93e40c253876e998360eb006859b4",
+  "verdict": "PASS_LOCAL_PENDING_EXACT_HEAD_CI",
+  "defects": [
+    {
+      "id": "M6-D001",
+      "severity": "P1",
+      "status": "CLOSED_VERIFIED",
+      "finding": "Windows orchestration imported and called the Wildberries dispatcher directly.",
+      "closure": "Dispatch now uses a marketplace-neutral request and registry."
+    },
+    {
+      "id": "M6-D002",
+      "severity": "P1",
+      "status": "CLOSED_VERIFIED",
+      "finding": "No enforceable adapter identity, registration or dispatch contract existed.",
+      "closure": "Added protocol, request envelope, canonical IDs, frozen registry and result validation."
+    },
+    {
+      "id": "M6-D003",
+      "severity": "P1",
+      "status": "CLOSED_VERIFIED",
+      "finding": "Concrete adapter output had no common invariant preventing marketplace writes.",
+      "closure": "Registry rejects write-enabled results and always emits marketplace_write_enabled=false."
+    },
+    {
+      "id": "M6-D004",
+      "severity": "P2",
+      "status": "CLOSED_VERIFIED",
+      "finding": "Missing marketplace identity was not enforced at the source bridge boundary.",
+      "closure": "Missing or invalid marketplace IDs fail closed with explicit reason codes."
+    },
+    {
+      "id": "M6-D005",
+      "severity": "P2",
+      "status": "CLOSED_WITH_LIMITATION",
+      "finding": "Ozon had no independent adapter boundary.",
+      "closure": "Registered an independent Ozon adapter that blocks semantic processing until approved source profiles exist.",
+      "limitation": "Ozon financial parsing remains intentionally unavailable."
+    },
+    {
+      "id": "M6-D006",
+      "severity": "P2",
+      "status": "CLOSED_VERIFIED",
+      "finding": "No regression gate prevented concrete marketplace dependencies from returning to core layers.",
+      "closure": "Added architecture source-boundary tests for finance, insights, recommendations, pilot and adapter layers."
+    },
+    {
+      "id": "M6-D007",
+      "severity": "P1",
+      "status": "CLOSED_LOCAL_PENDING_EXACT_HEAD_CI",
+      "finding": "Four legacy recommendation tests patched the removed Wildberries module seam and failed before exercising the neutral registry boundary.",
+      "closure": "Tests now inject a MarketplaceAdapterRegistry mock and provide explicit marketplace identity; production code remains marketplace-neutral.",
+      "evidence": [
+        "Foundation CI run 29229496302",
+        "OSS Admission CI run 29229496306"
+      ]
+    },
+    {
+      "id": "M6-D008",
+      "severity": "P1",
+      "status": "CLOSED_LOCAL_PENDING_EXACT_HEAD_CI",
+      "finding": "The first R53 recovery blob contained two misspelled historical B1B overlay names, causing manifest loader FileNotFoundError before admission checks.",
+      "closure": "Restored integration_manifest_support.py to the byte-verified R52 blob, moved R53/R54 chain extension into a compact bootstrap module, added a misspelled-control-path regression test, and retained Git blob SHA verification.",
+      "evidence": [
+        "Foundation CI run 29229927899",
+        "OSS Admission CI run 29229927926",
+        "M1 Baseline and Reproduction Audit run 29229927923",
+        "Quantum One Button R3 Native Red Team run 29229927948"
+      ]
+    }
+  ],
+  "release_authorized": false,
+  "marketplace_writes_authorized": false,
+  "merge_to_main_authorized": false,
+  "final_score_authorized": false,
+  "recovery_head_pending": true
+}

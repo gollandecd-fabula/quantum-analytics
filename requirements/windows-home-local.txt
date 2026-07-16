@@ -1,0 +1,4 @@
+# Windows does not ship the IANA database used by zoneinfo.
+# PyPI wheel provenance: tzdata 2026.2, universal py2.py3-none-any wheel.
+tzdata==2026.2 \
+    --hash=sha256:bbe9af844f658da81a5f95019480da3a89415801f6cc966806612cc7169bffe7

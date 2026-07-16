@@ -1,0 +1,29 @@
+{
+  "base_pilot_integration_r56_overlay_git_blob_sha": "a22637fb4e38f4377c0ed5b53fdf58ec7cdcfbce",
+  "entries": [
+    [
+      "docs/evidence/M7_DEFECT_REGISTER.json",
+      "20b72a5daee8fb026221c27f3c15004a9807f3f3222c817ffaa1ac0b2775386c",
+      3208
+    ],
+    [
+      "tests/integration_manifest_support_m7.py",
+      "4803f97bb1a3a44c448b8205c3d276c247bc75a51a5e009de97fa9a30c6091c4",
+      1144
+    ],
+    [
+      "tests/test_m7_security_audit_precision.py",
+      "aa72c087165759ed3aed6f8a9bcea2f7390db1b014660fe8ecf7c8b574bb03ef",
+      2182
+    ],
+    [
+      "tools/m7_security_performance_one_click.py",
+      "5104106b317f7d311f660e87a40f06528ec2feaae3513de9ac79455b3f3df2e8",
+      18256
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 57,
+  "reason": "MILESTONE 7 exact-head recovery seal: replace substring security classification with AST and switch-default analysis, distinguish network reads from explicit HTTP writes, add precision regressions, and record the closed false-positive defect without changing production runtime behavior",
+  "remove_paths": []
+}

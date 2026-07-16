@@ -2,9 +2,6 @@ name: OSS Admission CI
 
 on:
   pull_request:
-    branches:
-      - main
-      - build-b3-metric-evidence-contracts-v4
   workflow_dispatch:
 
 permissions:

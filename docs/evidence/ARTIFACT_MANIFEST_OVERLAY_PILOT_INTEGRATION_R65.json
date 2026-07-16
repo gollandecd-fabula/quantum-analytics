@@ -1,0 +1,54 @@
+{
+  "base_pilot_integration_r64_overlay_git_blob_sha": "89a52353b6b647c0de726baa653affbc49a1d7b4",
+  "entries": [
+    [
+      "config/home-local.template.json",
+      "a505b8603b3265c91a81a06dc2de0aeff7e279525c5e68898b509c32caf5fc5a",
+      2331
+    ],
+    [
+      "docs/evidence/M9_INDEPENDENT_FINAL_RED_TEAM_PLAN.json",
+      "fb5be597e9b390f596689294cf6d4968a0df38200773ae0a511aabcd5330d951",
+      1360
+    ],
+    [
+      "scripts/windows/build_local_production.ps1",
+      "002752671f5bebf65209b90d9ab4172231f0d475251599f47d08b11dcbe096bc",
+      12704
+    ],
+    [
+      "src/quantum/adapters/__init__.py",
+      "0879392c21cb56ce369f4c3a7ceae18955ab6fd63a1f6070a0af750a6ab51666",
+      793
+    ],
+    [
+      "src/quantum/adapters/defaults.py",
+      "0501d7763ca0fe8779fc4f28ec2e77cdf0a14fe6e869cf55232611e228d4ce71",
+      542
+    ],
+    [
+      "tests/integration_manifest_support_m8.py",
+      "530f7fbfd072db02d1297703626436c6f284d961525296cc622dcb47a7595734",
+      1085
+    ],
+    [
+      "tests/test_m6_marketplace_neutral_adapters.py",
+      "cc00d439d5dfc799e194d78d1ac96707487df145e510420730ed7f76773ad572",
+      6717
+    ],
+    [
+      "tests/test_m9_independent_final_red_team.py",
+      "64db6d00ff6968a875dc4e014fa4ce8153afc45ebc5c6cbe9392370794fc1f58",
+      3788
+    ],
+    [
+      "tests/test_windows_one_click_installer_r1.py",
+      "885e075c269851f06453f91316d25d48f34140b6db9799b11671b3bcb790f44d",
+      8653
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 65,
+  "reason": "MILESTONE 9 entry gate: freeze the first local release to Wildberries only, defer Ozon, remove the Ozon adapter from the user package, preserve marketplace-write and release blocks, and require physical Windows plus real-WB reconciliation evidence before PILOT_READY",
+  "remove_paths": []
+}

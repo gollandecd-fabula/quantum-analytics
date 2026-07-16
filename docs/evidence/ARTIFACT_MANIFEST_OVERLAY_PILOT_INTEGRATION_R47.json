@@ -1,0 +1,29 @@
+{
+  "base_pilot_integration_r46_overlay_git_blob_sha": "3c68c187866d85ac95a9c3dcc4cd7ebaa2b8237f",
+  "entries": [
+    [
+      "docs/research/M2_COMPETITIVE_BENCHMARK_2026_07_11.md",
+      "2c40272b8ededeb6754acc53cbd257bf78476c44599b98d88420868df80ba53b",
+      9409
+    ],
+    [
+      "docs/research/M2_COMPETITIVE_BENCHMARK_2026_07_11.json",
+      "c61046f382743885632480c1923d7434be56305db596b7bf9c3b7081d17c7736",
+      16786
+    ],
+    [
+      "tests/test_m2_competitive_benchmark.py",
+      "829da52ddb2550a13cfdd7c673dc2799415fc4a4a5766511930fecdd52ad73cd",
+      3073
+    ],
+    [
+      "tests/integration_manifest_support.py",
+      "8276466a44d4c484d4727bbd0d121901d664f28ef38f6c90a8f86687f5f1281d",
+      7845
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 47,
+  "reason": "MILESTONE 2 competitive research evidence: benchmark 7 global and 6 WB/Ozon-oriented analytics services, record ADOPT/ADAPT/DEFER/REJECT decisions, and prohibit runtime implementation in M2",
+  "remove_paths": []
+}

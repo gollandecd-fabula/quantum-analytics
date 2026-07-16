@@ -1,0 +1,103 @@
+name: Windows Local Production Repair
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - local-pilot-windows-repair-r1
+      - local-pilot-windows-acl-repair-r2
+      - local-pilot-runner-r1
+    paths:
+      - "src/quantum/pilot/**"
+      - "src/quantum/ingestion/**"
+      - "scripts/windows/**"
+      - "scripts/ci/windows_local_production_r37.ps1"
+      - "tests/test_windows_local_runner.py"
+      - "tests/test_windows_storage_compat.py"
+      - "tests/test_windows_redteam_hardening.py"
+      - "tests/test_windows_reviewed_file_hash.py"
+      - "tests/test_windows_one_click_installer_r1.py"
+      - "tests/test_m0_recovery_after_m1.py"
+      - "config/home-local.template.json"
+      - "requirements/windows-home-local.txt"
+      - "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R46.json"
+      - ".github/workflows/windows-local-production.yml"
+  pull_request:
+    paths:
+      - "src/quantum/pilot/**"
+      - "src/quantum/ingestion/**"
+      - "scripts/windows/**"
+      - "scripts/ci/windows_local_production_r37.ps1"
+      - "tests/test_windows_local_runner.py"
+      - "tests/test_windows_storage_compat.py"
+      - "tests/test_windows_redteam_hardening.py"
+      - "tests/test_windows_reviewed_file_hash.py"
+      - "tests/test_windows_one_click_installer_r1.py"
+      - "tests/test_m0_recovery_after_m1.py"
+      - "config/home-local.template.json"
+      - "requirements/windows-home-local.txt"
+      - "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R46.json"
+      - ".github/workflows/windows-local-production.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  windows-regression-and-build:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run versioned Windows production gate
+        shell: pwsh
+        env:
+          TARGET_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          try {
+            & .\scripts\ci\windows_local_production_r37.ps1 2>&1 |
+              Tee-Object -FilePath windows-production-r37.log
+            $gateExitCode = $LASTEXITCODE
+            if ($gateExitCode -ne 0) {
+              throw "Versioned Windows production gate failed with exit code $gateExitCode"
+            }
+          }
+          catch {
+            $_ | Out-String | Tee-Object -FilePath windows-production-r37.log -Append
+            throw
+          }
+
+      - name: Upload Windows production diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-local-production-r37-diagnostics
+          path: |
+            windows-production-r37.log
+            windows-repair-tests.log
+            existing-local-pilot-tests.log
+            windows-verification-error.log
+            tamper-rejection.log
+            configurator.log
+            installed-import.log
+            one-click-pilot.log
+            package-build.log
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Upload verified HOME_LOCAL package
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: QuantumLocalProduction-HOME_LOCAL
+          path: dist/QuantumLocalProduction_HOME_LOCAL.zip
+          if-no-files-found: error
+          retention-days: 14

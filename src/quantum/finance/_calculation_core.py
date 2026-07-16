@@ -151,6 +151,15 @@ def calculate_units_and_product_cost(
             reason_code="COST_RULE_SIGNATURE_MISMATCH",
             source_ids=cpu.source_ids,
         )
+    elif cpu.state == "VALID" and isinstance(cpu.value, Decimal) and cpu.value < 0:
+        cost = _make_nonvalid(
+            "BLOCKED",
+            value_type="MONEY",
+            unit="MONEY",
+            currency=currency,
+            reason_code="COST_PER_UNIT_NEGATIVE_FORBIDDEN",
+            source_ids=cpu.source_ids,
+        )
     else:
         cost = _propagate(
             [cpu],

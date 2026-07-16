@@ -1,0 +1,29 @@
+{
+  "base_pilot_integration_r53_overlay_git_blob_sha": "d4d1e4f6f47e2f6168f9c6ac34393144b6834b4c",
+  "entries": [
+    [
+      "docs/evidence/M6_DEFECT_REGISTER.json",
+      "a8d01b88eddb516254cbe03e135338df9e7e3dd45b12e8643b6045e92841fcf0",
+      3561
+    ],
+    [
+      "tests/integration_manifest_support.py",
+      "8a8a003476fc1137ba831ea2dce55374bebde748c5d07cf77a3185f290f4e333",
+      7845
+    ],
+    [
+      "tests/integration_manifest_support_m6.py",
+      "78d96df6062483f71fa17f81522f9324fbb353f587ecb3050cea863ceddc6e31",
+      1059
+    ],
+    [
+      "tests/test_b1a_artifact_manifest.py",
+      "784cccfbac04b35ad299dab901100637fe28cbb93885419cb39a8513aa2d6f49",
+      1014
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 54,
+  "reason": "MILESTONE 6 exact-head CI recovery R54: restore the byte-verified manifest loader blob, extend R53/R54 through a compact bootstrap, add a misspelled-control-path regression gate, and record the transport-integrity defect without changing production code",
+  "remove_paths": []
+}

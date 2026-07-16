@@ -1,0 +1,80 @@
+{
+  "branch": "fix/quantum-one-click-stable-release",
+  "conflicts": [
+    {
+      "conflict_id": "PCON-001",
+      "decision": "SOURCE_FREEZE_ESTABLISHED_NO_IMPLEMENTATION_CLAIM",
+      "evidence": ["PROTOCOL_SOURCE_DISCOVERY.json"],
+      "observed": "The raw Protocol v3.1 DOCX was hashed in-session and the declared SHA-256 matched; ZIP integrity and the 15-page render audit were recorded.",
+      "remaining_boundary": "The current production control plane does not ingest or enforce Protocol v3.1 at L2.",
+      "requirement": "Literal ingestion must bind the exact Protocol v3.1 bytes and SHA-256.",
+      "severity": "P0",
+      "status": "RESOLVED_L0",
+      "type": "PROTOCOL_SOURCE_BYTE_IDENTITY"
+    },
+    {
+      "conflict_id": "PCON-002",
+      "decision": "FAIL_CLOSED_CONTINUE_INDEPENDENT_L0_L3_WORK",
+      "observed": "No interactive installed Windows session or physical user-path worker is available in the current GitHub execution path.",
+      "requirement": "User-visible P0 and UI Reference Lock require interactive Windows L5 physical-user-path evidence.",
+      "resolution_required": "Execute the future Windows L4/L5 worker on the frozen exact artifact through the installed LNK and preserve actual process and physical-path evidence.",
+      "severity": "P0",
+      "status": "BLOCKED",
+      "type": "ENVIRONMENT_CAPABILITY"
+    },
+    {
+      "conflict_id": "PCON-003",
+      "decision": "FULL_TREE_AND_DUPLICATE_RISK_RESOLVED_L0_NO_PARALLEL_COMPONENTS",
+      "evidence": [
+        "RECURSIVE_EXACT_HEAD_TREE.json",
+        "DUPLICATE_RISK_ASSESSMENT.json"
+      ],
+      "observed": "Two independent Linux and Windows full-depth checkouts produced identical git ls-tree results for exact head d5afcf5e4a28a5ce3cc144cf25db649aceda8b1f: 682 entries, 682 unique paths, canonical entries SHA-256 44af77d30a2501157b75d13e0c495f8982cdfc1499b57bf8af28fdd6522f76db. Static duplicate analysis found the existing M9 gate, audit tools, Red Team tooling, worker and domain runtimes, but no executable Release Orchestrator or isolated Implementer, Verifier or Adversary process.",
+      "remaining_boundary": "The manager-specialist runtime and Protocol v3.1 enforcement are not implemented or runtime-tested.",
+      "requirement": "Inventory every existing agent/orchestrator/control-plane/release-gate/workflow/evidence component before creating an equivalent.",
+      "severity": "P1",
+      "status": "RESOLVED_L0",
+      "type": "INVENTORY_COMPLETENESS_AND_DUPLICATE_RISK"
+    },
+    {
+      "conflict_id": "PCON-004",
+      "decision": "UI_SPEC_FROZEN_NO_UI_IMPLEMENTATION_CLAIM",
+      "evidence": ["UI_REFERENCE_MANIFEST.json"],
+      "observed": "The approved PNG raw bytes were hashed and technically frozen.",
+      "remaining_boundary": "Installed visual conformity and L5 physical review remain unverified.",
+      "requirement": "Create UI_REFERENCE_MANIFEST.json from the exact approved PNG before any UI modification.",
+      "severity": "P0",
+      "status": "RESOLVED_L0",
+      "type": "UI_REFERENCE_TECHNICAL_FREEZE"
+    },
+    {
+      "conflict_id": "PCON-005",
+      "decision": "CANONICAL_REGISTRY_MATERIALIZED_L0",
+      "evidence": [
+        "REQUIREMENTS_TRACEABILITY_MATRIX.json",
+        "rtm/REQUIREMENTS_TRACEABILITY_MATRIX.part-001.json through part-012.json"
+      ],
+      "observed": "The canonical index plus twelve immutable shards materializes 712 unique requirements with nineteen mandatory fields.",
+      "remaining_boundary": "The deterministic controller has not ingested or enforced this registry at L2 runtime.",
+      "requirement": "Before implementation changes, preserve both source layers and every mandatory RTM field.",
+      "severity": "P0",
+      "status": "RESOLVED_L0",
+      "type": "PRECHANGE_REGISTRY_MATERIALIZATION"
+    }
+  ],
+  "current_decision": [
+    "FAIL-CLOSED",
+    "PROTOCOL_IMPLEMENTATION_INCOMPLETE",
+    "MILESTONE_NOT_COMPLETE",
+    "RELEASE_BLOCKED"
+  ],
+  "generated_at_utc": "2026-07-16T06:55:00Z",
+  "maximum_evidence_level": "L0_STATIC",
+  "open_conflicts": ["PCON-002"],
+  "release_authorized": false,
+  "repository": "gollandecd-fabula/quantum-analytics",
+  "resolved_conflicts": ["PCON-001", "PCON-003", "PCON-004", "PCON-005"],
+  "schema_version": "1.3.0",
+  "subject_exact_head": "2afdfd62830deac54c9159831c9812284c4f530a",
+  "work_order_id": "WO-M0-011"
+}

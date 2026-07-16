@@ -1,0 +1,29 @@
+{
+  "base_pilot_integration_r37_overlay_git_blob_sha": "eb7d4fe14ced7413989948cb8d9bff188e329af3",
+  "entries": [
+    [
+      ".github/workflows/windows-local-production.yml",
+      "02eb17c5d91b7f4da83162dc29d98907835e452bbe8eee08a09699460e9e26bb",
+      3314
+    ],
+    [
+      "scripts/ci/native_one_button_r37.ps1",
+      "f89113b72af927f31161eb017cc2b36a18a6fc077f714793c30d6d6fc809d5d1",
+      15126
+    ],
+    [
+      "scripts/ci/windows_local_production_r37.ps1",
+      "c5f7766bba95f4ddb0c242f3401aa202ac6530d72bb347eab0ff52be4b1fd254",
+      11683
+    ],
+    [
+      "tests/integration_manifest_support.py",
+      "15bd9d0e690c3ac91a83d078e579dfdcff6c4fccdff0c096b160e474e80ecae3",
+      7845
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 38,
+  "reason": "MILESTONE 0 Windows CI hardening: isolate each preserved workflow run block in its own PowerShell script scope so late traps cannot intercept earlier failures, and retain a complete production transcript for independent diagnosis",
+  "remove_paths": []
+}

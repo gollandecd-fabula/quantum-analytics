@@ -1,0 +1,44 @@
+{
+  "base_pilot_integration_r45_overlay_git_blob_sha": "8cfa124babeb9a424bfa1086f0313dd1bd762f3c",
+  "entries": [
+    [
+      ".github/workflows/build-one-button-redteam-r3.yml",
+      "0df6f02a794cc9f8db0e61bc4822be03f4cfdb29845812618dfa61570c07137c",
+      2833
+    ],
+    [
+      ".github/workflows/windows-local-production.yml",
+      "cc07526c2c709d35edfb1d68f08058ddd781c951ac32dff4c28cf129c31013a1",
+      3510
+    ],
+    [
+      "scripts/ci/native_one_button_r37.ps1",
+      "1dcc3b99b02d1217d435087b1f366518e63020730c73f7e4f0e87a1cd8940c25",
+      15214
+    ],
+    [
+      "scripts/ci/windows_local_production_r37.ps1",
+      "07e149c2527d645186e20db6edd05a90655e255895e329bf3ee33268cabefb5c",
+      11771
+    ],
+    [
+      "scripts/windows/one_click_home_local.ps1",
+      "de82d84e9dfb7bcb1a87b50ba801fa9d3be1797ffa01ed048945cdee6e14d281",
+      14392
+    ],
+    [
+      "tests/integration_manifest_support.py",
+      "25ff9843d0012763b036e43ff989d4359477ae3c5b01218f809090ed4c847bbe",
+      7845
+    ],
+    [
+      "tests/test_m0_recovery_after_m1.py",
+      "5dde777d46e2073c2c9b6caa6cbcd57420bb9f1cbdb3e5d842b0c09d690192e5",
+      1686
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 46,
+  "reason": "M0 recovery after M1 Red Team: persist externally supplied ready config inside fresh HOME_LOCAL and prevent production/native workflow exit-status masking",
+  "remove_paths": []
+}

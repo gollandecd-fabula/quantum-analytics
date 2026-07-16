@@ -1,0 +1,34 @@
+{
+  "base_pilot_integration_r75_overlay_git_blob_sha": "59f4fa23906e49a6cc18e8578ed90d6cbd03b015",
+  "entries": [
+    [
+      "src/quantum/application/_finance_center_import.py",
+      "507d4662bb757d8274dc9070887ac1a2687b5d969344a699b333e1a50b910e29",
+      4499
+    ],
+    [
+      "src/quantum/application/_finance_center_pages.py",
+      "aaffccff89119a080f58acec16b9b23dcf8dae2780030e4fee5655acd5dd3c9b",
+      9534
+    ],
+    [
+      "src/quantum/application/_finance_center_queue_runtime.py",
+      "57f37785f40475b41edf4d53c2eea34fa21bf70b848ad9fa14b2c47ccd447277",
+      9012
+    ],
+    [
+      "tests/test_finance_center_queue_hotfix.py",
+      "8f4f479adda32ea45d478f88fd2172c20748f01d287a4a247ec0356be9968764",
+      8860
+    ],
+    [
+      "tests/integration_manifest_support_m8.py",
+      "5ab26b030e898c6619304f47cf3cfb64a1d305741ba2d6d94cc12eff6d64c47f",
+      1090
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 76,
+  "reason": "Treat the explicit GUI action “Выбрать и запустить отчёты” as the user authorization for the selected batch; run the sequential importer with NonInteractive, AuthorityAttested and SchemaReviewed in a hidden PowerShell process while preserving Microsoft Defender scanning, duplicate protection, cancellation, single-instance, WB_ONLY and read-only marketplace boundaries",
+  "remove_paths": []
+}

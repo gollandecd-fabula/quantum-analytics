@@ -1,0 +1,63 @@
+{
+  "standard": "WCAG 2.x AA normal text",
+  "method": "sRGB relative luminance",
+  "pairs": [
+    {
+      "name": "body_text",
+      "foreground": "#172033",
+      "background": "#ffffff",
+      "contrast_ratio": 16.268,
+      "minimum": 4.5,
+      "result": "PASS"
+    },
+    {
+      "name": "muted_text",
+      "foreground": "#344054",
+      "background": "#ffffff",
+      "contrast_ratio": 10.461,
+      "minimum": 4.5,
+      "result": "PASS"
+    },
+    {
+      "name": "critical_badge",
+      "foreground": "#b42318",
+      "background": "#fee9e7",
+      "contrast_ratio": 5.643,
+      "minimum": 4.5,
+      "result": "PASS"
+    },
+    {
+      "name": "success_badge",
+      "foreground": "#067647",
+      "background": "#dcfce7",
+      "contrast_ratio": 5.182,
+      "minimum": 4.5,
+      "result": "PASS"
+    },
+    {
+      "name": "warning_badge",
+      "foreground": "#b54708",
+      "background": "#fff0dc",
+      "contrast_ratio": 4.845,
+      "minimum": 4.5,
+      "result": "PASS"
+    },
+    {
+      "name": "info_badge",
+      "foreground": "#175cd3",
+      "background": "#e2edff",
+      "contrast_ratio": 5.072,
+      "minimum": 4.5,
+      "result": "PASS"
+    },
+    {
+      "name": "navy_on_white",
+      "foreground": "#172554",
+      "background": "#ffffff",
+      "contrast_ratio": 14.695,
+      "minimum": 4.5,
+      "result": "PASS"
+    }
+  ],
+  "overall": "PASS"
+}

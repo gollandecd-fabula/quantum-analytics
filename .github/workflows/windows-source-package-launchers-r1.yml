@@ -1,0 +1,95 @@
+name: Windows Source Package Launchers R1
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [local-one-button-redteam-r3]
+    paths:
+      - ".github/workflows/windows-source-package-launchers-r1.yml"
+      - "scripts/windows/build_local_production.ps1"
+      - "scripts/windows/import_source.ps1"
+      - "scripts/windows/one_click_home_local.ps1"
+      - "tests/test_windows_source_package_launchers_r1.py"
+      - "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R72.json"
+  pull_request:
+    paths:
+      - ".github/workflows/windows-source-package-launchers-r1.yml"
+      - "scripts/windows/build_local_production.ps1"
+      - "scripts/windows/import_source.ps1"
+      - "scripts/windows/one_click_home_local.ps1"
+      - "tests/test_windows_source_package_launchers_r1.py"
+      - "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R72.json"
+
+permissions:
+  contents: read
+
+jobs:
+  source-package-launchers:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build and verify source package launchers
+        shell: pwsh
+        env:
+          TARGET_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          Set-StrictMode -Version Latest
+          $ErrorActionPreference = "Stop"
+          $expected = "${{ github.event.pull_request.head.sha || github.sha }}"
+          if ((& git rev-parse HEAD).Trim() -ne $expected) {
+            throw "Exact-head checkout failed."
+          }
+
+          $out = Join-Path $env:RUNNER_TEMP "quantum-source-launcher-audit"
+          $extract = Join-Path $env:RUNNER_TEMP "quantum-source-launcher-extract"
+          Remove-Item $out,$extract -Recurse -Force -ErrorAction SilentlyContinue
+          New-Item -ItemType Directory -Path $out -Force | Out-Null
+
+          powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\windows\build_local_production.ps1 -OutputDirectory $out
+          if ($LASTEXITCODE -ne 0) {
+            throw "Source package build failed: $LASTEXITCODE"
+          }
+
+          $archive = Join-Path $out "QuantumLocalProduction_HOME_LOCAL.zip"
+          Expand-Archive -LiteralPath $archive -DestinationPath $extract
+          $start = Get-Content -LiteralPath (Join-Path $extract "START_QUANTUM.cmd") -Raw
+          $import = Get-Content -LiteralPath (Join-Path $extract "IMPORT_XLSX.cmd") -Raw
+          $readme = Get-Content -LiteralPath (Join-Path $extract "README_FIRST.txt") -Raw
+
+          if ($start -notmatch '-PackageRoot\s+"%~dp0"') {
+            throw "Source START_QUANTUM.cmd does not preserve the package-root launch contract."
+          }
+          if ($start -match '-AuthorityAttested|-SchemaReviewed') {
+            throw "Source START_QUANTUM.cmd must not attest for the operator."
+          }
+          if ($import -match '-AuthorityAttested|-SchemaReviewed') {
+            throw "Source IMPORT_XLSX.cmd must not attest for the operator."
+          }
+          if ($readme -notmatch 'Введите AUTHORIZE') {
+            throw "Source README does not require explicit authority confirmation."
+          }
+          if ($readme -notmatch 'введите REVIEWED') {
+            throw "Source README does not require explicit schema and reporting-period review."
+          }
+          if ($readme -notmatch 'Программы запуска никогда не подтверждают AUTHORIZE или REVIEWED за пользователя') {
+            throw "Source README does not describe the fail-closed launcher boundary."
+          }
+          if ($readme -match 'No AUTHORIZE or REVIEWED console input is required') {
+            throw "Source README still claims automatic operator attestations."
+          }
+          if ($readme -notmatch 'Microsoft Defender остаётся включённым') {
+            throw "Source README does not preserve Defender safety."
+          }
+          if ($readme -notmatch 'Запись на маркетплейс отключена') {
+            throw "Source README does not preserve the read-only marketplace boundary."
+          }
+
+          Write-Host "SOURCE_PACKAGE_LAUNCHERS_PASS" -ForegroundColor Green

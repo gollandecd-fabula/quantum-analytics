@@ -1,0 +1,325 @@
+name: M8 Clean Environment Reproduction
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - fix/quantum-one-click-stable-release
+    paths:
+      - ".github/workflows/m8-clean-environment-reproduction.yml"
+      - "tools/m8_clean_environment_reproduction.py"
+      - "tests/integration_manifest_support_m8.py"
+      - "tests/test_m8_clean_environment_reproduction.py"
+      - "tests/test_b1a_artifact_manifest.py"
+      - "docs/evidence/M8_CLEAN_ENVIRONMENT_REPRODUCTION.json"
+      - "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R62.json"
+      - "scripts/ci/native_one_button_r37.ps1"
+      - "requirements/windows-home-local.txt"
+      - "src/quantum/**"
+      - "pyproject.toml"
+  pull_request:
+    paths:
+      - ".github/workflows/m8-clean-environment-reproduction.yml"
+      - "tools/m8_clean_environment_reproduction.py"
+      - "tests/integration_manifest_support_m8.py"
+      - "tests/test_m8_clean_environment_reproduction.py"
+      - "tests/test_b1a_artifact_manifest.py"
+      - "docs/evidence/M8_CLEAN_ENVIRONMENT_REPRODUCTION.json"
+      - "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R62.json"
+      - "scripts/ci/native_one_button_r37.ps1"
+      - "requirements/windows-home-local.txt"
+      - "src/quantum/**"
+      - "pyproject.toml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: m8-clean-environment-${{ github.event.pull_request.head.sha || github.sha }}
+  cancel-in-progress: false
+
+env:
+  TARGET_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+  PYTHONUTF8: "1"
+  PYTHONDONTWRITEBYTECODE: "1"
+  PYTHONNOUSERSITE: "1"
+
+jobs:
+  linux-clean-room-repetition:
+    name: Linux clean room 2x
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Checkout exact head into clean room A
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TARGET_SHA }}
+          path: run-a
+          clean: true
+          fetch-depth: 1
+
+      - name: Checkout exact head into clean room B
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TARGET_SHA }}
+          path: run-b
+          clean: true
+          fetch-depth: 1
+
+      - name: Set up Python 3.12 without dependency cache
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Reproduce twice from independent clean checkouts
+        shell: bash
+        run: |
+          set -euo pipefail
+          for slot in a b; do
+            root="$GITHUB_WORKSPACE/run-$slot"
+            sandbox="$RUNNER_TEMP/m8-linux-$slot-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+            rm -rf "$sandbox"
+            mkdir -p \
+              "$sandbox/home" \
+              "$sandbox/tmp" \
+              "$sandbox/xdg-cache" \
+              "$sandbox/pip-cache" \
+              "$sandbox/evidence"
+
+            test "$(git -C "$root" rev-parse HEAD)" = "$TARGET_SHA"
+            (
+              cd "$root"
+              export HOME="$sandbox/home"
+              export TMPDIR="$sandbox/tmp"
+              export XDG_CACHE_HOME="$sandbox/xdg-cache"
+              export PIP_CACHE_DIR="$sandbox/pip-cache"
+              export PYTHONPATH="$root/src"
+              python tools/m8_clean_environment_reproduction.py audit \
+                --root "$root" \
+                --sandbox "$sandbox" \
+                --expected-sha "$TARGET_SHA" \
+                --platform-label linux \
+                --output "$sandbox/evidence/preflight.json"
+              python -m unittest \
+                tests.test_m8_clean_environment_reproduction \
+                tests.test_b1a_artifact_manifest -v 2>&1 | \
+                tee "$sandbox/evidence/m8-contracts.log"
+              python -m quantum.scripts.ci 2>&1 | \
+                tee "$sandbox/evidence/repository-ci.log"
+            )
+
+            (
+              cd "$root"
+              python -c 'import shutil; from pathlib import Path; from tools.m8_clean_environment_reproduction import collect_repo_residue; root = Path.cwd(); targets = [root / relative.rstrip("/") for relative in collect_repo_residue(root)]; [shutil.rmtree(target) if target.is_dir() else target.unlink() for target in targets if target.exists()]'
+            )
+            status="$(git -C "$root" status --porcelain=v1 --untracked-files=all)"
+            if [ -n "$status" ]; then
+              printf '%s\n' "$status" >&2
+              exit 1
+            fi
+          done
+
+      - name: Write Linux repetition evidence
+        shell: bash
+        run: |
+          python - <<'PY'
+          from __future__ import annotations
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+
+          runner_temp = Path(os.environ["RUNNER_TEMP"])
+          run_id = os.environ["GITHUB_RUN_ID"]
+          attempt = os.environ["GITHUB_RUN_ATTEMPT"]
+          target = os.environ["TARGET_SHA"]
+          result = {
+              "milestone": "M8",
+              "status": "PASS",
+              "exact_head": target,
+              "independent_linux_checkouts": 2,
+              "runs": [],
+              "release_state": "RELEASE_BLOCKED",
+              "marketplace_write_enabled": False,
+          }
+          for slot in ("a", "b"):
+              evidence = runner_temp / f"m8-linux-{slot}-{run_id}-{attempt}" / "evidence"
+              logs = {}
+              for name in ("preflight.json", "m8-contracts.log", "repository-ci.log"):
+                  data = (evidence / name).read_bytes()
+                  logs[name] = {
+                      "sha256": hashlib.sha256(data).hexdigest(),
+                      "size_bytes": len(data),
+                  }
+              result["runs"].append({"slot": slot, "evidence": logs})
+          output = runner_temp / f"m8-linux-summary-{run_id}-{attempt}.json"
+          output.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
+          PY
+
+      - name: Upload Linux clean-room evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: M8-Linux-Clean-Room-${{ env.TARGET_SHA }}
+          path: |
+            ${{ runner.temp }}/m8-linux-a-${{ github.run_id }}-${{ github.run_attempt }}/evidence/**
+            ${{ runner.temp }}/m8-linux-b-${{ github.run_id }}-${{ github.run_attempt }}/evidence/**
+            ${{ runner.temp }}/m8-linux-summary-${{ github.run_id }}-${{ github.run_attempt }}.json
+          if-no-files-found: error
+          retention-days: 14
+
+  windows-clean-room-one-click:
+    name: Windows clean room and native one-click
+    runs-on: windows-2022
+    timeout-minutes: 70
+    steps:
+      - name: Disable Git CRLF conversion before checkout
+        shell: pwsh
+        run: git config --global core.autocrlf false
+
+      - name: Checkout exact head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TARGET_SHA }}
+          path: candidate
+          clean: true
+          fetch-depth: 1
+
+      - name: Set up Python 3.12 without dependency cache
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Create explicit empty Windows profile
+        shell: pwsh
+        run: |
+          $sandbox = Join-Path $env:RUNNER_TEMP "m8-windows-$env:GITHUB_RUN_ID-$env:GITHUB_RUN_ATTEMPT"
+          Remove-Item $sandbox -Recurse -Force -ErrorAction SilentlyContinue
+          $paths = @{
+            HOME = Join-Path $sandbox "home"
+            USERPROFILE = Join-Path $sandbox "profile"
+            LOCALAPPDATA = Join-Path $sandbox "local-app-data"
+            APPDATA = Join-Path $sandbox "roaming-app-data"
+            TEMP = Join-Path $sandbox "temp"
+            TMP = Join-Path $sandbox "temp"
+            PIP_CACHE_DIR = Join-Path $sandbox "pip-cache"
+          }
+          foreach ($value in $paths.Values) {
+            New-Item -ItemType Directory -Path $value -Force | Out-Null
+          }
+          New-Item -ItemType Directory -Path (Join-Path $sandbox "evidence") -Force | Out-Null
+          foreach ($entry in $paths.GetEnumerator()) {
+            "$($entry.Key)=$($entry.Value)" | Out-File $env:GITHUB_ENV -Encoding utf8 -Append
+          }
+          "M8_SANDBOX=$sandbox" | Out-File $env:GITHUB_ENV -Encoding utf8 -Append
+          "PYTHONPATH=$(Resolve-Path candidate\src)" | Out-File $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Assert exact head and clean-room preflight
+        shell: pwsh
+        working-directory: candidate
+        run: |
+          $actual = (& git rev-parse HEAD).Trim()
+          if ($actual -ne $env:TARGET_SHA) {
+            throw "Exact-head mismatch: expected $env:TARGET_SHA, got $actual"
+          }
+          python tools/m8_clean_environment_reproduction.py audit `
+            --root . `
+            --sandbox $env:M8_SANDBOX `
+            --expected-sha $env:TARGET_SHA `
+            --platform-label windows `
+            --output (Join-Path $env:M8_SANDBOX "evidence\preflight.json")
+          if ($LASTEXITCODE -ne 0) {
+            throw "M8 Windows preflight failed with exit code $LASTEXITCODE"
+          }
+
+      - name: Install exact hash-locked Windows dependency without cache reuse
+        shell: pwsh
+        working-directory: candidate
+        run: |
+          python -m pip install `
+            --disable-pip-version-check `
+            --no-input `
+            --no-cache-dir `
+            --no-deps `
+            --only-binary=:all: `
+            --require-hashes `
+            -r requirements/windows-home-local.txt
+          if ($LASTEXITCODE -ne 0) {
+            throw "Hash-locked Windows dependency installation failed."
+          }
+
+      - name: Run M8 manifest and clean-room contracts
+        shell: pwsh
+        working-directory: candidate
+        run: |
+          python -m unittest `
+            tests.test_m8_clean_environment_reproduction `
+            tests.test_b1a_artifact_manifest -v 2>&1 | `
+            Tee-Object (Join-Path $env:M8_SANDBOX "evidence\m8-contracts.log")
+          if ($LASTEXITCODE -ne 0) {
+            throw "M8 Windows contract tests failed with exit code $LASTEXITCODE"
+          }
+
+      - name: Run native one-button clean-environment Red Team
+        shell: pwsh
+        working-directory: candidate
+        env:
+          TARGET_SHA: ${{ env.TARGET_SHA }}
+        run: |
+          & .\scripts\ci\native_one_button_r37.ps1 2>&1 | `
+            Tee-Object (Join-Path $env:M8_SANDBOX "evidence\native-one-button.log")
+          $exitCode = $LASTEXITCODE
+          if ($exitCode -ne 0) {
+            throw "M8 native one-button Red Team failed with exit code $exitCode"
+          }
+
+      - name: Assert source immutability and write Windows evidence
+        shell: pwsh
+        working-directory: candidate
+        run: |
+          $trackedDiff = @(& git diff --name-only)
+          if ($trackedDiff.Count -gt 0) {
+            $trackedDiff | Write-Error
+            throw "Tracked source changed during clean-room reproduction."
+          }
+          $qa = Get-Content "dist\one-button-redteam-r3\qa.json" -Raw -Encoding UTF8 | ConvertFrom-Json
+          if ($qa.status -ne "NATIVE_WINDOWS_REDTEAM_PASS") {
+            throw "Native QA status is not PASS."
+          }
+          $payload = [ordered]@{
+            milestone = "M8"
+            status = "PASS"
+            exact_head = $env:TARGET_SHA
+            windows_profile_isolated = $true
+            hash_locked_dependency = "PASS"
+            m8_contracts = "PASS"
+            native_one_button = $qa.status
+            repository_ci = $qa.repository_ci
+            release_state = "RELEASE_BLOCKED"
+            marketplace_write_enabled = $false
+            merge_to_main_authorized = $false
+          }
+          [IO.File]::WriteAllText(
+            (Join-Path $env:M8_SANDBOX "evidence\windows-summary.json"),
+            ($payload | ConvertTo-Json -Depth 8),
+            [Text.UTF8Encoding]::new($false)
+          )
+
+      - name: Upload Windows clean-room evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: M8-Windows-Clean-Room-${{ env.TARGET_SHA }}
+          path: |
+            ${{ runner.temp }}/m8-windows-${{ github.run_id }}-${{ github.run_attempt }}/evidence/**
+            candidate/dist/one-button-redteam-r3/result.json
+            candidate/dist/one-button-redteam-r3/qa.json
+            candidate/native-test-error.log
+            candidate/native-install-1.log
+            candidate/native-install-2.log
+            candidate/native-full.log
+            candidate/native-gui-path.log
+            candidate/contamination.log
+            candidate/repository-ci.log
+          if-no-files-found: warn
+          retention-days: 14
