@@ -1,141 +1,56 @@
 {
-  "schema_version": "1.2.0",
+  "schema_version": "1.3.0",
   "artifact_type": "CURRENT_ARCHITECTURE_INVENTORY",
   "repository": "gollandecd-fabula/quantum-analytics",
   "branch": "fix/quantum-one-click-stable-release",
-  "historical_inventory_target_exact_head": "d5afcf5e4a28a5ce3cc144cf25db649aceda8b1f",
-  "current_head_inventory_status": "UNVERIFIED",
-  "previous_inventory_blob_sha": "2e2ece868b5097820f84198206528aaf38287f45",
   "work_order_id": "WO-M0-012",
-  "actual_status": "PARTIAL",
-  "inventory_evidence": {
-    "historical_tree_index": "RECURSIVE_EXACT_HEAD_TREE.json",
-    "historical_entry_count": 682,
-    "historical_path_completeness": "VALIDATED_L0_FOR_D5AFCF5_ONLY",
-    "semantic_coverage": "PARTIAL_L0_STATIC",
-    "semantic_absence": "UNVERIFIED",
-    "current_head_tree": "NOT_YET_RECONSTRUCTED",
-    "duplicate_risk_blob_sha": "72bae1609b69a672c499d33f6e74f4406c3aa968"
+  "supersedes_blob_sha": "9abff511a7d9c33cbaaf7265a099600c4837206b",
+  "historical_inventory": {
+    "target_exact_head": "d5afcf5e4a28a5ce3cc144cf25db649aceda8b1f",
+    "tracked_entry_count": 682,
+    "tracked_runtime_surface_count": 195,
+    "semantic_surface_coverage": "195_OF_195_L0",
+    "semantic_coverage_artifact": "SEMANTIC_DUPLICATE_COVERAGE.json",
+    "semantic_coverage_blob_sha": "ccd17d969048461bee1937f2042bd2d6d27a1b55"
+  },
+  "current_head_inventory": {
+    "status": "PENDING_RECONSTRUCTION",
+    "runtime_surface_transfer": "UNVERIFIED"
   },
   "components": [
-    {
-      "component_id": "CMP-001",
-      "name": "M9 maximum-assurance control plane and deterministic gate",
-      "paths": ["tools/m9_maximum_assurance_control_plane.py"],
-      "runtime_status": "EXISTS_SOURCE_PARTIAL_V3_0",
-      "reuse_constraint": "DO_NOT_DUPLICATE",
-      "future_decision": "EXTENSION_NOT_AUTHORIZED_UNTIL_DUPLICATE_GATE_PASSES"
-    },
-    {
-      "component_id": "CMP-002",
-      "name": "M9 unit and negative-control suite",
-      "paths": ["tests/test_m9_maximum_assurance_control_plane.py"],
-      "runtime_status": "EXISTS_SOURCE",
-      "reuse_constraint": "PRESERVE"
-    },
-    {
-      "component_id": "CMP-003",
-      "name": "M9 Linux/Windows source-runtime workflow",
-      "paths": [".github/workflows/m9-maximum-assurance-control-plane.yml"],
-      "runtime_status": "EXISTS_CI",
-      "reuse_constraint": "PRESERVE"
-    },
-    {
-      "component_id": "CMP-004",
-      "name": "Persisted historical M9 evidence",
-      "paths": ["docs/evidence/M9_MAXIMUM_ASSURANCE_CONTROL_PLANE.json"],
-      "runtime_status": "HISTORICAL_V3_0_SNAPSHOT",
-      "reuse_constraint": "DO_NOT_REWRITE_HISTORY"
-    },
-    {
-      "component_id": "CMP-005",
-      "name": "M1/M7/M8 audit tooling",
-      "paths": ["tools/m1_baseline_audit.py", "tools/m7_security_performance_one_click.py", "tools/m8_clean_environment_reproduction.py"],
-      "runtime_status": "EXISTS_AUDIT_TOOLS",
-      "reuse_constraint": "PRESERVE; ROLE_BINDING_NOT_AUTHORIZED"
-    },
-    {
-      "component_id": "CMP-006",
-      "name": "Native Red Team tooling",
-      "paths": ["scripts/ci/native_one_button_r37.ps1", ".github/workflows/build-one-button-redteam-r3.yml"],
-      "runtime_status": "EXISTS_TOOLING_ONLY",
-      "reuse_constraint": "PRESERVE; ROLE_BINDING_NOT_AUTHORIZED"
-    },
-    {
-      "component_id": "CMP-007",
-      "name": "Windows packaging/install/launcher paths",
-      "paths": ["scripts/windows/build_exe_installer.ps1", "scripts/windows/install_home_local.ps1", "scripts/windows/one_click_home_local.ps1"],
-      "runtime_status": "EXISTS_CI_AND_SCRIPTS",
-      "reuse_constraint": "PRESERVE",
-      "remaining_gaps": ["interactive installed path", "actual LNK process tree", "same-artifact L4/L5"]
-    },
-    {
-      "component_id": "CMP-008",
-      "name": "Financial and finance-center domain implementation",
-      "runtime_status": "EXISTS_DOMAIN_LOGIC",
-      "reuse_constraint": "DO_NOT_REIMPLEMENT"
-    },
-    {
-      "component_id": "CMP-009",
-      "name": "Marketplace adapters and recommendation domain implementation",
-      "runtime_status": "EXISTS_DOMAIN_LOGIC",
-      "reuse_constraint": "DO_NOT_REIMPLEMENT"
-    },
-    {
-      "component_id": "CMP-010",
-      "name": "Decision-center and dashboard UI",
-      "runtime_status": "EXISTS_PRODUCT_UI",
-      "reuse_constraint": "DO_NOT_REIMPLEMENT; CONFORMITY_UNVERIFIED"
-    },
-    {
-      "component_id": "CMP-011",
-      "name": "Release Orchestrator manager runtime",
-      "paths": [],
-      "runtime_status": "NOT_FOUND_IN_SELECTED_SEMANTIC_SCAN",
-      "absence_status": "UNVERIFIED",
-      "creation_authorized": false
-    },
-    {
-      "component_id": "CMP-012",
-      "name": "Implementer specialist process",
-      "paths": [],
-      "runtime_status": "NOT_FOUND_IN_SELECTED_SEMANTIC_SCAN",
-      "absence_status": "UNVERIFIED",
-      "creation_authorized": false
-    },
-    {
-      "component_id": "CMP-013",
-      "name": "Verifier specialist process",
-      "paths": [],
-      "runtime_status": "NOT_FOUND_IN_SELECTED_SEMANTIC_SCAN",
-      "absence_status": "UNVERIFIED",
-      "creation_authorized": false
-    },
-    {
-      "component_id": "CMP-014",
-      "name": "Adversary specialist process",
-      "paths": [],
-      "runtime_status": "NOT_FOUND_AS_ISOLATED_PROCESS; TOOLING_EXISTS",
-      "absence_status": "UNVERIFIED",
-      "creation_authorized": false
-    }
+    {"component_id":"CMP-001","name":"M9 v3.0 partial control plane and gate","status":"EXISTS","paths":["tools/m9_maximum_assurance_control_plane.py"],"constraint":"DO_NOT_DUPLICATE; EXTENSION_NOT_AUTHORIZED"},
+    {"component_id":"CMP-002","name":"M9 tests","status":"EXISTS","paths":["tests/test_m9_maximum_assurance_control_plane.py"],"constraint":"PRESERVE"},
+    {"component_id":"CMP-003","name":"M9 workflow","status":"EXISTS","paths":[".github/workflows/m9-maximum-assurance-control-plane.yml"],"constraint":"PRESERVE"},
+    {"component_id":"CMP-004","name":"Historical M9 evidence","status":"EXISTS_HISTORICAL","paths":["docs/evidence/M9_MAXIMUM_ASSURANCE_CONTROL_PLANE.json"],"constraint":"DO_NOT_REWRITE_HISTORY"},
+    {"component_id":"CMP-005","name":"M1/M7/M8 audit tooling","status":"EXISTS","constraint":"PRESERVE; ROLE_BINDING_NOT_AUTHORIZED"},
+    {"component_id":"CMP-006","name":"Native Red Team tooling","status":"EXISTS","constraint":"PRESERVE; ROLE_BINDING_NOT_AUTHORIZED"},
+    {"component_id":"CMP-007","name":"Windows package/install/launcher surfaces","status":"EXISTS","constraint":"PRESERVE; L4_L5_UNVERIFIED"},
+    {"component_id":"CMP-008","name":"Finance/domain implementation","status":"EXISTS","constraint":"DO_NOT_REIMPLEMENT"},
+    {"component_id":"CMP-009","name":"Marketplace adapters/recommendations","status":"EXISTS","constraint":"DO_NOT_REIMPLEMENT"},
+    {"component_id":"CMP-010","name":"Decision-center/dashboard UI","status":"EXISTS","constraint":"DO_NOT_REIMPLEMENT; INSTALLED_CONFORMITY_UNVERIFIED"},
+    {"component_id":"CMP-011","name":"Release Orchestrator manager runtime","status":"NOT_FOUND_IN_195_HISTORICAL_TRACKED_RUNTIME_SURFACES","current_head_status":"UNVERIFIED","creation_authorized":false},
+    {"component_id":"CMP-012","name":"Implementer specialist process","status":"NOT_FOUND_IN_195_HISTORICAL_TRACKED_RUNTIME_SURFACES","current_head_status":"UNVERIFIED","creation_authorized":false},
+    {"component_id":"CMP-013","name":"Verifier specialist process","status":"NOT_FOUND_IN_195_HISTORICAL_TRACKED_RUNTIME_SURFACES","current_head_status":"UNVERIFIED","creation_authorized":false},
+    {"component_id":"CMP-014","name":"Adversary specialist process","status":"NOT_FOUND_AS_ISOLATED_PROCESS_IN_195_HISTORICAL_SURFACES; TOOLING_EXISTS","current_head_status":"UNVERIFIED","creation_authorized":false}
   ],
   "duplicate_creation_policy": [
-    "No parallel RTM.",
-    "No parallel release gate or second M9 control plane.",
-    "No manager or specialist runtime creation while semantic absence and current-head inventory remain unverified.",
-    "Do not duplicate product/domain runtimes."
+    "No second RTM.",
+    "No parallel release gate or control plane.",
+    "No manager or specialist creation until current-head transfer is proved.",
+    "No product/domain runtime duplication."
   ],
   "open_blockers": [
     "BLK-CURRENT-HEAD-RECURSIVE-TREE-UNVERIFIED",
-    "BLK-SEMANTIC-DUPLICATE-ABSENCE-UNVERIFIED",
+    "BLK-CURRENT-HEAD-SEMANTIC-TRANSFER-UNVERIFIED",
     "BLK-DETERMINISTIC-CONTROLLER-RUNTIME-NOT-IMPLEMENTED",
     "BLK-CONTROL-PLANE-L2-INGESTION-NOT-IMPLEMENTED",
     "BLK-NO-INTERACTIVE-WINDOWS-L4_L5-SESSION",
     "BLK-SAME-ARTIFACT-RUN-A-RUN-B-NOT-EXECUTED",
     "BLK-PHYSICAL-PILOT-NOT-EXECUTED"
   ],
+  "actual_status": "PARTIAL",
   "maximum_evidence_level": "L0_STATIC",
+  "migration_authorized": false,
   "release_authorized": false,
   "milestone_complete": false,
   "current_decision": ["FAIL-CLOSED", "PROTOCOL_IMPLEMENTATION_INCOMPLETE", "MILESTONE_NOT_COMPLETE", "RELEASE_BLOCKED"]
