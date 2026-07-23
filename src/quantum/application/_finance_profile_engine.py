@@ -336,11 +336,17 @@ def calculate_by_group(
             )
             missing_all.append(group_name + ": " + exc.code)
             continue
-        blocked = tuple(
-            metric_id
-            for metric_id in total_metric_ids
-            if calculation["results"][metric_id]["state"] != "VALID"
-        )
+        blocked_reasons: list[str] = []
+        for metric_id in total_metric_ids:
+            metric = calculation["results"][metric_id]
+            if metric["state"] == "VALID":
+                continue
+            reason = str(metric.get("reason_code") or metric_id)
+            while reason.startswith("DEPENDENCY_BLOCKED:"):
+                reason = reason[len("DEPENDENCY_BLOCKED:") :]
+            if reason not in blocked_reasons:
+                blocked_reasons.append(reason)
+        blocked = tuple(blocked_reasons)
         if blocked:
             results.append(
                 GroupCalculation(
