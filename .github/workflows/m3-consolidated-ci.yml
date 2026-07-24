@@ -246,7 +246,7 @@ jobs:
       - name: Verify downloaded package identity
         shell: pwsh
         run: |
-          $archive = Resolve-Path "m3-package\QuantumLocalProduction_HOME_LOCAL.zip"
+          $archive = Resolve-Path "m3-package\dist\m3-build-once\QuantumLocalProduction_HOME_LOCAL.zip"
           $actual = (Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash.ToLowerInvariant()
           $expected = "${{ needs.build-once.outputs.package_sha256 }}"
           if ($actual -ne $expected) {
@@ -256,7 +256,7 @@ jobs:
       - name: Run installed-runtime L4 from the prebuilt artifact
         shell: pwsh
         run: |
-          $archive = (Resolve-Path "m3-package\QuantumLocalProduction_HOME_LOCAL.zip").Path
+          $archive = (Resolve-Path "m3-package\dist\m3-build-once\QuantumLocalProduction_HOME_LOCAL.zip").Path
           & .\scripts\ci\l4_installed_runtime.ps1 `
             -PackageArchive $archive `
             -EvidenceSlot "${{ matrix.slot }}" 2>&1 |

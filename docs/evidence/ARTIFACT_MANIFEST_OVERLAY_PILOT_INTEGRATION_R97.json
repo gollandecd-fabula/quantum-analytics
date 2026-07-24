@@ -3,8 +3,8 @@
   "entries": [
     [
       ".github/workflows/m3-consolidated-ci.yml",
-      "9baaf1b94229e347cc6a9f73a78ab4893d3792ad37623c82d24f2f04a1f3274b",
-      11673
+      "3c6656c9086529da71b7e8ff2e74c0003873340ab47cd6c7676a0f27be1d994e",
+      11711
     ],
     [
       "scripts/ci/l4_installed_runtime.ps1",
@@ -45,6 +45,7 @@
     "tools/m3_apply_stage.py",
     ".github/workflows/m3-stage-applicator.yml",
     ".github/workflows/m3-stage-applicator-r2.yml",
-    ".github/workflows/m3-export-source.yml"
+    ".github/workflows/m3-export-source.yml",
+    ".github/workflows/m3-transport-fix.yml"
   ]
 }
