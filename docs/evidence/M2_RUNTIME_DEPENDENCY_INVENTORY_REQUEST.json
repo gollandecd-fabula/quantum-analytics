@@ -1,0 +1,13 @@
+{
+  "schema_version": "quantum-m2-runtime-inventory-request-v1",
+  "milestone": "M2_RUNTIME_DEPENDENCY_MODERNIZATION",
+  "requested_against": "91e6ab72d859512f8f115b69000a661f36b73d6e",
+  "mode": "READ_ONLY_EXACT_HEAD",
+  "targets": [
+    "Python 3.12.10 and related launcher/runtime pins",
+    "tzdata 2026.2 and its wheel SHA-256",
+    "active versus historical evidence classification"
+  ],
+  "production_change_authorized_by_this_file": false,
+  "status": "REQUESTED"
+}
