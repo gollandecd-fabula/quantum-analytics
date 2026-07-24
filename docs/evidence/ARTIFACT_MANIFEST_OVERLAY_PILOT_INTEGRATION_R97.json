@@ -1,0 +1,51 @@
+{
+  "base_pilot_integration_r96_overlay_git_blob_sha": "43c043cbb53aed8e7b880ab40bcbd7d4665a6d9f",
+  "entries": [
+    [
+      ".github/workflows/m3-consolidated-ci.yml",
+      "a8d549d86527ece799c0f742678d98441d1be8cbe656abaaddca199b18462591",
+      11731
+    ],
+    [
+      "scripts/ci/l4_installed_runtime.ps1",
+      "3d3053192b24d07310b4b6e552d38d4ab14ab6920141f8df8059f0c87e6deaa8",
+      23330
+    ],
+    [
+      "scripts/ci/l4_installed_runtime_postcheck.ps1",
+      "6d4ca2a0d819ee4c8082fd3500f18541db977e00bf0657f11f397110c21f43c0",
+      10088
+    ],
+    [
+      "tools/m3_same_artifact_compare.py",
+      "0bdf91d31b005365fa753dc38fa9c8078d2815092a85de396f49b0da7146db8e",
+      4008
+    ],
+    [
+      "tests/test_m3_ci_consolidation.py",
+      "ef5bc00962bc401046806b33032ad6c50756265077bb11f40afd7463340dac63",
+      2601
+    ],
+    [
+      "tests/integration_manifest_support_m8.py",
+      "40646bc0095b625f77c4b6c168cd8f7ffd7d2e001d0df79b6806df781b07a5d5",
+      1090
+    ],
+    [
+      "docs/evidence/M3_CI_CONSOLIDATION_RTM.json",
+      "297aa81a952ef5ffd43f7202bdb012235af4223925a97ee7cff907fcb9c2f37d",
+      1622
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 97,
+  "reason": "M3 CI consolidation: source gates precede one HOME_LOCAL package build; two independent Windows L4 validators consume the same hash-bound artifact. Approved UI, Gatekeeper disconnection, WB_ONLY scope and marketplace-write-disabled state are unchanged.",
+  "remove_paths": [
+    "tools/M3_CI_CONSOLIDATION_TRIGGER.txt",
+    "tools/m3_apply_stage.py",
+    ".github/workflows/m3-stage-applicator.yml",
+    ".github/workflows/m3-stage-applicator-r2.yml",
+    ".github/workflows/m3-export-source.yml",
+    ".github/workflows/m3-transport-fix.yml"
+  ]
+}
