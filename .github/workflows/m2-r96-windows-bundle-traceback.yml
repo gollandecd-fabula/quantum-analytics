@@ -1,0 +1,46 @@
+name: M2 R96 Windows Bundle Traceback
+
+on:
+  pull_request:
+    types: [reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  traceback:
+    if: github.event.pull_request.head.ref == 'tmp/quantum-m2-r96-stage'
+    runs-on: windows-2025
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact R96 head
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Set up Python 3.13.14
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.13.14'
+      - name: Install pinned Windows dependency
+        shell: pwsh
+        run: python -m pip install --disable-pip-version-check --require-hashes -r requirements/windows-home-local.txt
+      - name: Run focused bundle regressions with full traceback
+        shell: pwsh
+        run: |
+          $env:PYTHONPATH = (Join-Path $PWD 'src')
+          $env:PYTHONDONTWRITEBYTECODE = '1'
+          $env:PYTHONPYCACHEPREFIX = (Join-Path $env:RUNNER_TEMP 'm2-r96-bundle-pycache')
+          python -m unittest `
+            tests.test_quantum_reaudit_plateau_r1.QuantumReauditPlateauR1Tests.test_output_bundle_is_transactional_unique_and_governed `
+            tests.test_quantum_reaudit_plateau_r1.QuantumReauditPlateauR1Tests.test_recommendations_are_human_readable_and_keep_code `
+            tests.test_quantum_reaudit_plateau_r1.QuantumReauditPlateauR1Tests.test_concurrent_output_names_do_not_collide `
+            -v 2>&1 | Tee-Object -FilePath m2-r96-windows-bundle-traceback.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Upload traceback
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: m2-r96-windows-bundle-traceback
+          path: m2-r96-windows-bundle-traceback.log
+          if-no-files-found: error
+          retention-days: 2
