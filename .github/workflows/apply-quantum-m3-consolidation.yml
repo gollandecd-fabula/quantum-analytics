@@ -1,0 +1,324 @@
+name: Apply Quantum M3 CI Consolidation
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.event.pull_request.head.ref == 'tmp/quantum-m3-stage'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Checkout exact staging head
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Set up Python 3.13.14
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.13.14'
+
+      - name: Apply bounded M3 source changes
+        shell: bash
+        env:
+          M2_HEAD: 3aad43573b205a98e2f2f718e208c8ba763d535e
+          STAGE_BRANCH: tmp/quantum-m3-stage
+        run: |
+          set -euo pipefail
+          test "$(git merge-base HEAD "$M2_HEAD")" = "$M2_HEAD"
+          python - <<'PYCODE'
+          from __future__ import annotations
+          import hashlib
+          import json
+          from pathlib import Path
+
+          root = Path.cwd()
+
+          def replace_once(path: str, old: str, new: str) -> None:
+              target = root / path
+              text = target.read_text(encoding='utf-8')
+              if text.count(old) != 1:
+                  raise SystemExit(f'M3_REPLACE_COUNT:{path}:{text.count(old)}')
+              target.write_text(text.replace(old, new), encoding='utf-8', newline='\n')
+
+          replace_once(
+              'scripts/ci/l4_installed_runtime.ps1',
+              '[CmdletBinding()]\nparam()\n',
+              '[CmdletBinding()]\nparam(\n    [string]$PackageArchive = "",\n    [ValidatePattern("^[A-Za-z0-9_-]+$")]\n    [string]$EvidenceSlot = "default"\n)\n',
+          )
+          replace_once(
+              'scripts/ci/l4_installed_runtime.ps1',
+              '$EvidenceRoot = Join-Path $RepoRoot "artifacts\\l4-installed-runtime"\n$BuildRoot = Join-Path $RepoRoot "dist\\l4-installed-runtime-build"\n$ExtractRoot = Join-Path $env:RUNNER_TEMP "quantum-l4-package"\n$InstallRoot = Join-Path $env:RUNNER_TEMP "quantum-l4-installed"\n$TamperRoot = Join-Path $env:RUNNER_TEMP "quantum-l4-tampered"\n',
+              '$EvidenceRoot = Join-Path $RepoRoot ("artifacts\\l4-installed-runtime-" + $EvidenceSlot)\n$BuildRoot = Join-Path $RepoRoot ("dist\\l4-installed-runtime-build-" + $EvidenceSlot)\n$ExtractRoot = Join-Path $env:RUNNER_TEMP ("quantum-l4-package-" + $EvidenceSlot)\n$InstallRoot = Join-Path $env:RUNNER_TEMP ("quantum-l4-installed-" + $EvidenceSlot)\n$TamperRoot = Join-Path $env:RUNNER_TEMP ("quantum-l4-tampered-" + $EvidenceSlot)\n',
+          )
+          replace_once(
+              'scripts/ci/l4_installed_runtime.ps1',
+              '''$Step = "PACKAGE_BUILD"\npowershell.exe `\n    -NoProfile `\n    -ExecutionPolicy Bypass `\n    -File .\\scripts\\windows\\build_local_production.ps1 `\n    -OutputDirectory $BuildRoot\nif ($LASTEXITCODE -ne 0) {\n    throw ("L4_PACKAGE_BUILD_FAILED:{0}" -f $LASTEXITCODE)\n}\n$archive = Join-Path $BuildRoot "QuantumLocalProduction_HOME_LOCAL.zip"\nif (-not (Test-Path -LiteralPath $archive -PathType Leaf)) {\n    throw "L4_PACKAGE_NOT_FOUND"\n}\n$packageHash = Get-Sha256 -Path $archive\n''',
+              '''$Step = "PACKAGE_SOURCE"\n$packageOrigin = "BUILT_IN_JOB"\nif ([string]::IsNullOrWhiteSpace($PackageArchive)) {\n    powershell.exe `\n        -NoProfile `\n        -ExecutionPolicy Bypass `\n        -File .\\scripts\\windows\\build_local_production.ps1 `\n        -OutputDirectory $BuildRoot\n    if ($LASTEXITCODE -ne 0) {\n        throw ("L4_PACKAGE_BUILD_FAILED:{0}" -f $LASTEXITCODE)\n    }\n    $archive = Join-Path $BuildRoot "QuantumLocalProduction_HOME_LOCAL.zip"\n}\nelse {\n    $archive = (Resolve-Path -LiteralPath $PackageArchive).Path\n    $packageOrigin = "PREBUILT_SAME_ARTIFACT"\n}\nif (-not (Test-Path -LiteralPath $archive -PathType Leaf)) {\n    throw "L4_PACKAGE_NOT_FOUND"\n}\n$packageHash = Get-Sha256 -Path $archive\n''',
+          )
+          replace_once(
+              'scripts/ci/l4_installed_runtime.ps1',
+              '    status = "L4_INSTALLED_RUNTIME_PASS"\n    evidence_level = "L4_INSTALLED_RUNTIME"\n    exact_head = $ExactHead\n',
+              '    status = "L4_INSTALLED_RUNTIME_PASS"\n    evidence_level = "L4_INSTALLED_RUNTIME"\n    exact_head = $ExactHead\n    validation_slot = $EvidenceSlot\n',
+          )
+          replace_once(
+              'scripts/ci/l4_installed_runtime.ps1',
+              '    source_package = [ordered]@{\n        path = $archive\n',
+              '    source_package = [ordered]@{\n        path = $archive\n        origin = $packageOrigin\n',
+          )
+
+          replace_once(
+              'scripts/ci/l4_installed_runtime_postcheck.ps1',
+              '[CmdletBinding()]\nparam()\n',
+              '[CmdletBinding()]\nparam(\n    [ValidatePattern("^[A-Za-z0-9_-]+$")]\n    [string]$EvidenceSlot = "default"\n)\n',
+          )
+          replace_once(
+              'scripts/ci/l4_installed_runtime_postcheck.ps1',
+              '$EvidenceRoot = Join-Path $RepoRoot "artifacts\\l4-installed-runtime"\n',
+              '$EvidenceRoot = Join-Path $RepoRoot ("artifacts\\l4-installed-runtime-" + $EvidenceSlot)\n',
+          )
+
+          compare_tool = r'''from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+from pathlib import Path
+from typing import Any
+
+
+def _load(path: Path) -> dict[str, Any]:
+    value = json.loads(path.read_text(encoding="utf-8-sig"))
+    if not isinstance(value, dict):
+        raise SystemExit(f"M3_JSON_OBJECT_REQUIRED:{path}")
+    return value
+
+
+def _sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--slot-a", type=Path, required=True)
+    parser.add_argument("--slot-b", type=Path, required=True)
+    parser.add_argument("--expected-head", required=True)
+    parser.add_argument("--expected-package-sha256", required=True)
+    parser.add_argument("--output", type=Path, required=True)
+    args = parser.parse_args()
+
+    slots: dict[str, dict[str, Any]] = {}
+    installed_hashes: list[str] = []
+    for label, root in (("A", args.slot_a), ("B", args.slot_b)):
+        evidence_path = root / "L4_INSTALLED_RUNTIME_EVIDENCE.json"
+        postcheck_path = root / "L4_INDEPENDENT_POSTCHECK_EVIDENCE.json"
+        installed_path = root / "INSTALLED_MANIFEST.json"
+        evidence = _load(evidence_path)
+        postcheck = _load(postcheck_path)
+        installed = _load(installed_path)
+        if evidence.get("status") != "L4_INSTALLED_RUNTIME_PASS":
+            raise SystemExit(f"M3_L4_STATUS:{label}")
+        if postcheck.get("status") != "L4_INDEPENDENT_POSTCHECK_PASS":
+            raise SystemExit(f"M3_POSTCHECK_STATUS:{label}")
+        if evidence.get("exact_head") != args.expected_head:
+            raise SystemExit(f"M3_HEAD_MISMATCH:{label}")
+        if evidence.get("validation_slot") != label:
+            raise SystemExit(f"M3_SLOT_MISMATCH:{label}")
+        source = evidence.get("source_package") or {}
+        if source.get("origin") != "PREBUILT_SAME_ARTIFACT":
+            raise SystemExit(f"M3_NOT_PREBUILT:{label}")
+        if source.get("sha256") != args.expected_package_sha256:
+            raise SystemExit(f"M3_PACKAGE_HASH:{label}")
+        if evidence.get("marketplace_write_enabled") is not False:
+            raise SystemExit(f"M3_WRITES_ENABLED:{label}")
+        if evidence.get("physical_user_path_verified") is not False:
+            raise SystemExit(f"M3_FALSE_L5:{label}")
+        if installed.get("exact_head") != args.expected_head:
+            raise SystemExit(f"M3_INSTALLED_HEAD:{label}")
+        if installed.get("source_package_sha256") != args.expected_package_sha256:
+            raise SystemExit(f"M3_INSTALLED_PACKAGE_HASH:{label}")
+        if installed.get("marketplace_write_enabled") is not False:
+            raise SystemExit(f"M3_INSTALLED_WRITES:{label}")
+        installed_sha = _sha256(installed_path)
+        installed_hashes.append(installed_sha)
+        slots[label] = {
+            "evidence_sha256": _sha256(evidence_path),
+            "postcheck_sha256": _sha256(postcheck_path),
+            "installed_manifest_sha256": installed_sha,
+            "managed_file_count": len(installed.get("managed_files") or []),
+        }
+
+    if installed_hashes[0] != installed_hashes[1]:
+        raise SystemExit("M3_AB_INSTALLED_MANIFEST_MISMATCH")
+
+    result = {
+        "milestone": "M3_CI_CONSOLIDATION",
+        "status": "PASS",
+        "exact_head": args.expected_head,
+        "build_count": 1,
+        "validator_count": 2,
+        "same_artifact_sha256": args.expected_package_sha256,
+        "installed_manifest_identical": True,
+        "slots": slots,
+        "marketplace_write_enabled": False,
+        "release_scope": "WB_ONLY",
+        "release_state": "RELEASE_BLOCKED",
+        "physical_user_path_verified": False,
+    }
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    args.output.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    print("M3_SAME_ARTIFACT_COMPARE=PASS")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+'''
+          (root / 'tools/m3_same_artifact_compare.py').write_text(compare_tool, encoding='utf-8', newline='\n')
+
+          test_text = r'''from __future__ import annotations
+
+from pathlib import Path
+import unittest
+
+
+ROOT = Path(__file__).resolve().parents[1]
+WORKFLOW = ROOT / ".github/workflows/m3-consolidated-ci.yml"
+
+
+class M3CiConsolidationTests(unittest.TestCase):
+    def test_order_is_source_then_one_build_then_same_artifact(self) -> None:
+        text = WORKFLOW.read_text(encoding="utf-8")
+        self.assertIn("needs: [source-foundation, source-oss]", text)
+        self.assertIn("needs: build-once", text)
+        self.assertIn("needs: [build-once, l4-same-artifact]", text)
+        self.assertEqual(text.count("build_local_production.ps1"), 1)
+        self.assertEqual(text.count("M3-Build-Once-${{ env.TARGET_SHA }}"), 2)
+
+    def test_two_validators_consume_prebuilt_archive(self) -> None:
+        text = WORKFLOW.read_text(encoding="utf-8")
+        self.assertIn("slot: [A, B]", text)
+        self.assertIn("-PackageArchive $archive", text)
+        self.assertIn("-EvidenceSlot \"${{ matrix.slot }}\"", text)
+        validator = text[text.index("l4-same-artifact:"):]
+        self.assertNotIn("build_two_installer_bundles.ps1", validator)
+
+    def test_l4_supports_prebuilt_same_artifact_fail_closed(self) -> None:
+        text = (ROOT / "scripts/ci/l4_installed_runtime.ps1").read_text(encoding="utf-8")
+        self.assertIn('[string]$PackageArchive = ""', text)
+        self.assertIn('"PREBUILT_SAME_ARTIFACT"', text)
+        self.assertIn("Resolve-Path -LiteralPath $PackageArchive", text)
+        self.assertIn("validation_slot = $EvidenceSlot", text)
+        self.assertIn("origin = $packageOrigin", text)
+
+    def test_comparator_requires_identical_installed_manifest(self) -> None:
+        text = (ROOT / "tools/m3_same_artifact_compare.py").read_text(encoding="utf-8")
+        self.assertIn("M3_AB_INSTALLED_MANIFEST_MISMATCH", text)
+        self.assertIn('"build_count": 1', text)
+        self.assertIn('"validator_count": 2', text)
+        self.assertIn('"marketplace_write_enabled": False', text)
+
+    def test_boundaries_are_explicit(self) -> None:
+        text = WORKFLOW.read_text(encoding="utf-8")
+        self.assertNotIn("gatekeeper", text.lower())
+        self.assertNotIn("ozon", text.lower())
+        self.assertIn('release_scope = "WB_ONLY"', text)
+        self.assertIn('marketplace_write_enabled = $false', text)
+
+
+if __name__ == "__main__":
+    unittest.main()
+'''
+          (root / 'tests/test_m3_ci_consolidation.py').write_text(test_text, encoding='utf-8', newline='\n')
+
+          rtm = {
+              'milestone': 'M3_CI_CONSOLIDATION',
+              'base_exact_head': '3aad43573b205a98e2f2f718e208c8ba763d535e',
+              'requirements': [
+                  {'id': 'M3-01', 'requirement': 'Foundation and OSS source gates complete before any package build', 'test': 'workflow needs graph plus exact-head CI'},
+                  {'id': 'M3-02', 'requirement': 'Canonical M3 workflow builds the HOME_LOCAL production package exactly once', 'test': 'static build-call count and runtime build evidence'},
+                  {'id': 'M3-03', 'requirement': 'Two independent Windows validators consume the same uploaded package bytes', 'test': 'A/B package SHA-256 equality'},
+                  {'id': 'M3-04', 'requirement': 'Both validators execute installed-runtime L4 and independent postcheck', 'test': 'L4 and postcheck evidence status'},
+                  {'id': 'M3-05', 'requirement': 'Installed managed-tree manifests are identical across A/B', 'test': 'installed manifest SHA-256 equality'},
+                  {'id': 'M3-06', 'requirement': 'Exact head, WB_ONLY and marketplace-write-disabled boundaries remain enforced', 'test': 'workflow and evidence assertions'},
+                  {'id': 'M3-07', 'requirement': 'No physical L5, merge, deployment or release claim is made', 'test': 'claim boundary evidence'},
+                  {'id': 'M3-08', 'requirement': 'M3 is published as one clean commit directly over M2', 'test': 'final ancestry postcheck'},
+              ],
+              'claim_boundary': 'L4_AUTOMATED_INSTALLED_RUNTIME; PHYSICAL_L5_EXCLUDED; RELEASE_BLOCKED',
+          }
+          rtm_path = root / 'docs/evidence/M3_CI_CONSOLIDATION_RTM.json'
+          rtm_path.write_text(json.dumps(rtm, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+
+          integration = root / 'tests/integration_manifest_support_m8.py'
+          text = integration.read_text(encoding='utf-8')
+          old = 'for number in range(1, 97)'
+          if text.count(old) != 1:
+              raise SystemExit('M3_MANIFEST_RANGE_NOT_FOUND')
+          integration.write_text(text.replace(old, 'for number in range(1, 98)'), encoding='utf-8', newline='\n')
+
+          trigger = root / 'tools/M3_CI_CONSOLIDATION_TRIGGER.txt'
+          trigger.unlink(missing_ok=True)
+
+          manifest_entries = []
+          for relative in (
+              '.github/workflows/m3-consolidated-ci.yml',
+              'scripts/ci/l4_installed_runtime.ps1',
+              'scripts/ci/l4_installed_runtime_postcheck.ps1',
+              'tools/m3_same_artifact_compare.py',
+              'tests/test_m3_ci_consolidation.py',
+              'tests/integration_manifest_support_m8.py',
+              'docs/evidence/M3_CI_CONSOLIDATION_RTM.json',
+          ):
+              data = (root / relative).read_bytes()
+              manifest_entries.append([relative, hashlib.sha256(data).hexdigest(), len(data)])
+          manifest = {
+              'base_pilot_integration_r96_overlay_git_blob_sha': '6e84f14ba0fa9f52aebe5d9a5288a3fe820ef44b',
+              'entries': manifest_entries,
+              'hash_encoding': 'sha256-hex',
+              'overlay_version': 97,
+              'reason': 'M3 CI consolidation: source gates precede one HOME_LOCAL package build; two independent Windows L4 validators consume the same hash-bound artifact. Approved UI, Gatekeeper disconnection, WB_ONLY scope and marketplace-write-disabled state are unchanged.',
+              'remove_paths': ['tools/M3_CI_CONSOLIDATION_TRIGGER.txt'],
+          }
+          manifest_path = root / 'docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R97.json'
+          manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+          PYCODE
+
+          git add -A
+          export PYTHONPATH="$PWD/src"
+          export PYTHONDONTWRITEBYTECODE=1
+          export PYTHONPYCACHEPREFIX="$RUNNER_TEMP/m3-pycache"
+          python -m compileall -q src tools tests/test_m3_ci_consolidation.py
+          python -m unittest tests.test_m3_ci_consolidation -v
+          python -m unittest tests.test_l4_installed_runtime_contract tests.test_l4_installed_runtime_postcheck_contract -v
+          python -m quantum.scripts.ci
+          python - <<'PYCODE'
+          import subprocess
+          allowed = {
+              '.github/workflows/m3-consolidated-ci.yml',
+              'scripts/ci/l4_installed_runtime.ps1',
+              'scripts/ci/l4_installed_runtime_postcheck.ps1',
+              'tools/m3_same_artifact_compare.py',
+              'tests/test_m3_ci_consolidation.py',
+              'tests/integration_manifest_support_m8.py',
+              'docs/evidence/M3_CI_CONSOLIDATION_RTM.json',
+              'docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R97.json',
+              'tools/M3_CI_CONSOLIDATION_TRIGGER.txt',
+          }
+          changed = set(subprocess.check_output(['git','diff','--cached','--name-only'], text=True).splitlines())
+          extra = changed - allowed
+          required = allowed - {'tools/M3_CI_CONSOLIDATION_TRIGGER.txt'}
+          missing = required - changed
+          if extra or missing:
+              raise SystemExit(f'M3_ALLOWLIST:extra={sorted(extra)};missing={sorted(missing)}')
+          PYCODE
+          git config user.name quantum-m3-ci-bot
+          git config user.email quantum-m3-ci-bot@users.noreply.github.com
+          git commit -m 'ci(quantum): consolidate M3 build-once same-artifact gates'
+          git push --force origin "HEAD:$STAGE_BRANCH"
