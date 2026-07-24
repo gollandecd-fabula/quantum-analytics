@@ -1,0 +1,62 @@
+name: Fix Quantum M5 V3 Staging Order
+
+on:
+  pull_request:
+    paths:
+      - "tools/M5_PAYLOAD_PART_*.txt"
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout runner base
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: tmp/quantum-m5-runner-base
+          fetch-depth: 1
+      - name: Patch stage-before-CI ordering
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('.github/workflows/m5-corrected-applicator-v3.yml')
+          text = path.read_text(encoding='utf-8')
+          compile_anchor = '          python3 -m compileall -q src/quantum/application\n'
+          stage_block = '''          git add -- \\
+            .github/workflows/m5-scheduled-reports.yml \\
+            src/quantum/application/scheduled_reports.py \\
+            src/quantum/application/_finance_center_scheduled_reports.py \\
+            src/quantum/application/finance_center.py \\
+            src/quantum/application/_finance_center_shell.py \\
+            src/quantum/application/_finance_center_pages.py \\
+            src/quantum/application/_finance_center_queue_runtime.py \\
+            tests/test_m5_scheduled_reports.py \\
+            tests/integration_manifest_support_m8.py \\
+            docs/evidence/M5_SCHEDULED_REPORTS_RTM.json \\
+            docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R99.json
+'''
+          if stage_block not in text:
+              if text.count(compile_anchor) != 1:
+                  raise SystemExit('V3 compile anchor mismatch')
+              text = text.replace(compile_anchor, stage_block + compile_anchor)
+          old_diff = "subprocess.check_output(['git', 'diff', '--name-only'], text=True)"
+          new_diff = "subprocess.check_output(['git', 'diff', '--cached', '--name-only'], text=True)"
+          if old_diff in text:
+              text = text.replace(old_diff, new_diff)
+          elif new_diff not in text:
+              raise SystemExit('V3 staged-diff anchor mismatch')
+          path.write_text(text, encoding='utf-8')
+          PY
+          if git diff --quiet; then
+            exit 0
+          fi
+          git diff --check
+          git config user.name "Quantum Protocol Bot"
+          git config user.email "quantum-protocol@users.noreply.github.com"
+          git add .github/workflows/m5-corrected-applicator-v3.yml
+          git commit -m "chore(m5): stage exact candidate before manifest CI"
+          git push origin HEAD:tmp/quantum-m5-runner-base
