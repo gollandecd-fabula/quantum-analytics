@@ -1,0 +1,96 @@
+name: M2 Runtime Dependency Inventory
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+permissions:
+  contents: read
+
+jobs:
+  inventory:
+    if: >-
+      github.event.pull_request.head.ref == 'fix/quantum-runtime-dependency-r1'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact M2 head
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up exact Python target
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.13.14'
+
+      - name: Collect exact-head runtime inventory
+        shell: bash
+        env:
+          EXPECTED_HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${EXPECTED_HEAD}"
+          python --version | tee m2-runtime-inventory.txt
+          python - <<'PY' | tee -a m2-runtime-inventory.txt
+          from __future__ import annotations
+
+          import re
+          import subprocess
+          from pathlib import Path
+
+          root = Path.cwd()
+          patterns = (
+              r"3\.12\.10",
+              r"67b5635e80ea51072b87941312d00ec8927c4db9ba18938f7ad2d27b328b95fb",
+              r"tzdata==2026\.2",
+              r"tzdata 2026\.2",
+              r"bbe9af844f658da81a5f95019480da3a89415801f6cc966806612cc7169bffe7",
+              r"-3\.12",
+              r"Python312",
+              r"Test-Python312",
+              r"\(3,\s*12\)",
+              r"Python 3\.12",
+          )
+          matcher = re.compile("|".join(f"(?:{item})" for item in patterns))
+          paths = subprocess.check_output(
+              ["git", "ls-files", "-z"], cwd=root
+          ).decode("utf-8").split("\0")
+          active = []
+          historical = []
+          skipped_binary = []
+          for relative in sorted(filter(None, paths)):
+              path = root / relative
+              try:
+                  text = path.read_text(encoding="utf-8")
+              except (UnicodeDecodeError, OSError):
+                  skipped_binary.append(relative)
+                  continue
+              for number, line in enumerate(text.splitlines(), start=1):
+                  if not matcher.search(line):
+                      continue
+                  row = f"{relative}:{number}:{line}"
+                  if relative.startswith("docs/evidence/"):
+                      historical.append(row)
+                  else:
+                      active.append(row)
+          print(f"M2_ACTIVE_OLD_REFERENCE_COUNT={len(active)}")
+          for row in active:
+              print("ACTIVE=" + row)
+          print(f"M2_HISTORICAL_OLD_REFERENCE_COUNT={len(historical)}")
+          for row in historical:
+              print("HISTORICAL=" + row)
+          print(f"M2_BINARY_OR_NON_UTF8_COUNT={len(skipped_binary)}")
+          print("M2_INVENTORY_RESULT=PASS")
+          PY
+
+      - name: Upload M2 inventory
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: quantum-m2-runtime-inventory
+          path: m2-runtime-inventory.txt
+          if-no-files-found: error
+          retention-days: 3
