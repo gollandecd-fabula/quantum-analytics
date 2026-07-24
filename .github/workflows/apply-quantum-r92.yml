@@ -2,7 +2,7 @@ name: Apply Quantum R92 Exact Patch
 
 on:
   pull_request:
-    types: [opened]
+    types: [reopened]
 
 permissions:
   contents: write
@@ -30,126 +30,20 @@ jobs:
         shell: bash
         env:
           EXPECTED_HEAD: ${{ github.event.pull_request.head.sha }}
-          TARGET_BRANCH: tmp/quantum-r92-stage
         run: |
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "${EXPECTED_HEAD}"
-          python - <<'PY'
-          from __future__ import annotations
+          set +e
+          python tools/apply_r92_exact.py 2>&1 | tee r92-apply.log
+          code=${PIPESTATUS[0]}
+          set -e
+          exit "${code}"
 
-          import base64
-          import hashlib
-          import io
-          import os
-          from pathlib import Path, PurePosixPath
-          import subprocess
-          import tarfile
-
-          root = Path.cwd()
-          part_dir = root / "tools"
-          expected_part_names = [f"r92_part_{i:02d}.txt" for i in range(10)]
-          parts = sorted(part_dir.glob("r92_part_*.txt"))
-          actual_names = [path.name for path in parts]
-          if actual_names != expected_part_names:
-              raise SystemExit(f"R92_PART_SET_MISMATCH:{actual_names!r}")
-
-          encoded = b"".join(path.read_bytes() for path in parts)
-          if len(encoded) != 66388:
-              raise SystemExit(f"R92_BASE64_SIZE_MISMATCH:{len(encoded)}")
-          if hashlib.sha256(encoded).hexdigest() != "11b76363e805bd64baca236bc3ca0ae1612bc295cc4975502756a0d6d6d02511":
-              raise SystemExit("R92_BASE64_SHA256_MISMATCH")
-          payload = base64.b64decode(encoded, validate=True)
-          if len(payload) != 49791:
-              raise SystemExit(f"R92_TAR_SIZE_MISMATCH:{len(payload)}")
-          if hashlib.sha256(payload).hexdigest() != "4fac5e7c41349c6530fd390e644c74f7c97535e8551ceebeeb2a6793871423c2":
-              raise SystemExit("R92_TAR_SHA256_MISMATCH")
-
-          expected = {
-              ".gitignore": (99, "5bc6d7b1a836ba2ef0aa880d18f405f0c9b1d2adbcd64642003d357418466fb0"),
-              "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R92.json": (16452, "816b3bfff0d15ad3436dbf479d2911759d7600cb434ccdec811954d6d5c7e659"),
-              "scripts/configure_home_local.ps1": (9788, "f4a1b4f7c711e6971854eabb2c4f8ce8caa91d358043ab530efe1340c5388ef0"),
-              "src/quantum/application/_finance_center_calculation.py": (25789, "e6958173cb34c621f0e4c00508840b6507049c05f72ce27f3338736be1187c10"),
-              "src/quantum/application/_finance_center_pages.py": (36552, "1263f469e514e1274059dba791a9bc5d11519de807d14f007ead40f7975fb255"),
-              "src/quantum/application/_finance_center_persistence.py": (16472, "6a74ce29439f4263d8c4574039951fd846bcb9e08d6100a4210e5a0def9b10e6"),
-              "src/quantum/application/_finance_center_shared.py": (4479, "5b242416e34e90cc82a3001c98b41c467f9c7d48312fe51aa916ac0d804bc9a6"),
-              "src/quantum/application/_finance_center_shell.py": (10612, "2d38f0f53931d4fbb0a1ca9bbdfa271212f78fdacce0110da489114a51028bb4"),
-              "src/quantum/application/_finance_profile_outputs.py": (19654, "2d4fbcdf6f8ee5fac6cae06c40d37f948ca5e8722684fde25d0ad47e35a1f4d0"),
-              "src/quantum/pilot/windows_runner.py": (22769, "2394a368463e680ca43f13a4ced07aa420beeabe679eb735f4c8fb888a8eefd3"),
-              "src/quantum/reporting/runtime.py": (29353, "9df11cbd0a63edee0ef2b2c3161018e8c25078afd9e0fea29c7fa91637f2859d"),
-              "src/quantum/scripts/ci.py": (5564, "5d532933b5cde129f099efa302d4ea4892c12fd41a962335e601060d46f1287b"),
-              "tests/__init__.py": (35, "5384bfdb2df380b6557cc7a71d16891415bccaa87699406e236f752c6415389f"),
-              "tests/integration_manifest_support_m8.py": (1090, "85efddba5ac42f0bd037759f65ab3cecb4b14d1d9c64a70de4a14c92b0e37c8b"),
-              "tests/test_quantum_reaudit_plateau_r1.py": (16859, "64ab3d7f8203e15d1a343f902f80abfaa96f44a5496f4d274df33efc171c47dd"),
-          }
-
-          with tarfile.open(fileobj=io.BytesIO(payload), mode="r:gz") as archive:
-              members = archive.getmembers()
-              names: list[str] = []
-              for member in members:
-                  pure = PurePosixPath(member.name)
-                  if pure.is_absolute() or ".." in pure.parts or member.issym() or member.islnk() or member.isdev():
-                      raise SystemExit(f"R92_UNSAFE_ARCHIVE_MEMBER:{member.name}")
-                  if member.isfile():
-                      names.append(member.name)
-              if set(names) != set(expected):
-                  raise SystemExit(f"R92_MEMBER_SET_MISMATCH:{sorted(names)!r}")
-              archive.extractall(root, filter="data")
-
-          for relative, (size, digest) in expected.items():
-              path = root / relative
-              data = path.read_bytes()
-              if len(data) != size:
-                  raise SystemExit(f"R92_FILE_SIZE_MISMATCH:{relative}:{len(data)}:{size}")
-              if hashlib.sha256(data).hexdigest() != digest:
-                  raise SystemExit(f"R92_FILE_SHA256_MISMATCH:{relative}")
-
-          tracked = subprocess.run(
-              ["git", "ls-files", "*.pyc"],
-              check=True,
-              capture_output=True,
-              text=True,
-          ).stdout.splitlines()
-          for relative in tracked:
-              subprocess.run(["git", "rm", "-f", "--", relative], check=True)
-          for relative in ("r91-apply.log",):
-              subprocess.run(["git", "rm", "-f", "--ignore-unmatch", "--", relative], check=True)
-          for path in parts:
-              subprocess.run(["git", "rm", "-f", "--", str(path.relative_to(root))], check=True)
-
-          env = dict(os.environ)
-          env["PYTHONPATH"] = str(root / "src")
-          env["PYTHONDONTWRITEBYTECODE"] = "1"
-          env["PYTHONPYCACHEPREFIX"] = "/tmp/quantum-r92-pycache"
-          commands = [
-              ["python", "-m", "compileall", "-q", "src"],
-              ["python", "-m", "unittest", "tests.test_quantum_reaudit_plateau_r1", "-v"],
-              ["python", "-m", "quantum.scripts.ci"],
-          ]
-          for command in commands:
-              print("+", " ".join(command), flush=True)
-              subprocess.run(command, cwd=root, env=env, check=True)
-
-          forbidden = [
-              "tools/apply_quantum_reaudit_r1.py",
-              ".github/workflows/apply-quantum-reaudit-r1.yml",
-          ]
-          for relative in forbidden:
-              if (root / relative).exists():
-                  raise SystemExit(f"R92_STAGING_FILE_PRESENT:{relative}")
-          if list((root / "tools").glob("reaudit_part_*.txt")):
-              raise SystemExit("R91_PAYLOAD_PART_PRESENT")
-          if list((root / "tools").glob("r92_part_*.txt")):
-              raise SystemExit("R92_PAYLOAD_PART_PRESENT")
-          if subprocess.run(["git", "ls-files", "*.pyc"], check=True, capture_output=True, text=True).stdout.strip():
-              raise SystemExit("TRACKED_BYTECODE_REMAINS")
-
-          subprocess.run(["git", "config", "user.name", "quantum-m1-bot"], check=True)
-          subprocess.run(["git", "config", "user.email", "quantum-m1-bot@users.noreply.github.com"], check=True)
-          subprocess.run(["git", "add", "-A"], check=True)
-          status = subprocess.run(["git", "status", "--porcelain"], check=True, capture_output=True, text=True).stdout
-          if not status.strip():
-              raise SystemExit("R92_NO_CHANGES_TO_COMMIT")
-          print(status, flush=True)
-          subprocess.run(["git", "commit", "-m", "fix(quantum): apply maximum reaudit R92"], check=True)
-          subprocess.run(["git", "push", "origin", "HEAD:tmp/quantum-r92-stage"], check=True)
-          PY
+      - name: Upload R92 apply diagnostics
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: quantum-r92-apply-log
+          path: r92-apply.log
+          if-no-files-found: warn
+          retention-days: 2
