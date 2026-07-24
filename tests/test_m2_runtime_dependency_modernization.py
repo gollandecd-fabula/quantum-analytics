@@ -136,6 +136,14 @@ class M2RuntimeDependencyModernizationTests(unittest.TestCase):
         )
         self.assertEqual(replace_line, "        os.replace(temporary, path)")
 
+    def test_finance_fsync_uses_write_capable_handle_on_windows(self) -> None:
+        source = read("src/quantum/application/_finance_center_calculation.py")
+        function_start = source.index("def _fsync_file(path: Path) -> None:")
+        function_end = source.index("\n\ndef _fsync_directory", function_start)
+        function = source[function_start:function_end]
+        self.assertIn('path.open("r+b")', function)
+        self.assertNotIn('path.open("rb")', function)
+
     def test_m7_installs_authoritative_hash_locked_dependency(self) -> None:
         workflow = read(".github/workflows/m7-security-performance-one-click.yml")
         self.assertIn("--require-hashes -r requirements/windows-home-local.txt", workflow)

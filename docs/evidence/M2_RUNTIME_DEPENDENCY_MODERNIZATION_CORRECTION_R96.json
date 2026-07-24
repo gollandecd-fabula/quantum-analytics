@@ -14,6 +14,12 @@
       "severity": "P0",
       "defect": "Atomic finance JSON publication called os.replace while NamedTemporaryFile was still open, causing WinError 32.",
       "correction": "Flush and fsync inside the context, close the file, then call os.replace; clean up fail-closed on error."
+    },
+    {
+      "id": "M2-D09",
+      "severity": "P0",
+      "defect": "Finance output durability used os.fsync on a read-only file descriptor, which fails on Windows after the temporary-file handle correction.",
+      "correction": "Open completed output artifacts with read/write access before os.fsync so Windows FlushFileBuffers receives a write-capable handle."
     }
   ],
   "required_gates": [

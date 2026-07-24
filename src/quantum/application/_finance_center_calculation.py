@@ -68,7 +68,8 @@ def _new_finance_run_id() -> str:
 
 
 def _fsync_file(path: Path) -> None:
-    with path.open("rb") as stream:
+    # Windows FlushFileBuffers requires a handle opened with write access.
+    with path.open("r+b") as stream:
         os.fsync(stream.fileno())
 
 

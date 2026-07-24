@@ -39,11 +39,16 @@
     },
     {
       "id": "M2-08",
+      "requirement": "Windows output durability fsync uses a write-capable file handle",
+      "test": "test_finance_fsync_uses_write_capable_handle_on_windows plus Windows output-bundle regressions"
+    },
+    {
+      "id": "M2-09",
       "requirement": "One exact corrected commit directly over M1 after final validation",
       "test": "exact ancestry postcheck"
     },
     {
-      "id": "M2-09",
+      "id": "M2-10",
       "requirement": "M2 claim is limited to source/build integration; physical L5 is excluded",
       "test": "claim boundary"
     }

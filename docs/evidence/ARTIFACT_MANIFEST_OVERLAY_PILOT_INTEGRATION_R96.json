@@ -22,9 +22,14 @@
       12219
     ],
     [
+      "src/quantum/application/_finance_center_calculation.py",
+      "868baf9a874c7381618fdea6e195e38f05d814f1d5255dd2eba6d4ef797f164e",
+      25208
+    ],
+    [
       "tests/test_m2_runtime_dependency_modernization.py",
-      "f6bc1e5810f78b286a925cb59c0ebe8e0542da232f65387681394f3fc6159c9d",
-      6673
+      "103d6e00c14db3cbfd2e63cb6e9aacacdd6e48691946027a2b758b086d7f2685",
+      7152
     ],
     [
       "tests/integration_manifest_support_m8.py",
@@ -33,17 +38,17 @@
     ],
     [
       "docs/evidence/M2_RUNTIME_DEPENDENCY_MODERNIZATION_RTM.json",
-      "f76e5db759acbd32ad82dfd53c99836927465e792b0432f66aec3e8e716f880a",
-      1973
+      "d7468ee8efc428c1b72b455989ea379a86d2f413c1cf0ab6dcb8971a794ce303",
+      2207
     ],
     [
       "docs/evidence/M2_RUNTIME_DEPENDENCY_MODERNIZATION_CORRECTION_R96.json",
-      "4cf1714cc867333b820a77d058963f024d2a68beaf4a7c57ff87a138355331b2",
-      1342
+      "e56a2dd43bd3c5a0866e7ec86f2b224368ce81509b2a523d822493f1e4c9b142",
+      1713
     ]
   ],
   "hash_encoding": "sha256-hex",
   "overlay_version": 96,
-  "reason": "Correct M2 boundary and Windows atomic output publication: Windows production remains pinned to Python 3.13.14 and tzdata 2026.3; Linux source admission remains Python 3.12+ compatible; temporary finance JSON is closed before atomic replace. No UI, Gatekeeper, Ozon or marketplace-write activation.",
+  "reason": "Correct M2 boundary and Windows atomic output publication: Windows production remains pinned to Python 3.13.14 and tzdata 2026.3; Linux source admission remains Python 3.12+ compatible; temporary finance JSON is closed before atomic replace; durability fsync uses a write-capable Windows handle. No UI, Gatekeeper, Ozon or marketplace-write activation.",
   "remove_paths": []
 }
