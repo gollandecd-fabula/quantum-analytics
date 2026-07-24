@@ -1,0 +1,47 @@
+name: M2 Reassemble Exact Transport
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+permissions:
+  contents: write
+
+jobs:
+  reassemble:
+    if: github.event.pull_request.head.ref == 'tmp/quantum-m2-corrected-stage'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+          persist-credentials: true
+      - name: Reassemble verified transport into exact final parts
+        shell: bash
+        run: |
+          set -euo pipefail
+          if test -f tools/m2_final_part_00.txt && ! compgen -G 'tools/m2_transport_part_*.txt' >/dev/null; then
+            echo 'M2_TRANSPORT_ALREADY_REASSEMBLED=PASS'
+            exit 0
+          fi
+          test "$(find tools -maxdepth 1 -type f -name 'm2_transport_part_*.txt' | wc -l)" -eq 10
+          cat tools/m2_transport_part_00.txt tools/m2_transport_part_01.txt tools/m2_transport_part_02.txt tools/m2_transport_part_03.txt tools/m2_transport_part_04.txt tools/m2_transport_part_05.txt tools/m2_transport_part_06.txt tools/m2_transport_part_07.txt tools/m2_transport_part_08.txt tools/m2_transport_part_09.txt > /tmp/m2-final.b64
+          test "$(wc -c < /tmp/m2-final.b64)" -eq 69368
+          test "$(sha256sum /tmp/m2-final.b64 | awk '{print $1}')" = 'dc32e263dfa5ccd9e0bf74c39aa351d870a5a0397a69d3837e565667e777812c'
+          base64 -d /tmp/m2-final.b64 > /tmp/m2-final.tar.gz
+          test "$(wc -c < /tmp/m2-final.tar.gz)" -eq 52024
+          test "$(sha256sum /tmp/m2-final.tar.gz | awk '{print $1}')" = '6c163fc03327ed4ffd4b596fdedadba3052f5eef80a84801198e6a7cc60c5669'
+          rm -f tools/m2_final_part_*.txt
+          split -b 18000 -d -a 2 /tmp/m2-final.b64 tools/m2_final_part_
+          for f in tools/m2_final_part_*; do mv "$f" "$f.txt"; done
+          test "$(sha256sum tools/m2_final_part_00.txt | awk '{print $1}')" = 'a18feb177f8e619e63e358324c0170aabcabe39b6b9d281b244cfb3f15d83e93'
+          test "$(sha256sum tools/m2_final_part_01.txt | awk '{print $1}')" = '4d58b613e865cb48b182105c34f8e8e89f70e24f652b925e1df49a005e110468'
+          test "$(sha256sum tools/m2_final_part_02.txt | awk '{print $1}')" = '5e8ecd46cf474189be88aa4d42ae1470793738f3655e4b40e9a1169d52802722'
+          test "$(sha256sum tools/m2_final_part_03.txt | awk '{print $1}')" = 'ed85f63e23f4704a40a4457d29b4b6bc53d60693771ec3de89ed85aa33a9113c'
+          git rm -f tools/m2_transport_part_*.txt
+          git add tools/m2_final_part_*.txt
+          git config user.name quantum-m2-transport-bot
+          git config user.email quantum-m2-transport-bot@users.noreply.github.com
+          git commit -m 'chore(m2): reassemble verified exact payload transport'
+          git push origin HEAD:tmp/quantum-m2-corrected-stage
