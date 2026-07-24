@@ -1,0 +1,46 @@
+name: M2 Repair Exact Final Payload Parts
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    if: github.event.pull_request.head.ref == 'tmp/quantum-m2-corrected-stage'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+          persist-credentials: true
+      - name: Replace only corrupt final parts using verified bounded segments
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! compgen -G 'tools/m2_repair_*.txt' >/dev/null; then
+            echo 'M2_FINAL_PART_REPAIR_ALREADY_APPLIED=PASS'
+            exit 0
+          fi
+          test "$(find tools -maxdepth 1 -type f -name 'm2_repair_*.txt' | wc -l)" -eq 6
+          cat tools/m2_repair_00_00.txt tools/m2_repair_00_01.txt tools/m2_repair_00_02.txt > tools/m2_final_part_00.txt
+          cat tools/m2_repair_03_00.txt tools/m2_repair_03_01.txt tools/m2_repair_03_02.txt > tools/m2_final_part_03.txt
+          test "$(wc -c < tools/m2_final_part_00.txt)" -eq 18000
+          test "$(sha256sum tools/m2_final_part_00.txt | awk '{print $1}')" = 'a18feb177f8e619e63e358324c0170aabcabe39b6b9d281b244cfb3f15d83e93'
+          test "$(wc -c < tools/m2_final_part_03.txt)" -eq 15368
+          test "$(sha256sum tools/m2_final_part_03.txt | awk '{print $1}')" = 'ed85f63e23f4704a40a4457d29b4b6bc53d60693771ec3de89ed85aa33a9113c'
+          cat tools/m2_final_part_00.txt tools/m2_final_part_01.txt tools/m2_final_part_02.txt tools/m2_final_part_03.txt > /tmp/m2-final.b64
+          test "$(wc -c < /tmp/m2-final.b64)" -eq 69368
+          test "$(sha256sum /tmp/m2-final.b64 | awk '{print $1}')" = 'dc32e263dfa5ccd9e0bf74c39aa351d870a5a0397a69d3837e565667e777812c'
+          base64 -d /tmp/m2-final.b64 > /tmp/m2-final.tar.gz
+          test "$(wc -c < /tmp/m2-final.tar.gz)" -eq 52024
+          test "$(sha256sum /tmp/m2-final.tar.gz | awk '{print $1}')" = '6c163fc03327ed4ffd4b596fdedadba3052f5eef80a84801198e6a7cc60c5669'
+          git rm -f tools/m2_repair_*.txt
+          git add tools/m2_final_part_00.txt tools/m2_final_part_03.txt
+          git config user.name quantum-m2-repair-bot
+          git config user.email quantum-m2-repair-bot@users.noreply.github.com
+          git commit -m 'chore(m2): repair exact payload transport parts'
+          git push origin HEAD:tmp/quantum-m2-corrected-stage
