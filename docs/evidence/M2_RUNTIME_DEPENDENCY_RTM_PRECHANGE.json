@@ -1,0 +1,126 @@
+{
+  "schema_version": "quantum-m2-runtime-dependency-rtm-v1",
+  "milestone": "M2_RUNTIME_DEPENDENCY_MODERNIZATION",
+  "status": "IN_PROGRESS_PRECHANGE",
+  "baseline": {
+    "branch": "fix/quantum-wb-release-r2",
+    "exact_head": "ad5229bbaca3cf8ae692ecb09f54220cde1db16b",
+    "m1_status": "COMPLETE"
+  },
+  "target": {
+    "python_version": "3.13.14",
+    "python_windows_amd64_embeddable_sha256": "90b4e5b9898b72d744650524bff92377c367f44bd5fbd09e3148656c080ad907",
+    "tzdata_version": "2026.3",
+    "tzdata_wheel_sha256": "dc096730c87af6cab1b171c9d532be840741ff5d459015e7f6947bd7d7e54931"
+  },
+  "requirements": [
+    {
+      "id": "M2-001",
+      "requirement": "Bind all work to the completed M1 exact head.",
+      "action": "Create an isolated M2 branch from ad5229bbaca3cf8ae692ecb09f54220cde1db16b.",
+      "test": "Commit ancestry check.",
+      "evidence": "Git compare metadata.",
+      "pass_criterion": "M2 branch starts exactly at the M1 head.",
+      "status": "PASS"
+    },
+    {
+      "id": "M2-002",
+      "requirement": "Use an official supported Windows application-local Python runtime.",
+      "action": "Pin Python 3.13.14 Windows x64 embeddable package and its official SHA-256.",
+      "test": "Static pin scan plus official digest comparison.",
+      "evidence": "Source diff and dependency review.",
+      "pass_criterion": "All authoritative runtime pins resolve to Python 3.13.14 and the exact approved digest.",
+      "status": "NOT_STARTED"
+    },
+    {
+      "id": "M2-003",
+      "requirement": "Use the current approved timezone fallback package.",
+      "action": "Pin tzdata 2026.3 wheel and its exact SHA-256.",
+      "test": "Requirements and package metadata scan.",
+      "evidence": "Source diff and official package digest.",
+      "pass_criterion": "No authoritative tzdata 2026.2 pin remains in active build/install paths.",
+      "status": "NOT_STARTED"
+    },
+    {
+      "id": "M2-004",
+      "requirement": "Find every authoritative and stale runtime/dependency reference before patching.",
+      "action": "Inventory Python version, runtime URL/hash, tzdata version/hash and package metadata references.",
+      "test": "Repository-wide static search with allow-listed historical evidence handling.",
+      "evidence": "M2 inventory register.",
+      "pass_criterion": "Every active reference is classified as update, preserve-history or remove.",
+      "status": "NOT_STARTED"
+    },
+    {
+      "id": "M2-005",
+      "requirement": "Update all active build, install, requirements and manifest surfaces consistently.",
+      "action": "Apply a minimal coherent patch without architecture rewrite.",
+      "test": "Cross-file consistency checks.",
+      "evidence": "Exact source diff.",
+      "pass_criterion": "No mixed active runtime or tzdata baseline remains.",
+      "status": "NOT_STARTED"
+    },
+    {
+      "id": "M2-006",
+      "requirement": "Dependency acquisition must fail closed on byte mismatch.",
+      "action": "Preserve or strengthen exact hash verification for Python and tzdata artifacts.",
+      "test": "Negative digest contract tests/static assertions.",
+      "evidence": "Tests and source gates.",
+      "pass_criterion": "Incorrect runtime or wheel bytes cannot be admitted.",
+      "status": "NOT_STARTED"
+    },
+    {
+      "id": "M2-007",
+      "requirement": "The source tree must execute under Python 3.13.",
+      "action": "Run compile and the complete repository source suite with Python 3.13.",
+      "test": "Focused runtime regression plus quantum.scripts.ci.",
+      "evidence": "GitHub Actions logs.",
+      "pass_criterion": "All mandatory source tests pass on the final exact head.",
+      "status": "NOT_STARTED"
+    },
+    {
+      "id": "M2-008",
+      "requirement": "The upgraded dependencies must pass admission checks.",
+      "action": "Run Foundation CI and OSS Admission CI on the final exact head.",
+      "test": "Official registry and OSV gates.",
+      "evidence": "Exact-head workflow runs.",
+      "pass_criterion": "Foundation and OSS Admission both pass.",
+      "status": "NOT_STARTED"
+    },
+    {
+      "id": "M2-009",
+      "requirement": "M2 must not change product behaviour or the approved UI.",
+      "action": "Limit changes to runtime/dependency/build metadata, tests and evidence.",
+      "test": "Changed-path and semantic boundary review.",
+      "evidence": "Final diff register.",
+      "pass_criterion": "No financial formula, UI layout or recommendation policy change.",
+      "status": "NOT_STARTED"
+    },
+    {
+      "id": "M2-010",
+      "requirement": "Existing release boundaries remain locked.",
+      "action": "Keep Gatekeeper disconnected, Ozon deferred and marketplace writes disabled.",
+      "test": "Boundary scanner and configuration assertions.",
+      "evidence": "Source tests and PR record.",
+      "pass_criterion": "No prohibited integration or write path is enabled.",
+      "status": "NOT_STARTED"
+    },
+    {
+      "id": "M2-011",
+      "requirement": "Do not overclaim packaged or installed evidence.",
+      "action": "Restrict M2 claims to source/runtime verification.",
+      "test": "Claim ledger review.",
+      "evidence": "M2 closure report.",
+      "pass_criterion": "No installer, L4 or L5 PASS claim is made by M2.",
+      "status": "NOT_STARTED"
+    },
+    {
+      "id": "M2-012",
+      "requirement": "Publish a clean exact-head M2 candidate.",
+      "action": "Remove staging files and record exact ancestry, diff and workflow evidence.",
+      "test": "Tree cleanliness and ancestry checks.",
+      "evidence": "Final M2 manifest and draft PR.",
+      "pass_criterion": "Clean source candidate with complete M2 evidence and no merge/release.",
+      "status": "NOT_STARTED"
+    }
+  ]
+}
