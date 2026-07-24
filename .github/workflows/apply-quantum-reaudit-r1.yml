@@ -1,36 +1,36 @@
-name: Apply Quantum Reaudit R1
+name: Apply Quantum Reaudit R91 Temporary Runner
 
 on:
-  push:
-    branches:
-      - fix/quantum-local-release-block-reasons-r1
-    paths:
-      - '.github/workflows/apply-quantum-reaudit-r1.yml'
+  pull_request:
+    types: [opened, reopened, synchronize]
 
 permissions:
   contents: write
 
 jobs:
   apply-exact-payload:
+    if: >-
+      github.event.pull_request.head.ref ==
+      'tmp/quantum-reaudit-r91-stage'
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     steps:
       - name: Checkout exact staging head
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
         with:
-          ref: ${{ github.sha }}
+          ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
           persist-credentials: true
 
       - name: Set up Python 3.12
-        uses: actions/setup-python@a26af69be951213d495a4c3e4e4022e16d87065
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
           python-version: '3.12'
 
       - name: Assert exact staging head and apply fail-closed payload
         shell: bash
         env:
-          EXPECTED_STAGING_HEAD: ${{ github.sha }}
+          EXPECTED_STAGING_HEAD: ${{ github.event.pull_request.head.sha }}
         run: |
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "${EXPECTED_STAGING_HEAD}"
