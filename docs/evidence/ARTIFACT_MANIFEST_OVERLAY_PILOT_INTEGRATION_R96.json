@@ -1,0 +1,49 @@
+{
+  "base_pilot_integration_r95_overlay_git_blob_sha": "3c1f25920c6897e76466b6e29873b46364116592",
+  "entries": [
+    [
+      ".github/workflows/foundation-ci.yml",
+      "4be3b84c5f71d790564a666a311b5815bd81474b325bef5070470261f7ab0b44",
+      1478
+    ],
+    [
+      ".github/workflows/oss-admission-ci.yml",
+      "8f7d4442040f70678fc9dfc7d8a8e8e0a4c462068d5aaee71f8ff1ca1044b824",
+      1669
+    ],
+    [
+      "pyproject.toml",
+      "743a4a9d2984ded4ddcf3eeaf06506c62af0bd45f7b42df2f96b092c208bae9a",
+      849
+    ],
+    [
+      "src/quantum/application/_finance_profile_groups.py",
+      "558a7f7290e77cad0888f6ad9a3b1c049603be073bf0aa86c82439c915c3f1ca",
+      12219
+    ],
+    [
+      "tests/test_m2_runtime_dependency_modernization.py",
+      "f6bc1e5810f78b286a925cb59c0ebe8e0542da232f65387681394f3fc6159c9d",
+      6673
+    ],
+    [
+      "tests/integration_manifest_support_m8.py",
+      "3cafb114e5d9a525f677552fccdbd30ec6024115537a14b5318315c52a8f7a64",
+      1090
+    ],
+    [
+      "docs/evidence/M2_RUNTIME_DEPENDENCY_MODERNIZATION_RTM.json",
+      "f76e5db759acbd32ad82dfd53c99836927465e792b0432f66aec3e8e716f880a",
+      1973
+    ],
+    [
+      "docs/evidence/M2_RUNTIME_DEPENDENCY_MODERNIZATION_CORRECTION_R96.json",
+      "4cf1714cc867333b820a77d058963f024d2a68beaf4a7c57ff87a138355331b2",
+      1342
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 96,
+  "reason": "Correct M2 boundary and Windows atomic output publication: Windows production remains pinned to Python 3.13.14 and tzdata 2026.3; Linux source admission remains Python 3.12+ compatible; temporary finance JSON is closed before atomic replace. No UI, Gatekeeper, Ozon or marketplace-write activation.",
+  "remove_paths": []
+}
