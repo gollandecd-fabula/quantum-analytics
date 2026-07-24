@@ -1,0 +1,72 @@
+name: M2 Publish Exact Commit Metadata
+
+on:
+  pull_request:
+    types: [reopened]
+
+permissions:
+  contents: write
+
+jobs:
+  publish-metadata:
+    if: github.event.pull_request.head.ref == 'tmp/quantum-m2-corrected-stage'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+          persist-credentials: true
+      - name: Create exact local commit and record Git object identities
+        shell: bash
+        env:
+          M1_HEAD: ad5229bbaca3cf8ae692ecb09f54220cde1db16b
+          STAGE_BRANCH: tmp/quantum-m2-corrected-stage
+        run: |
+          set -euo pipefail
+          cat tools/m2_final_part_00.txt tools/m2_final_part_01.txt tools/m2_final_part_02.txt tools/m2_final_part_03.txt > "$RUNNER_TEMP/m2-final.b64"
+          test "$(wc -c < "$RUNNER_TEMP/m2-final.b64")" -eq 69368
+          test "$(sha256sum "$RUNNER_TEMP/m2-final.b64" | awk '{print $1}')" = 'dc32e263dfa5ccd9e0bf74c39aa351d870a5a0397a69d3837e565667e777812c'
+          base64 -d "$RUNNER_TEMP/m2-final.b64" > "$RUNNER_TEMP/m2-final.tar.gz"
+          test "$(wc -c < "$RUNNER_TEMP/m2-final.tar.gz")" -eq 52024
+          test "$(sha256sum "$RUNNER_TEMP/m2-final.tar.gz" | awk '{print $1}')" = '6c163fc03327ed4ffd4b596fdedadba3052f5eef80a84801198e6a7cc60c5669'
+          tar -xzf "$RUNNER_TEMP/m2-final.tar.gz"
+          rm -f tools/m2_final_part_*.txt
+          git reset --soft "$M1_HEAD"
+          git add -A
+          test "$(git diff --cached --name-only | wc -l)" -eq 28
+          git config user.name quantum-m2-correction-bot
+          git config user.email quantum-m2-correction-bot@users.noreply.github.com
+          git commit -m 'chore(quantum): complete M2 runtime modernization R95'
+          {
+            echo "M1_HEAD=$M1_HEAD"
+            echo "M1_TREE=$(git rev-parse "$M1_HEAD^{tree}")"
+            echo "CORRECTED_COMMIT=$(git rev-parse HEAD)"
+            echo "CORRECTED_TREE=$(git rev-parse 'HEAD^{tree}')"
+            echo "PARENT=$(git rev-parse 'HEAD^')"
+            echo "CHANGED_COUNT=$(git diff --name-only "$M1_HEAD" HEAD | wc -l)"
+            echo '--- BLOBS ---'
+            git diff --name-only "$M1_HEAD" HEAD | while IFS= read -r path; do
+              printf '%s\t%s\n' "$(git rev-parse "HEAD:$path")" "$path"
+            done
+          } | tee m2-exact-commit-metadata.txt
+      - name: Attempt Actions-token push for evidence
+        id: push
+        continue-on-error: true
+        shell: bash
+        env:
+          STAGE_BRANCH: tmp/quantum-m2-corrected-stage
+        run: git push --force origin "HEAD:$STAGE_BRANCH"
+      - name: Record push result
+        if: always()
+        shell: bash
+        run: echo "ACTIONS_PUSH_OUTCOME=${{ steps.push.outcome }}" >> m2-exact-commit-metadata.txt
+      - name: Upload exact commit metadata
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: m2-exact-commit-metadata
+          path: m2-exact-commit-metadata.txt
+          if-no-files-found: error
+          retention-days: 2
