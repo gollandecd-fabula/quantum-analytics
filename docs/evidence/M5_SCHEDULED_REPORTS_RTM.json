@@ -1,0 +1,127 @@
+{
+  "milestone": "M5_SCHEDULED_WEEKLY_MONTHLY_REPORTS",
+  "base_exact_head": "050ce0cbae33dd06d0eee1dafb3676addf3dfee0",
+  "claim_boundary": "L2_SOURCE_AND_WINDOWS_RUNTIME; PHYSICAL_L5_EXCLUDED; RELEASE_BLOCKED",
+  "requirements": [
+    {
+      "id": "M5-01",
+      "requirement": "Generate the previous fully completed Monday-Sunday week and previous fully completed calendar month deterministically",
+      "action": "Use one completed_period implementation for CLI, GUI and scheduled execution",
+      "test": "focused calendar tests plus 10000 randomized calendar invariants",
+      "evidence": "M5 Linux and Windows runtime logs",
+      "artifact": "src/quantum/application/scheduled_reports.py",
+      "pass_criterion": "No current or partial period can be selected",
+      "status": "IMPLEMENTED_AWAITING_EXACT_HEAD"
+    },
+    {
+      "id": "M5-02",
+      "requirement": "Reuse the governed finance profile, detailed-financial parser, calculate_by_group and existing output bundle writer",
+      "action": "Call the existing calculation and export boundaries without duplicating formulas",
+      "test": "source contract and mocked integration tests",
+      "evidence": "focused tests and full source CI",
+      "artifact": "src/quantum/application/scheduled_reports.py",
+      "pass_criterion": "No parallel financial formula or report renderer exists",
+      "status": "IMPLEMENTED_AWAITING_EXACT_HEAD"
+    },
+    {
+      "id": "M5-03",
+      "requirement": "Accept only exact non-overlapping source coverage for the requested period",
+      "action": "Reject gaps, overlaps and source report periods that partially cross the target boundary",
+      "test": "exact, adjacent, gap, overlap and partial-period regressions",
+      "evidence": "test_m5_scheduled_reports",
+      "artifact": "tests/test_m5_scheduled_reports.py",
+      "pass_criterion": "Ambiguous source coverage fails closed before calculation",
+      "status": "IMPLEMENTED_AWAITING_EXACT_HEAD"
+    },
+    {
+      "id": "M5-04",
+      "requirement": "Bind source bytes, report periods, tenant and finance profile into a deterministic input identity",
+      "action": "Verify each source SHA-256 immediately before parsing and calculate a canonical input hash",
+      "test": "source hash tamper and idempotent identity regressions",
+      "evidence": "focused tests",
+      "artifact": "src/quantum/application/scheduled_reports.py",
+      "pass_criterion": "Changed source or profile produces a different package identity; hash mismatch blocks output",
+      "status": "IMPLEMENTED_AWAITING_EXACT_HEAD"
+    },
+    {
+      "id": "M5-05",
+      "requirement": "Write Excel, dashboard, finance JSON, recommendation JSON, short text summary and manifest atomically",
+      "action": "Generate in same-volume staging, fsync, validate hashes, rename and update latest pointer atomically",
+      "test": "atomic generation and validate_package regressions",
+      "evidence": "focused tests and Windows runtime",
+      "artifact": "output/scheduled/<kind>/<period>/<identity>",
+      "pass_criterion": "A failed run cannot expose an incomplete package or corrupt the previous valid package",
+      "status": "IMPLEMENTED_AWAITING_EXACT_HEAD"
+    },
+    {
+      "id": "M5-06",
+      "requirement": "Make repeated and missed scheduled runs safe",
+      "action": "Run both due periods daily, reuse an existing validated identity and retain bounded persistent outcomes",
+      "test": "idempotent reuse and failed new revision preservation regressions",
+      "evidence": "focused tests",
+      "artifact": "data/scheduled-reports-state.json and latest.json",
+      "pass_criterion": "Repeated execution does not recalculate identical inputs and the next daily trigger recovers a missed day",
+      "status": "IMPLEMENTED_AWAITING_EXACT_HEAD"
+    },
+    {
+      "id": "M5-07",
+      "requirement": "Reject path traversal, POSIX absolute paths, Windows drive paths, UNC paths, symlinks and tampered state",
+      "action": "Validate portable relative paths and package hashes fail closed",
+      "test": "portable path, state tamper and artifact validation regressions",
+      "evidence": "Linux and Windows focused tests",
+      "artifact": "src/quantum/application/scheduled_reports.py",
+      "pass_criterion": "Unsafe path state blocks before calculation or output",
+      "status": "IMPLEMENTED_AWAITING_EXACT_HEAD"
+    },
+    {
+      "id": "M5-08",
+      "requirement": "Use Windows Task Scheduler only as an external daily trigger of the same governed Python command",
+      "action": "Register a LIMITED daily schtasks task that invokes --kind due; verify registration with /Query",
+      "test": "command construction, registration, verification and non-Windows rejection tests",
+      "evidence": "M5 Windows runtime evidence",
+      "artifact": "Windows scheduled task Quantum Scheduled Reports <root hash>",
+      "pass_criterion": "No second scheduler engine or duplicate reporting implementation is introduced",
+      "status": "IMPLEMENTED_AWAITING_EXACT_HEAD"
+    },
+    {
+      "id": "M5-09",
+      "requirement": "Expose manual weekly/monthly generation, schedule enablement and output-folder access on the existing Reports page",
+      "action": "Add one mixin and one control row without changing the navigation or approved visual structure",
+      "test": "exact 11-navigation and Reports controls contract",
+      "evidence": "focused UI source contract",
+      "artifact": "src/quantum/application/_finance_center_scheduled_reports.py",
+      "pass_criterion": "The exact 11 navigation labels remain unchanged",
+      "status": "IMPLEMENTED_AWAITING_EXACT_HEAD"
+    },
+    {
+      "id": "M5-10",
+      "requirement": "Keep imports and scheduled reports mutually controlled and keep the GUI responsive",
+      "action": "Reject report launch while the sequential import queue is busy and run report actions on a background thread using the existing event queue",
+      "test": "GUI mixin and queue delegation contracts",
+      "evidence": "focused source tests and full CI",
+      "artifact": "_finance_center_scheduled_reports.py and _finance_center_queue_runtime.py",
+      "pass_criterion": "No report calculation runs on the Tk main thread or concurrently with active imports",
+      "status": "IMPLEMENTED_AWAITING_EXACT_HEAD"
+    },
+    {
+      "id": "M5-11",
+      "requirement": "Preserve WB_ONLY, Ozon deferred, Gatekeeper disconnected and marketplace writes disabled",
+      "action": "Validate configuration and emit fixed safety fields in every report outcome and evidence file",
+      "test": "static boundary scan, Foundation, OSS, M7, M8, L4 and same-artifact gates",
+      "evidence": "exact-head GitHub Actions",
+      "artifact": "M5 evidence artifacts",
+      "pass_criterion": "No write enablement, Ozon activation, Gatekeeper connection or UI navigation change",
+      "status": "IMPLEMENTED_AWAITING_EXACT_HEAD"
+    },
+    {
+      "id": "M5-12",
+      "requirement": "Publish M5 as exactly one direct-parent commit over M4 and limit completion to supported evidence",
+      "action": "Create one clean exact-head candidate, run all required gates, close validation PR unmerged",
+      "test": "commit ancestry, changed-file allow-list and exact-head workflow results",
+      "evidence": "commit/PR/workflow metadata",
+      "artifact": "canonical M5 commit",
+      "pass_criterion": "One commit over M4; L5 remains explicitly unclaimed; release remains blocked",
+      "status": "NOT_STARTED"
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "base_pilot_integration_r98_overlay_git_blob_sha": "5d09a0e22c0e58e5ff7c9f3662ccfa34a01f30a1",
+  "entries": [
+    [
+      ".github/workflows/m5-scheduled-reports.yml",
+      "bbb2a258eca3aee56c17145ef3fa41b7ec22121bae2f14557bf7a70698abc588",
+      9658
+    ],
+    [
+      "src/quantum/application/scheduled_reports.py",
+      "f560b95706140ff134d99c2552494f7e29cb37ccd444d1cc67aa936a653d2e5d",
+      42852
+    ],
+    [
+      "src/quantum/application/_finance_center_scheduled_reports.py",
+      "7edf62061ef040066844856cc037f026b28ba38f2625f56c880d36d9d77499e6",
+      5649
+    ],
+    [
+      "src/quantum/application/finance_center.py",
+      "ec6c36ae617133bb916c2b701c7710691e7a19ed6b6b34174bedf20acf8003c1",
+      3457
+    ],
+    [
+      "src/quantum/application/_finance_center_shell.py",
+      "79a91502a4f5a2dbee1bfd9888c3e7d907e4ab696186258ae3bb0cf8f4946fa0",
+      10640
+    ],
+    [
+      "src/quantum/application/_finance_center_pages.py",
+      "4399a53a38259917035debad9e3f820417f967f60fd30c7a0db516743d99f158",
+      37356
+    ],
+    [
+      "src/quantum/application/_finance_center_queue_runtime.py",
+      "e8c93df22cb72f615e67b29cf6e1e3f3c21f7a2335d6df64908577a1ea066b40",
+      18533
+    ],
+    [
+      "tests/test_m5_scheduled_reports.py",
+      "bcba2ac13ff4ebde671137748eccdec92e70cc5777180495e7c0b5bdeefaef49",
+      16073
+    ],
+    [
+      "tests/integration_manifest_support_m8.py",
+      "cb6e3e70e9005446fdcc6bde1f466da5a1a7d809abe7e5d1dc1ca49fa9801b03",
+      1091
+    ],
+    [
+      "docs/evidence/M5_SCHEDULED_REPORTS_RTM.json",
+      "7053c24abd92e9fe296b32467db227e48f7ae4becbb2d5624293ee50a9a0f01c",
+      7514
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 99,
+  "reason": "M5 scheduled weekly and monthly reports: deterministic completed periods, exact source coverage, existing governed finance calculation and export reuse, SHA-256-bound idempotent atomic packages, daily Windows Task Scheduler trigger, missed-run recovery and manual actions on the existing Reports page. Approved UI navigation, Gatekeeper disconnection, WB_ONLY scope and marketplace-write-disabled state are unchanged.",
+  "remove_paths": []
+}
