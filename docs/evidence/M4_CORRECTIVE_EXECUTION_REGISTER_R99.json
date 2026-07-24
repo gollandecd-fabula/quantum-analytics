@@ -1,0 +1,194 @@
+{
+  "protocol_mode": "PROTOCOL_LOCK",
+  "project": "Quantum",
+  "repository": "gollandecd-fabula/quantum-analytics",
+  "working_branch": "fix/quantum-m4-corrective-r99",
+  "base_exact_head": "050ce0cbae33dd06d0eee1dafb3676addf3dfee0",
+  "active_milestone": "M4-CORRECTIVE-R99",
+  "overall_status_before_change": "MILESTONE_NOT_COMPLETE",
+  "release_state": "RELEASE_BLOCKED",
+  "scope_lock": {
+    "allowed_paths": [
+      "src/quantum/application/_finance_center_auto_inbox.py",
+      "tests/test_m4_auto_inbox.py",
+      "tests/integration_manifest_support_m8.py",
+      "docs/evidence/M4_CORRECTIVE_EXECUTION_REGISTER_R99.json",
+      "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R99.json"
+    ],
+    "forbidden_changes": [
+      "approved UI redesign or navigation change",
+      "Gatekeeper or Protocol Controller connection",
+      "Ozon activation",
+      "marketplace write capability",
+      "merge to main",
+      "deployment or release authorization"
+    ]
+  },
+  "capability_gate": {
+    "github_exact_head_read": "SUPPORTED",
+    "github_branch_and_bounded_source_write": "SUPPORTED",
+    "pull_request_exact_head_ci": "SUPPORTED",
+    "local_repository_runtime": "BLOCKED_DNS_NO_CHECKOUT",
+    "installed_windows_l4": "NOT_IN_M4_CORRECTIVE_SCOPE",
+    "physical_user_path_l5": "NOT_IN_M4_CORRECTIVE_SCOPE",
+    "gate_result": "PASS_FOR_L0_TO_L2_CORRECTIVE_SCOPE_ONLY"
+  },
+  "prechange_control": {
+    "next_test": "focused M4 controller regressions, complete source CI, Windows M4 runtime contracts, then existing exact-head gates",
+    "rollback_condition": "any regression, manifest mismatch, changed-file scope violation, WB_ONLY violation, marketplace-write activation, or CI failure",
+    "rollback_action": "do not advance fix/quantum-wb-release-r2; reset or discard corrective branch to base_exact_head",
+    "maximum_claim": "L2_SOURCE_AND_WINDOWS_RUNTIME"
+  },
+  "rtm": [
+    {
+      "requirement": "M4-01 dedicated managed automatic incoming directory",
+      "milestone": "M4-CORRECTIVE-R99",
+      "action": "preserve existing directory contract unchanged",
+      "test": "existing controller directory and settings contracts",
+      "evidence_level": "L2",
+      "artifact": "tests/test_m4_auto_inbox.py",
+      "pass_criterion": "incoming, processing, completed, rejected and review-required remain under managed Quantum root",
+      "actual_status": "VERIFIED_EXISTING"
+    },
+    {
+      "requirement": "M4-02 supported stable XLSX/XLSM/ZIP admission only",
+      "milestone": "M4-CORRECTIVE-R99",
+      "action": "preserve stable-age and repeated-scan checks",
+      "test": "partial, unsupported and changing-file regressions",
+      "evidence_level": "L2",
+      "artifact": "tests/test_m4_auto_inbox.py",
+      "pass_criterion": "only stable supported regular files become candidates",
+      "actual_status": "VERIFIED_EXISTING"
+    },
+    {
+      "requirement": "M4-03 fail-closed symlink, size, traversal and state-tamper controls",
+      "milestone": "M4-CORRECTIVE-R99",
+      "action": "preserve existing rejection controls and add state-record limit validation",
+      "test": "symlink, traversal, state tamper and record-limit regressions",
+      "evidence_level": "L2",
+      "artifact": "src/quantum/application/_finance_center_auto_inbox.py; tests/test_m4_auto_inbox.py",
+      "pass_criterion": "unsafe or oversized state and paths are rejected without queue admission",
+      "actual_status": "PARTIAL"
+    },
+    {
+      "requirement": "M4-04 explicit authority and schema review",
+      "milestone": "M4-CORRECTIVE-R99",
+      "action": "no change",
+      "test": "existing integration contracts",
+      "evidence_level": "L2",
+      "artifact": "tests/test_m4_auto_inbox.py",
+      "pass_criterion": "no automatic queue admission without both controls",
+      "actual_status": "VERIFIED_EXISTING"
+    },
+    {
+      "requirement": "M4-05 reuse existing SequentialImportQueue and run_import worker",
+      "milestone": "M4-CORRECTIVE-R99",
+      "action": "no parallel importer",
+      "test": "static integration contract and complete source CI",
+      "evidence_level": "L2",
+      "artifact": "tests/test_m4_auto_inbox.py",
+      "pass_criterion": "existing queue and worker remain the only import path",
+      "actual_status": "VERIFIED_EXISTING"
+    },
+    {
+      "requirement": "M4-06 one SHA-256 binds preview, claim, processing, duplicate archive and completion",
+      "milestone": "M4-CORRECTIVE-R99",
+      "action": "add mandatory post-move duplicate hash verification and fail-closed quarantine",
+      "test": "duplicate post-move hash mismatch regression",
+      "evidence_level": "L2",
+      "artifact": "src/quantum/application/_finance_center_auto_inbox.py; tests/test_m4_auto_inbox.py",
+      "pass_criterion": "a duplicate changed during move is rejected and never recorded as a valid duplicate",
+      "actual_status": "FAILED_TOCTOU_FOUND"
+    },
+    {
+      "requirement": "M4-07 bounded atomic deduplication and outcome state",
+      "milestone": "M4-CORRECTIVE-R99",
+      "action": "introduce deterministic record cap, terminal-record pruning and fail-closed active-capacity handling",
+      "test": "bounded records, deterministic pruning, active-capacity exhaustion and oversized-state load regressions",
+      "evidence_level": "L2",
+      "artifact": "src/quantum/application/_finance_center_auto_inbox.py; tests/test_m4_auto_inbox.py",
+      "pass_criterion": "records never exceed the declared cap and active records are never silently removed",
+      "actual_status": "FAILED_UNBOUNDED_RECORDS_FOUND"
+    },
+    {
+      "requirement": "M4-08 crash recovery and cancellation finalization",
+      "milestone": "M4-CORRECTIVE-R99",
+      "action": "preserve existing behavior",
+      "test": "existing recovery and cancellation regressions",
+      "evidence_level": "L2",
+      "artifact": "tests/test_m4_auto_inbox.py",
+      "pass_criterion": "interrupted files return for retry and cancelled rows finalize rejected",
+      "actual_status": "VERIFIED_EXISTING"
+    },
+    {
+      "requirement": "M4-09 existing one-click desktop polling without UI redesign",
+      "milestone": "M4-CORRECTIVE-R99",
+      "action": "no UI or navigation change",
+      "test": "existing shell, mixin and navigation contracts",
+      "evidence_level": "L2",
+      "artifact": "tests/test_m4_auto_inbox.py",
+      "pass_criterion": "approved navigation remains unchanged",
+      "actual_status": "VERIFIED_EXISTING"
+    },
+    {
+      "requirement": "M4-10 WB_ONLY, Ozon deferred, Gatekeeper disconnected, marketplace writes disabled",
+      "milestone": "M4-CORRECTIVE-R99",
+      "action": "preserve all boundaries",
+      "test": "source CI, M7, M8 and manifest checks",
+      "evidence_level": "L2",
+      "artifact": "existing workflows",
+      "pass_criterion": "all four boundaries remain explicit and enforced",
+      "actual_status": "VERIFIED_EXISTING"
+    },
+    {
+      "requirement": "M4-11 controlled publication over the validated M4 exact head",
+      "milestone": "M4-CORRECTIVE-R99",
+      "action": "publish only on isolated corrective branch until all exact-head gates pass",
+      "test": "ancestry and changed-file scope comparison",
+      "evidence_level": "L0",
+      "artifact": "Git commit and PR metadata",
+      "pass_criterion": "corrective ancestry starts at 050ce0c and contains only allow-listed changes",
+      "actual_status": "IN_PROGRESS"
+    },
+    {
+      "requirement": "M4-12 no claim above evidence ceiling",
+      "milestone": "M4-CORRECTIVE-R99",
+      "action": "keep L4/L5 and release claims excluded",
+      "test": "evidence and PR claim audit",
+      "evidence_level": "L0",
+      "artifact": "this register and PR body",
+      "pass_criterion": "no installed or physical-user PASS is claimed",
+      "actual_status": "IN_PROGRESS"
+    },
+    {
+      "requirement": "M4-C01 corrective regression completeness",
+      "milestone": "M4-CORRECTIVE-R99",
+      "action": "add executable tests for both discovered defects and negative controls",
+      "test": "focused test suite",
+      "evidence_level": "L2",
+      "artifact": "tests/test_m4_auto_inbox.py",
+      "pass_criterion": "tests fail on base M4 behavior and pass only after the corrective implementation",
+      "actual_status": "NOT_STARTED"
+    },
+    {
+      "requirement": "M4-C02 artifact manifest exactness",
+      "milestone": "M4-CORRECTIVE-R99",
+      "action": "append R99 overlay and extend the canonical overlay loader",
+      "test": "manifest equality tests",
+      "evidence_level": "L2",
+      "artifact": "ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R99.json; integration_manifest_support_m8.py",
+      "pass_criterion": "effective manifest equals the exact tracked tree",
+      "actual_status": "NOT_STARTED"
+    },
+    {
+      "requirement": "M4-C03 exact-head verification",
+      "milestone": "M4-CORRECTIVE-R99",
+      "action": "run focused Linux/Windows M4 and existing mandatory workflows on one immutable head",
+      "test": "GitHub Actions exact-head runs",
+      "evidence_level": "L2",
+      "artifact": "workflow runs and uploaded evidence",
+      "pass_criterion": "all required checks succeed on the same corrective head",
+      "actual_status": "NOT_STARTED"
+    }
+  ]
+}
