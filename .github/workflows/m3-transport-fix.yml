@@ -1,0 +1,73 @@
+name: M3 Same Artifact Transport Fix
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    if: github.event.pull_request.head.ref == 'tmp/quantum-m3-stage'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact construction branch
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: tmp/quantum-m3-stage
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Correct artifact transport path and manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PYCODE'
+          from __future__ import annotations
+          import hashlib
+          import json
+          from pathlib import Path
+
+          root = Path.cwd()
+          workflow = root / '.github/workflows/m3-consolidated-ci.yml'
+          text = workflow.read_text(encoding='utf-8')
+          old = 'm3-package\\QuantumLocalProduction_HOME_LOCAL.zip'
+          new = 'm3-package\\dist\\m3-build-once\\QuantumLocalProduction_HOME_LOCAL.zip'
+          if text.count(old) != 2:
+              raise SystemExit(f'M3_TRANSPORT_PATH_COUNT:{text.count(old)}')
+          workflow.write_text(text.replace(old, new), encoding='utf-8', newline='\n')
+
+          manifest_path = root / 'docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R97.json'
+          manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
+          data = workflow.read_bytes()
+          replacement = [
+              '.github/workflows/m3-consolidated-ci.yml',
+              hashlib.sha256(data).hexdigest(),
+              len(data),
+          ]
+          entries = manifest.get('entries')
+          if not isinstance(entries, list):
+              raise SystemExit('M3_R97_ENTRIES_INVALID')
+          matches = [index for index, entry in enumerate(entries) if entry[0] == replacement[0]]
+          if len(matches) != 1:
+              raise SystemExit(f'M3_R97_WORKFLOW_ENTRY_COUNT:{len(matches)}')
+          entries[matches[0]] = replacement
+          manifest_path.write_text(
+              json.dumps(manifest, ensure_ascii=False, indent=2) + '\n',
+              encoding='utf-8',
+          )
+          (root / '.github/workflows/m3-transport-fix.yml').unlink()
+          PYCODE
+
+          git add -A
+          export PYTHONPATH="$PWD/src"
+          export PYTHONDONTWRITEBYTECODE=1
+          export PYTHONPYCACHEPREFIX="$RUNNER_TEMP/m3-transport-pycache"
+          python -m unittest tests.test_m3_ci_consolidation -v
+          python -m quantum.scripts.ci
+          git config user.name quantum-m3-transport-bot
+          git config user.email quantum-m3-transport-bot@users.noreply.github.com
+          git commit -m 'fix(m3): preserve uploaded artifact directory during A-B validation'
+          git push origin HEAD:tmp/quantum-m3-stage
