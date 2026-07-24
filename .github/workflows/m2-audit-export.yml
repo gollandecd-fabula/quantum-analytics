@@ -1,0 +1,44 @@
+name: M2 Exact-Head Audit Export
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+permissions:
+  contents: read
+
+jobs:
+  audit-export:
+    if: github.event.pull_request.head.ref == 'tmp/quantum-m2-audit-head'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact audit head
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+
+      - name: Verify exact head and generate audit report
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+          {
+            echo "HEAD=$(git rev-parse HEAD)"
+            echo "--- STALE_RUNTIME_REFERENCES ---"
+            git grep -nI -E '3\.12(\.10)?|Python312|Test-Python312|tzdata==2026\.2|bbe9af844f658da81a5f95019480da3a89415801f6cc966806612cc7169bffe7' -- . \
+              ':!docs/evidence/**' ':!*.md' || true
+            echo "--- RUNTIME_313_REFERENCES ---"
+            git grep -nI -E '3\.13(\.14)?|Python313|Test-Python313|tzdata==2026\.3|dc096730c87af6cab1b171c9d532be840741ff5d459015e7f6947bd7d7e54931' -- . || true
+          } > m2-audit-report.txt
+          git archive --format=zip --output=m2-source-exact-head.zip HEAD
+
+      - name: Upload M2 audit evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: quantum-m2-exact-head-audit
+          path: |
+            m2-audit-report.txt
+            m2-source-exact-head.zip
+          retention-days: 2
