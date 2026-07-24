@@ -14,7 +14,10 @@ class M3CiConsolidationTests(unittest.TestCase):
         self.assertIn("needs: [source-foundation, source-oss]", text)
         self.assertIn("needs: build-once", text)
         self.assertIn("needs: [build-once, l4-same-artifact]", text)
-        self.assertEqual(text.count("build_local_production.ps1"), 1)
+        self.assertEqual(
+            text.count("-File .\\scripts\\windows\\build_local_production.ps1"),
+            1,
+        )
         self.assertEqual(text.count("M3-Build-Once-${{ env.TARGET_SHA }}"), 2)
 
     def test_two_validators_consume_prebuilt_archive(self) -> None:
@@ -24,6 +27,10 @@ class M3CiConsolidationTests(unittest.TestCase):
         self.assertIn("-EvidenceSlot \"${{ matrix.slot }}\"", text)
         validator = text[text.index("l4-same-artifact:"):]
         self.assertNotIn("build_two_installer_bundles.ps1", validator)
+        self.assertNotIn(
+            "-File .\\scripts\\windows\\build_local_production.ps1",
+            validator,
+        )
 
     def test_l4_supports_prebuilt_same_artifact_fail_closed(self) -> None:
         text = (ROOT / "scripts/ci/l4_installed_runtime.ps1").read_text(
