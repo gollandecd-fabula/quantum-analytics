@@ -1,0 +1,50 @@
+name: Fix Quantum M5 V2 Runner
+
+on:
+  pull_request:
+    paths:
+      - "tools/M5_PAYLOAD_PART_*.txt"
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout runner base
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: tmp/quantum-m5-runner-base
+          fetch-depth: 1
+      - name: Apply exact idempotent correction
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('.github/workflows/m5-corrected-applicator-v2.yml')
+          text = path.read_text(encoding='utf-8')
+          bad = "              ''.join(('marketplace_write_enabled\\\\\\\"', ': ', 'True'))),"
+          good = "              ''.join(('marketplace_write_enabled\\\\\\\"', ': ', 'True')) ,"
+          final = "              ''.join(('marketplace_write_enabled\\\\\\\"', ': ', 'True'))," 
+          if final in text:
+              print('M5_V2_RUNNER_ALREADY_FIXED=1')
+          elif bad in text:
+              path.write_text(text.replace(bad, final), encoding='utf-8')
+              print('M5_V2_RUNNER_FIXED=1')
+          elif good in text:
+              path.write_text(text.replace(good, final), encoding='utf-8')
+              print('M5_V2_RUNNER_FIXED=1')
+          else:
+              raise SystemExit('M5 V2 correction anchor not found')
+          PY
+          if git diff --quiet; then
+            exit 0
+          fi
+          git diff --check
+          git config user.name "Quantum Protocol Bot"
+          git config user.email "quantum-protocol@users.noreply.github.com"
+          git add .github/workflows/m5-corrected-applicator-v2.yml
+          git commit -m "chore(m5): correct exact V2 transformation anchor"
+          git push origin HEAD:tmp/quantum-m5-runner-base
