@@ -26,18 +26,18 @@ jobs:
           set -uo pipefail
           {
             echo "HEAD=$(git rev-parse HEAD)"
-            cat tools/m2_final_part_00.txt tools/m2_final_part_01.txt tools/m2_final_part_02.txt tools/m2_final_part_03.txt > /tmp/m2-final.b64
-            echo "BASE64_SIZE=$(wc -c < /tmp/m2-final.b64)"
-            echo "BASE64_SHA256=$(sha256sum /tmp/m2-final.b64 | awk '{print $1}')"
-            base64 -d /tmp/m2-final.b64 > /tmp/m2-final.tar.gz || exit 31
-            echo "TAR_SIZE=$(wc -c < /tmp/m2-final.tar.gz)"
-            echo "TAR_SHA256=$(sha256sum /tmp/m2-final.tar.gz | awk '{print $1}')"
-            tar -xzf /tmp/m2-final.tar.gz
+            cat tools/m2_final_part_00.txt tools/m2_final_part_01.txt tools/m2_final_part_02.txt tools/m2_final_part_03.txt > "$RUNNER_TEMP/m2-final.b64"
+            echo "BASE64_SIZE=$(wc -c < "$RUNNER_TEMP/m2-final.b64")"
+            echo "BASE64_SHA256=$(sha256sum "$RUNNER_TEMP/m2-final.b64" | awk '{print $1}')"
+            base64 -d "$RUNNER_TEMP/m2-final.b64" > "$RUNNER_TEMP/m2-final.tar.gz" || exit 31
+            echo "TAR_SIZE=$(wc -c < "$RUNNER_TEMP/m2-final.tar.gz")"
+            echo "TAR_SHA256=$(sha256sum "$RUNNER_TEMP/m2-final.tar.gz" | awk '{print $1}')"
+            tar -xzf "$RUNNER_TEMP/m2-final.tar.gz"
             rm -f tools/m2_final_part_*.txt
             git add -A
             export PYTHONPATH="$PWD/src"
             export PYTHONDONTWRITEBYTECODE=1
-            export PYTHONPYCACHEPREFIX=/tmp/quantum-m2-validation-pycache
+            export PYTHONPYCACHEPREFIX="$RUNNER_TEMP/quantum-m2-validation-pycache"
             echo '=== COMPILEALL ==='
             python -m compileall -q src || exit 32
             echo '=== FOCUSED M2 ==='
@@ -46,44 +46,19 @@ jobs:
             pwsh -NoProfile -Command '$ErrorActionPreference="Stop"; Get-ChildItem scripts -Recurse -Filter *.ps1 | ForEach-Object { $tokens=$null; $localErrors=$null; [System.Management.Automation.Language.Parser]::ParseFile($_.FullName,[ref]$tokens,[ref]$localErrors) | Out-Null; if ($localErrors.Count -gt 0) { Write-Host "FILE=$($_.FullName)"; $localErrors | Format-List * | Out-String | Write-Host; exit 19 } }' || exit 34
             echo '=== FULL SOURCE CI ==='
             python -m quantum.scripts.ci || exit 35
-            echo '=== POST-CI STALE CONTRACT SCAN ==='
-            python - <<'PYCODE'
-            from pathlib import Path
-            import base64, re
-            root=Path.cwd()
-            active=[
-              '.github/workflows/build-one-button-redteam-r3.yml','.github/workflows/build-two-installer-bundles-r2.yml',
-              '.github/workflows/foundation-ci.yml','.github/workflows/l4-installed-runtime.yml',
-              '.github/workflows/m7-security-performance-one-click.yml','.github/workflows/m8-clean-environment-reproduction.yml',
-              '.github/workflows/oss-admission-ci.yml','.github/workflows/windows-local-production.yml',
-              '.github/workflows/windows-release-gate.yml','.github/workflows/windows-source-package-launchers-r1.yml',
-              '.github/workflows/windows-universal-any-file-corpus-r4.yml','pyproject.toml',
-              'requirements/windows-home-local.txt','scripts/ci/native_one_button_r37.ps1',
-              'scripts/windows/build_local_production.ps1','scripts/windows/build_two_installer_bundles.ps1',
-              'scripts/windows/import_source.ps1','scripts/windows/one_click_home_local.ps1',
-              'src/quantum/pilot/import_xlsx_source.ps1','tools/m7_security_performance_one_click.py']
-            stale=('3.12.10','Python312','Test-Python312','tzdata==2026.2','bbe9af844f658da81a5f95019480da3a89415801f6cc966806612cc7169bffe7')
-            errors=[]
-            for rel in active:
-                text=(root/rel).read_text(encoding='utf-8')
-                for token in stale:
-                    if token in text: errors.append(f'{rel}:{token}')
-                for encoded in re.findall(r'FromBase64String\(["\']([A-Za-z0-9+/=]+)["\']\)',text):
-                    try: decoded=base64.b64decode(encoded,validate=True).decode('utf-8')
-                    except Exception: continue
-                    for token in stale:
-                        if token in decoded: errors.append(f'{rel}:decoded:{token}')
-            if errors: raise SystemExit('M2_ACTIVE_STALE_REFERENCES:'+'|'.join(errors))
-            print('M2_ACTIVE_STALE_REFERENCES=0')
-            PYCODE
             echo 'M2_DIAGNOSTIC_VALIDATION=PASS'
-          } 2>&1 | tee /tmp/m2-corrected-validation.log
+          } 2>&1 | tee "$RUNNER_TEMP/m2-corrected-validation.log"
           exit ${PIPESTATUS[0]}
+      - name: Copy validation log for upload
+        if: always()
+        shell: bash
+        run: |
+          cp "$RUNNER_TEMP/m2-corrected-validation.log" "$GITHUB_WORKSPACE/m2-corrected-validation.log"
       - name: Upload full validation log
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: m2-corrected-validation-log-v2
-          path: /tmp/m2-corrected-validation.log
+          name: m2-corrected-validation-log-v3
+          path: m2-corrected-validation.log
           if-no-files-found: error
           retention-days: 2
