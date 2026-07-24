@@ -1,0 +1,29 @@
+{
+  "base_pilot_integration_r92_overlay_git_blob_sha": "c384be98f1b87ac1646bde4f12508b5c548f6919",
+  "entries": [
+    [
+      "src/quantum/application/_finance_center_dialog.py",
+      "9c373ef68814a70f42a16281eb917b520e41a4030a71631d5917c208ff070a06",
+      17208
+    ],
+    [
+      "src/quantum/scripts/ci.py",
+      "e52a5398558284f998e48130537a2a30d7ccfe44a4a3f2fbbd53f8031ce2f1ee",
+      5574
+    ],
+    [
+      "tests/integration_manifest_support_m8.py",
+      "85820a8f4534dcb1972a104d6ac5f0ac99594c8f0312f430be27a4a235a50303",
+      1090
+    ],
+    [
+      "tests/test_quantum_reaudit_plateau_r1.py",
+      "f1af69141db5f99abef90151f9b80c9d965685f9265656de5b4f18048e490d69",
+      17347
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 93,
+  "reason": "M1 exact-head source-gate correction: keep marketplace write enablement detection active for production and configuration surfaces while excluding test-contract literals that intentionally exercise the forbidden pattern; add focused regression coverage. Gatekeeper remains disconnected, Ozon deferred and marketplace writes disabled.",
+  "remove_paths": []
+}

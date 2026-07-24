@@ -70,12 +70,16 @@ PALETTE = {
 
 NAV_ITEMS = (
     ("decision", "Центр решений"),
-    ("reports", "Отчёты"),
-    ("finance", "Себестоимость и расходы"),
     ("analytics", "Аналитика"),
-    ("recommendations", "Рекомендации"),
-    ("export", "Экспорт"),
-    ("quality", "Контроль данных"),
+    ("finance", "Финансы"),
+    ("products", "Товары"),
+    ("advertising", "Реклама"),
+    ("supply", "Склад и поставки"),
+    ("competitors", "Конкуренты"),
+    ("seo", "SEO"),
+    ("ai", "Аналитик AI"),
+    ("reports", "Отчёты"),
+    ("settings", "Настройки"),
 )
 
 _ADVANCED_FIELDS = (
@@ -97,9 +101,16 @@ class ReportState:
     product_records: tuple[ProductRecord, ...] = ()
 
 
+_MAX_CONFIG_JSON_BYTES = 1024 * 1024
+
+
 def _safe_json(path: Path) -> dict[str, Any]:
     try:
-        value = json.loads(path.read_text(encoding="utf-8"))
+        with path.open("rb") as stream:
+            payload = stream.read(_MAX_CONFIG_JSON_BYTES + 1)
+        if len(payload) > _MAX_CONFIG_JSON_BYTES:
+            return {}
+        value = json.loads(payload.decode("utf-8"))
     except (OSError, UnicodeDecodeError, json.JSONDecodeError):
         return {}
     return value if isinstance(value, dict) else {}

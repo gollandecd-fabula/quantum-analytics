@@ -67,7 +67,7 @@ class FinanceProfileDialog:
         notebook.pack(fill=tk.BOTH, expand=True, padx=18, pady=14)
         groups_tab = ttk.Frame(notebook, padding=12)
         advanced_tab = ttk.Frame(notebook, padding=12)
-        notebook.add(groups_tab, text="Группы и себестоимость")
+        notebook.add(groups_tab, text="Себестоимость и расходы")
         notebook.add(advanced_tab, text="Недостающие финансовые данные")
         self._build_groups_tab(groups_tab)
         self._build_advanced_tab(advanced_tab)
