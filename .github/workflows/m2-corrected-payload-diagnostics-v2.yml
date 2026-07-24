@@ -1,0 +1,45 @@
+name: M2 Corrected Payload Diagnostics V2
+
+on:
+  pull_request:
+    types: [reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    if: github.event.pull_request.head.ref == 'tmp/quantum-m2-corrected-stage'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Record payload hashes without failing early
+        shell: bash
+        run: |
+          {
+            echo "HEAD=$(git rev-parse HEAD)"
+            for p in tools/m2_final_part_*.txt; do
+              echo "PART=$p SIZE=$(wc -c < "$p") SHA256=$(sha256sum "$p" | awk '{print $1}')"
+            done
+            cat tools/m2_final_part_00.txt tools/m2_final_part_01.txt tools/m2_final_part_02.txt tools/m2_final_part_03.txt > /tmp/m2.b64
+            echo "AGG_SIZE=$(wc -c < /tmp/m2.b64)"
+            echo "AGG_SHA256=$(sha256sum /tmp/m2.b64 | awk '{print $1}')"
+            if base64 -d /tmp/m2.b64 > /tmp/m2.tar.gz; then
+              echo "BASE64_DECODE=PASS"
+              echo "TAR_SIZE=$(wc -c < /tmp/m2.tar.gz)"
+              echo "TAR_SHA256=$(sha256sum /tmp/m2.tar.gz | awk '{print $1}')"
+              tar -tzf /tmp/m2.tar.gz || true
+            else
+              echo "BASE64_DECODE=FAIL"
+            fi
+          } | tee m2-payload-diagnostics-v2.txt
+      - name: Upload diagnostics
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: m2-corrected-payload-diagnostics-v2
+          path: m2-payload-diagnostics-v2.txt
+          if-no-files-found: error
+          retention-days: 2
