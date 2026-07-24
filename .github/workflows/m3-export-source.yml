@@ -1,0 +1,38 @@
+name: M3 Export Exact Source
+
+on:
+  pull_request:
+    types: [reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    if: github.event.pull_request.head.ref == 'tmp/quantum-m3-stage'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact stage head
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 1
+
+      - name: Assert and export tracked source
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+          git archive --format=tar.gz --output="$RUNNER_TEMP/m3-stage-source.tar.gz" HEAD
+          sha256sum "$RUNNER_TEMP/m3-stage-source.tar.gz" > "$RUNNER_TEMP/m3-stage-source.sha256"
+
+      - name: Upload source snapshot
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: M3-Exact-Stage-Source-${{ github.event.pull_request.head.sha }}
+          path: |
+            ${{ runner.temp }}/m3-stage-source.tar.gz
+            ${{ runner.temp }}/m3-stage-source.sha256
+          if-no-files-found: error
+          retention-days: 2
