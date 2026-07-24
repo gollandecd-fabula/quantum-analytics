@@ -69,9 +69,16 @@ def finance_center_summary(
     return status, detected_format, raw_status, comment
 
 
+_MAX_PERSISTED_JSON_BYTES = 16 * 1024 * 1024
+
+
 def _safe_json(path: Path) -> dict[str, Any]:
     try:
-        value = json.loads(path.read_text(encoding="utf-8"))
+        with path.open("rb") as stream:
+            payload = stream.read(_MAX_PERSISTED_JSON_BYTES + 1)
+        if len(payload) > _MAX_PERSISTED_JSON_BYTES:
+            return {}
+        value = json.loads(payload.decode("utf-8"))
     except (OSError, UnicodeDecodeError, json.JSONDecodeError):
         return {}
     return value if isinstance(value, dict) else {}
