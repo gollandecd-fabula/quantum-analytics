@@ -1,0 +1,31 @@
+name: M2 Repair Segment Diagnostics
+
+on:
+  pull_request:
+    types: [reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    if: github.event.pull_request.head.ref == 'tmp/quantum-m2-corrected-stage'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Record segment hashes
+        shell: bash
+        run: |
+          {
+            for p in tools/m2_repair_*.txt; do
+              echo "PART=$p SIZE=$(wc -c < "$p") SHA256=$(sha256sum "$p" | awk '{print $1}')"
+            done
+          } | tee m2-repair-segment-diagnostics.txt
+      - name: Upload diagnostics
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: m2-repair-segment-diagnostics
+          path: m2-repair-segment-diagnostics.txt
+          retention-days: 2
