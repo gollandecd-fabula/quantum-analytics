@@ -316,8 +316,8 @@ jobs:
         run: |
           set -euo pipefail
           python3 tools/m3_same_artifact_compare.py \
-            --slot-a evidence/A/l4-installed-runtime-A \
-            --slot-b evidence/B/l4-installed-runtime-B \
+            --slot-a evidence/A/artifacts/l4-installed-runtime-A \
+            --slot-b evidence/B/artifacts/l4-installed-runtime-B \
             --expected-head "$TARGET_SHA" \
             --expected-package-sha256 "${{ needs.build-once.outputs.package_sha256 }}" \
             --output dist/m3/M3_SAME_ARTIFACT_EVIDENCE.json
