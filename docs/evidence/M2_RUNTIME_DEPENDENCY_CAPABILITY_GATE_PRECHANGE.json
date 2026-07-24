@@ -1,0 +1,55 @@
+{
+  "schema_version": "quantum-m2-capability-gate-v1",
+  "milestone": "M2_RUNTIME_DEPENDENCY_MODERNIZATION",
+  "evaluated_against": "29be6f4f7b75febd8a139d187b520398ad4eba92",
+  "capabilities": [
+    {
+      "capability": "Edit repository runtime/dependency pins and tests",
+      "required": true,
+      "supported": true,
+      "evidence_level_target": "L2_SOURCE_RUNTIME"
+    },
+    {
+      "capability": "Verify official Python and PyPI release metadata and SHA-256 values",
+      "required": true,
+      "supported": true,
+      "evidence_level_target": "L1_L2"
+    },
+    {
+      "capability": "Run Python 3.13 source compilation and repository CI",
+      "required": true,
+      "supported": true,
+      "evidence_level_target": "L2_SOURCE_RUNTIME"
+    },
+    {
+      "capability": "Run Foundation and OSS Admission exact-head gates",
+      "required": true,
+      "supported": true,
+      "evidence_level_target": "L2_SOURCE_RUNTIME"
+    },
+    {
+      "capability": "Build and install the final Windows executable",
+      "required": false,
+      "supported": false,
+      "deferred_to": "M3_BUILD_SINGLE_CANDIDATE"
+    },
+    {
+      "capability": "Physical operator workstation verification",
+      "required": false,
+      "supported": false,
+      "deferred_to": "L5_PHYSICAL_PILOT"
+    }
+  ],
+  "locked_boundaries": {
+    "architecture_rewrite": false,
+    "ui_redesign": false,
+    "financial_logic_change": false,
+    "gatekeeper_connected": false,
+    "ozon_enabled": false,
+    "marketplace_writes_enabled": false,
+    "merge_authorized": false,
+    "release_authorized": false
+  },
+  "decision": "PASS",
+  "next_action": "INVENTORY_ACTIVE_RUNTIME_AND_DEPENDENCY_REFERENCES"
+}
