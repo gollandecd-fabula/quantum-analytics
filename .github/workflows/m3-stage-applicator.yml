@@ -1,16 +1,15 @@
 name: M3 Stage Applicator
 
 on:
-  push:
-    branches:
-      - tmp/quantum-m3-stage
+  pull_request:
+    types: [opened, reopened, synchronize]
 
 permissions:
   contents: write
 
 jobs:
   apply:
-    if: github.actor != 'github-actions[bot]'
+    if: github.event.pull_request.head.ref == 'tmp/quantum-m3-stage'
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     steps:
