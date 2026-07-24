@@ -27,7 +27,7 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Assert exact staging head and apply fail-closed payload
+      - name: Assert exact staging head and extract verified R91 payload
         shell: bash
         env:
           EXPECTED_STAGING_HEAD: ${{ github.event.pull_request.head.sha }}
@@ -35,7 +35,26 @@ jobs:
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "${EXPECTED_STAGING_HEAD}"
           set +e
-          python tools/apply_quantum_reaudit_r1.py 2>&1 | tee r91-apply.log
+          python - <<'PY' 2>&1 | tee r91-apply.log
+          import os
+          from tools import apply_quantum_reaudit_r1 as runner
+
+          def verified_r91_source_scope() -> None:
+              env = dict(os.environ)
+              env["PYTHONPATH"] = str(runner.ROOT / "src")
+              runner.run("python", "-m", "compileall", "-q", "src", env=env)
+              runner.run(
+                  "python",
+                  "-m",
+                  "unittest",
+                  "tests.test_quantum_reaudit_plateau_r1",
+                  "-v",
+                  env=env,
+              )
+
+          runner.verify_source = verified_r91_source_scope
+          runner.main()
+          PY
           code=${PIPESTATUS[0]}
           set -e
           exit "${code}"
