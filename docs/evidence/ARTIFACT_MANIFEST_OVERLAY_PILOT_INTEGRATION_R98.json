@@ -1,0 +1,54 @@
+{
+  "base_pilot_integration_r97_overlay_git_blob_sha": "28e98f5b56aaab65eb45cd0582590a19c81ea1db",
+  "entries": [
+    [
+      ".github/workflows/m4-auto-inbox.yml",
+      "2b159571225b8a26171b36a233371a3df56fdaa062b93818ae4f35e38d57b09c",
+      6301
+    ],
+    [
+      "src/quantum/application/_finance_center_auto_inbox.py",
+      "2934a714af85502b6a171528cbd521b2ad8a6bed08803f33aed93bba5d7ebcbe",
+      28183
+    ],
+    [
+      "src/quantum/application/finance_center.py",
+      "1fed33e23129c2314c82d5dda396971b1525a5590e1131388faf9e57a2b11f1f",
+      3307
+    ],
+    [
+      "src/quantum/application/_finance_center_shell.py",
+      "e6800bd239e7f35611189d790c1745356c169ad0143f0292030b7f23f98fc70d",
+      10901
+    ],
+    [
+      "src/quantum/application/_finance_center_queue_runtime.py",
+      "f9a15519133126fac50ad90f6a07a53e5f7ee75dcbc2ebd0501e25c2527f5b71",
+      18284
+    ],
+    [
+      "src/quantum/application/_finance_center_pages.py",
+      "4685f927ae05d295a3792d349cb88e3b10319e7c42a6873da45c45a6542253ff",
+      37139
+    ],
+    [
+      "tests/test_m4_auto_inbox.py",
+      "d690df26e67192d8399fc3fcb6e8027937c2d921e4dd4a7f57811089fbfd5c36",
+      12425
+    ],
+    [
+      "tests/integration_manifest_support_m8.py",
+      "a9a586b7c95bb4c77d8ad87435bf6475d56eac99bb791c7407fc37493ede0f97",
+      1090
+    ],
+    [
+      "docs/evidence/M4_AUTO_INBOX_RTM.json",
+      "9fed753a6a5d09b3a3bfa1d38d4d4333f0551aa1b0cadacbb25d802393b527a0",
+      2769
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 98,
+  "reason": "M4 automatic incoming folder: stable-write detection, SHA-256-bound atomic claim, persistent deduplication and recovery, explicit authority/schema review, and reuse of the existing sequential import worker. Approved UI navigation, Gatekeeper disconnection, WB_ONLY scope and marketplace-write-disabled state are unchanged.",
+  "remove_paths": []
+}

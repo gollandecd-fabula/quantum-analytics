@@ -226,6 +226,13 @@ class FinanceCenterQueueRuntimeMixin:
                     "schema_preview": row.details.get("schema_preview"),
                 }
             )
+            result.details.update(
+                {
+                    key: value
+                    for key, value in row.details.items()
+                    if key == "auto_inbox" or key.startswith("auto_inbox_")
+                }
+            )
             products: tuple[ProductRecord, ...] = ()
             if result.status not in {"Отменено", "Ошибка"}:
                 report_digest = ""
@@ -296,6 +303,9 @@ class FinanceCenterQueueRuntimeMixin:
                 continue
             state.row = row
             state.product_records = products
+            finalizer = getattr(self, "_finalize_auto_inbox_row", None)
+            if callable(finalizer):
+                finalizer(row)
             self._update_report_row(row)
             self._persist_report_index()
             if products:
@@ -351,6 +361,9 @@ class FinanceCenterQueueRuntimeMixin:
             row.progress = "Остановлено"
             row.comment = "Удалено из очереди пользователем."
             row.error = "CANCELLED_BY_USER"
+            finalizer = getattr(self, "_finalize_auto_inbox_row", None)
+            if callable(finalizer):
+                finalizer(row)
             self._update_report_row(row)
         active_id = self.import_queue.active
         if active_id is not None and active_id in self.reports:

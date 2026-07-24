@@ -31,6 +31,7 @@ class FinanceCenterShellMixin:
         self.current_outputs: dict[str, Path] = {}
         self.current_recommendations: tuple[dict[str, Any], ...] = ()
         self.current_recommendation_errors: tuple[str, ...] = ()
+        self._initialize_auto_inbox()
         self.root_widget.title(APP_TITLE)
         self.root_widget.geometry("1440x900")
         self.root_widget.minsize(1120, 700)
@@ -41,7 +42,13 @@ class FinanceCenterShellMixin:
         self.show_page("decision")
         self.refresh_finance_summary()
         self._refresh_queue_controls()
+        if self.auto_inbox_error:
+            self.set_status(
+                "Автовходящие отключены fail-closed: " + self.auto_inbox_error,
+                "error",
+            )
         self.root_widget.after(150, self._drain_events)
+        self._schedule_auto_inbox_poll()
 
     def _configure_style(self) -> None:
         style = ttk.Style(self.root_widget)

@@ -6,12 +6,14 @@ from quantum.application._finance_center_shell import FinanceCenterShellMixin
 from quantum.application._finance_center_pages import FinanceCenterPagesMixin
 from quantum.application._finance_center_reports import FinanceCenterReportsMixin
 from quantum.application._finance_center_queue_runtime import FinanceCenterQueueRuntimeMixin
+from quantum.application._finance_center_auto_inbox import FinanceCenterAutoInboxMixin
 from quantum.application._finance_center_calculation import FinanceCenterCalculationMixin
 from quantum.application._single_instance import SingleInstanceLock
 
 
 class QuantumFinanceCenter(
     FinanceCenterCalculationMixin,
+    FinanceCenterAutoInboxMixin,
     FinanceCenterQueueRuntimeMixin,
     FinanceCenterReportsMixin,
     FinanceCenterPagesMixin,

@@ -805,6 +805,12 @@ class FinanceCenterPagesMixin:
             "Такие источники в текущем контуре отсутствуют; синтетические "
             "ключевые слова не создаются.",
         )
+        auto_inbox = getattr(self, "auto_inbox", None)
+        auto_inbox_path = (
+            auto_inbox.incoming_dir
+            if auto_inbox is not None
+            else self.project_root / "data" / "auto-inbox" / "incoming"
+        )
         self._set_text(
             self.settings_text,
             "Режим: WB_ONLY\n"
@@ -812,7 +818,11 @@ class FinanceCenterPagesMixin:
             "Запись на маркетплейс: отключена\n"
             "Данные: локальное хранение\n"
             f"Конфигурация: {self.config_path}\n"
-            f"Финансовый профиль: {self.profile_path}\n\n"
+            f"Финансовый профиль: {self.profile_path}\n"
+            f"Автовходящие: {auto_inbox_path}\n\n"
+            "Поместите XLSX, XLSM или ZIP в папку автовходящих. "
+            "Quantum дождётся завершения записи, затем запросит "
+            "подтверждение полномочий и схемы. "
             "Основные параметры изменяются через финансовый профиль. "
             "Техническое редактирование JSON пользователю не требуется.",
         )
