@@ -1,69 +1,45 @@
-name: Apply Quantum Reaudit R91 Temporary Runner
+name: Export Clean Quantum R91 Source
 
 on:
   pull_request:
-    types: [opened, reopened, synchronize]
+    types: [reopened]
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  apply-exact-payload:
+  export-clean-source:
     if: >-
       github.event.pull_request.head.ref ==
       'tmp/quantum-reaudit-r91-stage'
     runs-on: ubuntu-24.04
-    timeout-minutes: 45
+    timeout-minutes: 15
     steps:
-      - name: Checkout exact staging head
+      - name: Checkout exact clean R91 head
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
         with:
           ref: ${{ github.event.pull_request.head.sha }}
-          fetch-depth: 0
-          persist-credentials: true
+          persist-credentials: false
 
-      - name: Set up Python 3.12
-        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
-        with:
-          python-version: '3.12'
-
-      - name: Assert exact staging head and extract verified R91 payload
+      - name: Assert no staging infrastructure and archive source
         shell: bash
         env:
-          EXPECTED_STAGING_HEAD: ${{ github.event.pull_request.head.sha }}
+          EXPECTED_HEAD: ${{ github.event.pull_request.head.sha }}
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD)" = "${EXPECTED_STAGING_HEAD}"
-          set +e
-          python - <<'PY' 2>&1 | tee r91-apply.log
-          import os
-          from tools import apply_quantum_reaudit_r1 as runner
+          test "$(git rev-parse HEAD)" = "${EXPECTED_HEAD}"
+          test ! -e tools/apply_quantum_reaudit_r1.py
+          test ! -e .github/workflows/apply-quantum-reaudit-r1.yml
+          test -z "$(find tools -maxdepth 1 -type f -name 'reaudit_part_*.txt' -print -quit)"
+          git ls-files -z | tar --null -T - -czf quantum-r91-clean-source.tar.gz
+          sha256sum quantum-r91-clean-source.tar.gz > quantum-r91-clean-source.sha256
 
-          def verified_r91_source_scope() -> None:
-              env = dict(os.environ)
-              env["PYTHONPATH"] = str(runner.ROOT / "src")
-              runner.run("python", "-m", "compileall", "-q", "src", env=env)
-              runner.run(
-                  "python",
-                  "-m",
-                  "unittest",
-                  "tests.test_quantum_reaudit_plateau_r1",
-                  "-v",
-                  env=env,
-              )
-
-          runner.verify_source = verified_r91_source_scope
-          runner.main()
-          PY
-          code=${PIPESTATUS[0]}
-          set -e
-          exit "${code}"
-
-      - name: Upload temporary runner diagnostics
-        if: always()
+      - name: Upload clean R91 source
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: quantum-r91-temporary-runner-log
-          path: r91-apply.log
-          if-no-files-found: warn
+          name: quantum-r91-clean-source
+          path: |
+            quantum-r91-clean-source.tar.gz
+            quantum-r91-clean-source.sha256
+          if-no-files-found: error
           retention-days: 2
