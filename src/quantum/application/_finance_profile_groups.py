@@ -309,19 +309,21 @@ def _atomic_json(path: Path, payload: Mapping[str, Any]) -> None:
         indent=2,
         allow_nan=False,
     ).encode("utf-8")
-    with tempfile.NamedTemporaryFile(
-        dir=path.parent,
-        delete=False,
-    ) as handle:
-        temporary = Path(handle.name)
-        try:
+    temporary: Path | None = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            dir=path.parent,
+            delete=False,
+        ) as handle:
+            temporary = Path(handle.name)
             handle.write(encoded)
             handle.flush()
             os.fsync(handle.fileno())
-            os.replace(temporary, path)
-        except Exception:
+        os.replace(temporary, path)
+    except Exception:
+        if temporary is not None:
             temporary.unlink(missing_ok=True)
-            raise
+        raise
 
 
 def save_profile(path: Path, profile: FinanceProfile) -> None:

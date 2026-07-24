@@ -1,0 +1,36 @@
+{
+  "base_pilot_integration_r93_overlay_git_blob_sha": "974585793e0aad7d02f30b81814cfc9774c5ad60",
+  "entries": [
+    [
+      "requirements/windows-home-local.txt",
+      "c5ff23d71fa3999004ca863b5da41c6d2ed4e33bbe8d75df9d886572745fa8a0",
+      234
+    ],
+    [
+      "scripts/windows/build_two_installer_bundles.ps1",
+      "d73701226e89f45088f82c51139ebd249afebc9b259864ba648556830c3f4cbb",
+      19884
+    ],
+    [
+      "tests/test_m2_runtime_dependency_modernization.py",
+      "8c4a7517c84b1a4bf44213449d182f85ad05bbb29c3161967e8732300f93188c",
+      1784
+    ],
+    [
+      "docs/evidence/M2_RUNTIME_DEPENDENCY_MODERNIZATION_RTM.json",
+      "4c74a44739116415a324a6fc7766c5785f765a686be03560d353a3e315e1baf3",
+      1915
+    ],
+    [
+      "tests/integration_manifest_support_m8.py",
+      "d50b6f921acc5225ed11532bb94fae9eabac658d2a966c4a925bc30cc9fda3ef",
+      1090
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 94,
+  "reason": "M2 runtime dependency modernization: pin official Python 3.13.14 Windows x64 installer and tzdata 2026.3 wheel with exact SHA-256 values; update only runtime/build contracts and regression evidence; no business logic, UI, Gatekeeper, Ozon or marketplace-write activation.",
+  "remove_paths": [
+    "tools/M2_RUNTIME_MODERNIZATION_TRIGGER.txt"
+  ]
+}

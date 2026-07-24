@@ -35,7 +35,7 @@ def _fixture(root: Path) -> None:
                 "Test-PathWithin -Child $directory -Parent $Root",
                 "& $installer -SourceRoot $PackageRoot -TargetRoot $TargetRoot",
                 "$Config = Invoke-ConfigurationWizard",
-                "Python 3.12 or newer was not found.",
+                "Python 3.13 or newer was not found.",
                 "File is required in non-interactive mode.",
                 "The supplied configuration is not ready:",
                 "Quantum did not create the expected pilot result:",
