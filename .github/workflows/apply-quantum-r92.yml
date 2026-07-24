@@ -45,6 +45,17 @@ jobs:
                     tools/r93_part_01.txt \
                     tools/r93_part_02.txt \
                     tools/r93_part_03.txt
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path("tools/apply_r92_exact.py")
+          source = path.read_text(encoding="utf-8")
+          old = 'pages_relative = "src/quantum/application/_finance_center_pages.py"'
+          new = 'pages_relative = "src/quantum/application/_finance_center_dialog.py"'
+          if source.count(old) != 1:
+              raise SystemExit("M1_RUNNER_UI_TARGET_ANCHOR_MISMATCH")
+          path.write_text(source.replace(old, new), encoding="utf-8")
+          PY
           set +e
           python tools/apply_r92_exact.py 2>&1 | tee r92-apply.log
           code=${PIPESTATUS[0]}
