@@ -34,4 +34,17 @@ jobs:
         run: |
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "${EXPECTED_STAGING_HEAD}"
-          python tools/apply_quantum_reaudit_r1.py
+          set +e
+          python tools/apply_quantum_reaudit_r1.py 2>&1 | tee r91-apply.log
+          code=${PIPESTATUS[0]}
+          set -e
+          exit "${code}"
+
+      - name: Upload temporary runner diagnostics
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: quantum-r91-temporary-runner-log
+          path: r91-apply.log
+          if-no-files-found: warn
+          retention-days: 2
