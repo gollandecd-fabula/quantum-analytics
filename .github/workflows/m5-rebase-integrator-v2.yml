@@ -1,0 +1,317 @@
+name: Integrate Quantum M5 over M4 Corrective R99 V2
+
+on:
+  pull_request:
+    paths:
+      - "tools/M5_REBASE_TRIGGER.txt"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: m5-rebase-v2-${{ github.event.pull_request.head.sha }}
+  cancel-in-progress: false
+
+env:
+  BASE_EXACT_HEAD: d89c29edfa93ecc61290a0fdeb9e218214638f7d
+  M5_VALIDATED_COMMIT: 87aac4b9b4432c841fa1de89d90ae3c12a23baaa
+  CURRENT_R99_BLOB_SHA: b52af806361e29c9e6be6842007b066ac22223a1
+  TARGET_BRANCH: tmp/quantum-m5-integrated-final
+  PYTHONDONTWRITEBYTECODE: "1"
+  PYTHONUTF8: "1"
+
+jobs:
+  integrate:
+    name: Deterministically compose M5 R100
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - name: Checkout exact trigger head
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+
+      - name: Compose exact file set over current working head
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+          rm -rf /tmp/m5-r100-evidence
+          mkdir -p /tmp/m5-r100-evidence
+          git fetch origin "$BASE_EXACT_HEAD" "$M5_VALIDATED_COMMIT" --depth=1
+          git checkout --detach "$BASE_EXACT_HEAD"
+          test "$(git rev-parse HEAD)" = "$BASE_EXACT_HEAD"
+
+          python3 - <<'PY'
+          from pathlib import Path
+          import json
+          import subprocess
+
+          candidate = '87aac4b9b4432c841fa1de89d90ae3c12a23baaa'
+          copy_paths = (
+              '.github/workflows/m5-scheduled-reports.yml',
+              'src/quantum/application/scheduled_reports.py',
+              'src/quantum/application/_finance_center_scheduled_reports.py',
+              'src/quantum/application/_finance_center_shell.py',
+              'src/quantum/application/_finance_center_pages.py',
+              'src/quantum/application/_finance_center_queue_runtime.py',
+              'tests/test_m5_scheduled_reports.py',
+              'docs/evidence/M5_SCHEDULED_REPORTS_RTM.json',
+          )
+          for relative in copy_paths:
+              raw = subprocess.check_output(['git', 'show', f'{candidate}:{relative}'])
+              path = Path(relative)
+              path.parent.mkdir(parents=True, exist_ok=True)
+              path.write_bytes(raw)
+
+          finance_path = Path('src/quantum/application/finance_center.py')
+          finance = finance_path.read_text(encoding='utf-8')
+          corrective_import = (
+              'from quantum.application._finance_center_auto_inbox_corrective '
+              'import FinanceCenterAutoInboxMixin\n'
+          )
+          scheduled_import = (
+              'from quantum.application._finance_center_scheduled_reports import (\n'
+              '    FinanceCenterScheduledReportsMixin,\n'
+              ')\n'
+          )
+          if finance.count(corrective_import) != 1:
+              raise SystemExit('Finance corrective import anchor mismatch')
+          finance = finance.replace(corrective_import, corrective_import + scheduled_import)
+          old_class = (
+              'class QuantumFinanceCenter(\n'
+              '    FinanceCenterCalculationMixin,\n'
+              '    FinanceCenterAutoInboxMixin,\n'
+          )
+          new_class = (
+              'class QuantumFinanceCenter(\n'
+              '    FinanceCenterCalculationMixin,\n'
+              '    FinanceCenterScheduledReportsMixin,\n'
+              '    FinanceCenterAutoInboxMixin,\n'
+          )
+          if finance.count(old_class) != 1:
+              raise SystemExit('Finance corrective class anchor mismatch')
+          finance_path.write_text(
+              finance.replace(old_class, new_class),
+              encoding='utf-8',
+              newline='\n',
+          )
+
+          support_path = Path('tests/integration_manifest_support_m8.py')
+          support = support_path.read_text(encoding='utf-8')
+          if support.count('for number in range(1, 100)') != 1:
+              raise SystemExit('Manifest R99 range anchor mismatch')
+          support = support.replace('for number in range(1, 100)', 'for number in range(1, 101)')
+          if support.count('append-only R99 overlay') != 1:
+              raise SystemExit('Manifest R99 comment anchor mismatch')
+          support_path.write_text(
+              support.replace('append-only R99 overlay', 'append-only R100 overlay'),
+              encoding='utf-8',
+              newline='\n',
+          )
+
+          workflow_path = Path('.github/workflows/m5-scheduled-reports.yml')
+          workflow = workflow_path.read_text(encoding='utf-8')
+          r99_name = 'ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R99.json'
+          r100_name = 'ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R100.json'
+          if workflow.count(r99_name) != 1:
+              raise SystemExit('M5 workflow R99 anchor mismatch')
+          workflow_path.write_text(
+              workflow.replace(r99_name, r100_name),
+              encoding='utf-8',
+              newline='\n',
+          )
+
+          rtm_path = Path('docs/evidence/M5_SCHEDULED_REPORTS_RTM.json')
+          rtm = json.loads(rtm_path.read_text(encoding='utf-8'))
+          if rtm.get('base_exact_head') != '050ce0cbae33dd06d0eee1dafb3676addf3dfee0':
+              raise SystemExit('M5 RTM original base mismatch')
+          rtm['base_exact_head'] = 'd89c29edfa93ecc61290a0fdeb9e218214638f7d'
+          rows = [row for row in rtm.get('requirements', []) if row.get('id') == 'M5-12']
+          if len(rows) != 1:
+              raise SystemExit('M5-12 RTM row mismatch')
+          row = rows[0]
+          row['requirement'] = (
+              'Publish M5 as exactly one direct-parent commit over the current validated '
+              'M4 corrective exact head and limit completion to supported evidence'
+          )
+          row['action'] = (
+              'Preserve M4 corrective R99, append M5 as R100, create one clean exact-head '
+              'candidate, run all required gates, and close validation PR unmerged'
+          )
+          row['pass_criterion'] = (
+              'One commit over M4 corrective R99; L5 remains explicitly unclaimed; '
+              'release remains blocked'
+          )
+          row['status'] = 'IMPLEMENTED_AWAITING_EXACT_HEAD'
+          rtm_path.write_text(
+              json.dumps(rtm, indent=2, ensure_ascii=False) + '\n',
+              encoding='utf-8',
+              newline='\n',
+          )
+
+          template = json.loads(
+              subprocess.check_output(
+                  [
+                      'git',
+                      'show',
+                      candidate + ':docs/evidence/'
+                      'ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R99.json',
+                  ],
+                  text=True,
+              )
+          )
+          template.pop('base_pilot_integration_r98_overlay_git_blob_sha', None)
+          template['base_pilot_integration_r99_overlay_git_blob_sha'] = (
+              'b52af806361e29c9e6be6842007b066ac22223a1'
+          )
+          template['overlay_version'] = 100
+          template['reason'] = (
+              'M5 scheduled weekly and monthly reports integrated over M4 corrective R99: '
+              'deterministic completed periods, exact source coverage, governed finance and '
+              'export reuse, SHA-256-bound idempotent atomic packages, Windows Task Scheduler '
+              'trigger, missed-run recovery and manual actions on the existing Reports page. '
+              'The bounded auto-inbox state and post-move duplicate-hash corrections remain '
+              'active. Approved UI navigation, Gatekeeper disconnection, WB_ONLY scope and '
+              'marketplace-write-disabled state are unchanged.'
+          )
+          r100_path = Path(
+              'docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R100.json'
+          )
+          r100_path.write_text(
+              json.dumps(template, indent=2, ensure_ascii=False) + '\n',
+              encoding='utf-8',
+              newline='\n',
+          )
+
+          for path in (
+              *map(Path, copy_paths),
+              finance_path,
+              support_path,
+              r100_path,
+          ):
+              if b'\r' in path.read_bytes():
+                  raise SystemExit('CR byte remains: ' + str(path))
+          print('M5_R100_COMPOSITION=PASS')
+          PY
+
+          git add -A
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib
+          import json
+          import subprocess
+
+          expected = {
+              '.github/workflows/m5-scheduled-reports.yml',
+              'docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R100.json',
+              'docs/evidence/M5_SCHEDULED_REPORTS_RTM.json',
+              'src/quantum/application/_finance_center_pages.py',
+              'src/quantum/application/_finance_center_queue_runtime.py',
+              'src/quantum/application/_finance_center_scheduled_reports.py',
+              'src/quantum/application/_finance_center_shell.py',
+              'src/quantum/application/finance_center.py',
+              'src/quantum/application/scheduled_reports.py',
+              'tests/integration_manifest_support_m8.py',
+              'tests/test_m5_scheduled_reports.py',
+          }
+          staged = set(
+              subprocess.check_output(
+                  ['git', 'diff', '--cached', '--name-only'],
+                  text=True,
+              ).splitlines()
+          )
+          if staged != expected:
+              raise SystemExit(f'M5 R100 staged scope mismatch: {sorted(staged ^ expected)}')
+
+          overlay_path = Path(
+              'docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R100.json'
+          )
+          overlay = json.loads(overlay_path.read_text(encoding='utf-8'))
+          for row in overlay['entries']:
+              file_path = Path(row[0])
+              if not file_path.is_file():
+                  raise SystemExit('R100 missing path: ' + row[0])
+              raw = file_path.read_bytes()
+              row[1] = hashlib.sha256(raw).hexdigest()
+              row[2] = len(raw)
+          overlay_path.write_text(
+              json.dumps(overlay, indent=2, ensure_ascii=False) + '\n',
+              encoding='utf-8',
+              newline='\n',
+          )
+          print('M5_R100_REBOUND=PASS')
+          PY
+          git add docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R100.json
+          git diff --cached --check
+
+      - name: Run combined focused and complete source gates
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m compileall -q src/quantum/application
+          find . -type d -name __pycache__ -prune -exec rm -rf {} +
+          find . -type f \( -name '*.pyc' -o -name '*.pyo' \) -delete
+          PYTHONPATH=src python3 -m unittest \
+            tests.test_m4_auto_inbox_corrective \
+            tests.test_m4_auto_inbox \
+            tests.test_m5_scheduled_reports -v 2>&1 | \
+            tee /tmp/m5-r100-evidence/focused-tests.log
+          PYTHONPATH=src python3 -m quantum.scripts.ci 2>&1 | \
+            tee /tmp/m5-r100-evidence/full-source-ci.log
+          git diff --cached --check
+
+      - name: Create one direct-parent R100 candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY' 2>&1 | tee /tmp/m5-r100-evidence/postcheck.log
+          from pathlib import Path
+          import hashlib
+          import json
+          import subprocess
+
+          overlay_path = Path(
+              'docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R100.json'
+          )
+          overlay = json.loads(overlay_path.read_text(encoding='utf-8'))
+          if overlay.get('overlay_version') != 100:
+              raise SystemExit('R100 version mismatch')
+          if overlay.get('base_pilot_integration_r99_overlay_git_blob_sha') != (
+              'b52af806361e29c9e6be6842007b066ac22223a1'
+          ):
+              raise SystemExit('R100 lineage mismatch')
+          for relative, digest, size in overlay['entries']:
+              raw = Path(relative).read_bytes()
+              if len(raw) != size or hashlib.sha256(raw).hexdigest() != digest:
+                  raise SystemExit('R100 entry mismatch: ' + relative)
+          parent = subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()
+          if parent != 'd89c29edfa93ecc61290a0fdeb9e218214638f7d':
+              raise SystemExit('R100 parent mismatch')
+          print('M5_R100_POSTCHECK=PASS')
+          print('M5_R100_PARENT=' + parent)
+          print('M5_R100_CHANGED_FILES=11')
+          PY
+          git config user.name "Quantum Protocol Bot"
+          git config user.email "quantum-protocol@users.noreply.github.com"
+          git commit -m "feat(quantum): integrate M5 scheduled reports as R100"
+          candidate="$(git rev-parse HEAD)"
+          test "$(git rev-parse HEAD^)" = "$BASE_EXACT_HEAD"
+          printf '{"milestone":"M5_SCHEDULED_WEEKLY_MONTHLY_REPORTS_R100","candidate_sha":"%s","parent_sha":"%s","changed_files":11,"combined_focused":"PASS","full_source_ci":"PASS","release_state":"RELEASE_BLOCKED","physical_l5":false}\n' "$candidate" "$BASE_EXACT_HEAD" > /tmp/m5-r100-evidence/M5_R100_CANDIDATE.json
+          set +e
+          git push origin "HEAD:refs/heads/$TARGET_BRANCH" --force 2>&1 | \
+            tee /tmp/m5-r100-evidence/push.log
+          status=${PIPESTATUS[0]}
+          set -e
+          printf 'candidate_sha=%s\npush_status=%s\n' "$candidate" "$status" > \
+            /tmp/m5-r100-evidence/candidate-sha.txt
+
+      - name: Upload R100 evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: M5-R100-V2-Evidence
+          path: /tmp/m5-r100-evidence
+          if-no-files-found: error
+          retention-days: 5
