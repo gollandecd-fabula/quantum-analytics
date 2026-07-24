@@ -171,7 +171,7 @@ def verify_source() -> None:
 
 def commit_and_push() -> None:
     branch = os.environ.get("GITHUB_HEAD_REF") or os.environ.get("GITHUB_REF_NAME")
-    expected_branch = "fix/quantum-local-release-block-reasons-r1"
+    expected_branch = "tmp/quantum-reaudit-r91-stage"
     if branch != expected_branch:
         raise RuntimeError(f"UNEXPECTED_BRANCH:{branch!r}")
     run("git", "config", "user.name", "quantum-reaudit-bot")
@@ -187,7 +187,7 @@ def commit_and_push() -> None:
     if not status.strip():
         raise RuntimeError("NO_REAUDIT_CHANGES_TO_COMMIT")
     print(status, flush=True)
-    run("git", "commit", "-m", "fix(reaudit): plateau repair cycle R1")
+    run("git", "commit", "-m", "fix(reaudit): plateau repair cycle R91")
     run("git", "push", "origin", f"HEAD:{expected_branch}")
 
 
