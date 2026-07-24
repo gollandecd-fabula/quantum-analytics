@@ -1,5 +1,9 @@
 [CmdletBinding()]
-param()
+param(
+    [string]$PackageArchive = "",
+    [ValidatePattern("^[A-Za-z0-9_-]+$")]
+    [string]$EvidenceSlot = "default"
+)
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
@@ -8,11 +12,11 @@ $ProgressPreference = "SilentlyContinue"
 $Step = "INIT"
 $ExactHead = [string]$env:TARGET_SHA
 $RepoRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot "..\..")).Path
-$EvidenceRoot = Join-Path $RepoRoot "artifacts\l4-installed-runtime"
-$BuildRoot = Join-Path $RepoRoot "dist\l4-installed-runtime-build"
-$ExtractRoot = Join-Path $env:RUNNER_TEMP "quantum-l4-package"
-$InstallRoot = Join-Path $env:RUNNER_TEMP "quantum-l4-installed"
-$TamperRoot = Join-Path $env:RUNNER_TEMP "quantum-l4-tampered"
+$EvidenceRoot = Join-Path $RepoRoot ("artifacts\l4-installed-runtime-" + $EvidenceSlot)
+$BuildRoot = Join-Path $RepoRoot ("dist\l4-installed-runtime-build-" + $EvidenceSlot)
+$ExtractRoot = Join-Path $env:RUNNER_TEMP ("quantum-l4-package-" + $EvidenceSlot)
+$InstallRoot = Join-Path $env:RUNNER_TEMP ("quantum-l4-installed-" + $EvidenceSlot)
+$TamperRoot = Join-Path $env:RUNNER_TEMP ("quantum-l4-tampered-" + $EvidenceSlot)
 
 foreach ($path in @($EvidenceRoot, $BuildRoot, $ExtractRoot, $InstallRoot, $TamperRoot)) {
     Remove-Item -LiteralPath $path -Recurse -Force -ErrorAction SilentlyContinue
@@ -469,16 +473,23 @@ if ($LASTEXITCODE -ne 0) {
     throw ("L4_CONTRACT_TEST_FAILED:{0}" -f $LASTEXITCODE)
 }
 
-$Step = "PACKAGE_BUILD"
-powershell.exe `
-    -NoProfile `
-    -ExecutionPolicy Bypass `
-    -File .\scripts\windows\build_local_production.ps1 `
-    -OutputDirectory $BuildRoot
-if ($LASTEXITCODE -ne 0) {
-    throw ("L4_PACKAGE_BUILD_FAILED:{0}" -f $LASTEXITCODE)
+$Step = "PACKAGE_SOURCE"
+$packageOrigin = "BUILT_IN_JOB"
+if ([string]::IsNullOrWhiteSpace($PackageArchive)) {
+    powershell.exe `
+        -NoProfile `
+        -ExecutionPolicy Bypass `
+        -File .\scripts\windows\build_local_production.ps1 `
+        -OutputDirectory $BuildRoot
+    if ($LASTEXITCODE -ne 0) {
+        throw ("L4_PACKAGE_BUILD_FAILED:{0}" -f $LASTEXITCODE)
+    }
+    $archive = Join-Path $BuildRoot "QuantumLocalProduction_HOME_LOCAL.zip"
 }
-$archive = Join-Path $BuildRoot "QuantumLocalProduction_HOME_LOCAL.zip"
+else {
+    $archive = (Resolve-Path -LiteralPath $PackageArchive).Path
+    $packageOrigin = "PREBUILT_SAME_ARTIFACT"
+}
 if (-not (Test-Path -LiteralPath $archive -PathType Leaf)) {
     throw "L4_PACKAGE_NOT_FOUND"
 }
@@ -589,8 +600,10 @@ $result = [ordered]@{
     status = "L4_INSTALLED_RUNTIME_PASS"
     evidence_level = "L4_INSTALLED_RUNTIME"
     exact_head = $ExactHead
+    validation_slot = $EvidenceSlot
     source_package = [ordered]@{
         path = $archive
+        origin = $packageOrigin
         size_bytes = (Get-Item -LiteralPath $archive).Length
         sha256 = $packageHash
         package_manifest_sha256 = Get-Sha256 -Path $packageManifestPath

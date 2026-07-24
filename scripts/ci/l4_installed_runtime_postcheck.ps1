@@ -1,12 +1,15 @@
 [CmdletBinding()]
-param()
+param(
+    [ValidatePattern("^[A-Za-z0-9_-]+$")]
+    [string]$EvidenceSlot = "default"
+)
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 $ExactHead = [string]$env:TARGET_SHA
 $RepoRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot "..\..")).Path
-$EvidenceRoot = Join-Path $RepoRoot "artifacts\l4-installed-runtime"
+$EvidenceRoot = Join-Path $RepoRoot ("artifacts\l4-installed-runtime-" + $EvidenceSlot)
 $MainEvidencePath = Join-Path $EvidenceRoot "L4_INSTALLED_RUNTIME_EVIDENCE.json"
 $MainEvidenceShaPath = Join-Path $EvidenceRoot "L4_INSTALLED_RUNTIME_EVIDENCE.sha256"
 $PostcheckPath = Join-Path $EvidenceRoot "L4_INDEPENDENT_POSTCHECK_EVIDENCE.json"
