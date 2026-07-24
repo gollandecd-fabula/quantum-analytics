@@ -1,0 +1,50 @@
+name: Repair Quantum M5 Split Payload
+
+on:
+  pull_request:
+    paths:
+      - "tools/M5_REPAIR_*.txt"
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - name: Reconstruct exact parts 01 and 07
+        shell: bash
+        env:
+          HEAD_BRANCH: ${{ github.event.pull_request.head.ref }}
+        run: |
+          set -euo pipefail
+          test "$(sha256sum tools/M5_REPAIR_010.txt | cut -d' ' -f1)" = "c3e13138b8ab4d9f65d16a40c3af0b4f93df9f20650effece1ebc9ab039132e9"
+          test "$(sha256sum tools/M5_REPAIR_011.txt | cut -d' ' -f1)" = "20cd67836aa0745c0f4acfd7ed348adac3ad6e90c7eb27d1719c8e63a7c2c531"
+          test "$(sha256sum tools/M5_REPAIR_070.txt | cut -d' ' -f1)" = "d52e9e377195e30ae9c31293a92cbbb96f9914955a77e11be896d9e879f88b1c"
+          test "$(sha256sum tools/M5_REPAIR_071.txt | cut -d' ' -f1)" = "5a28e549af10e51ffa83188db27fbb58301df734b6474be4ee335a2202630519"
+          cat tools/M5_REPAIR_010.txt tools/M5_REPAIR_011.txt > tools/M5_PAYLOAD_PART_01.txt
+          cat tools/M5_REPAIR_070.txt tools/M5_REPAIR_071.txt > tools/M5_PAYLOAD_PART_07.txt
+          test "$(wc -c < tools/M5_PAYLOAD_PART_01.txt)" -eq 8000
+          test "$(wc -c < tools/M5_PAYLOAD_PART_07.txt)" -eq 8000
+          test "$(sha256sum tools/M5_PAYLOAD_PART_01.txt | cut -d' ' -f1)" = "958daad0e54fee208fab0748dad5914bc8124de8f904a023c8e92e8d2028dc3b"
+          test "$(sha256sum tools/M5_PAYLOAD_PART_07.txt | cut -d' ' -f1)" = "603a14c999e5510192f20a6825bc523eeab7c3650d2b05f93babb0e4aad85672"
+          cat tools/M5_PAYLOAD_PART_*.txt | base64 --decode > /tmp/m5-payload.zip
+          test "$(wc -c < /tmp/m5-payload.zip)" -eq 42507
+          test "$(sha256sum /tmp/m5-payload.zip | cut -d' ' -f1)" = "fb285f1d823e5b388a42ea91c2590fd5f3c3eb057a8c5afd1d1c979ac878d103"
+          python3 - <<'PY'
+          import zipfile
+          with zipfile.ZipFile('/tmp/m5-payload.zip') as archive:
+              assert archive.testzip() is None
+              assert len(archive.namelist()) == 12
+          PY
+          rm -f tools/M5_REPAIR_*.txt
+          git config user.name "Quantum Protocol Bot"
+          git config user.email "quantum-protocol@users.noreply.github.com"
+          git add tools/M5_PAYLOAD_PART_01.txt tools/M5_PAYLOAD_PART_07.txt
+          git add -u -- tools/M5_REPAIR_*.txt
+          git commit -m "chore(m5): restore exact split payload identities"
+          git push origin "HEAD:refs/heads/$HEAD_BRANCH"
