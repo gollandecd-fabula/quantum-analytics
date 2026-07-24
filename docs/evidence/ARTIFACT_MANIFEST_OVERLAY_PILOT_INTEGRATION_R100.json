@@ -1,0 +1,59 @@
+{
+  "entries": [
+    [
+      ".github/workflows/m5-scheduled-reports.yml",
+      "9150825d1d711e9050f5b7a2db26b16621e9612184eeff9979f4d53a5233976e",
+      9659
+    ],
+    [
+      "src/quantum/application/scheduled_reports.py",
+      "f560b95706140ff134d99c2552494f7e29cb37ccd444d1cc67aa936a653d2e5d",
+      42852
+    ],
+    [
+      "src/quantum/application/_finance_center_scheduled_reports.py",
+      "7edf62061ef040066844856cc037f026b28ba38f2625f56c880d36d9d77499e6",
+      5649
+    ],
+    [
+      "src/quantum/application/finance_center.py",
+      "58db201fb2930be09ed2b546a2b9248635f7327a40e196c214f2084a4f7f391c",
+      3468
+    ],
+    [
+      "src/quantum/application/_finance_center_shell.py",
+      "79a91502a4f5a2dbee1bfd9888c3e7d907e4ab696186258ae3bb0cf8f4946fa0",
+      10640
+    ],
+    [
+      "src/quantum/application/_finance_center_pages.py",
+      "4399a53a38259917035debad9e3f820417f967f60fd30c7a0db516743d99f158",
+      37356
+    ],
+    [
+      "src/quantum/application/_finance_center_queue_runtime.py",
+      "e8c93df22cb72f615e67b29cf6e1e3f3c21f7a2335d6df64908577a1ea066b40",
+      18533
+    ],
+    [
+      "tests/test_m5_scheduled_reports.py",
+      "bcba2ac13ff4ebde671137748eccdec92e70cc5777180495e7c0b5bdeefaef49",
+      16073
+    ],
+    [
+      "tests/integration_manifest_support_m8.py",
+      "85ce300370c01228d1cf628b6a42130f9aa268c0c8e654b59755cff4f670fd3d",
+      1092
+    ],
+    [
+      "docs/evidence/M5_SCHEDULED_REPORTS_RTM.json",
+      "447159285c52c3a0c94aab55cf29f113ce2d0ad4d15eee6918be14c35b54762e",
+      7644
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 100,
+  "reason": "M5 scheduled weekly and monthly reports integrated over M4 corrective R99: deterministic completed periods, exact source coverage, governed finance and export reuse, SHA-256-bound idempotent atomic packages, Windows Task Scheduler trigger, missed-run recovery and manual actions on the existing Reports page. The bounded auto-inbox state and post-move duplicate-hash corrections remain active. Approved UI navigation, Gatekeeper disconnection, WB_ONLY scope and marketplace-write-disabled state are unchanged.",
+  "remove_paths": [],
+  "base_pilot_integration_r99_overlay_git_blob_sha": "b52af806361e29c9e6be6842007b066ac22223a1"
+}

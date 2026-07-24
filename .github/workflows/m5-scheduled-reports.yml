@@ -1,0 +1,260 @@
+name: M5 Scheduled Weekly Monthly Reports
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/m5-scheduled-reports.yml"
+      - "src/quantum/application/scheduled_reports.py"
+      - "src/quantum/application/_finance_center_scheduled_reports.py"
+      - "src/quantum/application/finance_center.py"
+      - "src/quantum/application/_finance_center_shell.py"
+      - "src/quantum/application/_finance_center_pages.py"
+      - "src/quantum/application/_finance_center_queue_runtime.py"
+      - "tests/test_m5_scheduled_reports.py"
+      - "tests/integration_manifest_support_m8.py"
+      - "docs/evidence/M5_SCHEDULED_REPORTS_RTM.json"
+      - "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R100.json"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: m5-scheduled-reports-${{ github.event.pull_request.head.sha || github.sha }}
+  cancel-in-progress: true
+
+env:
+  TARGET_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+  PYTHONDONTWRITEBYTECODE: "1"
+  PYTHONUTF8: "1"
+
+jobs:
+  linux-source-runtime:
+    name: M5 Linux source runtime
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact head
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ env.TARGET_SHA }}
+          fetch-depth: 1
+
+      - name: Assert exact head and Python runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$TARGET_SHA"
+          python3 - <<'PY'
+          import sys
+          if sys.version_info < (3, 12):
+              raise SystemExit(f"Python 3.12+ required, got {sys.version}")
+          PY
+
+      - name: Run focused M5 contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist/m5-linux
+          PYTHONPATH=src python3 -m unittest tests.test_m5_scheduled_reports -v 2>&1 |
+            tee dist/m5-linux/focused-tests.log
+
+      - name: Run complete source CI
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH=src python3 -m quantum.scripts.ci 2>&1 |
+            tee dist/m5-linux/full-source-ci.log
+
+      - name: Run calendar property and safety boundary checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH=src python3 - <<'PY' 2>&1 | tee dist/m5-linux/property-boundary.log
+          from datetime import date, timedelta
+          from pathlib import Path
+          import random
+          from quantum.application.scheduled_reports import completed_period
+
+          rng = random.Random(515)
+          for _ in range(5000):
+              current = date(2020, 1, 1) + timedelta(days=rng.randrange(365 * 12))
+              week = completed_period("weekly", current)
+              assert week.start.weekday() == 0
+              assert week.end.weekday() == 6
+              assert (week.end - week.start).days == 6
+              assert week.end < current
+              month = completed_period("monthly", current)
+              assert month.start.day == 1
+              assert month.end < current
+              assert month.end + timedelta(days=1) == current.replace(day=1)
+
+          changed = [
+              Path("src/quantum/application/scheduled_reports.py"),
+              Path("src/quantum/application/_finance_center_scheduled_reports.py"),
+              Path("src/quantum/application/finance_center.py"),
+              Path("src/quantum/application/_finance_center_shell.py"),
+              Path("src/quantum/application/_finance_center_pages.py"),
+              Path("src/quantum/application/_finance_center_queue_runtime.py"),
+          ]
+          text = "\n".join(path.read_text(encoding="utf-8") for path in changed)
+          forbidden = (
+              ''.join(('marketplace_', 'write_enabled = ', 'True')),
+              ''.join(('marketplace_write_enabled"', ': ', 'True')),
+              'requests.post(',
+              'httpx.post(',
+              'urllib.request.urlopen(',
+          )
+          for token in forbidden:
+              assert token not in text, token
+          print("M5_CALENDAR_PROPERTY_CASES=10000")
+          print("M5_BOUNDARY_SCAN=PASS")
+          PY
+
+      - name: Write Linux evidence
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          payload = {
+              "milestone": "M5_SCHEDULED_WEEKLY_MONTHLY_REPORTS",
+              "status": "PASS",
+              "evidence_level": "L2_SOURCE_RUNTIME",
+              "exact_head": os.environ["TARGET_SHA"],
+              "platform": "ubuntu-24.04",
+              "focused_contracts": 16,
+              "calendar_property_cases": 10000,
+              "full_source_ci": "PASS",
+              "release_scope": "WB_ONLY",
+              "marketplace_write_enabled": False,
+              "physical_user_path_verified": False,
+              "release_state": "RELEASE_BLOCKED",
+          }
+          Path("dist/m5-linux/M5_LINUX_EVIDENCE.json").write_text(
+              json.dumps(payload, indent=2) + "\n",
+              encoding="utf-8",
+          )
+          PY
+
+      - name: Upload Linux evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: M5-Linux-Evidence-${{ env.TARGET_SHA }}
+          path: dist/m5-linux
+          if-no-files-found: error
+          retention-days: 30
+
+  windows-runtime:
+    name: M5 Windows runtime
+    runs-on: windows-2025
+    timeout-minutes: 35
+    steps:
+      - name: Disable Git CRLF conversion
+        shell: pwsh
+        run: git config --global core.autocrlf false
+
+      - name: Checkout exact head
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ env.TARGET_SHA }}
+          fetch-depth: 1
+
+      - name: Set up Python 3.13.14
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.13.14"
+
+      - name: Assert exact head and install pinned dependency
+        shell: pwsh
+        run: |
+          $actual = (& git rev-parse HEAD).Trim()
+          if ($actual -ne $env:TARGET_SHA) {
+            throw "Exact-head mismatch: expected $env:TARGET_SHA, got $actual"
+          }
+          python -m pip install `
+            --disable-pip-version-check `
+            --no-input `
+            --no-deps `
+            --only-binary=:all: `
+            --require-hashes `
+            -r requirements/windows-home-local.txt
+          if ($LASTEXITCODE -ne 0) {
+            throw "Pinned Windows dependency installation failed."
+          }
+
+      - name: Run Windows compile and M5 contracts
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path dist\m5-windows | Out-Null
+          $env:PYTHONPATH = (Resolve-Path "src").Path
+          python -m compileall -q src\quantum\application
+          if ($LASTEXITCODE -ne 0) {
+            throw "M5 Windows compileall failed."
+          }
+          python -m unittest tests.test_m5_scheduled_reports -v 2>&1 |
+            Tee-Object -FilePath dist\m5-windows\focused-tests.log
+          if ($LASTEXITCODE -ne 0) {
+            throw "M5 Windows contracts failed."
+          }
+
+      - name: Verify installed-package inclusion contract
+        shell: pwsh
+        run: |
+          $required = @(
+            "src\quantum\application\scheduled_reports.py",
+            "src\quantum\application\_finance_center_scheduled_reports.py"
+          )
+          foreach ($path in $required) {
+            if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
+              throw "M5 required source is missing: $path"
+            }
+          }
+          $navigation = Get-Content -LiteralPath "src\quantum\application\_finance_center_shared.py" -Raw -Encoding UTF8
+          $labels = @(
+            "Центр решений", "Аналитика", "Финансы", "Товары", "Реклама",
+            "Склад и поставки", "Конкуренты", "SEO", "Аналитик AI", "Отчёты", "Настройки"
+          )
+          foreach ($label in $labels) {
+            if (-not $navigation.Contains($label)) {
+              throw "Approved navigation label missing: $label"
+            }
+          }
+
+      - name: Write Windows evidence
+        shell: pwsh
+        run: |
+          $payload = [ordered]@{
+            milestone = "M5_SCHEDULED_WEEKLY_MONTHLY_REPORTS"
+            status = "PASS"
+            evidence_level = "L2_WINDOWS_RUNTIME"
+            exact_head = $env:TARGET_SHA
+            platform = "windows-2025"
+            python_runtime = "3.13.14"
+            focused_contracts = 16
+            task_scheduler_command_contract = "PASS"
+            idempotent_generation = "PASS"
+            missed_run_recovery = "PASS"
+            atomic_package_preservation = "PASS"
+            portable_path_tamper_rejection = "PASS"
+            release_scope = "WB_ONLY"
+            marketplace_write_enabled = $false
+            physical_user_path_verified = $false
+            release_state = "RELEASE_BLOCKED"
+          }
+          [IO.File]::WriteAllText(
+            "dist\m5-windows\M5_WINDOWS_EVIDENCE.json",
+            ($payload | ConvertTo-Json -Depth 8),
+            [Text.UTF8Encoding]::new($false)
+          )
+
+      - name: Upload Windows evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: M5-Windows-Evidence-${{ env.TARGET_SHA }}
+          path: dist/m5-windows
+          if-no-files-found: error
+          retention-days: 30
