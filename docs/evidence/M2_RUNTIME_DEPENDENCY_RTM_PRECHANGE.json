@@ -9,7 +9,7 @@
   },
   "target": {
     "python_version": "3.13.14",
-    "python_windows_amd64_embeddable_sha256": "90b4e5b9898b72d744650524bff92377c367f44bd5fbd09e3148656c080ad907",
+    "python_windows_amd64_installer_sha256": "c54d9b9bbb8a36e6489363ddd01139707fd781d72f1f9e90c7ec65d0061368e0",
     "tzdata_version": "2026.3",
     "tzdata_wheel_sha256": "dc096730c87af6cab1b171c9d532be840741ff5d459015e7f6947bd7d7e54931"
   },
@@ -25,11 +25,11 @@
     },
     {
       "id": "M2-002",
-      "requirement": "Use an official supported Windows application-local Python runtime.",
-      "action": "Pin Python 3.13.14 Windows x64 embeddable package and its official SHA-256.",
+      "requirement": "Preserve the existing full-offline installation architecture while upgrading to a supported official Windows Python runtime.",
+      "action": "Pin the official Python 3.13.14 Windows x64 full installer and its official SHA-256 without switching installer methods.",
       "test": "Static pin scan plus official digest comparison.",
       "evidence": "Source diff and dependency review.",
-      "pass_criterion": "All authoritative runtime pins resolve to Python 3.13.14 and the exact approved digest.",
+      "pass_criterion": "All authoritative runtime pins resolve to Python 3.13.14 and the exact approved installer digest.",
       "status": "NOT_STARTED"
     },
     {
