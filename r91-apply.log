@@ -1,0 +1,21 @@
++ python -m compileall -q src
++ python -m unittest tests.test_quantum_reaudit_plateau_r1 -v
+test_approved_navigation_contract (tests.test_quantum_reaudit_plateau_r1.QuantumReauditPlateauR1Tests.test_approved_navigation_contract) ... ok
+test_concurrent_output_names_do_not_collide (tests.test_quantum_reaudit_plateau_r1.QuantumReauditPlateauR1Tests.test_concurrent_output_names_do_not_collide) ... ok
+test_duplicate_and_unknown_product_block (tests.test_quantum_reaudit_plateau_r1.QuantumReauditPlateauR1Tests.test_duplicate_and_unknown_product_block) ... ok
+test_known_answer_and_missing_cost_fail_closed (tests.test_quantum_reaudit_plateau_r1.QuantumReauditPlateauR1Tests.test_known_answer_and_missing_cost_fail_closed) ... ok
+test_marketplace_write_scanner_covers_powershell_and_json (tests.test_quantum_reaudit_plateau_r1.QuantumReauditPlateauR1Tests.test_marketplace_write_scanner_covers_powershell_and_json) ... ok
+test_noncanonical_cursor_alias_is_rejected (tests.test_quantum_reaudit_plateau_r1.QuantumReauditPlateauR1Tests.test_noncanonical_cursor_alias_is_rejected) ... ok
+test_output_bundle_is_transactional_unique_and_governed (tests.test_quantum_reaudit_plateau_r1.QuantumReauditPlateauR1Tests.test_output_bundle_is_transactional_unique_and_governed) ... ok
+test_output_failure_leaves_no_published_partial_run (tests.test_quantum_reaudit_plateau_r1.QuantumReauditPlateauR1Tests.test_output_failure_leaves_no_published_partial_run) ... ok
+test_primary_block_reason_is_actionable (tests.test_quantum_reaudit_plateau_r1.QuantumReauditPlateauR1Tests.test_primary_block_reason_is_actionable) ... ok
+test_return_cost_restoration_and_compensation (tests.test_quantum_reaudit_plateau_r1.QuantumReauditPlateauR1Tests.test_return_cost_restoration_and_compensation) ... ok
+test_windows_schema_discovery_rejects_xml_comment (tests.test_quantum_reaudit_plateau_r1.QuantumReauditPlateauR1Tests.test_windows_schema_discovery_rejects_xml_comment) ... ok
+
+----------------------------------------------------------------------
+Ran 11 tests in 0.116s
+
+OK
++ git config user.name quantum-reaudit-bot
++ git config user.email quantum-reaudit-bot@users.noreply.github.com
++ git add -A

@@ -13,8 +13,16 @@ FORBIDDEN_SOURCE_MARKERS = (
     "ghp_",
     "github_pat_",
     "BEGIN PRIVATE KEY",
-    "marketplace_write_enabled = true",
 )
+_WRITE_ENABLE_PATTERN = re.compile(
+    r"(?i)(?:marketplace[_-]?write(?:_enabled)?[\"']?|"
+    r"MARKETPLACE_WRITE_ENABLED)\s*[:=]\s*"
+    r"(?:\$?true|1|enabled|on)(?![A-Za-z0-9_])"
+)
+_SCANNED_SUFFIXES = {
+    ".py", ".md", ".toml", ".sql", ".json", ".yaml", ".yml",
+    ".ps1", ".cmd", ".bat", ".txt",
+}
 
 _FAILURE_HEADER = re.compile(r"^(?:FAIL|ERROR): .+$")
 _FAILURE_DETAIL = re.compile(
@@ -31,25 +39,23 @@ def project_root() -> Path:
 
 def scan_forbidden_markers(root: Path) -> None:
     violations: list[str] = []
+    scanner_path = Path(__file__).resolve()
     for path in root.rglob("*"):
         if not path.is_file():
             continue
         if any(part in {".git", "__pycache__"} for part in path.parts):
             continue
-        if path.suffix.lower() not in {
-            ".py",
-            ".md",
-            ".toml",
-            ".sql",
-            ".json",
-            ".yaml",
-            ".yml",
-        }:
+        if path.suffix.lower() not in _SCANNED_SUFFIXES:
             continue
         text = path.read_text(encoding="utf-8", errors="ignore")
+        is_scanner = path.resolve() == scanner_path
         for marker in FORBIDDEN_SOURCE_MARKERS:
-            if marker in text and path.name != "ci.py":
+            if marker in text and not is_scanner:
                 violations.append(f"{path.relative_to(root)}: {marker}")
+        if not is_scanner and _WRITE_ENABLE_PATTERN.search(text):
+            violations.append(
+                f"{path.relative_to(root)}: marketplace write enablement"
+            )
     if violations:
         raise RuntimeError("Forbidden source markers:\n" + "\n".join(violations))
 

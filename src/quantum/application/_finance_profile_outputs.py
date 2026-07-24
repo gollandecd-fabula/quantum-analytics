@@ -58,7 +58,11 @@ def _xlsx_number_cell(reference: str, value: object) -> str:
     return f'<c r="{reference}" t="n"><v>{format(parsed, "f")}</v></c>'
 
 
-def _xlsx_sheet(rows: Sequence[Sequence[tuple[str, object, bool]]]) -> str:
+def _xlsx_sheet(
+    rows: Sequence[Sequence[tuple[str, object, bool]]],
+    *,
+    autofilter_end: str = "D",
+) -> str:
     xml_rows: list[str] = []
     for row_index, cells in enumerate(rows, start=1):
         values: list[str] = []
@@ -76,12 +80,108 @@ def _xlsx_sheet(rows: Sequence[Sequence[tuple[str, object, bool]]]) -> str:
         '<sheetViews><sheetView workbookViewId="0"/></sheetViews>'
         '<sheetFormatPr defaultRowHeight="18"/>'
         '<sheetData>' + "".join(xml_rows) + '</sheetData>'
-        '<autoFilter ref="A1:D1"/>'
+        f'<autoFilter ref="A1:{autofilter_end}1"/>'
         '</worksheet>'
     )
 
 
-def write_run_result_xlsx(path: Path, result: FinanceRunResult) -> None:
+def _recommendation_rows(
+    recommendations: Sequence[Mapping[str, Any]],
+    recommendation_errors: Sequence[str],
+) -> list[list[tuple[str, object, bool]]]:
+    rows: list[list[tuple[str, object, bool]]] = [[
+        ("A", "Группа", False),
+        ("B", "Категория", False),
+        ("C", "Критичность", False),
+        ("D", "Действие", False),
+        ("E", "Текущий эффект, ₽", False),
+        ("F", "Прогноз min, ₽", False),
+        ("G", "Прогноз max, ₽", False),
+        ("H", "Уверенность", False),
+        ("I", "Ограничения", False),
+    ]]
+    for record in recommendations:
+        item = record.get("recommendation")
+        if not isinstance(item, Mapping):
+            continue
+        current = item.get("current_effect")
+        forecast = item.get("forecast_effect")
+        confidence = item.get("confidence")
+        rows.append([
+            ("A", record.get("group_name", ""), False),
+            ("B", item.get("category", ""), False),
+            ("C", item.get("severity", ""), False),
+            ("D", item.get("action_code", ""), False),
+            (
+                "E",
+                current.get("amount", "")
+                if isinstance(current, Mapping)
+                else "",
+                True,
+            ),
+            (
+                "F",
+                forecast.get("amount_min", "")
+                if isinstance(forecast, Mapping)
+                else "",
+                True,
+            ),
+            (
+                "G",
+                forecast.get("amount_max", "")
+                if isinstance(forecast, Mapping)
+                else "",
+                True,
+            ),
+            (
+                "H",
+                confidence.get("state", "")
+                if isinstance(confidence, Mapping)
+                else "",
+                False,
+            ),
+            (
+                "I",
+                "; ".join(
+                    str(value) for value in item.get("limitations", [])
+                ),
+                False,
+            ),
+        ])
+    for error in recommendation_errors:
+        rows.append([
+            ("A", "", False),
+            ("B", "DATA_QUALITY", False),
+            ("C", "BLOCKED", False),
+            ("D", "RECOMMENDATION_BUILD_BLOCKED", False),
+            ("E", "", False),
+            ("F", "", False),
+            ("G", "", False),
+            ("H", "LOW", False),
+            ("I", error, False),
+        ])
+    if len(rows) == 1:
+        rows.append([
+            ("A", "", False),
+            ("B", "", False),
+            ("C", "", False),
+            ("D", "Нет подтверждённых рекомендаций", False),
+            ("E", "", False),
+            ("F", "", False),
+            ("G", "", False),
+            ("H", "", False),
+            ("I", "Рекомендации не создаются без доказуемого основания", False),
+        ])
+    return rows
+
+
+def write_run_result_xlsx(
+    path: Path,
+    result: FinanceRunResult,
+    *,
+    recommendations: Sequence[Mapping[str, Any]] = (),
+    recommendation_errors: Sequence[str] = (),
+) -> None:
     summary_labels = {
         "net_sold_units": "Продано единиц",
         "net_marketplace_income_amount": "Чистый доход маркетплейса, ₽",
@@ -126,6 +226,10 @@ def write_run_result_xlsx(path: Path, result: FinanceRunResult) -> None:
                 ("D", "; ".join(item.reason_codes), False),
             ]
         )
+    recommendation_rows = _recommendation_rows(
+        recommendations,
+        recommendation_errors,
+    )
     workbook = (
         '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
         '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" '
@@ -133,6 +237,7 @@ def write_run_result_xlsx(path: Path, result: FinanceRunResult) -> None:
         '<sheets>'
         '<sheet name="Итоги" sheetId="1" r:id="rId1"/>'
         '<sheet name="Группы" sheetId="2" r:id="rId2"/>'
+        '<sheet name="Рекомендации" sheetId="3" r:id="rId3"/>'
         '</sheets></workbook>'
     )
     relationships = (
@@ -140,6 +245,7 @@ def write_run_result_xlsx(path: Path, result: FinanceRunResult) -> None:
         '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
         '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>'
         '<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet2.xml"/>'
+        '<Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet3.xml"/>'
         '</Relationships>'
     )
     root_relationships = (
@@ -156,6 +262,7 @@ def write_run_result_xlsx(path: Path, result: FinanceRunResult) -> None:
         '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>'
         '<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>'
         '<Override PartName="/xl/worksheets/sheet2.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>'
+        '<Override PartName="/xl/worksheets/sheet3.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>'
         '</Types>'
     )
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -166,9 +273,19 @@ def write_run_result_xlsx(path: Path, result: FinanceRunResult) -> None:
         archive.writestr("xl/_rels/workbook.xml.rels", relationships)
         archive.writestr("xl/worksheets/sheet1.xml", _xlsx_sheet(summary_rows))
         archive.writestr("xl/worksheets/sheet2.xml", _xlsx_sheet(group_rows))
+        archive.writestr(
+            "xl/worksheets/sheet3.xml",
+            _xlsx_sheet(recommendation_rows, autofilter_end="I"),
+        )
 
 
-def write_run_dashboard(path: Path, result: FinanceRunResult) -> None:
+def write_run_dashboard(
+    path: Path,
+    result: FinanceRunResult,
+    *,
+    recommendations: Sequence[Mapping[str, Any]] = (),
+    recommendation_errors: Sequence[str] = (),
+) -> None:
     from html import escape
 
     metrics = (
@@ -202,6 +319,53 @@ def write_run_dashboard(path: Path, result: FinanceRunResult) -> None:
             )
         )
     missing = "".join(f"<li>{escape(value)}</li>" for value in result.missing_inputs)
+    recommendation_cards: list[str] = []
+    for record in recommendations:
+        item = record.get("recommendation")
+        if not isinstance(item, Mapping):
+            continue
+        current = item.get("current_effect")
+        forecast = item.get("forecast_effect")
+        confidence = item.get("confidence")
+        current_amount = (
+            current.get("amount") if isinstance(current, Mapping) else None
+        )
+        forecast_min = (
+            forecast.get("amount_min")
+            if isinstance(forecast, Mapping)
+            else None
+        )
+        forecast_max = (
+            forecast.get("amount_max")
+            if isinstance(forecast, Mapping)
+            else None
+        )
+        confidence_state = (
+            confidence.get("state")
+            if isinstance(confidence, Mapping)
+            else "UNVERIFIED"
+        )
+        recommendation_cards.append(
+            '<article class="recommendation">'
+            f'<h3>{escape(str(record.get("group_name") or "Общие данные"))}</h3>'
+            f'<p><strong>{escape(str(item.get("action_code") or ""))}</strong></p>'
+            f'<p>Текущий эффект: {escape(str(current_amount or "—"))} ₽</p>'
+            f'<p>Прогноз: {escape(str(forecast_min or "—"))}…{escape(str(forecast_max or "—"))} ₽</p>'
+            f'<p>Уверенность: {escape(str(confidence_state))}</p>'
+            f'<p>Ограничения: {escape("; ".join(str(v) for v in item.get("limitations", [])) or "нет")}</p>'
+            '</article>'
+        )
+    for error in recommendation_errors:
+        recommendation_cards.append(
+            '<article class="recommendation blocked">'
+            '<h3>Рекомендация заблокирована</h3>'
+            f'<p>{escape(error)}</p></article>'
+        )
+    if not recommendation_cards:
+        recommendation_cards.append(
+            '<article class="recommendation"><h3>Нет подтверждённых рекомендаций</h3>'
+            '<p>Quantum не создаёт совет без доказуемого финансового основания.</p></article>'
+        )
     html = f'''<!doctype html>
 <html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Quantum — финансовая аналитика WB</title>
@@ -214,11 +378,13 @@ main{{max-width:1220px;margin:0 auto;padding:24px}}.grid{{display:grid;grid-temp
 .card span,.card small{{display:block;color:#627d98}}.card strong{{display:block;font-size:28px;margin:8px 0;color:var(--navy)}}
 section{{background:white;border:1px solid var(--line);border-radius:10px;margin-top:18px;padding:20px;overflow:auto}}table{{border-collapse:collapse;width:100%}}th,td{{text-align:left;padding:11px;border-bottom:1px solid var(--line)}}th{{background:#eaf3f9;color:var(--navy)}}
 .status{{display:inline-block;padding:4px 9px;border-radius:999px;color:white;font-size:12px;font-weight:700}}.ok{{background:var(--green)}}.blocked{{background:var(--red)}}
+.recommendations{{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}}.recommendation{{border:1px solid var(--line);border-left:5px solid var(--blue);padding:14px;border-radius:8px}}.recommendation h3{{margin:0 0 8px}}
 .notice{{border-left:5px solid var(--orange)}}footer{{padding:20px;text-align:center;color:#627d98}}@media(max-width:850px){{.grid{{grid-template-columns:1fr 1fr}}}}
 </style></head><body>
 <header><h1>Quantum · аналитика Wildberries</h1><p>Локальный режим · WB_ONLY · запись на маркетплейс отключена</p></header>
 <main><div class="grid">{cards}</div>
 <section><h2>Результаты по товарным группам</h2><table><thead><tr><th>Группа</th><th>Статус</th><th>Прибыль, ₽</th><th>Контроль</th></tr></thead><tbody>{''.join(group_rows)}</tbody></table></section>
+<section><h2>Рекомендации</h2><div class="recommendations">{''.join(recommendation_cards)}</div></section>
 <section class="notice"><h2>Контроль полноты данных</h2><p>Статус: <strong>{escape(result.status)}</strong></p><ul>{missing or '<li>Обязательные данные заполнены.</li>'}</ul></section>
 </main><footer>Quantum HOME_LOCAL · данные не отправляются во внешние сервисы</footer></body></html>'''
     path.parent.mkdir(parents=True, exist_ok=True)

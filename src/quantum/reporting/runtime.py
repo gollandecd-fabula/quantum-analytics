@@ -3,6 +3,7 @@ from __future__ import annotations
 import base64
 import csv
 import hashlib
+import hmac
 import io
 import json
 import re
@@ -663,6 +664,12 @@ def _decode_cursor(cursor: str, digest: str) -> int:
         or data["offset"] < 0
         or data.get("digest") != digest
     ):
+        raise ReportingError("REPORT_CURSOR_INVALID")
+    # Reject non-canonical Base64 spellings of the same JSON payload.  Without
+    # this check a caller can manufacture multiple cursor strings for one
+    # logical position, which weakens auditability and cache/idempotency keys.
+    canonical = _encode_cursor(data["offset"], digest)
+    if not hmac.compare_digest(cursor, canonical):
         raise ReportingError("REPORT_CURSOR_INVALID")
     return data["offset"]
 

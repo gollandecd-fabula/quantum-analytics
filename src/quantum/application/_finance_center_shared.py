@@ -70,12 +70,16 @@ PALETTE = {
 
 NAV_ITEMS = (
     ("decision", "Центр решений"),
-    ("reports", "Отчёты"),
-    ("finance", "Себестоимость и расходы"),
     ("analytics", "Аналитика"),
-    ("recommendations", "Рекомендации"),
-    ("export", "Экспорт"),
-    ("quality", "Контроль данных"),
+    ("finance", "Финансы"),
+    ("products", "Товары"),
+    ("advertising", "Реклама"),
+    ("supply", "Склад и поставки"),
+    ("competitors", "Конкуренты"),
+    ("seo", "SEO"),
+    ("ai", "Аналитик AI"),
+    ("reports", "Отчёты"),
+    ("settings", "Настройки"),
 )
 
 _ADVANCED_FIELDS = (

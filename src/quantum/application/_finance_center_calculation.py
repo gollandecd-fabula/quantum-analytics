@@ -1,6 +1,221 @@
 from __future__ import annotations
 
+from collections.abc import Mapping, Sequence
+from datetime import UTC, datetime
+from decimal import Decimal, InvalidOperation
+import json
+import os
+from pathlib import Path
+import shutil
+import tempfile
+import time
+from typing import Any
+from uuid import uuid4
+
 from quantum.application._finance_center_shared import *
+from quantum.application._finance_profile_financial_rows import (
+    PERIOD_TAX_GROUP,
+    UNALLOCATED_SERVICE_GROUP,
+)
+from quantum.insights.financial import (
+    FinancialRecommendationError,
+    build_financial_recommendations,
+)
+
+
+_RECOMMENDATIONS_SCHEMA_VERSION = "quantum-finance-recommendations-v1"
+
+
+def _new_finance_run_id() -> str:
+    return (
+        datetime.now(UTC).strftime("%Y%m%d_%H%M%S_%f")
+        + "_"
+        + uuid4().hex[:12]
+    )
+
+
+def _fsync_file(path: Path) -> None:
+    with path.open("rb") as stream:
+        os.fsync(stream.fileno())
+
+
+def _fsync_directory(path: Path) -> None:
+    if os.name == "nt":
+        return
+    descriptor = os.open(path, os.O_RDONLY)
+    try:
+        os.fsync(descriptor)
+    finally:
+        os.close(descriptor)
+
+
+def _cleanup_stale_staging(
+    output_dir: Path,
+    *,
+    minimum_age_seconds: float = 3600.0,
+) -> tuple[Path, ...]:
+    cutoff = time.time() - max(0.0, minimum_age_seconds)
+    removed: list[Path] = []
+    if not output_dir.is_dir():
+        return ()
+    for path in sorted(output_dir.glob(".quantum-run-*.tmp")):
+        try:
+            if path.is_symlink() or not path.is_dir():
+                continue
+            if path.stat().st_mtime > cutoff:
+                continue
+        except OSError:
+            continue
+        shutil.rmtree(path)
+        removed.append(path)
+    return tuple(removed)
+
+
+def _recommendation_source_refs(
+    calculation: Mapping[str, Any],
+) -> tuple[str, ...]:
+    refs: set[str] = set()
+    results = calculation.get("results")
+    if not isinstance(results, Mapping):
+        return ()
+    for metric in results.values():
+        if not isinstance(metric, Mapping):
+            continue
+        source_ids = metric.get("source_ids")
+        if not isinstance(source_ids, Sequence) or isinstance(
+            source_ids,
+            (str, bytes),
+        ):
+            continue
+        refs.update(
+            item
+            for item in source_ids
+            if isinstance(item, str) and item.strip()
+        )
+    return tuple(sorted(refs))
+
+
+def _build_governed_recommendations(
+    result: FinanceRunResult,
+) -> tuple[tuple[dict[str, Any], ...], tuple[str, ...]]:
+    records: list[dict[str, Any]] = []
+    errors: list[str] = []
+    for group in result.group_results:
+        if (
+            group.state != "VALID"
+            or not group.calculation
+            or "ZERO_ACTIVITY" in group.reason_codes
+            or group.group_name in {PERIOD_TAX_GROUP, UNALLOCATED_SERVICE_GROUP}
+        ):
+            continue
+        try:
+            recommendations = build_financial_recommendations(
+                calculation=group.calculation,
+                reconciliation={"state": "NOT_REQUESTED"},
+                source_type="WB_DETAILED_FINANCIAL",
+                source_refs=_recommendation_source_refs(group.calculation),
+                scope={"product_group": group.group_name},
+            )
+        except FinancialRecommendationError as exc:
+            errors.append(f"{group.group_name}: {exc.code}")
+            continue
+        records.extend(
+            {
+                "group_name": group.group_name,
+                "recommendation": recommendation,
+            }
+            for recommendation in recommendations
+        )
+    return tuple(records), tuple(sorted(set(errors)))
+
+
+def _write_recommendation_payload(
+    path: Path,
+    *,
+    records: Sequence[Mapping[str, Any]],
+    errors: Sequence[str],
+) -> None:
+    payload = {
+        "schema_version": _RECOMMENDATIONS_SCHEMA_VERSION,
+        "recommendation_count": len(records),
+        "recommendations": [dict(record) for record in records],
+        "errors": list(errors),
+        "marketplace_write_enabled": False,
+    }
+    path.write_text(
+        json.dumps(payload, ensure_ascii=False, sort_keys=True, indent=2)
+        + "\n",
+        encoding="utf-8",
+    )
+
+
+def _write_finance_output_bundle(
+    output_dir: Path,
+    result: FinanceRunResult,
+) -> tuple[dict[str, Path], tuple[dict[str, Any], ...], tuple[str, ...]]:
+    """Publish one complete run directory or nothing.
+
+    A run is first materialized under a private staging directory.  Every
+    artifact is checked and flushed before one atomic directory rename makes
+    the run visible.  This prevents mixed/partial JSON-XLSX-dashboard states
+    after disk errors or process interruption.
+    """
+    output_dir.mkdir(parents=True, exist_ok=True)
+    _cleanup_stale_staging(output_dir)
+    run_id = _new_finance_run_id()
+    final_dir = output_dir / f"Quantum_Run_{run_id}"
+    stage_dir = Path(
+        tempfile.mkdtemp(
+            dir=output_dir,
+            prefix=f".quantum-run-{run_id}-",
+            suffix=".tmp",
+        )
+    )
+    recommendations, recommendation_errors = (
+        _build_governed_recommendations(result)
+    )
+    try:
+        staged = {
+            "JSON": stage_dir / f"Quantum_Finance_{run_id}.json",
+            "Recommendations": (
+                stage_dir / f"Quantum_Recommendations_{run_id}.json"
+            ),
+            "Excel": stage_dir / f"Quantum_Report_{run_id}.xlsx",
+            "Dashboard": stage_dir / f"Quantum_Dashboard_{run_id}.html",
+        }
+        save_run_result(staged["JSON"], result)
+        _write_recommendation_payload(
+            staged["Recommendations"],
+            records=recommendations,
+            errors=recommendation_errors,
+        )
+        write_run_result_xlsx(
+            staged["Excel"],
+            result,
+            recommendations=recommendations,
+            recommendation_errors=recommendation_errors,
+        )
+        write_run_dashboard(
+            staged["Dashboard"],
+            result,
+            recommendations=recommendations,
+            recommendation_errors=recommendation_errors,
+        )
+        for path in staged.values():
+            if not path.is_file() or path.stat().st_size <= 0:
+                raise OSError("FINANCE_OUTPUT_BUNDLE_INCOMPLETE")
+            _fsync_file(path)
+        _fsync_directory(stage_dir)
+        os.replace(stage_dir, final_dir)
+        _fsync_directory(output_dir)
+        outputs = {
+            label: final_dir / path.name
+            for label, path in staged.items()
+        }
+        return outputs, recommendations, recommendation_errors
+    except Exception:
+        shutil.rmtree(stage_dir, ignore_errors=True)
+        raise
 
 
 class FinanceCenterCalculationMixin:
@@ -100,17 +315,14 @@ class FinanceCenterCalculationMixin:
                 ),
                 source_sha256=source_hash,
             )
-            output_dir = self.project_root / "output"
-            output_dir.mkdir(parents=True, exist_ok=True)
-            stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            json_path = output_dir / f"Quantum_Finance_{stamp}.json"
-            xlsx_path = output_dir / f"Quantum_Report_{stamp}.xlsx"
-            dashboard_path = (
-                output_dir / f"Quantum_Dashboard_{stamp}.html"
+            (
+                outputs,
+                recommendations,
+                recommendation_errors,
+            ) = _write_finance_output_bundle(
+                self.project_root / "output",
+                result,
             )
-            save_run_result(json_path, result)
-            write_run_result_xlsx(xlsx_path, result)
-            write_run_dashboard(dashboard_path, result)
         except FinanceProfileError as exc:
             messagebox.showerror(APP_TITLE, self.describe_error(exc))
             self.set_status("Финансовый расчёт заблокирован.", "error")
@@ -128,11 +340,9 @@ class FinanceCenterCalculationMixin:
             )
             return
         self.current_result = result
-        self.current_outputs = {
-            "JSON": json_path,
-            "Excel": xlsx_path,
-            "Dashboard": dashboard_path,
-        }
+        self.current_outputs = outputs
+        self.current_recommendations = recommendations
+        self.current_recommendation_errors = recommendation_errors
         self._render_result(result)
         self.refresh_exports()
         if result.status == "CALCULATED":
@@ -238,9 +448,46 @@ class FinanceCenterCalculationMixin:
         self.refresh_quality()
 
     def _recommendations(self, result: FinanceRunResult) -> str:
-        group_profit: list[tuple[str, float]] = []
-        period_tax: float | None = None
-        service_impact: float | None = None
+        governed = getattr(self, "current_recommendations", ())
+        governed_errors = getattr(
+            self,
+            "current_recommendation_errors",
+            (),
+        )
+        if governed:
+            lines = ["РЕКОМЕНДАЦИИ С ДОКАЗАТЕЛЬСТВАМИ", ""]
+            for record in governed:
+                item = record.get("recommendation", {})
+                forecast = item.get("forecast_effect", {})
+                confidence = item.get("confidence", {})
+                lines.extend(
+                    (
+                        f"• {record.get('group_name', 'Общие данные')}: "
+                        f"{item.get('action_code', '—')}",
+                        "  Текущий эффект: "
+                        f"{item.get('current_effect', {}).get('amount', '—')} ₽",
+                        "  Прогноз: "
+                        f"{forecast.get('amount_min', '—')}…"
+                        f"{forecast.get('amount_max', '—')} ₽",
+                        "  Уверенность: "
+                        f"{confidence.get('state', 'UNVERIFIED')}",
+                        "  Ограничения: "
+                        + (
+                            "; ".join(item.get("limitations", []))
+                            or "нет"
+                        ),
+                        "",
+                    )
+                )
+            lines.append(
+                "Любое действие является рекомендацией и не выполняется "
+                "на Wildberries автоматически."
+            )
+            return "\n".join(lines)
+
+        group_profit: list[tuple[str, Decimal]] = []
+        period_tax: Decimal | None = None
+        service_impact: Decimal | None = None
         zero_activity: list[str] = []
         for item in result.group_results:
             if item.state != "VALID":
@@ -254,8 +501,10 @@ class FinanceCenterCalculationMixin:
                 "value"
             ]
             try:
-                value = float(raw)
-            except (TypeError, ValueError):
+                value = Decimal(str(raw))
+                if not value.is_finite():
+                    raise InvalidOperation
+            except (InvalidOperation, TypeError, ValueError):
                 continue
             if item.group_name == PERIOD_TAX_GROUP:
                 period_tax = -value
@@ -294,7 +543,15 @@ class FinanceCenterCalculationMixin:
                 + "."
             )
         if not group_profit:
-            lines.append("Нет подтверждённых активных товарных групп.")
+            lines.append(
+                "Нет подтверждённых активных товарных групп или "
+                "нет доказуемого основания для управленческой рекомендации."
+            )
+        if governed_errors:
+            lines.append(
+                "Ошибки построения рекомендаций: "
+                + "; ".join(governed_errors)
+            )
         lines.append("")
         lines.append(
             "Любое действие является рекомендацией и не выполняется "
@@ -305,29 +562,7 @@ class FinanceCenterCalculationMixin:
     def refresh_cards(self) -> None:
         if not hasattr(self, "decision_cards"):
             return
-        self.decision_cards["reports"].configure(
-            text=str(len(self.reports))
-        )
-        self.decision_cards["groups"].configure(
-            text=str(len(self.profile.groups))
-        )
-        self.decision_cards["profile"].configure(
-            text=(
-                "ГОТОВ"
-                if not validate_profile(self.profile)
-                else "НЕПОЛНЫЙ"
-            )
-        )
-        self.decision_cards["calculation"].configure(
-            text=(
-                "ГОТОВ"
-                if (
-                    self.current_result
-                    and self.current_result.status == "CALCULATED"
-                )
-                else "НЕТ"
-            )
-        )
+        self.refresh_decision_center()
 
     def refresh_exports(self) -> None:
         self.export_list.delete(0, tk.END)
