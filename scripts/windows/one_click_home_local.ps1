@@ -92,7 +92,7 @@ function Test-PythonVersion {
     )
     $probe = @()
     $probe += $Prefix
-    $probe += @("-c", "import sys; raise SystemExit(0 if sys.version_info >= (3,12) else 17)")
+    $probe += @("-c", "import sys; raise SystemExit(0 if sys.version_info >= (3,13) else 17)")
     & $Executable @probe | Out-Null
     return $LASTEXITCODE -eq 0
 }
@@ -103,10 +103,10 @@ function Resolve-PythonCommand {
         return [pscustomobject]@{ Executable = $python.Source; Prefix = @() }
     }
     $py = Get-Command py.exe -ErrorAction SilentlyContinue
-    if ($py -and (Test-PythonVersion -Executable $py.Source -Prefix @("-3.12"))) {
-        return [pscustomobject]@{ Executable = $py.Source; Prefix = @("-3.12") }
+    if ($py -and (Test-PythonVersion -Executable $py.Source -Prefix @("-3.13"))) {
+        return [pscustomobject]@{ Executable = $py.Source; Prefix = @("-3.13") }
     }
-    throw (Get-QuantumRussianText -Encoded "UHl0aG9uIDMuMTIg0LjQu9C4INC90L7QstC10LUg0L3QtSDQvdCw0LnQtNC10L0uINCj0YHRgtCw0L3QvtCy0LjRgtC1IFB5dGhvbiAzLjEyKyDQuCDRgdC90L7QstCwINC30LDQv9GD0YHRgtC40YLQtSBTVEFSVF9RVUFOVFVNLmNtZC4=")
+    throw (Get-QuantumRussianText -Encoded "UHl0aG9uIDMuMTMg0LjQu9C4INC90L7QstC10LUg0L3QtSDQvdCw0LnQtNC10L0uINCj0YHRgtCw0L3QvtCy0LjRgtC1IFB5dGhvbiAzLjEzKyDQuCDRgdC90L7QstCwINC30LDQv9GD0YHRgtC40YLQtSBTVEFSVF9RVUFOVFVNLmNtZC4=")
 }
 
 function Test-ReadyConfig {

@@ -356,8 +356,8 @@ def audit_one_click(root: Path) -> list[Finding]:
 
     user_error_contracts = (
         (
-            "Python 3.12 or newer was not found.",
-            "Python 3.12 или новее не найден.",
+            "Python 3.13 or newer was not found.",
+            "Python 3.13 или новее не найден.",
         ),
         (
             "File is required in non-interactive mode.",

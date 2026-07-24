@@ -7,9 +7,9 @@ name = "quantum-analytics"
 version = "0.9.0rc1"
 description = "Local read-only Wildberries financial desktop decision center"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.13"
 dependencies = [
-  "tzdata==2026.2; platform_system == 'Windows'",
+  "tzdata==2026.3; platform_system == 'Windows'",
 ]
 
 [project.scripts]

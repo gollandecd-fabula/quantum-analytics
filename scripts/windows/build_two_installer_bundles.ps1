@@ -48,10 +48,10 @@ try {
     }
     $quantumHash = Get-Sha256 -Path $quantumPackage
 
-    $pythonVersion = "3.12.10"
+    $pythonVersion = "3.13.14"
     $pythonInstallerName = "python-$pythonVersion-amd64.exe"
     $pythonUrl = "https://www.python.org/ftp/python/$pythonVersion/$pythonInstallerName"
-    $pythonExpectedSha256 = "67b5635e80ea51072b87941312d00ec8927c4db9ba18938f7ad2d27b328b95fb"
+    $pythonExpectedSha256 = "c54d9b9bbb8a36e6489363ddd01139707fd781d72f1f9e90c7ec65d0061368e0"
     $pythonInstaller = Join-Path $workRoot $pythonInstallerName
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
     Invoke-WebRequest -Uri $pythonUrl -OutFile $pythonInstaller -UseBasicParsing
@@ -99,15 +99,15 @@ function Get-QuantumRussianText {
     return $text
 }
 
-function Test-Python312 {
+function Test-Python313 {
     $python = Get-Command python.exe -ErrorAction SilentlyContinue
     if ($python) {
-        & $python.Source -c "import sys; raise SystemExit(0 if sys.version_info >= (3,12) else 17)" | Out-Null
+        & $python.Source -c "import sys; raise SystemExit(0 if sys.version_info >= (3,13) else 17)" | Out-Null
         if ($LASTEXITCODE -eq 0) { return $true }
     }
     $py = Get-Command py.exe -ErrorAction SilentlyContinue
     if ($py) {
-        & $py.Source -3.12 -c "import sys; raise SystemExit(0 if sys.version_info >= (3,12) else 17)" | Out-Null
+        & $py.Source -3.13 -c "import sys; raise SystemExit(0 if sys.version_info >= (3,13) else 17)" | Out-Null
         if ($LASTEXITCODE -eq 0) { return $true }
     }
     return $false
@@ -116,8 +116,8 @@ function Test-Python312 {
 if (-not [Environment]::Is64BitOperatingSystem) {
     throw (Get-QuantumRussianText -Encoded "0KPRgdGC0LDQvdC+0LLRidC40Log0L/QvtC00LTQtdGA0LbQuNCy0LDQtdGCINGC0L7Qu9GM0LrQviA2NC3RgNCw0LfRgNGP0LTQvdGL0LUgV2luZG93cyAxMCDQuCBXaW5kb3dzIDExLg==")
 }
-if (-not (Test-Python312)) {
-    throw (Get-QuantumRussianText -Encoded "UHl0aG9uIDMuMTIg0LjQu9C4INC90L7QstC10LUg0L3QtSDQvdCw0LnQtNC10L0uINCX0LDQv9GD0YHRgtC40YLQtSDQv9Cw0LrQtdGCIDI6IFFVQU5UVU1fRlVMTF9PRkZMSU5FX0lOU1RBTExFUi4=")
+if (-not (Test-Python313)) {
+    throw (Get-QuantumRussianText -Encoded "UHl0aG9uIDMuMTMg0LjQu9C4INC90L7QstC10LUg0L3QtSDQvdCw0LnQtNC10L0uINCX0LDQv9GD0YHRgtC40YLQtSDQv9Cw0LrQtdGCIDI6IFFVQU5UVU1fRlVMTF9PRkZMSU5FX0lOU1RBTExFUi4=")
 }
 
 $bundle = Join-Path $PSScriptRoot "QuantumLocalProduction_HOME_LOCAL.zip"
@@ -147,7 +147,7 @@ finally {
     $continuePs1 = $continuePs1.Replace("__QUANTUM_HASH__", $quantumHash)
     Write-AsciiFile -Path (Join-Path $continueRoot "CONTINUE_AND_FINISH.ps1") -Content $continuePs1
 
-    $continueReadme = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String("0J/QkNCa0JXQoiBRVUFOVFVNIDEg4oCUINCf0KDQntCU0J7Qm9CW0JXQndCY0JUg0Jgg0JLQntCh0KHQotCQ0J3QntCS0JvQldCd0JjQlQoK0JjRgdC/0L7Qu9GM0LfRg9C50YLQtSDRjdGC0L7RgiDQv9Cw0LrQtdGCLCDQutC+0LPQtNCwINGD0YHRgtCw0L3QvtCy0LrQsCDRg9C20LUg0L3QsNGH0LjQvdCw0LvQsNGB0Ywg0LggUHl0aG9uIDMuMTIrINGD0YHRgtCw0L3QvtCy0LvQtdC9LgoKMS4g0KDQsNGB0L/QsNC60YPQudGC0LUgWklQINCyINC+0LHRi9GH0L3Rg9GOINC70L7QutCw0LvRjNC90YPRjiDQv9Cw0L/QutGDLgoyLiDQl9Cw0L/Rg9GB0YLQuNGC0LUgQ09OVElOVUVfQU5EX0ZJTklTSC5jbWQuCjMuINCh0YPRidC10YHRgtCy0YPRjtGJ0LjQtSBjb25maWcsIGRhdGEg0Lggb3V0cHV0INGB0L7RhdGA0LDQvdGP0Y7RgtGB0Y8uCjQuINCf0LDQutC10YIg0LLQvtGB0YHRgtCw0L3QvtCy0LjRgiDRg9C/0YDQsNCy0LvRj9C10LzRg9GOINGB0YDQtdC00YMgUXVhbnR1bSDQuCDQv9GA0L7QtNC+0LvQttC40YIg0L3QsNGB0YLRgNC+0LnQutGDINC4INC40LzQv9C+0YDRgi4KNS4g0JXRgdC70LggUHl0aG9uINC+0YLRgdGD0YLRgdGC0LLRg9C10YIsINC40YHQv9C+0LvRjNC30YPQudGC0LUg0L/QsNC60LXRgiAyLgoKU0hBLTI1NiDQv9Cw0LrQtdGC0LAgUXVhbnR1bTogX19RVUFOVFVNX0hBU0hfXwo="))
+    $continueReadme = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String("0J/QkNCa0JXQoiBRVUFOVFVNIDEg4oCUINCf0KDQntCU0J7Qm9CW0JXQndCY0JUg0Jgg0JLQntCh0KHQotCQ0J3QntCS0JvQldCd0JjQlQoK0JjRgdC/0L7Qu9GM0LfRg9C50YLQtSDRjdGC0L7RgiDQv9Cw0LrQtdGCLCDQutC+0LPQtNCwINGD0YHRgtCw0L3QvtCy0LrQsCDRg9C20LUg0L3QsNGH0LjQvdCw0LvQsNGB0Ywg0LggUHl0aG9uIDMuMTMrINGD0YHRgtCw0L3QvtCy0LvQtdC9LgoKMS4g0KDQsNGB0L/QsNC60YPQudGC0LUgWklQINCyINC+0LHRi9GH0L3Rg9GOINC70L7QutCw0LvRjNC90YPRjiDQv9Cw0L/QutGDLgoyLiDQl9Cw0L/Rg9GB0YLQuNGC0LUgQ09OVElOVUVfQU5EX0ZJTklTSC5jbWQuCjMuINCh0YPRidC10YHRgtCy0YPRjtGJ0LjQtSBjb25maWcsIGRhdGEg0Lggb3V0cHV0INGB0L7RhdGA0LDQvdGP0Y7RgtGB0Y8uCjQuINCf0LDQutC10YIg0LLQvtGB0YHRgtCw0L3QvtCy0LjRgiDRg9C/0YDQsNCy0LvRj9C10LzRg9GOINGB0YDQtdC00YMgUXVhbnR1bSDQuCDQv9GA0L7QtNC+0LvQttC40YIg0L3QsNGB0YLRgNC+0LnQutGDINC4INC40LzQv9C+0YDRgi4KNS4g0JXRgdC70LggUHl0aG9uINC+0YLRgdGD0YLRgdGC0LLRg9C10YIsINC40YHQv9C+0LvRjNC30YPQudGC0LUg0L/QsNC60LXRgiAyLgoKU0hBLTI1NiDQv9Cw0LrQtdGC0LAgUXVhbnR1bTogX19RVUFOVFVNX0hBU0hfXwo="))
     $continueReadme = $continueReadme.Replace("__QUANTUM_HASH__", $quantumHash)
     [IO.File]::WriteAllText((Join-Path $continueRoot "README_FIRST.txt"), $continueReadme, [Text.UTF8Encoding]::new($false))
 
@@ -186,20 +186,20 @@ function Get-QuantumRussianText {
     return $text
 }
 
-function Test-Python312 {
+function Test-Python313 {
     $candidates = @()
     $python = Get-Command python.exe -ErrorAction SilentlyContinue
     if ($python) { $candidates += [pscustomobject]@{ Exe = $python.Source; Prefix = @() } }
     $py = Get-Command py.exe -ErrorAction SilentlyContinue
-    if ($py) { $candidates += [pscustomobject]@{ Exe = $py.Source; Prefix = @("-3.12") } }
-    $localPython = Join-Path $env:LOCALAPPDATA "Programs\Python\Python312\python.exe"
+    if ($py) { $candidates += [pscustomobject]@{ Exe = $py.Source; Prefix = @("-3.13") } }
+    $localPython = Join-Path $env:LOCALAPPDATA "Programs\Python\Python313\python.exe"
     if (Test-Path -LiteralPath $localPython -PathType Leaf) {
         $candidates += [pscustomobject]@{ Exe = $localPython; Prefix = @() }
     }
     foreach ($candidate in $candidates) {
         $arguments = @()
         $arguments += $candidate.Prefix
-        $arguments += @("-c", "import sys; raise SystemExit(0 if sys.version_info >= (3,12) else 17)")
+        $arguments += @("-c", "import sys; raise SystemExit(0 if sys.version_info >= (3,13) else 17)")
         & $candidate.Exe @arguments | Out-Null
         if ($LASTEXITCODE -eq 0) { return $candidate.Exe }
     }
@@ -224,9 +224,9 @@ if ($pythonActualHash -ne $pythonExpectedHash) {
     throw (Get-QuantumRussianText -Encoded "U0hBLTI1NiDQstGB0YLRgNC+0LXQvdC90L7Qs9C+INGD0YHRgtCw0L3QvtCy0YnQuNC60LAgUHl0aG9uINC90LUg0YHQvtCy0L/QsNC00LDQtdGCINGBINC+0LbQuNC00LDQtdC80YvQvCDQt9C90LDRh9C10L3QuNC10Lwu")
 }
 
-$pythonExecutable = Test-Python312
+$pythonExecutable = Test-Python313
 if (-not $pythonExecutable) {
-    Write-Host (Get-QuantumRussianText -Encoded "0KPRgdGC0LDQvdC+0LLQutCwINCy0YHRgtGA0L7QtdC90L3QvtCz0L4gUHl0aG9uIDMuMTIuMTAg0LTQu9GPINGC0LXQutGD0YnQtdCz0L4g0L/QvtC70YzQt9C+0LLQsNGC0LXQu9GPIFdpbmRvd3MuLi4=") -ForegroundColor Cyan
+    Write-Host (Get-QuantumRussianText -Encoded "0KPRgdGC0LDQvdC+0LLQutCwINCy0YHRgtGA0L7QtdC90L3QvtCz0L4gUHl0aG9uIDMuMTMuMTQg0LTQu9GPINGC0LXQutGD0YnQtdCz0L4g0L/QvtC70YzQt9C+0LLQsNGC0LXQu9GPIFdpbmRvd3MuLi4=") -ForegroundColor Cyan
     $arguments = @(
         "/quiet",
         "InstallAllUsers=0",
@@ -243,13 +243,13 @@ if (-not $pythonExecutable) {
         throw (Get-QuantumRussianText -Encoded "0KPRgdGC0LDQvdC+0LLRidC40LogUHl0aG9uINC30LDQstC10YDRiNC40LvRgdGPINC+0YjQuNCx0LrQvtC5LiDQmtC+0LQg0LLRi9GF0L7QtNCwOiB7MH0u" -Arguments @($($process.ExitCode)))
     }
     Refresh-ProcessPath
-    $localPythonRoot = Join-Path $env:LOCALAPPDATA "Programs\Python\Python312"
+    $localPythonRoot = Join-Path $env:LOCALAPPDATA "Programs\Python\Python313"
     if (Test-Path -LiteralPath $localPythonRoot -PathType Container) {
         $env:PATH = "$localPythonRoot;$(Join-Path $localPythonRoot 'Scripts');$env:PATH"
     }
-    $pythonExecutable = Test-Python312
+    $pythonExecutable = Test-Python313
     if (-not $pythonExecutable) {
-        throw (Get-QuantumRussianText -Encoded "UHl0aG9uIDMuMTIg0YPRgdGC0LDQvdC+0LLQu9C10L0sINC90L4g0L3QtSDQt9Cw0L/Rg9GB0LrQsNC10YLRgdGPLiDQn9C10YDQtdC30LDQv9GD0YHRgtC40YLQtSBXaW5kb3dzINC4INGB0L3QvtCy0LAg0LfQsNC/0YPRgdGC0LjRgtC1INGD0YHRgtCw0L3QvtCy0YnQuNC6Lg==")
+        throw (Get-QuantumRussianText -Encoded "UHl0aG9uIDMuMTMg0YPRgdGC0LDQvdC+0LLQu9C10L0sINC90L4g0L3QtSDQt9Cw0L/Rg9GB0LrQsNC10YLRgdGPLiDQn9C10YDQtdC30LDQv9GD0YHRgtC40YLQtSBXaW5kb3dzINC4INGB0L3QvtCy0LAg0LfQsNC/0YPRgdGC0LjRgtC1INGD0YHRgtCw0L3QvtCy0YnQuNC6Lg==")
     }
 }
 else {
@@ -286,7 +286,7 @@ finally {
     $fullPs1 = $fullPs1.Replace("__QUANTUM_HASH__", $quantumHash)
     Write-AsciiFile -Path (Join-Path $fullRoot "INSTALL_QUANTUM_FULL_OFFLINE.ps1") -Content $fullPs1
 
-    $fullReadme = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String("0J/QkNCa0JXQoiBRVUFOVFVNIDIg4oCUINCf0J7Qm9Cd0JDQryDQkNCS0KLQntCd0J7QnNCd0JDQryDQo9Ch0KLQkNCd0J7QktCa0JAKCtCh0L7QtNC10YDQttC40LzQvtC1OgotINC+0YTQuNGG0LjQsNC70YzQvdGL0LkgNjQt0YDQsNC30YDRj9C00L3Ri9C5INGD0YHRgtCw0L3QvtCy0YnQuNC6IFB5dGhvbiBfX1BZVEhPTl9WRVJTSU9OX18g0YEgcHl0aG9uLm9yZzsKLSDQv9GA0L7QstC10YDQtdC90L3Ri9C5INC/0LDQutC10YIgUXVhbnR1bSBIT01FX0xPQ0FMIFIzOwotINC10LTQuNC90LDRjyDQv9GA0L7Qs9GA0LDQvNC80LAg0L/QvtC70L3QvtC5INGD0YHRgtCw0L3QvtCy0LrQuC4KCtCf0L7QtNC00LXRgNC20LjQstCw0LXQvNCw0Y8g0YHQuNGB0YLQtdC80LA6IDY0LdGA0LDQt9GA0Y/QtNC90LDRjyBXaW5kb3dzIDEwINC40LvQuCBXaW5kb3dzIDExLgrQn9C+0YHQu9C1INC30LDQs9GA0YPQt9C60LggWklQINC/0L7QtNC60LvRjtGH0LXQvdC40LUg0Log0LjQvdGC0LXRgNC90LXRgtGDINC90LUg0YLRgNC10LHRg9C10YLRgdGPLgrQlNC70Y8g0YPRgdGC0LDQvdC+0LLQutC4INGC0LXQutGD0YnQtdC80YMg0L/QvtC70YzQt9C+0LLQsNGC0LXQu9GOINC/0YDQsNCy0LAg0LDQtNC80LjQvdC40YHRgtGA0LDRgtC+0YDQsCDQvdC1INC90YPQttC90YsuCgoxLiDQoNCw0YHQv9Cw0LrRg9C50YLQtSBaSVAg0LIg0L7QsdGL0YfQvdGD0Y4g0LvQvtC60LDQu9GM0L3Rg9GOINC/0LDQv9C60YMg0LLQvdC1IE9uZURyaXZlLCBEcm9wYm94INC40LvQuCBHb29nbGUgRHJpdmUuCjIuINCX0LDQv9GD0YHRgtC40YLQtSBJTlNUQUxMX1FVQU5UVU1fRlVMTF9PRkZMSU5FLmNtZC4KMy4gUHl0aG9uINGD0YHRgtCw0L3QsNCy0LvQuNCy0LDQtdGC0YHRjyDRgtC+0LvRjNC60L4g0L/RgNC4INC+0YLRgdGD0YLRgdGC0LLQuNC4IFB5dGhvbiAzLjEyKy4KNC4gUXVhbnR1bSDRg9GB0YLQsNC90LDQstC70LjQstCw0LXRgtGB0Y8g0LIgJUxPQ0FMQVBQREFUQSVcUXVhbnR1bUxvY2FsUHJvZHVjdGlvbi4KNS4g0KHQu9C10LTRg9C50YLQtSDRgNGD0YHRgdC60LjQvCDQv9C+0LTRgdC60LDQt9C60LDQvCDQvdCw0YHRgtGA0L7QudC60Lgg0Lgg0L/RgNC+0LLQtdGA0LrQuCBYTFNYLgoK0JDQtNGA0LXRgSDRg9GB0YLQsNC90L7QstGJ0LjQutCwIFB5dGhvbjogX19QWVRIT05fVVJMX18KU0hBLTI1NiDRg9GB0YLQsNC90L7QstGJ0LjQutCwIFB5dGhvbjogX19QWVRIT05fSEFTSF9fClNIQS0yNTYg0L/QsNC60LXRgtCwIFF1YW50dW06IF9fUVVBTlRVTV9IQVNIX18K"))
+    $fullReadme = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String("0J/QkNCa0JXQoiBRVUFOVFVNIDIg4oCUINCf0J7Qm9Cd0JDQryDQkNCS0KLQntCd0J7QnNCd0JDQryDQo9Ch0KLQkNCd0J7QktCa0JAKCtCh0L7QtNC10YDQttC40LzQvtC1OgotINC+0YTQuNGG0LjQsNC70YzQvdGL0LkgNjQt0YDQsNC30YDRj9C00L3Ri9C5INGD0YHRgtCw0L3QvtCy0YnQuNC6IFB5dGhvbiBfX1BZVEhPTl9WRVJTSU9OX18g0YEgcHl0aG9uLm9yZzsKLSDQv9GA0L7QstC10YDQtdC90L3Ri9C5INC/0LDQutC10YIgUXVhbnR1bSBIT01FX0xPQ0FMIFIzOwotINC10LTQuNC90LDRjyDQv9GA0L7Qs9GA0LDQvNC80LAg0L/QvtC70L3QvtC5INGD0YHRgtCw0L3QvtCy0LrQuC4KCtCf0L7QtNC00LXRgNC20LjQstCw0LXQvNCw0Y8g0YHQuNGB0YLQtdC80LA6IDY0LdGA0LDQt9GA0Y/QtNC90LDRjyBXaW5kb3dzIDEwINC40LvQuCBXaW5kb3dzIDExLgrQn9C+0YHQu9C1INC30LDQs9GA0YPQt9C60LggWklQINC/0L7QtNC60LvRjtGH0LXQvdC40LUg0Log0LjQvdGC0LXRgNC90LXRgtGDINC90LUg0YLRgNC10LHRg9C10YLRgdGPLgrQlNC70Y8g0YPRgdGC0LDQvdC+0LLQutC4INGC0LXQutGD0YnQtdC80YMg0L/QvtC70YzQt9C+0LLQsNGC0LXQu9GOINC/0YDQsNCy0LAg0LDQtNC80LjQvdC40YHRgtGA0LDRgtC+0YDQsCDQvdC1INC90YPQttC90YsuCgoxLiDQoNCw0YHQv9Cw0LrRg9C50YLQtSBaSVAg0LIg0L7QsdGL0YfQvdGD0Y4g0LvQvtC60LDQu9GM0L3Rg9GOINC/0LDQv9C60YMg0LLQvdC1IE9uZURyaXZlLCBEcm9wYm94INC40LvQuCBHb29nbGUgRHJpdmUuCjIuINCX0LDQv9GD0YHRgtC40YLQtSBJTlNUQUxMX1FVQU5UVU1fRlVMTF9PRkZMSU5FLmNtZC4KMy4gUHl0aG9uINGD0YHRgtCw0L3QsNCy0LvQuNCy0LDQtdGC0YHRjyDRgtC+0LvRjNC60L4g0L/RgNC4INC+0YLRgdGD0YLRgdGC0LLQuNC4IFB5dGhvbiAzLjEzKy4KNC4gUXVhbnR1bSDRg9GB0YLQsNC90LDQstC70LjQstCw0LXRgtGB0Y8g0LIgJUxPQ0FMQVBQREFUQSVcUXVhbnR1bUxvY2FsUHJvZHVjdGlvbi4KNS4g0KHQu9C10LTRg9C50YLQtSDRgNGD0YHRgdC60LjQvCDQv9C+0LTRgdC60LDQt9C60LDQvCDQvdCw0YHRgtGA0L7QudC60Lgg0Lgg0L/RgNC+0LLQtdGA0LrQuCBYTFNYLgoK0JDQtNGA0LXRgSDRg9GB0YLQsNC90L7QstGJ0LjQutCwIFB5dGhvbjogX19QWVRIT05fVVJMX18KU0hBLTI1NiDRg9GB0YLQsNC90L7QstGJ0LjQutCwIFB5dGhvbjogX19QWVRIT05fSEFTSF9fClNIQS0yNTYg0L/QsNC60LXRgtCwIFF1YW50dW06IF9fUVVBTlRVTV9IQVNIX18K"))
     $fullReadme = $fullReadme.Replace("__PYTHON_VERSION__", $pythonVersion).Replace("__PYTHON_URL__", $pythonUrl).Replace("__PYTHON_HASH__", $pythonActualSha256).Replace("__QUANTUM_HASH__", $quantumHash)
     [IO.File]::WriteAllText((Join-Path $fullRoot "README_FIRST.txt"), $fullReadme, [Text.UTF8Encoding]::new($false))
 

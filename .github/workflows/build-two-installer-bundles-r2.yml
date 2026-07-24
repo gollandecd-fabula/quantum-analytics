@@ -15,6 +15,8 @@ on:
       - "scripts/windows/configure_home_local.ps1"
       - "src/**"
       - "requirements/windows-home-local.txt"
+      - "pyproject.toml"
+      - "tests/test_m2_runtime_dependency_modernization.py"
       - "tests/test_tz_correction_and_exe_installer.py"
       - ".github/workflows/build-two-installer-bundles-r2.yml"
   pull_request:
@@ -28,6 +30,8 @@ on:
       - "scripts/windows/configure_home_local.ps1"
       - "src/**"
       - "requirements/windows-home-local.txt"
+      - "pyproject.toml"
+      - "tests/test_m2_runtime_dependency_modernization.py"
       - "tests/test_tz_correction_and_exe_installer.py"
       - ".github/workflows/build-two-installer-bundles-r2.yml"
 
@@ -53,10 +57,10 @@ jobs:
             throw "Exact-head checkout failed. Expected $expected, got $actual"
           }
 
-      - name: Set up Python 3.12 for package build
+      - name: Set up Python 3.13.14 for package build
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: "3.13.14"
 
       - name: Parse installer builders
         shell: pwsh
@@ -154,7 +158,7 @@ jobs:
             (Join-Path $continueRoot "BUNDLE_MANIFEST.json"),
             (Join-Path $fullRoot "INSTALL_QUANTUM_FULL_OFFLINE.cmd"),
             (Join-Path $fullRoot "INSTALL_QUANTUM_FULL_OFFLINE.ps1"),
-            (Join-Path $fullRoot "python-3.12.10-amd64.exe"),
+            (Join-Path $fullRoot "python-3.13.14-amd64.exe"),
             (Join-Path $fullRoot "QuantumLocalProduction_HOME_LOCAL.zip"),
             (Join-Path $fullRoot "BUNDLE_MANIFEST.json")
           )) {
@@ -185,13 +189,13 @@ jobs:
           }
 
           $fullManifest = Get-Content -LiteralPath (Join-Path $fullRoot "BUNDLE_MANIFEST.json") -Raw -Encoding UTF8 | ConvertFrom-Json
-          $pythonInstaller = Join-Path $fullRoot "python-3.12.10-amd64.exe"
+          $pythonInstaller = Join-Path $fullRoot "python-3.13.14-amd64.exe"
           $pythonHash = (Get-FileHash -LiteralPath $pythonInstaller -Algorithm SHA256).Hash.ToLowerInvariant()
           if ($pythonHash -ne [string]$fullManifest.python_installer_sha256) {
             throw "Bundled Python hash does not match bundle manifest."
           }
-          if ($pythonHash -ne "67b5635e80ea51072b87941312d00ec8927c4db9ba18938f7ad2d27b328b95fb") {
-            throw "Bundled Python hash is not the approved Python 3.12.10 x64 installer hash."
+          if ($pythonHash -ne "c54d9b9bbb8a36e6489363ddd01139707fd781d72f1f9e90c7ec65d0061368e0") {
+            throw "Bundled Python hash is not the approved Python 3.13.14 x64 installer hash."
           }
           $signature = Get-AuthenticodeSignature -LiteralPath $pythonInstaller
           if ([string]$signature.Status -ne "Valid") {

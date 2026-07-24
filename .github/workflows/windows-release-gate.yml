@@ -28,10 +28,10 @@ jobs:
           ref: ${{ inputs.ref }}
           fetch-depth: 1
 
-      - name: Set up Python 3.12
+      - name: Set up Python 3.13.14
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: "3.13.14"
 
       - name: Inspect and freeze exact head
         id: inspect
@@ -121,10 +121,10 @@ jobs:
             throw "Exact-head checkout mismatch: expected $env:TARGET_SHA, got $actual"
           }
 
-      - name: Set up Python 3.12
+      - name: Set up Python 3.13.14
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: "3.13.14"
 
       - name: Run complete Windows production gate
         shell: pwsh

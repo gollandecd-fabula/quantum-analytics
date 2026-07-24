@@ -1,0 +1,46 @@
+{
+  "milestone": "M2_RUNTIME_DEPENDENCY_MODERNIZATION_CORRECTION",
+  "supersedes_head": "6760b4856e34c5173d87f568aea9b112fa2bdd8c",
+  "base_exact_head": "ad5229bbaca3cf8ae692ecb09f54220cde1db16b",
+  "defects": [
+    {
+      "id": "M2-D01",
+      "severity": "P0",
+      "defect": "Build verification still expected Python 3.12.10 and failed on the M2 exact head."
+    },
+    {
+      "id": "M2-D02",
+      "severity": "P0",
+      "defect": "Active runtime resolvers still selected py -3.12 and accepted a 3.12 floor."
+    },
+    {
+      "id": "M2-D03",
+      "severity": "P0",
+      "defect": "pyproject.toml still declared Python >=3.12 and tzdata 2026.2."
+    },
+    {
+      "id": "M2-D04",
+      "severity": "P1",
+      "defect": "Active Windows validation workflows still executed Python 3.12 and one installed tzdata 2026.2."
+    },
+    {
+      "id": "M2-D05",
+      "severity": "P1",
+      "defect": "Generated user-facing error text still referred to Python 3.12."
+    },
+    {
+      "id": "M2-D06",
+      "severity": "P1",
+      "defect": "M2 regression tests covered only two files and did not exercise the active runtime surface."
+    }
+  ],
+  "correction_scope": "runtime/dependency/build/test contracts only; no business logic or approved UI changes",
+  "required_gates": [
+    "repository-wide stale-runtime regression",
+    "full source CI",
+    "Foundation CI",
+    "OSS Admission CI",
+    "Windows installer bundle build and verification"
+  ],
+  "claim_boundary": "M2 may close at source/build integration evidence; no installed L4 or physical L5 claim"
+}

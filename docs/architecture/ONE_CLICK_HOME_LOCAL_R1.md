@@ -15,7 +15,7 @@ The launcher does not remove the existing recovery commands. `INSTALL_HOME_LOCAL
 3. Run the existing package-manifest verifier before target mutation.
 4. Install or update the managed runtime under `%LOCALAPPDATA%\QuantumLocalProduction`.
 5. Preserve `config`, `data` and `output`.
-6. Verify Python 3.12+ and required installed files.
+6. Verify Python 3.13+ and required installed files.
 7. Reuse the first valid existing configuration.
 8. If no valid configuration exists, run the interactive configurator and create `ADMISSION_ONLY` configuration without finance defaults.
 9. Start the reviewed import workflow in the same console.

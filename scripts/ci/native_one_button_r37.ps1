@@ -24,10 +24,10 @@ Remove-Item $source,$root,$out -Recurse -Force -ErrorAction SilentlyContinue
 New-Item -ItemType Directory -Path $source,$payload,$out -Force | Out-Null
 Expand-Archive $sourceZip $source
 Copy-Item "$source\QuantumLocalProduction_HOME_LOCAL.zip" $payload
-Copy-Item "$source\python-3.12.10-amd64.exe" $payload
-$pythonHash = (Get-FileHash "$payload\python-3.12.10-amd64.exe" -Algorithm SHA256).Hash.ToLowerInvariant()
-if ($pythonHash -ne "67b5635e80ea51072b87941312d00ec8927c4db9ba18938f7ad2d27b328b95fb") { throw "Python hash mismatch." }
-$sig = Get-AuthenticodeSignature "$payload\python-3.12.10-amd64.exe"
+Copy-Item "$source\python-3.13.14-amd64.exe" $payload
+$pythonHash = (Get-FileHash "$payload\python-3.13.14-amd64.exe" -Algorithm SHA256).Hash.ToLowerInvariant()
+if ($pythonHash -ne "c54d9b9bbb8a36e6489363ddd01139707fd781d72f1f9e90c7ec65d0061368e0") { throw "Python hash mismatch." }
+$sig = Get-AuthenticodeSignature "$payload\python-3.13.14-amd64.exe"
 if ($sig.Status -ne "Valid" -or $sig.SignerCertificate.Subject -notmatch "Python Software Foundation") { throw "Python signature invalid." }
 $quantumHash = (Get-FileHash "$payload\QuantumLocalProduction_HOME_LOCAL.zip" -Algorithm SHA256).Hash.ToLowerInvariant()
 
@@ -47,11 +47,11 @@ param([string]$File,[string]$TargetRoot=(Join-Path $env:LOCALAPPDATA "QuantumLoc
 Set-StrictMode -Version Latest
 $ErrorActionPreference="Stop"
 function Hash([string]$p){(Get-FileHash -LiteralPath $p -Algorithm SHA256).Hash.ToLowerInvariant()}
-function Python312 {
+function Python313 {
   $c=@();$p=Get-Command python.exe -ErrorAction SilentlyContinue;if($p){$c+=,@($p.Source,@())}
-  $p=Get-Command py.exe -ErrorAction SilentlyContinue;if($p){$c+=,@($p.Source,@("-3.12"))}
-  $p=Join-Path $env:LOCALAPPDATA "Programs\Python\Python312\python.exe";if(Test-Path $p){$c+=,@($p,@())}
-  foreach($x in $c){$a=@($x[1])+@("-c","import sys;raise SystemExit(0 if sys.version_info>=(3,12) else 17)");& $x[0] @a|Out-Null;if($LASTEXITCODE-eq 0){return $x[0]}}
+  $p=Get-Command py.exe -ErrorAction SilentlyContinue;if($p){$c+=,@($p.Source,@("-3.13"))}
+  $p=Join-Path $env:LOCALAPPDATA "Programs\Python\Python313\python.exe";if(Test-Path $p){$c+=,@($p,@())}
+  foreach($x in $c){$a=@($x[1])+@("-c","import sys;raise SystemExit(0 if sys.version_info>=(3,13) else 17)");& $x[0] @a|Out-Null;if($LASTEXITCODE-eq 0){return $x[0]}}
   return $null
 }
 $payload=$PSScriptRoot;$root=[IO.Path]::GetFullPath((Join-Path $payload ".."))
@@ -61,9 +61,9 @@ $prefix=$root.TrimEnd("\")+"\";$seen=[Collections.Generic.HashSet[string]]::new(
 foreach($e in @($m.files)){$f=[IO.Path]::GetFullPath((Join-Path $root ([string]$e.path).Replace("/","\")));if(-not$f.StartsWith($prefix,[StringComparison]::OrdinalIgnoreCase)){throw "Unsafe manifest path."};$r=$f.Substring($prefix.Length).Replace("\","/");if(-not$seen.Add($r)){throw "Duplicate manifest path."};if(-not(Test-Path $f -PathType Leaf)){throw "Missing bundle file: $r"};if((Get-Item $f).Length-ne[int64]$e.size_bytes-or(Hash $f)-ne$e.sha256){throw "Bundle integrity mismatch: $r"}}
 $actual=@(Get-ChildItem $root -Recurse -File|Where-Object{$_.FullName-ne"$payload\BUNDLE_MANIFEST.json"}|ForEach-Object{$_.FullName.Substring($prefix.Length).Replace("\","/")})
 foreach($r in $actual){if(-not$seen.Contains($r)){throw "Unmanifested bundle file: $r"}};if($actual.Count-ne$seen.Count){throw "Bundle inventory mismatch."}
-$py="$payload\python-3.12.10-amd64.exe";if((Hash $py)-ne"__PYTHON_HASH__"){throw "Python hash mismatch."};$s=Get-AuthenticodeSignature $py;if($s.Status-ne"Valid"-or$s.SignerCertificate.Subject-notmatch"Python Software Foundation"){throw "Python signature invalid."}
-$python=Python312
-if(-not$python){$q=Start-Process $py -ArgumentList @("/quiet","InstallAllUsers=0","PrependPath=1","Include_launcher=1","Include_pip=1","Include_test=0","Include_doc=0","Shortcuts=0","AssociateFiles=0") -Wait -PassThru;if($q.ExitCode-notin@(0,3010)){throw "Python install failed: $($q.ExitCode)"};$env:PATH="$(Join-Path $env:LOCALAPPDATA 'Programs\Python\Python312');$(Join-Path $env:LOCALAPPDATA 'Programs\Python\Python312\Scripts');$env:PATH";if(-not(Python312)){throw "Python installed but unavailable."}}
+$py="$payload\python-3.13.14-amd64.exe";if((Hash $py)-ne"__PYTHON_HASH__"){throw "Python hash mismatch."};$s=Get-AuthenticodeSignature $py;if($s.Status-ne"Valid"-or$s.SignerCertificate.Subject-notmatch"Python Software Foundation"){throw "Python signature invalid."}
+$python=Python313
+if(-not$python){$q=Start-Process $py -ArgumentList @("/quiet","InstallAllUsers=0","PrependPath=1","Include_launcher=1","Include_pip=1","Include_test=0","Include_doc=0","Shortcuts=0","AssociateFiles=0") -Wait -PassThru;if($q.ExitCode-notin@(0,3010)){throw "Python install failed: $($q.ExitCode)"};$env:PATH="$(Join-Path $env:LOCALAPPDATA 'Programs\Python\Python313');$(Join-Path $env:LOCALAPPDATA 'Programs\Python\Python313\Scripts');$env:PATH";if(-not(Python313)){throw "Python installed but unavailable."}}
 $zip="$payload\QuantumLocalProduction_HOME_LOCAL.zip";if((Hash $zip)-ne"__QUANTUM_HASH__"){throw "Quantum hash mismatch."}
 $temp=Join-Path $env:TEMP ("QuantumOneButtonR3_"+[guid]::NewGuid().ToString("N"));$package=Join-Path $temp "verified-package"
 try{New-Item -ItemType Directory $temp -Force|Out-Null;Add-Type -AssemblyName System.IO.Compression.FileSystem;[IO.Compression.ZipFile]::ExtractToDirectory($zip,$package);$launch="$package\scripts\one_click_home_local.ps1";if(-not(Test-Path $launch)){throw "Launcher missing."}
