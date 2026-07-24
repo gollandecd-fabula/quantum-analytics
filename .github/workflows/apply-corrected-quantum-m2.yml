@@ -1,0 +1,125 @@
+name: Apply Corrected Quantum M2 Exact Payload
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+permissions:
+  contents: write
+
+jobs:
+  apply-corrected-m2:
+    if: github.event.pull_request.head.ref == 'tmp/quantum-m2-corrected-stage'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - name: Checkout exact staging head
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Set up Python 3.13.14
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.13.14'
+
+      - name: Verify payload, apply, test and create one exact M2 commit
+        shell: bash
+        env:
+          M1_HEAD: ad5229bbaca3cf8ae692ecb09f54220cde1db16b
+          STAGE_BRANCH: tmp/quantum-m2-corrected-stage
+        run: |
+          set -euo pipefail
+          test "$(git merge-base HEAD "$M1_HEAD")" = "$M1_HEAD"
+          python - <<'PYCODE'
+          from __future__ import annotations
+          import base64, hashlib, io, json, subprocess, tarfile
+          from pathlib import Path, PurePosixPath
+
+          root = Path.cwd()
+          parts = [root / 'tools' / f'm2_final_part_{i:02d}.txt' for i in range(4)]
+          actual = sorted((root / 'tools').glob('m2_final_part_*.txt'))
+          if actual != parts:
+              raise SystemExit(f'M2_PART_SET_MISMATCH:{[p.name for p in actual]}')
+          encoded = b''.join(p.read_bytes() for p in parts)
+          if len(encoded) != 69368:
+              raise SystemExit(f'M2_BASE64_SIZE_MISMATCH:{len(encoded)}')
+          if hashlib.sha256(encoded).hexdigest() != 'dc32e263dfa5ccd9e0bf74c39aa351d870a5a0397a69d3837e565667e777812c':
+              raise SystemExit('M2_BASE64_SHA256_MISMATCH')
+          payload = base64.b64decode(encoded, validate=True)
+          if len(payload) != 52024:
+              raise SystemExit(f'M2_TAR_GZ_SIZE_MISMATCH:{len(payload)}')
+          if hashlib.sha256(payload).hexdigest() != '6c163fc03327ed4ffd4b596fdedadba3052f5eef80a84801198e6a7cc60c5669':
+              raise SystemExit('M2_TAR_GZ_SHA256_MISMATCH')
+          expected = json.loads(r'''{".github/workflows/build-one-button-redteam-r3.yml":[2839,"63478d6b7a0fb0d509eb2ceaea4581bc57300fcf981fbfc753e09562d300a494"],".github/workflows/build-two-installer-bundles-r2.yml":[14661,"2c05c4c2edf2a5d8a8b5630b23b119079777f6f5e0ee9fe5035fd7f8bad26187"],".github/workflows/foundation-ci.yml":[1442,"9e411086876855d4d904748fab1ab531206819a53f639e4194bc74b3bf870978"],".github/workflows/l4-installed-runtime.yml":[2914,"2c60fe7debfe26dc22e5bc83a2973016dfaa0f7e0f4852d39be9c60d4de26bb4"],".github/workflows/m7-security-performance-one-click.yml":[7186,"80f4138bf54f328e92630fc768b3be95d8f672e090ead61d609c2002baf7f0c6"],".github/workflows/m8-clean-environment-reproduction.yml":[12623,"c9ada996d46507dd0ed8f866fa4563c84f5fe42ea6126b3a19aca798e71bc8ea"],".github/workflows/oss-admission-ci.yml":[1633,"db4c6db7030a450ea3e6688c872e4c6bf4f4933baa818555de34c8c7ecce9898"],".github/workflows/windows-local-production.yml":[3516,"2ce40e17c62e28d9ae49caa0998380675d4bcdb929d75b75a9194c6529cc68a8"],".github/workflows/windows-release-gate.yml":[11106,"8dc7afc4b91ea4cea2788ce759229ad1222002e9e1b1bbbf3af74b6b654c510d"],".github/workflows/windows-source-package-launchers-r1.yml":[4352,"8ab705c1264e3dcd2702acd794611c9d97893f1720865a004e0bf3ad6126d60d"],".github/workflows/windows-universal-any-file-corpus-r4.yml":[7778,"cade3303c63a2bf92f54977f0b61b35d63efad568cc2468ee637b5fcc0518fd2"],"docs/architecture/ONE_CLICK_HOME_LOCAL_R1.md":[4330,"c5323987f2b9808fa129669c8f9eb89170ac070d3cf668dba0d0e52635c0c643"],"docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R94.json":[1307,"f97637e4b328907a7f0daa419ab9d7a75df0f5a9736a4ded729936dc2945a0e7"],"docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R95.json":[4199,"6f179362a79c2788d1196d07de265c9ff366902a99942143f89e24fb0ba6fd6b"],"docs/evidence/M2_RUNTIME_DEPENDENCY_MODERNIZATION_CORRECTION_R95.json":[1571,"2f24e73747354ba1128a742cf9f557ddc5745a8e1e9fe01cf5715a6c02b0753e"],"docs/evidence/M2_RUNTIME_DEPENDENCY_MODERNIZATION_RTM.json":[1915,"4c74a44739116415a324a6fc7766c5785f765a686be03560d353a3e315e1baf3"],"pyproject.toml":[849,"5d52448fcc76bab0eb64bfdd476731febc32bc700684f41606f0c702abdc415a"],"requirements/windows-home-local.txt":[234,"c5ff23d71fa3999004ca863b5da41c6d2ed4e33bbe8d75df9d886572745fa8a0"],"scripts/ci/native_one_button_r37.ps1":[15214,"82c99eb014cf7297686472da7d3cceddf521df6b9f3202631131ef991f687890"],"scripts/windows/build_local_production.ps1":[14751,"641ab5e6ea7985be5a4e4b73b12787b96625bd90b6f8ec1d7f2cdd38b809a8e2"],"scripts/windows/build_two_installer_bundles.ps1":[19884,"acb005335defd460dda79b4de5b24c88c2910fba4054b666b6cc5d4ca30fe792"],"scripts/windows/import_source.ps1":[14682,"fe3f9de50d44074a4e5bb4d95bc2909b80399e335ae53541a29ca39bc476dedb"],"scripts/windows/one_click_home_local.ps1":[21131,"b48ae47a35ac338cd492f0e261ba469ad2e21fe6ecf141ae55a171363ee0446a"],"src/quantum/pilot/import_xlsx_source.ps1":[20553,"eae97b913717091b7f9dced52b6594a446142cfbbbcf5abbe4a5a227b2588782"],"tests/integration_manifest_support_m8.py":[1090,"8ba26b940bf07f3655ab20b8bbaf42259b0bdba1db0fd8599256daef4b303115"],"tests/test_m2_runtime_dependency_modernization.py":[6043,"6fbce6a58fea77af2662ffe5404605cad1679a9c74fef8bc35116a054b48f289"],"tests/test_m7_security_performance_one_click.py":[7834,"29c8be702365862750949fef6421762dd72f32d38997c2036506a5308c3db567"],"tools/m7_security_performance_one_click.py":[20636,"4476c476cff5a9014491f5137fd10f77839c7375fd65838b0f160567385f19cc"]}''')
+          with tarfile.open(fileobj=io.BytesIO(payload), mode='r:gz') as archive:
+              members = archive.getmembers()
+              files = []
+              for member in members:
+                  pure = PurePosixPath(member.name)
+                  if pure.is_absolute() or '..' in pure.parts or member.issym() or member.islnk() or member.isdev():
+                      raise SystemExit(f'M2_UNSAFE_ARCHIVE_MEMBER:{member.name}')
+                  if member.isfile():
+                      files.append(member.name)
+              if set(files) != set(expected):
+                  raise SystemExit(f'M2_MEMBER_SET_MISMATCH:{sorted(files)}')
+              archive.extractall(root, filter='data')
+          for relative, (size, digest) in expected.items():
+              data = (root / relative).read_bytes()
+              if len(data) != size:
+                  raise SystemExit(f'M2_FILE_SIZE_MISMATCH:{relative}')
+              if hashlib.sha256(data).hexdigest() != digest:
+                  raise SystemExit(f'M2_FILE_SHA256_MISMATCH:{relative}')
+          for part in parts:
+              subprocess.run(['git','rm','-f','--',str(part.relative_to(root))],check=True)
+          PYCODE
+          git add -A
+          export PYTHONPATH="$PWD/src"
+          export PYTHONDONTWRITEBYTECODE=1
+          export PYTHONPYCACHEPREFIX=/tmp/quantum-m2-corrected-pycache
+          python -m compileall -q src
+          python -m unittest tests.test_m2_runtime_dependency_modernization -v
+          pwsh -NoProfile -Command '$ErrorActionPreference="Stop"; Get-ChildItem scripts -Recurse -Filter *.ps1 | ForEach-Object { $tokens=$null; $localErrors=$null; [System.Management.Automation.Language.Parser]::ParseFile($_.FullName,[ref]$tokens,[ref]$localErrors) | Out-Null; if ($localErrors.Count -gt 0) { $localErrors | Out-String | Write-Error; exit 19 } }'
+          python -m quantum.scripts.ci
+          test -z "$(git ls-files '*.pyc' '*.pyo')"
+          test -z "$(git ls-files | grep -E 'm2_final_part_|M2_AUDIT_TRIGGER|apply-quantum-m2|m2-audit-export' || true)"
+          python - <<'PYCODE'
+          from pathlib import Path
+          import base64, re
+          root=Path.cwd()
+          active=[
+          '.github/workflows/build-one-button-redteam-r3.yml','.github/workflows/build-two-installer-bundles-r2.yml',
+          '.github/workflows/foundation-ci.yml','.github/workflows/l4-installed-runtime.yml',
+          '.github/workflows/m7-security-performance-one-click.yml','.github/workflows/m8-clean-environment-reproduction.yml',
+          '.github/workflows/oss-admission-ci.yml','.github/workflows/windows-local-production.yml',
+          '.github/workflows/windows-release-gate.yml','.github/workflows/windows-source-package-launchers-r1.yml',
+          '.github/workflows/windows-universal-any-file-corpus-r4.yml','pyproject.toml',
+          'requirements/windows-home-local.txt','scripts/ci/native_one_button_r37.ps1',
+          'scripts/windows/build_local_production.ps1','scripts/windows/build_two_installer_bundles.ps1',
+          'scripts/windows/import_source.ps1','scripts/windows/one_click_home_local.ps1',
+          'src/quantum/pilot/import_xlsx_source.ps1','tools/m7_security_performance_one_click.py']
+          stale=('3.12.10','Python312','Test-Python312','tzdata==2026.2','bbe9af844f658da81a5f95019480da3a89415801f6cc966806612cc7169bffe7')
+          errors=[]
+          for rel in active:
+              text=(root/rel).read_text(encoding='utf-8')
+              for token in stale:
+                  if token in text: errors.append(f'{rel}:{token}')
+              for encoded in re.findall(r'FromBase64String\(["\']([A-Za-z0-9+/=]+)["\']\)',text):
+                  try: decoded=base64.b64decode(encoded,validate=True).decode('utf-8')
+                  except Exception: continue
+                  for token in stale:
+                      if token in decoded: errors.append(f'{rel}:decoded:{token}')
+          if errors: raise SystemExit('M2_ACTIVE_STALE_REFERENCES:'+'|'.join(errors))
+          PYCODE
+          git config user.name quantum-m2-correction-bot
+          git config user.email quantum-m2-correction-bot@users.noreply.github.com
+          git reset --soft "$M1_HEAD"
+          git add -A
+          test "$(git diff --cached --name-only | wc -l)" -eq 28
+          git commit -m "chore(quantum): complete M2 runtime modernization R95"
+          test "$(git rev-list --count "$M1_HEAD"..HEAD)" -eq 1
+          test "$(git rev-parse HEAD^)" = "$M1_HEAD"
+          git push --force-with-lease origin "HEAD:$STAGE_BRANCH"
+          echo M2_CORRECTION_RESULT=PASS
