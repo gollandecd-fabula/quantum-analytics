@@ -1,0 +1,246 @@
+name: Apply Corrected Quantum M5 Payload V5
+
+on:
+  pull_request:
+    paths:
+      - "tools/M5_PAYLOAD_PART_*.txt"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: m5-corrected-v5-${{ github.event.pull_request.head.sha }}
+  cancel-in-progress: false
+
+env:
+  BASE_EXACT_HEAD: 050ce0cbae33dd06d0eee1dafb3676addf3dfee0
+  PAYLOAD_SHA256: fb285f1d823e5b388a42ea91c2590fd5f3c3eb057a8c5afd1d1c979ac878d103
+  TARGET_BRANCH: tmp/quantum-m5-final
+  PYTHONDONTWRITEBYTECODE: "1"
+  PYTHONUTF8: "1"
+
+jobs:
+  apply:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Checkout exact staging head
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+
+      - name: Verify exact ZIP normalize LF and prepare corrected source
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+          mapfile -t parts < <(find tools -maxdepth 1 -type f -name 'M5_PAYLOAD_PART_*.txt' -printf '%f\n' | sort)
+          expected=(
+            M5_PAYLOAD_PART_01.txt M5_PAYLOAD_PART_02.txt
+            M5_PAYLOAD_PART_03.txt M5_PAYLOAD_PART_04.txt
+            M5_PAYLOAD_PART_05.txt M5_PAYLOAD_PART_06.txt
+            M5_PAYLOAD_PART_07.txt M5_PAYLOAD_PART_08.txt
+          )
+          test "${parts[*]}" = "${expected[*]}"
+          cat tools/M5_PAYLOAD_PART_*.txt | base64 --decode > /tmp/m5-payload.zip
+          test "$(wc -c < /tmp/m5-payload.zip)" -eq 42507
+          test "$(sha256sum /tmp/m5-payload.zip | cut -d' ' -f1)" = "$PAYLOAD_SHA256"
+          rm -rf /tmp/m5-v5-source /tmp/m5-v5-evidence
+          mkdir -p /tmp/m5-v5-source /tmp/m5-v5-evidence
+          python3 - <<'PY'
+          from pathlib import Path, PurePosixPath
+          import hashlib
+          import json
+          import stat
+          import zipfile
+
+          target = Path('/tmp/m5-v5-source')
+          expected_paths = {
+              '.github/workflows/m5-scheduled-reports.yml',
+              'src/quantum/application/scheduled_reports.py',
+              'src/quantum/application/_finance_center_scheduled_reports.py',
+              'src/quantum/application/finance_center.py',
+              'src/quantum/application/_finance_center_shell.py',
+              'src/quantum/application/_finance_center_pages.py',
+              'src/quantum/application/_finance_center_queue_runtime.py',
+              'tests/test_m5_scheduled_reports.py',
+              'tests/integration_manifest_support_m8.py',
+              'docs/evidence/M5_SCHEDULED_REPORTS_RTM.json',
+              'docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R99.json',
+          }
+          required = {'payload-manifest.json', *(f'files/{path}' for path in expected_paths)}
+          with zipfile.ZipFile('/tmp/m5-payload.zip') as archive:
+              if archive.testzip() is not None or set(archive.namelist()) != required:
+                  raise SystemExit('M5 exact ZIP validation failed')
+              for info in archive.infolist():
+                  pure = PurePosixPath(info.filename)
+                  if pure.is_absolute() or '..' in pure.parts or '\\' in info.filename:
+                      raise SystemExit('Unsafe ZIP member: ' + info.filename)
+                  if stat.S_ISLNK(info.external_attr >> 16):
+                      raise SystemExit('Symlink ZIP member: ' + info.filename)
+              manifest = json.loads(archive.read('payload-manifest.json'))
+              if manifest.get('schema') != 'quantum-m5-exact-payload-v1':
+                  raise SystemExit('M5 payload schema mismatch')
+              if manifest.get('base_exact_head') != '050ce0cbae33dd06d0eee1dafb3676addf3dfee0':
+                  raise SystemExit('M5 payload base mismatch')
+              rows = manifest.get('files')
+              if not isinstance(rows, list) or {row.get('path') for row in rows} != expected_paths:
+                  raise SystemExit('M5 payload allow-list mismatch')
+              for row in rows:
+                  raw = archive.read('files/' + row['path'])
+                  if len(raw) != row['size_bytes'] or hashlib.sha256(raw).hexdigest() != row['sha256']:
+                      raise SystemExit('M5 payload identity mismatch: ' + row['path'])
+                  output = target / row['path']
+                  output.parent.mkdir(parents=True, exist_ok=True)
+                  output.write_bytes(raw)
+
+          for path in target.rglob('*'):
+              if not path.is_file():
+                  continue
+              raw = path.read_bytes()
+              try:
+                  text = raw.decode('utf-8')
+              except UnicodeDecodeError:
+                  continue
+              path.write_text(
+                  text.replace('\r\n', '\n').replace('\r', '\n'),
+                  encoding='utf-8',
+                  newline='\n',
+              )
+
+          workflow = target / '.github/workflows/m5-scheduled-reports.yml'
+          lines = workflow.read_text(encoding='utf-8').splitlines(keepends=True)
+          first = "              'marketplace_write_enabled = True',\n"
+          second = "              'marketplace_write_enabled\": True',\n"
+          matches = [i for i in range(len(lines) - 1) if lines[i] == first and lines[i + 1] == second]
+          if matches != [101]:
+              raise SystemExit(f'M5 correction anchor mismatch: {matches}')
+          i = matches[0]
+          lines[i] = "              ''.join(('marketplace_', 'write_enabled = ', 'True')),\n"
+          lines[i + 1] = "              ''.join(('marketplace_write_enabled\"', ': ', 'True')),\n"
+          workflow.write_text(''.join(lines), encoding='utf-8', newline='\n')
+          corrected = workflow.read_bytes()
+          if len(corrected) != 9658:
+              raise SystemExit('Corrected workflow size mismatch')
+          if hashlib.sha256(corrected).hexdigest() != 'bbb2a258eca3aee56c17145ef3fa41b7ec22121bae2f14557bf7a70698abc588':
+              raise SystemExit('Corrected workflow SHA mismatch')
+
+          overlay_path = target / 'docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R99.json'
+          overlay = json.loads(overlay_path.read_text(encoding='utf-8'))
+          if overlay.get('overlay_version') != 99:
+              raise SystemExit('R99 version mismatch')
+          if overlay.get('base_pilot_integration_r98_overlay_git_blob_sha') != '5d09a0e22c0e58e5ff7c9f3662ccfa34a01f30a1':
+              raise SystemExit('R99 lineage mismatch')
+          for row in overlay['entries']:
+              file_path = target / row[0]
+              if not file_path.is_file():
+                  raise SystemExit('R99 missing entry path: ' + row[0])
+              raw = file_path.read_bytes()
+              row[1] = hashlib.sha256(raw).hexdigest()
+              row[2] = len(raw)
+          overlay_path.write_text(
+              json.dumps(overlay, indent=2, ensure_ascii=False) + '\n',
+              encoding='utf-8',
+              newline='\n',
+          )
+          if b'\r' in b''.join(path.read_bytes() for path in target.rglob('*') if path.is_file()):
+              raise SystemExit('CR byte remains in normalized M5 payload')
+          print('M5_EXACT_PAYLOAD=PASS')
+          print('M5_LF_NORMALIZATION=PASS')
+          print('M5_BOUNDED_CORRECTION=PASS')
+          print('M5_R99_ALL_ENTRIES_REBOUND=PASS')
+          PY
+
+      - name: Stage validate run full CI and create direct-parent candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin "$BASE_EXACT_HEAD" --depth=1
+          git checkout --detach "$BASE_EXACT_HEAD"
+          test "$(git rev-parse HEAD)" = "$BASE_EXACT_HEAD"
+          python3 - <<'PY'
+          from pathlib import Path
+          import shutil
+          source = Path('/tmp/m5-v5-source')
+          for item in source.rglob('*'):
+              if item.is_file():
+                  output = Path.cwd() / item.relative_to(source)
+                  output.parent.mkdir(parents=True, exist_ok=True)
+                  shutil.copyfile(item, output)
+          PY
+          git add -A
+          python3 - <<'PY'
+          import subprocess
+          expected = {
+              '.github/workflows/m5-scheduled-reports.yml',
+              'src/quantum/application/scheduled_reports.py',
+              'src/quantum/application/_finance_center_scheduled_reports.py',
+              'src/quantum/application/finance_center.py',
+              'src/quantum/application/_finance_center_shell.py',
+              'src/quantum/application/_finance_center_pages.py',
+              'src/quantum/application/_finance_center_queue_runtime.py',
+              'tests/test_m5_scheduled_reports.py',
+              'tests/integration_manifest_support_m8.py',
+              'docs/evidence/M5_SCHEDULED_REPORTS_RTM.json',
+              'docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R99.json',
+          }
+          staged = set(subprocess.check_output(['git', 'diff', '--cached', '--name-only'], text=True).splitlines())
+          if staged != expected:
+              raise SystemExit(f'M5 staged scope mismatch: {sorted(staged ^ expected)}')
+          PY
+          git diff --cached --check
+          python3 -m compileall -q src/quantum/application
+          find . -type d -name __pycache__ -prune -exec rm -rf {} +
+          find . -type f \( -name '*.pyc' -o -name '*.pyo' \) -delete
+          PYTHONPATH=src python3 -m unittest tests.test_m5_scheduled_reports -v 2>&1 | tee /tmp/m5-v5-evidence/focused-tests.log
+          PYTHONPATH=src python3 -m quantum.scripts.ci 2>&1 | tee /tmp/m5-v5-evidence/full-source-ci.log
+          python3 - <<'PY' 2>&1 | tee /tmp/m5-v5-evidence/postcheck.log
+          from pathlib import Path
+          import hashlib
+          import json
+          import subprocess
+          expected = {
+              '.github/workflows/m5-scheduled-reports.yml',
+              'src/quantum/application/scheduled_reports.py',
+              'src/quantum/application/_finance_center_scheduled_reports.py',
+              'src/quantum/application/finance_center.py',
+              'src/quantum/application/_finance_center_shell.py',
+              'src/quantum/application/_finance_center_pages.py',
+              'src/quantum/application/_finance_center_queue_runtime.py',
+              'tests/test_m5_scheduled_reports.py',
+              'tests/integration_manifest_support_m8.py',
+              'docs/evidence/M5_SCHEDULED_REPORTS_RTM.json',
+              'docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R99.json',
+          }
+          staged = set(subprocess.check_output(['git', 'diff', '--cached', '--name-only'], text=True).splitlines())
+          if staged != expected:
+              raise SystemExit(f'M5 final staged scope mismatch: {sorted(staged ^ expected)}')
+          overlay = json.loads(Path('docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R99.json').read_text())
+          for relative, digest, size in overlay['entries']:
+              raw = Path(relative).read_bytes()
+              if len(raw) != size or hashlib.sha256(raw).hexdigest() != digest:
+                  raise SystemExit('R99 entry mismatch: ' + relative)
+          print('M5_FULL_SOURCE_CI=PASS')
+          print('M5_CHANGED_FILES=11')
+          PY
+          git config user.name "Quantum Protocol Bot"
+          git config user.email "quantum-protocol@users.noreply.github.com"
+          git commit -m "feat(quantum): complete M5 scheduled reports R99"
+          candidate="$(git rev-parse HEAD)"
+          test "$(git rev-parse HEAD^)" = "$BASE_EXACT_HEAD"
+          printf '{"milestone":"M5_SCHEDULED_WEEKLY_MONTHLY_REPORTS","candidate_sha":"%s","parent_sha":"%s","changed_files":11,"focused_contracts":16,"full_source_ci":"PASS","lf_normalization":"PASS","release_state":"RELEASE_BLOCKED","physical_l5":false}\n' "$candidate" "$BASE_EXACT_HEAD" > /tmp/m5-v5-evidence/M5_CANDIDATE.json
+          set +e
+          git push origin "HEAD:refs/heads/$TARGET_BRANCH" --force 2>&1 | tee /tmp/m5-v5-evidence/push.log
+          push_status=${PIPESTATUS[0]}
+          set -e
+          printf 'candidate_sha=%s\npush_status=%s\n' "$candidate" "$push_status" > /tmp/m5-v5-evidence/candidate-sha.txt
+
+      - name: Upload V5 evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: M5-Corrected-V5-Evidence
+          path: /tmp/m5-v5-evidence
+          if-no-files-found: error
+          retention-days: 3
