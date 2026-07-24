@@ -1,0 +1,65 @@
+name: M3 Stage Applicator R2
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.event.pull_request.head.ref == 'tmp/quantum-m3-stage'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Checkout exact stage branch
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: tmp/quantum-m3-stage
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Set up Python 3.13.14
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.13.14'
+
+      - name: Apply exact M3 transformation
+        shell: bash
+        run: |
+          set -euo pipefail
+          exec > >(tee "$RUNNER_TEMP/m3-stage-r2.log") 2>&1
+          test "$(git merge-base HEAD 3aad43573b205a98e2f2f718e208c8ba763d535e)" = "3aad43573b205a98e2f2f718e208c8ba763d535e"
+          python tools/m3_apply_stage.py
+          git add -A
+          export PYTHONPATH="$PWD/src"
+          export PYTHONDONTWRITEBYTECODE=1
+          export PYTHONPYCACHEPREFIX="$RUNNER_TEMP/m3-r2-pycache"
+          python -m compileall -q src tools tests/test_m3_ci_consolidation.py
+          python -m unittest tests.test_m3_ci_consolidation -v
+          python -m unittest \
+            tests.test_l4_installed_runtime_contract \
+            tests.test_l4_installed_runtime_postcheck_contract -v
+          python -m quantum.scripts.ci
+          git config user.name quantum-m3-r2-bot
+          git config user.email quantum-m3-r2-bot@users.noreply.github.com
+          git commit -m 'ci(quantum): apply verified M3 consolidation R97'
+          git push origin HEAD:tmp/quantum-m3-stage
+
+      - name: Copy diagnostic log
+        if: always()
+        shell: bash
+        run: |
+          if [ -f "$RUNNER_TEMP/m3-stage-r2.log" ]; then
+            cp "$RUNNER_TEMP/m3-stage-r2.log" "$GITHUB_WORKSPACE/m3-stage-r2.log"
+          fi
+
+      - name: Upload diagnostic log
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: M3-Stage-R2-Diagnostics
+          path: m3-stage-r2.log
+          if-no-files-found: warn
+          retention-days: 2
