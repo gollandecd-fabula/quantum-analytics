@@ -3,9 +3,7 @@ name: Apply Quantum M5 Exact Payload
 on:
   pull_request:
     paths:
-      - "tools/M5_PAYLOAD_PART_01.txt"
-      - "tools/M5_PAYLOAD_PART_02.txt"
-      - "tools/M5_PAYLOAD_PART_03.txt"
+      - "tools/M5_PAYLOAD_PART_*.txt"
 
 permissions:
   contents: write
@@ -38,9 +36,14 @@ jobs:
         run: |
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
-          test "$(sha256sum tools/M5_PAYLOAD_PART_01.txt | cut -d' ' -f1)" = "5e4d4f9ef5a513d335892b39d28e953ba98b9eda9c867833161b99eca0394bd8"
-          test "$(sha256sum tools/M5_PAYLOAD_PART_02.txt | cut -d' ' -f1)" = "acf0b92248bcb4f46084f87c165f92a08c708cf976fa35fad9a1ee3448e2f349"
-          test "$(sha256sum tools/M5_PAYLOAD_PART_03.txt | cut -d' ' -f1)" = "69f56b98602015f27e7e6895f29c912c0731940926e3d9f9310031a6d7e3242e"
+          mapfile -t actual_parts < <(find tools -maxdepth 1 -type f -name 'M5_PAYLOAD_PART_*.txt' -printf '%f\n' | sort)
+          expected_parts=(
+            M5_PAYLOAD_PART_01.txt M5_PAYLOAD_PART_02.txt
+            M5_PAYLOAD_PART_03.txt M5_PAYLOAD_PART_04.txt
+            M5_PAYLOAD_PART_05.txt M5_PAYLOAD_PART_06.txt
+            M5_PAYLOAD_PART_07.txt M5_PAYLOAD_PART_08.txt
+          )
+          test "${actual_parts[*]}" = "${expected_parts[*]}"
           cat tools/M5_PAYLOAD_PART_*.txt | base64 --decode > /tmp/m5-payload.zip
           test "$(sha256sum /tmp/m5-payload.zip | cut -d' ' -f1)" = "$PAYLOAD_SHA256"
           rm -rf /tmp/m5-payload
