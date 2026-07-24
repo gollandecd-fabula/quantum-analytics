@@ -1,0 +1,165 @@
+name: Apply Quantum M2 Runtime Modernization
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+permissions:
+  contents: write
+
+jobs:
+  apply-m2:
+    if: >-
+      github.event.pull_request.head.ref == 'tmp/quantum-m2-stage'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Checkout exact M2 staging head
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.13'
+
+      - name: Apply exact M2 source changes and test
+        shell: bash
+        env:
+          M1_HEAD: ad5229bbaca3cf8ae692ecb09f54220cde1db16b
+        run: |
+          set -euo pipefail
+          test "$(git merge-base HEAD "${M1_HEAD}")" = "${M1_HEAD}"
+          test -f tools/M2_RUNTIME_MODERNIZATION_TRIGGER.txt
+          python - <<'PY'
+          from __future__ import annotations
+          import base64
+          import hashlib
+          import json
+          import re
+          from pathlib import Path
+
+          root = Path.cwd()
+          m1 = "ad5229bbaca3cf8ae692ecb09f54220cde1db16b"
+          old_sha = "67b5635e80ea51072b87941312d00ec8927c4db9ba18938f7ad2d27b328b95fb"
+          new_sha = "c54d9b9bbb8a36e6489363ddd01139707fd781d72f1f9e90c7ec65d0061368e0"
+          old_tz_sha = "bbe9af844f658da81a5f95019480da3a89415801f6cc966806612cc7169bffe7"
+          new_tz_sha = "dc096730c87af6cab1b171c9d532be840741ff5d459015e7f6947bd7d7e54931"
+
+          requirements = root / "requirements/windows-home-local.txt"
+          text = requirements.read_text(encoding="utf-8")
+          text = text.replace("tzdata 2026.2", "tzdata 2026.3")
+          text = text.replace("tzdata==2026.2", "tzdata==2026.3")
+          text = text.replace(old_tz_sha, new_tz_sha)
+          requirements.write_text(text, encoding="utf-8")
+
+          builder = root / "scripts/windows/build_two_installer_bundles.ps1"
+          source = builder.read_text(encoding="utf-8")
+          replacements = {
+              '"3.12.10"': '"3.13.14"',
+              old_sha: new_sha,
+              "Test-Python312": "Test-Python313",
+              "Python312": "Python313",
+              'Prefix = @("-3.12")': 'Prefix = @("-3.13")',
+              "sys.version_info >= (3,12)": "sys.version_info >= (3,13)",
+          }
+          for old, new in replacements.items():
+              if old not in source:
+                  raise SystemExit(f"M2_REQUIRED_ANCHOR_MISSING:{old}")
+              source = source.replace(old, new)
+
+          literal = re.compile(r'FromBase64String\("([A-Za-z0-9+/=]+)"\)')
+          def modernize(match: re.Match[str]) -> str:
+              encoded = match.group(1)
+              try:
+                  decoded = base64.b64decode(encoded, validate=True).decode("utf-8")
+              except Exception:
+                  return match.group(0)
+              updated = (decoded
+                  .replace("3.12.10", "3.13.14")
+                  .replace("Python 3.12+", "Python 3.13+")
+                  .replace("Python 3.12", "Python 3.13"))
+              if updated == decoded:
+                  return match.group(0)
+              return 'FromBase64String("' + base64.b64encode(updated.encode("utf-8")).decode("ascii") + '")'
+          source = literal.sub(modernize, source)
+          builder.write_text(source, encoding="utf-8")
+
+          test_path = root / "tests/test_m2_runtime_dependency_modernization.py"
+          test_path.write_text('''from pathlib import Path\nimport unittest\n\n\nclass M2RuntimeDependencyModernizationTests(unittest.TestCase):\n    def test_runtime_and_tzdata_are_exactly_pinned(self) -> None:\n        root = Path(__file__).resolve().parents[1]\n        builder = (root / "scripts/windows/build_two_installer_bundles.ps1").read_text(encoding="utf-8")\n        requirements = (root / "requirements/windows-home-local.txt").read_text(encoding="utf-8")\n        self.assertIn('"3.13.14"', builder)\n        self.assertIn('c54d9b9bbb8a36e6489363ddd01139707fd781d72f1f9e90c7ec65d0061368e0', builder)\n        self.assertIn('Test-Python313', builder)\n        self.assertIn('Python313', builder)\n        self.assertIn('sys.version_info >= (3,13)', builder)\n        self.assertIn('tzdata==2026.3', requirements)\n        self.assertIn('dc096730c87af6cab1b171c9d532be840741ff5d459015e7f6947bd7d7e54931', requirements)\n\n    def test_stale_runtime_pins_are_absent_from_active_contracts(self) -> None:\n        root = Path(__file__).resolve().parents[1]\n        active = "\\n".join((root / path).read_text(encoding="utf-8") for path in (\n            "scripts/windows/build_two_installer_bundles.ps1",\n            "requirements/windows-home-local.txt",\n        ))\n        for stale in ("3.12.10", "Python312", "Test-Python312", "tzdata==2026.2"):\n            self.assertNotIn(stale, active)\n\n    def test_runtime_hash_tamper_is_fail_closed(self) -> None:\n        root = Path(__file__).resolve().parents[1]\n        builder = (root / "scripts/windows/build_two_installer_bundles.ps1").read_text(encoding="utf-8")\n        self.assertIn('if ($pythonActualSha256 -ne $pythonExpectedSha256)', builder)\n        self.assertIn('if ($pythonActualHash -ne $pythonExpectedHash)', builder)\n\n\nif __name__ == "__main__":\n    unittest.main()\n''', encoding="utf-8")
+
+          rtm = {
+              "milestone": "M2_RUNTIME_DEPENDENCY_MODERNIZATION",
+              "base_exact_head": m1,
+              "requirements": [
+                  {"id": "M2-01", "requirement": "Python Windows x64 runtime pinned to 3.13.14", "test": "test_runtime_and_tzdata_are_exactly_pinned"},
+                  {"id": "M2-02", "requirement": "Official installer SHA-256 pinned", "test": "test_runtime_and_tzdata_are_exactly_pinned"},
+                  {"id": "M2-03", "requirement": "Minimum runtime contract updated to Python 3.13", "test": "test_runtime_and_tzdata_are_exactly_pinned"},
+                  {"id": "M2-04", "requirement": "tzdata pinned to 2026.3 wheel", "test": "test_runtime_and_tzdata_are_exactly_pinned"},
+                  {"id": "M2-05", "requirement": "tzdata wheel SHA-256 pinned", "test": "test_runtime_and_tzdata_are_exactly_pinned"},
+                  {"id": "M2-06", "requirement": "Stale active pins absent", "test": "test_stale_runtime_pins_are_absent_from_active_contracts"},
+                  {"id": "M2-07", "requirement": "Runtime hash tamper remains fail-closed", "test": "test_runtime_hash_tamper_is_fail_closed"},
+                  {"id": "M2-08", "requirement": "Business logic unchanged", "test": "git diff allow-list"},
+                  {"id": "M2-09", "requirement": "Approved UI unchanged", "test": "git diff allow-list"},
+                  {"id": "M2-10", "requirement": "Gatekeeper disconnected and writes disabled", "test": "full repository CI"},
+                  {"id": "M2-11", "requirement": "One clean commit over M1", "test": "exact ancestry postcheck"},
+                  {"id": "M2-12", "requirement": "Installer/L4/L5 claims excluded", "test": "claim boundary"},
+              ],
+              "claim_boundary": "L2_SOURCE_RUNTIME_ONLY; NO_INSTALLER_L4_L5_CLAIM",
+          }
+          rtm_path = root / "docs/evidence/M2_RUNTIME_DEPENDENCY_MODERNIZATION_RTM.json"
+          rtm_path.write_text(json.dumps(rtm, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+          support = root / "tests/integration_manifest_support_m8.py"
+          support_text = support.read_text(encoding="utf-8")
+          if "range(1, 94)" not in support_text:
+              raise SystemExit("M2_MANIFEST_RANGE_ANCHOR_MISSING")
+          support.write_text(support_text.replace("range(1, 94)", "range(1, 95)"), encoding="utf-8")
+
+          changed = [
+              "requirements/windows-home-local.txt",
+              "scripts/windows/build_two_installer_bundles.ps1",
+              "tests/test_m2_runtime_dependency_modernization.py",
+              "docs/evidence/M2_RUNTIME_DEPENDENCY_MODERNIZATION_RTM.json",
+              "tests/integration_manifest_support_m8.py",
+          ]
+          entries = []
+          for relative in changed:
+              data = (root / relative).read_bytes()
+              entries.append([relative, hashlib.sha256(data).hexdigest(), len(data)])
+          r93 = root / "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R93.json"
+          raw = r93.read_bytes()
+          blob = hashlib.sha1(f"blob {len(raw)}\0".encode("ascii") + raw).hexdigest()
+          overlay = {
+              "base_pilot_integration_r93_overlay_git_blob_sha": blob,
+              "entries": entries,
+              "hash_encoding": "sha256-hex",
+              "overlay_version": 94,
+              "reason": "M2 runtime dependency modernization: pin official Python 3.13.14 Windows x64 installer and tzdata 2026.3 wheel with exact SHA-256 values; update only runtime/build contracts and regression evidence; no business logic, UI, Gatekeeper, Ozon or marketplace-write activation.",
+              "remove_paths": ["tools/M2_RUNTIME_MODERNIZATION_TRIGGER.txt"],
+          }
+          (root / "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R94.json").write_text(
+              json.dumps(overlay, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+          PY
+          git rm -f tools/M2_RUNTIME_MODERNIZATION_TRIGGER.txt
+          git add -A
+          export PYTHONPATH="$PWD/src"
+          export PYTHONDONTWRITEBYTECODE=1
+          export PYTHONPYCACHEPREFIX=/tmp/quantum-m2-pycache
+          python -m compileall -q src
+          python -m unittest tests.test_m2_runtime_dependency_modernization -v
+          python -m quantum.scripts.ci
+          test -z "$(git ls-files '*.pyc')"
+          test -z "$(git ls-files | grep -E 'M2_RUNTIME_MODERNIZATION_TRIGGER|apply-quantum-m2-runtime' || true)"
+          test "$(git diff --name-only "${M1_HEAD}" | grep -Ev '^(requirements/windows-home-local.txt|scripts/windows/build_two_installer_bundles.ps1|tests/test_m2_runtime_dependency_modernization.py|tests/integration_manifest_support_m8.py|docs/evidence/M2_RUNTIME_DEPENDENCY_MODERNIZATION_RTM.json|docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R94.json)$' | wc -l)" -eq 0
+          git config user.name quantum-m2-bot
+          git config user.email quantum-m2-bot@users.noreply.github.com
+          git reset --soft "${M1_HEAD}"
+          git add -A
+          git commit -m "chore(quantum): modernize runtime dependencies for M2"
+          test "$(git rev-list --count "${M1_HEAD}"..HEAD)" -eq 1
+          git push --force-with-lease origin HEAD:fix/quantum-wb-release-r2
+          echo M2_RESULT=PASS
