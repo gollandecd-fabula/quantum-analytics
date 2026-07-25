@@ -1,0 +1,98 @@
+name: Temporary UPR1 V3 Materialize
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/temp-upr1-v3-materialize.yml"
+      - "tools/upr1-v3-delta.patch.xz.b64"
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 55
+    env:
+      SOURCE_HEAD: e752fae36e170beb7b43ecd502d3a248d7f51d02
+      EXPECTED_TREE: 15c11ff56b73b33aa7b1a1d727bf32cb4c2f6a69
+      DELTA_SHA256: 98aa7b0a1604109af703107e299ba46f8fb49463c361976035116ada8af692af
+      PYTHONDONTWRITEBYTECODE: "1"
+      PYTHONUTF8: "1"
+    steps:
+      - name: Checkout materializer head
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - name: Reconstruct delta
+        shell: bash
+        run: |
+          set -euo pipefail
+          base64 --decode tools/upr1-v3-delta.patch.xz.b64 > "$RUNNER_TEMP/upr1-v3.patch.xz"
+          test "$(sha256sum "$RUNNER_TEMP/upr1-v3.patch.xz" | cut -d' ' -f1)" = "$DELTA_SHA256"
+          xz --decompress --stdout "$RUNNER_TEMP/upr1-v3.patch.xz" > "$RUNNER_TEMP/upr1-v3.patch"
+      - name: Checkout exact source implementation
+        shell: bash
+        run: |
+          set -euo pipefail
+          git checkout --detach "$SOURCE_HEAD"
+          test "$(git rev-parse HEAD)" = "$SOURCE_HEAD"
+      - name: Apply exact seven-file delta
+        shell: bash
+        run: |
+          set -euo pipefail
+          git apply --check "$RUNNER_TEMP/upr1-v3.patch"
+          git apply --index "$RUNNER_TEMP/upr1-v3.patch"
+          mapfile -t actual < <(git diff --cached --name-only | sort)
+          mapfile -t expected <<'PATHS'
+          .github/workflows/m5-scheduled-reports.yml
+          .github/workflows/m7-security-performance-one-click.yml
+          .github/workflows/m8-clean-environment-reproduction.yml
+          .github/workflows/universal-partial-r1.yml
+          docs/evidence/ARTIFACT_MANIFEST_OVERLAY_UNIVERSAL_PARTIAL_R1.json
+          docs/evidence/UNIVERSAL_PARTIAL_R1_DEFECT_REGISTER.json
+          scripts/ci/native_one_button_r37.ps1
+          PATHS
+          diff -u <(printf '%s\n' "${expected[@]}" | sort) <(printf '%s\n' "${actual[@]}")
+          test "$(git write-tree)" = "$EXPECTED_TREE"
+      - name: Create exact local object
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name quantum-redteam-bot
+          git config user.email quantum-redteam-bot@users.noreply.github.com
+          git commit -m "Complete M5 M7 M8 exact-head compatibility"
+          test "$(git rev-parse HEAD^{tree})" = "$EXPECTED_TREE"
+      - name: Validate focused and complete source CI
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m compileall -q src tests
+          PYTHONPATH=src python3 -m unittest \
+            tests.test_universal_partial_r1 \
+            tests.test_full_project_redteam_r1 \
+            tests.test_m5_scheduled_reports \
+            tests.test_m7_security_performance_one_click \
+            tests.test_m8_clean_environment_reproduction -v
+          PYTHONPATH=src python3 -m quantum.scripts.ci
+          test "$(git rev-parse HEAD^{tree})" = "$EXPECTED_TREE"
+      - name: Upload validated Git objects
+        continue-on-error: true
+        shell: bash
+        run: |
+          git push origin "HEAD:refs/heads/tmp/upr1-v3-object-upload"
+      - name: Write evidence
+        shell: bash
+        run: |
+          printf '%s\n' "$(git rev-parse HEAD)" > "$RUNNER_TEMP/commit.txt"
+          printf '%s\n' "$(git rev-parse HEAD^{tree})" > "$RUNNER_TEMP/tree.txt"
+      - name: Upload evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: UPR1-V3-Materialization-${{ github.event.pull_request.head.sha }}
+          path: |
+            ${{ runner.temp }}/commit.txt
+            ${{ runner.temp }}/tree.txt
+          if-no-files-found: error
+          retention-days: 3
