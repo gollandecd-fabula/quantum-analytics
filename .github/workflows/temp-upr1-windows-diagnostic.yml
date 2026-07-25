@@ -1,0 +1,55 @@
+name: Temporary UPR1 Windows Exact-Head Diagnostic
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/temp-upr1-windows-diagnostic.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: windows-2025
+    timeout-minutes: 40
+    env:
+      TARGET_SHA: e9db3985ce58cd110f2b144b6faa064856f701c3
+      PYTHONDONTWRITEBYTECODE: "1"
+      PYTHONUTF8: "1"
+    steps:
+      - name: Disable Git CRLF conversion
+        shell: pwsh
+        run: git config --global core.autocrlf false
+      - name: Checkout exact candidate
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ env.TARGET_SHA }}
+          fetch-depth: 1
+      - name: Set up Python 3.13.14
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.13.14"
+      - name: Run complete source CI and preserve log
+        id: ci
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          $env:PYTHONPATH = (Resolve-Path "src").Path
+          python -m quantum.scripts.ci 2>&1 | Tee-Object -FilePath "$env:RUNNER_TEMP\upr1-windows-full-ci.log"
+          $code = $LASTEXITCODE
+          "exit_code=$code" | Out-File "$env:RUNNER_TEMP\upr1-windows-exit.txt" -Encoding utf8
+          if ($code -ne 0) { throw "Windows full CI failed with exit code $code" }
+      - name: Upload complete diagnostic
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: UPR1-Windows-Diagnostic-${{ env.TARGET_SHA }}
+          path: |
+            ${{ runner.temp }}/upr1-windows-full-ci.log
+            ${{ runner.temp }}/upr1-windows-exit.txt
+          if-no-files-found: error
+          retention-days: 3
+      - name: Preserve failure status
+        if: steps.ci.outcome == 'failure'
+        shell: pwsh
+        run: throw "Exact-head Windows source CI failed; see diagnostic artifact."
