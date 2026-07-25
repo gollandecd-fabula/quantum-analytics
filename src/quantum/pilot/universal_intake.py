@@ -11,6 +11,7 @@ from .universal_gateway import (
     UNIVERSAL_IMPORT_SCHEMA_VERSION,
     UniversalImportError,
 )
+from .universal_tables import UniversalTableError, extract_tables
 
 
 _OLE_MAGIC = b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1"
@@ -47,16 +48,39 @@ def classify_payload(payload: bytes, suffix: str) -> IntakeDecision:
                 ("PDF_REQUIRES_SANDBOX",),
             )
     decision = _gateway.classify_payload(payload, suffix)
-    if decision.detected_format == "SAFE_ARCHIVE_UNSUPPORTED":
-        reasons = ["ARCHIVE_REQUIRES_DEDICATED_ADAPTER"]
-        if decision.metadata.get("nested_archive_detected"):
-            reasons.append("NESTED_ARCHIVE_NOT_RECURSIVELY_INSPECTED")
+    if decision.status.startswith("QUARANTINED"):
+        return decision
+    try:
+        extraction = extract_tables(payload, source_name="preview" + suffix)
+    except UniversalTableError:
+        return decision
+    if extraction.tables:
         return IntakeDecision(
-            "QUARANTINED_SECURITY",
-            "ARCHIVE_REQUIRES_SANDBOX",
+            "ACCEPTED_PARTIAL",
+            extraction.detected_format,
+            "UNIVERSAL_TABLES",
+            {**decision.metadata, "extracted_table_count": len(extraction.tables)},
+            tuple(
+                dict.fromkeys(
+                    (
+                        *decision.reason_codes,
+                        *extraction.reason_codes,
+                        "UNIVERSAL_TABLE_EXTRACTION",
+                    )
+                )
+            ),
+        )
+    if decision.status == "ROUTE_XLSX":
+        return IntakeDecision(
+            "ACCEPTED_UNPARSED",
+            "XLSX",
             None,
             decision.metadata,
-            tuple(reasons),
+            tuple(
+                dict.fromkeys(
+                    (*decision.reason_codes, "NO_USABLE_TABLE_DATA")
+                )
+            ),
         )
     return decision
 
@@ -72,6 +96,38 @@ def register_file(
     try:
         payload, digest = _gateway._read_source(source)
         decision = classify_payload(payload, source.suffix)
+        extraction_summary: dict[str, object] | None = None
+        if not decision.status.startswith("QUARANTINED"):
+            try:
+                extraction = extract_tables(payload, source_name=source.name)
+                extraction_summary = extraction.public_summary()
+                if extraction.tables:
+                    decision = IntakeDecision(
+                        "ACCEPTED_PARTIAL",
+                        extraction.detected_format,
+                        "UNIVERSAL_TABLES",
+                        {**decision.metadata, "extracted_table_count": len(extraction.tables)},
+                        tuple(dict.fromkeys((*decision.reason_codes, *extraction.reason_codes))),
+                    )
+                elif not extraction.tables:
+                    decision = IntakeDecision(
+                        decision.status,
+                        decision.detected_format,
+                        decision.route,
+                        decision.metadata,
+                        tuple(dict.fromkeys((*decision.reason_codes, *extraction.reason_codes))),
+                    )
+            except UniversalTableError as exc:
+                extraction_summary = {
+                    "schema_version": "quantum-universal-tables-v1",
+                    "status": "ERROR",
+                    "detected_format": None,
+                    "table_count": 0,
+                    "tables": [],
+                    "members": [],
+                    "reason_codes": [exc.code],
+                    "raw_rows_in_report": False,
+                }
         destination: Path | None = None
         if decision.status != "ROUTE_XLSX":
             zone = (
@@ -102,9 +158,11 @@ def register_file(
                 "sanitized_filename": _gateway._safe_filename(source.name),
                 "stored_path": str(destination) if destination is not None else None,
                 "metadata": decision.metadata,
+                "universal_extraction": extraction_summary,
                 "limitations": [
                     "RELEASE_BLOCKED",
-                    "UNPARSED_OR_PARTIAL_FILES_EXCLUDED_FROM_FINANCE",
+                    "UNMAPPED_SEMANTICS_ARE_NOT_GUESSED",
+                    "PARTIAL_CALCULATIONS_REQUIRE_EXPLICIT_COVERAGE",
                     "HOME_LOCAL_UNENCRYPTED_STORAGE",
                 ],
             }

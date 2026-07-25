@@ -12,6 +12,7 @@ from typing import Any, Iterable, Mapping
 from quantum.application.finance_profile import (
     FinanceProfileError,
     ProductRecord,
+    detect_products_from_any_file,
     detect_products_from_xlsx,
 )
 from quantum.application.local_app import (
@@ -495,7 +496,7 @@ def restore_reports(
             )
         else:
             try:
-                products = detect_products_from_xlsx(source_path)
+                products = detect_products_from_any_file(source_path)
             except FinanceProfileError as exc:
                 row.details["product_restore_error"] = exc.code
             except OSError as exc:

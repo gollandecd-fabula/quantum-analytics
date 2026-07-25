@@ -66,7 +66,7 @@ class FinanceProfileBlockReasonTests(unittest.TestCase):
             source_sha256="d" * 64,
         )
 
-        self.assertEqual(result.status, "CALCULATION_BLOCKED")
+        self.assertEqual(result.status, "CALCULATED_PARTIAL")
         self.assertIn(
             "Футболка: RETURN_COMPENSATION_SEMANTICS_INVALID",
             result.missing_inputs,

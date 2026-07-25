@@ -18,25 +18,21 @@ def _zip(entries: dict[str, bytes]) -> bytes:
 
 
 class UniversalIntakeHardeningR4Tests(unittest.TestCase):
-    def test_unknown_archive_is_quarantined_until_adapter_exists(self):
+    def test_unknown_safe_archive_is_registered_without_guessed_semantics(self):
         decision = classify_payload(
             _zip({"safe.txt": b"plain text"}),
             ".zip",
         )
-        self.assertEqual(decision.status, "QUARANTINED_SECURITY")
-        self.assertEqual(decision.detected_format, "ARCHIVE_REQUIRES_SANDBOX")
-        self.assertIn(
-            "ARCHIVE_REQUIRES_DEDICATED_ADAPTER",
-            decision.reason_codes,
-        )
+        self.assertEqual(decision.status, "ACCEPTED_UNPARSED")
+        self.assertIn("ARCHIVE_FORMAT_NOT_MAPPED", decision.reason_codes)
 
-    def test_nested_archive_is_quarantined(self):
+    def test_nested_safe_archive_is_not_a_global_security_failure(self):
         inner = _zip({"payload.txt": b"content"})
         decision = classify_payload(
             _zip({"nested.zip": inner}),
             ".zip",
         )
-        self.assertEqual(decision.status, "QUARANTINED_SECURITY")
+        self.assertEqual(decision.status, "ACCEPTED_UNPARSED")
         self.assertIn(
             "NESTED_ARCHIVE_NOT_RECURSIVELY_INSPECTED",
             decision.reason_codes,

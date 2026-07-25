@@ -16,8 +16,12 @@ from quantum.application._finance_center_shared import *
 from quantum.application._finance_profile_financial_rows import (
     PERIOD_TAX_GROUP,
     UNALLOCATED_SERVICE_GROUP,
-    read_detailed_financial_rows_payload,
 )
+from quantum.application._finance_generic_tabular import (
+    extract_metric_groups,
+    merge_metric_groups,
+)
+from quantum.pilot.universal_tables import extract_tables
 from quantum.insights.financial import (
     FinancialRecommendationError,
     build_financial_recommendations,
@@ -44,19 +48,19 @@ def _recommendation_action_label(item: Mapping[str, Any]) -> str:
 
 def _read_finance_source(path: Path) -> bytes:
     if not path.is_file():
-        raise FinanceProfileError("XLSX_FILE_NOT_FOUND")
+        raise FinanceProfileError("SOURCE_FILE_NOT_FOUND")
     try:
         with path.open("rb") as stream:
             payload = stream.read(_MAX_FINANCE_SOURCE_BYTES + 1)
     except OSError as exc:
-        raise FinanceProfileError("XLSX_FILE_READ_FAILED") from exc
+        raise FinanceProfileError("SOURCE_FILE_READ_FAILED") from exc
     if len(payload) > _MAX_FINANCE_SOURCE_BYTES:
         raise FinanceProfileError(
-            "XLSX_FILE_TOO_LARGE",
+            "SOURCE_FILE_TOO_LARGE",
             (str(_MAX_FINANCE_SOURCE_BYTES),),
         )
     if not payload:
-        raise FinanceProfileError("XLSX_BYTES_REQUIRED")
+        raise FinanceProfileError("SOURCE_FILE_EMPTY")
     return payload
 
 def _new_finance_run_id() -> str:
@@ -254,103 +258,206 @@ def _write_finance_output_bundle(
 
 class FinanceCenterCalculationMixin:
     def _detailed_report(self) -> ImportRow | None:
+        """Compatibility selector; universal calculations no longer require it."""
+        candidates = [
+            row
+            for row in self._finance_sources()
+            if (
+                row.detected_format == "WB_DETAILED_FINANCIAL"
+                or (
+                    isinstance(row.report, Mapping)
+                    and (
+                        row.report.get("source_type") == "WB_DETAILED_FINANCIAL"
+                        or (
+                            isinstance(row.report.get("source_bridge"), Mapping)
+                            and row.report["source_bridge"].get("source_type")
+                            == "WB_DETAILED_FINANCIAL"
+                        )
+                    )
+                )
+            )
+        ]
+        return candidates[-1] if candidates else None
+
+    def _finance_sources(self) -> tuple[ImportRow, ...]:
         candidates: list[ImportRow] = []
         for state in self.reports.values():
             row = state.row
             if row.status in {"Ошибка", "Недоступен", "Отменено"}:
                 continue
-            if not row.source_path.is_file():
+            if row.source_path.is_file():
+                candidates.append(row)
+        return tuple(sorted(candidates, key=lambda row: row.row_id))
+
+    def _collect_universal_evidence(
+        self,
+        sources: Sequence[ImportRow],
+    ) -> tuple[tuple[Any, ...], tuple[dict[str, Any], ...], dict[str, Any]]:
+        evidence: list[Any] = []
+        unresolved: list[dict[str, Any]] = []
+        seen_file_hashes: set[str] = set()
+        processed = 0
+        with_tables = 0
+        for row in sources:
+            try:
+                payload = _read_finance_source(row.source_path)
+            except FinanceProfileError as exc:
+                unresolved.append(
+                    {
+                        "scope": row.source_path.name,
+                        "state": "FAILED",
+                        "reason_codes": [exc.code],
+                        "source_name": row.source_path.name,
+                    }
+                )
                 continue
-            bridge = (
-                row.report.get("source_bridge")
+            file_hash = sha256(payload).hexdigest()
+            if file_hash in seen_file_hashes:
+                unresolved.append(
+                    {
+                        "scope": row.source_path.name,
+                        "state": "SKIPPED_DUPLICATE",
+                        "reason_codes": ["DUPLICATE_FILE_SHA256"],
+                        "source_name": row.source_path.name,
+                    }
+                )
+                continue
+            seen_file_hashes.add(file_hash)
+            expected_hash = (
+                str(row.report.get("file_sha256") or "").strip().lower()
                 if isinstance(row.report, dict)
-                else None
+                else ""
             )
-            source_type = (
-                bridge.get("source_type")
-                if isinstance(bridge, dict)
-                else None
-            )
-            if (
-                row.detected_format == "WB_DETAILED_FINANCIAL"
-                or source_type == "WB_DETAILED_FINANCIAL"
-            ):
-                candidates.append(row)
+            if expected_hash and expected_hash != file_hash:
+                unresolved.append(
+                    {
+                        "scope": row.source_path.name,
+                        "state": "FAILED",
+                        "reason_codes": ["SOURCE_FILE_HASH_MISMATCH"],
+                        "source_name": row.source_path.name,
+                    }
+                )
                 continue
-            if (
-                isinstance(row.report, dict)
-                and row.report.get("source_type")
-                == "WB_DETAILED_FINANCIAL"
-            ):
-                candidates.append(row)
-        return candidates[-1] if candidates else None
+            processed += 1
+            try:
+                extraction = extract_tables(
+                    payload,
+                    source_name=row.source_path.name,
+                )
+            except Exception as exc:
+                unresolved.append(
+                    {
+                        "scope": row.source_path.name,
+                        "state": "FAILED",
+                        "reason_codes": [
+                            getattr(
+                                exc,
+                                "code",
+                                "UNIVERSAL_EXTRACTION_UNEXPECTED_ERROR",
+                            )
+                        ],
+                        "source_name": row.source_path.name,
+                    }
+                )
+                continue
+            if extraction.tables:
+                with_tables += 1
+                evidence.extend(
+                    extract_metric_groups(
+                        extraction.tables,
+                        product_to_group=self.profile.product_to_group,
+                    )
+                )
+            if extraction.status != "COMPLETE" or not extraction.tables:
+                unresolved.append(
+                    {
+                        "scope": row.source_path.name,
+                        "state": extraction.status,
+                        "reason_codes": list(
+                            extraction.reason_codes
+                            or (("NO_USABLE_FINANCIAL_FIELDS",) if not extraction.tables else ())
+                        ),
+                        "source_name": row.source_path.name,
+                        "member_results": [item.to_dict() for item in extraction.members],
+                    }
+                )
+        coverage = {
+            "uploaded_file_count": len(sources),
+            "processed_file_count": processed,
+            "files_with_tables": with_tables,
+            "files_without_tables_or_partial": len(unresolved),
+        }
+        return merge_metric_groups(tuple(evidence)), tuple(unresolved), coverage
 
     def calculate_finance(self) -> None:
-        missing = validate_profile(self.profile)
-        if missing:
-            messagebox.showerror(
-                APP_TITLE,
-                "Расчёт заблокирован:\n\n"
-                + "\n".join(f"• {item}" for item in missing),
-            )
-            self.open_finance_profile()
-            return
-        detailed = self._detailed_report()
-        if detailed is None:
+        sources = self._finance_sources()
+        if not sources:
             messagebox.showwarning(
                 APP_TITLE,
-                "Для расчёта нужен детализированный финансовый отчёт "
-                "Wildberries. Если он был загружен ранее, проверьте раздел "
-                "«Контроль данных»: Quantum должен восстановить сохранённый "
-                "исходник автоматически.",
+                "Загрузите любые имеющиеся файлы отчётов или архивы. "
+                "Quantum обработает доступные таблицы и отдельно укажет, "
+                "какие показатели нельзя рассчитать.",
             )
             return
         config = _safe_json(self.config_path)
-        organization_id = str(config.get("tenant_id") or "").strip()
-        if not organization_id:
-            messagebox.showerror(
-                APP_TITLE,
-                "В локальной конфигурации отсутствует tenant_id.",
-            )
-            return
+        organization_id = str(config.get("tenant_id") or "home-local").strip()
         self.set_status(
-            "Финансовый расчёт выполняется по подтверждённым группам.",
+            "Quantum извлекает доступные данные из всех загруженных файлов.",
             "info",
         )
         try:
-            source_payload = _read_finance_source(detailed.source_path)
-            source_hash = sha256(source_payload).hexdigest()
-            expected_hash = (
-                str(detailed.report.get("file_sha256") or "")
-                .strip()
-                .lower()
-                if isinstance(detailed.report, dict)
-                else ""
+            evidence, file_unresolved, file_coverage = (
+                self._collect_universal_evidence(sources)
             )
-            if expected_hash and source_hash != expected_hash:
-                raise FinanceProfileError(
-                    "SOURCE_FILE_HASH_MISMATCH",
-                    (str(detailed.source_path),),
+            if evidence:
+                base_result = calculate_metric_groups(
+                    evidence_groups=evidence,
+                    profile=self.profile,
+                    organization_id=organization_id,
                 )
-            # Parse the exact immutable byte string whose digest was accepted.
-            # Reopening the path here would create a hash/parse TOCTOU window.
-            rows = read_detailed_financial_rows_payload(
-                source_payload,
-                detailed.report,
-            )
-            result = calculate_by_group(
-                detailed_rows=rows,
-                profile=self.profile,
-                organization_id=organization_id,
-                source_id=(
-                    "home-local:"
-                    + str(
-                        detailed.details.get("original_source_name")
-                        or detailed.source_path.name
+                missing = list(base_result.missing_inputs)
+                missing.extend(
+                    f"{scope.get('scope', 'Файл')}: {reason}"
+                    for scope in file_unresolved
+                    for reason in scope.get("reason_codes", [])
+                    if reason
+                )
+                result = FinanceRunResult(
+                    status=(
+                        "CALCULATED_PARTIAL"
+                        if file_unresolved and base_result.status == "CALCULATED"
+                        else base_result.status
+                    ),
+                    group_results=base_result.group_results,
+                    totals=base_result.totals,
+                    missing_inputs=tuple(sorted(set(missing))),
+                    metric_states=base_result.metric_states,
+                    coverage={**base_result.coverage, **file_coverage},
+                    unresolved_scopes=tuple(
+                        (*base_result.unresolved_scopes, *file_unresolved)
+                    ),
+                )
+            else:
+                reasons = tuple(
+                    sorted(
+                        set(
+                            f"{scope.get('scope', 'Файл')}: {reason}"
+                            for scope in file_unresolved
+                            for reason in scope.get("reason_codes", [])
+                            if reason
+                        )
+                        or {"NO_USABLE_FINANCIAL_FIELDS"}
                     )
-                ),
-                source_sha256=source_hash,
-            )
+                )
+                result = FinanceRunResult(
+                    status="CALCULATION_BLOCKED",
+                    group_results=(),
+                    totals={},
+                    missing_inputs=reasons,
+                    metric_states={},
+                    coverage=file_coverage,
+                    unresolved_scopes=file_unresolved,
+                )
             (
                 outputs,
                 recommendations,
@@ -361,19 +468,16 @@ class FinanceCenterCalculationMixin:
             )
         except FinanceProfileError as exc:
             messagebox.showerror(APP_TITLE, self.describe_error(exc))
-            self.set_status("Финансовый расчёт заблокирован.", "error")
+            self.set_status("Ошибка финансового анализа.", "error")
             return
         except OSError as exc:
             messagebox.showerror(
                 APP_TITLE,
-                "Не удалось прочитать сохранённый отчёт или записать "
+                "Не удалось прочитать сохранённые файлы или записать "
                 "результат.\n\n"
                 f"Технические сведения: {type(exc).__name__}",
             )
-            self.set_status(
-                "Ошибка доступа к файлам финансового расчёта.",
-                "error",
-            )
+            self.set_status("Ошибка доступа к файлам анализа.", "error")
             return
         self.current_result = result
         self.current_outputs = outputs
@@ -381,105 +485,87 @@ class FinanceCenterCalculationMixin:
         self.current_recommendation_errors = recommendation_errors
         self._render_result(result)
         self.refresh_exports()
+        self.show_page("analytics")
         if result.status == "CALCULATED":
-            self.set_status("Финансовый расчёт завершён.", "success")
-            self.show_page("analytics")
-        else:
+            self.set_status("Все доступные показатели рассчитаны.", "success")
+        elif result.status == "CALCULATED_PARTIAL":
             self.set_status(
-                "Расчёт заблокирован: требуются дополнительные данные.",
+                "Доступные показатели рассчитаны; часть требует данных.",
                 "warning",
             )
             messagebox.showwarning(
                 APP_TITLE,
-                "Расчёт не завершён:\n\n"
-                + "\n".join(
-                    f"• {item}" for item in result.missing_inputs
-                ),
-            )
-            self.open_finance_profile()
-
-    def _render_result(self, result: FinanceRunResult) -> None:
-        if result.status == "CALCULATED":
-            lines = ["ПОДТВЕРЖДЁННЫЙ ФИНАНСОВЫЙ РЕЗУЛЬТАТ", ""]
-            labels = {
-                "net_sold_units": "Продано единиц",
-                "net_marketplace_income_amount": (
-                    "Чистый доход маркетплейса, ₽"
-                ),
-                "product_cost_amount": "Себестоимость, ₽",
-                "other_expense_amount": "Прочие расходы, ₽",
-                "tax_amount": "Налог, ₽",
-                "net_profit_amount": "Чистая прибыль, ₽",
-                "profit_per_sold_unit": "Прибыль на единицу, ₽",
-            }
-            for metric_id, label in labels.items():
-                lines.append(
-                    f"{label}: {result.totals.get(metric_id, '—')}"
-                )
-            lines.append("")
-            lines.append("ПО ГРУППАМ")
-            for item in result.group_results:
-                calculation = item.calculation or {}
-                metrics = (
-                    calculation.get("results")
-                    if isinstance(calculation, dict)
-                    else None
-                )
-                profit = (
-                    metrics.get("net_profit_amount", {}).get("value")
-                    if isinstance(metrics, dict)
-                    else None
-                )
-                if "ZERO_ACTIVITY" in item.reason_codes:
-                    lines.append(
-                        f"• {item.group_name}: операций в периоде нет"
-                    )
-                elif item.group_name == PERIOD_TAX_GROUP:
-                    tax = (
-                        metrics.get("tax_amount", {}).get("value")
-                        if isinstance(metrics, dict)
-                        else None
-                    )
-                    lines.append(
-                        f"• {item.group_name}: {tax or '—'} ₽"
-                    )
-                elif item.group_name == UNALLOCATED_SERVICE_GROUP:
-                    lines.append(
-                        f"• {item.group_name}: влияние на прибыль "
-                        f"{profit or '—'} ₽"
-                    )
-                else:
-                    lines.append(
-                        f"• {item.group_name}: прибыль до налога "
-                        f"{profit or '—'} ₽"
-                    )
-            self._set_text(self.analytics_text, "\n".join(lines))
-            recommendations = self._recommendations(result)
-            self._set_text(
-                self.recommendations_text,
-                recommendations,
-            )
-            self._set_text(
-                self.decision_text,
-                "Расчёт выполнен без подстановки отсутствующих значений."
-                "\n\n"
-                + recommendations,
+                "Quantum сохранил все рассчитанные показатели.\n\n"
+                "Для остальных нужны данные:\n"
+                + "\n".join(f"• {item}" for item in result.missing_inputs[:30]),
             )
         else:
-            blocked = (
-                "РАСЧЁТ ЗАБЛОКИРОВАН\n\n"
-                + "\n".join(
-                    f"• {item}" for item in result.missing_inputs
+            self.set_status(
+                "Финансовых полей для расчёта недостаточно; файлы сохранены.",
+                "warning",
+            )
+            messagebox.showwarning(
+                APP_TITLE,
+                "Загруженные файлы обработаны, но финансовый расчёт пока "
+                "невозможен.\n\nНужны данные:\n"
+                + "\n".join(f"• {item}" for item in result.missing_inputs[:30]),
+            )
+
+    def _render_result(self, result: FinanceRunResult) -> None:
+        labels = {
+            "net_sold_units": "Продано единиц",
+            "gross_sales_amount": "Продажи/возвраты, ₽",
+            "net_marketplace_income_amount": "Доход после расходов WB, ₽",
+            "product_cost_amount": "Себестоимость, ₽",
+            "other_expense_amount": "Прочие расходы, ₽",
+            "pre_tax_profit_amount": "Прибыль до налога, ₽",
+            "tax_amount": "Налог, ₽",
+            "net_profit_amount": "Чистая прибыль, ₽",
+            "profit_per_sold_unit": "Прибыль на единицу, ₽",
+        }
+        calculated = ["РАССЧИТАНО", ""]
+        unavailable = ["НЕ РАССЧИТАНО", ""]
+        for metric_id, label in labels.items():
+            state = result.metric_states.get(metric_id, {})
+            value = result.totals.get(metric_id)
+            metric_state = str(state.get("state") or ("VALID" if value is not None else "BLOCKED"))
+            if value is not None:
+                suffix = " (частичный охват)" if metric_state == "PARTIAL" else ""
+                calculated.append(f"{label}: {value}{suffix}")
+            else:
+                reasons = "; ".join(str(item) for item in state.get("reason_codes", []))
+                unavailable.append(f"{label}: {reasons or 'недостаточно данных'}")
+        if len(calculated) == 2:
+            calculated.append("Финансовые показатели пока не извлечены.")
+        if len(unavailable) == 2:
+            unavailable.append("Нет заблокированных показателей.")
+        coverage = ["", "ОХВАТ"]
+        for key, value in sorted(result.coverage.items()):
+            coverage.append(f"• {key}: {value}")
+        groups = ["", "ПО ИСТОЧНИКАМ И ГРУППАМ"]
+        for item in result.group_results:
+            groups.append(
+                f"• {item.group_name}: {item.state}"
+                + (
+                    " — " + "; ".join(item.reason_codes)
+                    if item.reason_codes and item.state != "VALID"
+                    else ""
                 )
             )
-            self._set_text(self.analytics_text, blocked)
-            self._set_text(
-                self.recommendations_text,
-                "Управленческие рекомендации по прибыли не сформированы."
-                "\n\n"
-                + blocked,
-            )
-            self._set_text(self.decision_text, blocked)
+        needs = ["", "НУЖНЫ ДАННЫЕ"]
+        needs.extend(f"• {item}" for item in result.missing_inputs)
+        if len(needs) == 2:
+            needs.append("Дополнительные данные не требуются.")
+        text = "\n".join((*calculated, *unavailable, *coverage, *groups, *needs))
+        self._set_text(self.analytics_text, text)
+        recommendations = self._recommendations(result)
+        self._set_text(self.recommendations_text, recommendations)
+        self._set_text(
+            self.decision_text,
+            "Quantum не подставляет отсутствующие значения. Все доступные "
+            "цифры сохранены; недоступные показатели перечислены отдельно.\n\n"
+            + recommendations,
+        )
         self.refresh_cards()
         self.refresh_quality()
 

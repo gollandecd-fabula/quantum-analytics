@@ -105,7 +105,7 @@ $bad=Join-Path $env:RUNNER_TEMP "q-bad";Remove-Item $bad -Recurse -Force -ErrorA
 $xlsx=Join-Path $env:RUNNER_TEMP "q-test.xlsx";$env:PYTHONPATH="src";python -c "from pathlib import Path;from tests.p16_fixtures import build_xlsx;Path(r'$xlsx').write_bytes(build_xlsx(headers=('Артикул','Количество продаж','Сумма продаж'),rows=(('SKU-1','1','100.00'),)))"
 $full=Join-Path $env:RUNNER_TEMP "q-full";powershell.exe -NoProfile -ExecutionPolicy Bypass -File $entry -File $xlsx -TargetRoot $full -NoOpenResult -SkipDefenderScanForCi 2>&1|Tee-Object native-full.log;if($LASTEXITCODE-ne 0){throw "Full workflow failed: $LASTEXITCODE"}
 $cfg=Get-Content "$full\config\default-home-local.json" -Raw|ConvertFrom-Json;if($cfg.reporting_period_start-ne"2022-01-01"-or$cfg.reporting_period_end-ne"2035-12-31"-or$cfg.retention_deadline-ne"2036-12-31T00:00:00Z"){throw "CI config mismatch."};if($cfg.attestations.malware_scan_clean-ne$true){throw "Explicit equivalent-scan attestation missing."}
-$reports=@(Get-ChildItem "$full\output" -Filter "pilot_*.json");if($reports.Count-ne 1){throw "Result count mismatch."};$r=Get-Content $reports[0].FullName -Raw|ConvertFrom-Json;if($r.status-ne"ADMISSION_COMPLETE"-or$null-ne$r.calculation){throw "Admission result invalid."}
+$reports=@(Get-ChildItem "$full\output" -Filter "pilot_*.json");if($reports.Count-ne 1){throw "Result count mismatch."};$r=Get-Content $reports[0].FullName -Raw|ConvertFrom-Json;$acceptedStatuses=@("ADMISSION_COMPLETE","ACCEPTED_PARTIAL");if($acceptedStatuses-notcontains[string]$r.status-or$null-ne$r.calculation){throw "Admission result invalid."}
 
 $startText=Get-Content "$full\START_QUANTUM.cmd" -Raw
 $importText=Get-Content "$full\IMPORT_XLSX.cmd" -Raw
@@ -118,7 +118,7 @@ if($LASTEXITCODE-ne 0){throw "GUI-selected-file attestation regression failed: $
 $guiReports=@(Get-ChildItem "$full\output" -Filter "pilot_*.json")
 if($guiReports.Count-ne($before+1)){throw "GUI-selected-file result count mismatch."}
 $guiResult=Get-Content ($guiReports|Sort-Object LastWriteTime -Descending|Select-Object -First 1).FullName -Raw|ConvertFrom-Json
-if($guiResult.status-ne"ADMISSION_COMPLETE"-or$null-ne$guiResult.calculation){throw "GUI-selected-file admission result invalid."}
+$acceptedStatuses=@("ADMISSION_COMPLETE","ACCEPTED_PARTIAL");if($acceptedStatuses-notcontains[string]$guiResult.status-or$null-ne$guiResult.calculation){throw "GUI-selected-file admission result invalid."}
 }
 
 # === Complete repository CI ===
@@ -132,7 +132,9 @@ if($LASTEXITCODE-ne 0){throw "Exact-head CI worktree creation failed with exit c
 try {
   Push-Location $ciRoot
   $env:PYTHONUTF8="1"
-  python -m pip install --disable-pip-version-check --no-deps --only-binary=:all: --require-hashes -r requirements/windows-home-local.txt
+  python -m pip install --disable-pip-version-check --no-input --no-cache-dir --no-deps --only-binary=:all: setuptools==80.9.0
+  if($LASTEXITCODE-ne 0){throw "Pinned build backend installation failed with exit code $LASTEXITCODE."}
+  python -m pip install --disable-pip-version-check --no-input --no-cache-dir --no-deps --only-binary=:all: --require-hashes -r requirements/windows-home-local.txt
   if($LASTEXITCODE-ne 0){throw "Windows test dependency installation failed with exit code $LASTEXITCODE."}
   [IO.File]::WriteAllText((Join-Path $ciRoot "src\sitecustomize.py"),"import quantum.pilot`n",[Text.Encoding]::ASCII)
   $env:PYTHONPATH=Join-Path $ciRoot "src"

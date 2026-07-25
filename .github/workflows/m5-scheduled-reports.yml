@@ -29,6 +29,8 @@ env:
   TARGET_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
   M5_RTM_SHA: a7a03336b9c5a476aff6b51717e2e95a80aea2d8
   M5_BASE_SHA: 96e96a88cbb16ef6e0ca2219f2f4abff372b0f2e
+  UPR1_RTM_SHA: a300184c673f79f15e37eb388ef41c4a85773f2a
+  UPR1_BASE_SHA: f251c9325e701b6cf3de127111b86fe8e2d71269
   PYTHONDONTWRITEBYTECODE: "1"
   PYTHONUTF8: "1"
 
@@ -49,8 +51,16 @@ jobs:
         run: |
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "$TARGET_SHA"
-          test "$(git rev-parse HEAD^)" = "$M5_RTM_SHA"
-          test "$(git rev-parse HEAD^^)" = "$M5_BASE_SHA"
+          parent="$(git rev-parse HEAD^)"
+          base="$(git rev-parse HEAD^^)"
+          if [ "$parent" = "$M5_RTM_SHA" ] && [ "$base" = "$M5_BASE_SHA" ]; then
+            echo "M5_CONSTRUCTION=ORIGINAL"
+          elif [ "$parent" = "$UPR1_RTM_SHA" ] && [ "$base" = "$UPR1_BASE_SHA" ]; then
+            echo "M5_CONSTRUCTION=UPR1_SUPERSEDING_VALIDATION"
+          else
+            echo "Unsupported M5 validation ancestry: parent=$parent base=$base" >&2
+            exit 1
+          fi
           python3 - <<'PY'
           import sys
           if sys.version_info < (3, 12):
@@ -117,7 +127,7 @@ jobs:
           state = Path("docs/evidence/WB_RELEASE_R2_EXECUTION_STATE.yaml").read_text(encoding="utf-8")
           current_state = Path("docs/governance/CURRENT_STATE.md").read_text(encoding="utf-8")
           assert "current_unit: WBR2-M5" in state
-          assert "state: IMPLEMENTED_AT_CONTAINING_HEAD_AWAITING_EXTERNAL_EXACT_HEAD_VALIDATION" in state
+          assert "state: VALIDATED_IN_WORKING_BRANCH" in state
           assert "WBR2-M6:" in state
           assert "state: UNASSIGNED_NOT_AUTHORIZED" in state
           assert "No `WBR2-M6` is assigned or authorized." in current_state
@@ -141,8 +151,8 @@ jobs:
               "status": "PASS",
               "evidence_level": "L2_SOURCE_RUNTIME",
               "exact_head": os.environ["TARGET_SHA"],
-              "direct_parent": os.environ["M5_RTM_SHA"],
-              "governance_base": os.environ["M5_BASE_SHA"],
+              "direct_parent": os.popen("git rev-parse HEAD^").read().strip(),
+              "governance_base": os.popen("git rev-parse HEAD^^").read().strip(),
               "platform": "ubuntu-24.04",
               "focused_contracts": 16,
               "calendar_property_cases": 10000,
@@ -198,12 +208,21 @@ jobs:
             throw "Exact-head mismatch: expected $env:TARGET_SHA, got $actual"
           }
           $parent = (& git rev-parse HEAD^).Trim()
-          if ($parent -ne $env:M5_RTM_SHA) {
-            throw "M5 RTM parent mismatch: expected $env:M5_RTM_SHA, got $parent"
-          }
           $base = (& git rev-parse HEAD^^).Trim()
-          if ($base -ne $env:M5_BASE_SHA) {
-            throw "M5 governance base mismatch: expected $env:M5_BASE_SHA, got $base"
+          $original = ($parent -eq $env:M5_RTM_SHA -and $base -eq $env:M5_BASE_SHA)
+          $superseding = ($parent -eq $env:UPR1_RTM_SHA -and $base -eq $env:UPR1_BASE_SHA)
+          if (-not ($original -or $superseding)) {
+            throw "Unsupported M5 validation ancestry: parent=$parent base=$base"
+          }
+          python -m pip install `
+            --disable-pip-version-check `
+            --no-input `
+            --no-cache-dir `
+            --no-deps `
+            --only-binary=:all: `
+            setuptools==80.9.0
+          if ($LASTEXITCODE -ne 0) {
+            throw "Pinned setuptools installation failed."
           }
           python -m pip install `
             --disable-pip-version-check `
@@ -256,7 +275,7 @@ jobs:
           $state = Get-Content -LiteralPath "docs\evidence\WB_RELEASE_R2_EXECUTION_STATE.yaml" -Raw -Encoding UTF8
           foreach ($marker in @(
             "current_unit: WBR2-M5",
-            "state: IMPLEMENTED_AT_CONTAINING_HEAD_AWAITING_EXTERNAL_EXACT_HEAD_VALIDATION",
+            "state: VALIDATED_IN_WORKING_BRANCH",
             "state: UNASSIGNED_NOT_AUTHORIZED",
             "marketplace_writes: DISABLED",
             "ozon: DEFERRED",

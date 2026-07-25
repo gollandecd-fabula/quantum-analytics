@@ -192,12 +192,6 @@ class FinanceCenterReportsMixin:
                 "исходный файл.",
             )
             return
-        if not self.profile.groups:
-            messagebox.showwarning(
-                APP_TITLE,
-                "Сначала загрузите отчёт WB, содержащий товары и артикулы.",
-            )
-            return
         FinanceProfileDialog(self, self.profile, self.products)
 
     def refresh_finance_summary(self) -> None:
@@ -227,12 +221,15 @@ class FinanceCenterReportsMixin:
             )
         lines.append("")
         if missing:
-            lines.append("РАСЧЁТ ЗАБЛОКИРОВАН")
+            lines.append(
+                "НЕПОЛНЫЙ ПРОФИЛЬ: независимые показатели будут рассчитаны, "
+                "а зависимые останутся недоступны."
+            )
             lines.extend(f"• {item}" for item in missing)
         else:
             lines.append(
-                "Обязательные поля профиля заполнены. Дополнительные данные "
-                "проверяются при расчёте по фактическому отчёту WB."
+                "Поля профиля заполнены. Quantum всё равно проверит каждый "
+                "показатель по фактически загруженным данным."
             )
         self._set_text(self.finance_summary, "\n".join(lines))
         self.refresh_cards()

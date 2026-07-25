@@ -32,6 +32,8 @@ from quantum.application.finance_profile import (
     backup_corrupt_profile,
     build_profile,
     calculate_by_group,
+    calculate_metric_groups,
+    detect_products_from_any_file,
     detect_products_from_xlsx,
     load_profile,
     merge_detected_products,

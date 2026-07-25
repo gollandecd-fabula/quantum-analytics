@@ -145,7 +145,7 @@ class PlateauM2FinancialIntegrationTests(unittest.TestCase):
         self.assertEqual("99.00", result.totals["tax_amount"])
         self.assertEqual("671.00", result.totals["net_profit_amount"])
 
-    def test_unknown_nonblank_product_still_blocks(self) -> None:
+    def test_unknown_nonblank_product_preserves_independent_metrics(self) -> None:
         result = calculate_by_group(
             detailed_rows=(_row(vendor_code="UNKNOWN"),),
             profile=_profile(),
@@ -153,13 +153,15 @@ class PlateauM2FinancialIntegrationTests(unittest.TestCase):
             source_id="dataset:test",
             source_sha256="c" * 64,
         )
-        self.assertEqual("CALCULATION_BLOCKED", result.status)
-        self.assertEqual(
-            ("UNKNOWN_PRODUCT_FINANCIAL_ROWS:1",),
-            result.missing_inputs,
+        self.assertEqual("CALCULATED_PARTIAL", result.status)
+        self.assertEqual("2", result.totals["net_sold_units"])
+        self.assertEqual("120.00", result.totals["tax_amount"])
+        self.assertNotIn("net_profit_amount", result.totals)
+        self.assertTrue(
+            any(item.startswith("Не определено: ") for item in result.missing_inputs)
         )
 
-    def test_physical_sale_without_sku_blocks(self) -> None:
+    def test_physical_sale_without_sku_preserves_independent_metrics(self) -> None:
         result = calculate_by_group(
             detailed_rows=(_row(vendor_code=""),),
             profile=_profile(),
@@ -167,10 +169,14 @@ class PlateauM2FinancialIntegrationTests(unittest.TestCase):
             source_id="dataset:test",
             source_sha256="d" * 64,
         )
-        self.assertEqual("CALCULATION_BLOCKED", result.status)
-        self.assertEqual(
-            ("UNATTRIBUTED_PHYSICAL_ROWS:1",),
-            result.missing_inputs,
+        self.assertEqual("CALCULATED_PARTIAL", result.status)
+        self.assertEqual("2", result.totals["net_sold_units"])
+        self.assertNotIn("net_profit_amount", result.totals)
+        self.assertTrue(
+            any(
+                item.startswith("Продажи/возвраты без артикула: ")
+                for item in result.missing_inputs
+            )
         )
 
     def test_zero_activity_group_is_valid(self) -> None:

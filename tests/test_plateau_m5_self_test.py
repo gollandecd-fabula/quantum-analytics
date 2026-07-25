@@ -59,13 +59,13 @@ class PlateauM5SelfTestTests(unittest.TestCase):
             ],
         )
 
-    def test_invalid_config_forces_finance_self_test_failure(self) -> None:
+    def test_unconfigured_profile_reports_configuration_required(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             config = self._config(root, ready=False)
             result = run_finance_center_self_test(root, config)
         self.assertEqual(
-            "FINANCE_CENTER_SELF_TEST_FAILED",
+            "FINANCE_CENTER_SELF_TEST_CONFIGURATION_REQUIRED",
             result["status"],
         )
         self.assertFalse(result["checks"]["config_valid"])

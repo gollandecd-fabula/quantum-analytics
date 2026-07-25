@@ -88,7 +88,7 @@ def _known_answer_finance() -> tuple[bool, dict[str, str]]:
         source_sha256="a" * 64,
     )
     expected = {
-        "net_sold_units": "2.00",
+        "net_sold_units": "2",
         "product_cost_amount": "800.00",
         "other_expense_amount": "80.00",
         "tax_amount": "120.00",

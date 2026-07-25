@@ -31,19 +31,31 @@ class SchemaReviewPreview:
         return asdict(self)
 
     def confirmation_text(self) -> str:
-        if not self.requires_schema_review:
-            return (
-                f"Файл: {self.file_name}\n"
-                f"Формат: {self.detected_format}\n"
-                f"Размер: {self.file_size_bytes} байт\n"
-                f"SHA-256: {self.file_sha256}\n\n"
-                "Для этого формата проверка табличной схемы не требуется."
-            )
         headers = " | ".join(self.headers)
         period = (
             f"{self.reporting_period_start or 'не задан'} — "
             f"{self.reporting_period_end or 'не задан'}"
         )
+        if not self.requires_schema_review:
+            details = ""
+            if self.sheet_name is not None:
+                details = (
+                    f"Лист: {self.sheet_name}\n"
+                    f"Строка заголовка: {self.header_row_index}\n"
+                    f"Столбцов: {self.column_count}\n"
+                    f"Строк данных: {self.data_row_count}\n"
+                    f"Период профиля: {period}\n"
+                    f"Заголовки: {headers}\n"
+                )
+            return (
+                f"Файл: {self.file_name}\n"
+                f"Формат: {self.detected_format}\n"
+                f"Размер: {self.file_size_bytes} байт\n"
+                f"SHA-256: {self.file_sha256}\n"
+                f"{details}\n"
+                "Файл передан в универсальную обработку. Конкретная "
+                "схема отчёта и отдельное подтверждение не требуются."
+            )
         return (
             f"Файл: {self.file_name}\n"
             f"Формат: {self.detected_format}\n"
@@ -92,7 +104,8 @@ def build_schema_review_preview(
     decision = classify_payload(payload, source_path.suffix)
     detected = str(decision.detected_format or "UNKNOWN")
     config = _config(config_path)
-    if decision.status != "ROUTE_XLSX":
+    is_xlsx = detected in {"XLSX", "XLSM"}
+    if not is_xlsx and decision.status != "ROUTE_XLSX":
         return SchemaReviewPreview(
             file_name=source_path.name,
             file_sha256=digest,
@@ -120,8 +133,8 @@ def build_schema_review_preview(
         file_name=source_path.name,
         file_sha256=digest,
         file_size_bytes=len(payload),
-        detected_format="XLSX",
-        requires_schema_review=True,
+        detected_format=detected,
+        requires_schema_review=False,
         sheet_name=schema.sheet_name,
         header_row_index=schema.header_row_index,
         headers=schema.headers,

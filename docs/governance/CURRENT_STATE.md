@@ -4,7 +4,7 @@ Date: 2026-07-25
 Live program: `WB_RELEASE_R2`  
 Live namespace: `WBR2`  
 Current product unit: `WBR2-M5 — Scheduled weekly and monthly reports`  
-Current phase: `PHYSICAL_L5_PREPARATION`  
+Current phase: `UNIVERSAL_PARTIAL_EXACT_HEAD_VALIDATION`
 Release status: `RELEASE_BLOCKED`  
 Working branch: `fix/quantum-wb-release-r2`  
 Validated product head: `5e0e52c0141c5860ea108ba515a073094037ad72`  
@@ -69,13 +69,40 @@ The audit explicitly enforces the latest financial-input requirement:
 - cost per product/group is entered and changed by the user;
 - other expenses and applicable missing report values are entered by the user;
 - no business value is silently prefilled or hard-coded;
-- empty or invalid mandatory values block calculation fail-closed;
+- missing or invalid values block only dependent metrics; independent observed and derived metrics continue;
 - profile changes affect calculations only after explicit successful Save.
 
 Candidate fixes cover staged dialog editing, corrupt-profile recovery, bounded
 window geometry, profile resource limits, removal of duplicate persistence and
 a distinct `CONFIGURATION_REQUIRED` self-test state. They are not authoritative
 until the exact candidate head passes validation.
+
+## Universal intake and maximum-available calculations R1
+
+The user-authorized corrective cycle `QUANTUM-UNIVERSAL-PARTIAL-R1` starts from
+`f251c9325e701b6cf3de127111b86fe8e2d71269`; its RTM-first commit is
+`a300184c673f79f15e37eb388ef41c4a85773f2a`.
+
+The candidate contract is:
+
+- every uploaded file receives an auditable per-file result;
+- safe XLSX/XLSM, delimited text, JSON tables and XML tables are processed
+  without requiring a named Wildberries report or exact header hash;
+- ZIP, TAR, TAR.GZ/TGZ, GZIP, BZIP2 and XZ are inspected under bounded archive
+  rules; safe members continue independently;
+- unsupported RAR/7z and non-tabular data are retained with explicit reason
+  codes and do not abort other files;
+- unknown columns, units, currency, sign and product attribution are never
+  invented;
+- each financial metric is `VALID`, `PARTIAL` or `BLOCKED` according to its own
+  dependencies;
+- partial totals expose coverage and excluded scopes and are never represented
+  as complete totals;
+- GUI, JSON, Excel and HTML show calculated values first, then unavailable
+  values and exact required data.
+
+This candidate is not authoritative until exact-head Linux, hosted Windows,
+archive corpus, installer, installed-runtime and same-artifact gates pass.
 
 ## Release-candidate evidence
 

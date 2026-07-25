@@ -209,6 +209,7 @@ def write_run_result_xlsx(
         "net_sold_units": "Продано единиц",
         "net_marketplace_income_amount": "Чистый доход маркетплейса, ₽",
         "product_cost_amount": "Себестоимость, ₽",
+        "pre_tax_profit_amount": "Прибыль до налога, ₽",
         "other_expense_amount": "Прочие расходы, ₽",
         "tax_amount": "Налог, ₽",
         "net_profit_amount": "Чистая прибыль, ₽",
@@ -222,7 +223,13 @@ def write_run_result_xlsx(
             [
                 ("A", label, False),
                 ("B", result.totals.get(metric_id, ""), True),
-                ("C", result.status, False),
+                (
+                    "C",
+                    result.metric_states.get(metric_id, {}).get(
+                        "state", result.status
+                    ),
+                    False,
+                ),
             ]
         )
     group_rows: list[list[tuple[str, object, bool]]] = [
@@ -253,6 +260,30 @@ def write_run_result_xlsx(
         recommendations,
         recommendation_errors,
     )
+    missing_rows: list[list[tuple[str, object, bool]]] = [[
+        ("A", "Недоступный показатель / область", False),
+        ("B", "Статус", False),
+        ("C", "Какие данные нужны", False),
+    ]]
+    for metric_id, metric in sorted(result.metric_states.items()):
+        if metric.get("state") == "VALID":
+            continue
+        missing_rows.append([
+            ("A", summary_labels.get(metric_id, metric_id), False),
+            ("B", metric.get("state", "BLOCKED"), False),
+            ("C", "; ".join(str(v) for v in metric.get("reason_codes", [])), False),
+        ])
+    for scope in result.unresolved_scopes:
+        missing_rows.append([
+            ("A", scope.get("scope", ""), False),
+            ("B", scope.get("state", "UNRESOLVED"), False),
+            ("C", "; ".join(str(v) for v in scope.get("reason_codes", [])), False),
+        ])
+    if len(missing_rows) == 1:
+        missing_rows.append([
+            ("A", "", False), ("B", "VALID", False),
+            ("C", "Дополнительные данные не требуются", False),
+        ])
     workbook = (
         '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
         '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" '
@@ -261,6 +292,7 @@ def write_run_result_xlsx(
         '<sheet name="Итоги" sheetId="1" r:id="rId1"/>'
         '<sheet name="Группы" sheetId="2" r:id="rId2"/>'
         '<sheet name="Рекомендации" sheetId="3" r:id="rId3"/>'
+        '<sheet name="Нужны данные" sheetId="4" r:id="rId4"/>'
         '</sheets></workbook>'
     )
     relationships = (
@@ -269,6 +301,7 @@ def write_run_result_xlsx(
         '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>'
         '<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet2.xml"/>'
         '<Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet3.xml"/>'
+        '<Relationship Id="rId4" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet4.xml"/>'
         '</Relationships>'
     )
     root_relationships = (
@@ -286,6 +319,7 @@ def write_run_result_xlsx(
         '<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>'
         '<Override PartName="/xl/worksheets/sheet2.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>'
         '<Override PartName="/xl/worksheets/sheet3.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>'
+        '<Override PartName="/xl/worksheets/sheet4.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>'
         '</Types>'
     )
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -300,6 +334,10 @@ def write_run_result_xlsx(
             "xl/worksheets/sheet3.xml",
             _xlsx_sheet(recommendation_rows, autofilter_end="J"),
         )
+        archive.writestr(
+            "xl/worksheets/sheet4.xml",
+            _xlsx_sheet(missing_rows, autofilter_end="C"),
+        )
 
 
 def write_run_dashboard(
@@ -312,16 +350,19 @@ def write_run_dashboard(
     from html import escape
 
     metrics = (
-        ("Чистая прибыль", result.totals.get("net_profit_amount", "—"), "₽"),
-        ("Прибыль на единицу", result.totals.get("profit_per_sold_unit", "—"), "₽"),
-        ("Чистый доход WB", result.totals.get("net_marketplace_income_amount", "—"), "₽"),
-        ("Продано", result.totals.get("net_sold_units", "—"), "шт."),
+        ("Чистая прибыль", "net_profit_amount", "₽"),
+        ("Прибыль до налога", "pre_tax_profit_amount", "₽"),
+        ("Доход после расходов WB", "net_marketplace_income_amount", "₽"),
+        ("Продано", "net_sold_units", "шт."),
     )
     cards = "".join(
-        '<article class="card"><span>{}</span><strong>{}</strong><small>{}</small></article>'.format(
-            escape(label), escape(str(value)), escape(unit)
+        '<article class="card"><span>{}</span><strong>{}</strong><small>{} · {}</small></article>'.format(
+            escape(label),
+            escape(str(result.totals.get(metric_id, "—"))),
+            escape(unit),
+            escape(str(result.metric_states.get(metric_id, {}).get("state", "BLOCKED"))),
         )
-        for label, value, unit in metrics
+        for label, metric_id, unit in metrics
     )
     group_rows = []
     for item in result.group_results:
@@ -342,6 +383,14 @@ def write_run_dashboard(
             )
         )
     missing = "".join(f"<li>{escape(value)}</li>" for value in result.missing_inputs)
+    unresolved = "".join(
+        "<li><strong>{}</strong>: {} — {}</li>".format(
+            escape(str(scope.get("scope", ""))),
+            escape(str(scope.get("state", "UNRESOLVED"))),
+            escape("; ".join(str(v) for v in scope.get("reason_codes", []))),
+        )
+        for scope in result.unresolved_scopes
+    )
     recommendation_cards: list[str] = []
     for record in recommendations:
         item = record.get("recommendation")
@@ -409,7 +458,7 @@ section{{background:white;border:1px solid var(--line);border-radius:10px;margin
 <main><div class="grid">{cards}</div>
 <section><h2>Результаты по товарным группам</h2><table><thead><tr><th>Группа</th><th>Статус</th><th>Прибыль, ₽</th><th>Контроль</th></tr></thead><tbody>{''.join(group_rows)}</tbody></table></section>
 <section><h2>Рекомендации</h2><div class="recommendations">{''.join(recommendation_cards)}</div></section>
-<section class="notice"><h2>Контроль полноты данных</h2><p>Статус: <strong>{escape(result.status)}</strong></p><ul>{missing or '<li>Обязательные данные заполнены.</li>'}</ul></section>
+<section class="notice"><h2>Контроль полноты данных</h2><p>Статус: <strong>{escape(result.status)}</strong></p><h3>Какие данные нужны</h3><ul>{missing or '<li>Дополнительные данные не требуются.</li>'}</ul><h3>Необработанный или исключённый охват</h3><ul>{unresolved or '<li>Исключённого охвата нет.</li>'}</ul></section>
 </main><footer>Quantum HOME_LOCAL · данные не отправляются во внешние сервисы</footer></body></html>'''
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(html, encoding="utf-8")

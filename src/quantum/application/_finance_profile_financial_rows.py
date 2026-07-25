@@ -328,12 +328,25 @@ def _fill_blocked_kernel_inputs(
         ):
             continue
         if _optional_text(raw_value) is None:
-            reason = (
-                existing.get("reason_code")
-                if isinstance(existing, Mapping)
-                else None
+            reason = str(
+                (
+                    existing.get("reason_code")
+                    if isinstance(existing, Mapping)
+                    else None
+                )
+                or ("INPUT_REQUIRED_MISSING:" + metric_id)
             )
-            missing.append(str(reason or metric_id))
+            missing.append(reason)
+            if value_type == "INTEGER":
+                inputs[metric_id] = _typed(
+                    "BLOCKED", None, "INTEGER", "ITEM",
+                    reason_code=reason, source_ids=evidence,
+                )
+            else:
+                inputs[metric_id] = _typed(
+                    "BLOCKED", None, "MONEY", "MONEY", "RUB",
+                    reason_code=reason, source_ids=evidence,
+                )
             continue
         if value_type == "INTEGER":
             inputs[metric_id] = _valid_integer(raw_value, evidence)

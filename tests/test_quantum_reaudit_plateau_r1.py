@@ -104,13 +104,23 @@ _LIMITS = XlsxInspectionLimits(
 
 
 class QuantumReauditPlateauR1Tests(unittest.TestCase):
-    def test_known_answer_and_missing_cost_fail_closed(self) -> None:
+    def test_known_answer_and_missing_cost_preserves_available_metrics(self) -> None:
         result = _calculate()
         self.assertEqual(result.status, "CALCULATED")
         self.assertEqual(result.totals["net_profit_amount"], "680.00")
         self.assertEqual(result.totals["tax_amount"], "120.00")
-        with self.assertRaises(FinanceProfileError):
-            _calculate(profile=_profile(cost=""))
+        partial = _calculate(profile=_profile(cost=""))
+        self.assertEqual(partial.status, "CALCULATED_PARTIAL")
+        self.assertEqual(
+            partial.totals["net_marketplace_income_amount"],
+            "1680.00",
+        )
+        self.assertEqual(partial.totals["tax_amount"], "120.00")
+        self.assertNotIn("net_profit_amount", partial.totals)
+        self.assertIn(
+            "Футболка: COST_REQUIRED:Футболка",
+            partial.missing_inputs,
+        )
 
     def test_return_cost_restoration_and_compensation(self) -> None:
         sale = dict(
@@ -146,7 +156,7 @@ class QuantumReauditPlateauR1Tests(unittest.TestCase):
         self.assertEqual(result.totals["product_cost_amount"], "400.00")
         self.assertEqual(result.totals["net_profit_amount"], "400.00")
 
-    def test_duplicate_and_unknown_product_block(self) -> None:
+    def test_duplicate_blocks_scope_but_unknown_product_keeps_independent_metrics(self) -> None:
         duplicate = _calculate((BASE_ROW, dict(BASE_ROW)))
         self.assertEqual(duplicate.status, "CALCULATION_BLOCKED")
         self.assertIn(
@@ -156,9 +166,12 @@ class QuantumReauditPlateauR1Tests(unittest.TestCase):
         unknown = _calculate(
             (dict(BASE_ROW, vendorCode="UNKNOWN", rrdId="9", srid="u"),)
         )
-        self.assertEqual(
-            unknown.missing_inputs,
-            ("UNKNOWN_PRODUCT_FINANCIAL_ROWS:1",),
+        self.assertEqual(unknown.status, "CALCULATED_PARTIAL")
+        self.assertEqual(unknown.totals["net_sold_units"], "2")
+        self.assertEqual(unknown.totals["tax_amount"], "120.00")
+        self.assertNotIn("net_profit_amount", unknown.totals)
+        self.assertTrue(
+            any(item.startswith("Не определено: ") for item in unknown.missing_inputs)
         )
 
     def test_primary_block_reason_is_actionable(self) -> None:
@@ -313,7 +326,7 @@ class QuantumReauditPlateauR1Tests(unittest.TestCase):
         replacement = b"replacement-after-digest"
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            source = root / "report.xlsx"
+            source = root / "report.bin"
             source.write_bytes(accepted)
             config = root / "config.json"
             config.write_text(
@@ -321,19 +334,19 @@ class QuantumReauditPlateauR1Tests(unittest.TestCase):
                 encoding="utf-8",
             )
             row = SimpleNamespace(
+                row_id="one",
                 status="Готово",
                 source_path=source,
-                detected_format="WB_DETAILED_FINANCIAL",
+                detected_format="UNKNOWN",
                 report={
                     "file_sha256": hashlib.sha256(accepted).hexdigest(),
-                    "source_type": "WB_DETAILED_FINANCIAL",
                 },
                 details={"original_source_name": source.name},
             )
 
             class Dummy(FinanceCenterCalculationMixin):
                 def __init__(self) -> None:
-                    self.profile = object()
+                    self.profile = _profile()
                     self.reports = {"one": SimpleNamespace(row=row)}
                     self.config_path = config
                     self.project_root = root
@@ -357,27 +370,30 @@ class QuantumReauditPlateauR1Tests(unittest.TestCase):
             dummy = Dummy()
             observed = []
 
-            def parse(payload, _report):
-                observed.append(payload)
+            def parse(payload, *, source_name):
+                observed.append((payload, source_name))
                 source.write_bytes(replacement)
-                return [dict(BASE_ROW)]
+                return SimpleNamespace(
+                    tables=(object(),),
+                    status="COMPLETE",
+                    reason_codes=(),
+                    members=(),
+                )
 
             result = _calculate()
             module = "quantum.application._finance_center_calculation"
             with (
-                mock.patch(module + ".validate_profile", return_value=()),
-                mock.patch(
-                    module + ".read_detailed_financial_rows_payload",
-                    side_effect=parse,
-                ),
-                mock.patch(module + ".calculate_by_group", return_value=result),
+                mock.patch(module + ".extract_tables", side_effect=parse),
+                mock.patch(module + ".extract_metric_groups", return_value=(object(),)),
+                mock.patch(module + ".merge_metric_groups", return_value=(object(),)),
+                mock.patch(module + ".calculate_metric_groups", return_value=result),
                 mock.patch(
                     module + "._write_finance_output_bundle",
                     return_value=({}, (), ()),
                 ),
             ):
                 dummy.calculate_finance()
-            self.assertEqual(observed, [accepted])
+            self.assertEqual(observed, [(accepted, source.name)])
             self.assertEqual(source.read_bytes(), replacement)
 
     def test_recommendations_are_human_readable_and_keep_code(self) -> None:
@@ -419,7 +435,7 @@ class QuantumReauditPlateauR1Tests(unittest.TestCase):
             with mock.patch(module + "._MAX_FINANCE_SOURCE_BYTES", 32):
                 with self.assertRaises(FinanceProfileError) as context:
                     _read_finance_source(source)
-            self.assertEqual(context.exception.code, "XLSX_FILE_TOO_LARGE")
+            self.assertEqual(context.exception.code, "SOURCE_FILE_TOO_LARGE")
 
             config = root / "config.json"
             config.write_bytes(b" " * 33)

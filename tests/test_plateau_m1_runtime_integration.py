@@ -93,7 +93,7 @@ class PlateauM1RuntimeIntegrationTests(unittest.TestCase):
                 return_value=managed,
             ) as resolve_managed, mock.patch.object(
                 runtime,
-                "detect_products_from_xlsx",
+                "detect_products_from_any_file",
                 return_value=(),
             ) as detect_products:
                 harness._worker(input_row)

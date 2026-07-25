@@ -71,6 +71,18 @@ jobs:
         with:
           python-version: "3.13.14"
 
+      - name: Install pinned build backend without cache reuse
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install \
+            --disable-pip-version-check \
+            --no-input \
+            --no-cache-dir \
+            --no-deps \
+            --only-binary=:all: \
+            setuptools==80.9.0
+
       - name: Reproduce twice from independent clean checkouts
         shell: bash
         run: |
@@ -232,10 +244,20 @@ jobs:
             throw "M8 Windows preflight failed with exit code $LASTEXITCODE"
           }
 
-      - name: Install exact hash-locked Windows dependency without cache reuse
+      - name: Install exact Windows dependencies without cache reuse
         shell: pwsh
         working-directory: candidate
         run: |
+          python -m pip install `
+            --disable-pip-version-check `
+            --no-input `
+            --no-cache-dir `
+            --no-deps `
+            --only-binary=:all: `
+            setuptools==80.9.0
+          if ($LASTEXITCODE -ne 0) {
+            throw "Pinned setuptools installation failed."
+          }
           python -m pip install `
             --disable-pip-version-check `
             --no-input `
