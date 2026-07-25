@@ -369,13 +369,13 @@ class FinanceCenterProfileTests(unittest.TestCase):
             source_sha256="b" * 64,
         )
         self.assertEqual(result.status, "CALCULATED")
-        self.assertEqual(result.totals["net_sold_units"], "2.00")
+        self.assertEqual(result.totals["net_sold_units"], "2")
         self.assertEqual(result.totals["product_cost_amount"], "800.00")
         self.assertEqual(result.totals["other_expense_amount"], "80.00")
         self.assertEqual(result.totals["tax_amount"], "120.00")
         self.assertEqual(result.totals["net_profit_amount"], "680.00")
 
-    def test_unattributed_financial_rows_block_entire_calculation(
+    def test_unattributed_row_without_usable_metrics_is_scoped_blocked(
         self,
     ) -> None:
         result = calculate_by_group(
@@ -386,10 +386,13 @@ class FinanceCenterProfileTests(unittest.TestCase):
             source_sha256="a" * 64,
         )
         self.assertEqual(result.status, "CALCULATION_BLOCKED")
-        self.assertEqual(
-            result.missing_inputs,
-            ("UNKNOWN_PRODUCT_FINANCIAL_ROWS:1",),
+        self.assertTrue(
+            any(
+                item.startswith("Не определено: ")
+                for item in result.missing_inputs
+            )
         )
+        self.assertEqual(result.totals, {})
 
     def test_offline_result_exports_are_created(self) -> None:
         result = FinanceRunResult(

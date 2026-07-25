@@ -1,10 +1,10 @@
-execution_state_id: WB-RELEASE-R2-LIVE-v4
+execution_state_id: WB-RELEASE-R2-LIVE-v5
 updated_on: 2026-07-25
 source_of_truth_for_live_unit_state: true
 program_namespace: WBR2
 program_name: WB_RELEASE_R2
 current_unit: WBR2-M5
-current_phase: PHYSICAL_L5_PREPARATION
+current_phase: UNIVERSAL_PARTIAL_EXACT_HEAD_VALIDATION
 release_status: RELEASE_BLOCKED
 marketplace_mode: READ_ONLY
 marketplace_write_capability: DISABLED
@@ -87,6 +87,34 @@ units:
     state: UNASSIGNED_NOT_AUTHORIZED
     reason: NO_APPROVED_SOURCE_DEFINES_THIS_UNIT
 
+universal_partial_cycle:
+  id: QUANTUM-UNIVERSAL-PARTIAL-R1
+  role: USER_AUTHORIZED_CORRECTIVE_AUDIT_NOT_WBR2_M6
+  immutable_base_exact_head: f251c9325e701b6cf3de127111b86fe8e2d71269
+  rtm_first_exact_head: a300184c673f79f15e37eb388ef41c4a85773f2a
+  candidate_head: RESOLVE_FROM_GIT
+  state: CANDIDATE_AWAITING_EXACT_HEAD_VALIDATION
+  intake_contract: ACCEPT_EVERY_FILE_REGISTER_EVERY_RESULT
+  supported_structured_extraction:
+    - XLSX
+    - XLSM
+    - CSV_TSV_DELIMITED_TEXT
+    - JSON_TABLE
+    - XML_TABLE
+    - ZIP
+    - TAR
+    - TAR_GZ_TGZ
+    - GZIP
+    - BZIP2
+    - XZ
+  unsupported_optional_adapter_archives:
+    - RAR
+    - 7Z
+  calculation_contract: MAXIMUM_AVAILABLE_DEPENDENCY_SCOPED
+  unknown_semantics: NEVER_INFER
+  main_merge_authorized: false
+  release_authorized: false
+
 audit_cycle:
   id: QUANTUM-FULL-PROJECT-REDTEAM-R1
   role: CROSS_MILESTONE_AUDIT_NOT_WBR2_M6
@@ -104,7 +132,7 @@ release_candidate:
   static_state_claim: DOES_NOT_PREDECLARE_DYNAMIC_BUILD_PASS
   intended_scope: WB_ONLY_READ_ONLY
   physical_installation: NOT_STARTED
-  financial_profile: USER_INPUT_REQUIRED_AT_RUNTIME
+  financial_profile: PARTIAL_USER_INPUT_ALLOWED_AT_RUNTIME
   financial_values_hardcoded: false
   required_user_inputs:
     - tax_rate_percent
@@ -112,7 +140,7 @@ release_candidate:
     - other_expense_per_unit
     - group_cost_per_unit
     - report-missing return/compensation/discount/subsidy/advertising values
-  missing_or_invalid_required_values: CALCULATION_BLOCKED_FAIL_CLOSED
+  missing_or_invalid_required_values: BLOCK_DEPENDENT_METRICS_ONLY
   local_persistence: REQUIRED_AFTER_EXPLICIT_SAVE
   authenticode: REQUIRED_WHERE_APPLICABLE
 

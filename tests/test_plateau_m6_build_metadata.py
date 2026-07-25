@@ -58,6 +58,7 @@ class PlateauM6BuildMetadataTests(unittest.TestCase):
                         "pip",
                         "wheel",
                         "--no-deps",
+                        "--no-build-isolation",
                         "--no-cache-dir",
                         "--wheel-dir",
                         directory,

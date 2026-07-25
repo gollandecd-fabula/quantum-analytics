@@ -16,6 +16,11 @@ OVERLAY = (
     / "docs/evidence"
     / "ARTIFACT_MANIFEST_OVERLAY_WBR2_M5_CLOSURE_R2.json"
 )
+UNIVERSAL_OVERLAY_PATH = (
+    ROOT
+    / "docs/evidence"
+    / "ARTIFACT_MANIFEST_OVERLAY_UNIVERSAL_PARTIAL_R1.json"
+)
 
 
 class Wbr2M5ClosureCorrectiveR2Tests(unittest.TestCase):
@@ -75,8 +80,21 @@ class Wbr2M5ClosureCorrectiveR2Tests(unittest.TestCase):
             "8323094c94b08894063b7e89b033c640a38e6910",
         )
         rows = {row[0]: row for row in load_effective_manifest()["artifacts"]}
-        for path, digest, size in overlay["entries"]:
-            self.assertEqual(rows[path], [path, digest, size])
+        universal = json.loads(
+            UNIVERSAL_OVERLAY_PATH.read_text(encoding="utf-8")
+        )
+        final = {
+            path: [path, digest, size]
+            for path, digest, size in overlay["entries"]
+        }
+        final.update(
+            {
+                path: [path, digest, size]
+                for path, digest, size in universal["entries"]
+            }
+        )
+        for path, _digest, _size in overlay["entries"]:
+            self.assertEqual(rows[path], final[path])
 
 
 if __name__ == "__main__":

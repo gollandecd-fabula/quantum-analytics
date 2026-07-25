@@ -116,15 +116,15 @@ def _archive(entries: dict[str, bytes]) -> bytes:
 
 
 class UniversalGatewayTests(unittest.TestCase):
-    def test_valid_xlsx_routes_to_existing_xlsx_pipeline(self):
+    def test_valid_xlsx_routes_to_universal_table_pipeline(self):
         decision = classify_payload(_baseline_xlsx(), ".xlsx")
-        self.assertEqual(decision.status, "ROUTE_XLSX")
-        self.assertEqual(decision.route, "XLSX")
+        self.assertEqual(decision.status, "ACCEPTED_PARTIAL")
+        self.assertEqual(decision.route, "UNIVERSAL_TABLES")
         self.assertEqual(decision.detected_format, "XLSX")
 
     def test_standard_relationship_type_uri_is_not_treated_as_external_target(self):
         decision = classify_payload(_baseline_xlsx(), ".xlsx")
-        self.assertEqual(decision.status, "ROUTE_XLSX")
+        self.assertEqual(decision.status, "ACCEPTED_PARTIAL")
 
     def test_external_relationship_is_quarantined(self):
         payload = _archive(

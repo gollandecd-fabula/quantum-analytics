@@ -124,17 +124,16 @@ class M2RuntimeDependencyModernizationTests(unittest.TestCase):
         self.assertIn("Get-AuthenticodeSignature", workflow)
 
     def test_atomic_json_closes_temp_file_before_replace(self) -> None:
-        source = read("src/quantum/application/_finance_profile_groups.py")
-        with_position = source.index("with tempfile.NamedTemporaryFile(")
-        replace_position = source.index("os.replace(temporary, path)")
-        block_end = source.index("    except Exception:", with_position)
-        self.assertGreater(replace_position, with_position)
-        self.assertLess(replace_position, block_end)
-        replace_line = next(
-            line for line in source.splitlines()
-            if "os.replace(temporary, path)" in line
-        )
-        self.assertEqual(replace_line, "        os.replace(temporary, path)")
+        source = read("src/quantum/application/finance_profile.py")
+        function_start = source.index("def _atomic_profile_json(")
+        function_end = source.index("\n\ndef _commit_saved_profile", function_start)
+        function = source[function_start:function_end]
+        fdopen_position = function.index("with _os.fdopen(")
+        replace_position = function.index("_replace_with_retry(temporary, path)")
+        self.assertGreater(replace_position, fdopen_position)
+        self.assertIn("handle.flush()", function)
+        self.assertIn("_os.fsync(handle.fileno())", function)
+        self.assertIn("_validate_staged_profile(temporary)", function)
 
     def test_finance_fsync_uses_write_capable_handle_on_windows(self) -> None:
         source = read("src/quantum/application/_finance_center_calculation.py")

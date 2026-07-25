@@ -262,6 +262,9 @@ class FinanceRunResult:
     group_results: tuple[GroupCalculation, ...]
     totals: dict[str, str]
     missing_inputs: tuple[str, ...]
+    metric_states: dict[str, dict[str, Any]] = field(default_factory=dict)
+    coverage: dict[str, Any] = field(default_factory=dict)
+    unresolved_scopes: tuple[dict[str, Any], ...] = ()
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -279,6 +282,12 @@ class FinanceRunResult:
             ],
             "totals": dict(self.totals),
             "missing_inputs": list(self.missing_inputs),
+            "metric_states": {
+                key: dict(value)
+                for key, value in sorted(self.metric_states.items())
+            },
+            "coverage": dict(self.coverage),
+            "unresolved_scopes": [dict(item) for item in self.unresolved_scopes],
             "marketplace_write_enabled": False,
         }
 

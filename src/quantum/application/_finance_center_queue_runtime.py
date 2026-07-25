@@ -272,7 +272,7 @@ class FinanceCenterQueueRuntimeMixin:
                         result.source_path = managed
                         result.details["managed_source_path"] = str(managed)
                         try:
-                            products = detect_products_from_xlsx(managed)
+                            products = detect_products_from_any_file(managed)
                         except FinanceProfileError as exc:
                             result.details["product_detection_error"] = exc.code
                         except Exception as exc:

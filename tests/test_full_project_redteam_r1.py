@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import ast
 import json
+import sys
 from pathlib import Path
+from types import SimpleNamespace
 import tempfile
 import unittest
 from unittest.mock import patch
@@ -249,7 +251,15 @@ class FullProjectRedTeamR1Tests(unittest.TestCase):
                 ),
                 encoding="utf-8",
             )
-            result = desktop_self_test(root, config)
+            fake_tk = SimpleNamespace(TkVersion=8.6)
+            with (
+                patch.dict(sys.modules, {"tkinter": fake_tk}),
+                patch(
+                    "quantum.application._finance_center_shared.tk",
+                    fake_tk,
+                ),
+            ):
+                result = desktop_self_test(root, config)
         self.assertEqual(
             result["status"],
             "DESKTOP_CENTER_SELF_TEST_CONFIGURATION_REQUIRED",
@@ -275,7 +285,15 @@ class FullProjectRedTeamR1Tests(unittest.TestCase):
                 ),
                 encoding="utf-8",
             )
-            result = desktop_self_test(root, config)
+            fake_tk = SimpleNamespace(TkVersion=8.6)
+            with (
+                patch.dict(sys.modules, {"tkinter": fake_tk}),
+                patch(
+                    "quantum.application._finance_center_shared.tk",
+                    fake_tk,
+                ),
+            ):
+                result = desktop_self_test(root, config)
         self.assertEqual(result["status"], "DESKTOP_CENTER_SELF_TEST_PASS")
 
 

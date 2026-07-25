@@ -1,0 +1,147 @@
+name: Universal Intake and Partial Calculation R1
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/universal-partial-r1.yml"
+      - "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_UNIVERSAL_PARTIAL_R1.json"
+      - "docs/evidence/UNIVERSAL_PARTIAL_R1_DEFECT_REGISTER.json"
+      - "docs/evidence/UNIVERSAL_PARTIAL_R1_RTM.json"
+      - "docs/evidence/WB_RELEASE_R2_EXECUTION_STATE.yaml"
+      - "docs/governance/CURRENT_STATE.md"
+      - "src/**"
+      - "tests/**"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: universal-partial-r1-${{ github.event.pull_request.head.sha || github.sha }}
+  cancel-in-progress: true
+
+env:
+  TARGET_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+  BASE_SHA: f251c9325e701b6cf3de127111b86fe8e2d71269
+  RTM_SHA: a300184c673f79f15e37eb388ef41c4a85773f2a
+  PYTHONDONTWRITEBYTECODE: "1"
+  PYTHONUTF8: "1"
+
+jobs:
+  scope:
+    name: RTM ancestry and exact scope
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact head
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ env.TARGET_SHA }}
+          fetch-depth: 3
+      - name: Assert RTM-first two-commit construction
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$TARGET_SHA"
+          test "$(git rev-parse HEAD^)" = "$RTM_SHA"
+          test "$(git rev-parse HEAD^^)" = "$BASE_SHA"
+          test "$(git rev-list --count "$BASE_SHA"..HEAD)" = "2"
+          test "$(git diff --name-only HEAD^^..HEAD^)" = "docs/evidence/UNIVERSAL_PARTIAL_R1_RTM.json"
+          mapfile -t actual < <(git diff --name-only "$BASE_SHA"..HEAD | sort)
+          mapfile -t expected <<'PATHS'
+          .github/workflows/universal-partial-r1.yml
+          docs/evidence/ARTIFACT_MANIFEST_OVERLAY_UNIVERSAL_PARTIAL_R1.json
+          docs/evidence/UNIVERSAL_PARTIAL_R1_DEFECT_REGISTER.json
+          docs/evidence/UNIVERSAL_PARTIAL_R1_RTM.json
+          docs/evidence/WB_RELEASE_R2_EXECUTION_STATE.yaml
+          docs/governance/CURRENT_STATE.md
+          src/quantum/application/_finance_center_calculation.py
+          src/quantum/application/_finance_center_dialog.py
+          src/quantum/application/_finance_center_pages.py
+          src/quantum/application/_finance_center_persistence.py
+          src/quantum/application/_finance_center_queue_runtime.py
+          src/quantum/application/_finance_center_reports.py
+          src/quantum/application/_finance_center_self_test.py
+          src/quantum/application/_finance_center_shared.py
+          src/quantum/application/_finance_generic_tabular.py
+          src/quantum/application/_finance_profile_engine.py
+          src/quantum/application/_finance_profile_financial_rows.py
+          src/quantum/application/_finance_profile_model.py
+          src/quantum/application/_finance_profile_outputs.py
+          src/quantum/application/_finance_schema_review.py
+          src/quantum/application/finance_profile.py
+          src/quantum/pilot/universal_intake.py
+          src/quantum/pilot/universal_tables.py
+          tests/integration_manifest_support_m8.py
+          tests/test_finance_center_profile.py
+          tests/test_finance_profile_block_reasons.py
+          tests/test_full_project_redteam_r1.py
+          tests/test_m2_runtime_dependency_modernization.py
+          tests/test_plateau_m1_runtime_integration.py
+          tests/test_plateau_m2_financial_integration.py
+          tests/test_plateau_m4_schema_review.py
+          tests/test_plateau_m5_self_test.py
+          tests/test_plateau_m6_build_metadata.py
+          tests/test_quantum_reaudit_plateau_r1.py
+          tests/test_universal_any_file_contract_r4.py
+          tests/test_universal_ingestion_r4.py
+          tests/test_universal_intake_hardening_r4.py
+          tests/test_universal_partial_r1.py
+          tests/test_wbr2_m5_closure.py
+          tests/test_wbr2_m5_closure_corrective_r2.py
+          PATHS
+          diff -u <(printf '%s\n' "${expected[@]}" | sort) <(printf '%s\n' "${actual[@]}")
+
+  linux:
+    name: Linux full source and adversarial corpus
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - name: Checkout exact head
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ env.TARGET_SHA }}
+          fetch-depth: 1
+      - name: Compile production source
+        run: python3 -m compileall -q src/quantum
+      - name: Run universal and partial focused contracts
+        run: PYTHONPATH=src python3 -m unittest tests.test_universal_partial_r1 -v
+      - name: Run complete source CI
+        run: PYTHONPATH=src python3 -m quantum.scripts.ci
+      - name: Verify read-only boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'marketplace_writes: DISABLED' docs/evidence/WB_RELEASE_R2_EXECUTION_STATE.yaml
+          grep -q 'ozon: DEFERRED' docs/evidence/WB_RELEASE_R2_EXECUTION_STATE.yaml
+          grep -q 'gatekeeper: DISCONNECTED' docs/evidence/WB_RELEASE_R2_EXECUTION_STATE.yaml
+
+  windows:
+    name: Windows full source, archive and UI-source corpus
+    runs-on: windows-2025
+    timeout-minutes: 35
+    steps:
+      - name: Disable Git CRLF conversion
+        shell: pwsh
+        run: git config --global core.autocrlf false
+      - name: Checkout exact head
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ env.TARGET_SHA }}
+          fetch-depth: 1
+      - name: Set up Python 3.13.14
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.13.14"
+      - name: Run universal and partial focused contracts
+        shell: pwsh
+        run: |
+          $env:PYTHONPATH = (Resolve-Path "src").Path
+          python -m unittest tests.test_universal_partial_r1 -v
+          if ($LASTEXITCODE -ne 0) { throw "UPR1 Windows focused corpus failed" }
+      - name: Run complete source CI
+        shell: pwsh
+        run: |
+          $env:PYTHONPATH = (Resolve-Path "src").Path
+          python -m quantum.scripts.ci
+          if ($LASTEXITCODE -ne 0) { throw "UPR1 Windows complete source CI failed" }
