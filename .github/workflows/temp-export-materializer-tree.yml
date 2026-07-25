@@ -1,0 +1,39 @@
+name: Temporary Export Materializer Tree
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/temp-export-materializer-tree.yml"
+      - ".github/workflows/temp-materialize-upr1.yml"
+      - "tools/upr1-patch/**"
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact PR head
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 1
+      - name: Archive exact tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          git archive --format=zip --output="$RUNNER_TEMP/materializer-tree.zip" HEAD
+          sha256sum "$RUNNER_TEMP/materializer-tree.zip" > "$RUNNER_TEMP/materializer-tree.sha256"
+          git rev-parse HEAD > "$RUNNER_TEMP/materializer-head.txt"
+      - name: Upload exact tree
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: UPR1-Materializer-Tree-${{ github.event.pull_request.head.sha }}
+          path: |
+            ${{ runner.temp }}/materializer-tree.zip
+            ${{ runner.temp }}/materializer-tree.sha256
+            ${{ runner.temp }}/materializer-head.txt
+          if-no-files-found: error
+          retention-days: 2
