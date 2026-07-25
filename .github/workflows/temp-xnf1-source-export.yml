@@ -1,0 +1,36 @@
+name: Temporary XNF1 Exact Source Export
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/temp-xnf1-source-export.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact XNF1 base
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: a4e7957c661f46f87c408da7f347fcbbcdc49414
+          fetch-depth: 1
+      - name: Assert and archive exact source
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "a4e7957c661f46f87c408da7f347fcbbcdc49414"
+          git archive --format=zip --output="$RUNNER_TEMP/xnf1-base-source.zip" HEAD
+          sha256sum "$RUNNER_TEMP/xnf1-base-source.zip" > "$RUNNER_TEMP/xnf1-base-source.sha256"
+      - name: Upload exact source
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: XNF1-Exact-Base-Source-a4e7957c
+          path: |
+            ${{ runner.temp }}/xnf1-base-source.zip
+            ${{ runner.temp }}/xnf1-base-source.sha256
+          if-no-files-found: error
+          retention-days: 2
