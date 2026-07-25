@@ -69,7 +69,7 @@ class PlateauM4SchemaReviewTests(unittest.TestCase):
                 [["SKU-1", "Продажа", "1", "1000", "800"]],
             )
             preview = build_schema_review_preview(source, config)
-            self.assertTrue(preview.requires_schema_review)
+            self.assertFalse(preview.requires_schema_review)
             self.assertEqual("Sheet1", preview.sheet_name)
             self.assertEqual(2, preview.header_row_index)
             self.assertEqual(5, preview.column_count)
@@ -82,6 +82,7 @@ class PlateauM4SchemaReviewTests(unittest.TestCase):
             self.assertIn("Артикул продавца", text)
             self.assertIn("2026-07-01 — 2026-07-07", text)
             self.assertIn(preview.file_sha256, text)
+            self.assertIn("универс", text.casefold())
 
     def test_non_xlsx_file_never_receives_schema_attestation(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

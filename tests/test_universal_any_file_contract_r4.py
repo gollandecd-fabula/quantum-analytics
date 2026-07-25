@@ -50,17 +50,22 @@ class UniversalAnyFileContractR4Tests(unittest.TestCase):
         pdf = classify_payload(b"%PDF-1.4\n%%EOF", ".json")
         self.assertEqual(pdf.detected_format, "PDF")
 
-    def test_opaque_containers_fail_closed(self):
-        cases = (
+    def test_opaque_security_formats_quarantine_but_safe_archives_continue(self):
+        for payload in (
             b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1" + b"0" * 64,
-            make_zip({"plain.txt": b"plain"}),
-            make_zip({"nested.zip": make_zip({"data.txt": b"data"})}),
             b"%PDF-1.7\n<</OpenAction 1 0 R /JavaScript true>>",
-        )
-        for payload in cases:
+        ):
             self.assertEqual(
                 classify_payload(payload, ".dat").status,
                 "QUARANTINED_SECURITY",
+            )
+        for payload in (
+            make_zip({"plain.txt": b"plain"}),
+            make_zip({"nested.zip": make_zip({"data.txt": b"data"})}),
+        ):
+            self.assertIn(
+                classify_payload(payload, ".zip").status,
+                {"ACCEPTED_UNPARSED", "ACCEPTED_PARTIAL"},
             )
 
     def test_corrupted_inputs_return_controlled_status(self):

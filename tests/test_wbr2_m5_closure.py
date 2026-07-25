@@ -21,6 +21,11 @@ CORRECTIVE_R2_OVERLAY_PATH = (
     / "docs/evidence"
     / "ARTIFACT_MANIFEST_OVERLAY_WBR2_M5_CLOSURE_R2.json"
 )
+UNIVERSAL_OVERLAY_PATH = (
+    ROOT
+    / "docs/evidence"
+    / "ARTIFACT_MANIFEST_OVERLAY_UNIVERSAL_PARTIAL_R1.json"
+)
 
 
 class Wbr2M5ClosureContracts(unittest.TestCase):
@@ -84,6 +89,15 @@ class Wbr2M5ClosureContracts(unittest.TestCase):
             {
                 path: [path, digest, size]
                 for path, digest, size in corrective["entries"]
+            }
+        )
+        universal = json.loads(
+            UNIVERSAL_OVERLAY_PATH.read_text(encoding="utf-8")
+        )
+        expected.update(
+            {
+                path: [path, digest, size]
+                for path, digest, size in universal["entries"]
             }
         )
         for path in (entry[0] for entry in overlay["entries"]):

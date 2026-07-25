@@ -1,0 +1,132 @@
+{
+  "register_id": "QUANTUM-UNIVERSAL-PARTIAL-R1-DEFECTS",
+  "created_on": "2026-07-25",
+  "immutable_base_exact_head": "f251c9325e701b6cf3de127111b86fe8e2d71269",
+  "rtm_first_exact_head": "a300184c673f79f15e37eb388ef41c4a85773f2a",
+  "candidate_head": "RESOLVE_FROM_GIT",
+  "claim_boundary": "All entries are candidate fixes until exact-head Linux, hosted Windows, installer and native installed-runtime evidence pass.",
+  "summary": {
+    "open_p0": 0,
+    "open_p1": 0,
+    "open_reproducible_p2_correctness": 0,
+    "fixed_p0": 2,
+    "fixed_p1": 7,
+    "fixed_p2": 3
+  },
+  "defects": [
+    {
+      "id": "UPR1-001",
+      "severity": "P1",
+      "title": "Safe archives were excluded unless they contained one XLSX",
+      "baseline": "ZIP archives with CSV, JSON, XML, multiple spreadsheets or mixed safe members were registered but excluded from finance.",
+      "fix": "Resource-bounded recursive extraction for ZIP, TAR, TAR.GZ/TGZ, GZIP, BZIP2 and XZ; per-member results preserve safe siblings.",
+      "status": "FIXED_IN_CANDIDATE"
+    },
+    {
+      "id": "UPR1-002",
+      "severity": "P1",
+      "title": "Unknown products or unattributed rows globally blocked the period",
+      "baseline": "Any unresolved attribution returned CALCULATION_BLOCKED with no group calculations.",
+      "fix": "Known scopes calculate independently; unresolved scopes remain visible with reason codes and are excluded from complete totals.",
+      "status": "FIXED_IN_CANDIDATE"
+    },
+    {
+      "id": "UPR1-003",
+      "severity": "P1",
+      "title": "Financial profile could not be saved partially",
+      "baseline": "Saving tax while cost was unknown, or cost while tax was unknown, was rejected.",
+      "fix": "Provided values are validated and normalized; missing values persist as missing and block only dependent metrics.",
+      "status": "FIXED_IN_CANDIDATE"
+    },
+    {
+      "id": "UPR1-004",
+      "severity": "P1",
+      "title": "Safe XLSX was routed through a specific schema-review prerequisite",
+      "baseline": "A workbook could require a particular sheet/header review before processing.",
+      "fix": "Every safe XLSX/XLSM is processed as a universal table source; discovered sheet/header information is shown without requiring one report schema.",
+      "status": "FIXED_IN_CANDIDATE"
+    },
+    {
+      "id": "UPR1-005",
+      "severity": "P1",
+      "title": "Universal GUI calculation path referenced an unavailable symbol",
+      "baseline": "The UI could raise NameError when invoking calculate_metric_groups.",
+      "fix": "The shared runtime explicitly exports the universal partial calculation function and the GUI path is regression-tested.",
+      "status": "FIXED_IN_CANDIDATE"
+    },
+    {
+      "id": "UPR1-006",
+      "severity": "P0",
+      "title": "Partial pre-tax and tax coverage could produce a misleading net-profit total",
+      "baseline": "Totals could combine amounts computed over different product/source coverage.",
+      "fix": "Net profit and per-unit profit require equal dependency coverage; otherwise the metric is BLOCKED with a coverage-mismatch reason.",
+      "status": "FIXED_IN_CANDIDATE"
+    },
+    {
+      "id": "UPR1-007",
+      "severity": "P0",
+      "title": "Overlapping source values could be selected or combined without explicit conflict",
+      "baseline": "Multiple files providing the same metric did not always expose incompatible coverage or values.",
+      "fix": "Complementary metrics merge; overlapping independent evidence becomes CONFLICT and is never silently selected or summed.",
+      "status": "FIXED_IN_CANDIDATE"
+    },
+    {
+      "id": "UPR1-008",
+      "severity": "P1",
+      "title": "Partial results were represented as a global block",
+      "baseline": "Calculated figures, missing figures and needed inputs were not consistently separated in all outputs.",
+      "fix": "Metric states VALID/PARTIAL/BLOCKED, coverage and unresolved scopes are consistent in GUI, JSON, XLSX and HTML.",
+      "status": "FIXED_IN_CANDIDATE"
+    },
+    {
+      "id": "UPR1-009",
+      "severity": "P1",
+      "title": "Result persistence depended on a non-canonical imported atomic writer",
+      "baseline": "save_run_result could fail depending on wildcard export composition.",
+      "fix": "Finance engine owns a bounded canonical atomic JSON writer.",
+      "status": "FIXED_IN_CANDIDATE"
+    },
+    {
+      "id": "UPR1-010",
+      "severity": "P2",
+      "title": "Filename suffix could override actual safe text content",
+      "baseline": "A CSV renamed .json or .bin could be rejected or misclassified.",
+      "fix": "Content classification precedes extension hints, while malformed genuine JSON/XML remains explicitly invalid.",
+      "status": "FIXED_IN_CANDIDATE"
+    },
+    {
+      "id": "UPR1-011",
+      "severity": "P2",
+      "title": "Unsupported RAR and 7z could be confused with generic binary failures",
+      "baseline": "Operator feedback did not clearly identify optional-adapter archive formats.",
+      "fix": "RAR and 7z are registered as unsupported archives with an explicit optional-adapter reason; content is not guessed.",
+      "status": "FIXED_IN_CANDIDATE"
+    },
+    {
+      "id": "UPR1-012",
+      "severity": "P2",
+      "title": "Unconfigured self-test used a stale known-answer count representation",
+      "baseline": "A valid integer count of 2 was compared with 2.00 and could produce a false technical failure.",
+      "fix": "Known-answer self-test uses the canonical integer representation and preserves CONFIGURATION_REQUIRED as distinct from FAILED.",
+      "status": "FIXED_IN_CANDIDATE"
+    }
+  ],
+  "security_boundary": {
+    "blocked": [
+      "path traversal",
+      "symlink archive members",
+      "encrypted ZIP entries",
+      "unsupported compression methods",
+      "compression bombs",
+      "entry and aggregate size overflow",
+      "active executable/script content",
+      "XML entity declarations"
+    ],
+    "not_claimed": [
+      "OCR of images or scanned PDF",
+      "native RAR or 7z extraction without an installed adapter",
+      "semantic interpretation of arbitrary unknown columns",
+      "physical operator L5"
+    ]
+  }
+}

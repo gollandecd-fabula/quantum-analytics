@@ -537,7 +537,8 @@ class FinanceProfileDialog:
         self.owner.profile_save_blocked = False
         self.owner.refresh_finance_summary()
         self.owner.set_status(
-            "Финансовый профиль сохранён. Можно запускать расчёт.",
+            "Профиль сохранён. Quantum рассчитает все показатели, для "
+            "которых данных достаточно.",
             "success",
         )
         self.window.destroy()
