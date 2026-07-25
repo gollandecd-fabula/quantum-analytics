@@ -1,0 +1,110 @@
+name: WBR2 M5 Closure Corrective R2
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/wbr2-m5-closure-corrective-r2.yml"
+      - "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_WBR2_M5_CLOSURE_R2.json"
+      - "docs/evidence/WBR2_M5_CLOSURE_CORRECTIVE_R2_RTM.json"
+      - "docs/evidence/WB_RELEASE_R2_EXECUTION_STATE.yaml"
+      - "docs/governance/CURRENT_STATE.md"
+      - "tests/integration_manifest_support_m8.py"
+      - "tests/test_wbr2_m5_closure.py"
+      - "tests/test_wbr2_m5_closure_corrective_r2.py"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: wbr2-m5-closure-r2-${{ github.event.pull_request.head.sha || github.sha }}
+  cancel-in-progress: true
+
+env:
+  TARGET_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+  BASE_SHA: c8e4126bb987df878fe2b3039eaf5e0376cc3796
+  PYTHONDONTWRITEBYTECODE: "1"
+  PYTHONUTF8: "1"
+
+jobs:
+  scope:
+    name: Corrective R2 ancestry and scope
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact head
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ env.TARGET_SHA }}
+          fetch-depth: 3
+      - name: Assert exact head, ancestry and allow-list
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$TARGET_SHA"
+          test "$(git rev-parse HEAD^^)" = "$BASE_SHA"
+          test "$(git diff --name-only HEAD^^..HEAD^)" = "docs/evidence/WBR2_M5_CLOSURE_CORRECTIVE_R2_RTM.json"
+          test "$(git rev-list --count "$BASE_SHA"..HEAD)" = "2"
+          mapfile -t actual < <(git diff --name-only "$BASE_SHA"..HEAD | sort)
+          mapfile -t expected <<'EOF'
+          .github/workflows/wbr2-m5-closure-corrective-r2.yml
+          docs/evidence/ARTIFACT_MANIFEST_OVERLAY_WBR2_M5_CLOSURE_R2.json
+          docs/evidence/WBR2_M5_CLOSURE_CORRECTIVE_R2_RTM.json
+          docs/evidence/WB_RELEASE_R2_EXECUTION_STATE.yaml
+          docs/governance/CURRENT_STATE.md
+          tests/integration_manifest_support_m8.py
+          tests/test_wbr2_m5_closure.py
+          tests/test_wbr2_m5_closure_corrective_r2.py
+          EOF
+          diff -u <(printf '%s\n' "${expected[@]}" | sort) <(printf '%s\n' "${actual[@]}")
+          if printf '%s\n' "${actual[@]}" | grep -q '^src/'; then
+            echo "Product runtime path changed during corrective R2" >&2
+            exit 1
+          fi
+
+  linux:
+    name: Corrective R2 Linux source
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact head
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ env.TARGET_SHA }}
+          fetch-depth: 1
+      - name: Run focused corrective contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH=src python3 -m unittest tests.test_wbr2_m5_closure_corrective_r2 -v
+      - name: Run complete source CI
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH=src python3 -m quantum.scripts.ci
+
+  windows:
+    name: Corrective R2 Windows source
+    runs-on: windows-2025
+    timeout-minutes: 25
+    steps:
+      - name: Disable Git CRLF conversion
+        shell: pwsh
+        run: git config --global core.autocrlf false
+      - name: Checkout exact head
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ env.TARGET_SHA }}
+          fetch-depth: 1
+      - name: Set up Python 3.13.14
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.13.14"
+      - name: Run focused corrective contracts
+        shell: pwsh
+        run: |
+          $env:PYTHONPATH = (Resolve-Path "src").Path
+          python -m unittest tests.test_wbr2_m5_closure_corrective_r2 -v
+          if ($LASTEXITCODE -ne 0) {
+            throw "WBR2 closure corrective R2 Windows contracts failed."
+          }

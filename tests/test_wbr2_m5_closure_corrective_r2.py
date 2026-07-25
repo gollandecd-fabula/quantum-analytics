@@ -1,0 +1,83 @@
+from __future__ import annotations
+
+import json
+from pathlib import Path
+import unittest
+
+from tests.integration_manifest_support_m8 import load_effective_manifest
+
+
+ROOT = Path(__file__).resolve().parents[1]
+STATE = ROOT / "docs/evidence/WB_RELEASE_R2_EXECUTION_STATE.yaml"
+CURRENT = ROOT / "docs/governance/CURRENT_STATE.md"
+RTM = ROOT / "docs/evidence/WBR2_M5_CLOSURE_CORRECTIVE_R2_RTM.json"
+OVERLAY = (
+    ROOT
+    / "docs/evidence"
+    / "ARTIFACT_MANIFEST_OVERLAY_WBR2_M5_CLOSURE_R2.json"
+)
+
+
+class Wbr2M5ClosureCorrectiveR2Tests(unittest.TestCase):
+    def test_rtm_is_corrective_only(self) -> None:
+        rtm = json.loads(RTM.read_text(encoding="utf-8"))
+        self.assertEqual(rtm["rtm_id"], "WBR2-M5-CLOSURE-CORRECTIVE-R2")
+        self.assertEqual(
+            rtm["capability_gate"]["result"],
+            "PASS_FOR_GOVERNANCE_CORRECTIVE_ONLY",
+        )
+        self.assertIn("src/** changes", rtm["forbidden"])
+
+    def test_static_self_reference_is_removed(self) -> None:
+        state = STATE.read_text(encoding="utf-8")
+        self.assertNotIn("working_branch_exact_head:", state)
+        self.assertIn(
+            "validated_product_exact_head: "
+            "5e0e52c0141c5860ea108ba515a073094037ad72",
+            state,
+        )
+        self.assertIn("containing_governance_head: RESOLVE_FROM_GIT", state)
+        self.assertIn(
+            "build_evidence_authority: "
+            "GITHUB_ACTIONS_AT_CONTAINING_GIT_HEAD",
+            state,
+        )
+        self.assertIn(
+            "static_state_claim: DOES_NOT_PREDECLARE_DYNAMIC_BUILD_PASS",
+            state,
+        )
+
+    def test_safety_and_compatibility_markers_remain(self) -> None:
+        state = STATE.read_text(encoding="utf-8")
+        current = CURRENT.read_text(encoding="utf-8")
+        for marker in (
+            "state: VALIDATED_IN_WORKING_BRANCH",
+            "state: VALIDATED_CANDIDATE_NOT_INTEGRATED",
+            "state: UNASSIGNED_NOT_AUTHORIZED",
+            "scope: WB_ONLY",
+            "ozon: DEFERRED",
+            "gatekeeper: DISCONNECTED",
+            "marketplace_writes: DISABLED",
+            "release: BLOCKED",
+            "physical_user_path_l5: UNVERIFIED",
+        ):
+            self.assertIn(marker, state)
+        self.assertIn(
+            "AUTHORIZED_FOR_CLOSED_PILOT_PENDING_ADMISSION_CONTROLS",
+            current,
+        )
+        self.assertIn("does not predeclare a dynamic build PASS", current)
+
+    def test_r2_overlay_is_effective(self) -> None:
+        overlay = json.loads(OVERLAY.read_text(encoding="utf-8"))
+        self.assertEqual(
+            overlay["base_m5_closure_r1_overlay_git_blob_sha"],
+            "8323094c94b08894063b7e89b033c640a38e6910",
+        )
+        rows = {row[0]: row for row in load_effective_manifest()["artifacts"]}
+        for path, digest, size in overlay["entries"]:
+            self.assertEqual(rows[path], [path, digest, size])
+
+
+if __name__ == "__main__":
+    unittest.main()

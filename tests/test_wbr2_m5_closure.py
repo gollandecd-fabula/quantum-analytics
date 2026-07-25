@@ -16,6 +16,11 @@ OVERLAY_PATH = (
     / "docs/evidence"
     / "ARTIFACT_MANIFEST_OVERLAY_WBR2_M5_CLOSURE_R1.json"
 )
+CORRECTIVE_R2_OVERLAY_PATH = (
+    ROOT
+    / "docs/evidence"
+    / "ARTIFACT_MANIFEST_OVERLAY_WBR2_M5_CLOSURE_R2.json"
+)
 
 
 class Wbr2M5ClosureContracts(unittest.TestCase):
@@ -61,14 +66,28 @@ class Wbr2M5ClosureContracts(unittest.TestCase):
 
     def test_closure_overlay_is_effective(self) -> None:
         overlay = json.loads(OVERLAY_PATH.read_text(encoding="utf-8"))
+        corrective = json.loads(
+            CORRECTIVE_R2_OVERLAY_PATH.read_text(encoding="utf-8")
+        )
         self.assertEqual(
             overlay["base_m5_r100_overlay_git_blob_sha"],
             "914a10017125e025eb86968a52b028dfabb05ef2",
         )
+        self.assertEqual(
+            corrective["base_m5_closure_r1_overlay_git_blob_sha"],
+            "8323094c94b08894063b7e89b033c640a38e6910",
+        )
         manifest = load_effective_manifest()
         rows = {row[0]: row for row in manifest["artifacts"]}
-        for path, digest, size in overlay["entries"]:
-            self.assertEqual(rows[path], [path, digest, size])
+        expected = {path: [path, digest, size] for path, digest, size in overlay["entries"]}
+        expected.update(
+            {
+                path: [path, digest, size]
+                for path, digest, size in corrective["entries"]
+            }
+        )
+        for path in (entry[0] for entry in overlay["entries"]):
+            self.assertEqual(rows[path], expected[path])
 
 
 if __name__ == "__main__":

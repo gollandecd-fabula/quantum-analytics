@@ -9,7 +9,8 @@ release_status: RELEASE_BLOCKED
 marketplace_mode: READ_ONLY
 marketplace_write_capability: DISABLED
 working_branch: fix/quantum-wb-release-r2
-working_branch_exact_head: 5e0e52c0141c5860ea108ba515a073094037ad72
+validated_product_exact_head: 5e0e52c0141c5860ea108ba515a073094037ad72
+containing_governance_head: RESOLVE_FROM_GIT
 main_branch_changed: false
 
 precedence:
@@ -84,7 +85,8 @@ units:
 
 release_candidate:
   source_product_exact_head: 5e0e52c0141c5860ea108ba515a073094037ad72
-  status: BUILD_AND_IDENTITY_VERIFICATION_REQUIRED_AT_CLOSURE_EXACT_HEAD
+  build_evidence_authority: GITHUB_ACTIONS_AT_CONTAINING_GIT_HEAD
+  static_state_claim: DOES_NOT_PREDECLARE_DYNAMIC_BUILD_PASS
   intended_scope: WB_ONLY_READ_ONLY
   physical_installation: NOT_STARTED
   financial_profile: USER_OR_ACCOUNTANT_CONFIRMATION_REQUIRED
