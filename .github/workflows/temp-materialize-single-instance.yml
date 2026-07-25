@@ -1,0 +1,50 @@
+name: Materialize Full Red Team R1 Single Instance
+
+on:
+  push:
+    branches:
+      - tmp/materialize-full-redteam-r1-single-instance
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    if: github.event.head_commit.message != 'Materialize Full Red Team R1 single-instance repair'
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout helper branch
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: tmp/materialize-full-redteam-r1-single-instance
+          fetch-depth: 0
+
+      - name: Apply verified repair
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/temp_materialize_single_instance.py
+
+      - name: Verify materialized repair
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m compileall -q src tests
+          PYTHONPATH=src python3 -m unittest -v tests.test_full_project_redteam_r1
+          PYTHONPATH=src python3 -m quantum.scripts.ci
+
+      - name: Commit materialized blobs
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            docs/evidence/FULL_PROJECT_REDTEAM_R1_DEFECT_REGISTER.json \
+            docs/evidence/ARTIFACT_MANIFEST_OVERLAY_FULL_PROJECT_REDTEAM_R1.json \
+            src/quantum/application/_finance_center_dialog.py \
+            src/quantum/application/_finance_center_reports.py \
+            src/quantum/application/_finance_center_shell.py \
+            tests/test_full_project_redteam_r1.py
+          git commit -m "Materialize Full Red Team R1 single-instance repair"
+          git push origin HEAD:tmp/materialize-full-redteam-r1-single-instance
