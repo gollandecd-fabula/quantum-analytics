@@ -1,10 +1,10 @@
-execution_state_id: WB-RELEASE-R2-LIVE-v3
+execution_state_id: WB-RELEASE-R2-LIVE-v4
 updated_on: 2026-07-25
 source_of_truth_for_live_unit_state: true
 program_namespace: WBR2
 program_name: WB_RELEASE_R2
 current_unit: WBR2-M5
-current_phase: RELEASE_CANDIDATE_PREPARATION
+current_phase: PHYSICAL_L5_PREPARATION
 release_status: RELEASE_BLOCKED
 marketplace_mode: READ_ONLY
 marketplace_write_capability: DISABLED
@@ -16,6 +16,11 @@ main_branch_changed: false
 precedence:
   live_state_artifact: docs/evidence/WB_RELEASE_R2_EXECUTION_STATE.yaml
   current_state_pointer: docs/governance/CURRENT_STATE.md
+  current_task_correction:
+    costs: USER_INPUT_NOT_CONSTANT
+    tax_rate_and_model: USER_INPUT_NOT_CONSTANT
+    other_expenses: USER_INPUT_NOT_CONSTANT
+    required_interface: EDITABLE_FIELDS_OR_DIALOGS
   historical_stage_b:
     path: docs/evidence/STAGE_B_EXECUTION_STATE.yaml
     git_blob_sha: e132b51f2dae47777d379304731e1b7738d47aac
@@ -69,7 +74,6 @@ units:
     validation_pr_merged: false
     working_branch_fast_forward: COMPLETE
     exact_head_gate_set: PASS_WITH_GOV_CONSTRUCTION_SCOPE_NA
-    product_code_changes_after_validation: NONE
     evidence:
       m5_linux_sha256: da83f9e69aa6ad5c52caeef428d4591ead62e875cf9fb8d7fd0ff2477dd14625
       m5_windows_sha256: 3b4c1c4a34af9c845ff07e4c221291362a574e4ee8975470f45893996a7ebc49
@@ -83,13 +87,33 @@ units:
     state: UNASSIGNED_NOT_AUTHORIZED
     reason: NO_APPROVED_SOURCE_DEFINES_THIS_UNIT
 
+audit_cycle:
+  id: QUANTUM-FULL-PROJECT-REDTEAM-R1
+  role: CROSS_MILESTONE_AUDIT_NOT_WBR2_M6
+  immutable_base_exact_head: b8e94e8cdf3f2b2179193c752fd17a1a52fb6690
+  rtm_first_exact_head: 30e52ea175eea627bb7469ba0142463d921237a2
+  candidate_head: RESOLVE_FROM_GIT
+  state: CANDIDATE_AWAITING_EXACT_HEAD_VALIDATION
+  source_changes: FINANCE_PROFILE_UI_RESILIENCE_AND_SELF_TEST_STATUS
+  main_merge_authorized: false
+  release_authorized: false
+
 release_candidate:
-  source_product_exact_head: 5e0e52c0141c5860ea108ba515a073094037ad72
+  source_identity: CONTAINING_GIT_HEAD_AFTER_EXACT_HEAD_VALIDATION
   build_evidence_authority: GITHUB_ACTIONS_AT_CONTAINING_GIT_HEAD
   static_state_claim: DOES_NOT_PREDECLARE_DYNAMIC_BUILD_PASS
   intended_scope: WB_ONLY_READ_ONLY
   physical_installation: NOT_STARTED
-  financial_profile: USER_OR_ACCOUNTANT_CONFIRMATION_REQUIRED
+  financial_profile: USER_INPUT_REQUIRED_AT_RUNTIME
+  financial_values_hardcoded: false
+  required_user_inputs:
+    - tax_rate_percent
+    - tax_base_metric_id
+    - other_expense_per_unit
+    - group_cost_per_unit
+    - report-missing return/compensation/discount/subsidy/advertising values
+  missing_or_invalid_required_values: CALCULATION_BLOCKED_FAIL_CLOSED
+  local_persistence: REQUIRED_AFTER_EXPLICIT_SAVE
   authenticode: REQUIRED_WHERE_APPLICABLE
 
 superseded_wbr2_pull_requests:
@@ -117,4 +141,5 @@ boundaries:
   deployment: NOT_AUTHORIZED
   release: BLOCKED
   physical_user_path_l5: UNVERIFIED
-  tax_regime_and_tax_base: USER_OR_ACCOUNTANT_CONFIRMATION_REQUIRED
+  financial_values: USER_ENTERED_AND_EDITABLE_NOT_CONSTANTS
+  visual_operator_acceptance: UNVERIFIED_UNTIL_PHYSICAL_L5

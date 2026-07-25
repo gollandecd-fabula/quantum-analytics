@@ -7,11 +7,8 @@ from datetime import UTC, datetime
 from decimal import Decimal, InvalidOperation
 from hashlib import sha256
 from io import BytesIO
-import json
-import os
 from pathlib import Path
 import re
-import tempfile
 from typing import Any
 from xml.etree import ElementTree
 from zipfile import ZIP_DEFLATED, ZipFile
@@ -299,48 +296,6 @@ def confirm_profile(profile: FinanceProfile) -> None:
     profile.confirmed = True
     profile.updated_at = datetime.now(UTC).isoformat()
 
-
-def _atomic_json(path: Path, payload: Mapping[str, Any]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    encoded = json.dumps(
-        payload,
-        ensure_ascii=False,
-        sort_keys=True,
-        indent=2,
-        allow_nan=False,
-    ).encode("utf-8")
-    temporary: Path | None = None
-    try:
-        with tempfile.NamedTemporaryFile(
-            dir=path.parent,
-            delete=False,
-        ) as handle:
-            temporary = Path(handle.name)
-            handle.write(encoded)
-            handle.flush()
-            os.fsync(handle.fileno())
-        os.replace(temporary, path)
-    except Exception:
-        if temporary is not None:
-            temporary.unlink(missing_ok=True)
-        raise
-
-
-def save_profile(path: Path, profile: FinanceProfile) -> None:
-    confirm_profile(profile)
-    _atomic_json(path, profile.to_dict())
-
-
-def load_profile(path: Path) -> FinanceProfile | None:
-    if not path.is_file():
-        return None
-    try:
-        raw = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
-        raise FinanceProfileError("FINANCE_PROFILE_READ_FAILED") from exc
-    if not isinstance(raw, Mapping):
-        raise FinanceProfileError("FINANCE_PROFILE_INVALID")
-    return FinanceProfile.from_dict(raw)
 
 
 __all__ = [name for name in globals() if not name.startswith("__")]

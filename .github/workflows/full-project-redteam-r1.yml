@@ -1,0 +1,136 @@
+name: Full Project Red Team R1
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/full-project-redteam-r1.yml"
+      - "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_FULL_PROJECT_REDTEAM_R1.json"
+      - "docs/evidence/FULL_PROJECT_REDTEAM_R1_DEFECT_REGISTER.json"
+      - "docs/evidence/FULL_PROJECT_REDTEAM_R1_RTM.json"
+      - "docs/evidence/WB_RELEASE_R2_EXECUTION_STATE.yaml"
+      - "docs/governance/CURRENT_STATE.md"
+      - "src/quantum/application/_finance_center_dialog.py"
+      - "src/quantum/application/_finance_center_reports.py"
+      - "src/quantum/application/_finance_center_self_test.py"
+      - "src/quantum/application/_finance_center_shared.py"
+      - "src/quantum/application/_finance_center_shell.py"
+      - "src/quantum/application/_finance_profile_groups.py"
+      - "src/quantum/application/desktop_center.py"
+      - "src/quantum/application/finance_profile.py"
+      - "tests/integration_manifest_support_m8.py"
+      - "tests/test_full_project_redteam_r1.py"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: full-project-redteam-r1-${{ github.event.pull_request.head.sha || github.sha }}
+  cancel-in-progress: true
+
+env:
+  TARGET_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+  BASE_SHA: b8e94e8cdf3f2b2179193c752fd17a1a52fb6690
+  RTM_SHA: 30e52ea175eea627bb7469ba0142463d921237a2
+  PYTHONDONTWRITEBYTECODE: "1"
+  PYTHONUTF8: "1"
+
+jobs:
+  scope:
+    name: RTM ancestry and exact scope
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact head
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ env.TARGET_SHA }}
+          fetch-depth: 3
+      - name: Assert RTM-first two-commit construction
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$TARGET_SHA"
+          test "$(git rev-parse HEAD^)" = "$RTM_SHA"
+          test "$(git rev-parse HEAD^^)" = "$BASE_SHA"
+          test "$(git rev-list --count "$BASE_SHA"..HEAD)" = "2"
+          test "$(git diff --name-only HEAD^^..HEAD^)" = "docs/evidence/FULL_PROJECT_REDTEAM_R1_RTM.json"
+          mapfile -t actual < <(git diff --name-only "$BASE_SHA"..HEAD | sort)
+          mapfile -t expected <<'PATHS'
+          .github/workflows/full-project-redteam-r1.yml
+          docs/evidence/ARTIFACT_MANIFEST_OVERLAY_FULL_PROJECT_REDTEAM_R1.json
+          docs/evidence/FULL_PROJECT_REDTEAM_R1_DEFECT_REGISTER.json
+          docs/evidence/FULL_PROJECT_REDTEAM_R1_RTM.json
+          docs/evidence/WB_RELEASE_R2_EXECUTION_STATE.yaml
+          docs/governance/CURRENT_STATE.md
+          src/quantum/application/_finance_center_dialog.py
+          src/quantum/application/_finance_center_reports.py
+          src/quantum/application/_finance_center_self_test.py
+          src/quantum/application/_finance_center_shared.py
+          src/quantum/application/_finance_center_shell.py
+          src/quantum/application/_finance_profile_groups.py
+          src/quantum/application/desktop_center.py
+          src/quantum/application/finance_profile.py
+          tests/integration_manifest_support_m8.py
+          tests/test_full_project_redteam_r1.py
+          PATHS
+          diff -u <(printf '%s\n' "${expected[@]}" | sort) <(printf '%s\n' "${actual[@]}")
+
+  linux:
+    name: Linux focused and complete source CI
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - name: Checkout exact head
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ env.TARGET_SHA }}
+          fetch-depth: 1
+      - name: Compile production source
+        run: python3 -m compileall -q src/quantum
+      - name: Run focused Red Team contracts
+        run: PYTHONPATH=src python3 -m unittest tests.test_full_project_redteam_r1 -v
+      - name: Run complete source CI
+        run: PYTHONPATH=src python3 -m quantum.scripts.ci
+
+  windows:
+    name: Windows finance and UI-source Red Team
+    runs-on: windows-2025
+    timeout-minutes: 30
+    steps:
+      - name: Disable Git CRLF conversion
+        shell: pwsh
+        run: git config --global core.autocrlf false
+      - name: Checkout exact head
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ env.TARGET_SHA }}
+          fetch-depth: 1
+      - name: Set up Python 3.13.14
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.13.14"
+      - name: Run focused Red Team contracts
+        shell: pwsh
+        run: |
+          $env:PYTHONPATH = (Resolve-Path "src").Path
+          python -m unittest tests.test_full_project_redteam_r1 -v
+          if ($LASTEXITCODE -ne 0) { throw "Focused Windows Red Team failed" }
+      - name: Verify ready and configuration-required self-test states
+        shell: pwsh
+        run: |
+          $env:PYTHONPATH = (Resolve-Path "src").Path
+          @'
+          import json
+          from pathlib import Path
+          from tempfile import TemporaryDirectory
+          from quantum.application.desktop_center import self_test
+          with TemporaryDirectory() as directory:
+              root = Path(directory)
+              config = root / "config.json"
+              config.write_text(json.dumps({"configuration_status":"READY","tenant_id":"tenant","execution_mode":"ADMISSION_ONLY"}), encoding="utf-8")
+              assert self_test(root, config)["status"] == "DESKTOP_CENTER_SELF_TEST_PASS"
+              config.write_text(json.dumps({"configuration_status":"REQUIRES_USER_VALUES","tenant_id":"tenant","execution_mode":"ADMISSION_ONLY"}), encoding="utf-8")
+              assert self_test(root, config)["status"] == "DESKTOP_CENTER_SELF_TEST_CONFIGURATION_REQUIRED"
+          '@ | python -
+          if ($LASTEXITCODE -ne 0) { throw "Windows self-test status contract failed" }

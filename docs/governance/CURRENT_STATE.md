@@ -8,7 +8,7 @@ Current phase: `PHYSICAL_L5_PREPARATION`
 Release status: `RELEASE_BLOCKED`  
 Working branch: `fix/quantum-wb-release-r2`  
 Validated product head: `5e0e52c0141c5860ea108ba515a073094037ad72`  
-Containing governance head: resolved from Git; not self-referenced in this file  
+Containing governance/audit head: resolved from Git; not self-referenced here  
 Marketplace writes: `DISABLED`  
 Ozon: `DEFERRED`  
 Gatekeeper: `DISCONNECTED`
@@ -49,25 +49,41 @@ Validation PR #129 closed with `merged=false`; issue #124 closed as completed.
   M8, standalone L4, M3 same-artifact A/B, installer and Native Red Team;
 - recorded in Validation PR #130, which closed with `merged=false`.
 
-No product or `src/**` change is made by this closure unit.
-
 No `WBR2-M6` is assigned or authorized.
+
+## Full-project Red Team R1
+
+A cross-milestone audit was started from immutable working head
+`b8e94e8cdf3f2b2179193c752fd17a1a52fb6690`.
+
+Its RTM-first commit is
+`30e52ea175eea627bb7469ba0142463d921237a2`.
+
+This is an audit and corrective cycle, not an invented `WBR2-M6`. The candidate
+must pass exact-head Linux, hosted Windows, manifest, installer, installed-runtime
+and same-artifact gates before integration into the working branch.
+
+The audit explicitly enforces the latest financial-input requirement:
+
+- tax rate and tax base/model are entered and changed by the user;
+- cost per product/group is entered and changed by the user;
+- other expenses and applicable missing report values are entered by the user;
+- no business value is silently prefilled or hard-coded;
+- empty or invalid mandatory values block calculation fail-closed;
+- profile changes affect calculations only after explicit successful Save.
+
+Candidate fixes cover staged dialog editing, corrupt-profile recovery, bounded
+window geometry, profile resource limits, removal of duplicate persistence and
+a distinct `CONFIGURATION_REQUIRED` self-test state. They are not authoritative
+until the exact candidate head passes validation.
 
 ## Release-candidate evidence
 
 The exact containing Git head is the only valid source identity for an RC build.
 This static file does not predeclare a dynamic build PASS. Authoritative RC
 evidence is a successful GitHub Actions installer run whose `head_sha` equals
-the containing governance head, together with downloaded artifact hashes and
-native self-test evidence.
-
-Before physical L5, that exact-head evidence must show:
-
-- the two Windows installer bundles and EXE were built;
-- the source commit matches the containing Git head;
-- WB_ONLY and marketplace writes disabled;
-- native EXE self-test PASS;
-- SHA-256 identities retained externally.
+the containing Git head, together with downloaded artifact hashes and native
+self-test evidence.
 
 The release candidate remains read-only and WB-only. It cannot write to a
 marketplace.
@@ -79,12 +95,13 @@ production release authorization and does not override `RELEASE_BLOCKED`.
 ## Evidence boundary
 
 Repository, Linux and hosted Windows evidence do not establish physical
-installation or real-report execution on the operator computer.
+installation, real monitor usability or real-report execution on the operator
+computer.
 
 The following remain blocked or unverified:
 
 - physical installation and real-report user path, L5;
-- applicable tax regime and tax base confirmation;
+- physical verification of user-entered financial values and persistence;
 - Authenticode signing where required;
 - merge into `main`;
 - deployment or production release;

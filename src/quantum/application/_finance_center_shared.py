@@ -29,6 +29,7 @@ from quantum.application.finance_profile import (
     ProductRecord,
     TAX_BASE_OPTIONS,
     apply_costs,
+    backup_corrupt_profile,
     build_profile,
     calculate_by_group,
     detect_products_from_xlsx,
@@ -134,13 +135,71 @@ def self_test(root: Path, config: Path) -> dict[str, object]:
     checks = result.get("checks")
     if isinstance(checks, dict):
         checks["tkinter_available"] = tk is not None
+        previous_status = result.get("status")
         passed = all(value is True for value in checks.values())
+        configuration_required = (
+            previous_status
+            == "FINANCE_CENTER_SELF_TEST_CONFIGURATION_REQUIRED"
+            and tk is not None
+            and all(
+                value is True
+                for name, value in checks.items()
+                if name != "config_valid"
+            )
+        )
         result["status"] = (
             "FINANCE_CENTER_SELF_TEST_PASS"
             if passed
-            else "FINANCE_CENTER_SELF_TEST_FAILED"
+            else (
+                "FINANCE_CENTER_SELF_TEST_CONFIGURATION_REQUIRED"
+                if configuration_required
+                else "FINANCE_CENTER_SELF_TEST_FAILED"
+            )
         )
     return result
+
+
+def bounded_window_geometry(
+    screen_width: int,
+    screen_height: int,
+    preferred_width: int,
+    preferred_height: int,
+    minimum_width: int,
+    minimum_height: int,
+    *,
+    margin: int = 32,
+) -> tuple[str, tuple[int, int]]:
+    """Return centered geometry that never exceeds the usable screen."""
+    width_limit = max(320, int(screen_width) - (margin * 2))
+    height_limit = max(240, int(screen_height) - (margin * 2))
+    width = min(max(320, int(preferred_width)), width_limit)
+    height = min(max(240, int(preferred_height)), height_limit)
+    x = max(0, (int(screen_width) - width) // 2)
+    y = max(0, (int(screen_height) - height) // 2)
+    minimum = (
+        min(max(320, int(minimum_width)), width),
+        min(max(240, int(minimum_height)), height),
+    )
+    return f"{width}x{height}+{x}+{y}", minimum
+
+
+def apply_bounded_window_geometry(
+    window: Any,
+    preferred_width: int,
+    preferred_height: int,
+    minimum_width: int,
+    minimum_height: int,
+) -> None:
+    geometry, minimum = bounded_window_geometry(
+        window.winfo_screenwidth(),
+        window.winfo_screenheight(),
+        preferred_width,
+        preferred_height,
+        minimum_width,
+        minimum_height,
+    )
+    window.geometry(geometry)
+    window.minsize(*minimum)
 
 
 __all__ = [name for name in globals() if not name.startswith("__")]

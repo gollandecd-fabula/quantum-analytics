@@ -1,0 +1,264 @@
+{
+  "rtm_id": "QUANTUM-FULL-PROJECT-REDTEAM-R1",
+  "created_on": "2026-07-25",
+  "immutable_base_exact_head": "b8e94e8cdf3f2b2179193c752fd17a1a52fb6690",
+  "working_branch": "audit/quantum-full-redteam-r1",
+  "purpose": "Re-audit the entire WB-only local pilot from its authoritative requirements through source, UI, runtime, installer and evidence; repair confirmed defects without inventing a new product milestone.",
+  "source_precedence": [
+    "Explicit user instructions in the current task and latest correction",
+    "docs/evidence/WB_RELEASE_R2_EXECUTION_STATE.yaml",
+    "docs/governance/CURRENT_STATE.md",
+    "README.md",
+    "approved architecture and pilot documents",
+    "validated milestone RTMs and defect registers",
+    "executable code and tests"
+  ],
+  "latest_user_correction": {
+    "costs": "USER_INPUT_NOT_CONSTANT",
+    "tax_rate_and_model": "USER_INPUT_NOT_CONSTANT",
+    "other_expenses": "USER_INPUT_NOT_CONSTANT",
+    "required_ui_behavior": "EDITABLE_FIELDS_OR_DIALOGS_WITH_LOCAL_PERSISTENCE_AND_FAIL_CLOSED_VALIDATION"
+  },
+  "capability_gate": {
+    "repository_read_and_patch": "SUPPORTED",
+    "full_tracked_tree_inventory": "SUPPORTED_VIA_GITHUB_COMPARE_AND_MANIFEST",
+    "source_static_analysis": "SUPPORTED_VIA_GITHUB_ACTIONS",
+    "linux_runtime_tests": "SUPPORTED_VIA_GITHUB_ACTIONS",
+    "hosted_windows_runtime_tests": "SUPPORTED_VIA_GITHUB_ACTIONS",
+    "windows_installer_build_and_native_smoke": "SUPPORTED_VIA_GITHUB_ACTIONS",
+    "ui_source_review": "SUPPORTED",
+    "hosted_windows_ui_smoke": "SUPPORTED_WITH_LIMITS",
+    "visual_human_usability_on_operator_monitor": "NOT_ESTABLISHED_UNTIL_PHYSICAL_L5",
+    "real_operator_files_and_environment": "NOT_AVAILABLE_UNTIL_PHYSICAL_L5",
+    "authenticode_certificate": "NOT_AVAILABLE",
+    "physical_l5": "EXTERNAL_BLOCKER_NOT_CLAIMABLE",
+    "main_merge": "NOT_AUTHORIZED",
+    "production_release": "NOT_AUTHORIZED",
+    "marketplace_writes": "FORBIDDEN",
+    "ozon_activation": "FORBIDDEN",
+    "gatekeeper_connection": "FORBIDDEN"
+  },
+  "milestones": [
+    {
+      "id": "FR1-M0",
+      "title": "Source-of-truth and repository reconstruction",
+      "requirements": [
+        "Enumerate the complete tracked project delta and active runtime surfaces",
+        "Resolve contradictory plans, stale states and superseded milestone claims",
+        "Preserve WB_ONLY, READ_ONLY, Ozon deferred, Gatekeeper disconnected and marketplace writes disabled",
+        "Prove the audit branch descends exactly from the immutable base"
+      ],
+      "tests": [
+        "source-precedence contract",
+        "branch ancestry check",
+        "tracked-path inventory",
+        "duplicate live-state pointer check"
+      ],
+      "pass_criteria": "One unambiguous current source of truth and complete auditable scope inventory",
+      "status": "IN_PROGRESS"
+    },
+    {
+      "id": "FR1-M1",
+      "title": "Finance model and user-input contract",
+      "requirements": [
+        "No hard-coded or silently prefilled cost, tax or other-expense business values",
+        "Tax rate is user-editable",
+        "Tax base/model is user-selectable",
+        "Other expense per unit is user-editable",
+        "Cost per product or group is user-editable",
+        "Return, compensation, advertising, discount and subsidy inputs are user-editable where used",
+        "Required missing values block calculation",
+        "Invalid, negative, non-finite or malformed values fail closed",
+        "Profile confirmation and persistence are explicit",
+        "Changing a saved profile changes subsequent calculations without code changes",
+        "Decimal arithmetic and rounding are deterministic",
+        "Return-cost rules do not double count compensated units"
+      ],
+      "tests": [
+        "empty-profile block tests",
+        "editable-field source and UI contract tests",
+        "profile round-trip and corrupt-profile recovery tests",
+        "property tests for decimal inputs and boundaries",
+        "return/compensation mutation tests",
+        "absence-of-business-default static scan"
+      ],
+      "pass_criteria": "All financial values originate from explicit user input or imported evidence and no required value is invented",
+      "status": "NOT_STARTED"
+    },
+    {
+      "id": "FR1-M2",
+      "title": "Interface and usability Red Team",
+      "requirements": [
+        "Financial profile is reachable from the main decision screen",
+        "Every editable value has a visible label and validation feedback",
+        "Calculate action cannot bypass incomplete profile validation",
+        "User can edit, save, reopen and change values",
+        "Keyboard navigation and Enter/Escape behavior are safe",
+        "Dialogs remain usable at common Windows scaling and smaller screens",
+        "Long product/group lists are scrollable",
+        "Errors are actionable and do not expose tracebacks as the only feedback",
+        "Queue controls and report actions expose correct enabled/disabled state",
+        "Cyrillic paths and values render and persist correctly",
+        "Closing dialogs cannot partially save invalid data",
+        "Single-instance and repeated-click behavior do not create duplicate operations"
+      ],
+      "tests": [
+        "Tk widget construction smoke",
+        "dialog source contract inspection",
+        "headless/hosted Windows interaction probes",
+        "focus/order and button-state tests",
+        "small-screen geometry assertions",
+        "repeated-click and reentrancy tests"
+      ],
+      "pass_criteria": "Hosted Windows UI path is executable and no confirmed source-level usability blocker remains; physical visual acceptance remains L5",
+      "status": "NOT_STARTED"
+    },
+    {
+      "id": "FR1-M3",
+      "title": "Input admission, storage and persistence",
+      "requirements": [
+        "Only admitted XLSX content reaches calculations",
+        "Malformed, oversized, compressed-bomb, traversal and unsafe workbook inputs fail closed",
+        "Duplicate files are idempotent",
+        "Source copies and derived outputs are atomic and recoverable",
+        "Corrupt configuration does not silently reset to invented values",
+        "Concurrent queue and scheduler operations cannot corrupt state",
+        "Paths with spaces, Unicode and long names are handled",
+        "No raw commercial data is sent to external models or services"
+      ],
+      "tests": [
+        "malformed workbook corpus",
+        "archive and XML limit mutation tests",
+        "duplicate and concurrent import tests",
+        "atomic-write interruption tests",
+        "corrupt JSON recovery tests",
+        "network-call and marketplace-write static scan"
+      ],
+      "pass_criteria": "All input and persistence paths are deterministic, local and fail closed",
+      "status": "NOT_STARTED"
+    },
+    {
+      "id": "FR1-M4",
+      "title": "Calculation, outputs and recommendations",
+      "requirements": [
+        "Observed WB metrics map to the correct calculation fields",
+        "Unassigned expenses remain visible and are not silently allocated",
+        "Excel, HTML and JSON totals reconcile",
+        "Weekly and monthly periods use complete deterministic boundaries",
+        "Scheduled and manual runs are idempotent",
+        "Output packages are SHA-256 bound and atomically published",
+        "Recommendations distinguish evidence, assumptions and forecast",
+        "Missing evidence lowers confidence or blocks claims",
+        "No unsupported profit or growth promise is emitted"
+      ],
+      "tests": [
+        "cross-output reconciliation",
+        "period-boundary and timezone tests",
+        "idempotence and interrupted-publish tests",
+        "recommendation evidence-boundary tests",
+        "negative/zero/extreme amount tests"
+      ],
+      "pass_criteria": "All outputs reconcile to one calculation result and claims do not exceed evidence",
+      "status": "NOT_STARTED"
+    },
+    {
+      "id": "FR1-M5",
+      "title": "Installer, security and offline boundaries",
+      "requirements": [
+        "Installer is built from the exact audited head",
+        "Native self-test passes after installation",
+        "Repair/reinstall preserves config, data and output",
+        "Uninstall and rollback behavior are documented",
+        "Installed launchers resolve the managed runtime correctly",
+        "Microsoft Defender is not required to be disabled",
+        "No marketplace write capability is enabled",
+        "No Ozon or Gatekeeper activation is introduced",
+        "Unsigned Quantum EXE is disclosed and not represented as signed"
+      ],
+      "tests": [
+        "build-once same-artifact A/B",
+        "installed-runtime L4",
+        "native one-button Red Team",
+        "repair preservation sentinels",
+        "package inventory and exact-head binding",
+        "offline/network boundary scan"
+      ],
+      "pass_criteria": "One exact-head Windows candidate passes all applicable hosted installation gates",
+      "status": "NOT_STARTED"
+    },
+    {
+      "id": "FR1-M6",
+      "title": "Adversarial plateau cycle",
+      "requirements": [
+        "Search for stale constants, unreachable code, duplicated implementations and contradictory states",
+        "Inject malformed values and interrupted operations",
+        "Review exception swallowing, race windows and unsafe fallback behavior",
+        "Repeat Red Team until no new P0/P1 and no reproducible P2 correctness defect is found",
+        "Record every rejected candidate and exact reason"
+      ],
+      "tests": [
+        "static anti-pattern scan",
+        "mutation tests",
+        "randomized financial profile tests",
+        "workflow contradiction scan",
+        "two consecutive exact-head validation runs where practical"
+      ],
+      "pass_criteria": "Technical plateau: zero open P0/P1, zero known reproducible calculation/data-loss defects, and all applicable gates pass",
+      "status": "NOT_STARTED"
+    },
+    {
+      "id": "FR1-M7",
+      "title": "Final exact-head evidence and integration decision",
+      "requirements": [
+        "Validate the final exact head on Linux and hosted Windows",
+        "Bind installer and evidence artifacts to the final exact head",
+        "Update live state without predeclaring dynamic PASS",
+        "Keep main merge and production release unauthorized",
+        "Fast-forward the working branch only after validation PR closes unmerged"
+      ],
+      "tests": [
+        "Foundation",
+        "OSS Admission",
+        "M4 and M5 regressions",
+        "M7 security/performance",
+        "M8 clean environment",
+        "L4 installed runtime",
+        "M3 same-artifact A/B",
+        "installer and Native Red Team"
+      ],
+      "pass_criteria": "Final audit head is validated and safely integrated into the working branch without main merge",
+      "status": "NOT_STARTED"
+    },
+    {
+      "id": "FR1-M8",
+      "title": "Physical L5 operator pilot",
+      "requirements": [
+        "Install on the operator computer",
+        "Verify real display scaling, Defender behavior and shortcuts",
+        "Enter user-selected finance values through the interface",
+        "Run real WB reports and manually reconcile sampled results",
+        "Verify persistence after restart and scheduled reports"
+      ],
+      "tests": [
+        "physical user-path checklist",
+        "real-report reconciliation",
+        "operator acceptance"
+      ],
+      "pass_criteria": "Physical pilot PASS on the actual operator computer",
+      "status": "EXTERNAL_NOT_STARTED"
+    }
+  ],
+  "severity_policy": {
+    "P0": "data loss, unsafe external write, incorrect financial result without warning, security boundary breach or inability to start",
+    "P1": "major required workflow unavailable, persistent incorrect output, installer/repair failure or critical UI blocker",
+    "P2": "recoverable correctness, resilience or usability defect",
+    "P3": "non-blocking maintainability, wording or cosmetic issue"
+  },
+  "claim_boundary": {
+    "complete_without_physical_l5": "TECHNICAL_PLATEAU_READY_FOR_PHYSICAL_PILOT",
+    "fully_ready_without_errors": "NOT_CLAIMABLE_ABSOLUTELY; claim is limited to tested scope and known-defect register",
+    "release": "BLOCKED",
+    "physical_l5": "UNVERIFIED"
+  },
+  "initial_status": "RTM_AND_CAPABILITY_GATE_COMPLETE_EXECUTION_NOT_YET_STARTED"
+}
