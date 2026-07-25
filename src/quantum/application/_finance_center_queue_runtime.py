@@ -293,6 +293,11 @@ class FinanceCenterQueueRuntimeMixin:
                 event, row_id, payload = self.events.get_nowait()
             except queue.Empty:
                 break
+            if event.startswith("scheduled_report_"):
+                handler = getattr(self, "_handle_scheduled_report_event", None)
+                if callable(handler):
+                    handler(event, row_id, payload)
+                continue
             if event != "done":
                 continue
             row, products = payload

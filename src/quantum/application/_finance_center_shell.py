@@ -23,6 +23,7 @@ class FinanceCenterShellMixin:
         self.process_lock = threading.Lock()
         self.active_process: subprocess.Popen[object] | None = None
         self.profile_changed_pending = False
+        self.scheduled_report_busy = False
         self.closing = False
         self.counter = 0
         self.pages: dict[str, ttk.Frame] = {}

@@ -315,6 +315,33 @@ class FinanceCenterPagesMixin:
             text="Подробности",
             command=self.show_selected_details,
         ).pack(side=tk.LEFT, padx=7)
+
+        scheduled = ttk.Frame(page)
+        scheduled.pack(fill=tk.X, pady=(0, 10))
+        self.weekly_report_button = ttk.Button(
+            scheduled,
+            text="Сформировать недельный отчёт",
+            command=self.run_weekly_scheduled_report,
+        )
+        self.weekly_report_button.pack(side=tk.LEFT)
+        self.monthly_report_button = ttk.Button(
+            scheduled,
+            text="Сформировать месячный отчёт",
+            command=self.run_monthly_scheduled_report,
+        )
+        self.monthly_report_button.pack(side=tk.LEFT, padx=7)
+        self.enable_schedule_button = ttk.Button(
+            scheduled,
+            text="Включить расписание 08:00",
+            command=self.enable_scheduled_reports,
+        )
+        self.enable_schedule_button.pack(side=tk.LEFT)
+        ttk.Button(
+            scheduled,
+            text="Открыть автоматические отчёты",
+            command=self.open_scheduled_reports_folder,
+        ).pack(side=tk.LEFT, padx=7)
+
         columns = ("file", "status", "format", "progress", "comment")
         self.report_tree = ttk.Treeview(page, columns=columns, show="headings")
         headings = {

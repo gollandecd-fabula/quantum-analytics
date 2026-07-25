@@ -3,6 +3,7 @@
 Date: 2026-07-25  
 Live program: `WB_RELEASE_R2`  
 Live namespace: `WBR2`  
+Current unit: `WBR2-M5 — Scheduled weekly and monthly reports`  
 Release status: `RELEASE_BLOCKED`  
 Working branch: `fix/quantum-wb-release-r2`  
 Marketplace writes: `DISABLED`  
@@ -15,50 +16,52 @@ The only live execution-state artifact is:
 
 - `docs/evidence/WB_RELEASE_R2_EXECUTION_STATE.yaml`
 
-`docs/evidence/STAGE_B_EXECUTION_STATE.yaml` is preserved byte-for-byte as a
-historical Stage-B snapshot. Its older internal `source_of_truth` declaration is
-superseded by the later, explicitly scoped WB Release R2 pointer above. Historical
-Stage-B milestone labels must not be used as live WB Release R2 identities.
+`docs/evidence/STAGE_B_EXECUTION_STATE.yaml` remains the byte-identical
+historical Stage-B snapshot. Its older internal live declaration is superseded
+by the WBR2 pointer.
 
 ## Historical Stage-B compatibility markers
 
-The following literal markers are retained only for compatibility with historical
-Stage-B regression contracts. They do **not** override the authoritative WBR2 live
-pointer above:
+These literal markers are retained only for historical regression compatibility
+and do not override the WBR2 live pointer:
 
 Status: `TECHNICAL_PLATEAU_CANDIDATE`  
 Live execution state: `docs/evidence/STAGE_B_EXECUTION_STATE.yaml`  
 Current unit: `M9 — Historical Stage-B plateau snapshot`
 
-## Current integrated product baseline
+## Completed WBR2 governance reconciliation
 
-The current integrated product/runtime baseline before this governance
-reconciliation is:
+`WBR2-GOV-R1` was validated at:
 
-`d89c29edfa93ecc61290a0fdeb9e218214638f7d`
+`96e96a88cbb16ef6e0ca2219f2f4abff372b0f2e`
 
-It contains the validated WB Release R2 sequence through:
+Validation PR #129 closed with `merged=false`; issue #124 closed as completed.
+The Stage-B snapshot was preserved, one WBR2 live-state was established and
+superseded WBR2 construction PRs were closed unmerged.
 
-- `WBR2-M0` — baseline and release integrity;
-- `WBR2-M1` — re-audit corrections;
-- `WBR2-M2` — runtime dependency modernization;
-- `WBR2-M3` — build-once and same-artifact verification;
-- `WBR2-M4` — governed automatic incoming folder;
-- `WBR2-M4-CORRECTIVE-R99` — bounded state and post-move digest correction.
+## Current product implementation unit
 
-## Next product milestone
+`WBR2-M5 — Scheduled weekly and monthly reports` is implemented by the
+containing commit directly above governance head
+`96e96a88cbb16ef6e0ca2219f2f4abff372b0f2e`.
 
-The next approved product milestone is:
+The containing exact head is resolved from Git rather than self-referenced in
+this file. It must pass all mandatory exact-head workflows and its validation
+PR must close with `merged=false` before the working branch may advance.
 
-`WBR2-M5 — Scheduled weekly and monthly reports`
+M5 adds:
 
-Its approved source is `docs/evidence/M5_SCHEDULED_REPORTS_RTM.json` at validated
-candidate `1563b9c9de6a78142930719073f43e2b931eaa6e` / PR #128.
-
-That candidate passed its exact-head workflows but is **not contained in the
-working branch**. Plan reconciliation does not integrate it. Because the
-governance head changes first, WBR2-M5 must be rebuilt and revalidated as one
-direct-parent commit over the reconciled governance head.
+- deterministic previous completed Monday-Sunday week selection;
+- deterministic previous completed calendar month selection;
+- exact non-overlapping source coverage enforcement;
+- SHA-256-bound input identity and idempotent package reuse;
+- atomic Excel, dashboard, finance JSON, recommendation JSON, text summary and
+  manifest publication;
+- bounded scheduled-run outcome state and missed-run recovery;
+- Windows Task Scheduler as an external trigger of the same governed command;
+- manual weekly/monthly generation and schedule controls on the existing
+  `Отчёты` page;
+- background execution coordinated with the existing import queue.
 
 No `WBR2-M6` is assigned or authorized.
 
@@ -70,13 +73,13 @@ JSON, Excel and HTML output. It has no marketplace-write capability.
 
 ## Evidence boundary
 
-This reconciliation may establish repository/source and hosted Windows runtime
-evidence for governance controls. It does not establish a physical user path on
-the operator computer.
+Exact-head repository, Linux and hosted Windows evidence may support WBR2-M5.
+This does not establish physical installation or real-report execution on the
+operator computer.
 
 Historical closed-pilot authorization marker retained for compatibility:
-`AUTHORIZED_FOR_CLOSED_PILOT_PENDING_ADMISSION_CONTROLS`. This is not a production
-release authorization and remains subject to the recorded admission controls.
+`AUTHORIZED_FOR_CLOSED_PILOT_PENDING_ADMISSION_CONTROLS`. This is not a
+production release authorization.
 
 The following remain blocked or unverified:
 
