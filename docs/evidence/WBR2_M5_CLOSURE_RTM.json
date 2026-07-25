@@ -1,0 +1,83 @@
+{
+  "rtm_id": "WBR2-M5-CLOSURE-R1",
+  "created_on": "2026-07-25",
+  "program": "WB_RELEASE_R2",
+  "namespace": "WBR2",
+  "unit_type": "GOVERNANCE_CLOSURE",
+  "base_exact_head": "5e0e52c0141c5860ea108ba515a073094037ad72",
+  "purpose": "Close WBR2-M5 in the authoritative live state after exact-head validation and working-branch fast-forward, without product changes or assignment of WBR2-M6.",
+  "scope": {
+    "allowed_paths": [
+      ".github/workflows/wbr2-m5-closure.yml",
+      "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_WBR2_M5_CLOSURE_R1.json",
+      "docs/evidence/WBR2_M5_CLOSURE_RTM.json",
+      "docs/evidence/WB_RELEASE_R2_EXECUTION_STATE.yaml",
+      "docs/governance/CURRENT_STATE.md",
+      "tests/integration_manifest_support_m8.py",
+      "tests/test_wbr2_m5_closure.py"
+    ],
+    "forbidden": [
+      "src/** changes",
+      "WBR2-M6 assignment or implementation",
+      "main merge",
+      "deployment or release authorization",
+      "Ozon activation",
+      "Gatekeeper connection",
+      "marketplace writes",
+      "physical L5 claim"
+    ]
+  },
+  "requirements": [
+    {
+      "id": "CLOSE-01",
+      "requirement": "Record WBR2-M5 as validated in the working branch at exact head 5e0e52c0141c5860ea108ba515a073094037ad72.",
+      "test": "Focused state contract checks exact head and state marker.",
+      "pass": "VALIDATED_IN_WORKING_BRANCH is present with exact head."
+    },
+    {
+      "id": "CLOSE-02",
+      "requirement": "Record validation PR 130 as closed and merged=false.",
+      "test": "Focused state contract checks PR metadata markers.",
+      "pass": "validation_pr_state=CLOSED and validation_pr_merged=false."
+    },
+    {
+      "id": "CLOSE-03",
+      "requirement": "Preserve WBR2-M6 as UNASSIGNED_NOT_AUTHORIZED.",
+      "test": "Focused state contract.",
+      "pass": "No M6 title, scope, requirements or implementation is introduced."
+    },
+    {
+      "id": "CLOSE-04",
+      "requirement": "Preserve WB_ONLY, Ozon deferred, Gatekeeper disconnected and marketplace writes disabled.",
+      "test": "Focused state and complete source CI.",
+      "pass": "All safety boundary markers remain unchanged."
+    },
+    {
+      "id": "CLOSE-05",
+      "requirement": "Extend the effective artifact manifest append-only from R100.",
+      "test": "Manifest equality in complete source CI.",
+      "pass": "The closure overlay is anchored to the immutable R100 Git blob and manifest diff is empty."
+    },
+    {
+      "id": "CLOSE-06",
+      "requirement": "Use RTM-first plus one atomic implementation commit.",
+      "test": "Workflow ancestry and changed-file allow-list.",
+      "pass": "Exactly two commits above base; first only RTM; second completes the seven-path scope."
+    }
+  ],
+  "capability_gate": {
+    "git_object_writes": "SUPPORTED",
+    "exact_head_ci": "SUPPORTED",
+    "hosted_windows_runtime": "SUPPORTED",
+    "physical_operator_windows_l5": "NOT_IN_SCOPE",
+    "authenticode": "NOT_IN_SCOPE",
+    "result": "PASS_FOR_GOVERNANCE_CLOSURE_ONLY"
+  },
+  "claim_ceiling": "L2_REPOSITORY_AND_HOSTED_RUNTIME",
+  "initial_status": [
+    "FAIL-CLOSED",
+    "PROTOCOL_IMPLEMENTATION_INCOMPLETE",
+    "MILESTONE_NOT_COMPLETE",
+    "RELEASE_BLOCKED"
+  ]
+}
