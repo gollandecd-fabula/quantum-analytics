@@ -113,12 +113,24 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 -m compileall -q src tests
-          PYTHONPATH=src python3 -m unittest tests.test_universal_partial_r1 -v
-          PYTHONPATH=src python3 -m quantum.scripts.ci
+          mkdir -p "$RUNNER_TEMP/upr1-validation"
+          python3 -m compileall -q src tests 2>&1 | tee "$RUNNER_TEMP/upr1-validation/compile.log"
+          PYTHONPATH=src python3 -m unittest tests.test_universal_partial_r1 -v 2>&1 | tee "$RUNNER_TEMP/upr1-validation/focused.log"
+          PYTHONPATH=src python3 -m quantum.scripts.ci 2>&1 | tee "$RUNNER_TEMP/upr1-validation/full-ci.log"
           test "$(git rev-parse HEAD^)" = "$TARGET_BASE"
           test "$(git rev-parse HEAD^{tree})" = "$EXPECTED_TREE"
-          test -z "$(git status --porcelain)"
+          git diff --exit-code
+          git diff --cached --exit-code
+          git status --porcelain=v1 --untracked-files=all | tee "$RUNNER_TEMP/upr1-validation/status.txt"
+
+      - name: Upload validation diagnostics
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: UPR1-Materializer-Validation-${{ github.event.pull_request.head.sha || github.sha }}
+          path: ${{ runner.temp }}/upr1-validation
+          if-no-files-found: warn
+          retention-days: 2
 
       - name: Publish validated one-child commit
         shell: bash
@@ -129,7 +141,7 @@ jobs:
           git rev-parse HEAD | tee "$RUNNER_TEMP/upr1-final-sha.txt"
 
       - name: Upload materialization evidence
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        uses: actions/upload-artifact@ea165f8d65b540449e92b4886f43607fa02
         with:
           name: UPR1-Materialization-Evidence
           path: ${{ runner.temp }}/upr1-final-sha.txt
