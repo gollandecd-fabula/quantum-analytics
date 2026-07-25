@@ -1,0 +1,36 @@
+name: Temporary Universal Source Export
+
+on:
+  push:
+    branches:
+      - tmp/quantum-universal-source-export
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact head
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          fetch-depth: 1
+      - name: Build source archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          mkdir -p dist
+          git archive --format=zip --output=dist/quantum-source-$GITHUB_SHA.zip HEAD
+          sha256sum dist/quantum-source-$GITHUB_SHA.zip > dist/quantum-source-$GITHUB_SHA.sha256
+      - name: Upload source archive
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: Quantum-Source-${{ github.sha }}
+          path: |
+            dist/quantum-source-${{ github.sha }}.zip
+            dist/quantum-source-${{ github.sha }}.sha256
+          if-no-files-found: error
+          retention-days: 2
