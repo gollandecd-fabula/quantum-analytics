@@ -11,16 +11,24 @@ class FinanceProfileDialog:
         products: dict[str, ProductRecord],
     ) -> None:
         self.owner = owner
-        self.profile = profile
+        self.profile = FinanceProfile.from_dict(profile.to_dict())
         self.products = products
         self.window = tk.Toplevel(owner.root_widget)
         self.window.title(
             "Финансовый профиль — группы, себестоимость и расходы"
         )
-        self.window.geometry("1120x760")
-        self.window.minsize(900, 640)
+        apply_bounded_window_geometry(
+            self.window,
+            1120,
+            760,
+            720,
+            520,
+        )
         self.window.transient(owner.root_widget)
         self.window.grab_set()
+        self.window.protocol("WM_DELETE_WINDOW", self._cancel)
+        self.window.bind("<Escape>", self._cancel)
+        self.window.bind("<Control-s>", self._save)
         self.cost_vars: dict[str, tk.StringVar] = {}
         self.advanced_vars: dict[tuple[str, str], tk.StringVar] = {}
         self.tax_var = tk.StringVar(value=profile.tax_rate_percent or "")
@@ -41,6 +49,37 @@ class FinanceProfileDialog:
         self.product_var = tk.StringVar()
         self.target_group_var = tk.StringVar()
         self._build()
+
+    def _cancel(self, _event: object | None = None) -> None:
+        self.window.destroy()
+
+    def _reopen_staged(self) -> None:
+        staged = FinanceProfile.from_dict(self.profile.to_dict())
+        self.window.destroy()
+        FinanceProfileDialog(self.owner, staged, self.products)
+
+    @staticmethod
+    def _scroll_units(event: object) -> int:
+        delta = int(getattr(event, "delta", 0) or 0)
+        if delta:
+            return -1 if delta > 0 else 1
+        number = int(getattr(event, "num", 0) or 0)
+        return -1 if number == 4 else 1
+
+    def _bind_scroll_tree(self, canvas: tk.Canvas, widget: tk.Widget) -> None:
+        def scroll(event: object) -> str:
+            canvas.yview_scroll(self._scroll_units(event), "units")
+            return "break"
+
+        def bind_one(current: tk.Widget) -> None:
+            current.bind("<MouseWheel>", scroll, add="+")
+            current.bind("<Button-4>", scroll, add="+")
+            current.bind("<Button-5>", scroll, add="+")
+            for child in current.winfo_children():
+                bind_one(child)
+
+        bind_one(widget)
+        bind_one(canvas)
 
     def _build(self) -> None:
         header = tk.Frame(self.window, bg=PALETTE["navy"], height=88)
@@ -87,7 +126,7 @@ class FinanceProfileDialog:
         ttk.Button(
             footer,
             text="Отмена",
-            command=self.window.destroy,
+            command=self._cancel,
         ).pack(side=tk.RIGHT)
         ttk.Button(
             footer,
@@ -306,6 +345,7 @@ class FinanceProfileDialog:
         ).grid(row=1, column=2)
         editor.columnconfigure(0, weight=2)
         editor.columnconfigure(1, weight=1)
+        self._bind_scroll_tree(_canvas, body)
 
     def _build_advanced_tab(self, parent: ttk.Frame) -> None:
         ttk.Label(
@@ -349,6 +389,7 @@ class FinanceProfileDialog:
                     pady=3,
                 )
             block.columnconfigure(0, weight=1)
+        self._bind_scroll_tree(_canvas, body)
 
     def _sync_profile_from_vars(self) -> None:
         self.profile.tax_rate_percent = self.tax_var.get().strip() or None
@@ -391,8 +432,7 @@ class FinanceProfileDialog:
                 parent=self.window,
             )
             return
-        self.window.destroy()
-        self.owner.open_finance_profile()
+        self._reopen_staged()
 
     def _move_product(self) -> None:
         selected = self.product_var.get().strip()
@@ -415,8 +455,7 @@ class FinanceProfileDialog:
                 parent=self.window,
             )
             return
-        self.window.destroy()
-        self.owner.open_finance_profile()
+        self._reopen_staged()
 
     def _export_template(self) -> None:
         target = filedialog.asksaveasfilename(
@@ -471,10 +510,17 @@ class FinanceProfileDialog:
                 "В Excel найдены неизвестные группы:\n" + "\n".join(unknown),
                 parent=self.window,
             )
-        self.window.destroy()
-        self.owner.open_finance_profile()
+        self._reopen_staged()
 
-    def _save(self) -> None:
+    def _save(self, _event: object | None = None) -> None:
+        if self.owner.profile_save_blocked:
+            messagebox.showerror(
+                APP_TITLE,
+                "Сохранение заблокировано: повреждённый исходный профиль "
+                "не удалось сохранить в резервную копию.",
+                parent=self.window,
+            )
+            return
         self._sync_profile_from_vars()
         try:
             save_profile(self.owner.profile_path, self.profile)
@@ -486,6 +532,9 @@ class FinanceProfileDialog:
             )
             return
         self.owner.profile = self.profile
+        self.owner.profile_load_error = None
+        self.owner.profile_recovery_backup = None
+        self.owner.profile_save_blocked = False
         self.owner.refresh_finance_summary()
         self.owner.set_status(
             "Финансовый профиль сохранён. Можно запускать расчёт.",

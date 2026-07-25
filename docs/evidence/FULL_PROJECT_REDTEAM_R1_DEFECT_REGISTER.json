@@ -1,0 +1,120 @@
+{
+  "register_id": "QUANTUM-FULL-PROJECT-REDTEAM-R1-DEFECTS",
+  "created_on": "2026-07-25",
+  "immutable_base_exact_head": "b8e94e8cdf3f2b2179193c752fd17a1a52fb6690",
+  "candidate_branch": "audit/quantum-full-redteam-r1",
+  "claim_boundary": "Candidate findings and fixes are not authoritative until exact-head Linux, hosted Windows, installer and regression validation complete.",
+  "summary": {
+    "p0_open": 0,
+    "p1_found": 2,
+    "p2_found": 5,
+    "p3_found": 1,
+    "candidate_fixes": 8,
+    "physical_l5": "UNVERIFIED",
+    "release": "BLOCKED"
+  },
+  "defects": [
+    {
+      "id": "FR1-001",
+      "severity": "P1",
+      "area": "FINANCE_UI_TRANSACTION",
+      "finding": "The finance dialog edited the owner's live FinanceProfile object before Save. Cancel, invalid Save, rename, move or Excel import could leave unsaved values active in memory and affect a later calculation.",
+      "repair": "The dialog now edits a deep staged copy. Rename, move and import reopen the staged copy. The owner profile changes only after an atomic successful Save.",
+      "evidence": [
+        "tests.test_full_project_redteam_r1.test_dialog_uses_staged_profile_and_explicit_cancel",
+        "tests.test_full_project_redteam_r1.test_staged_profile_mutation_does_not_touch_owner_profile"
+      ],
+      "status": "FIXED_IN_CANDIDATE_AWAITING_EXACT_HEAD_VALIDATION"
+    },
+    {
+      "id": "FR1-002",
+      "severity": "P1",
+      "area": "PROFILE_STARTUP_RECOVERY",
+      "finding": "Malformed, unreadable or unsupported finance-profile.json could raise during GUI construction and prevent the local center from starting.",
+      "repair": "Loading is bounded and typed. An unreadable profile is atomically moved to a unique corrupt backup before an empty, unconfirmed profile is used. If preservation fails, profile editing and saving are blocked fail-closed.",
+      "evidence": [
+        "tests.test_full_project_redteam_r1.test_corrupt_profile_is_moved_to_backup_without_data_loss",
+        "tests.test_full_project_redteam_r1.test_backup_failure_is_typed_and_original_remains",
+        "tests.test_full_project_redteam_r1.test_shell_recovers_corrupt_profile_fail_closed"
+      ],
+      "status": "FIXED_IN_CANDIDATE_AWAITING_EXACT_HEAD_VALIDATION"
+    },
+    {
+      "id": "FR1-003",
+      "severity": "P2",
+      "area": "PROFILE_PERSISTENCE_DUPLICATION",
+      "finding": "A weaker legacy load/save implementation remained in _finance_profile_groups.py while finance_profile.py overrode only part of it, creating an unsafe alternative import surface and maintenance ambiguity.",
+      "repair": "The duplicate persistence implementation and its unused imports were removed. One bounded load path and one validated atomic save path remain.",
+      "evidence": [
+        "tests.test_full_project_redteam_r1.test_only_one_profile_persistence_implementation_remains"
+      ],
+      "status": "FIXED_IN_CANDIDATE_AWAITING_EXACT_HEAD_VALIDATION"
+    },
+    {
+      "id": "FR1-004",
+      "severity": "P2",
+      "area": "WINDOW_GEOMETRY",
+      "finding": "The main window and finance dialog used fixed 1440x900 and 1120x760 geometry with minimum sizes that could exceed a 1366x768 display or a scaled Windows work area.",
+      "repair": "All primary/detail windows use centered bounded geometry with minimum size capped to the actual screen.",
+      "evidence": [
+        "tests.test_full_project_redteam_r1.test_window_geometry_never_exceeds_screen"
+      ],
+      "status": "FIXED_IN_CANDIDATE_AWAITING_EXACT_HEAD_VALIDATION"
+    },
+    {
+      "id": "FR1-005",
+      "severity": "P2",
+      "area": "PROFILE_INPUT_RESOURCE_LIMIT",
+      "finding": "Profile loading used unbounded read_text and could attempt to decode an arbitrarily large local file.",
+      "repair": "Profile input is capped at 4 MiB before JSON decoding and oversized files are preserved through the corrupt-profile recovery path.",
+      "evidence": [
+        "tests.test_full_project_redteam_r1.test_oversized_profile_is_rejected_without_unbounded_parse"
+      ],
+      "status": "FIXED_IN_CANDIDATE_AWAITING_EXACT_HEAD_VALIDATION"
+    },
+    {
+      "id": "FR1-006",
+      "severity": "P2",
+      "area": "SELF_TEST_STATUS",
+      "finding": "The normal unconfigured template produced a generic technical FAILED result even when runtime, known-answer finance, persistence, schema review and write-disable checks passed.",
+      "repair": "Self-test now distinguishes CONFIGURATION_REQUIRED from a technical failure. Ready configuration still requires and returns PASS; malformed configuration still returns FAILED.",
+      "evidence": [
+        "tests.test_full_project_redteam_r1.test_unconfigured_template_is_distinct_from_technical_failure",
+        "tests.test_full_project_redteam_r1.test_ready_configuration_still_passes_self_test"
+      ],
+      "status": "FIXED_IN_CANDIDATE_AWAITING_EXACT_HEAD_VALIDATION"
+    },
+    {
+      "id": "FR1-007",
+      "severity": "P2",
+      "area": "REQUIREMENT_STATE_CONTRADICTION",
+      "finding": "Live-state language implied fixed user/accountant confirmation of cost/tax values, while the latest executable specification requires values to be entered and changed by the user through UI fields.",
+      "repair": "Live state now explicitly requires runtime user input, local persistence, no hard-coded business values and calculation blocking when mandatory values are empty or invalid.",
+      "evidence": [
+        "docs/evidence/WB_RELEASE_R2_EXECUTION_STATE.yaml",
+        "docs/governance/CURRENT_STATE.md",
+        "tests.test_full_project_redteam_r1.test_profile_values_are_user_data_not_business_defaults"
+      ],
+      "status": "FIXED_IN_CANDIDATE_AWAITING_EXACT_HEAD_VALIDATION"
+    },
+    {
+      "id": "FR1-008",
+      "severity": "P3",
+      "area": "SCROLL_USABILITY",
+      "finding": "Scrollable finance-profile tabs exposed a scrollbar but did not handle mouse-wheel events over their child controls.",
+      "repair": "Mouse-wheel bindings are applied recursively to the active scroll tree for Windows, macOS and Linux event forms.",
+      "evidence": [
+        "src/quantum/application/_finance_center_dialog.py"
+      ],
+      "status": "FIXED_IN_CANDIDATE_AWAITING_EXACT_HEAD_VALIDATION"
+    },
+    {
+      "id": "FR1-N01",
+      "severity": "N_A",
+      "area": "HISTORICAL_WORKFLOWS",
+      "finding": "Legacy construction-only GOV/M5 workflows can fail on later product/audit heads because their ancestry and path-count assertions are intentionally bound to old one-time construction units.",
+      "repair": "Do not weaken or rewrite historical evidence. Classify their construction-only jobs as N/A outside their original exact scope, while running current source/runtime/manifest contracts in the new exact-head workflow.",
+      "status": "DOCUMENTED_SCOPE_NA"
+    }
+  ]
+}

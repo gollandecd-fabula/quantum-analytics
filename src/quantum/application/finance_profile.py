@@ -19,6 +19,7 @@ from quantum.application._finance_profile_outputs import *
 
 _PROFILE_REPLACE_ATTEMPTS = 5
 _PROFILE_REPLACE_INITIAL_DELAY_SECONDS = 0.05
+_PROFILE_MAX_BYTES = 4 * 1024 * 1024
 
 
 def _profile_payload_bytes(payload: _Mapping[str, _Any]) -> bytes:
@@ -115,6 +116,54 @@ def _commit_saved_profile(
     target.confirmed = staged.confirmed
     target.updated_at = staged.updated_at
     target.schema_version = staged.schema_version
+
+
+def load_profile(path: _Path) -> FinanceProfile | None:
+    if not path.is_file():
+        return None
+    try:
+        with path.open("rb") as stream:
+            payload = stream.read(_PROFILE_MAX_BYTES + 1)
+    except OSError as exc:
+        raise FinanceProfileError(
+            "FINANCE_PROFILE_READ_FAILED",
+            (type(exc).__name__, str(path)),
+        ) from exc
+    if len(payload) > _PROFILE_MAX_BYTES:
+        raise FinanceProfileError(
+            "FINANCE_PROFILE_TOO_LARGE",
+            (str(len(payload)), str(_PROFILE_MAX_BYTES)),
+        )
+    try:
+        raw = _json.loads(payload.decode("utf-8"))
+    except (UnicodeDecodeError, _json.JSONDecodeError) as exc:
+        raise FinanceProfileError(
+            "FINANCE_PROFILE_READ_FAILED",
+            (type(exc).__name__, str(path)),
+        ) from exc
+    if not isinstance(raw, _Mapping):
+        raise FinanceProfileError("FINANCE_PROFILE_INVALID")
+    return FinanceProfile.from_dict(raw)
+
+
+def backup_corrupt_profile(path: _Path) -> _Path:
+    """Atomically move an unreadable profile aside before replacement."""
+    if not path.is_file():
+        raise FinanceProfileError(
+            "FINANCE_PROFILE_BACKUP_FAILED",
+            ("SOURCE_NOT_FOUND", str(path)),
+        )
+    backup = path.with_name(
+        f"{path.name}.corrupt-{_time.time_ns()}.bak"
+    )
+    try:
+        _replace_with_retry(path, backup)
+    except OSError as exc:
+        raise FinanceProfileError(
+            "FINANCE_PROFILE_BACKUP_FAILED",
+            (type(exc).__name__, str(path)),
+        ) from exc
+    return backup
 
 
 def save_profile(path: _Path, profile: FinanceProfile) -> None:
