@@ -99,16 +99,7 @@ jobs:
           diff -u <(printf '%s\n' "${expected[@]}" | sort) <(printf '%s\n' "${actual[@]}")
           test "$(git write-tree)" = "$EXPECTED_TREE"
 
-      - name: Run exact candidate validation
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 -m compileall -q src tests
-          PYTHONPATH=src python3 -m unittest tests.test_universal_partial_r1 -v
-          PYTHONPATH=src python3 -m quantum.scripts.ci
-          test "$(git write-tree)" = "$EXPECTED_TREE"
-
-      - name: Commit and publish one child
+      - name: Create exact local candidate commit
         shell: bash
         run: |
           set -euo pipefail
@@ -117,6 +108,22 @@ jobs:
           git commit -m "Implement universal intake and maximum available calculations"
           test "$(git rev-parse HEAD^)" = "$TARGET_BASE"
           test "$(git rev-parse HEAD^{tree})" = "$EXPECTED_TREE"
+
+      - name: Run exact candidate validation
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m compileall -q src tests
+          PYTHONPATH=src python3 -m unittest tests.test_universal_partial_r1 -v
+          PYTHONPATH=src python3 -m quantum.scripts.ci
+          test "$(git rev-parse HEAD^)" = "$TARGET_BASE"
+          test "$(git rev-parse HEAD^{tree})" = "$EXPECTED_TREE"
+          test -z "$(git status --porcelain)"
+
+      - name: Publish validated one-child commit
+        shell: bash
+        run: |
+          set -euo pipefail
           git push origin "HEAD:refs/heads/$TARGET_BRANCH" \
             --force-with-lease="refs/heads/$TARGET_BRANCH:$TARGET_BASE"
           git rev-parse HEAD | tee "$RUNNER_TEMP/upr1-final-sha.txt"
