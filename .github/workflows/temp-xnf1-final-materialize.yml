@@ -1,0 +1,120 @@
+name: Temporary XNF1 Final Materialize
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/temp-xnf1-final-materialize.yml"
+      - "tools/xnf1-final-patch/**"
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      TARGET_BRANCH: fix/quantum-xlsx-namespace-fallback-r1
+      TARGET_BASE: ccc07dcb0a016768b3a287d61fb854760e30891c
+      EXPECTED_TREE: b3e36c502c59519889a71dd4449843fab21a4e9e
+      PATCH_SHA256: 2b8d48b6afb5c16f107510ee3fd3c449e7f65f931a86fa1417ca603adbd45535
+      PYTHONDONTWRITEBYTECODE: "1"
+      PYTHONUTF8: "1"
+    steps:
+      - name: Checkout exact materializer head
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+
+      - name: Reconstruct and verify exact patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat tools/xnf1-final-patch/part-*.b64 | base64 --decode > "$RUNNER_TEMP/xnf1.patch.xz"
+          test "$(sha256sum "$RUNNER_TEMP/xnf1.patch.xz" | cut -d' ' -f1)" = "$PATCH_SHA256"
+          xz --decompress --stdout "$RUNNER_TEMP/xnf1.patch.xz" > "$RUNNER_TEMP/xnf1.patch"
+
+      - name: Checkout exact RTM-first target
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin "$TARGET_BRANCH"
+          test "$(git rev-parse "origin/$TARGET_BRANCH")" = "$TARGET_BASE"
+          git checkout -B "$TARGET_BRANCH" "origin/$TARGET_BRANCH"
+          test "$(git rev-parse HEAD)" = "$TARGET_BASE"
+
+      - name: Apply exact implementation and prove scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          git apply --check "$RUNNER_TEMP/xnf1.patch"
+          git apply --index "$RUNNER_TEMP/xnf1.patch"
+          mapfile -t actual < <(git diff --cached --name-only | sort)
+          mapfile -t expected <<'PATHS'
+          .github/workflows/xlsx-namespace-fallback-r1.yml
+          docs/evidence/ARTIFACT_MANIFEST_OVERLAY_XLSX_NAMESPACE_FALLBACK_R1.json
+          docs/evidence/UNIVERSAL_PARTIAL_R1_DEFECT_REGISTER.json
+          docs/evidence/WB_RELEASE_R2_EXECUTION_STATE.yaml
+          docs/governance/CURRENT_STATE.md
+          src/quantum/application/_finance_center_pages.py
+          src/quantum/application/_finance_center_queue_runtime.py
+          src/quantum/application/_finance_schema_review.py
+          src/quantum/pilot/universal_intake.py
+          src/quantum/pilot/universal_tables.py
+          tests/integration_manifest_support_m8.py
+          tests/test_xlsx_namespace_fallback_r1.py
+          tests/test_wbr2_m5_closure.py
+          tests/test_wbr2_m5_closure_corrective_r2.py
+          PATHS
+          diff -u <(printf '%s\n' "${expected[@]}" | sort) <(printf '%s\n' "${actual[@]}")
+          test "$(git write-tree)" = "$EXPECTED_TREE"
+
+      - name: Create exact local implementation object
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "quantum-redteam-bot"
+          git config user.email "quantum-redteam-bot@users.noreply.github.com"
+          git commit -m "Implement namespace-tolerant safe XLSX fallback"
+          test "$(git rev-parse HEAD^)" = "$TARGET_BASE"
+          test "$(git rev-parse HEAD^{tree})" = "$EXPECTED_TREE"
+          mkdir -p "$RUNNER_TEMP/xnf1-evidence"
+          git rev-parse HEAD | tee "$RUNNER_TEMP/xnf1-evidence/local-candidate-sha.txt"
+          git rev-parse HEAD^{tree} | tee "$RUNNER_TEMP/xnf1-evidence/tree-sha.txt"
+          git diff-tree --no-commit-id --name-only -r HEAD | sort > "$RUNNER_TEMP/xnf1-evidence/implementation-paths.txt"
+
+      - name: Validate namespace fallback and complete source
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m compileall -q src/quantum tests 2>&1 | tee "$RUNNER_TEMP/xnf1-evidence/compile.log"
+          PYTHONPATH=src python3 -m unittest \
+            tests.test_xlsx_namespace_fallback_r1 \
+            tests.test_universal_partial_r1 \
+            tests.test_plateau_m4_schema_review \
+            tests.test_universal_any_file_contract_r4 \
+            tests.test_universal_ingestion_r4 \
+            tests.test_universal_intake_hardening_r4 -v \
+            2>&1 | tee "$RUNNER_TEMP/xnf1-evidence/focused.log"
+          PYTHONPATH=src python3 -m quantum.scripts.ci 2>&1 | tee "$RUNNER_TEMP/xnf1-evidence/full-ci.log"
+          test "$(git rev-parse HEAD^)" = "$TARGET_BASE"
+          test "$(git rev-parse HEAD^{tree})" = "$EXPECTED_TREE"
+          git diff --exit-code
+          git diff --cached --exit-code
+
+      - name: Upload validated evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: XNF1-Final-Materialization-${{ github.event.pull_request.head.sha }}
+          path: ${{ runner.temp }}/xnf1-evidence
+          if-no-files-found: warn
+          retention-days: 3
+
+      - name: Publish validated implementation commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          git push origin "HEAD:refs/heads/$TARGET_BRANCH" \
+            --force-with-lease="refs/heads/$TARGET_BRANCH:$TARGET_BASE"
