@@ -1,0 +1,249 @@
+{
+  "protocol_mode": "PROTOCOL_LOCK",
+  "project": "Quantum",
+  "program_namespace": "WB_RELEASE_R2",
+  "milestone": "WBR2-GOV-R1_PLAN_RECONCILIATION",
+  "authorization": "USER_AUTHORIZED_PROTOCOL_LOCKED_PLAN_RECONCILIATION",
+  "authorized_on": "2026-07-25",
+  "repository": "gollandecd-fabula/quantum-analytics",
+  "working_branch_before_change": "fix/quantum-wb-release-r2",
+  "working_exact_head_before_change": "d89c29edfa93ecc61290a0fdeb9e218214638f7d",
+  "historical_stage_b_state_blob_sha": "e132b51f2dae47777d379304731e1b7738d47aac",
+  "historical_current_state_blob_sha": "59030b16848b57d9f6680705ea956f18739ffbfa",
+  "m5_validated_candidate": {
+    "pull_request": 128,
+    "exact_head": "1563b9c9de6a78142930719073f43e2b931eaa6e",
+    "direct_parent": "d89c29edfa93ecc61290a0fdeb9e218214638f7d",
+    "rtm_path": "docs/evidence/M5_SCHEDULED_REPORTS_RTM.json",
+    "rtm_blob_sha": "0337728b7276292048255b4f48f2723b9dde704e",
+    "workflow_result": "ALL_TRIGGERED_EXACT_HEAD_RUNS_SUCCESS",
+    "integration_state": "NOT_IN_WORKING_BRANCH",
+    "post_reconciliation_state": "REBUILD_REQUIRED_ON_GOVERNANCE_HEAD"
+  },
+  "capability_gate": {
+    "read_exact_repository_and_pr_state": "SUPPORTED",
+    "create_isolated_branch_and_atomic_commits": "CONNECTOR_REQUIRED",
+    "create_draft_validation_pr": "CONNECTOR_REQUIRED",
+    "run_exact_head_linux_windows_ci": "SUPPORTED_AFTER_PUSH",
+    "update_working_branch_by_fast_forward_after_pass": "SUPPORTED_AFTER_PASS",
+    "local_checkout_runtime": "NOT_AVAILABLE",
+    "physical_user_path_l5": "OUT_OF_SCOPE",
+    "main_merge": "FORBIDDEN",
+    "product_runtime_change": "FORBIDDEN",
+    "result": "PASS_FOR_GOVERNANCE_L0_L2_SCOPE_ONLY"
+  },
+  "scope_lock": {
+    "allowed_repository_paths": [
+      ".github/workflows/wb-release-r2-plan-reconciliation.yml",
+      "docs/evidence/WB_RELEASE_R2_PLAN_RECONCILIATION_RTM.json",
+      "docs/evidence/WB_RELEASE_R2_EXECUTION_STATE.yaml",
+      "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_WB_RELEASE_R2_GOV_R1.json",
+      "docs/governance/CURRENT_STATE.md",
+      "tests/integration_manifest_support_m8.py",
+      "tests/test_wb_release_r2_plan_reconciliation.py"
+    ],
+    "allowed_pr_state_actions": [
+      "close superseded WB Release R2 construction or validation PRs only after exact-head reconciliation PASS",
+      "retain evidence in closed PR discussions",
+      "keep main and unrelated historical program branches unchanged"
+    ],
+    "forbidden_changes": [
+      "src product runtime or financial logic",
+      "approved UI or navigation",
+      "M5 product integration",
+      "M6 invention or assignment",
+      "Gatekeeper or Protocol Controller connection",
+      "Ozon activation",
+      "marketplace writes",
+      "main merge",
+      "deployment or release authorization",
+      "physical L5 claim"
+    ]
+  },
+  "prechange_control": {
+    "next_test": "focused governance contracts, complete source CI, manifest equality, Linux and Windows exact-head verification, changed-file allow-list and ancestry",
+    "rollback_condition": "any scope, manifest, namespace, history, boundary, CI or claim failure",
+    "rollback_action": "do not advance fix/quantum-wb-release-r2; close validation PR as failed and discard reconciliation branch",
+    "maximum_claim": "L2_SOURCE_AND_WINDOWS_RUNTIME_FOR_GOVERNANCE_ONLY"
+  },
+  "rtm_columns": [
+    "protocol_item",
+    "requirement",
+    "milestone",
+    "action",
+    "test",
+    "evidence_level",
+    "artifact",
+    "pass_criterion",
+    "actual_status"
+  ],
+  "rtm_rows": [
+    [
+      "GOV-R1-01",
+      "Preserve Stage-B history without rewriting historical evidence",
+      "WBR2-GOV-R1",
+      "Leave STAGE_B_EXECUTION_STATE.yaml byte-identical and bind its blob SHA",
+      "historical blob and no-diff contract",
+      "L0",
+      "historical Stage-B + new live state",
+      "historical file remains byte-identical and is classified HISTORICAL_SNAPSHOT",
+      "NOT_STARTED"
+    ],
+    [
+      "GOV-R1-02",
+      "Identify exactly one live execution-state artifact",
+      "WBR2-GOV-R1",
+      "Create WB_RELEASE_R2_EXECUTION_STATE.yaml and point CURRENT_STATE.md exclusively to it",
+      "single-live-pointer contract",
+      "L0",
+      "new live state + CURRENT_STATE",
+      "only WB Release R2 artifact is live",
+      "NOT_STARTED"
+    ],
+    [
+      "GOV-R1-03",
+      "Use a collision-free milestone namespace",
+      "WBR2-GOV-R1",
+      "Use WBR2-M0..WBR2-M5 and WBR2-GOV-R1",
+      "namespace uniqueness contract",
+      "L0",
+      "new live state",
+      "Stage-B and WBR2 milestones cannot be confused",
+      "NOT_STARTED"
+    ],
+    [
+      "GOV-R1-04",
+      "Record validated WBR2 sequence and exact heads",
+      "WBR2-GOV-R1",
+      "Record M0 e32a7e9, M1 ad5229b, M2 3aad435, M3 f6df81e, M4 050ce0c + d89c29e",
+      "exact-head metadata contract",
+      "L0",
+      "new live state",
+      "each validated unit has distinct name and exact head",
+      "NOT_STARTED"
+    ],
+    [
+      "GOV-R1-05",
+      "Separate integrated working head from candidates",
+      "WBR2-GOV-R1",
+      "Declare d89c29e as product baseline before reconciliation",
+      "branch compare and PR assertion",
+      "L0",
+      "new live state + PR",
+      "no candidate is represented as integrated",
+      "NOT_STARTED"
+    ],
+    [
+      "GOV-R1-06",
+      "Enumerate next product milestone from approved source",
+      "WBR2-GOV-R1",
+      "Set WBR2-M5 to Scheduled Weekly and Monthly Reports from PR128/M5 RTM",
+      "candidate identity contract",
+      "L0",
+      "new live state + PR128",
+      "WBR2-M5 is next; M6 unassigned",
+      "NOT_STARTED"
+    ],
+    [
+      "GOV-R1-07",
+      "Do not integrate M5 during reconciliation",
+      "WBR2-GOV-R1",
+      "Record 1563b9c as validated but not integrated; rebuild after governance head",
+      "no-product-diff contract",
+      "L0",
+      "new live state + diff",
+      "no M5 product path changes",
+      "NOT_STARTED"
+    ],
+    [
+      "GOV-R1-08",
+      "Define superseded WBR2 PR treatment",
+      "WBR2-GOV-R1",
+      "After PASS close #112,#114-#117,#125-#128 with comments",
+      "PR inventory",
+      "L0",
+      "GitHub PR metadata",
+      "no superseded WBR2 PR remains open",
+      "NOT_STARTED"
+    ],
+    [
+      "GOV-R1-09",
+      "Preserve safety boundaries",
+      "WBR2-GOV-R1",
+      "Keep WB_ONLY, Ozon deferred, Gatekeeper disconnected, writes disabled",
+      "focused + source/security/runtime gates",
+      "L2",
+      "state + CI",
+      "all boundaries unchanged",
+      "NOT_STARTED"
+    ],
+    [
+      "GOV-R1-10",
+      "Keep manifest exact without consuming R100",
+      "WBR2-GOV-R1",
+      "Add separate governance overlay anchored to immutable R99",
+      "manifest equality + negative test",
+      "L2",
+      "governance overlay + loader",
+      "tracked tree equals effective manifest and R100 remains available",
+      "NOT_STARTED"
+    ],
+    [
+      "GOV-R1-11",
+      "Controlled ancestry and scope",
+      "WBR2-GOV-R1",
+      "RTM first commit then one atomic implementation commit",
+      "ancestry and allow-list compare",
+      "L0",
+      "Git commits + PR",
+      "two commits over d89c29e and only allowed paths",
+      "IN_PROGRESS_RTM_FIRST_COMMIT"
+    ],
+    [
+      "GOV-R1-12",
+      "Prevent auto-merged PR classification",
+      "WBR2-GOV-R1",
+      "Validate against temp immutable base; close PR before fast-forward",
+      "PR state and branch compare",
+      "L0",
+      "temp base + PR",
+      "PR closes merged=false; working branch advances afterward",
+      "NOT_STARTED"
+    ],
+    [
+      "GOV-R1-13",
+      "Do not overclaim",
+      "WBR2-GOV-R1",
+      "Keep L5, main merge, deployment and release blocked",
+      "claim audit",
+      "L0",
+      "CURRENT_STATE + PR",
+      "no claim exceeds evidence",
+      "NOT_STARTED"
+    ],
+    [
+      "GOV-R1-14",
+      "Exact-head verification",
+      "WBR2-GOV-R1",
+      "Run Linux/Windows governance tests, source CI and existing mandatory gates",
+      "GitHub Actions",
+      "L2",
+      "workflow runs",
+      "all required checks pass same head",
+      "NOT_STARTED"
+    ],
+    [
+      "GOV-R1-15",
+      "Close issue only after reconciliation",
+      "WBR2-GOV-R1",
+      "Post item evidence to #124 and close after branch/PR cleanup",
+      "issue state",
+      "L0",
+      "issue #124",
+      "no unresolved reconciliation requirement",
+      "NOT_STARTED"
+    ]
+  ],
+  "overall_status": "MILESTONE_NOT_COMPLETE",
+  "release_state": "RELEASE_BLOCKED"
+}
