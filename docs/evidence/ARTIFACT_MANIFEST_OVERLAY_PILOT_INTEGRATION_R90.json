@@ -1,0 +1,24 @@
+{
+  "base_pilot_integration_r89_overlay_git_blob_sha": "39e5bc6e85afb8ef006c23f1ce114e2829be3ca5",
+  "entries": [
+    [
+      "src/quantum/application/_finance_profile_engine.py",
+      "63f00986f910777b4737b7ac1e0478d35122a092bce8ca5053cb78b7301162c7",
+      14222
+    ],
+    [
+      "tests/integration_manifest_support_m8.py",
+      "4380c3e9ca4e904096c1e7e9a199fd41b4773b19dfdc4b38349887b6f4b91a55",
+      1090
+    ],
+    [
+      "tests/test_finance_profile_block_reasons.py",
+      "0bb352a8ba6c520479b8452dd8e0d2f6a9b10ca8ee5de39aab271469d1007de0",
+      2448
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 90,
+  "reason": "Expose the primary finance-kernel reason code for blocked calculations instead of dependent metric identifiers, add focused regression coverage, preserve all formulas and the approved desktop interface, keep Ozon deferred, Gatekeeper disconnected and marketplace writes disabled",
+  "remove_paths": []
+}

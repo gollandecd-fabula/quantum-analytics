@@ -1,0 +1,67 @@
+{
+  "milestone": "M4_AUTO_INBOX",
+  "base_exact_head": "f6df81ee62f7ee419c0303886362d917b6d82103",
+  "requirements": [
+    {
+      "id": "M4-01",
+      "requirement": "Create a dedicated local automatic incoming directory under the managed Quantum root",
+      "test": "controller directory contract and desktop settings contract"
+    },
+    {
+      "id": "M4-02",
+      "requirement": "Process only supported XLSX, XLSM and ZIP files after age and repeated stability checks",
+      "test": "stable-file and partial-file regressions on Linux and Windows"
+    },
+    {
+      "id": "M4-03",
+      "requirement": "Reject symlinks, oversized files, traversal paths and tampered state fail-closed",
+      "test": "security and state-tamper regressions"
+    },
+    {
+      "id": "M4-04",
+      "requirement": "Require explicit authority confirmation and existing schema review before queue admission",
+      "test": "existing review path reuse contract"
+    },
+    {
+      "id": "M4-05",
+      "requirement": "Reuse SequentialImportQueue and the existing run_import worker; do not create a parallel importer",
+      "test": "queue and worker integration contracts"
+    },
+    {
+      "id": "M4-06",
+      "requirement": "Bind preview, claim, processing and completion to one SHA-256 digest with atomic same-volume moves",
+      "test": "claim/finalize digest-bound controller tests"
+    },
+    {
+      "id": "M4-07",
+      "requirement": "Persist bounded deduplication and outcome state atomically without external absolute paths",
+      "test": "state schema, canonical duplicate and relative-path regressions"
+    },
+    {
+      "id": "M4-08",
+      "requirement": "Recover interrupted processing files for retry and finalize pending cancellations fail-closed",
+      "test": "crash-recovery and cancellation-finalization regressions"
+    },
+    {
+      "id": "M4-09",
+      "requirement": "Start polling with the existing desktop one-click path without adding navigation or redesigning the approved UI",
+      "test": "desktop mixin, shell startup, exact 11-navigation and settings contracts"
+    },
+    {
+      "id": "M4-10",
+      "requirement": "Keep WB_ONLY scope, Ozon deferred, Gatekeeper disconnected and marketplace writes disabled",
+      "test": "state, workflow, source CI, M7 and M8 boundary checks"
+    },
+    {
+      "id": "M4-11",
+      "requirement": "Publish M4 as one clean commit directly over M3",
+      "test": "exact ancestry and changed-file postcheck"
+    },
+    {
+      "id": "M4-12",
+      "requirement": "Limit the M4 claim to source and Windows runtime evidence; physical user path remains pending",
+      "test": "evidence claim boundary"
+    }
+  ],
+  "claim_boundary": "L2_SOURCE_AND_WINDOWS_RUNTIME; PHYSICAL_L5_EXCLUDED; RELEASE_BLOCKED"
+}

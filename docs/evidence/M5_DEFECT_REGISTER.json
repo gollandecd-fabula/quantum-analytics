@@ -1,0 +1,70 @@
+{
+  "milestone": "M5_COLOR_UI_GRAPH_QUALITY",
+  "baseline_head": "aef2f4eed219a56dbbeaa7d6a8a738e1ce65eff2",
+  "open_p0": 0,
+  "open_p1": 0,
+  "defects": [
+    {
+      "id": "M5-D001",
+      "priority": "P1",
+      "status": "CLOSED_VERIFIED",
+      "boundary": "Financial graph sign semantics",
+      "finding": "Income and expense bars used absolute widths without a shared visible zero axis, allowing a negative expense to be read as a positive magnitude.",
+      "fix": "Render a diverging bridge on one scale: income and positive results to the right of zero, expenses and negative results to the left, with signed labels and accessible descriptions.",
+      "evidence": [
+        "tests/test_m5_color_ui_graph_quality.py",
+        "docs/evidence/M5_BROWSER_RED_TEAM.json"
+      ]
+    },
+    {
+      "id": "M5-D002",
+      "priority": "P1",
+      "status": "CLOSED_VERIFIED",
+      "boundary": "Transactional dashboard verification",
+      "finding": "After upgrading the dashboard schema to v2, the transactional writer still required the v1 literal and rejected a valid output bundle as OUTPUT_DASHBOARD_BUNDLE_MISMATCH.",
+      "fix": "Bind the writer verification requirement to INTERACTIVE_DASHBOARD_SCHEMA_VERSION while preserving bundle hash, CSP and forbidden-resource checks.",
+      "evidence": [
+        "src/quantum/outputs/writer.py",
+        "tests/test_interactive_dashboard_r1.py",
+        "tests/test_m5_color_ui_graph_quality.py"
+      ]
+    },
+    {
+      "id": "M5-D003",
+      "priority": "P2",
+      "status": "CLOSED_VERIFIED",
+      "boundary": "Zero-value presentation",
+      "finding": "The badge helper treated numeric zero as falsy and displayed NOT_AVAILABLE, which could hide a confirmed zero blocked-metric count.",
+      "fix": "Preserve zero and only use NOT_AVAILABLE for undefined, null or empty-string values.",
+      "evidence": [
+        "src/quantum/outputs/dashboard_script_core.py",
+        "tests/test_m5_color_ui_graph_quality.py"
+      ]
+    },
+    {
+      "id": "M5-D004",
+      "priority": "P2",
+      "status": "CLOSED_VERIFIED",
+      "boundary": "Historical graph evidence",
+      "finding": "The overview had no explicit historical-series contract, creating pressure to infer a trend from one period.",
+      "fix": "Render a historical graph only with at least two valid confirmed periods; otherwise show NO_HISTORICAL_SERIES and state that no synthetic trend is created.",
+      "evidence": [
+        "src/quantum/outputs/dashboard_script_core.py",
+        "docs/evidence/M5_BROWSER_RED_TEAM.json"
+      ]
+    },
+    {
+      "id": "M5-D005",
+      "priority": "P2",
+      "status": "CLOSED_VERIFIED",
+      "boundary": "Decision-oriented information architecture",
+      "finding": "The overview exposed useful data but did not act as one prioritized Decision Center with a main signal, next actions and evidence readiness.",
+      "fix": "Promote the first view to a profit-first Decision Center with a main signal, ranked actions, evidence readiness, signed financial bridge, cost composition and recommendation focus.",
+      "evidence": [
+        "src/quantum/outputs/dashboard_shell.py"
+      ]
+    }
+  ],
+  "release_state": "RELEASE_BLOCKED",
+  "score": "NOT_SCORED"
+}

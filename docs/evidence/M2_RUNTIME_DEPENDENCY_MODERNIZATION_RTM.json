@@ -1,0 +1,57 @@
+{
+  "milestone": "M2_RUNTIME_DEPENDENCY_MODERNIZATION",
+  "base_exact_head": "ad5229bbaca3cf8ae692ecb09f54220cde1db16b",
+  "requirements": [
+    {
+      "id": "M2-01",
+      "requirement": "Windows x64 production runtime pinned to Python 3.13.14",
+      "test": "test_windows_runtime_and_tzdata_are_exactly_pinned"
+    },
+    {
+      "id": "M2-02",
+      "requirement": "Official Windows installer SHA-256 pinned and signature verified",
+      "test": "test_runtime_hash_tamper_is_fail_closed"
+    },
+    {
+      "id": "M2-03",
+      "requirement": "Linux source admission remains compatible with system Python 3.12+",
+      "test": "test_linux_source_gates_accept_python_312_plus"
+    },
+    {
+      "id": "M2-04",
+      "requirement": "Windows tzdata pinned to 2026.3 with exact wheel SHA-256",
+      "test": "test_windows_runtime_and_tzdata_are_exactly_pinned"
+    },
+    {
+      "id": "M2-05",
+      "requirement": "Active Windows runtime paths contain no stale Python 3.12.10 or tzdata 2026.2 contract",
+      "test": "test_windows_runtime_paths_have_no_stale_312_contract"
+    },
+    {
+      "id": "M2-06",
+      "requirement": "Atomic finance JSON publication closes the temporary file before os.replace on Windows",
+      "test": "test_atomic_json_closes_temp_file_before_replace plus Windows focused output-bundle tests"
+    },
+    {
+      "id": "M2-07",
+      "requirement": "Approved UI, Gatekeeper state, WB_ONLY scope and marketplace-write disablement remain unchanged",
+      "test": "git diff allow-list and full repository CI"
+    },
+    {
+      "id": "M2-08",
+      "requirement": "Windows output durability fsync uses a write-capable file handle",
+      "test": "test_finance_fsync_uses_write_capable_handle_on_windows plus Windows output-bundle regressions"
+    },
+    {
+      "id": "M2-09",
+      "requirement": "One exact corrected commit directly over M1 after final validation",
+      "test": "exact ancestry postcheck"
+    },
+    {
+      "id": "M2-10",
+      "requirement": "M2 claim is limited to source/build integration; physical L5 is excluded",
+      "test": "claim boundary"
+    }
+  ],
+  "claim_boundary": "L2_SOURCE_RUNTIME_AND_BUILD_INTEGRATION_ONLY; NO_PHYSICAL_L5_CLAIM"
+}

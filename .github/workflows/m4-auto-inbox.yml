@@ -1,0 +1,187 @@
+name: M4 Automatic Incoming Folder
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/m4-auto-inbox.yml"
+      - "src/quantum/application/_finance_center_auto_inbox.py"
+      - "src/quantum/application/finance_center.py"
+      - "src/quantum/application/_finance_center_shell.py"
+      - "src/quantum/application/_finance_center_queue_runtime.py"
+      - "src/quantum/application/_finance_center_pages.py"
+      - "tests/test_m4_auto_inbox.py"
+      - "tests/integration_manifest_support_m8.py"
+      - "docs/evidence/M4_AUTO_INBOX_RTM.json"
+      - "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R98.json"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: m4-auto-inbox-${{ github.event.pull_request.head.sha || github.sha }}
+  cancel-in-progress: true
+
+env:
+  TARGET_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+  PYTHONDONTWRITEBYTECODE: "1"
+  PYTHONUTF8: "1"
+
+jobs:
+  source-contracts:
+    name: M4 source contracts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - name: Checkout exact head
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ env.TARGET_SHA }}
+          fetch-depth: 1
+
+      - name: Assert exact head and source runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$TARGET_SHA"
+          python3 - <<'PY'
+          import sys
+          if sys.version_info < (3, 12):
+              raise SystemExit(f"Python 3.12+ required, got {sys.version}")
+          PY
+
+      - name: Run focused M4 contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist/m4-linux
+          PYTHONPATH=src python3 -m unittest tests.test_m4_auto_inbox -v 2>&1 |
+            tee dist/m4-linux/focused-tests.log
+
+      - name: Run complete source CI
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH=src python3 -m quantum.scripts.ci 2>&1 |
+            tee dist/m4-linux/full-source-ci.log
+
+      - name: Write Linux evidence
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          payload = {
+              "milestone": "M4_AUTO_INBOX",
+              "status": "PASS",
+              "evidence_level": "L2_SOURCE_RUNTIME",
+              "exact_head": os.environ["TARGET_SHA"],
+              "platform": "ubuntu-24.04",
+              "focused_contracts": "PASS",
+              "full_source_ci": "PASS",
+              "release_scope": "WB_ONLY",
+              "marketplace_write_enabled": False,
+              "physical_user_path_verified": False,
+              "release_state": "RELEASE_BLOCKED",
+          }
+          path = Path("dist/m4-linux/M4_LINUX_EVIDENCE.json")
+          path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+          PY
+
+      - name: Upload Linux evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: M4-Linux-Evidence-${{ env.TARGET_SHA }}
+          path: dist/m4-linux
+          if-no-files-found: error
+          retention-days: 30
+
+  windows-runtime:
+    name: M4 Windows runtime
+    runs-on: windows-2025
+    timeout-minutes: 30
+    steps:
+      - name: Disable Git CRLF conversion
+        shell: pwsh
+        run: git config --global core.autocrlf false
+
+      - name: Checkout exact head
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ env.TARGET_SHA }}
+          fetch-depth: 1
+
+      - name: Set up Python 3.13.14
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.13.14"
+
+      - name: Assert exact head and install pinned dependency
+        shell: pwsh
+        run: |
+          $actual = (& git rev-parse HEAD).Trim()
+          if ($actual -ne $env:TARGET_SHA) {
+            throw "Exact-head mismatch: expected $env:TARGET_SHA, got $actual"
+          }
+          python -m pip install `
+            --disable-pip-version-check `
+            --no-input `
+            --no-deps `
+            --only-binary=:all: `
+            --require-hashes `
+            -r requirements/windows-home-local.txt
+          if ($LASTEXITCODE -ne 0) {
+            throw "Pinned Windows dependency installation failed."
+          }
+
+      - name: Run Windows file-system and integration contracts
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path dist\m4-windows | Out-Null
+          $env:PYTHONPATH = (Resolve-Path "src").Path
+          python -m compileall -q src\quantum\application
+          if ($LASTEXITCODE -ne 0) {
+            throw "M4 Windows compileall failed."
+          }
+          python -m unittest tests.test_m4_auto_inbox -v 2>&1 |
+            Tee-Object -FilePath dist\m4-windows\focused-tests.log
+          if ($LASTEXITCODE -ne 0) {
+            throw "M4 Windows contracts failed."
+          }
+
+      - name: Write Windows evidence
+        shell: pwsh
+        run: |
+          $payload = [ordered]@{
+            milestone = "M4_AUTO_INBOX"
+            status = "PASS"
+            evidence_level = "L2_WINDOWS_RUNTIME"
+            exact_head = $env:TARGET_SHA
+            platform = "windows-2025"
+            python_runtime = "3.13.14"
+            stable_file_detection = "PASS"
+            digest_deduplication = "PASS"
+            crash_recovery = "PASS"
+            cancellation_finalization = "PASS"
+            state_tamper_fail_closed = "PASS"
+            release_scope = "WB_ONLY"
+            marketplace_write_enabled = $false
+            physical_user_path_verified = $false
+            release_state = "RELEASE_BLOCKED"
+          }
+          [IO.File]::WriteAllText(
+            "dist\m4-windows\M4_WINDOWS_EVIDENCE.json",
+            ($payload | ConvertTo-Json -Depth 8),
+            [Text.UTF8Encoding]::new($false)
+          )
+
+      - name: Upload Windows evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: M4-Windows-Evidence-${{ env.TARGET_SHA }}
+          path: dist/m4-windows
+          if-no-files-found: error
+          retention-days: 30

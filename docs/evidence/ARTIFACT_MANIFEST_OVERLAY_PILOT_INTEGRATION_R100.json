@@ -1,0 +1,69 @@
+{
+  "entries": [
+    [
+      ".github/workflows/m5-scheduled-reports.yml",
+      "fbad984990ddf0964020d9fd3bc289a16fd16e5f5580f578da79f82874829253",
+      12148
+    ],
+    [
+      "src/quantum/application/scheduled_reports.py",
+      "f560b95706140ff134d99c2552494f7e29cb37ccd444d1cc67aa936a653d2e5d",
+      42852
+    ],
+    [
+      "src/quantum/application/_finance_center_scheduled_reports.py",
+      "7edf62061ef040066844856cc037f026b28ba38f2625f56c880d36d9d77499e6",
+      5649
+    ],
+    [
+      "src/quantum/application/finance_center.py",
+      "58db201fb2930be09ed2b546a2b9248635f7327a40e196c214f2084a4f7f391c",
+      3468
+    ],
+    [
+      "src/quantum/application/_finance_center_shell.py",
+      "79a91502a4f5a2dbee1bfd9888c3e7d907e4ab696186258ae3bb0cf8f4946fa0",
+      10640
+    ],
+    [
+      "src/quantum/application/_finance_center_pages.py",
+      "4399a53a38259917035debad9e3f820417f967f60fd30c7a0db516743d99f158",
+      37356
+    ],
+    [
+      "src/quantum/application/_finance_center_queue_runtime.py",
+      "e8c93df22cb72f615e67b29cf6e1e3f3c21f7a2335d6df64908577a1ea066b40",
+      18533
+    ],
+    [
+      "tests/test_m5_scheduled_reports.py",
+      "bcba2ac13ff4ebde671137748eccdec92e70cc5777180495e7c0b5bdeefaef49",
+      16073
+    ],
+    [
+      "tests/integration_manifest_support_m8.py",
+      "fc21e65e682416436d739864e016e3a10fb8fec36fb0a4ce95083f8dc0f754e6",
+      2549
+    ],
+    [
+      "docs/evidence/M5_SCHEDULED_REPORTS_RTM.json",
+      "0d598070919e243feb7f525aa1317439bff71414005bf3f7efc10e24dbeb1f77",
+      14113
+    ],
+    [
+      "docs/evidence/WB_RELEASE_R2_EXECUTION_STATE.yaml",
+      "52b5035fbe2907b86a76a569cea06cc13c886842da0a4894c5dd8bdd10e1056c",
+      3991
+    ],
+    [
+      "docs/governance/CURRENT_STATE.md",
+      "a1420ed4aef77ce6fd84d6d210842dff70d098b28cd86712d13484d0ee786d5f",
+      3499
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 100,
+  "reason": "WBR2-M5 scheduled weekly and monthly reports rebuilt over reconciled governance head 96e96a88: deterministic completed periods, exact source coverage, governed finance/export reuse, SHA-256-bound idempotent atomic packages, Windows Task Scheduler trigger, missed-run recovery and manual actions on the existing Reports page. The immutable GOV-R1 overlay is applied before R100, while R100 supplies final merged-tree entries. Approved navigation, WB_ONLY scope, Ozon deferral, Gatekeeper disconnection and marketplace-write-disabled state remain unchanged.",
+  "remove_paths": [],
+  "base_pilot_integration_r99_overlay_git_blob_sha": "b52af806361e29c9e6be6842007b066ac22223a1"
+}

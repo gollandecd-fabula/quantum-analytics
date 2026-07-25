@@ -1,0 +1,34 @@
+{
+  "base_pilot_integration_r36_overlay_git_blob_sha": "75876f8d34639e9a9dde7484b131cc873f4534ae",
+  "entries": [
+    [
+      ".github/workflows/build-one-button-redteam-r3.yml",
+      "427373a1f1e32b704d229eb68607217a1d7f5d9b93762a6ceb20a6bb468e72e7",
+      2494
+    ],
+    [
+      ".github/workflows/windows-local-production.yml",
+      "0d1303781cc84b55373dd92d1c312a370cb8339b0274b40935b158d0611ff437",
+      3168
+    ],
+    [
+      "scripts/ci/native_one_button_r37.ps1",
+      "251a969631b2793b96799a49a9a93b1f069269bcb4380576c51e1af9f6077c29",
+      15096
+    ],
+    [
+      "scripts/ci/windows_local_production_r37.ps1",
+      "147dd505ca2c88e6dcca4dc3ef2c05d86bf63100e86dae65d0fe66ceccc6be02",
+      11635
+    ],
+    [
+      "tests/integration_manifest_support.py",
+      "675285a765ca9222eb973d0dde3f65d71fd468afb93624da100e3ccba304e468",
+      7845
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 37,
+  "reason": "MILESTONE 0 Windows CI reconciliation: route production and native Red Team workflows through immutable versioned PowerShell scripts, preserve complete E2E coverage, require explicit operator confirmations in normal use, and permit CI scan skipping only with a separate equivalent-scan attestation",
+  "remove_paths": []
+}

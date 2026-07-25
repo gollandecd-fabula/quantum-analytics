@@ -1,0 +1,24 @@
+{
+  "base_pilot_integration_r40_overlay_git_blob_sha": "910afe7c254b22e076e8ecada75e6d1f3a1fa7dc",
+  "entries": [
+    [
+      ".github/workflows/build-one-button-redteam-r3.yml",
+      "9977d0d984d037fc7d1c7d2774ced583efa2455861a04f37bc39039f2ea6bdab",
+      2565
+    ],
+    [
+      ".github/workflows/windows-local-production.yml",
+      "720ecf3efe7295734534174ca81a05ca967d3e7252954fc351bc6fdbcf5947f3",
+      3250
+    ],
+    [
+      "tests/integration_manifest_support.py",
+      "b66c412b8679824eca3b1217ea502fb3263db2e35af9952cfaac0eeb5befe9bc",
+      7845
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 41,
+  "reason": "MILESTONE 0 final Windows wrapper semantics: after a versioned E2E script completes without a terminating exception, explicitly return success so verbose native stderr and expected negative checks cannot create a false workflow failure",
+  "remove_paths": []
+}

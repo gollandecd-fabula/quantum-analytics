@@ -10,6 +10,17 @@ from tests.p16_fixtures import build_xlsx, policy
 from tests.test_b1b_rescue_input_boundaries import request
 
 
+def control_totals_sha256(expected_metrics):
+    payload = json.dumps(
+        expected_metrics,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+        allow_nan=False,
+    ).encode("utf-8")
+    return sha256(payload).hexdigest()
+
+
 class LocalPilotRunnerTests(unittest.TestCase):
     def config(self):
         tenant_id = "tenant-local-pilot"
@@ -42,6 +53,23 @@ class LocalPilotRunnerTests(unittest.TestCase):
             },
             "finance_request": finance_request,
         }
+
+    def expected_metrics(self):
+        return {
+            "net_sold_units": "1",
+            "product_cost_amount": "0.00",
+            "other_expense_amount": "0.00",
+            "tax_amount": "0.00",
+            "net_marketplace_income_amount": "1000.00",
+            "net_profit_amount": "1000.00",
+            "profit_per_sold_unit": "1000.00",
+        }
+
+    def bind_reconciliation(self, config, expected_metrics):
+        config["reconciliation"] = {"expected_metrics": expected_metrics}
+        config["control_totals_sha256"] = control_totals_sha256(
+            expected_metrics
+        )
 
     def run_candidate(self, config):
         with tempfile.TemporaryDirectory() as temporary:
@@ -96,32 +124,62 @@ class LocalPilotRunnerTests(unittest.TestCase):
 
     def test_matching_expected_metrics_completes_run(self):
         config = self.config()
-        config["reconciliation"] = {
-            "expected_metrics": {
-                "net_sold_units": "1",
-                "product_cost_amount": "0.00",
-                "other_expense_amount": "0.00",
-                "tax_amount": "0.00",
-                "net_marketplace_income_amount": "1000.00",
-                "net_profit_amount": "1000.00",
-                "profit_per_sold_unit": "1000.00",
-            }
-        }
+        expected = self.expected_metrics()
+        self.bind_reconciliation(config, expected)
         report = self.run_candidate(config)
         self.assertEqual(report["status"], "PILOT_RUN_COMPLETE")
         self.assertEqual(report["reconciliation"]["state"], "RECONCILED")
+        self.assertTrue(report["reconciliation"]["control_totals_bound"])
+
+    def test_matching_expected_metrics_without_hash_remain_pending(self):
+        config = self.config()
+        config["reconciliation"] = {
+            "expected_metrics": self.expected_metrics()
+        }
+        report = self.run_candidate(config)
+        self.assertEqual(report["status"], "CALCULATED_RECONCILIATION_PENDING")
+        self.assertEqual(report["reconciliation"]["state"], "PENDING")
+        self.assertEqual(
+            report["reconciliation"]["reason_code"],
+            "CONTROL_TOTALS_HASH_REQUIRED",
+        )
+
+    def test_partial_matching_expected_metrics_fail_closed(self):
+        config = self.config()
+        expected = {"net_profit_amount": "1000.00"}
+        self.bind_reconciliation(config, expected)
+        report = self.run_candidate(config)
+        self.assertEqual(report["status"], "RECONCILIATION_CONFLICT")
+        self.assertEqual(report["reconciliation"]["state"], "CONFLICT")
+        self.assertEqual(
+            report["reconciliation"]["reason_code"],
+            "RECONCILIATION_METRIC_SET_MISMATCH",
+        )
 
     def test_reconciliation_difference_fails_closed(self):
         config = self.config()
-        config["reconciliation"] = {
-            "expected_metrics": {"net_profit_amount": "999.00"}
-        }
+        expected = self.expected_metrics()
+        expected["net_profit_amount"] = "999.00"
+        self.bind_reconciliation(config, expected)
         report = self.run_candidate(config)
         self.assertEqual(report["status"], "RECONCILIATION_CONFLICT")
         self.assertEqual(report["reconciliation"]["state"], "CONFLICT")
         self.assertEqual(
             report["reconciliation"]["differences"][0]["metric_id"],
             "net_profit_amount",
+        )
+
+    def test_tampered_control_totals_hash_fails_closed(self):
+        config = self.config()
+        config["reconciliation"] = {
+            "expected_metrics": self.expected_metrics()
+        }
+        config["control_totals_sha256"] = "0" * 64
+        report = self.run_candidate(config)
+        self.assertEqual(report["status"], "RECONCILIATION_CONFLICT")
+        self.assertEqual(
+            report["reconciliation"]["reason_code"],
+            "CONTROL_TOTALS_HASH_MISMATCH",
         )
 
     def test_independent_verifier_is_required(self):

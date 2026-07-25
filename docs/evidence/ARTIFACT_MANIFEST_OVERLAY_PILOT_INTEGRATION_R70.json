@@ -1,0 +1,29 @@
+{
+  "base_pilot_integration_r69_overlay_git_blob_sha": "099713cf9c044fc1d3d600230f9d07e6816f18e5",
+  "entries": [
+    [
+      ".github/workflows/build-two-installer-bundles-r2.yml",
+      "5a7a2175e3d390198e7bddb30c99bf138f9c4b464df940735ae82843578d365c",
+      14485
+    ],
+    [
+      "scripts/windows/build_exe_installer.ps1",
+      "a44dce289cfb2655230cfe2fffd5e7d56094e9a205dc0f95748a5a84c709c01e",
+      13761
+    ],
+    [
+      "tests/integration_manifest_support_m8.py",
+      "a0e9a606a41caa71fa5160d5fcf65e2de8872c22fc3b3bf41662c2733cd2c322",
+      1085
+    ],
+    [
+      "tests/test_tz_correction_and_exe_installer.py",
+      "4f5453804c34875665c8902468f7babd6a14429bc45a147e786bcaffbe053711",
+      4267
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 70,
+  "reason": "Replace the unreliable IExpress child-launch wrapper with a deterministic .NET Framework executable that embeds and verifies the existing full offline bundle, validates exact source commit and inner Quantum package hashes, exposes a direct native self-test argument, and preserves WB-only release, marketplace-write and production-release blocks",
+  "remove_paths": []
+}

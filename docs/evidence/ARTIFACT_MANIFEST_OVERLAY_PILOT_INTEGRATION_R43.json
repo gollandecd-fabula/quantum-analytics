@@ -1,0 +1,19 @@
+{
+  "base_pilot_integration_r42_overlay_git_blob_sha": "827f772ee0cd34d97a8f8572fa6826f97ee50fa2",
+  "entries": [
+    [
+      ".github/workflows/m1-baseline-audit.yml",
+      "8a1980d9bb96a9db26b3b5b23cd2be69e19981a953ffecec8cb8a70044b9b942",
+      9303
+    ],
+    [
+      "tests/integration_manifest_support.py",
+      "45d24edc99bab41ba47a3be88eb9a9f681c2c49e64b6ca0cba6415cf52a38ce6",
+      7845
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 43,
+  "reason": "MILESTONE 1 orchestration correction: execute exact-head baseline jobs on PR events after push-only manifest reconciliation",
+  "remove_paths": []
+}

@@ -1,0 +1,19 @@
+{
+  "base_pilot_integration_r63_overlay_git_blob_sha": "743e4a069e9935f07fd143d8032e3148b7ba16a5",
+  "entries": [
+    [
+      "scripts/windows/build_local_production.ps1",
+      "abd9a8517a481c44c0bf476b2f64e81639ac515a8d1630d7a9867e831ce28e86",
+      12130
+    ],
+    [
+      "tests/integration_manifest_support_m8.py",
+      "dd2abbb9d6769b1f3e3c8ae6c4c4f436f520af29444516514a6e4a78635cef33",
+      1085
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 64,
+  "reason": "Post-M8 corrective audit: remove Python bytecode and __pycache__ contamination from the Windows HOME_LOCAL package while preserving exact-head, release-blocked and marketplace-write-disabled invariants",
+  "remove_paths": []
+}

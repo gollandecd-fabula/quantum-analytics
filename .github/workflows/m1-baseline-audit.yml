@@ -1,0 +1,273 @@
+name: M1 Baseline and Reproduction Audit
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - fix/quantum-one-click-stable-release
+    paths:
+      - "tools/m1_baseline_audit.py"
+      - ".github/workflows/m1-baseline-audit.yml"
+      - "tests/integration_manifest_support.py"
+      - "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R45.json"
+  pull_request:
+    paths:
+      - "tools/m1_baseline_audit.py"
+      - ".github/workflows/m1-baseline-audit.yml"
+      - "tests/integration_manifest_support.py"
+      - "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R45.json"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: m1-baseline-${{ github.event.pull_request.head.sha || github.sha }}
+  cancel-in-progress: false
+
+env:
+  BASELINE_SHA: 4c3449278d41a40d7ebb3bddcd9585347cc30586
+  TARGET_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+  PYTHONUTF8: "1"
+  PYTHONDONTWRITEBYTECODE: "1"
+
+jobs:
+  manifest-reconcile:
+    name: Reconcile immutable manifest R45
+    if: github.event_name == 'push' && github.ref_name == 'fix/quantum-one-click-stable-release'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    permissions:
+      contents: write
+    outputs:
+      changed: ${{ steps.reconcile.outputs.changed }}
+    steps:
+      - name: Checkout writable branch head
+        uses: actions/checkout@v4
+        with:
+          ref: fix/quantum-one-click-stable-release
+          fetch-depth: 0
+
+      - name: Assert exact branch head
+        shell: bash
+        run: |
+          test "$(git rev-parse HEAD)" = "$TARGET_SHA"
+          git cat-file -e "$BASELINE_SHA^{commit}"
+
+      - name: Generate immutable R45 overlay
+        id: reconcile
+        shell: bash
+        run: |
+          python - <<'PY'
+          from __future__ import annotations
+          import hashlib
+          import json
+          from pathlib import Path
+
+          root = Path.cwd()
+          support_path = root / "tests/integration_manifest_support.py"
+          support = support_path.read_text(encoding="utf-8")
+          old = "for n in range(1, 45)"
+          new = "for n in range(1, 46)"
+          if old in support:
+              support_path.write_text(support.replace(old, new, 1), encoding="utf-8")
+          elif new not in support:
+              raise SystemExit("M1_MANIFEST_RANGE_UNEXPECTED")
+
+          def git_blob_sha(data: bytes) -> str:
+              return hashlib.sha1(f"blob {len(data)}\0".encode("ascii") + data).hexdigest()
+
+          def entry(path: str) -> list[object]:
+              data = (root / path).read_bytes()
+              return [path, hashlib.sha256(data).hexdigest(), len(data)]
+
+          r44 = (root / "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R44.json").read_bytes()
+          overlay = {
+              "base_pilot_integration_r44_overlay_git_blob_sha": git_blob_sha(r44),
+              "entries": [
+                  entry(".github/workflows/m1-baseline-audit.yml"),
+                  entry("tests/integration_manifest_support.py"),
+              ],
+              "hash_encoding": "sha256-hex",
+              "overlay_version": 45,
+              "reason": "MILESTONE 1 reproduction semantics: preserve Native and production evidence after an expected baseline defect instead of skipping downstream scenarios",
+              "remove_paths": [],
+          }
+          target = root / "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R45.json"
+          target.write_text(json.dumps(overlay, indent=2) + "\n", encoding="utf-8")
+          PY
+
+          python -m unittest \
+            tests.test_a0_manifest_diagnostic \
+            tests.test_b1a_artifact_manifest -v
+
+          git add \
+            tests/integration_manifest_support.py \
+            docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R45.json
+          if git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "M1: register baseline audit manifest R45"
+          git push origin HEAD:fix/quantum-one-click-stable-release
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+  linux-baseline:
+    name: Linux baseline inventory
+    needs: manifest-reconcile
+    if: ${{ always() && (github.event_name == 'pull_request' || needs.manifest-reconcile.outputs.changed == 'false') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Checkout exact head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TARGET_SHA }}
+          fetch-depth: 0
+
+      - name: Assert exact head
+        shell: bash
+        run: |
+          test "$(git rev-parse HEAD)" = "$TARGET_SHA"
+          git cat-file -e "$BASELINE_SHA^{commit}"
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run Linux functional inventory and baseline
+        shell: bash
+        run: |
+          python tools/m1_baseline_audit.py \
+            --platform-label linux \
+            --baseline-sha "$BASELINE_SHA" 2>&1 | tee m1-linux-console.log
+
+      - name: Upload Linux M1 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: M1-Baseline-Linux-${{ env.TARGET_SHA }}
+          path: |
+            m1-artifacts/linux/**
+            m1-linux-console.log
+          if-no-files-found: error
+          retention-days: 14
+
+  windows-baseline:
+    name: Windows baseline and one-click reproduction
+    needs: manifest-reconcile
+    if: ${{ always() && (github.event_name == 'pull_request' || needs.manifest-reconcile.outputs.changed == 'false') }}
+    runs-on: windows-latest
+    timeout-minutes: 55
+    steps:
+      - name: Disable Git CRLF conversion before checkout
+        shell: pwsh
+        run: git config --global core.autocrlf false
+
+      - name: Checkout exact head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TARGET_SHA }}
+          fetch-depth: 0
+
+      - name: Assert exact head
+        shell: pwsh
+        run: |
+          $actual = (& git rev-parse HEAD).Trim()
+          if ($actual -ne $env:TARGET_SHA) {
+            throw "Exact-head mismatch: expected $env:TARGET_SHA, got $actual"
+          }
+          git cat-file -e "$env:BASELINE_SHA`^{commit}"
+          if ($LASTEXITCODE -ne 0) {
+            throw "Baseline commit is unavailable."
+          }
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run Windows functional inventory and baseline
+        shell: pwsh
+        run: |
+          python tools/m1_baseline_audit.py `
+            --platform-label windows `
+            --baseline-sha $env:BASELINE_SHA 2>&1 | Tee-Object m1-windows-console.log
+          if ($LASTEXITCODE -ne 0) {
+            throw "Windows baseline audit reported a hard failure."
+          }
+
+      - name: Reproduce production one-click, persistence, restart and UI path
+        id: production
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          & .\scripts\ci\windows_local_production_r37.ps1 2>&1 |
+            Tee-Object m1-windows-production.log
+
+      - name: Reproduce native packaged Red Team path
+        id: native
+        if: always()
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          & .\scripts\ci\native_one_button_r37.ps1 2>&1 |
+            Tee-Object m1-windows-native.log
+
+      - name: Write Windows E2E evidence index
+        if: always()
+        shell: pwsh
+        env:
+          PRODUCTION_OUTCOME: ${{ steps.production.outcome }}
+          NATIVE_OUTCOME: ${{ steps.native.outcome }}
+        run: |
+          New-Item -ItemType Directory -Path m1-artifacts\windows -Force | Out-Null
+          $payload = [ordered]@{
+            baseline_sha = $env:BASELINE_SHA
+            exact_head = $env:TARGET_SHA
+            production_one_click = $env:PRODUCTION_OUTCOME
+            native_red_team = $env:NATIVE_OUTCOME
+            settings_persistence = $env:PRODUCTION_OUTCOME
+            restart = $env:PRODUCTION_OUTCOME
+            one_click_startup = $env:PRODUCTION_OUTCOME
+            ui_smoke_functional = $env:NATIVE_OUTCOME
+            visual_browser_render = "NOT_EXECUTED"
+            marketplace_write_enabled = $false
+            expected_baseline_defects_are_evidence = $true
+          }
+          [IO.File]::WriteAllText(
+            "m1-artifacts\windows\m1-windows-e2e.json",
+            ($payload | ConvertTo-Json -Depth 8),
+            [Text.UTF8Encoding]::new($false)
+          )
+
+      - name: Upload Windows M1 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: M1-Baseline-Windows-${{ env.TARGET_SHA }}
+          path: |
+            m1-artifacts/windows/**
+            m1-windows-console.log
+            m1-windows-production.log
+            m1-windows-native.log
+            windows-repair-tests.log
+            existing-local-pilot-tests.log
+            windows-verification-error.log
+            tamper-rejection.log
+            configurator.log
+            installed-import.log
+            one-click-pilot.log
+            native-test-error.log
+            native-install-1.log
+            native-install-2.log
+            native-full.log
+            native-gui-path.log
+            contamination.log
+            repository-ci.log
+            dist/one-button-redteam-r3/**
+          if-no-files-found: warn
+          retention-days: 14

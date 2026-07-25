@@ -1,0 +1,34 @@
+{
+  "base_pilot_integration_r82_overlay_git_blob_sha": "f1e8badfde4ee77a248154539eaecb64a643e804",
+  "entries": [
+    [
+      ".github/workflows/windows-release-gate.yml",
+      "95c42997a7032bd933b927aed7b2e6b921d0539478c870147af688ebfa22294c",
+      11094
+    ],
+    [
+      "scripts/windows/one_click_home_local.ps1",
+      "43a1eccb0e9dc86b81fb4e30cf067fc56c477d4c158063df151e9652cfce7a99",
+      21131
+    ],
+    [
+      "tests/test_plateau_m7_release_integration.py",
+      "cad5d89186415aa6b74ae2d47178fc3760595914f4c2bbf942ba66eb93ce3fc3",
+      3119
+    ],
+    [
+      "tests/test_windows_first_run_finance_center_r74.py",
+      "061b1b55be1b9626d6bcce8451c6d8d4fffbdc32b1ba93c6a2bfc33c3dc0b35e",
+      3687
+    ],
+    [
+      "tests/integration_manifest_support_m8.py",
+      "f9ee9f4e6cf3a5ee70e81522468959592a2356fee876421b51de65852b89eb47",
+      1090
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 83,
+  "reason": "Establish real main ancestry while preserving the immutable evidence chain, replace the obsolete localhost HTTP release workflow with exact-head desktop, installed-runtime and offline-EXE verification, harden installed-copy bootstrap detection against partial updates, and add release integration regressions without enabling marketplace writes.",
+  "remove_paths": []
+}

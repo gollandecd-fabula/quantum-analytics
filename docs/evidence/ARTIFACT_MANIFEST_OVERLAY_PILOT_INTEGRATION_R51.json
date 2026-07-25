@@ -1,0 +1,74 @@
+{
+  "base_pilot_integration_r50_overlay_git_blob_sha": "ca6631c14e1e54ecd2e82a2c81163419e8555855",
+  "entries": [
+    [
+      "src/quantum/outputs/dashboard.py",
+      "97077fd3ddefd772dac729016925bb108e5d0863049c217057f6cdb54dca2e50",
+      2269
+    ],
+    [
+      "src/quantum/outputs/dashboard_shell.py",
+      "f39e4907878405be7bb1bfeb547be9e6c89842a499932d636bd361cf8f9339f5",
+      14910
+    ],
+    [
+      "src/quantum/outputs/dashboard_style.py",
+      "3bc99387bfc6e6c0988842d6914c0a740175c55af1759b6ea43b43f3dfbdfa04",
+      25401
+    ],
+    [
+      "src/quantum/outputs/dashboard_script_core.py",
+      "bd363fe37e00256dc9844f99b38b38fd530da673ef45395bc7a972eff32a29e4",
+      21883
+    ],
+    [
+      "src/quantum/outputs/dashboard_script_data.py",
+      "bbd801ebf82372a74c8d5752aa26acc5b37d286b064bf55da6519d2057e2b21a",
+      7222
+    ],
+    [
+      "src/quantum/outputs/writer.py",
+      "af3fa16e669e12e94094e8451e768d348c164c49f9c6422be5e1410cf23c7f70",
+      13858
+    ],
+    [
+      "tests/test_m5_color_ui_graph_quality.py",
+      "08f70d91c1a05067007d7360ddb729f565dc32daf1cd3b3f722c5d363eb56419",
+      6312
+    ],
+    [
+      "docs/evidence/M5_COLOR_UI_GRAPH_QUALITY_REPORT.md",
+      "41082f1e2ab0251e49bed8480df6077b72ed927daccffa306717d3d0132e7695",
+      4200
+    ],
+    [
+      "docs/evidence/M5_DEFECT_REGISTER.json",
+      "1724316c8f42d5c91bd05530091a1e365bbad511e4269f290505c6d951238915",
+      3233
+    ],
+    [
+      "docs/evidence/M5_BROWSER_RED_TEAM.json",
+      "7cd737ec3cb203e6cfbe604673f8426c34614b863ebfb4a9dfa3f630ef4b3530",
+      877
+    ],
+    [
+      "docs/evidence/M5_CONTRAST_AUDIT.json",
+      "2da4e114214f96e47130974dceaaa2aeabd66d5d1ee4277f023702c9bdd0bab2",
+      1388
+    ],
+    [
+      "tests/integration_manifest_support.py",
+      "4acce99c8a34da6d233044769255dc5b41b3b98fbed1f4ac25ad5238db2bce30",
+      7845
+    ],
+    [
+      "docs/evidence/M5_CI_TRIGGER.txt",
+      "4acdc14ceb710ffa3aa38e029ae46bed61170ba2834a2518efa461c38b69d6a8",
+      25
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 51,
+  "reason": "MILESTONE 5 color UI and graph quality: deliver the offline read-only Decision Center, signed financial bridge, evidence-bound cost and priority charts, fail-closed history, responsive accessibility controls, browser evidence, and schema-aware transactional verification",
+  "remove_paths": []
+}

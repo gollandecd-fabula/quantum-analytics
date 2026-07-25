@@ -1,0 +1,114 @@
+name: WB Release R2 Plan Reconciliation
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/wb-release-r2-plan-reconciliation.yml"
+      - "docs/evidence/WB_RELEASE_R2_PLAN_RECONCILIATION_RTM.json"
+      - "docs/evidence/WB_RELEASE_R2_EXECUTION_STATE.yaml"
+      - "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_WB_RELEASE_R2_GOV_R1.json"
+      - "docs/governance/CURRENT_STATE.md"
+      - "tests/integration_manifest_support_m8.py"
+      - "tests/test_wb_release_r2_plan_reconciliation.py"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: wbr2-gov-r1-${{ github.event.pull_request.head.sha || github.sha }}
+  cancel-in-progress: true
+
+env:
+  TARGET_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+  BASE_SHA: d89c29edfa93ecc61290a0fdeb9e218214638f7d
+  PYTHONDONTWRITEBYTECODE: "1"
+  PYTHONUTF8: "1"
+
+jobs:
+  scope:
+    name: GOV-R1 ancestry and scope
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact head
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ env.TARGET_SHA }}
+          fetch-depth: 20
+      - name: Assert exact head, ancestry and allow-list
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$TARGET_SHA"
+          test "$(git merge-base "$BASE_SHA" HEAD)" = "$BASE_SHA"
+          test "$(git rev-list --count "$BASE_SHA"..HEAD)" = "2"
+          mapfile -t actual < <(git diff --name-only "$BASE_SHA"..HEAD | sort)
+          mapfile -t expected <<'EOF'
+          .github/workflows/wb-release-r2-plan-reconciliation.yml
+          docs/evidence/ARTIFACT_MANIFEST_OVERLAY_WB_RELEASE_R2_GOV_R1.json
+          docs/evidence/WB_RELEASE_R2_EXECUTION_STATE.yaml
+          docs/evidence/WB_RELEASE_R2_PLAN_RECONCILIATION_RTM.json
+          docs/governance/CURRENT_STATE.md
+          tests/integration_manifest_support_m8.py
+          tests/test_wb_release_r2_plan_reconciliation.py
+          EOF
+          if ! diff -u <(printf '%s\n' "${expected[@]}" | sort) <(printf '%s\n' "${actual[@]}"); then
+            echo "WBR2 GOV-R1 changed-file scope mismatch" >&2
+            exit 1
+          fi
+          if printf '%s\n' "${actual[@]}" | grep -q '^src/'; then
+            echo "Product runtime path changed during governance reconciliation" >&2
+            exit 1
+          fi
+
+  linux:
+    name: GOV-R1 Linux source
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact head
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ env.TARGET_SHA }}
+          fetch-depth: 1
+      - name: Run focused governance contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$TARGET_SHA"
+          PYTHONPATH=src python3 -m unittest             tests.test_wb_release_r2_plan_reconciliation -v
+      - name: Run complete source CI
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH=src python3 -m quantum.scripts.ci
+
+  windows:
+    name: GOV-R1 Windows source
+    runs-on: windows-2025
+    timeout-minutes: 25
+    steps:
+      - name: Disable Git CRLF conversion
+        shell: pwsh
+        run: git config --global core.autocrlf false
+      - name: Checkout exact head
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ env.TARGET_SHA }}
+          fetch-depth: 1
+      - name: Set up Python 3.13.14
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.13.14"
+      - name: Run focused governance contracts
+        shell: pwsh
+        run: |
+          if ((& git rev-parse HEAD).Trim() -ne $env:TARGET_SHA) {
+            throw "Exact-head mismatch."
+          }
+          $env:PYTHONPATH = (Resolve-Path "src").Path
+          python -m unittest tests.test_wb_release_r2_plan_reconciliation -v
+          if ($LASTEXITCODE -ne 0) {
+            throw "WBR2 GOV-R1 Windows contracts failed."
+          }

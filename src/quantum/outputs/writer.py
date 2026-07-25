@@ -13,7 +13,10 @@ from typing import Any
 from xml.etree import ElementTree
 from zipfile import BadZipFile, ZipFile
 
-from .dashboard import render_dashboard_html
+from .dashboard import (
+    INTERACTIVE_DASHBOARD_SCHEMA_VERSION,
+    render_dashboard_html,
+)
 from .local_bundle import (
     EXPECTED_XLSX_SHEETS,
     LOCAL_OUTPUT_MANIFEST_SCHEMA_VERSION,
@@ -210,7 +213,9 @@ def _verify_dashboard_payload(payload: bytes, bundle_hash: str) -> None:
     required = (
         bundle_hash.encode("ascii"),
         b'id="bundle-data"',
-        b'data-dashboard-schema="quantum-interactive-dashboard-v1"',
+        f'data-dashboard-schema="{INTERACTIVE_DASHBOARD_SCHEMA_VERSION}"'.encode(
+            "ascii"
+        ),
         b'http-equiv="Content-Security-Policy"',
         b"connect-src 'none'",
         b"object-src 'none'",

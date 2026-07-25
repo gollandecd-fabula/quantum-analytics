@@ -1,0 +1,19 @@
+{
+  "base_pilot_integration_r43_overlay_git_blob_sha": "c355aefb7050e9a7e78ebae1e4a70688b07e4530",
+  "entries": [
+    [
+      ".github/workflows/m1-baseline-audit.yml",
+      "319e55ea6ada0c7aaa37cda55aa13ec16c92f12c1d0494ce2ef6c048284d92bf",
+      9454
+    ],
+    [
+      "tests/integration_manifest_support.py",
+      "fe83c318af99d2e949fe9a2efbf5dea2353d68afe9c3541b33f822f5972ec88b",
+      7845
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 44,
+  "reason": "MILESTONE 1 Windows baseline reproducibility: disable Git CRLF conversion before checkout so immutable manifest blob anchors remain byte-exact",
+  "remove_paths": []
+}

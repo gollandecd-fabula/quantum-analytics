@@ -1,0 +1,47 @@
+{
+  "milestone": "M3_CI_CONSOLIDATION",
+  "base_exact_head": "3aad43573b205a98e2f2f718e208c8ba763d535e",
+  "requirements": [
+    {
+      "id": "M3-01",
+      "requirement": "Foundation and OSS source gates complete before any package build",
+      "test": "workflow needs graph plus exact-head CI"
+    },
+    {
+      "id": "M3-02",
+      "requirement": "Canonical M3 workflow builds the HOME_LOCAL production package exactly once",
+      "test": "static build-call count and runtime build evidence"
+    },
+    {
+      "id": "M3-03",
+      "requirement": "Two independent Windows validators consume the same uploaded package bytes",
+      "test": "A/B package SHA-256 equality"
+    },
+    {
+      "id": "M3-04",
+      "requirement": "Both validators execute installed-runtime L4 and independent postcheck",
+      "test": "L4 and postcheck evidence status"
+    },
+    {
+      "id": "M3-05",
+      "requirement": "Installed managed-tree manifests are identical across A/B",
+      "test": "installed manifest SHA-256 equality"
+    },
+    {
+      "id": "M3-06",
+      "requirement": "Exact head, WB_ONLY and marketplace-write-disabled boundaries remain enforced",
+      "test": "workflow and evidence assertions"
+    },
+    {
+      "id": "M3-07",
+      "requirement": "No physical L5, merge, deployment or release claim is made",
+      "test": "claim boundary evidence"
+    },
+    {
+      "id": "M3-08",
+      "requirement": "M3 is published as one clean commit directly over M2",
+      "test": "final ancestry postcheck"
+    }
+  ],
+  "claim_boundary": "L4_AUTOMATED_INSTALLED_RUNTIME; PHYSICAL_L5_EXCLUDED; RELEASE_BLOCKED"
+}

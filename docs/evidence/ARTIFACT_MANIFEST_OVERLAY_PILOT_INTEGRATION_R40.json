@@ -1,0 +1,24 @@
+{
+  "base_pilot_integration_r39_overlay_git_blob_sha": "82a2f5350e3efe3b662d4e58c6dd729b4f391d8b",
+  "entries": [
+    [
+      ".github/workflows/build-one-button-redteam-r3.yml",
+      "b96cf81281d30fc5278a4f3d80495c1833bee01cac5527f9f7abe48edffc5c7c",
+      2548
+    ],
+    [
+      ".github/workflows/windows-local-production.yml",
+      "7297c1aa6612af8a78d9e4228406a280c7f09cba8fdd7d48ae0a7ec80f45094c",
+      3233
+    ],
+    [
+      "tests/integration_manifest_support.py",
+      "544554ab35f8b26c5d65373a7721464087005c77fee7fa8e80a1e734fe50c0af",
+      7845
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 40,
+  "reason": "MILESTONE 0 Windows wrapper reliability: propagate only terminating script failures, not stale native exit codes left by expected negative Red Team checks, while preserving exact-head binding and complete transcripts",
+  "remove_paths": []
+}

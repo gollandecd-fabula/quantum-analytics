@@ -27,6 +27,7 @@ from quantum.ingestion._xlsx_contracts import (
     XlsxInspectionLimits,
     normalized_header_sha256,
 )
+from quantum.ingestion._xlsx_xml_lexical import validate_xml_lexical_content
 from quantum.ingestion import _xlsx_relationships_core as _relationship_core
 
 from . import local_runner as _engine
@@ -262,6 +263,10 @@ def discover_schema(
         limits.max_columns,
     )
     package_kind, workbook = _extract_workbook(payload, limits)
+    # Schema discovery is a security boundary, not a permissive preview path.
+    # Apply the same lexical XML policy as the canonical inspector before any
+    # workbook relationship or cell content is interpreted.
+    validate_xml_lexical_content(workbook, limits)
     candidates: list[tuple[tuple[int, int, int, int, int, int], DiscoveredSchema]] = []
     try:
         with ZipFile(BytesIO(workbook)) as archive:
@@ -524,6 +529,7 @@ def main() -> int:
                 min_columns=args.min_header_columns,
             )
             config = apply_discovered_schema(config, candidate)
+            config["schema_reviewed"] = True
         else:
             candidate = None
         report = _engine.run_local_pilot(

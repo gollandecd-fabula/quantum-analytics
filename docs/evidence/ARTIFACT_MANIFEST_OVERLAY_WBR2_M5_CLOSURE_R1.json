@@ -1,0 +1,39 @@
+{
+  "entries": [
+    [
+      ".github/workflows/wbr2-m5-closure.yml",
+      "41b80d0549cced0c11e69093e3ebfc19bcf60b96f4bde5aea4b68877dabd8323",
+      3884
+    ],
+    [
+      "docs/evidence/WBR2_M5_CLOSURE_RTM.json",
+      "12d07191035a7297b679d7d4d503aa2cf7ae72b5bd1f4bf5f5109bc9406c0f0d",
+      3208
+    ],
+    [
+      "docs/evidence/WB_RELEASE_R2_EXECUTION_STATE.yaml",
+      "cff4ca3287fcf9d87288043d8c6e0f912073b17898bf0e3a6e705acc359e32c0",
+      4270
+    ],
+    [
+      "docs/governance/CURRENT_STATE.md",
+      "2661041cc1996346be76f6775dc4d748dd682575e287c33b610b293972a150c3",
+      3036
+    ],
+    [
+      "tests/integration_manifest_support_m8.py",
+      "df7d7e6c89289fbde4d5e4aaff59038a46d04b882a2e8b3b618f747866f52a85",
+      2969
+    ],
+    [
+      "tests/test_wbr2_m5_closure.py",
+      "9cba23395596e676a2ad3d44785fdd117f6d5be9c4eb497673a39facd50842a7",
+      2816
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": "WBR2-M5-CLOSURE-R1",
+  "reason": "Append-only governance closure after WBR2-M5 exact-head validation and fast-forward into the working branch. Records validated state, PR #130 closed unmerged, release-candidate preparation, unchanged WB_ONLY/read-only boundaries and unassigned WBR2-M6. No product source change.",
+  "remove_paths": [],
+  "base_m5_r100_overlay_git_blob_sha": "914a10017125e025eb86968a52b028dfabb05ef2"
+}

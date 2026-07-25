@@ -1,81 +1,99 @@
 # CURRENT STATE
 
-Date: 2026-07-02
-Status: `BUILD_P1_5_COMPLETE_R3_REAL_DATA_PILOT_AUTHORIZED_PENDING_CONTROLS`
-Active contract: `STAGE-B-BUILD-v1`
-Live execution state: `docs/evidence/STAGE_B_EXECUTION_STATE.yaml`
-Current unit: `R3D1 — REAL_DATA_PILOT_ADMISSION`
-Tracking issue: `#41`
-Working branch: `r3-real-commercial-data-pilot-v1`
-Decision: `docs/decisions/DR-2026-07-01-REAL-COMMERCIAL-DATA-PILOT.md`
-Local-storage decision: `docs/decisions/DR-2026-07-02-LOCAL-DISK-ENCRYPTION-NOT-REQUIRED.md`
-Admission contract: `docs/security/REAL_COMMERCIAL_DATA_ADMISSION_CONTRACT_2026_07_08.md`
-Assurance-plan amendment: `docs/governance/ASSURANCE_EXECUTION_PLAN_2026_07_08_LOCAL_STORAGE_AMENDMENT.md`
+Date: 2026-07-25  
+Live program: `WB_RELEASE_R2`  
+Live namespace: `WBR2`  
+Current product unit: `WBR2-M5 — Scheduled weekly and monthly reports`  
+Current phase: `PHYSICAL_L5_PREPARATION`  
+Release status: `RELEASE_BLOCKED`  
+Working branch: `fix/quantum-wb-release-r2`  
+Validated product head: `5e0e52c0141c5860ea108ba515a073094037ad72`  
+Containing governance head: resolved from Git; not self-referenced in this file  
+Marketplace writes: `DISABLED`  
+Ozon: `DEFERRED`  
+Gatekeeper: `DISCONNECTED`
 
-## Completed foundation
+## Authoritative live execution state
 
-P1.5/B5 remains complete and provides a dependency-free, headless UX foundation over B1a, B3, B4,
-and ingestion contracts:
+The only live execution-state artifact is:
 
-- explicit preview-only cost, tax-rate, tax-base, and other-expense inputs;
-- no hidden commercial defaults and no missing-to-zero coercion;
-- B1a-aligned RATE tax-base vocabulary;
-- strict RFC3339 timestamps in executable and machine-readable contracts;
-- canonical lowercase-hyphenated raw-file UUID enforcement;
-- text-first accessible typed-state and numeric-zero presentation;
-- preview-safe Evidence Chain drill-down;
-- deterministic Exception Inbox;
-- fail-closed organization, Actual/Scenario, tenant, duplicate, and forged-input boundaries.
+- `docs/evidence/WB_RELEASE_R2_EXECUTION_STATE.yaml`
 
-Prior verification remains valid for its exact historical head:
+`docs/evidence/STAGE_B_EXECUTION_STATE.yaml` remains the byte-identical
+historical Stage-B snapshot. Its older internal live declaration is superseded
+by the WBR2 pointer.
 
-- merged commit: `8a714e5688f3af5872305f8e1fdbdb4f56ee9d9a`;
-- 64 targeted P1.5 tests passed;
-- Foundation CI and OSS Admission passed;
-- artifact-manifest equality passed;
-- unresolved review threads: 0.
+## Historical Stage-B compatibility markers
 
-## New explicit R3 decisions
+These literal markers are retained only for historical regression compatibility
+and do not override the WBR2 live pointer:
 
-The July 8 closed pilot must operate on real commercial data. Synthetic fixtures remain required for
-testing but are insufficient for `PILOT_READY`.
+Status: `TECHNICAL_PLATEAU_CANDIDATE`  
+Live execution state: `docs/evidence/STAGE_B_EXECUTION_STATE.yaml`  
+Current unit: `M9 — Historical Stage-B plateau snapshot`
 
-Real data is `AUTHORIZED_FOR_CLOSED_PILOT_PENDING_ADMISSION_CONTROLS`, not yet automatically
-`ADMITTED`. Every dataset must pass the Real Commercial Data Admission Contract.
+## Completed WBR2 governance reconciliation
 
-For the local single-user version:
+`WBR2-GOV-R1` was validated at
+`96e96a88cbb16ef6e0ca2219f2f4abff372b0f2e`.
 
-- full-disk encryption is not required;
-- local application-level encryption at rest is not required;
-- absence of local disk encryption is not a pilot blocker;
-- the runtime must remain loopback-only unless separately approved;
-- encryption remains required for hosted, cloud, shared, removable, exported, and backup storage;
-- TLS remains required for separately approved non-loopback transport.
+Validation PR #129 closed with `merged=false`; issue #124 closed as completed.
 
-Required boundaries:
+## WBR2-M5 closure
 
-- invitation or approved-request access only;
-- pseudonymous accounts and minimized personal data;
-- tenant- and account-scoped storage and access;
-- immutable source SHA-256 and Evidence Chain;
-- row-level and aggregate source reconciliation;
-- privacy-safe logging;
-- retention, deletion, withdrawal, and revocation controls;
-- no raw commercial data in GitHub, CI, evidence packages, or external model prompts;
-- read-only marketplace behavior and no marketplace write credentials.
+`WBR2-M5 — Scheduled weekly and monthly reports` is:
 
-## Critical path
+- validated at exact head `5e0e52c0141c5860ea108ba515a073094037ad72`;
+- integrated into `fix/quantum-wb-release-r2` by fast-forward;
+- supported by M5 Linux and Windows, Foundation, OSS, M4 regressions, M7,
+  M8, standalone L4, M3 same-artifact A/B, installer and Native Red Team;
+- recorded in Validation PR #130, which closed with `merged=false`.
 
-B1b, B2, and B6 remain on the financial critical path. The real-data pilot additionally requires
-quarantine, classification, tenant/account isolation, controlled persistence, reconciliation,
-deletion/retention, and recovery controls. External public access remains unauthorized.
+No product or `src/**` change is made by this closure unit.
 
-`PILOT_READY` requires at least one authorized real dataset to complete admission, ingestion, calculation,
-reconciliation, tenant/account-isolation, and deletion/retention verification with zero open P0/P1 findings.
+No `WBR2-M6` is assigned or authorized.
 
-## Exclusions
+## Release-candidate evidence
 
-No public registration, unrestricted external access, marketplace writes, production marketplace
-credentials, raw-data disclosure to external models, or production release is included.
+The exact containing Git head is the only valid source identity for an RC build.
+This static file does not predeclare a dynamic build PASS. Authoritative RC
+evidence is a successful GitHub Actions installer run whose `head_sha` equals
+the containing governance head, together with downloaded artifact hashes and
+native self-test evidence.
 
+Before physical L5, that exact-head evidence must show:
+
+- the two Windows installer bundles and EXE were built;
+- the source commit matches the containing Git head;
+- WB_ONLY and marketplace writes disabled;
+- native EXE self-test PASS;
+- SHA-256 identities retained externally.
+
+The release candidate remains read-only and WB-only. It cannot write to a
+marketplace.
+
+Historical closed-pilot authorization marker retained for compatibility:
+`AUTHORIZED_FOR_CLOSED_PILOT_PENDING_ADMISSION_CONTROLS`. This is not a
+production release authorization and does not override `RELEASE_BLOCKED`.
+
+## Evidence boundary
+
+Repository, Linux and hosted Windows evidence do not establish physical
+installation or real-report execution on the operator computer.
+
+The following remain blocked or unverified:
+
+- physical installation and real-report user path, L5;
+- applicable tax regime and tax base confirmation;
+- Authenticode signing where required;
+- merge into `main`;
+- deployment or production release;
+- Ozon activation;
+- marketplace writes.
+
+Until those boundaries are explicitly satisfied:
+
+`FAIL-CLOSED`  
+`PROTOCOL_IMPLEMENTATION_INCOMPLETE`  
+`MILESTONE_NOT_COMPLETE`  
 `RELEASE_BLOCKED`

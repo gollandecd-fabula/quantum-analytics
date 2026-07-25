@@ -1,0 +1,37 @@
+{
+  "milestone": "M2_RUNTIME_DEPENDENCY_MODERNIZATION_CORRECTION_R96",
+  "supersedes_candidate_head": "782a8eb55e0c6e79649b2f12a83b09f4c5722024",
+  "base_exact_head": "ad5229bbaca3cf8ae692ecb09f54220cde1db16b",
+  "defects": [
+    {
+      "id": "M2-D07",
+      "severity": "P0",
+      "defect": "Foundation and OSS admission incorrectly required Python 3.13 on hardened Ubuntu 24.04 source gates without setup-python.",
+      "correction": "Keep Windows production runtime at Python 3.13.14 while restoring Linux/source-package compatibility to Python 3.12+."
+    },
+    {
+      "id": "M2-D08",
+      "severity": "P0",
+      "defect": "Atomic finance JSON publication called os.replace while NamedTemporaryFile was still open, causing WinError 32.",
+      "correction": "Flush and fsync inside the context, close the file, then call os.replace; clean up fail-closed on error."
+    },
+    {
+      "id": "M2-D09",
+      "severity": "P0",
+      "defect": "Finance output durability used os.fsync on a read-only file descriptor, which fails on Windows after the temporary-file handle correction.",
+      "correction": "Open completed output artifacts with read/write access before os.fsync so Windows FlushFileBuffers receives a write-capable handle."
+    }
+  ],
+  "required_gates": [
+    "focused M2 regressions",
+    "Windows finance output-bundle regressions",
+    "Foundation CI",
+    "OSS Admission CI",
+    "Windows installer bundle build",
+    "Windows local production",
+    "Native Red Team",
+    "M7 security/performance/one-click",
+    "M8 clean-environment reproduction"
+  ],
+  "claim_boundary": "M2 may close only after exact-head remote gates; merge, release and physical L5 remain separately blocked"
+}

@@ -1,0 +1,19 @@
+{
+  "base_pilot_integration_r62_overlay_git_blob_sha": "4b24e7d441ef799510dc4e8e1fff702a630dcaf6",
+  "entries": [
+    [
+      "docs/evidence/M8_CLEAN_ENVIRONMENT_REPRODUCTION.json",
+      "9b235948617af667728628b27a0d729c961ee298dc1fb7e0b79575e50dedd6ff",
+      4369
+    ],
+    [
+      "tests/integration_manifest_support_m8.py",
+      "758904106fef6577c2491cf439baf5cafec185cde022e90f7f0f8a6c6271c265",
+      1085
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 63,
+  "reason": "MILESTONE 8 exact-head seal: record completed staging and branch verification evidence, close clean-environment defects, preserve release and marketplace-write blocks, and retain explicit scope limitations",
+  "remove_paths": []
+}

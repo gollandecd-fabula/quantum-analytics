@@ -1,0 +1,19 @@
+{
+  "base_pilot_integration_r67_overlay_git_blob_sha": "78ca1e70eff485e63a6a16feba738a17e74bd640",
+  "entries": [
+    [
+      ".github/workflows/build-two-installer-bundles-r2.yml",
+      "8c4cd0091f0190b6271d0cae3803869b11fb7c7c6fdd5d274f9fcbcfdd66ee6c",
+      14985
+    ],
+    [
+      "tests/integration_manifest_support_m8.py",
+      "c278192331b9d0ea696628f581f9ccfbb5e942ea5f073115d5292f729f2af005",
+      1085
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 68,
+  "reason": "Correct the Windows IExpress native-test race by waiting for the bounded asynchronous bootstrap result before validation while preserving exact-head, payload hash, WB-only release scope, marketplace-write and production-release blocks",
+  "remove_paths": []
+}

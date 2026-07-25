@@ -1,0 +1,24 @@
+{
+  "base_pilot_integration_r84_overlay_git_blob_sha": "82ee813043ee1cd9bbe07d88eceaa697aa52922b",
+  "entries": [
+    [
+      "src/quantum/application/_finance_center_shared.py",
+      "67803e7529fd7cf517166fd2a68f131c8a36cfa4e4728f8745b3e985120eb170",
+      4033
+    ],
+    [
+      "tests/integration_manifest_support_m8.py",
+      "1ad4ce8b50bafcd131fd8daf7a73f30af9b883d26806bf36f9828df5ce6512b3",
+      1090
+    ],
+    [
+      "tests/test_finance_center_tax_base_startup.py",
+      "a178cb1d977b05773691dc39a47ecbd76bf76d968a912b4784682ce3156a587b",
+      1739
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 85,
+  "reason": "P0 finance-center GUI startup repair: import TAX_BASE_OPTIONS through the shared module and add a regression that executes the tax-base summary render path without reducing financial functionality",
+  "remove_paths": []
+}

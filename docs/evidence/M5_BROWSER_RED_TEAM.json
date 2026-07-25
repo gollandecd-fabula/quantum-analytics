@@ -1,0 +1,32 @@
+{
+  "milestone": "M5_COLOR_UI_GRAPH_QUALITY",
+  "desktop": {
+    "schema": "quantum-interactive-dashboard-v2",
+    "decision_title": "Требуют устранения: 1",
+    "financial_rows": 12,
+    "cost_rows": 9,
+    "priority_rows": 3,
+    "history_fail_closed": true,
+    "tab_keyboard_navigation": "PASS",
+    "recommendation_filter_empty_state": "PASS",
+    "recommendation_drawer_focus_escape": "PASS",
+    "metric_filter_and_drawer": "PASS",
+    "quality_grid": "PASS",
+    "scroll_width": 1440,
+    "client_width": 1440
+  },
+  "mobile": {
+    "scroll_width": 390,
+    "client_width": 390,
+    "no_horizontal_overflow": true,
+    "decision_center_visible": true,
+    "financial_chart_visible": true
+  },
+  "stress": {
+    "long_text_no_horizontal_overflow": true,
+    "long_token_wrap": true,
+    "scroll_width": 390,
+    "client_width": 390
+  },
+  "errors": []
+}

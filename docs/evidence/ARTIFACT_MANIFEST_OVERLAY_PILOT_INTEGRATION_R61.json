@@ -1,0 +1,24 @@
+{
+  "base_pilot_integration_r60_overlay_git_blob_sha": "02e235a95898421ee6487a1d002de23a9918dac8",
+  "entries": [
+    [
+      "docs/evidence/M7_DEFECT_REGISTER.json",
+      "d2f54c52e8a6dea91594fa81abcccc038ef7c050a9bdda97cdeac3273a842282",
+      5038
+    ],
+    [
+      "tests/integration_manifest_support_m7.py",
+      "cd7546824a5e745550b9d4ef3980b6d9d2934d55a7f45359308f14d2d88655cc",
+      1144
+    ],
+    [
+      "tests/test_real_commercial_data_pilot_contract.py",
+      "563630101ebdef33d9a367bb2cf93267638bbd7ef132f181c40eb9886dc7ed87",
+      3683
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 61,
+  "reason": "MILESTONE 7 Windows Unicode recovery: make governance and evidence contract reads explicitly UTF-8, record the closed locale-dependent test defect, and preserve the production governance state machine unchanged",
+  "remove_paths": []
+}

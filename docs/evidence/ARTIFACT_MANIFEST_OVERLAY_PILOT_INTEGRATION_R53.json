@@ -1,0 +1,29 @@
+{
+  "base_pilot_integration_r52_overlay_git_blob_sha": "751c9a16e0c580521c3af9d4b8763cb81718c63c",
+  "entries": [
+    [
+      "docs/evidence/M6_DEFECT_REGISTER.json",
+      "5445bd4efcff409c337a04194fc8fef35558132cdd1f6ad72e877306f6fba493",
+      2794
+    ],
+    [
+      "tests/integration_manifest_support.py",
+      "221bd41e3f4d605b8643359f219249f1e6635ccc3c00284ffc78b5a64636d685",
+      7845
+    ],
+    [
+      "tests/test_recommendation_contract_r1.py",
+      "eee6c0aa6e63377cc8801d1e76fc1a71ff8861d1fcdb0badd1df4ea4d9756a1b",
+      5613
+    ],
+    [
+      "tests/test_windows_recommendation_attachment_r1.py",
+      "34f3196736d60a92d29e120b8eada52e05c44f836a71bad89abef403a34f2f5b",
+      3908
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 53,
+  "reason": "MILESTONE 6 exact-head CI recovery: update legacy recommendation tests to inject the marketplace-neutral registry instead of patching the removed Wildberries module seam, record the P1 recovery, and preserve production architecture boundaries",
+  "remove_paths": []
+}

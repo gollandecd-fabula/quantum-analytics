@@ -1,0 +1,17 @@
+{
+  "base_pilot_integration_r83_overlay_git_blob_sha": "38115b175a256065f3e4ce909688092b6acc2d13",
+  "entries": [
+    ["pyproject.toml", "90253b47444c99cc78ff563f388882fded3f4a2f0628d63a93d34e1bea5e9c6e", 849],
+    ["src/quantum/application/_finance_center_self_test.py", "36f5fbd6f966272e342bfaefefca3f024a1a71f4e333e75a0dcc0238c6547b6e", 8810],
+    ["tests/test_plateau_m6_build_metadata.py", "3ed084125392da9ca456e4f08f7b6fcc7de6dea71e8b7ee3007dc012875e6342", 4542],
+    ["docs/governance/CURRENT_STATE.md", "a1f065b346be8a7cd016168b563af2bd990c87e73390bc5558f103f3047d471c", 5199],
+    ["docs/evidence/STAGE_B_EXECUTION_STATE.yaml", "4054205971b435959734caf3df7921c776b1d44647a74faf01a214d345dcace2", 5836],
+    ["docs/evidence/M9_DEFECT_REGISTER.json", "b124f85eb169a99c3822e558032b6d5b7bd12af8ef5ee5780a19fa759621b231", 3771],
+    ["docs/evidence/M9_PLATEAU_RED_TEAM_REPORT.md", "5b209608cafd6fa5fd1a992fa6d1af750e6b92345444c33ce22dd86a9e418f98", 4325],
+    ["tests/integration_manifest_support_m8.py", "e504858c8b30b1f3968b170917b4ae9ab6a4e650ee198930a1e52ee473df85fb", 1090]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 84,
+  "reason": "Pin the isolated PEP 517 build backend, make persistence self-test portable across Windows path representations, publish the final M9 defect register and plateau verification dossier, synchronize human and machine governance at the technical plateau candidate stage, and freeze the final source tree for repeated exact-head verification.",
+  "remove_paths": []
+}

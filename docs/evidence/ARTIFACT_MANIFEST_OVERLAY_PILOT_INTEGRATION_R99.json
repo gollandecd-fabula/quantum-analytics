@@ -1,0 +1,39 @@
+{
+  "base_pilot_integration_r98_overlay_git_blob_sha": "5d09a0e22c0e58e5ff7c9f3662ccfa34a01f30a1",
+  "entries": [
+    [
+      ".github/workflows/m4-corrective-r99.yml",
+      "1aafaf89476fd1dcbde39993f3b0b4e22d4ecd521ea225f4e00c56b7acc143f9",
+      3098
+    ],
+    [
+      "docs/evidence/M4_CORRECTIVE_EXECUTION_REGISTER_R99.json",
+      "8eb797f20ba31934b5b6c219ce6e3bc463fb5c30f16715c2ecd66f04c9c0d8d4",
+      5163
+    ],
+    [
+      "src/quantum/application/_finance_center_auto_inbox_corrective.py",
+      "da8838f24ea3cf5dc7c30073e4bca6327e8ccd45a6819eee3c45e2117f5aff7d",
+      5026
+    ],
+    [
+      "src/quantum/application/finance_center.py",
+      "0a412a1b1089ce0a90e31f22812e8b39cc2fddfc39b927298d89fa5a5bfda2c1",
+      3318
+    ],
+    [
+      "tests/integration_manifest_support_m8.py",
+      "cb6e3e70e9005446fdcc6bde1f466da5a1a7d809abe7e5d1dc1ca49fa9801b03",
+      1091
+    ],
+    [
+      "tests/test_m4_auto_inbox_corrective.py",
+      "21a3c5138ce470afc6f6e7c18c1366bbf6fafa7129b08ed270e44ccf9a829d82",
+      6706
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 99,
+  "reason": "M4 corrective R99: bounded deduplication/outcome records and post-move duplicate hash binding; UI, WB_ONLY, Ozon deferral, Gatekeeper disconnection and disabled marketplace writes unchanged.",
+  "remove_paths": []
+}

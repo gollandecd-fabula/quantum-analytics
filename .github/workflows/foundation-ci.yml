@@ -37,14 +37,14 @@ jobs:
           git remote set-url origin "https://github.com/${GITHUB_REPOSITORY}.git"
           echo "Validated exact head ${TARGET_SHA}"
 
-      - name: Verify runtime
+      - name: Verify source-compatible runtime
         run: |
           set -euo pipefail
           python3 --version
           python3 - <<'PY'
           import sys
           if sys.version_info < (3, 12):
-              raise SystemExit(f"Python 3.12+ required, got {sys.version}")
+              raise SystemExit(f"Python 3.12+ required for source checks, got {sys.version}")
           PY
 
       - name: Run Foundation checks

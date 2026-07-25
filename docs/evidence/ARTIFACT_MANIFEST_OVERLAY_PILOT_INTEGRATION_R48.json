@@ -1,0 +1,29 @@
+{
+  "base_pilot_integration_r47_overlay_git_blob_sha": "81399c80922d1e46ee5913c9652e38babf69af55",
+  "entries": [
+    [
+      "docs/evidence/M3_DEFECT_REGISTER.json",
+      "56e101be323a59043aa2b64dcde6d947ef49b1a72d2b6218e5fb2606bfab7fc8",
+      2146
+    ],
+    [
+      "docs/evidence/M3_P0_P1_STABILIZATION_REPORT.md",
+      "a61685978c23f646004aeca3e02f659029583bfe9c838747a39ed11814f682c9",
+      4250
+    ],
+    [
+      "tests/test_m3_p0_p1_stabilization.py",
+      "8f673a9ad9b4dce8e7939bcb6816777fc89509cc840e1d339c9064179b61358c",
+      7620
+    ],
+    [
+      "tests/integration_manifest_support.py",
+      "d89cc86ae60af36406f66ceaae282c79a14a9ca2097e9974f7f27e55fd1b79e7",
+      7845
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 48,
+  "reason": "MILESTONE 3 P0/P1 stabilization: preserve verified fail-closed finance and ingestion behavior with permanent Red Team regressions, without changing product runtime",
+  "remove_paths": []
+}

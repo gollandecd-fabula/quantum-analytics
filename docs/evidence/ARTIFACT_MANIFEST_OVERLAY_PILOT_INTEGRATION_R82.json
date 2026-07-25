@@ -1,0 +1,44 @@
+{
+  "base_pilot_integration_r81_overlay_git_blob_sha": "c900b722b01413f1749a68527651d95410d52d1e",
+  "entries": [
+    [
+      "pyproject.toml",
+      "737e0f6aa6898ee683c4ceef14762ca8932044b06a509f68bbfe932eff7f8e3c",
+      849
+    ],
+    [
+      "quantum_build_backend.py",
+      "83655dfba7265d20ce73c54093f9d058aef1223f7e66f0e400e4c1c14c11d4a9",
+      811
+    ],
+    [
+      "README.md",
+      "ead9e64dda7a8d1530e106708388f649186b94d897cc42198c22ff51fa0c1832",
+      4983
+    ],
+    [
+      "docs/governance/CURRENT_STATE.md",
+      "52d0bd33a50e6369895748a6e4444fa6eb1e3335ad52c9e10929a76b6fa3190d",
+      5094
+    ],
+    [
+      "docs/evidence/STAGE_B_EXECUTION_STATE.yaml",
+      "c5bd7bc8bcab38252ecaf0938e15f3e63a49fe7049d8fc39754bf56ae82e504e",
+      5375
+    ],
+    [
+      "tests/test_plateau_m6_build_metadata.py",
+      "dd65abc4ff1f1991b6541a9cc5a1525f7d5d7b26ff637888af33c31bcf970e9d",
+      3508
+    ],
+    [
+      "tests/integration_manifest_support_m8.py",
+      "ce600cb593d80d9f9e559f06642e30a3159b6b9707e0a9be23fd9b685b2c89ee",
+      1090
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 82,
+  "reason": "Replace the disabled Foundation-only build backend with a standard setuptools wheel surface, publish truthful desktop entry points and version metadata, align README and live governance with the actual local read-only product, synchronize machine-readable execution state with the plateau milestone, preserve closed-pilot security boundaries, and add executable wheel and documentation red-team checks.",
+  "remove_paths": []
+}

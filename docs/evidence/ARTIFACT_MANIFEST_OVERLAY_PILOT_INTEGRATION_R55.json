@@ -1,0 +1,49 @@
+{
+  "base_pilot_integration_r54_overlay_git_blob_sha": "4039b8f6e305a51f3f38fc85ce9369549e210f41",
+  "entries": [
+    [
+      ".github/workflows/m7-security-performance-one-click.yml",
+      "e8fbf0dd4c3f09c2d0fefc5e7cde6edf168c196bcac59198b22abe13ef196fed",
+      6531
+    ],
+    [
+      "docs/evidence/M7_DEFECT_REGISTER.json",
+      "caafcba0d05606c678832266d9e731a65e6da24850cc86c05bae6514edef1b64",
+      2487
+    ],
+    [
+      "docs/evidence/M7_PERFORMANCE_BUDGET.json",
+      "453e8a313b8127e41319bc67b14b9ce6cbbae3cb2bb2e91ba88a6f76f8288db8",
+      524
+    ],
+    [
+      "docs/evidence/M7_SECURITY_PERFORMANCE_ONE_CLICK_REPORT.md",
+      "854b5286558f4735ae366bbcd373750bce924c72c19a3063ed3fe78829e465e5",
+      4173
+    ],
+    [
+      "tests/integration_manifest_support_m7.py",
+      "0b0a3d1c3e87521a306640dd6b96855a6b205efec2c6a235ca3ab79d9677abee",
+      1144
+    ],
+    [
+      "tests/test_b1a_artifact_manifest.py",
+      "cfee801eb276036e3a4e8fa522db8e641b86b656e18ac85f25c1f27384500ede",
+      1014
+    ],
+    [
+      "tests/test_m7_security_performance_one_click.py",
+      "76b50acd71bd4232b1c38bf46ef37f1d00beff49a9f2016e62bdf82ef299108f",
+      7834
+    ],
+    [
+      "tools/m7_security_performance_one_click.py",
+      "9ee79f7ca7a52d0b2e70036ae0d6fc4a5deecfb911c223e55facdb15090ad09c",
+      16491
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 55,
+  "reason": "MILESTONE 7 Security, Performance and One-Click: add fail-closed security and actionable-error audit, immutable M6 baseline performance comparison, dedicated exact-head Windows native one-click Red Team, evidence, tests and manifest bootstrap without changing financial or marketplace adapter semantics",
+  "remove_paths": []
+}

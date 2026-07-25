@@ -1,0 +1,24 @@
+{
+  "base_pilot_integration_r57_overlay_git_blob_sha": "5f6a1e0a6ca8e7e80e30b31d75ff0d92a72af877",
+  "entries": [
+    [
+      ".github/workflows/m7-security-performance-one-click.yml",
+      "723bdf475410f4df2e20395133169554dc399cbbf060cf9f0987218032f4fde5",
+      6430
+    ],
+    [
+      "docs/evidence/M7_DEFECT_REGISTER.json",
+      "a4eb915070ccce483a15281de2bca3d93ac1baf212022d8fb68fbb4027639dbb",
+      3794
+    ],
+    [
+      "tests/integration_manifest_support_m7.py",
+      "c50eba91f278d9354a181e9cb4d673e8e6f5f64aa33bb9c00a156db0c26ade7c",
+      1144
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 58,
+  "reason": "MILESTONE 7 Windows gate recovery: use the repository-owned deterministic quantum.scripts.ci entry point before native one-button execution, retain exact-head assertions, and record the closed divergent test-orchestration defect",
+  "remove_paths": []
+}

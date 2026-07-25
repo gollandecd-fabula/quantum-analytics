@@ -1,0 +1,24 @@
+{
+  "base_pilot_integration_r41_overlay_git_blob_sha": "78c8763f0d6bb8678867959310b6f7776934e1fd",
+  "entries": [
+    [
+      ".github/workflows/m1-baseline-audit.yml",
+      "6c84204a6f0c65954946975efc2fedae54bb3ca2f266826be3791e9c9906dcef",
+      9240
+    ],
+    [
+      "tests/integration_manifest_support.py",
+      "7d3a24709ea6f0ffbe4fa75647723e3e3c8037d2d99693986682ee883c009748",
+      7845
+    ],
+    [
+      "tools/m1_baseline_audit.py",
+      "77fb0094bcff1f88f04cf3e3090b75074476356be7f036dad0473ed2e915ed26",
+      21640
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 42,
+  "reason": "MILESTONE 1 reproducible functional inventory and baseline audit; evidence-only workflow and audit script",
+  "remove_paths": []
+}

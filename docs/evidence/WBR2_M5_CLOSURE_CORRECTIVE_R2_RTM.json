@@ -1,0 +1,75 @@
+{
+  "rtm_id": "WBR2-M5-CLOSURE-CORRECTIVE-R2",
+  "created_on": "2026-07-25",
+  "base_exact_head": "c8e4126bb987df878fe2b3039eaf5e0376cc3796",
+  "defect": "The static live-state field working_branch_exact_head self-referenced the earlier product head after a governance-only closure advanced the branch.",
+  "resolution": "Separate immutable validated_product_exact_head from containing governance head resolution. The containing exact head is resolved from Git and is not self-referenced inside its own tree.",
+  "allowed_paths": [
+    ".github/workflows/wbr2-m5-closure-corrective-r2.yml",
+    "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_WBR2_M5_CLOSURE_R2.json",
+    "docs/evidence/WBR2_M5_CLOSURE_CORRECTIVE_R2_RTM.json",
+    "docs/evidence/WB_RELEASE_R2_EXECUTION_STATE.yaml",
+    "docs/governance/CURRENT_STATE.md",
+    "tests/integration_manifest_support_m8.py",
+    "tests/test_wbr2_m5_closure_corrective_r2.py",
+    "tests/test_wbr2_m5_closure.py"
+  ],
+  "forbidden": [
+    "src/** changes",
+    "product behavior changes",
+    "WBR2-M6 assignment",
+    "main merge",
+    "deployment",
+    "release authorization",
+    "physical L5 claim",
+    "Ozon activation",
+    "Gatekeeper connection",
+    "marketplace writes"
+  ],
+  "requirements": [
+    {
+      "id": "R2-01",
+      "requirement": "Remove misleading working_branch_exact_head static claim.",
+      "pass": "Field absent."
+    },
+    {
+      "id": "R2-02",
+      "requirement": "Preserve validated product head 5e0e52c...",
+      "pass": "validated_product_exact_head exact marker present."
+    },
+    {
+      "id": "R2-03",
+      "requirement": "Define containing governance head as Git-resolved dynamic evidence.",
+      "pass": "containing_governance_head: RESOLVE_FROM_GIT marker present."
+    },
+    {
+      "id": "R2-04",
+      "requirement": "Define RC build evidence as external exact-head workflow evidence rather than self-claimed static state.",
+      "pass": "RC evidence authority marker present."
+    },
+    {
+      "id": "R2-05",
+      "requirement": "Preserve all safety and historical compatibility markers.",
+      "pass": "Full source CI and focused tests pass."
+    },
+    {
+      "id": "R2-06",
+      "requirement": "Use RTM-first plus one atomic corrective commit.",
+      "pass": "Exactly two commits and eight allowed paths."
+    },
+    {
+      "id": "R2-07",
+      "requirement": "Update the R1 closure regression to recognize append-only R2 supersession for changed governance artifacts.",
+      "pass": "R1 invariant checks remain while manifest expectations use R2 entries for paths superseded by R2."
+    }
+  ],
+  "capability_gate": {
+    "git_objects": "SUPPORTED",
+    "exact_head_ci": "SUPPORTED",
+    "hosted_windows": "SUPPORTED",
+    "physical_l5": "NOT_IN_SCOPE",
+    "result": "PASS_FOR_GOVERNANCE_CORRECTIVE_ONLY"
+  },
+  "claim_ceiling": "L2_REPOSITORY_AND_HOSTED_RUNTIME",
+  "release_state": "RELEASE_BLOCKED"
+}

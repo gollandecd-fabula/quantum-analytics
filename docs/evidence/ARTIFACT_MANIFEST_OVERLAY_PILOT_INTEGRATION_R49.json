@@ -1,0 +1,49 @@
+{
+  "base_pilot_integration_r48_overlay_git_blob_sha": "32890125e8f346a8daec7fc3350d318d9643c436",
+  "entries": [
+    [
+      "src/quantum/pilot/local_runner.py",
+      "ff448f725560923b4cb91adac556943e8ac8697c5b01577e409acd913d2c03f3",
+      5434
+    ],
+    [
+      "src/quantum/pilot/local_runner_legacy_m4.py",
+      "747a493aaa101e071c580154e8443b350135d27e0b1aa98277c0b31059cd6c21",
+      20659
+    ],
+    [
+      "src/quantum/finance/oracle.py",
+      "3d3b20337e6dc73636a68752ee740371eabc8ec391c28b6342e2dadd94132158",
+      3802
+    ],
+    [
+      "tests/test_local_pilot_runner.py",
+      "e0cbd350df8d697c3f2730bd6429c5616a30c92678c9cfed7e27fa7f796d6c87",
+      8030
+    ],
+    [
+      "tests/test_m4_financial_data_correctness.py",
+      "04137659036fe4e5e4320d20307a28c9f59830c324702b257b7394c2122e3e63",
+      11893
+    ],
+    [
+      "docs/evidence/M4_DEFECT_REGISTER.json",
+      "d52ef80fc8f355da0236597910c8c993e6e94b0438a485360294ffce7dbeb898",
+      2985
+    ],
+    [
+      "docs/evidence/M4_FINANCIAL_DATA_CORRECTNESS_REPORT.md",
+      "0bab75ab2f44b968f77f845f38d7efe9ba37d7bf017254e2760e906e244bd016",
+      6434
+    ],
+    [
+      "tests/integration_manifest_support.py",
+      "cef7ec13c923b9c487ad2eaca9b7ce9bb08b9bfeb78285ed04f05ca0404abd11",
+      7845
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 49,
+  "reason": "MILESTONE 4 financial and data correctness: require complete SHA-256-bound reconciliation controls, preserve the existing runner behind a minimal fail-closed boundary, align the independent oracle with negative-tax-base policy, and add permanent financial Red Team evidence",
+  "remove_paths": []
+}

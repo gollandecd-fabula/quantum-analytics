@@ -1,0 +1,14 @@
+{
+  "milestone": "M7",
+  "title": "Security, Performance and One-Click",
+  "baseline_head": "0972d02312bdee3aae3583dc6d9caf369622a57d",
+  "probe": "marketplace-neutral adapter normalization and registry resolution",
+  "iterations": 50000,
+  "repeats": 5,
+  "aggregation": "median",
+  "max_ratio": 1.75,
+  "absolute_slack_seconds": 0.25,
+  "decision_rule": "candidate_median <= max(baseline_median * max_ratio, baseline_median + absolute_slack_seconds)",
+  "marketplace_write_enabled": false,
+  "release_authorized": false
+}

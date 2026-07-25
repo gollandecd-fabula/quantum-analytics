@@ -1,0 +1,19 @@
+{
+  "base_pilot_integration_r58_overlay_git_blob_sha": "5586d2ddcaa943750f8981524fa4ef2623289d90",
+  "entries": [
+    [
+      ".github/workflows/m7-security-performance-one-click.yml",
+      "57651150ab1c980b0e7704f854d2afc7efa880827cf60facfd793147b1a704a2",
+      6643
+    ],
+    [
+      "tests/integration_manifest_support_m7.py",
+      "b07693c3b257822af8230cb36a4f842605ff367ed0b24ed437ee504281a38b24",
+      1144
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 59,
+  "reason": "MILESTONE 7 Windows diagnostic hardening: preserve canonical repository-contract output and exit code as an always-uploaded exact-head artifact so platform-specific failures can be diagnosed without weakening the gate",
+  "remove_paths": []
+}

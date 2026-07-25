@@ -1,0 +1,59 @@
+{
+  "base_pilot_integration_r90_overlay_git_blob_sha": "4d5ad47c0fec0dfb9a516deae03fd6406c0260e9",
+  "entries": [
+    [
+      "src/quantum/application/_finance_center_calculation.py",
+      "63c19b52f693d1137caf2cfc0a6cc82a52a9acab7cd82f2d6508d88f0195afd4",
+      23726
+    ],
+    [
+      "src/quantum/application/_finance_center_pages.py",
+      "5f6b09598416ebe02ab3461514ea4592edba985e6070e32a8a2957883bb88e10",
+      34859
+    ],
+    [
+      "src/quantum/application/_finance_center_shared.py",
+      "dea39729bcf9ca34b92358d7beb1190221b162903f0857ac771d3c13a8876a3b",
+      4129
+    ],
+    [
+      "src/quantum/application/_finance_center_shell.py",
+      "fe26df69b8af67c13830e0e99c603623802e99567fcba64dfdee1247df91b82e",
+      10315
+    ],
+    [
+      "src/quantum/application/_finance_profile_outputs.py",
+      "79b70c87a9c0b1ac63f3fcbee3f2474522655793f15395a32e71e0cece2bb044",
+      18280
+    ],
+    [
+      "src/quantum/pilot/windows_runner.py",
+      "d7bcaf505e4337679dd4b10ad9fd679afff653c5b7c1435bfcbff73deb223a66",
+      22172
+    ],
+    [
+      "src/quantum/reporting/runtime.py",
+      "79ba5322f7df3f1508e6230cdc805ff19f27a076b4ba22b7ac04a768dc80908a",
+      28513
+    ],
+    [
+      "src/quantum/scripts/ci.py",
+      "23f87c7a1abd2ba3d7fa1225e99c3f683ab9510fa8d6c5997b524c05f8ca8a3f",
+      5392
+    ],
+    [
+      "tests/integration_manifest_support_m8.py",
+      "141157ef6f94a672ae827ab781c6e98784ef8ed58a1990db4d7d2f70bf119d18",
+      1090
+    ],
+    [
+      "tests/test_quantum_reaudit_plateau_r1.py",
+      "5c92aa1b4a21ae3f5d5e7cc056bcd9533912b32ec6b4570f3f3ce7c2cee6a096",
+      10573
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 91,
+  "reason": "Maximum re-audit repair cycle: enforce approved Decision Center structure without redesigning the reference, publish finance outputs transactionally, integrate governed recommendation evidence into Excel/dashboard, preserve primary finance block reasons, reject noncanonical cursors and unsafe XLSX lexical content on the Windows discovery path, expand marketplace-write negative scanning, and add focused Red Team regression coverage while Gatekeeper remains disconnected, Ozon deferred and marketplace writes disabled",
+  "remove_paths": []
+}

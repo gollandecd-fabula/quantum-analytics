@@ -1,0 +1,36 @@
+{
+  "base_pilot_integration_r49_overlay_git_blob_sha": "50e2ec5b240a5e9b46e9a40b13f267ddb1b91302",
+  "entries": [
+    [
+      "src/quantum/pilot/local_runner.py",
+      "747a493aaa101e071c580154e8443b350135d27e0b1aa98277c0b31059cd6c21",
+      20659
+    ],
+    [
+      "src/quantum/pilot/reconciliation_guard.py",
+      "31ee0bfdce6042e21b547b8f57dd31e6c74dbf8ea0cd62c3beb0abd457c730ba",
+      6750
+    ],
+    [
+      "src/quantum/pilot/__init__.py",
+      "1eb371f2936e43c5edf9b698e6c0a62e60b334c1d8a8a1310ab31d8d5497f398",
+      548
+    ],
+    [
+      "tests/test_m4_financial_data_correctness.py",
+      "bdfd681be7f5741fa6406a0b1df62d8c9d2b01930eeebcdd86ba8b931435ef5c",
+      12221
+    ],
+    [
+      "tests/integration_manifest_support.py",
+      "37a01338f73e5754703dc818fe417ff8fa532d84a9ff19fb8ac1d8ca100646ef",
+      7845
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": 50,
+  "reason": "MILESTONE 4 exact-head remediation: restore the original local runner unchanged, install the complete SHA-256-bound reconciliation policy through a small package boundary guard, preserve M0 static security evidence, and remove the temporary legacy module",
+  "remove_paths": [
+    "src/quantum/pilot/local_runner_legacy_m4.py"
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "entries": [
+    [
+      ".github/workflows/wbr2-m5-closure-corrective-r2.yml",
+      "d7dfcc3f63a75b61795d775c01327b15e9cb55d8c51820ab42b36725b48a47c5",
+      3963
+    ],
+    [
+      "docs/evidence/WBR2_M5_CLOSURE_CORRECTIVE_R2_RTM.json",
+      "3c34d17518308e359452b90a767e887e496dff079c3ded9763b60b710b55f0ac",
+      2914
+    ],
+    [
+      "docs/evidence/WB_RELEASE_R2_EXECUTION_STATE.yaml",
+      "cf560a753091e596e597e3a3a3579fbb3eb6b3b703d60269f9539f502d2ac873",
+      4372
+    ],
+    [
+      "docs/governance/CURRENT_STATE.md",
+      "3319559cf529b934d38bca8589dbf03ec0776efb463e36e9b6bc59482e51333c",
+      3459
+    ],
+    [
+      "tests/integration_manifest_support_m8.py",
+      "aafedd35b69773a1beb1c140824ee442ebd73e3f3503958eee95d3771dddc43d",
+      3427
+    ],
+    [
+      "tests/test_wbr2_m5_closure.py",
+      "944a2c86fbfc671f45a55ec129bec95d01325bde377beb0f65b1962a10cc2f1c",
+      3474
+    ],
+    [
+      "tests/test_wbr2_m5_closure_corrective_r2.py",
+      "fea2bd4145ba135cac94a618614a239e0dd83f63a5f2bd46f17f401e0c7aa1ab",
+      2954
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": "WBR2-M5-CLOSURE-CORRECTIVE-R2",
+  "reason": "Correct the static working-branch self-reference, preserve the immutable validated product head, define the containing governance head and RC evidence as Git-resolved external evidence, and update the R1 closure regression for append-only R2 supersession. No product source change.",
+  "remove_paths": [],
+  "base_m5_closure_r1_overlay_git_blob_sha": "8323094c94b08894063b7e89b033c640a38e6910"
+}

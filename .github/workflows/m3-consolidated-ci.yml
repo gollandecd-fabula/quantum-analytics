@@ -1,0 +1,331 @@
+name: M3 Consolidated Build Once Same Artifact
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/m3-consolidated-ci.yml"
+      - "scripts/ci/l4_installed_runtime.ps1"
+      - "scripts/ci/l4_installed_runtime_postcheck.ps1"
+      - "scripts/windows/build_local_production.ps1"
+      - "tools/m3_same_artifact_compare.py"
+      - "tests/test_m3_ci_consolidation.py"
+      - "tests/integration_manifest_support_m8.py"
+      - "docs/evidence/M3_CI_CONSOLIDATION_RTM.json"
+      - "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R97.json"
+      - "requirements/windows-home-local.txt"
+      - "pyproject.toml"
+      - "src/**"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: m3-consolidated-${{ github.event.pull_request.head.sha || github.sha }}
+  cancel-in-progress: false
+
+env:
+  TARGET_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+  PYTHONDONTWRITEBYTECODE: "1"
+  PYTHONUTF8: "1"
+
+jobs:
+  source-foundation:
+    name: Source Foundation
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact head
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ env.TARGET_SHA }}
+          fetch-depth: 1
+
+      - name: Assert exact head and source runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$TARGET_SHA"
+          python3 - <<'PY'
+          import sys
+          if sys.version_info < (3, 12):
+              raise SystemExit(f"Python 3.12+ required, got {sys.version}")
+          PY
+
+      - name: Run complete source CI
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist/m3-source
+          PYTHONPATH=src python3 -m quantum.scripts.ci 2>&1 |
+            tee dist/m3-source/foundation.log
+
+      - name: Upload Foundation evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: M3-Source-Foundation-${{ env.TARGET_SHA }}
+          path: dist/m3-source/foundation.log
+          if-no-files-found: error
+          retention-days: 14
+
+  source-oss:
+    name: Source OSS Admission
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact head
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ env.TARGET_SHA }}
+          fetch-depth: 1
+
+      - name: Assert exact head
+        shell: bash
+        run: test "$(git rev-parse HEAD)" = "$TARGET_SHA"
+
+      - name: Run OSS admission
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist/m3-source
+          PYTHONPATH=src python3 -m quantum.scripts.oss_admission_scan \
+            --output dist/m3-source/oss-admission.json 2>&1 |
+            tee dist/m3-source/oss-admission.log
+
+      - name: Upload OSS evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: M3-Source-OSS-${{ env.TARGET_SHA }}
+          path: |
+            dist/m3-source/oss-admission.json
+            dist/m3-source/oss-admission.log
+          if-no-files-found: error
+          retention-days: 14
+
+  build-once:
+    name: Build HOME_LOCAL once
+    needs: [source-foundation, source-oss]
+    runs-on: windows-2025
+    timeout-minutes: 45
+    outputs:
+      package_sha256: ${{ steps.identity.outputs.package_sha256 }}
+    steps:
+      - name: Disable Git CRLF conversion
+        shell: pwsh
+        run: git config --global core.autocrlf false
+
+      - name: Checkout exact head
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ env.TARGET_SHA }}
+          fetch-depth: 1
+
+      - name: Set up Python 3.13.14
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.13.14"
+
+      - name: Assert exact head and install pinned dependency
+        shell: pwsh
+        run: |
+          $actual = (& git rev-parse HEAD).Trim()
+          if ($actual -ne $env:TARGET_SHA) {
+            throw "Exact-head mismatch: expected $env:TARGET_SHA, got $actual"
+          }
+          python -m pip install `
+            --disable-pip-version-check `
+            --no-input `
+            --no-deps `
+            --only-binary=:all: `
+            --require-hashes `
+            -r requirements/windows-home-local.txt
+          if ($LASTEXITCODE -ne 0) {
+            throw "Pinned dependency installation failed."
+          }
+
+      - name: Run M3 contracts
+        shell: pwsh
+        run: |
+          $env:PYTHONPATH = (Resolve-Path "src").Path
+          python -m unittest tests.test_m3_ci_consolidation -v
+          if ($LASTEXITCODE -ne 0) {
+            throw "M3 consolidation contracts failed."
+          }
+
+      - name: Build production package exactly once
+        shell: pwsh
+        run: |
+          powershell.exe -NoProfile -ExecutionPolicy Bypass `
+            -File .\scripts\windows\build_local_production.ps1 `
+            -OutputDirectory .\dist\m3-build-once 2>&1 |
+            Tee-Object -FilePath m3-build-once.log
+          if ($LASTEXITCODE -ne 0) {
+            throw "M3 build-once package creation failed: $LASTEXITCODE"
+          }
+
+      - name: Bind package identity to exact head
+        id: identity
+        shell: pwsh
+        run: |
+          Set-StrictMode -Version Latest
+          $ErrorActionPreference = "Stop"
+          $archive = Resolve-Path "dist\m3-build-once\QuantumLocalProduction_HOME_LOCAL.zip"
+          $sha = (Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash.ToLowerInvariant()
+          $extract = Join-Path $env:RUNNER_TEMP "m3-build-identity"
+          Remove-Item -LiteralPath $extract -Recurse -Force -ErrorAction SilentlyContinue
+          Expand-Archive -LiteralPath $archive -DestinationPath $extract
+          $manifest = Get-Content -LiteralPath (Join-Path $extract "manifest.sha256.json") -Raw -Encoding UTF8 | ConvertFrom-Json
+          if ([string]$manifest.source_commit -ne $env:TARGET_SHA) {
+            throw "M3 package source commit mismatch."
+          }
+          if ([bool]$manifest.marketplace_write_enabled) {
+            throw "M3 package enabled marketplace writes."
+          }
+          $evidence = [ordered]@{
+            milestone = "M3_CI_CONSOLIDATION"
+            status = "BUILD_ONCE_PASS"
+            exact_head = $env:TARGET_SHA
+            build_count = 1
+            package_sha256 = $sha
+            package_size_bytes = (Get-Item -LiteralPath $archive).Length
+            release_scope = "WB_ONLY"
+            marketplace_write_enabled = $false
+            release_state = "RELEASE_BLOCKED"
+          }
+          [IO.File]::WriteAllText(
+            "dist\m3-build-once\M3_BUILD_ONCE_EVIDENCE.json",
+            ($evidence | ConvertTo-Json -Depth 8),
+            [Text.UTF8Encoding]::new($false)
+          )
+          "package_sha256=$sha" | Out-File $env:GITHUB_OUTPUT -Encoding utf8 -Append
+
+      - name: Upload the single build artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: M3-Build-Once-${{ env.TARGET_SHA }}
+          path: |
+            dist/m3-build-once/QuantumLocalProduction_HOME_LOCAL.zip
+            dist/m3-build-once/M3_BUILD_ONCE_EVIDENCE.json
+            m3-build-once.log
+          if-no-files-found: error
+          retention-days: 14
+
+  l4-same-artifact:
+    name: L4 same artifact ${{ matrix.slot }}
+    needs: build-once
+    strategy:
+      fail-fast: false
+      matrix:
+        slot: [A, B]
+    runs-on: windows-2025
+    timeout-minutes: 55
+    steps:
+      - name: Disable Git CRLF conversion
+        shell: pwsh
+        run: git config --global core.autocrlf false
+
+      - name: Checkout exact head
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ env.TARGET_SHA }}
+          fetch-depth: 1
+
+      - name: Set up Python 3.13.14
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.13.14"
+
+      - name: Download the one build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: M3-Build-Once-${{ env.TARGET_SHA }}
+          path: m3-package
+
+      - name: Verify downloaded package identity
+        shell: pwsh
+        run: |
+          $archive = Resolve-Path "m3-package\dist\m3-build-once\QuantumLocalProduction_HOME_LOCAL.zip"
+          $actual = (Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash.ToLowerInvariant()
+          $expected = "${{ needs.build-once.outputs.package_sha256 }}"
+          if ($actual -ne $expected) {
+            throw "Downloaded M3 artifact hash mismatch: expected $expected, got $actual"
+          }
+
+      - name: Run installed-runtime L4 from the prebuilt artifact
+        shell: pwsh
+        run: |
+          $archive = (Resolve-Path "m3-package\dist\m3-build-once\QuantumLocalProduction_HOME_LOCAL.zip").Path
+          & .\scripts\ci\l4_installed_runtime.ps1 `
+            -PackageArchive $archive `
+            -EvidenceSlot "${{ matrix.slot }}" 2>&1 |
+            Tee-Object -FilePath "m3-l4-${{ matrix.slot }}.log"
+          if ($LASTEXITCODE -ne 0) {
+            throw "M3 L4 slot ${{ matrix.slot }} failed: $LASTEXITCODE"
+          }
+
+      - name: Run independent L4 postcheck
+        shell: pwsh
+        run: |
+          & .\scripts\ci\l4_installed_runtime_postcheck.ps1 `
+            -EvidenceSlot "${{ matrix.slot }}" 2>&1 |
+            Tee-Object -FilePath "m3-l4-postcheck-${{ matrix.slot }}.log"
+          if ($LASTEXITCODE -ne 0) {
+            throw "M3 L4 postcheck slot ${{ matrix.slot }} failed: $LASTEXITCODE"
+          }
+
+      - name: Upload slot evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: M3-L4-${{ matrix.slot }}-${{ env.TARGET_SHA }}
+          path: |
+            artifacts/l4-installed-runtime-${{ matrix.slot }}
+            m3-l4-${{ matrix.slot }}.log
+            m3-l4-postcheck-${{ matrix.slot }}.log
+          if-no-files-found: error
+          retention-days: 14
+
+  compare-same-artifact:
+    name: Compare A/B installed evidence
+    needs: [build-once, l4-same-artifact]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact head
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ env.TARGET_SHA }}
+          fetch-depth: 1
+
+      - name: Download slot A evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: M3-L4-A-${{ env.TARGET_SHA }}
+          path: evidence/A
+
+      - name: Download slot B evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: M3-L4-B-${{ env.TARGET_SHA }}
+          path: evidence/B
+
+      - name: Compare same-artifact results
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/m3_same_artifact_compare.py \
+            --slot-a evidence/A/artifacts/l4-installed-runtime-A \
+            --slot-b evidence/B/artifacts/l4-installed-runtime-B \
+            --expected-head "$TARGET_SHA" \
+            --expected-package-sha256 "${{ needs.build-once.outputs.package_sha256 }}" \
+            --output dist/m3/M3_SAME_ARTIFACT_EVIDENCE.json
+
+      - name: Upload consolidated M3 evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: M3-Consolidated-Evidence-${{ env.TARGET_SHA }}
+          path: dist/m3/M3_SAME_ARTIFACT_EVIDENCE.json
+          if-no-files-found: error
+          retention-days: 30
