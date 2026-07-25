@@ -1,0 +1,41 @@
+name: Materialize Full Red Team R1 Process Lock
+
+on:
+  push:
+    branches:
+      - tmp/materialize-full-redteam-r1-process-lock
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    if: github.event.head_commit.message != 'Materialize Full Red Team R1 process-lock repair'
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout helper branch
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: tmp/materialize-full-redteam-r1-process-lock
+          fetch-depth: 0
+      - name: Apply and verify process lock
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/temp_materialize_process_lock.py
+          python3 -m compileall -q src tests
+          PYTHONPATH=src python3 -m unittest -v tests.test_full_project_redteam_r1
+          PYTHONPATH=src python3 -m quantum.scripts.ci
+      - name: Commit materialized blobs
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            docs/evidence/FULL_PROJECT_REDTEAM_R1_DEFECT_REGISTER.json \
+            docs/evidence/ARTIFACT_MANIFEST_OVERLAY_FULL_PROJECT_REDTEAM_R1.json \
+            src/quantum/application/desktop_center.py \
+            tests/test_full_project_redteam_r1.py
+          git commit -m "Materialize Full Red Team R1 process-lock repair"
+          git push origin HEAD:tmp/materialize-full-redteam-r1-process-lock
