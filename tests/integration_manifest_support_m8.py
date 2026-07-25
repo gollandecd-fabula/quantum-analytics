@@ -19,6 +19,10 @@ R100_OVERLAY = (
     "ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R100.json",
     "base_pilot_integration_r99_overlay_git_blob_sha",
 )
+M5_CLOSURE_OVERLAY = (
+    "ARTIFACT_MANIFEST_OVERLAY_WBR2_M5_CLOSURE_R1.json",
+    "base_m5_r100_overlay_git_blob_sha",
+)
 ALL_OVERLAY_NAMES = tuple(
     name
     for name, _ in (
@@ -29,6 +33,7 @@ ALL_OVERLAY_NAMES = tuple(
     *PRODUCT_BASE_NAMES,
     GOVERNANCE_OVERLAY[0],
     R100_OVERLAY[0],
+    M5_CLOSURE_OVERLAY[0],
 )
 CONTROL_PATHS = {
     "docs/evidence/ARTIFACT_MANIFEST.json",
@@ -36,8 +41,9 @@ CONTROL_PATHS = {
 }
 
 # The historical product chain remains linear through R99. GOV-R1 and R100 are
-# independent branches anchored to immutable R99; the effective merged tree
-# applies governance first and R100 last.
+# independent branches anchored to immutable R99. The M5 closure overlay is
+# anchored to immutable R100 and applies last to record the validated working
+# branch state without changing product code.
 _core.FINAL_NAMES = PRODUCT_BASE_NAMES
 _core.FINAL_OVERLAY_R1 = FINAL_OVERLAY_R1
 _core.FINAL_OVERLAYS = PRODUCT_BASE_OVERLAYS
@@ -66,14 +72,17 @@ def _apply_parallel_overlay(
 def load_effective_manifest() -> dict:
     current = _base.load_effective_manifest()
     artifacts = {row[0]: row for row in current["artifacts"]}
+    evidence = _core.ROOT / "docs/evidence"
     r99_raw = (
-        _core.ROOT
-        / "docs/evidence"
-        / "ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R99.json"
+        evidence / "ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R99.json"
+    ).read_bytes()
+    r100_raw = (
+        evidence / "ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R100.json"
     ).read_bytes()
 
     _apply_parallel_overlay(artifacts, GOVERNANCE_OVERLAY, r99_raw)
     _apply_parallel_overlay(artifacts, R100_OVERLAY, r99_raw)
+    _apply_parallel_overlay(artifacts, M5_CLOSURE_OVERLAY, r100_raw)
 
     current["artifacts"] = [artifacts[path] for path in sorted(artifacts)]
     current["artifact_count"] = len(current["artifacts"])

@@ -3,9 +3,11 @@
 Date: 2026-07-25  
 Live program: `WB_RELEASE_R2`  
 Live namespace: `WBR2`  
-Current unit: `WBR2-M5 — Scheduled weekly and monthly reports`  
+Current product unit: `WBR2-M5 — Scheduled weekly and monthly reports`  
+Current phase: `RELEASE_CANDIDATE_PREPARATION`  
 Release status: `RELEASE_BLOCKED`  
 Working branch: `fix/quantum-wb-release-r2`  
+Working product head: `5e0e52c0141c5860ea108ba515a073094037ad72`  
 Marketplace writes: `DISABLED`  
 Ozon: `DEFERRED`  
 Gatekeeper: `DISCONNECTED`
@@ -31,55 +33,45 @@ Current unit: `M9 — Historical Stage-B plateau snapshot`
 
 ## Completed WBR2 governance reconciliation
 
-`WBR2-GOV-R1` was validated at:
-
-`96e96a88cbb16ef6e0ca2219f2f4abff372b0f2e`
-
-Validation PR #129 closed with `merged=false`; issue #124 closed as completed.
-The Stage-B snapshot was preserved, one WBR2 live-state was established and
-superseded WBR2 construction PRs were closed unmerged.
-
-## Current product implementation unit
-
-`WBR2-M5 — Scheduled weekly and monthly reports` is implemented by the
-containing commit directly above governance head
+`WBR2-GOV-R1` was validated at
 `96e96a88cbb16ef6e0ca2219f2f4abff372b0f2e`.
 
-The containing exact head is resolved from Git rather than self-referenced in
-this file. It must pass all mandatory exact-head workflows and its validation
-PR must close with `merged=false` before the working branch may advance.
+Validation PR #129 closed with `merged=false`; issue #124 closed as completed.
 
-M5 adds:
+## WBR2-M5 closure
 
-- deterministic previous completed Monday-Sunday week selection;
-- deterministic previous completed calendar month selection;
-- exact non-overlapping source coverage enforcement;
-- SHA-256-bound input identity and idempotent package reuse;
-- atomic Excel, dashboard, finance JSON, recommendation JSON, text summary and
-  manifest publication;
-- bounded scheduled-run outcome state and missed-run recovery;
-- Windows Task Scheduler as an external trigger of the same governed command;
-- manual weekly/monthly generation and schedule controls on the existing
-  `Отчёты` page;
-- background execution coordinated with the existing import queue.
+`WBR2-M5 — Scheduled weekly and monthly reports` is:
+
+- validated at exact head `5e0e52c0141c5860ea108ba515a073094037ad72`;
+- integrated into `fix/quantum-wb-release-r2` by fast-forward;
+- supported by M5 Linux and Windows, Foundation, OSS, M4 regressions, M7,
+  M8, standalone L4, M3 same-artifact A/B, installer and Native Red Team;
+- recorded in Validation PR #130, which closed with `merged=false`.
+
+No product or `src/**` change is made by this closure unit.
 
 No `WBR2-M6` is assigned or authorized.
 
-## Current product
+## Release-candidate phase
 
-Quantum remains a local Windows read-only decision center for Wildberries
-reports. It performs local admission, governed financial calculation and local
-JSON, Excel and HTML output. It has no marketplace-write capability.
+The next internal actions are limited to:
 
-## Evidence boundary
+1. build and identify one exact-head Windows release candidate;
+2. retain its SHA-256 and build evidence;
+3. prepare the user/accountant financial-profile confirmation;
+4. stop before physical L5 installation on the operator computer.
 
-Exact-head repository, Linux and hosted Windows evidence may support WBR2-M5.
-This does not establish physical installation or real-report execution on the
-operator computer.
+The release candidate remains read-only and WB-only. It cannot write to a
+marketplace.
 
 Historical closed-pilot authorization marker retained for compatibility:
 `AUTHORIZED_FOR_CLOSED_PILOT_PENDING_ADMISSION_CONTROLS`. This is not a
-production release authorization.
+production release authorization and does not override `RELEASE_BLOCKED`.
+
+## Evidence boundary
+
+Repository, Linux and hosted Windows evidence do not establish physical
+installation or real-report execution on the operator computer.
 
 The following remain blocked or unverified:
 

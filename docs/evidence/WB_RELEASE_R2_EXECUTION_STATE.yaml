@@ -1,14 +1,15 @@
-execution_state_id: WB-RELEASE-R2-LIVE-v2
+execution_state_id: WB-RELEASE-R2-LIVE-v3
 updated_on: 2026-07-25
 source_of_truth_for_live_unit_state: true
 program_namespace: WBR2
 program_name: WB_RELEASE_R2
 current_unit: WBR2-M5
+current_phase: RELEASE_CANDIDATE_PREPARATION
 release_status: RELEASE_BLOCKED
 marketplace_mode: READ_ONLY
 marketplace_write_capability: DISABLED
 working_branch: fix/quantum-wb-release-r2
-m5_implementation_parent_exact_head: 96e96a88cbb16ef6e0ca2219f2f4abff372b0f2e
+working_branch_exact_head: 5e0e52c0141c5860ea108ba515a073094037ad72
 main_branch_changed: false
 
 precedence:
@@ -60,30 +61,34 @@ units:
     product_code_changes: NONE
   WBR2-M5:
     title: Scheduled weekly and monthly reports
-    state: IMPLEMENTED_AT_CONTAINING_HEAD_AWAITING_EXTERNAL_EXACT_HEAD_VALIDATION
-    implementation_parent_exact_head: 96e96a88cbb16ef6e0ca2219f2f4abff372b0f2e
-    approved_source_pull_request: 128
-    approved_source_candidate_exact_head: 1563b9c9de6a78142930719073f43e2b931eaa6e
-    source_rtm_path: docs/evidence/M5_SCHEDULED_REPORTS_RTM.json
-    implementation_authorized: true
+    state: VALIDATED_IN_WORKING_BRANCH
+    exact_head: 5e0e52c0141c5860ea108ba515a073094037ad72
+    validation_pull_request: 130
+    validation_pr_state: CLOSED
+    validation_pr_merged: false
+    working_branch_fast_forward: COMPLETE
+    exact_head_gate_set: PASS_WITH_GOV_CONSTRUCTION_SCOPE_NA
+    product_code_changes_after_validation: NONE
+    evidence:
+      m5_linux_sha256: da83f9e69aa6ad5c52caeef428d4591ead62e875cf9fb8d7fd0ff2477dd14625
+      m5_windows_sha256: 3b4c1c4a34af9c845ff07e4c221291362a574e4ee8975470f45893996a7ebc49
+      m3_consolidated_sha256: 647eb1af6afb90ebcaa871b22c0d0e961f760657be59b19e13d9c407572a1a67
     historical_pre_integration_candidate:
       state: VALIDATED_CANDIDATE_NOT_INTEGRATED
       candidate_exact_head: 1563b9c9de6a78142930719073f43e2b931eaa6e
       integration_authorized: false
       role: SUPERSEDED_SOURCE_CANDIDATE_COMPATIBILITY_MARKERS
-    required_before_working_branch_advance:
-      - M5 Linux and Windows runtime
-      - Foundation and OSS Admission
-      - M4 and M4 Corrective regressions
-      - M7 and M8
-      - standalone L4
-      - M3 build-once same-artifact A/B
-      - native one-button Red Team
-      - Windows packaging regressions
-      - validation PR closed merged=false
   WBR2-M6:
     state: UNASSIGNED_NOT_AUTHORIZED
     reason: NO_APPROVED_SOURCE_DEFINES_THIS_UNIT
+
+release_candidate:
+  source_product_exact_head: 5e0e52c0141c5860ea108ba515a073094037ad72
+  status: BUILD_AND_IDENTITY_VERIFICATION_REQUIRED_AT_CLOSURE_EXACT_HEAD
+  intended_scope: WB_ONLY_READ_ONLY
+  physical_installation: NOT_STARTED
+  financial_profile: USER_OR_ACCOUNTANT_CONFIRMATION_REQUIRED
+  authenticode: REQUIRED_WHERE_APPLICABLE
 
 superseded_wbr2_pull_requests:
   closed_unmerged:
@@ -97,6 +102,7 @@ superseded_wbr2_pull_requests:
     - 127
     - 128
     - 129
+    - 130
   evidence_retention: KEEP_CLOSED_DISCUSSIONS_AND_COMMITS
   unrelated_historical_program_pull_requests: LEAVE_UNCHANGED
 
