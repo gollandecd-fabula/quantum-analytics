@@ -1,0 +1,39 @@
+{
+  "base_pilot_integration_r99_overlay_git_blob_sha": "b52af806361e29c9e6be6842007b066ac22223a1",
+  "entries": [
+    [
+      ".github/workflows/wb-release-r2-plan-reconciliation.yml",
+      "309339ed911037e0be151a37dc4b6d6cdc6fba66a681a9ca7122a0fc3f56740f",
+      4085
+    ],
+    [
+      "docs/evidence/WB_RELEASE_R2_PLAN_RECONCILIATION_RTM.json",
+      "da43d2048d313dee5f4ef36f6781f4ae3a20e33614890dff69cb550ed9123ecc",
+      9210
+    ],
+    [
+      "docs/evidence/WB_RELEASE_R2_EXECUTION_STATE.yaml",
+      "27b56cf6606d3d0fda669691bb0db0944efc318540e6bc997650cc0a274d92de",
+      3474
+    ],
+    [
+      "docs/governance/CURRENT_STATE.md",
+      "79dece2a76c356fac61664b234829e3802a20a443c3d02e7d685d07e2e365291",
+      3382
+    ],
+    [
+      "tests/integration_manifest_support_m8.py",
+      "6e97a9cba6fd1bbed67c6496227f052905d40d0dbcf14aac202a0bfe94537d0e",
+      2038
+    ],
+    [
+      "tests/test_wb_release_r2_plan_reconciliation.py",
+      "b1008fae22ece20473d1ff03f5bbbadc24539894d74035030bdd982f080f4e3b",
+      5535
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_id": "WB_RELEASE_R2_GOV_R1",
+  "reason": "Protocol-locked plan reconciliation: preserve Stage-B history, establish one WBR2 live state and collision-free namespace, identify WBR2-M5 without integrating product code, and keep all release boundaries blocked.",
+  "remove_paths": []
+}

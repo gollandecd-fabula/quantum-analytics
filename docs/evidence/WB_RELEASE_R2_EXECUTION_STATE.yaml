@@ -1,0 +1,95 @@
+execution_state_id: WB-RELEASE-R2-LIVE-v1
+updated_on: 2026-07-25
+source_of_truth_for_live_unit_state: true
+program_namespace: WBR2
+program_name: WB_RELEASE_R2
+governance_unit: WBR2-GOV-R1
+governance_state: SOURCE_RECONCILIATION_IMPLEMENTED_CANDIDATE
+governance_completion: REQUIRES_EXACT_HEAD_CI_PR_CLEANUP_AND_ISSUE_124_CLOSURE
+release_status: RELEASE_BLOCKED
+marketplace_mode: READ_ONLY
+marketplace_write_capability: DISABLED
+working_branch: fix/quantum-wb-release-r2
+product_runtime_baseline_exact_head: d89c29edfa93ecc61290a0fdeb9e218214638f7d
+main_branch_changed: false
+
+precedence:
+  live_state_artifact: docs/evidence/WB_RELEASE_R2_EXECUTION_STATE.yaml
+  current_state_pointer: docs/governance/CURRENT_STATE.md
+  historical_stage_b:
+    path: docs/evidence/STAGE_B_EXECUTION_STATE.yaml
+    git_blob_sha: e132b51f2dae47777d379304731e1b7738d47aac
+    role: HISTORICAL_STAGE_B_SNAPSHOT
+    older_self_declaration_as_live: SUPERSEDED_BY_THIS_LATER_SCOPED_POINTER
+  historical_current_state:
+    path: docs/governance/CURRENT_STATE.md
+    previous_git_blob_sha: 59030b16848b57d9f6680705ea956f18739ffbfa
+    role: SUPERSEDED_CURRENT_POINTER
+
+units:
+  WBR2-M0:
+    title: Baseline and release integrity
+    state: VALIDATED_IN_WORKING_HISTORY
+    exact_head: e32a7e9ec77eb8abd051f7f1cc7ba32b22ce33fb
+  WBR2-M1:
+    title: Re-audit corrections
+    state: VALIDATED_IN_WORKING_HISTORY
+    exact_head: ad5229bbaca3cf8ae692ecb09f54220cde1db16b
+  WBR2-M2:
+    title: Runtime dependency modernization
+    state: VALIDATED_IN_WORKING_HISTORY
+    exact_head: 3aad43573b205a98e2f2f718e208c8ba763d535e
+  WBR2-M3:
+    title: Consolidated build-once same-artifact verification
+    state: VALIDATED_IN_WORKING_HISTORY
+    exact_head: f6df81ee62f7ee419c0303886362d917b6d82103
+  WBR2-M4:
+    title: Governed automatic incoming folder
+    state: VALIDATED_WITH_CORRECTIVE
+    original_exact_head: 050ce0cbae33dd06d0eee1dafb3676addf3dfee0
+    corrective_exact_head: d89c29edfa93ecc61290a0fdeb9e218214638f7d
+    corrective_id: M4-CORRECTIVE-R99
+  WBR2-GOV-R1:
+    title: Plan namespace and live-state reconciliation
+    state: ACTIVE_WHEN_THIS_ARTIFACT_IS_CONTAINED_IN_WORKING_BRANCH
+    authorization: USER_AUTHORIZED_2026-07-25
+    product_code_changes: PROHIBITED
+  WBR2-M5:
+    title: Scheduled weekly and monthly reports
+    state: VALIDATED_CANDIDATE_NOT_INTEGRATED
+    source_pull_request: 128
+    source_rtm_path: docs/evidence/M5_SCHEDULED_REPORTS_RTM.json
+    source_rtm_git_blob_sha: 0337728b7276292048255b4f48f2723b9dde704e
+    candidate_exact_head: 1563b9c9de6a78142930719073f43e2b931eaa6e
+    candidate_parent: d89c29edfa93ecc61290a0fdeb9e218214638f7d
+    exact_head_gates: PASS
+    required_next_action: REBUILD_AS_ONE_DIRECT_PARENT_COMMIT_OVER_RECONCILED_GOVERNANCE_HEAD
+    integration_authorized: false
+  WBR2-M6:
+    state: UNASSIGNED_NOT_AUTHORIZED
+    reason: NO_APPROVED_SOURCE_DEFINES_THIS_UNIT
+
+superseded_wbr2_pull_requests:
+  close_after_reconciliation_exact_head_pass:
+    - 112
+    - 114
+    - 115
+    - 116
+    - 117
+    - 125
+    - 126
+    - 127
+    - 128
+  evidence_retention: KEEP_CLOSED_DISCUSSIONS_AND_COMMITS
+  unrelated_historical_program_pull_requests: LEAVE_UNCHANGED
+
+boundaries:
+  scope: WB_ONLY
+  ozon: DEFERRED
+  gatekeeper: DISCONNECTED
+  marketplace_writes: DISABLED
+  main_merge: NOT_AUTHORIZED
+  deployment: NOT_AUTHORIZED
+  release: BLOCKED
+  physical_user_path_l5: UNVERIFIED
+  tax_regime_and_tax_base: USER_OR_ACCOUNTANT_CONFIRMATION_REQUIRED

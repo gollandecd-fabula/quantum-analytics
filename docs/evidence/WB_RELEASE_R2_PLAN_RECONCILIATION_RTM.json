@@ -87,7 +87,7 @@
       "L0",
       "historical Stage-B + new live state",
       "historical file remains byte-identical and is classified HISTORICAL_SNAPSHOT",
-      "NOT_STARTED"
+      "IMPLEMENTED_IN_CANDIDATE_AWAITING_EXACT_HEAD"
     ],
     [
       "GOV-R1-02",
@@ -98,7 +98,7 @@
       "L0",
       "new live state + CURRENT_STATE",
       "only WB Release R2 artifact is live",
-      "NOT_STARTED"
+      "IMPLEMENTED_IN_CANDIDATE_AWAITING_EXACT_HEAD"
     ],
     [
       "GOV-R1-03",
@@ -109,7 +109,7 @@
       "L0",
       "new live state",
       "Stage-B and WBR2 milestones cannot be confused",
-      "NOT_STARTED"
+      "IMPLEMENTED_IN_CANDIDATE_AWAITING_EXACT_HEAD"
     ],
     [
       "GOV-R1-04",
@@ -120,7 +120,7 @@
       "L0",
       "new live state",
       "each validated unit has distinct name and exact head",
-      "NOT_STARTED"
+      "IMPLEMENTED_IN_CANDIDATE_AWAITING_EXACT_HEAD"
     ],
     [
       "GOV-R1-05",
@@ -131,7 +131,7 @@
       "L0",
       "new live state + PR",
       "no candidate is represented as integrated",
-      "NOT_STARTED"
+      "IMPLEMENTED_IN_CANDIDATE_AWAITING_EXACT_HEAD"
     ],
     [
       "GOV-R1-06",
@@ -142,7 +142,7 @@
       "L0",
       "new live state + PR128",
       "WBR2-M5 is next; M6 unassigned",
-      "NOT_STARTED"
+      "IMPLEMENTED_IN_CANDIDATE_AWAITING_EXACT_HEAD"
     ],
     [
       "GOV-R1-07",
@@ -153,7 +153,7 @@
       "L0",
       "new live state + diff",
       "no M5 product path changes",
-      "NOT_STARTED"
+      "IMPLEMENTED_IN_CANDIDATE_AWAITING_EXACT_HEAD"
     ],
     [
       "GOV-R1-08",
@@ -164,7 +164,7 @@
       "L0",
       "GitHub PR metadata",
       "no superseded WBR2 PR remains open",
-      "NOT_STARTED"
+      "PLANNED_AFTER_EXACT_HEAD_PASS"
     ],
     [
       "GOV-R1-09",
@@ -175,7 +175,7 @@
       "L2",
       "state + CI",
       "all boundaries unchanged",
-      "NOT_STARTED"
+      "IMPLEMENTED_IN_CANDIDATE_AWAITING_EXACT_HEAD"
     ],
     [
       "GOV-R1-10",
@@ -186,7 +186,7 @@
       "L2",
       "governance overlay + loader",
       "tracked tree equals effective manifest and R100 remains available",
-      "NOT_STARTED"
+      "IMPLEMENTED_IN_CANDIDATE_AWAITING_EXACT_HEAD"
     ],
     [
       "GOV-R1-11",
@@ -197,7 +197,7 @@
       "L0",
       "Git commits + PR",
       "two commits over d89c29e and only allowed paths",
-      "IN_PROGRESS_RTM_FIRST_COMMIT"
+      "IMPLEMENTED_TWO_COMMIT_ANCESTRY_AWAITING_EXACT_HEAD"
     ],
     [
       "GOV-R1-12",
@@ -208,7 +208,7 @@
       "L0",
       "temp base + PR",
       "PR closes merged=false; working branch advances afterward",
-      "NOT_STARTED"
+      "IMPLEMENTED_PROCESS_AWAITING_PR_STATE_EVIDENCE"
     ],
     [
       "GOV-R1-13",
@@ -219,7 +219,7 @@
       "L0",
       "CURRENT_STATE + PR",
       "no claim exceeds evidence",
-      "NOT_STARTED"
+      "IMPLEMENTED_IN_CANDIDATE_AWAITING_EXACT_HEAD"
     ],
     [
       "GOV-R1-14",
@@ -230,7 +230,7 @@
       "L2",
       "workflow runs",
       "all required checks pass same head",
-      "NOT_STARTED"
+      "AWAITING_EXACT_HEAD_GITHUB_ACTIONS"
     ],
     [
       "GOV-R1-15",
@@ -241,9 +241,14 @@
       "L0",
       "issue #124",
       "no unresolved reconciliation requirement",
-      "NOT_STARTED"
+      "BLOCKED_BY_GOV_R1_08_AND_GOV_R1_14"
     ]
   ],
-  "overall_status": "MILESTONE_NOT_COMPLETE",
-  "release_state": "RELEASE_BLOCKED"
+  "overall_status": "IMPLEMENTED_AWAITING_EXACT_HEAD_AND_GITHUB_STATE_RECONCILIATION",
+  "release_state": "RELEASE_BLOCKED",
+  "status_model": {
+    "source_implementation_status": "RECORDED_IN_THIS_RTM",
+    "dynamic_exact_head_ci_and_pr_status": "AUTHORITATIVE_IN_VALIDATION_PR_AND_ISSUE_124",
+    "pass_predeclaration": "FORBIDDEN"
+  }
 }
