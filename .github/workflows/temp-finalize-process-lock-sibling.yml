@@ -1,0 +1,65 @@
+name: Finalize Full Red Team R1 Process Lock Sibling
+
+on:
+  push:
+    branches:
+      - tmp/materialize-full-redteam-r1-process-lock
+
+permissions:
+  contents: write
+
+jobs:
+  finalize:
+    if: github.event.head_commit.message == 'Materialize Full Red Team R1 process-lock repair'
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout materialized helper
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: tmp/materialize-full-redteam-r1-process-lock
+          fetch-depth: 0
+      - name: Reverify and build exact sibling
+        shell: bash
+        env:
+          RTM_SHA: 30e52ea175eea627bb7469ba0142463d921237a2
+          TARGET_BRANCH: audit/quantum-full-redteam-r1
+        run: |
+          set -euo pipefail
+          test "$(git log -1 --format=%s)" = 'Materialize Full Red Team R1 process-lock repair'
+          python3 -m compileall -q src tests
+          PYTHONPATH=src python3 -m unittest -v tests.test_full_project_redteam_r1
+          PYTHONPATH=src python3 -m quantum.scripts.ci
+          paths=(
+            .github/workflows/full-project-redteam-r1.yml
+            docs/evidence/ARTIFACT_MANIFEST_OVERLAY_FULL_PROJECT_REDTEAM_R1.json
+            docs/evidence/FULL_PROJECT_REDTEAM_R1_DEFECT_REGISTER.json
+            docs/evidence/WB_RELEASE_R2_EXECUTION_STATE.yaml
+            docs/governance/CURRENT_STATE.md
+            src/quantum/application/_finance_center_dialog.py
+            src/quantum/application/_finance_center_reports.py
+            src/quantum/application/_finance_center_self_test.py
+            src/quantum/application/_finance_center_shared.py
+            src/quantum/application/_finance_center_shell.py
+            src/quantum/application/_finance_profile_groups.py
+            src/quantum/application/desktop_center.py
+            src/quantum/application/finance_profile.py
+            tests/integration_manifest_support_m8.py
+            tests/test_full_project_redteam_r1.py
+          )
+          git read-tree "${RTM_SHA}"
+          for path in "${paths[@]}"; do
+            blob="$(git rev-parse HEAD:"${path}")"
+            git update-index --add --cacheinfo "100644,${blob},${path}"
+          done
+          tree="$(git write-tree)"
+          export GIT_AUTHOR_NAME='OpenAI Red Team'
+          export GIT_AUTHOR_EMAIL='redteam@invalid.local'
+          export GIT_COMMITTER_NAME='OpenAI Red Team'
+          export GIT_COMMITTER_EMAIL='redteam@invalid.local'
+          commit="$(printf '%s\n' 'Add desktop process lock and finalize Full Red Team R1 candidate' | git commit-tree "${tree}" -p "${RTM_SHA}")"
+          test "$(git rev-parse "${commit}^")" = "${RTM_SHA}"
+          test "$(git diff --name-only "${RTM_SHA}" "${commit}" | wc -l | tr -d ' ')" = '15'
+          current="$(git ls-remote origin "refs/heads/${TARGET_BRANCH}" | cut -f1)"
+          test -n "${current}"
+          git push --force-with-lease="refs/heads/${TARGET_BRANCH}:${current}" origin "${commit}:refs/heads/${TARGET_BRANCH}"
+          echo "FINAL_SIBLING_SHA=${commit}" >> "$GITHUB_STEP_SUMMARY"
