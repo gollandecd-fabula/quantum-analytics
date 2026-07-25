@@ -1,0 +1,38 @@
+name: Temporary Universal Source Export PR
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/temp-source-export-pr.yml"
+      - ".github/workflows/temp-source-export.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact head
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 1
+      - name: Build source archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+          mkdir -p dist
+          git archive --format=zip --output=dist/quantum-source-${{ github.event.pull_request.head.sha }}.zip HEAD
+          sha256sum dist/quantum-source-${{ github.event.pull_request.head.sha }}.zip > dist/quantum-source-${{ github.event.pull_request.head.sha }}.sha256
+      - name: Upload source archive
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: Quantum-Source-${{ github.event.pull_request.head.sha }}
+          path: |
+            dist/quantum-source-${{ github.event.pull_request.head.sha }}.zip
+            dist/quantum-source-${{ github.event.pull_request.head.sha }}.sha256
+          if-no-files-found: error
+          retention-days: 2
