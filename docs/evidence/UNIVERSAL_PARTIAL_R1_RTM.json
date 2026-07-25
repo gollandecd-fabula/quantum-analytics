@@ -1,0 +1,187 @@
+{
+  "rtm_id": "QUANTUM-UNIVERSAL-PARTIAL-R1",
+  "created_on": "2026-07-25",
+  "immutable_base_exact_head": "f251c9325e701b6cf3de127111b86fe8e2d71269",
+  "working_branch": "audit/quantum-universal-partial-r1",
+  "purpose": "Make the local WB read-only pilot accept every uploaded file as an auditable intake object, safely extract usable information from supported direct and archived formats, calculate every independently derivable metric, and report unresolved metrics and required data without aborting unrelated calculations.",
+  "source_precedence": [
+    "Explicit user instruction dated 2026-07-25 for universal file acceptance and maximum available calculations",
+    "docs/evidence/WB_RELEASE_R2_EXECUTION_STATE.yaml",
+    "docs/governance/CURRENT_STATE.md",
+    "existing validated safety and financial-domain contracts",
+    "executable code and exact-head tests"
+  ],
+  "semantic_boundary": {
+    "any_file": "Every local file is accepted for classification and auditable registration unless blocked by a security or corruption condition. Acceptance does not mean invented semantic interpretation.",
+    "supported_extraction": "Usable structured data is extracted from safely readable XLSX/XLSM, delimited text, JSON tables, XML tables and supported archives containing such members.",
+    "unsupported_format": "Unsupported or non-tabular files remain registered with explicit reason codes and do not abort processing of other files.",
+    "archives": "ZIP and standard-library TAR/GZIP/BZIP2/XZ containers are inspected with traversal, symlink, executable, encryption, recursion, entry-count, size and compression-ratio limits. Unsupported archive types are registered without guessed contents.",
+    "partial_calculation": "A missing input blocks only metrics whose dependency graph needs that input. Independent observed or derived metrics continue. Partial totals are explicitly labelled and never represented as complete totals.",
+    "no_specific_report": "No fixed Wildberries report identity or exact header hash is required for intake. Known schemas receive stronger semantic mapping; unknown tables preserve observed columns and row counts and can contribute only where aliases establish meaning.",
+    "no_guessing": "Unknown columns, units, currencies, signs, product attribution and business meaning are never inferred without a declared alias or user mapping."
+  },
+  "capability_gate": {
+    "repository_patch": "SUPPORTED",
+    "linux_source_tests": "SUPPORTED",
+    "hosted_windows_tests": "SUPPORTED",
+    "safe_archive_corpus": "SUPPORTED",
+    "one_click_windows_installer_build": "SUPPORTED",
+    "physical_operator_l5": "EXTERNAL_UNVERIFIED",
+    "ocr_for_images_or_scanned_pdf": "NOT_REQUIRED_FOR_R1_AND_NOT_CLAIMED",
+    "rar_7z_native_extraction_without_added_dependency": "NOT_SUPPORTED; REGISTER_AND_REPORT_ONLY",
+    "marketplace_writes": "FORBIDDEN",
+    "ozon": "DEFERRED",
+    "gatekeeper": "DISCONNECTED",
+    "main_merge": "NOT_AUTHORIZED"
+  },
+  "milestones": [
+    {
+      "id": "UPR1-M0",
+      "title": "Baseline and exact source reconstruction",
+      "requirements": [
+        "Prove ancestry from f251c9325e701b6cf3de127111b86fe8e2d71269",
+        "Inventory all active intake, dispatcher, finance, output, UI and installer paths",
+        "Record confirmed gaps before implementation"
+      ],
+      "tests": [
+        "branch ancestry",
+        "source inventory",
+        "current behavior reproduction"
+      ],
+      "pass_criteria": "One reproducible baseline and no undocumented implementation scope",
+      "status": "IN_PROGRESS"
+    },
+    {
+      "id": "UPR1-M1",
+      "title": "Universal file and archive intake",
+      "requirements": [
+        "Accept and register every uploaded file independently",
+        "Safely parse XLSX/XLSM, CSV/TSV/delimited text, JSON tables and XML tables",
+        "Safely recurse through supported archives within fixed depth and resource limits",
+        "Do not let one bad archive member abort usable siblings",
+        "Return per-file and per-member status, detected format, extracted table count and reason codes",
+        "Preserve unsupported files without sending data externally"
+      ],
+      "tests": [
+        "direct format corpus",
+        "mixed ZIP corpus",
+        "nested archive depth",
+        "zip-slip and symlink",
+        "encrypted and executable member",
+        "compression bomb",
+        "duplicate names",
+        "one corrupt member with one valid sibling",
+        "Unicode names and paths"
+      ],
+      "pass_criteria": "Every input receives an auditable result and all safely usable members continue to downstream processing",
+      "status": "NOT_STARTED"
+    },
+    {
+      "id": "UPR1-M2",
+      "title": "Schema-neutral extraction and evidence mapping",
+      "requirements": [
+        "Discover tables without requiring one named WB report",
+        "Map financial fields only through explicit normalized aliases and units",
+        "Combine complementary fields from multiple files with source provenance",
+        "Keep conflicting values separate and report conflict instead of selecting silently",
+        "Retain observed row, column, period, product and currency evidence"
+      ],
+      "tests": [
+        "renamed columns",
+        "reordered columns",
+        "partial columns",
+        "multiple sheets",
+        "multiple files with complementary fields",
+        "conflicting duplicate evidence",
+        "unknown table"
+      ],
+      "pass_criteria": "Known evidence is mapped with provenance; unknown meaning remains explicitly unmapped",
+      "status": "NOT_STARTED"
+    },
+    {
+      "id": "UPR1-M3",
+      "title": "Maximum available partial calculations",
+      "requirements": [
+        "Do not globally stop calculations because one product, group, row or metric is unresolved",
+        "Calculate every metric whose dependencies are valid",
+        "Represent each metric as VALID, PARTIAL or BLOCKED",
+        "Publish partial totals only with coverage and excluded-scope disclosure",
+        "List every unavailable metric and exact missing inputs",
+        "Keep unknown or unattributed rows visible as unresolved evidence",
+        "Do not fabricate tax, cost, attribution, currency or unit values",
+        "Allow pre-tax calculations when tax inputs are absent",
+        "Allow observed marketplace metrics when cost inputs are absent"
+      ],
+      "tests": [
+        "missing tax rate",
+        "missing tax base",
+        "missing one group cost",
+        "unknown product rows",
+        "unattributed service rows",
+        "mixed valid and invalid groups",
+        "zero activity",
+        "conflicting currency",
+        "partial period tax coverage",
+        "dependency mutation tests"
+      ],
+      "pass_criteria": "No independent valid metric is lost because another metric is blocked, and no partial figure is presented as complete",
+      "status": "NOT_STARTED"
+    },
+    {
+      "id": "UPR1-M4",
+      "title": "UI and output disclosure",
+      "requirements": [
+        "Show processed, partially processed, unsupported, quarantined and failed files separately",
+        "Show calculated figures before missing-data requests",
+        "For every blocked figure show required data and affected scope",
+        "Show coverage for partial totals",
+        "Keep Excel, JSON and HTML output consistent",
+        "Do not expose raw commercial rows unless already permitted by existing policy"
+      ],
+      "tests": [
+        "mixed-status batch UI",
+        "partial result rendering",
+        "reason-code localization",
+        "cross-output reconciliation",
+        "small-screen and keyboard smoke"
+      ],
+      "pass_criteria": "The operator can distinguish available results, limitations and next required data without reading logs",
+      "status": "NOT_STARTED"
+    },
+    {
+      "id": "UPR1-M5",
+      "title": "Red Team plateau and one-click EXE",
+      "requirements": [
+        "Run complete Linux and hosted Windows source gates",
+        "Run adversarial file and archive corpus",
+        "Build one exact-head Windows installer EXE",
+        "Install and run native self-test from the built artifact",
+        "Preserve WB_ONLY read-only boundaries",
+        "Retain SHA-256 identity and artifact evidence",
+        "Repeat Red Team until zero open P0/P1 and zero known reproducible P2 correctness defect"
+      ],
+      "tests": [
+        "Foundation",
+        "OSS Admission",
+        "universal corpus",
+        "partial calculation corpus",
+        "M4/M5 regressions",
+        "M7/M8",
+        "L4 installed runtime",
+        "build-once same-artifact",
+        "native one-button Red Team"
+      ],
+      "pass_criteria": "A downloadable exact-head one-click EXE exists and all applicable hosted gates pass; physical operator L5 remains separately identified",
+      "status": "NOT_STARTED"
+    }
+  ],
+  "claim_boundary": {
+    "fully_arbitrary_semantic_understanding": "NOT_CLAIMED",
+    "universal_safe_acceptance": "REQUIRED",
+    "maximum_available_calculation": "REQUIRED",
+    "one_click_exe": "REQUIRED_BEFORE_STAGE_COMPLETE",
+    "physical_l5": "UNVERIFIED",
+    "release": "BLOCKED_UNTIL_EXPLICIT_AUTHORIZATION"
+  },
+  "initial_status": "RTM_AND_CAPABILITY_GATE_COMPLETE"
+}
