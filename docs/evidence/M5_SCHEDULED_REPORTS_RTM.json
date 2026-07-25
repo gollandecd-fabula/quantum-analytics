@@ -1,0 +1,258 @@
+{
+  "protocol_mode": "PROTOCOL_LOCK",
+  "project": "Quantum",
+  "program_namespace": "WBR2",
+  "milestone": "WBR2-M5_SCHEDULED_WEEKLY_MONTHLY_REPORTS",
+  "authorization": "CONTINUE_PROJECT_PER_APPROVED_WBR2_PLAN",
+  "authorized_on": "2026-07-25",
+  "repository": "gollandecd-fabula/quantum-analytics",
+  "base_branch": "fix/quantum-wb-release-r2",
+  "base_exact_head": "96e96a88cbb16ef6e0ca2219f2f4abff372b0f2e",
+  "approved_source_candidate": {
+    "pull_request": 128,
+    "exact_head": "1563b9c9de6a78142930719073f43e2b931eaa6e",
+    "direct_parent": "d89c29edfa93ecc61290a0fdeb9e218214638f7d",
+    "historical_rtm_blob_sha": "0337728b7276292048255b4f48f2723b9dde704e",
+    "state": "VALIDATED_SOURCE_BYTES_SUPERSEDED_AS_INTEGRATION_VEHICLE"
+  },
+  "claim_boundary": "L2_SOURCE_AND_HOSTED_WINDOWS_RUNTIME; PHYSICAL_L5_EXCLUDED; RELEASE_BLOCKED",
+  "capability_gate": {
+    "read_approved_candidate_bytes_and_repository_state": "SUPPORTED",
+    "create_isolated_branch_and_two_commit_ancestry": "SUPPORTED",
+    "compose_governance_overlay_with_r100": "SUPPORTED",
+    "run_linux_windows_exact_head_ci": "SUPPORTED_AFTER_PUSH",
+    "build_and_verify_one_artifact_twice": "SUPPORTED_AFTER_PUSH",
+    "advance_working_branch_by_fast_forward_after_pass": "SUPPORTED_AFTER_PASS",
+    "physical_operator_computer_l5": "OUT_OF_SCOPE",
+    "main_merge": "FORBIDDEN",
+    "ozon_activation": "FORBIDDEN",
+    "marketplace_writes": "FORBIDDEN",
+    "result": "PASS_FOR_WBR2_M5_L0_L2_SCOPE_ONLY"
+  },
+  "scope_lock": {
+    "allowed_repository_paths": [
+      ".github/workflows/m5-scheduled-reports.yml",
+      "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R100.json",
+      "docs/evidence/M5_SCHEDULED_REPORTS_RTM.json",
+      "docs/evidence/WB_RELEASE_R2_EXECUTION_STATE.yaml",
+      "docs/governance/CURRENT_STATE.md",
+      "src/quantum/application/_finance_center_pages.py",
+      "src/quantum/application/_finance_center_queue_runtime.py",
+      "src/quantum/application/_finance_center_scheduled_reports.py",
+      "src/quantum/application/_finance_center_shell.py",
+      "src/quantum/application/finance_center.py",
+      "src/quantum/application/scheduled_reports.py",
+      "tests/integration_manifest_support_m8.py",
+      "tests/test_m5_scheduled_reports.py"
+    ],
+    "forbidden_changes": [
+      "new navigation labels or UI redesign",
+      "parallel finance formulas or report renderer",
+      "second scheduler engine",
+      "WBR2-M6 assignment or implementation",
+      "Gatekeeper or Protocol Controller connection",
+      "Ozon activation",
+      "marketplace writes",
+      "main merge",
+      "deployment or release authorization",
+      "physical L5 claim"
+    ]
+  },
+  "manifest_composition": {
+    "immutable_product_anchor": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R99.json",
+    "immutable_governance_branch": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_WB_RELEASE_R2_GOV_R1.json",
+    "new_product_overlay": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R100.json",
+    "required_order": [
+      "load product chain through R99",
+      "apply governance overlay anchored to R99",
+      "apply R100 product overlay anchored to R99 as final merged-tree entries"
+    ],
+    "governance_overlay_rewrite": "FORBIDDEN"
+  },
+  "prechange_control": {
+    "next_test": "focused M5 contracts, complete source CI, manifest equality, Linux/Windows M5 runtime, Foundation, OSS, M4, M4 corrective, M7, M8, standalone L4, M3 build-once same-artifact A/B, native one-button Red Team and Windows packaging regressions",
+    "rollback_condition": "any scope, ancestry, manifest, period, identity, atomicity, scheduler, UI, safety-boundary, CI or claim failure",
+    "rollback_action": "do not advance fix/quantum-wb-release-r2; close validation PR merged=false and discard M5 candidate branch",
+    "maximum_claim": "L2_SOURCE_AND_HOSTED_WINDOWS_RUNTIME_FOR_WBR2_M5"
+  },
+  "rtm_columns": [
+    "protocol_item",
+    "requirement",
+    "milestone",
+    "action",
+    "test",
+    "evidence_level",
+    "artifact",
+    "pass_criterion",
+    "actual_status"
+  ],
+  "rtm_rows": [
+    {
+      "protocol_item": "M5-01",
+      "requirement": "Generate only the previous fully completed Monday-Sunday week and previous fully completed calendar month deterministically",
+      "milestone": "WBR2-M5",
+      "action": "Use one completed_period implementation for CLI, GUI and scheduled execution",
+      "test": "focused calendar tests plus 10000 randomized calendar invariants",
+      "evidence_level": "L2",
+      "artifact": "src/quantum/application/scheduled_reports.py",
+      "pass_criterion": "No current or partial period can be selected",
+      "actual_status": "VALIDATED_SOURCE_CANDIDATE_REBUILD_NOT_STARTED"
+    },
+    {
+      "protocol_item": "M5-02",
+      "requirement": "Reuse the governed finance profile, detailed-financial parser, calculate_by_group and existing output bundle writer",
+      "milestone": "WBR2-M5",
+      "action": "Call existing calculation and export boundaries without duplicating formulas",
+      "test": "source contract and mocked integration tests",
+      "evidence_level": "L2",
+      "artifact": "src/quantum/application/scheduled_reports.py",
+      "pass_criterion": "No parallel financial formula or report renderer exists",
+      "actual_status": "VALIDATED_SOURCE_CANDIDATE_REBUILD_NOT_STARTED"
+    },
+    {
+      "protocol_item": "M5-03",
+      "requirement": "Accept only exact non-overlapping source coverage for the requested period",
+      "milestone": "WBR2-M5",
+      "action": "Reject gaps, overlaps and source report periods that partially cross the target boundary",
+      "test": "exact, adjacent, gap, overlap and partial-period regressions",
+      "evidence_level": "L2",
+      "artifact": "tests/test_m5_scheduled_reports.py",
+      "pass_criterion": "Ambiguous source coverage fails closed before calculation",
+      "actual_status": "VALIDATED_SOURCE_CANDIDATE_REBUILD_NOT_STARTED"
+    },
+    {
+      "protocol_item": "M5-04",
+      "requirement": "Bind source bytes, report periods, tenant and finance profile into a deterministic input identity",
+      "milestone": "WBR2-M5",
+      "action": "Verify each source SHA-256 immediately before parsing and calculate a canonical input hash",
+      "test": "source hash tamper and idempotent identity regressions",
+      "evidence_level": "L2",
+      "artifact": "src/quantum/application/scheduled_reports.py",
+      "pass_criterion": "Changed source or profile changes package identity and hash mismatch blocks output",
+      "actual_status": "VALIDATED_SOURCE_CANDIDATE_REBUILD_NOT_STARTED"
+    },
+    {
+      "protocol_item": "M5-05",
+      "requirement": "Write Excel, dashboard, finance JSON, recommendation JSON, short text summary and manifest atomically",
+      "milestone": "WBR2-M5",
+      "action": "Generate in same-volume staging, fsync, validate hashes, rename and update latest pointer atomically",
+      "test": "atomic generation and validate_package regressions",
+      "evidence_level": "L2",
+      "artifact": "output/scheduled/<kind>/<period>/<identity>",
+      "pass_criterion": "Failure cannot expose an incomplete package or corrupt the previous valid package",
+      "actual_status": "VALIDATED_SOURCE_CANDIDATE_REBUILD_NOT_STARTED"
+    },
+    {
+      "protocol_item": "M5-06",
+      "requirement": "Make repeated and missed scheduled runs safe",
+      "milestone": "WBR2-M5",
+      "action": "Run both due periods daily, reuse validated identity and retain bounded persistent outcomes",
+      "test": "idempotent reuse and failed new revision preservation regressions",
+      "evidence_level": "L2",
+      "artifact": "data/scheduled-reports-state.json and latest.json",
+      "pass_criterion": "Repeated execution does not recalculate identical inputs and the next trigger recovers a missed day",
+      "actual_status": "VALIDATED_SOURCE_CANDIDATE_REBUILD_NOT_STARTED"
+    },
+    {
+      "protocol_item": "M5-07",
+      "requirement": "Reject traversal, absolute paths, Windows drive paths, UNC paths, symlinks and tampered state",
+      "milestone": "WBR2-M5",
+      "action": "Validate portable relative paths and package hashes fail closed",
+      "test": "portable path, state tamper and artifact validation regressions",
+      "evidence_level": "L2",
+      "artifact": "src/quantum/application/scheduled_reports.py",
+      "pass_criterion": "Unsafe path state blocks before calculation or output",
+      "actual_status": "VALIDATED_SOURCE_CANDIDATE_REBUILD_NOT_STARTED"
+    },
+    {
+      "protocol_item": "M5-08",
+      "requirement": "Use Windows Task Scheduler only as an external daily trigger of the same governed Python command",
+      "milestone": "WBR2-M5",
+      "action": "Register a LIMITED daily task invoking --kind due and verify it with schtasks /Query",
+      "test": "command construction, registration, verification and non-Windows rejection tests",
+      "evidence_level": "L2",
+      "artifact": "Windows scheduled task Quantum Scheduled Reports <root hash>",
+      "pass_criterion": "No second scheduler engine or duplicate reporting implementation is introduced",
+      "actual_status": "VALIDATED_SOURCE_CANDIDATE_REBUILD_NOT_STARTED"
+    },
+    {
+      "protocol_item": "M5-09",
+      "requirement": "Expose manual weekly/monthly generation, schedule enablement and output-folder access on the existing Reports page",
+      "milestone": "WBR2-M5",
+      "action": "Add one mixin and one control row without changing navigation or approved visual structure",
+      "test": "exact 11-navigation and Reports controls contract",
+      "evidence_level": "L2",
+      "artifact": "src/quantum/application/_finance_center_scheduled_reports.py",
+      "pass_criterion": "The exact 11 navigation labels remain unchanged",
+      "actual_status": "VALIDATED_SOURCE_CANDIDATE_REBUILD_NOT_STARTED"
+    },
+    {
+      "protocol_item": "M5-10",
+      "requirement": "Keep imports and scheduled reports mutually controlled and keep the GUI responsive",
+      "milestone": "WBR2-M5",
+      "action": "Reject report launch while the import queue is busy and run actions on a background thread using the existing event queue",
+      "test": "GUI mixin and queue delegation contracts",
+      "evidence_level": "L2",
+      "artifact": "_finance_center_scheduled_reports.py and _finance_center_queue_runtime.py",
+      "pass_criterion": "No calculation runs on the Tk main thread or concurrently with active imports",
+      "actual_status": "VALIDATED_SOURCE_CANDIDATE_REBUILD_NOT_STARTED"
+    },
+    {
+      "protocol_item": "M5-11",
+      "requirement": "Preserve WB_ONLY, Ozon deferred, Gatekeeper disconnected and marketplace writes disabled",
+      "milestone": "WBR2-M5",
+      "action": "Validate configuration and emit fixed safety fields in every report outcome and evidence file",
+      "test": "static boundary scan and all mandatory exact-head gates",
+      "evidence_level": "L2",
+      "artifact": "M5 evidence artifacts",
+      "pass_criterion": "No write enablement, Ozon activation, Gatekeeper connection or navigation change",
+      "actual_status": "VALIDATED_SOURCE_CANDIDATE_REBUILD_NOT_STARTED"
+    },
+    {
+      "protocol_item": "M5-12",
+      "requirement": "Publish WBR2-M5 as exactly one direct-parent implementation commit over the reconciled governance exact head",
+      "milestone": "WBR2-M5",
+      "action": "Use one RTM-first commit and one implementation commit over 96e96a88, then validate against an immutable temporary base",
+      "test": "commit ancestry, 13-file allow-list, PR state and exact-head workflow results",
+      "evidence_level": "L0-L2",
+      "artifact": "canonical WBR2-M5 commit and validation PR",
+      "pass_criterion": "Exactly two commits over 96e96a88; validation PR closes merged=false before working-branch fast-forward",
+      "actual_status": "RTM_FIRST_COMMIT_IN_PROGRESS"
+    },
+    {
+      "protocol_item": "M5-13",
+      "requirement": "Compose immutable WBR2 governance evidence with R100 without rewriting the governance overlay",
+      "milestone": "WBR2-M5",
+      "action": "Load R99, apply governance overlay, then apply R100 final entries; bind both branches to immutable R99",
+      "test": "manifest equality, anchor tamper rejection and R100 final-loader regression",
+      "evidence_level": "L2",
+      "artifact": "R100 overlay and tests/integration_manifest_support_m8.py",
+      "pass_criterion": "Effective manifest equals tracked tree and governance evidence remains immutable",
+      "actual_status": "NOT_STARTED_ON_RECONCILED_HEAD"
+    },
+    {
+      "protocol_item": "M5-14",
+      "requirement": "Keep the authoritative WBR2 live state and CURRENT_STATE accurate after M5 implementation",
+      "milestone": "WBR2-M5",
+      "action": "Record governance completion, M5 implementation-candidate state, parent 96e96a88 and M6 unassigned status",
+      "test": "live-state/current-pointer contracts and no-M6-invention regression",
+      "evidence_level": "L0-L2",
+      "artifact": "WB_RELEASE_R2_EXECUTION_STATE.yaml and CURRENT_STATE.md",
+      "pass_criterion": "No stale candidate/integration statement and WBR2-M6 remains unassigned",
+      "actual_status": "NOT_STARTED_ON_RECONCILED_HEAD"
+    },
+    {
+      "protocol_item": "M5-15",
+      "requirement": "Limit completion claims to supported evidence",
+      "milestone": "WBR2-M5",
+      "action": "Keep physical L5, main merge, deployment and release explicitly blocked",
+      "test": "claim audit across RTM, live state, current state, workflow evidence and PR",
+      "evidence_level": "L0",
+      "artifact": "governance and validation evidence",
+      "pass_criterion": "No claim exceeds exact-head evidence",
+      "actual_status": "NOT_STARTED_ON_RECONCILED_HEAD"
+    }
+  ],
+  "overall_status": "MILESTONE_NOT_COMPLETE",
+  "release_state": "RELEASE_BLOCKED"
+}
