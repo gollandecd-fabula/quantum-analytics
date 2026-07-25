@@ -1,0 +1,84 @@
+{
+  "entries": [
+    [
+      ".github/workflows/full-project-redteam-r1.yml",
+      "3fa4d9833928e6fb1445dd2e3941bd4f428e0fda22c4381b3de05afda37429de",
+      5895
+    ],
+    [
+      "docs/evidence/FULL_PROJECT_REDTEAM_R1_DEFECT_REGISTER.json",
+      "0fef4686ec18a8aca2d4c7bc9de081049f000dbc60dbfccfc3d873028377b86e",
+      6827
+    ],
+    [
+      "docs/evidence/FULL_PROJECT_REDTEAM_R1_RTM.json",
+      "5e39372d68f2322ead6389684268b83d953e659c65f60f8aafc978c36f5af32d",
+      12385
+    ],
+    [
+      "docs/evidence/WB_RELEASE_R2_EXECUTION_STATE.yaml",
+      "6627a4f9f13d220ac4868a8d9485d7ec3232c1ce33aa9b9c5afbbffe88370b87",
+      5363
+    ],
+    [
+      "docs/governance/CURRENT_STATE.md",
+      "569a766bc09fbb554640a994d13392d379c1cd2f9f3087142559c29756d44dd0",
+      4361
+    ],
+    [
+      "src/quantum/application/_finance_center_dialog.py",
+      "1bca9d2937793183a72a78543f32671a8701813956a8cb4ac4c4910a097472a9",
+      19129
+    ],
+    [
+      "src/quantum/application/_finance_center_reports.py",
+      "55c13c4bfc19d31e053c9040142bc3da204a677d696edb9ca599d6bf611c7ff3",
+      9076
+    ],
+    [
+      "src/quantum/application/_finance_center_self_test.py",
+      "87075b4db42c32c39047fce87ed416ee852e3a0ea14178868dd349b7d4831bec",
+      9160
+    ],
+    [
+      "src/quantum/application/_finance_center_shared.py",
+      "b55b5fd2976a602e4c4864218a10127ce4622333ce1841147d2c24462e118ca6",
+      6168
+    ],
+    [
+      "src/quantum/application/_finance_center_shell.py",
+      "b0bd7b6d00757c3537abbf2ef0831ef2476af2cd4842045cb7fbcb171e3f70c1",
+      12160
+    ],
+    [
+      "src/quantum/application/_finance_profile_groups.py",
+      "3660fc8e2dc94221f5417a4544cd2240103934520a299a7ff40cabe34c0bba1d",
+      10857
+    ],
+    [
+      "src/quantum/application/desktop_center.py",
+      "b0fc439164931a07d495fa19d9d88db730d98dcb3df9c409be7f6db900816796",
+      3480
+    ],
+    [
+      "src/quantum/application/finance_profile.py",
+      "1104273fc809342e08c66da98ca87269056fc31df1b27606d8bd4cc75f4953e6",
+      5705
+    ],
+    [
+      "tests/integration_manifest_support_m8.py",
+      "49371048a6550c153c10491deeda6511280153a6e4bc9ec303da254121b9a9fc",
+      3824
+    ],
+    [
+      "tests/test_full_project_redteam_r1.py",
+      "8f3169b1a4946953ea1b2316f7d989a93c622bd0bd39fa6c6b249847e8c2bb7b",
+      12113
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": "QUANTUM-FULL-PROJECT-REDTEAM-R1",
+  "reason": "Full protocol and Red Team audit corrective candidate: enforce runtime user-entered finance values, staged Save/Cancel semantics, fail-closed corrupt-profile preservation, bounded UI geometry, one canonical profile persistence path and distinct configuration-required self-test status. WB_ONLY, Ozon deferred, Gatekeeper disconnected and marketplace writes disabled remain unchanged. Dynamic PASS is not predeclared.",
+  "remove_paths": [],
+  "base_wbr2_m5_closure_r2_overlay_git_blob_sha": "308126071b049df00c5ad579628bd687e151591c"
+}

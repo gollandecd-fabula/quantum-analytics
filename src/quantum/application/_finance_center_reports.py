@@ -156,7 +156,7 @@ class FinanceCenterReportsMixin:
             return
         window = tk.Toplevel(self.root_widget)
         window.title(f"Подробности — {row.source_path.name}")
-        window.geometry("980x680")
+        apply_bounded_window_geometry(window, 980, 680, 640, 440)
         text = tk.Text(window, wrap=tk.NONE, font=("Consolas", 9))
         text.pack(fill=tk.BOTH, expand=True)
         payload = {
@@ -184,6 +184,14 @@ class FinanceCenterReportsMixin:
         text.configure(state=tk.DISABLED)
 
     def open_finance_profile(self) -> None:
+        if self.profile_save_blocked:
+            messagebox.showerror(
+                APP_TITLE,
+                "Финансовый профиль повреждён, а резервную копию создать "
+                "не удалось. Сохранение заблокировано, чтобы не потерять "
+                "исходный файл.",
+            )
+            return
         if not self.profile.groups:
             messagebox.showwarning(
                 APP_TITLE,

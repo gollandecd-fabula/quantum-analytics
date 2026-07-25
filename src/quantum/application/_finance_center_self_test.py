@@ -253,12 +253,25 @@ def run_finance_center_self_test(
 
     checks["marketplace_writes_disabled"] = True
     passed = all(checks.values())
-    return {
-        "status": (
-            "FINANCE_CENTER_SELF_TEST_PASS"
-            if passed
+    configuration_required = (
+        config_error == "CONFIG_NOT_READY"
+        and all(
+            value is True
+            for name, value in checks.items()
+            if name != "config_valid"
+        )
+    )
+    status = (
+        "FINANCE_CENTER_SELF_TEST_PASS"
+        if passed
+        else (
+            "FINANCE_CENTER_SELF_TEST_CONFIGURATION_REQUIRED"
+            if configuration_required
             else "FINANCE_CENTER_SELF_TEST_FAILED"
-        ),
+        )
+    )
+    return {
+        "status": status,
         "checks": checks,
         "diagnostics": diagnostics,
         "marketplace_write_enabled": False,

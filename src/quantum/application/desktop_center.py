@@ -28,10 +28,13 @@ def self_test(root: Path, config: Path) -> dict[str, object]:
             "status": "FINANCE_CENTER_SELF_TEST_FAILED",
             "detail": type(exc).__name__,
         }
-    checks["finance_center"] = (
-        finance_center.get("status") == "FINANCE_CENTER_SELF_TEST_PASS"
+    finance_status = (
+        finance_center.get("status")
         if isinstance(finance_center, dict)
-        else False
+        else None
+    )
+    checks["finance_center"] = (
+        finance_status == "FINANCE_CENTER_SELF_TEST_PASS"
     )
     try:
         from quantum.application.shortcut_repair import (
@@ -48,12 +51,25 @@ def self_test(root: Path, config: Path) -> dict[str, object]:
     checks["config_exists"] = config.resolve().is_file()
     checks["marketplace_writes_disabled"] = True
     passed = all(checks.values())
-    return {
-        "status": (
-            "DESKTOP_CENTER_SELF_TEST_PASS"
-            if passed
+    configuration_required = (
+        finance_status == "FINANCE_CENTER_SELF_TEST_CONFIGURATION_REQUIRED"
+        and all(
+            value is True
+            for name, value in checks.items()
+            if name != "finance_center"
+        )
+    )
+    status = (
+        "DESKTOP_CENTER_SELF_TEST_PASS"
+        if passed
+        else (
+            "DESKTOP_CENTER_SELF_TEST_CONFIGURATION_REQUIRED"
+            if configuration_required
             else "DESKTOP_CENTER_SELF_TEST_FAILED"
-        ),
+        )
+    )
+    return {
+        "status": status,
         "checks": checks,
         "diagnostics": diagnostics,
         "tkinter_version": version,
@@ -76,7 +92,11 @@ def main() -> int:
     if args.self_test:
         result = self_test(args.root, args.config)
         print(json.dumps(result, ensure_ascii=False))
-        return 0 if result["status"] == "DESKTOP_CENTER_SELF_TEST_PASS" else 2
+        if result["status"] == "DESKTOP_CENTER_SELF_TEST_PASS":
+            return 0
+        if result["status"] == "DESKTOP_CENTER_SELF_TEST_CONFIGURATION_REQUIRED":
+            return 4
+        return 2
 
     from quantum.application.shortcut_repair import repair_legacy_shortcuts
     from quantum.application.local_runtime import main as finance_center_main

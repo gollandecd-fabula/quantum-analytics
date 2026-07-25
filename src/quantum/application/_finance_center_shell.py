@@ -14,7 +14,20 @@ class FinanceCenterShellMixin:
         self.project_root = project_root.resolve()
         self.config_path = config_path.resolve()
         self.profile_path = self.project_root / PROFILE_RELATIVE_PATH
-        self.profile = load_profile(self.profile_path) or FinanceProfile()
+        self.profile_load_error: FinanceProfileError | None = None
+        self.profile_recovery_backup: Path | None = None
+        self.profile_save_blocked = False
+        try:
+            self.profile = load_profile(self.profile_path) or FinanceProfile()
+        except FinanceProfileError as exc:
+            self.profile_load_error = exc
+            self.profile = FinanceProfile()
+            try:
+                self.profile_recovery_backup = backup_corrupt_profile(
+                    self.profile_path
+                )
+            except FinanceProfileError:
+                self.profile_save_blocked = True
         self.reports: dict[str, ReportState] = {}
         self.products: dict[str, ProductRecord] = {}
         self.events: queue.Queue[tuple[str, str, Any]] = queue.Queue()
@@ -34,8 +47,13 @@ class FinanceCenterShellMixin:
         self.current_recommendation_errors: tuple[str, ...] = ()
         self._initialize_auto_inbox()
         self.root_widget.title(APP_TITLE)
-        self.root_widget.geometry("1440x900")
-        self.root_widget.minsize(1120, 700)
+        apply_bounded_window_geometry(
+            self.root_widget,
+            1440,
+            900,
+            760,
+            560,
+        )
         self._configure_style()
         self._build_shell()
         self.root_widget.protocol("WM_DELETE_WINDOW", self.request_close)
@@ -48,6 +66,24 @@ class FinanceCenterShellMixin:
                 "Автовходящие отключены fail-closed: " + self.auto_inbox_error,
                 "error",
             )
+        if self.profile_load_error is not None:
+            if self.profile_save_blocked:
+                self.set_status(
+                    "Финансовый профиль повреждён. Резервная копия не "
+                    "создана, поэтому сохранение заблокировано fail-closed.",
+                    "error",
+                )
+            else:
+                backup_name = (
+                    self.profile_recovery_backup.name
+                    if self.profile_recovery_backup is not None
+                    else "резервная копия"
+                )
+                self.set_status(
+                    "Повреждённый финансовый профиль сохранён как "
+                    f"{backup_name}. Введите значения заново.",
+                    "warning",
+                )
         self.root_widget.after(150, self._drain_events)
         self._schedule_auto_inbox_poll()
 
