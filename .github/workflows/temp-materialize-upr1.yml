@@ -114,6 +114,32 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p "$RUNNER_TEMP/upr1-validation"
+          python3 --version 2>&1 | tee "$RUNNER_TEMP/upr1-validation/python-version.txt"
+          PYTHONPATH=src python3 - <<'PY' > "$RUNNER_TEMP/upr1-validation/desktop-self-test.json"
+          import json
+          import sys
+          import tempfile
+          from pathlib import Path
+          from quantum.application.desktop_center import self_test
+
+          output = {"python": sys.version}
+          try:
+              import tkinter
+              output["tkinter"] = {"available": True, "version": str(tkinter.TkVersion)}
+          except Exception as exc:
+              output["tkinter"] = {"available": False, "error": type(exc).__name__, "detail": str(exc)}
+          for status in ("READY", "REQUIRES_USER_VALUES"):
+              with tempfile.TemporaryDirectory() as directory:
+                  root = Path(directory)
+                  config = root / "config.json"
+                  config.write_text(json.dumps({
+                      "configuration_status": status,
+                      "tenant_id": "tenant-test",
+                      "execution_mode": "ADMISSION_ONLY",
+                  }), encoding="utf-8")
+                  output[status] = self_test(root, config)
+          print(json.dumps(output, ensure_ascii=False, indent=2))
+          PY
           python3 -m compileall -q src tests 2>&1 | tee "$RUNNER_TEMP/upr1-validation/compile.log"
           PYTHONPATH=src python3 -m unittest tests.test_universal_partial_r1 -v 2>&1 | tee "$RUNNER_TEMP/upr1-validation/focused.log"
           PYTHONPATH=src python3 -m quantum.scripts.ci 2>&1 | tee "$RUNNER_TEMP/upr1-validation/full-ci.log"
