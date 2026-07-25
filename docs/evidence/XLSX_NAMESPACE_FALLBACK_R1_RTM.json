@@ -1,0 +1,62 @@
+{
+  "rtm_id": "QUANTUM-XLSX-NAMESPACE-FALLBACK-R1",
+  "created_on": "2026-07-26",
+  "immutable_base_exact_head": "a4e7957c661f46f87c408da7f347fcbbcdc49414",
+  "trigger": "Physical Windows pilot rejected a user XLSX before queue admission with XLSX_XML_NAMESPACE_UNMODELED / XlsxInspectionError.",
+  "purpose": "Remove strict XML namespace modelling as a mandatory prerequisite for safe XLSX intake while preserving archive, active-content, corruption and resource-limit protections.",
+  "requirements": [
+    {
+      "id": "XNF1-R1",
+      "requirement": "A structurally safe XLSX with additional or alternate namespace declarations must be admitted for universal processing instead of being rejected by schema preview.",
+      "test": "Synthetic namespace-extended XLSX passes preview and queue admission.",
+      "pass_criterion": "No blocking FinanceProfileError; preview records a non-fatal diagnostic."
+    },
+    {
+      "id": "XNF1-R2",
+      "requirement": "Universal XLSX extraction must identify workbook sheets, relationships, shared strings and worksheet cells by safe local-name semantics rather than one hard-coded namespace URI.",
+      "test": "Transitional, strict and vendor-extended namespace workbooks yield the same table rows.",
+      "pass_criterion": "Available tables and values are extracted without executing formulas or external relationships."
+    },
+    {
+      "id": "XNF1-R3",
+      "requirement": "Unknown namespace declarations must never weaken security checks for traversal, external relationships, active content, encrypted entries, XML entities, excessive sizes or archive bombs.",
+      "test": "Adversarial workbook corpus remains quarantined or blocked with exact reason codes.",
+      "pass_criterion": "All existing security tests and new namespace-security mutation tests pass."
+    },
+    {
+      "id": "XNF1-R4",
+      "requirement": "The GUI must describe strict-schema failure as a warning/diagnostic and continue queue processing when universal extraction or safe registration is possible.",
+      "test": "Finance center review path returns a preview and add_reports queues the file.",
+      "pass_criterion": "No 'Файл не добавлен' dialog for namespace-only incompatibility."
+    },
+    {
+      "id": "XNF1-R5",
+      "requirement": "Build and validate a replacement one-click Windows EXE from the corrected exact head.",
+      "test": "Linux/Windows source CI, namespace corpus, installer build, installed-runtime and native self-test.",
+      "pass_criterion": "Downloadable EXE with exact SHA-256 and zero open P0/P1 defects."
+    }
+  ],
+  "capability_gate": {
+    "repository_patch": "SUPPORTED",
+    "synthetic_xlsx_corpus": "SUPPORTED",
+    "linux_source_tests": "SUPPORTED",
+    "hosted_windows_tests": "SUPPORTED",
+    "installer_build": "SUPPORTED",
+    "physical_original_xlsx_reproduction": "REQUIRES_USER_FILE",
+    "physical_user_pc_l5": "EXTERNAL"
+  },
+  "milestones": [
+    {"id": "XNF1-M0", "title": "Reproduce and map failure", "status": "COMPLETE"},
+    {"id": "XNF1-M1", "title": "Non-blocking preview fallback", "status": "NOT_STARTED"},
+    {"id": "XNF1-M2", "title": "Namespace-tolerant universal XLSX reader", "status": "NOT_STARTED"},
+    {"id": "XNF1-M3", "title": "Security and regression Red Team", "status": "NOT_STARTED"},
+    {"id": "XNF1-M4", "title": "Exact-head Windows installer", "status": "NOT_STARTED"}
+  ],
+  "boundaries": {
+    "marketplace_writes": "DISABLED",
+    "ozon": "DEFERRED",
+    "gatekeeper": "DISCONNECTED",
+    "main_merge": "NOT_AUTHORIZED",
+    "release": "BLOCKED_UNTIL_VALIDATION"
+  }
+}
