@@ -1,0 +1,149 @@
+name: Temporary Materialize UPR1 Final
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/temp-materialize-upr1-final.yml"
+      - "tools/upr1-corrective-delta.patch.xz.b64"
+      - "tools/upr1-patch/**"
+
+permissions:
+  contents: write
+
+jobs:
+  materialize-final:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 55
+    env:
+      TARGET_BRANCH: audit/quantum-universal-partial-r1
+      TARGET_BASE: a300184c673f79f15e37eb388ef41c4a85773f2a
+      EXPECTED_TREE: c8f0eb8404a777706ab5c3623b976eae690f7f6a
+      BASE_PATCH_SHA256: fdc0a9b4312464f6b098b2523503f9b797feb87b5be9413c2f316f01a98750ab
+      DELTA_PATCH_SHA256: ed209d3e7c5cd728ee776ec2c329a297fd59ee57881e9238d31b9d2f4adc6c33
+      PYTHONDONTWRITEBYTECODE: "1"
+      PYTHONUTF8: "1"
+    steps:
+      - name: Checkout exact materializer head
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+
+      - name: Reconstruct and verify patches
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat tools/upr1-patch/part-*.b64 | base64 --decode > "$RUNNER_TEMP/upr1-base.patch.xz"
+          test "$(sha256sum "$RUNNER_TEMP/upr1-base.patch.xz" | cut -d' ' -f1)" = "$BASE_PATCH_SHA256"
+          xz --decompress --stdout "$RUNNER_TEMP/upr1-base.patch.xz" > "$RUNNER_TEMP/upr1-base.patch"
+          base64 --decode tools/upr1-corrective-delta.patch.xz.b64 > "$RUNNER_TEMP/upr1-delta.patch.xz"
+          test "$(sha256sum "$RUNNER_TEMP/upr1-delta.patch.xz" | cut -d' ' -f1)" = "$DELTA_PATCH_SHA256"
+          xz --decompress --stdout "$RUNNER_TEMP/upr1-delta.patch.xz" > "$RUNNER_TEMP/upr1-delta.patch"
+
+      - name: Checkout exact RTM-first target
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin "$TARGET_BRANCH"
+          test "$(git rev-parse "origin/$TARGET_BRANCH")" = "$TARGET_BASE"
+          git checkout -B "$TARGET_BRANCH" "origin/$TARGET_BRANCH"
+          test "$(git rev-parse HEAD)" = "$TARGET_BASE"
+
+      - name: Apply base implementation and corrective delta
+        shell: bash
+        run: |
+          set -euo pipefail
+          git apply --check "$RUNNER_TEMP/upr1-base.patch"
+          git apply --index "$RUNNER_TEMP/upr1-base.patch"
+          git apply --check "$RUNNER_TEMP/upr1-delta.patch"
+          git apply --index "$RUNNER_TEMP/upr1-delta.patch"
+          mapfile -t actual < <(git diff --cached --name-only | sort)
+          mapfile -t expected <<'PATHS'
+          .github/workflows/universal-partial-r1.yml
+          docs/evidence/ARTIFACT_MANIFEST_OVERLAY_UNIVERSAL_PARTIAL_R1.json
+          docs/evidence/UNIVERSAL_PARTIAL_R1_DEFECT_REGISTER.json
+          docs/evidence/WB_RELEASE_R2_EXECUTION_STATE.yaml
+          docs/governance/CURRENT_STATE.md
+          src/quantum/application/_finance_center_calculation.py
+          src/quantum/application/_finance_center_dialog.py
+          src/quantum/application/_finance_center_pages.py
+          src/quantum/application/_finance_center_persistence.py
+          src/quantum/application/_finance_center_queue_runtime.py
+          src/quantum/application/_finance_center_reports.py
+          src/quantum/application/_finance_center_self_test.py
+          src/quantum/application/_finance_center_shared.py
+          src/quantum/application/_finance_generic_tabular.py
+          src/quantum/application/_finance_profile_engine.py
+          src/quantum/application/_finance_profile_financial_rows.py
+          src/quantum/application/_finance_profile_model.py
+          src/quantum/application/_finance_profile_outputs.py
+          src/quantum/application/_finance_schema_review.py
+          src/quantum/application/finance_profile.py
+          src/quantum/pilot/universal_intake.py
+          src/quantum/pilot/universal_tables.py
+          tests/integration_manifest_support_m8.py
+          tests/test_finance_center_profile.py
+          tests/test_finance_profile_block_reasons.py
+          tests/test_full_project_redteam_r1.py
+          tests/test_m2_runtime_dependency_modernization.py
+          tests/test_plateau_m1_runtime_integration.py
+          tests/test_plateau_m2_financial_integration.py
+          tests/test_plateau_m4_schema_review.py
+          tests/test_plateau_m5_self_test.py
+          tests/test_plateau_m6_build_metadata.py
+          tests/test_quantum_reaudit_plateau_r1.py
+          tests/test_universal_any_file_contract_r4.py
+          tests/test_universal_ingestion_r4.py
+          tests/test_universal_intake_hardening_r4.py
+          tests/test_universal_partial_r1.py
+          tests/test_wbr2_m5_closure.py
+          tests/test_wbr2_m5_closure_corrective_r2.py
+          PATHS
+          diff -u <(printf '%s\n' "${expected[@]}" | sort) <(printf '%s\n' "${actual[@]}")
+          test "$(git write-tree)" = "$EXPECTED_TREE"
+
+      - name: Create exact local implementation commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "quantum-redteam-bot"
+          git config user.email "quantum-redteam-bot@users.noreply.github.com"
+          git commit -m "Implement universal intake and maximum available calculations"
+          test "$(git rev-parse HEAD^)" = "$TARGET_BASE"
+          test "$(git rev-parse HEAD^{tree})" = "$EXPECTED_TREE"
+
+      - name: Validate exact candidate before publication
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/upr1-final-validation"
+          python3 -m compileall -q src tests 2>&1 | tee "$RUNNER_TEMP/upr1-final-validation/compile.log"
+          PYTHONPATH=src python3 -m unittest \
+            tests.test_universal_partial_r1 \
+            tests.test_full_project_redteam_r1 -v 2>&1 | tee "$RUNNER_TEMP/upr1-final-validation/focused.log"
+          PYTHONPATH=src python3 -m quantum.scripts.ci 2>&1 | tee "$RUNNER_TEMP/upr1-final-validation/full-ci.log"
+          test "$(git rev-parse HEAD^)" = "$TARGET_BASE"
+          test "$(git rev-parse HEAD^{tree})" = "$EXPECTED_TREE"
+          git diff --exit-code
+          git diff --cached --exit-code
+          git status --porcelain=v1 --untracked-files=all | tee "$RUNNER_TEMP/upr1-final-validation/status.txt"
+          test ! -s "$RUNNER_TEMP/upr1-final-validation/status.txt"
+
+      - name: Publish validated implementation commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          git push origin "HEAD:refs/heads/$TARGET_BRANCH" \
+            --force-with-lease="refs/heads/$TARGET_BRANCH:$TARGET_BASE"
+          git rev-parse HEAD | tee "$RUNNER_TEMP/upr1-final-sha.txt"
+
+      - name: Upload materialization evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: UPR1-Final-Materialization-${{ github.event.pull_request.head.sha }}
+          path: |
+            ${{ runner.temp }}/upr1-final-sha.txt
+            ${{ runner.temp }}/upr1-final-validation
+          if-no-files-found: warn
+          retention-days: 7
