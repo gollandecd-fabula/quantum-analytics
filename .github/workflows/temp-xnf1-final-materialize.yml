@@ -54,7 +54,7 @@ jobs:
           mapfile -t expected <<'PATHS'
           .github/workflows/xlsx-namespace-fallback-r1.yml
           docs/evidence/ARTIFACT_MANIFEST_OVERLAY_XLSX_NAMESPACE_FALLBACK_R1.json
-          docs/evidence/UNIVERSAL_PARTIAL_R1_DEFECT_REGISTER.json
+          docs/evidence/XLSX_NAMESPACE_FALLBACK_R1_DEFECT_REGISTER.json
           docs/evidence/WB_RELEASE_R2_EXECUTION_STATE.yaml
           docs/governance/CURRENT_STATE.md
           src/quantum/application/_finance_center_pages.py
