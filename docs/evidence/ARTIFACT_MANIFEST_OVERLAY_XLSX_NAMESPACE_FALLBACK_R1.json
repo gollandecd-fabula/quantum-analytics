@@ -1,0 +1,79 @@
+{
+  "entries": [
+    [
+      ".github/workflows/xlsx-namespace-fallback-r1.yml",
+      "be8b5905e89d3de90612be12cba15c83bd239a3e26cb470022a5a4d5f7614aae",
+      4886
+    ],
+    [
+      "docs/evidence/XLSX_NAMESPACE_FALLBACK_R1_DEFECT_REGISTER.json",
+      "52af5dfab51ac361a0ccb430dbda9875c92612264a3723a48161d89b81cd0526",
+      1703
+    ],
+    [
+      "docs/evidence/XLSX_NAMESPACE_FALLBACK_R1_RTM.json",
+      "34ac1cbfe27eb585f461037e173e3a85162599f8acfef308a341434bd5fd9735",
+      3607
+    ],
+    [
+      "docs/evidence/WB_RELEASE_R2_EXECUTION_STATE.yaml",
+      "9366580755b7dd2c4481ccf20658e224ff73295d61e42df5a25c967ee8158239",
+      7035
+    ],
+    [
+      "docs/governance/CURRENT_STATE.md",
+      "a2a708915ae87e562cc9f16ea466dbb575cb47b3decf7df6fa4a48e33db5f19e",
+      6694
+    ],
+    [
+      "src/quantum/application/_finance_center_pages.py",
+      "54760300eef04171e718fc3e51fa2b24e34550bc915eada15535273269e00968",
+      38420
+    ],
+    [
+      "src/quantum/application/_finance_center_queue_runtime.py",
+      "dafe6feb9954d0c0543601b1f87096a2a8d3dc6440569c477fa8ce4fcb0e961d",
+      18966
+    ],
+    [
+      "src/quantum/application/_finance_schema_review.py",
+      "4ba96b081a43d2adeea57f7d1bd004f4ef4741a9a15e73bb031e5aa45722f933",
+      7897
+    ],
+    [
+      "src/quantum/pilot/universal_intake.py",
+      "4a814409319459c3a537bf3dfc5a4deaee7826baa7e1e4a67f3a9cade240f26a",
+      9753
+    ],
+    [
+      "src/quantum/pilot/universal_tables.py",
+      "b602950d44d34040c2510d570945468c84f53e57df92b7084cb3d292281f108e",
+      33173
+    ],
+    [
+      "tests/integration_manifest_support_m8.py",
+      "43343c470c89e6bbeb7462322a250ad7a6f03a1440e0a6b119237dddc16b51a6",
+      4727
+    ],
+    [
+      "tests/test_xlsx_namespace_fallback_r1.py",
+      "2297e0e463a183f750184305e28ce723c37b308cb39f4f491e764d4c08f97a14",
+      8649
+    ],
+    [
+      "tests/test_wbr2_m5_closure.py",
+      "598f69c76f519ddd41848c986cc7254ff3104746312c2d78dc62e22f63c5cb49",
+      4158
+    ],
+    [
+      "tests/test_wbr2_m5_closure_corrective_r2.py",
+      "491672d1f0f9bd416bcea5344f2c455a5b9787e2b057a662f51bddc6deeec4c5",
+      3749
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": "QUANTUM-XLSX-NAMESPACE-FALLBACK-R1",
+  "reason": "Physical Windows L5 exposed XLSX_XML_NAMESPACE_UNMODELED before queue admission. Strict schema discovery is now diagnostic while safe namespace-tolerant universal XLSX extraction continues. External relationships, XML entities, active content, encryption, archive corruption and resource limits remain fail-closed; formulas are not executed and cached formula values are omitted. The old installer is superseded for XLSX pilot import and physical retest with the exact operator file remains required.",
+  "remove_paths": [],
+  "base_universal_partial_r1_overlay_git_blob_sha": "4020b849d8c80601b1fb131b34cead75ba3e9af6"
+}

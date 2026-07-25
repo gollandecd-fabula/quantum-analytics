@@ -141,3 +141,12 @@ Until those boundaries are explicitly satisfied:
 `PROTOCOL_IMPLEMENTATION_INCOMPLETE`  
 `MILESTONE_NOT_COMPLETE`  
 `RELEASE_BLOCKED`
+
+
+## XLSX namespace fallback corrective R1
+
+Physical Windows L5 started at exact head `a4e7957c661f46f87c408da7f347fcbbcdc49414`: the GUI launched, but a real operator XLSX was rejected before queue admission with `XLSX_XML_NAMESPACE_UNMODELED`. The old installer is superseded for XLSX pilot import.
+
+Corrective cycle `QUANTUM-XLSX-NAMESPACE-FALLBACK-R1` uses RTM-first commit `ccc07dcb0a016768b3a287d61fb854760e30891c`. Strict schema discovery is now diagnostic; namespace-extended, strict and transitional OOXML can proceed through bounded universal extraction. External relationships, XML entities, active content, encryption, archive corruption and resource-limit violations remain fail-closed. Formula code is never executed and cached formula values are omitted.
+
+The exact rejected workbook was not uploaded. Hosted validation therefore uses synthetic namespace and adversarial XLSX corpora. Physical acceptance remains incomplete until the replacement installer is retested with the operator file.

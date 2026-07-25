@@ -21,6 +21,11 @@ UNIVERSAL_OVERLAY_PATH = (
     / "docs/evidence"
     / "ARTIFACT_MANIFEST_OVERLAY_UNIVERSAL_PARTIAL_R1.json"
 )
+XNF1_OVERLAY_PATH = (
+    ROOT
+    / "docs/evidence"
+    / "ARTIFACT_MANIFEST_OVERLAY_XLSX_NAMESPACE_FALLBACK_R1.json"
+)
 
 
 class Wbr2M5ClosureCorrectiveR2Tests(unittest.TestCase):
@@ -93,6 +98,8 @@ class Wbr2M5ClosureCorrectiveR2Tests(unittest.TestCase):
                 for path, digest, size in universal["entries"]
             }
         )
+        xnf1 = json.loads(XNF1_OVERLAY_PATH.read_text(encoding="utf-8"))
+        final.update({path: [path, digest, size] for path, digest, size in xnf1["entries"]})
         for path, _digest, _size in overlay["entries"]:
             self.assertEqual(rows[path], final[path])
 

@@ -54,6 +54,18 @@ def classify_payload(payload: bytes, suffix: str) -> IntakeDecision:
         extraction = extract_tables(payload, source_name="preview" + suffix)
     except UniversalTableError:
         return decision
+    if extraction.status.startswith("QUARANTINED"):
+        return IntakeDecision(
+            extraction.status,
+            extraction.detected_format,
+            None,
+            decision.metadata,
+            tuple(
+                dict.fromkeys(
+                    (*decision.reason_codes, *extraction.reason_codes)
+                )
+            ),
+        )
     if extraction.tables:
         return IntakeDecision(
             "ACCEPTED_PARTIAL",
@@ -101,7 +113,19 @@ def register_file(
             try:
                 extraction = extract_tables(payload, source_name=source.name)
                 extraction_summary = extraction.public_summary()
-                if extraction.tables:
+                if extraction.status.startswith("QUARANTINED"):
+                    decision = IntakeDecision(
+                        extraction.status,
+                        extraction.detected_format,
+                        None,
+                        decision.metadata,
+                        tuple(
+                            dict.fromkeys(
+                                (*decision.reason_codes, *extraction.reason_codes)
+                            )
+                        ),
+                    )
+                elif extraction.tables:
                     decision = IntakeDecision(
                         "ACCEPTED_PARTIAL",
                         extraction.detected_format,

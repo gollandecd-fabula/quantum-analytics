@@ -1,0 +1,53 @@
+{
+  "register_id": "QUANTUM-XLSX-NAMESPACE-FALLBACK-R1-DEFECTS",
+  "base_exact_head": "a4e7957c661f46f87c408da7f347fcbbcdc49414",
+  "trigger_evidence": {
+    "type": "PHYSICAL_WINDOWS_SCREENSHOT",
+    "observed_on": "2026-07-26",
+    "reason_code": "XLSX_XML_NAMESPACE_UNMODELED",
+    "exception": "XlsxInspectionError",
+    "physical_gui_launch": "CONFIRMED",
+    "physical_xlsx_import": "FAILED_OLD_INSTALLER"
+  },
+  "defects": [
+    {
+      "id": "XNF1-001",
+      "severity": "P1",
+      "status": "FIXED_CANDIDATE",
+      "title": "Strict namespace allow-list blocked safe XLSX before universal intake"
+    },
+    {
+      "id": "XNF1-002",
+      "severity": "P1",
+      "status": "FIXED_CANDIDATE",
+      "title": "Universal XLSX reader depended on one hard-coded OOXML namespace"
+    },
+    {
+      "id": "XNF1-003",
+      "severity": "P1_SECURITY",
+      "status": "FIXED_CANDIDATE",
+      "title": "Universal intake could discard quarantine result from table extraction"
+    },
+    {
+      "id": "XNF1-004",
+      "severity": "P2",
+      "status": "FIXED_CANDIDATE",
+      "title": "File chooser and status wording implied a fixed WB report prerequisite"
+    }
+  ],
+  "red_team_boundaries": {
+    "unknown_namespace": "NON_BLOCKING_DIAGNOSTIC",
+    "external_relationship": "QUARANTINED_SECURITY",
+    "xml_entity_or_doctype": "QUARANTINED_SECURITY",
+    "active_content": "QUARANTINED_SECURITY",
+    "formula_execution": "FORBIDDEN_CACHED_VALUE_OMITTED",
+    "unknown_business_semantics": "NOT_GUESSED",
+    "original_user_xlsx": "NOT_AVAILABLE_FOR_AUTOMATED_REPRODUCTION"
+  },
+  "open_defects": {
+    "P0": 0,
+    "P1": 0,
+    "P2_correctness": 0,
+    "physical_original_file_retest": 1
+  }
+}

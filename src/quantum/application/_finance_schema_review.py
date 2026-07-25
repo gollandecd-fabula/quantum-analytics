@@ -8,6 +8,7 @@ from typing import Any
 
 from quantum.application.finance_profile import FinanceProfileError
 from quantum.pilot.universal_intake import classify_payload
+from quantum.pilot.universal_tables import extract_tables
 from quantum.pilot.windows_runner import discover_schema, _limits
 
 
@@ -26,6 +27,8 @@ class SchemaReviewPreview:
     formula_count: int | None = None
     reporting_period_start: str | None = None
     reporting_period_end: str | None = None
+    inspection_status: str = "COMPLETE"
+    diagnostic_codes: tuple[str, ...] = ()
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -36,25 +39,33 @@ class SchemaReviewPreview:
             f"{self.reporting_period_start or 'не задан'} — "
             f"{self.reporting_period_end or 'не задан'}"
         )
+        details = ""
+        if self.sheet_name is not None:
+            details = (
+                f"Лист: {self.sheet_name}\n"
+                f"Строка заголовка: {self.header_row_index}\n"
+                f"Столбцов: {self.column_count}\n"
+                f"Строк данных: {self.data_row_count}\n"
+                f"Период профиля: {period}\n"
+                f"Заголовки: {headers}\n"
+            )
+        diagnostics = ""
+        if self.diagnostic_codes:
+            diagnostics = (
+                "Диагностика строгой схемы: "
+                + ", ".join(self.diagnostic_codes)
+                + "\n"
+            )
         if not self.requires_schema_review:
-            details = ""
-            if self.sheet_name is not None:
-                details = (
-                    f"Лист: {self.sheet_name}\n"
-                    f"Строка заголовка: {self.header_row_index}\n"
-                    f"Столбцов: {self.column_count}\n"
-                    f"Строк данных: {self.data_row_count}\n"
-                    f"Период профиля: {period}\n"
-                    f"Заголовки: {headers}\n"
-                )
             return (
                 f"Файл: {self.file_name}\n"
                 f"Формат: {self.detected_format}\n"
                 f"Размер: {self.file_size_bytes} байт\n"
                 f"SHA-256: {self.file_sha256}\n"
-                f"{details}\n"
-                "Файл передан в универсальную обработку. Конкретная "
-                "схема отчёта и отдельное подтверждение не требуются."
+                f"{details}{diagnostics}\n"
+                "Файл передан в универсальную обработку. Неизвестные "
+                "особенности формата фиксируются как диагностика и не "
+                "блокируют доступные данные; значения не додумываются."
             )
         return (
             f"Файл: {self.file_name}\n"
@@ -85,6 +96,10 @@ def _config(path: Path) -> dict[str, Any]:
     return value
 
 
+def _period(config: dict[str, Any], key: str) -> str | None:
+    return str(config.get(key) or "") or None
+
+
 def build_schema_review_preview(
     source_path: Path,
     config_path: Path,
@@ -104,6 +119,8 @@ def build_schema_review_preview(
     decision = classify_payload(payload, source_path.suffix)
     detected = str(decision.detected_format or "UNKNOWN")
     config = _config(config_path)
+    period_start = _period(config, "reporting_period_start")
+    period_end = _period(config, "reporting_period_end")
     is_xlsx = detected in {"XLSX", "XLSM"}
     if not is_xlsx and decision.status != "ROUTE_XLSX":
         return SchemaReviewPreview(
@@ -112,23 +129,59 @@ def build_schema_review_preview(
             file_size_bytes=len(payload),
             detected_format=detected,
             requires_schema_review=False,
-            reporting_period_start=str(
-                config.get("reporting_period_start") or ""
-            )
-            or None,
-            reporting_period_end=str(
-                config.get("reporting_period_end") or ""
-            )
-            or None,
+            reporting_period_start=period_start,
+            reporting_period_end=period_end,
+            inspection_status="UNIVERSAL_INTAKE",
+            diagnostic_codes=tuple(decision.reason_codes),
         )
     try:
-        schema = discover_schema(
-            payload=payload,
-            limits=_limits(config),
-        )
+        schema = discover_schema(payload=payload, limits=_limits(config))
     except Exception as exc:
-        code = getattr(exc, "code", "SCHEMA_DISCOVERY_FAILED")
-        raise FinanceProfileError(str(code), (type(exc).__name__,)) from exc
+        code = str(getattr(exc, "code", "SCHEMA_DISCOVERY_FAILED"))
+        extraction = extract_tables(payload, source_name=source_path.name)
+        if extraction.status.startswith("QUARANTINED"):
+            raise FinanceProfileError(
+                extraction.reason_codes[0] if extraction.reason_codes else code,
+                tuple(extraction.reason_codes[1:]),
+            ) from exc
+        if not extraction.tables:
+            raise FinanceProfileError(
+                code,
+                tuple(extraction.reason_codes) or (type(exc).__name__,),
+            ) from exc
+        table = extraction.tables[0]
+        sheet_name = (
+            table.member_path.rsplit("#", 1)[1]
+            if "#" in table.member_path
+            else None
+        )
+        diagnostics = tuple(
+            dict.fromkeys(
+                (
+                    "STRICT_SCHEMA_PREVIEW_BYPASSED",
+                    code,
+                    *extraction.reason_codes,
+                    *table.reason_codes,
+                )
+            )
+        )
+        return SchemaReviewPreview(
+            file_name=source_path.name,
+            file_sha256=digest,
+            file_size_bytes=len(payload),
+            detected_format=extraction.detected_format,
+            requires_schema_review=False,
+            sheet_name=sheet_name,
+            header_row_index=1,
+            headers=table.headers,
+            column_count=table.column_count,
+            data_row_count=table.row_count,
+            formula_count=None,
+            reporting_period_start=period_start,
+            reporting_period_end=period_end,
+            inspection_status="UNIVERSAL_FALLBACK",
+            diagnostic_codes=diagnostics,
+        )
     return SchemaReviewPreview(
         file_name=source_path.name,
         file_sha256=digest,
@@ -141,14 +194,9 @@ def build_schema_review_preview(
         column_count=schema.column_count,
         data_row_count=schema.data_row_count,
         formula_count=schema.formula_count,
-        reporting_period_start=str(
-            config.get("reporting_period_start") or ""
-        )
-        or None,
-        reporting_period_end=str(
-            config.get("reporting_period_end") or ""
-        )
-        or None,
+        reporting_period_start=period_start,
+        reporting_period_end=period_end,
+        inspection_status="STRICT_SCHEMA_COMPLETE",
     )
 
 

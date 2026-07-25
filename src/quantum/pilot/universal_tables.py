@@ -17,9 +17,13 @@ import unicodedata
 from xml.etree import ElementTree
 from zipfile import BadZipFile, ZIP_DEFLATED, ZIP_STORED, ZipFile, ZipInfo
 
-from quantum.adapters.wildberries.source_bridge import _sheet_rows
 from quantum.application._finance_profile_model import _SAFE_LIMITS
-from quantum.ingestion._xlsx_archive import _extract_workbook, _read_limited, _xml_root
+from quantum.ingestion._xlsx_archive import (
+    _cell_position,
+    _extract_workbook,
+    _read_limited,
+    _xml_root,
+)
 
 
 UNIVERSAL_TABLE_SCHEMA_VERSION = "quantum-universal-tables-v1"
@@ -43,7 +47,6 @@ _EXECUTABLE_MAGIC = (
 _XLSX_REQUIRED = frozenset(
     {"[content_types].xml", "_rels/.rels", "xl/workbook.xml", "xl/_rels/workbook.xml.rels"}
 )
-_SPREADSHEET_NS = "http://schemas.openxmlformats.org/spreadsheetml/2006/main"
 
 
 class UniversalTableError(ValueError):
@@ -228,44 +231,268 @@ def _rows_to_table(
     )
 
 
-def _xlsx_sheet_names(payload: bytes) -> tuple[str, ...]:
-    _, workbook_payload = _extract_workbook(payload, _SAFE_LIMITS)
-    with ZipFile(BytesIO(workbook_payload)) as archive:
-        root = _xml_root(
+def _local_name(value: str) -> str:
+    return value.rsplit("}", 1)[-1]
+
+
+def _direct_children(root: ElementTree.Element, name: str) -> list[ElementTree.Element]:
+    return [child for child in root if _local_name(child.tag) == name]
+
+
+def _first_child(root: ElementTree.Element, name: str) -> ElementTree.Element | None:
+    for child in root:
+        if _local_name(child.tag) == name:
+            return child
+    return None
+
+
+def _attribute_by_local_name(element: ElementTree.Element, name: str) -> str | None:
+    for key, value in element.attrib.items():
+        if _local_name(key) == name:
+            return value
+    return None
+
+
+def _xlsx_relationship_target(target: str) -> str:
+    normalized = str(target).replace("\\", "/").strip()
+    if (
+        not normalized
+        or normalized.startswith("//")
+        or re.match(r"^[A-Za-z][A-Za-z0-9+.-]*:", normalized)
+        or ":" in normalized
+    ):
+        raise UniversalTableError(
+            "UNIVERSAL_XLSX_EXTERNAL_RELATIONSHIP_FORBIDDEN"
+        )
+    if normalized.startswith("/"):
+        normalized = normalized[1:]
+    elif not normalized.casefold().startswith("xl/"):
+        normalized = "xl/" + normalized
+    path = PurePosixPath(normalized)
+    if any(part in {"", ".", ".."} for part in path.parts):
+        raise UniversalTableError("UNIVERSAL_XLSX_RELATIONSHIP_PATH_INVALID")
+    result = str(path)
+    if not (
+        result.casefold().startswith("xl/worksheets/")
+        and result.casefold().endswith(".xml")
+    ):
+        raise UniversalTableError("UNIVERSAL_XLSX_WORKSHEET_TARGET_INVALID")
+    return result
+
+
+def _xlsx_sheet_catalog(payload: bytes) -> tuple[bytes, tuple[tuple[str, str], ...]]:
+    _kind, workbook_payload = _extract_workbook(payload, _SAFE_LIMITS)
+    try:
+        archive = ZipFile(BytesIO(workbook_payload))
+    except BadZipFile as exc:
+        raise UniversalTableError("UNIVERSAL_XLSX_ARCHIVE_INVALID") from exc
+    with archive:
+        workbook = _xml_root(
             _read_limited(archive, "xl/workbook.xml", _SAFE_LIMITS),
             "UNIVERSAL_XLSX_WORKBOOK_INVALID",
         )
-        sheets = root.find(f"{{{_SPREADSHEET_NS}}}sheets")
-        if sheets is None:
-            raise UniversalTableError("UNIVERSAL_XLSX_SHEETS_MISSING")
-        names = tuple(
-            str(sheet.get("name") or "").strip()
-            for sheet in sheets.findall(f"{{{_SPREADSHEET_NS}}}sheet")
+        relationships = _xml_root(
+            _read_limited(
+                archive, "xl/_rels/workbook.xml.rels", _SAFE_LIMITS
+            ),
+            "UNIVERSAL_XLSX_RELATIONSHIPS_INVALID",
         )
-    if not names or any(not name for name in names) or len(set(names)) != len(names):
-        raise UniversalTableError("UNIVERSAL_XLSX_SHEETS_INVALID")
-    return names
+        relation_map: dict[str, str] = {}
+        for relation in relationships.iter():
+            if _local_name(relation.tag) != "Relationship":
+                continue
+            relation_id = relation.get("Id")
+            target_mode = str(relation.get("TargetMode") or "").casefold()
+            if target_mode == "external":
+                raise UniversalTableError(
+                    "UNIVERSAL_XLSX_EXTERNAL_RELATIONSHIP_FORBIDDEN"
+                )
+            target = str(relation.get("Target") or "")
+            if not relation_id or relation_id in relation_map:
+                raise UniversalTableError(
+                    "UNIVERSAL_XLSX_RELATIONSHIPS_INVALID"
+                )
+            # Non-worksheet relationships are valid package metadata and are
+            # ignored. Worksheet relationships are resolved after the workbook
+            # sheet declarations identify their relationship ids.
+            relation_map[relation_id] = target
+        catalog: list[tuple[str, str]] = []
+        names: set[str] = set()
+        for sheet in workbook.iter():
+            if _local_name(sheet.tag) != "sheet":
+                continue
+            sheet_name = str(sheet.get("name") or "").strip()
+            relation_id = _attribute_by_local_name(sheet, "id")
+            if not sheet_name or sheet_name in names or not relation_id:
+                raise UniversalTableError("UNIVERSAL_XLSX_SHEETS_INVALID")
+            target = relation_map.get(relation_id)
+            if target is None:
+                raise UniversalTableError(
+                    "UNIVERSAL_XLSX_SHEET_RELATIONSHIP_MISSING"
+                )
+            catalog.append((sheet_name, _xlsx_relationship_target(target)))
+            names.add(sheet_name)
+    if not catalog:
+        raise UniversalTableError("UNIVERSAL_XLSX_SHEETS_MISSING")
+    return workbook_payload, tuple(catalog)
 
 
-def _extract_xlsx(payload: bytes, source_name: str, member_path: str) -> list[ExtractedTable]:
+def _xlsx_shared_strings(archive: ZipFile) -> tuple[str, ...]:
+    try:
+        payload = _read_limited(archive, "xl/sharedStrings.xml", _SAFE_LIMITS)
+    except Exception as exc:
+        if getattr(exc, "code", "") == "XLSX_REQUIRED_PART_MISSING":
+            return ()
+        raise
+    root = _xml_root(payload, "UNIVERSAL_XLSX_SHARED_STRINGS_INVALID")
+    values: list[str] = []
+    for item in root.iter():
+        if _local_name(item.tag) != "si":
+            continue
+        values.append(
+            "".join(
+                node.text or ""
+                for node in item.iter()
+                if _local_name(node.tag) == "t"
+            )
+        )
+    return tuple(values)
+
+
+def _xlsx_cell_text(
+    cell: ElementTree.Element,
+    shared: tuple[str, ...],
+) -> tuple[str, bool]:
+    if any(_local_name(child.tag) == "f" for child in cell):
+        return "", True
+    cell_type = str(cell.get("t") or "")
+    if cell_type == "inlineStr":
+        return (
+            "".join(
+                node.text or ""
+                for node in cell.iter()
+                if _local_name(node.tag) == "t"
+            ),
+            False,
+        )
+    value_node = _first_child(cell, "v")
+    raw = value_node.text if value_node is not None and value_node.text else ""
+    if cell_type == "s":
+        try:
+            index = int(raw)
+        except ValueError as exc:
+            raise UniversalTableError(
+                "UNIVERSAL_XLSX_SHARED_STRING_REFERENCE_INVALID"
+            ) from exc
+        if index < 0 or index >= len(shared):
+            raise UniversalTableError(
+                "UNIVERSAL_XLSX_SHARED_STRING_REFERENCE_INVALID"
+            )
+        return shared[index], False
+    return raw, False
+
+
+def _xlsx_rows_from_sheet_with_shared(
+    archive: ZipFile,
+    sheet_path: str,
+    shared: tuple[str, ...],
+) -> tuple[list[tuple[str, ...]], bool]:
+    root = _xml_root(
+        _read_limited(archive, sheet_path, _SAFE_LIMITS),
+        "UNIVERSAL_XLSX_WORKSHEET_INVALID",
+    )
+    sheet_data = next(
+        (node for node in root.iter() if _local_name(node.tag) == "sheetData"),
+        None,
+    )
+    if sheet_data is None:
+        raise UniversalTableError("UNIVERSAL_XLSX_SHEET_DATA_MISSING")
+    rows: list[tuple[str, ...]] = []
+    formula_present = False
+    for row in _direct_children(sheet_data, "row"):
+        values: dict[int, str] = {}
+        for cell in _direct_children(row, "c"):
+            reference = str(cell.get("r") or "")
+            column, _row_number = _cell_position(reference)
+            if column > _MAX_COLUMNS or column in values:
+                raise UniversalTableError(
+                    "UNIVERSAL_XLSX_CELL_LAYOUT_INVALID"
+                )
+            value, had_formula = _xlsx_cell_text(cell, shared)
+            values[column] = value
+            formula_present = formula_present or had_formula
+        rows.append(
+            tuple(values.get(index, "") for index in range(1, max(values) + 1))
+            if values
+            else ()
+        )
+        if len(rows) > _MAX_ROWS:
+            raise UniversalTableError("TABLE_ROW_LIMIT_EXCEEDED")
+    return rows, formula_present
+
+
+def _extract_xlsx(
+    payload: bytes,
+    source_name: str,
+    member_path: str,
+) -> list[ExtractedTable]:
+    try:
+        workbook_payload, catalog = _xlsx_sheet_catalog(payload)
+    except UniversalTableError:
+        raise
+    except Exception as exc:
+        raise UniversalTableError(
+            str(getattr(exc, "code", type(exc).__name__))
+        ) from exc
     result: list[ExtractedTable] = []
     errors: list[str] = []
-    for sheet_name in _xlsx_sheet_names(payload):
+    try:
+        archive = ZipFile(BytesIO(workbook_payload))
+    except BadZipFile as exc:
+        raise UniversalTableError("UNIVERSAL_XLSX_ARCHIVE_INVALID") from exc
+    with archive:
         try:
-            indexed = _sheet_rows(payload, sheet_name=sheet_name, limits=_SAFE_LIMITS)
-            rows = [values for _index, values in indexed]
-            table = _rows_to_table(
-                source_name=source_name,
-                member_path=f"{member_path}#{sheet_name}",
-                detected_format="XLSX",
-                rows=rows,
-                payload=payload,
-            )
-            result.append(table)
+            shared = _xlsx_shared_strings(archive)
+        except UniversalTableError:
+            raise
         except Exception as exc:
-            errors.append(getattr(exc, "code", type(exc).__name__) + ":" + sheet_name)
+            raise UniversalTableError(
+                str(getattr(exc, "code", type(exc).__name__))
+            ) from exc
+        for sheet_name, sheet_path in catalog:
+            try:
+                rows, formula_present = _xlsx_rows_from_sheet_with_shared(
+                    archive, sheet_path, shared
+                )
+                table = _rows_to_table(
+                    source_name=source_name,
+                    member_path=f"{member_path}#{sheet_name}",
+                    detected_format="XLSX",
+                    rows=rows,
+                    payload=payload,
+                )
+                reasons = ["XLSX_NAMESPACE_TOLERANT_SAFE_PARSE"]
+                if formula_present:
+                    reasons.append("XLSX_FORMULA_VALUES_OMITTED")
+                result.append(
+                    ExtractedTable(
+                        source_name=table.source_name,
+                        member_path=table.member_path,
+                        detected_format=table.detected_format,
+                        headers=table.headers,
+                        rows=table.rows,
+                        source_sha256=table.source_sha256,
+                        reason_codes=tuple(reasons),
+                    )
+                )
+            except UniversalTableError as exc:
+                errors.append(exc.code)
+            except Exception as exc:
+                errors.append(str(getattr(exc, "code", type(exc).__name__)))
     if not result:
-        raise UniversalTableError(errors[0] if errors else "UNIVERSAL_XLSX_TABLE_NOT_FOUND")
+        raise UniversalTableError(
+            errors[0] if errors else "UNIVERSAL_XLSX_TABLE_NOT_FOUND"
+        )
     return result
 
 
@@ -580,9 +807,31 @@ def _extract_payload(payload: bytes, source_name: str, member_path: str, depth: 
     try:
         detected, tables = _direct_tables(payload, source_name, member_path)
     except UniversalTableError as exc:
-        return ExtractionResult("UNSUPPORTED", "UNMAPPED", (), (), (exc.code,))
+        security_tokens = (
+            "ENTITY",
+            "EXTERNAL_RELATIONSHIP",
+            "ACTIVE_CONTENT",
+            "ENCRYPTED",
+            "SYMLINK",
+            "POLYGLOT",
+            "COMPRESSION_RATIO",
+            "PATH_INVALID",
+        )
+        status = (
+            "QUARANTINED_SECURITY"
+            if any(token in exc.code for token in security_tokens)
+            else "UNSUPPORTED"
+        )
+        return ExtractionResult(status, "UNMAPPED", (), (), (exc.code,))
     public_detected = tables[0].detected_format if len(tables) == 1 else detected
-    return ExtractionResult("COMPLETE", public_detected, tuple(tables), (), ())
+    reasons = tuple(
+        dict.fromkeys(
+            code for table in tables for code in table.reason_codes
+        )
+    )
+    return ExtractionResult(
+        "COMPLETE", public_detected, tuple(tables), (), reasons
+    )
 
 
 def extract_tables(payload: bytes, *, source_name: str) -> ExtractionResult:

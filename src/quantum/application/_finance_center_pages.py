@@ -34,7 +34,7 @@ class FinanceCenterPagesMixin:
         actions.pack(fill=tk.X, pady=(0, 12))
         self.decision_add_button = ttk.Button(
             actions,
-            text="Загрузить отчёты WB",
+            text="Загрузить файлы",
             style="Success.TButton",
             command=self.add_reports,
         )

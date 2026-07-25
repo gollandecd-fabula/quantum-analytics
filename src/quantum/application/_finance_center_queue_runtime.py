@@ -55,8 +55,8 @@ class FinanceCenterQueueRuntimeMixin:
         except FinanceProfileError as exc:
             messagebox.showerror(
                 APP_TITLE,
-                "Файл не добавлен: предварительная проверка схемы "
-                "завершилась ошибкой.\n\n"
+                "Файл не добавлен: безопасное чтение или регистрация "
+                "файла завершились ошибкой.\n\n"
                 + self.describe_error(exc),
             )
             return None
@@ -78,9 +78,13 @@ class FinanceCenterQueueRuntimeMixin:
             )
             return
         selected = filedialog.askopenfilenames(
-            title="Выберите один или несколько отчётов Wildberries",
+            title="Выберите один или несколько файлов данных",
             filetypes=[
-                ("Excel и ZIP", "*.xlsx *.xlsm *.zip"),
+                (
+                    "Таблицы и архивы",
+                    "*.xlsx *.xlsm *.csv *.tsv *.json *.xml "
+                    "*.zip *.tar *.gz *.tgz *.bz2 *.xz",
+                ),
                 ("Все файлы", "*.*"),
             ],
         )
@@ -121,9 +125,9 @@ class FinanceCenterQueueRuntimeMixin:
                 status="В очереди",
                 progress="0%",
                 comment=(
-                    "Полномочия подтверждены; схема проверена. "
-                    "Ожидает последовательной обработки."
-                    if preview.requires_schema_review
+                    "Полномочия подтверждены; строгая схема недоступна, "
+                    "используется безопасная универсальная обработка."
+                    if preview.inspection_status == "UNIVERSAL_FALLBACK"
                     else "Полномочия подтверждены; ожидает обработки."
                 ),
                 details={
@@ -132,6 +136,10 @@ class FinanceCenterQueueRuntimeMixin:
                     "authority_attested": True,
                     "schema_reviewed": preview.requires_schema_review,
                     "schema_preview": preview.to_dict(),
+                    "schema_inspection_status": preview.inspection_status,
+                    "schema_diagnostic_codes": list(
+                        preview.diagnostic_codes
+                    ),
                 },
             )
             self.reports[row_id] = ReportState(row)

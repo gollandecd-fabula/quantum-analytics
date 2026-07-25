@@ -1,10 +1,10 @@
 execution_state_id: WB-RELEASE-R2-LIVE-v5
-updated_on: 2026-07-25
+updated_on: 2026-07-26
 source_of_truth_for_live_unit_state: true
 program_namespace: WBR2
 program_name: WB_RELEASE_R2
 current_unit: WBR2-M5
-current_phase: UNIVERSAL_PARTIAL_EXACT_HEAD_VALIDATION
+current_phase: XLSX_NAMESPACE_FALLBACK_EXACT_HEAD_VALIDATION
 release_status: RELEASE_BLOCKED
 marketplace_mode: READ_ONLY
 marketplace_write_capability: DISABLED
@@ -131,7 +131,7 @@ release_candidate:
   build_evidence_authority: GITHUB_ACTIONS_AT_CONTAINING_GIT_HEAD
   static_state_claim: DOES_NOT_PREDECLARE_DYNAMIC_BUILD_PASS
   intended_scope: WB_ONLY_READ_ONLY
-  physical_installation: NOT_STARTED
+  physical_installation: STARTED_GUI_LAUNCH_CONFIRMED_XLSX_IMPORT_FAILED_OLD_INSTALLER
   financial_profile: PARTIAL_USER_INPUT_ALLOWED_AT_RUNTIME
   financial_values_hardcoded: false
   required_user_inputs:
@@ -171,3 +171,22 @@ boundaries:
   physical_user_path_l5: UNVERIFIED
   financial_values: USER_ENTERED_AND_EDITABLE_NOT_CONSTANTS
   visual_operator_acceptance: UNVERIFIED_UNTIL_PHYSICAL_L5
+
+
+xlsx_namespace_fallback_cycle:
+  id: QUANTUM-XLSX-NAMESPACE-FALLBACK-R1
+  role: PHYSICAL_L5_CORRECTIVE_NOT_WBR2_M6
+  immutable_base_exact_head: a4e7957c661f46f87c408da7f347fcbbcdc49414
+  rtm_first_exact_head: ccc07dcb0a016768b3a287d61fb854760e30891c
+  candidate_head: RESOLVE_FROM_GIT
+  trigger: PHYSICAL_WINDOWS_XLSX_XML_NAMESPACE_UNMODELED
+  old_installer_status: SUPERSEDED_FOR_XLSX_PILOT_IMPORT
+  strict_schema_role: OPTIONAL_DIAGNOSTIC
+  universal_namespace_tolerant_extraction: REQUIRED
+  security_boundaries: UNCHANGED_FAIL_CLOSED
+  original_operator_xlsx_available_to_ci: false
+  physical_retest: REQUIRED
+  physical_user_path_l5_current: IN_PROGRESS_REPLACEMENT_XLSX_RETEST_REQUIRED
+  state: CANDIDATE_AWAITING_EXACT_HEAD_VALIDATION
+  main_merge_authorized: false
+  release_authorized: false
