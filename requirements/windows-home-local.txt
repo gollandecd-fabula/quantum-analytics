@@ -2,3 +2,5 @@
 # PyPI wheel provenance: tzdata 2026.3, universal py2.py3-none-any wheel.
 tzdata==2026.3 \
     --hash=sha256:dc096730c87af6cab1b171c9d532be840741ff5d459015e7f6947bd7d7e54931
+xlrd==2.0.2 \
+    --hash=sha256:08b5e25de58f21ce71dc7db3b3b8106c1fa776f3024c54e45b45b374e89234c9

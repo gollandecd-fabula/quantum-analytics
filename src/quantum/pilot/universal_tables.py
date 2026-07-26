@@ -3,6 +3,7 @@ from __future__ import annotations
 import bz2
 import csv
 from dataclasses import dataclass, field
+from datetime import date, datetime, time
 import gzip
 from hashlib import sha256
 from io import BytesIO, StringIO
@@ -44,6 +45,7 @@ _EXECUTABLE_MAGIC = (
     b"MZ", b"\x7fELF", b"\xfe\xed\xfa\xce", b"\xce\xfa\xed\xfe",
     b"\xfe\xed\xfa\xcf", b"\xcf\xfa\xed\xfe",
 )
+_OLE_MAGIC = b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1"
 _XLSX_REQUIRED = frozenset(
     {"[content_types].xml", "_rels/.rels", "xl/workbook.xml", "xl/_rels/workbook.xml.rels"}
 )
@@ -496,6 +498,129 @@ def _extract_xlsx(
     return result
 
 
+def _xls_cell_value(xlrd_module: Any, workbook: Any, cell: Any) -> object:
+    value = cell.value
+    cell_type = cell.ctype
+    if cell_type in {
+        xlrd_module.XL_CELL_EMPTY,
+        xlrd_module.XL_CELL_BLANK,
+    }:
+        return ""
+    if cell_type == xlrd_module.XL_CELL_DATE:
+        try:
+            converted = xlrd_module.xldate_as_datetime(value, workbook.datemode)
+        except (OverflowError, TypeError, ValueError) as exc:
+            raise UniversalTableError("XLS_DATE_VALUE_INVALID") from exc
+        if isinstance(converted, datetime):
+            if converted.time() == time.min:
+                return converted.date().isoformat()
+            return converted.isoformat(sep=" ")
+        if isinstance(converted, (date, time)):
+            return converted.isoformat()
+        return str(converted)
+    if cell_type == xlrd_module.XL_CELL_BOOLEAN:
+        return "TRUE" if bool(value) else "FALSE"
+    if cell_type == xlrd_module.XL_CELL_ERROR:
+        return f"#ERROR_{int(value)}"
+    if cell_type == xlrd_module.XL_CELL_NUMBER:
+        numeric = float(value)
+        return int(numeric) if numeric.is_integer() else numeric
+    return value
+
+
+def _classify_xls_error(exc: Exception) -> str:
+    message = str(exc).casefold()
+    if any(token in message for token in ("encrypted", "password")):
+        return "XLS_ENCRYPTED"
+    if any(
+        token in message
+        for token in (
+            "can't find workbook",
+            "cannot find workbook",
+            "workbook stream",
+            "not an excel file",
+            "not a compound document",
+        )
+    ):
+        return "XLS_WORKBOOK_STREAM_MISSING"
+    return "XLS_CORRUPTED"
+
+
+def _extract_xls(
+    payload: bytes,
+    source_name: str,
+    member_path: str,
+) -> list[ExtractedTable]:
+    try:
+        import xlrd  # type: ignore[import-not-found]
+    except ImportError as exc:
+        raise UniversalTableError("XLS_ADAPTER_UNAVAILABLE") from exc
+    try:
+        workbook = xlrd.open_workbook(
+            file_contents=payload,
+            on_demand=True,
+            formatting_info=False,
+        )
+    except Exception as exc:
+        raise UniversalTableError(_classify_xls_error(exc)) from exc
+    result: list[ExtractedTable] = []
+    errors: list[str] = []
+    try:
+        if workbook.nsheets > 256:
+            raise UniversalTableError("XLS_SHEET_LIMIT_EXCEEDED")
+        for index in range(workbook.nsheets):
+            sheet = workbook.sheet_by_index(index)
+            sheet_name = str(sheet.name or f"Sheet{index + 1}").strip()
+            if sheet.nrows > _MAX_ROWS + 80:
+                errors.append("TABLE_ROW_LIMIT_EXCEEDED")
+                continue
+            if sheet.ncols > _MAX_COLUMNS:
+                errors.append("TABLE_COLUMN_LIMIT_EXCEEDED")
+                continue
+            rows: list[tuple[object, ...]] = []
+            for row_index in range(sheet.nrows):
+                rows.append(
+                    tuple(
+                        _xls_cell_value(
+                            xlrd,
+                            workbook,
+                            sheet.cell(row_index, column_index),
+                        )
+                        for column_index in range(sheet.ncols)
+                    )
+                )
+            try:
+                table = _rows_to_table(
+                    source_name=source_name,
+                    member_path=f"{member_path}#{sheet_name}",
+                    detected_format="XLS",
+                    rows=rows,
+                    payload=payload,
+                )
+            except UniversalTableError as exc:
+                errors.append(exc.code)
+                continue
+            result.append(
+                ExtractedTable(
+                    source_name=table.source_name,
+                    member_path=table.member_path,
+                    detected_format=table.detected_format,
+                    headers=table.headers,
+                    rows=table.rows,
+                    source_sha256=table.source_sha256,
+                    reason_codes=("XLS_PASSIVE_BIFF_PARSE",),
+                )
+            )
+    finally:
+        try:
+            workbook.release_resources()
+        except Exception:
+            pass
+    if not result:
+        raise UniversalTableError(errors[0] if errors else "XLS_TABLE_NOT_FOUND")
+    return result
+
+
 def _extract_json(payload: bytes, source_name: str, member_path: str) -> list[ExtractedTable]:
     decoded = _decode_text(payload)
     if decoded is None:
@@ -641,6 +766,8 @@ def _detect_archive(payload: bytes, name: str) -> str | None:
 
 
 def _direct_tables(payload: bytes, source_name: str, member_path: str) -> tuple[str, list[ExtractedTable]]:
+    if payload.startswith(_OLE_MAGIC):
+        return "XLS", _extract_xls(payload, source_name, member_path)
     if _is_xlsx(payload):
         return "XLSX", _extract_xlsx(payload, source_name, member_path)
     stripped = payload.lstrip()

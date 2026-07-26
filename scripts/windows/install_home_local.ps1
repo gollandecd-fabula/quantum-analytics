@@ -45,40 +45,54 @@ function New-QuantumShortcut {
     if ([string]::IsNullOrWhiteSpace($desktop)) {
         throw (Get-QuantumRussianText -Encoded "0J3QtSDRg9C00LDQu9C+0YHRjCDRgdC+0LfQtNCw0YLRjCDQuNC70Lgg0L/RgNC+0LLQtdGA0LjRgtGMINGP0YDQu9GL0LogUXVhbnR1bTogezB9" -Arguments @("DesktopDirectory unavailable"))
     }
-    $name = Get-QuantumRussianText -Encoded "0KbQtdC90YLRgCDRgNC10YjQtdC90LjQuSBRdWFudHVtLmxuaw=="
-    $path = Join-Path $desktop $name
+    $primaryName = Get-QuantumRussianText -Encoded "0KbQtdC90YLRgCDRgNC10YjQtdC90LjQuSBRdWFudHVtLmxuaw=="
+    $fallbackName = "Quantum Decision Center.lnk"
+    $candidateNames = @($primaryName, $fallbackName)
     $shell = New-Object -ComObject WScript.Shell
-    try {
-        Remove-Item -LiteralPath $path -Force -ErrorAction SilentlyContinue
-        $shortcut = $shell.CreateShortcut($path)
-        $shortcut.TargetPath = [IO.Path]::GetFullPath($Launcher)
-        $shortcut.Arguments = ""
-        $shortcut.WorkingDirectory = [IO.Path]::GetFullPath($WorkingDirectory)
-        $shortcut.Description = Get-QuantumRussianText -Encoded "0KbQtdC90YLRgCDRgNC10YjQtdC90LjQuSBRdWFudHVtIOKAlCDQu9C+0LrQsNC70YzQvdGL0Lkg0LfQsNC/0YPRgdC6"
-        $shortcut.IconLocation = "$env:SystemRoot\System32\shell32.dll,167"
-        $shortcut.Save()
+    $createdPath = $null
+    $shortcutErrors = @()
 
-        $verified = $shell.CreateShortcut($path)
-        $expectedTarget = [IO.Path]::GetFullPath($Launcher)
-        $expectedWorking = [IO.Path]::GetFullPath($WorkingDirectory)
-        if (
-            -not ([IO.Path]::GetFullPath([string]$verified.TargetPath)).Equals(
-                $expectedTarget,
-                [StringComparison]::OrdinalIgnoreCase
-            ) -or
-            -not ([IO.Path]::GetFullPath([string]$verified.WorkingDirectory)).Equals(
-                $expectedWorking,
-                [StringComparison]::OrdinalIgnoreCase
-            ) -or
-            -not [string]::IsNullOrWhiteSpace([string]$verified.Arguments)
-        ) {
-            throw "SHORTCUT_VERIFICATION_FAILED"
+    foreach ($candidateName in $candidateNames) {
+        $path = Join-Path $desktop $candidateName
+        try {
+            Remove-Item -LiteralPath $path -Force -ErrorAction SilentlyContinue
+            $shortcut = $shell.CreateShortcut($path)
+            $shortcut.TargetPath = [IO.Path]::GetFullPath($Launcher)
+            $shortcut.Arguments = ""
+            $shortcut.WorkingDirectory = [IO.Path]::GetFullPath($WorkingDirectory)
+            $shortcut.Description = Get-QuantumRussianText -Encoded "0KbQtdC90YLRgCDRgNC10YjQtdC90LjQuSBRdWFudHVtIOKAlCDQu9C+0LrQsNC70YzQvdGL0Lkg0LfQsNC/0YPRgdC6"
+            $shortcut.IconLocation = "$env:SystemRoot\System32\shell32.dll,167"
+            $shortcut.Save()
+
+            $verified = $shell.CreateShortcut($path)
+            $expectedTarget = [IO.Path]::GetFullPath($Launcher)
+            $expectedWorking = [IO.Path]::GetFullPath($WorkingDirectory)
+            if (
+                -not ([IO.Path]::GetFullPath([string]$verified.TargetPath)).Equals(
+                    $expectedTarget,
+                    [StringComparison]::OrdinalIgnoreCase
+                ) -or
+                -not ([IO.Path]::GetFullPath([string]$verified.WorkingDirectory)).Equals(
+                    $expectedWorking,
+                    [StringComparison]::OrdinalIgnoreCase
+                ) -or
+                -not [string]::IsNullOrWhiteSpace([string]$verified.Arguments)
+            ) {
+                throw "SHORTCUT_VERIFICATION_FAILED"
+            }
+            $createdPath = $path
+            break
         }
-        Write-Host (Get-QuantumRussianText -Encoded "0K/RgNC70YvQuiDQvdCwINGA0LDQsdC+0YfQtdC8INGB0YLQvtC70LUg0YHQvtC30LTQsNC9INC4INC/0YDQvtCy0LXRgNC10L06IHswfQ==" -Arguments @($path))
+        catch {
+            $shortcutErrors += "{0}: {1}" -f $candidateName, $_.Exception.Message
+            Remove-Item -LiteralPath $path -Force -ErrorAction SilentlyContinue
+        }
     }
-    catch {
-        throw (Get-QuantumRussianText -Encoded "0J3QtSDRg9C00LDQu9C+0YHRjCDRgdC+0LfQtNCw0YLRjCDQuNC70Lgg0L/RgNC+0LLQtdGA0LjRgtGMINGP0YDQu9GL0LogUXVhbnR1bTogezB9" -Arguments @($($_.Exception.Message)))
+
+    if ([string]::IsNullOrWhiteSpace([string]$createdPath)) {
+        throw (Get-QuantumRussianText -Encoded "0J3QtSDRg9C00LDQu9C+0YHRjCDRgdC+0LfQtNCw0YLRjCDQuNC70Lgg0L/RgNC+0LLQtdGA0LjRgtGMINGP0YDQu9GL0LogUXVhbnR1bTogezB9" -Arguments @(($shortcutErrors -join " | ")))
     }
+    Write-Host (Get-QuantumRussianText -Encoded "0K/RgNC70YvQuiDQvdCwINGA0LDQsdC+0YfQtdC8INGB0YLQvtC70LUg0YHQvtC30LTQsNC9INC4INC/0YDQvtCy0LXRgNC10L06IHswfQ==" -Arguments @($createdPath))
 
     $commonDesktop = [Environment]::GetFolderPath(
         [Environment+SpecialFolder]::CommonDesktopDirectory
@@ -87,13 +101,15 @@ function New-QuantumShortcut {
         -not [string]::IsNullOrWhiteSpace($commonDesktop) -and
         -not $commonDesktop.Equals($desktop, [StringComparison]::OrdinalIgnoreCase)
     ) {
-        $staleCommon = Join-Path $commonDesktop $name
-        if (Test-Path -LiteralPath $staleCommon -PathType Leaf) {
-            try {
-                Remove-Item -LiteralPath $staleCommon -Force
-            }
-            catch {
-                Write-Warning "STALE_COMMON_DESKTOP_SHORTCUT_NOT_REMOVED: $staleCommon"
+        foreach ($candidateName in $candidateNames) {
+            $staleCommon = Join-Path $commonDesktop $candidateName
+            if (Test-Path -LiteralPath $staleCommon -PathType Leaf) {
+                try {
+                    Remove-Item -LiteralPath $staleCommon -Force
+                }
+                catch {
+                    Write-Warning "STALE_COMMON_DESKTOP_SHORTCUT_NOT_REMOVED: $staleCommon"
+                }
             }
         }
     }

@@ -14,7 +14,13 @@ from quantum.application._finance_center_shared import *
 
 
 _AUTO_INBOX_SCHEMA = "quantum-auto-inbox-v1"
-_SUPPORTED_SUFFIXES = frozenset({".xlsx", ".xlsm", ".zip"})
+_SUPPORTED_SUFFIXES = frozenset(
+    {
+        ".xls", ".xlsx", ".xlsm", ".csv", ".tsv", ".json", ".xml",
+        ".zip", ".tar", ".gz", ".tgz", ".bz2", ".tbz", ".tbz2",
+        ".xz", ".txz", ".7z", ".rar",
+    }
+)
 _IGNORED_SUFFIXES = frozenset({".tmp", ".part", ".crdownload"})
 _MAX_FILE_BYTES = 100 * 1024 * 1024
 _MAX_STATE_BYTES = 2 * 1024 * 1024

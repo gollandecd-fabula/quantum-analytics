@@ -40,7 +40,8 @@ class WindowsOneClickInstallerR1Tests(unittest.TestCase):
     def test_package_exposes_one_primary_start_command(self):
         self.assertIn('START_QUANTUM.cmd', self.builder)
         self.assertIn('scripts\\one_click_home_local.ps1', self.builder)
-        self.assertIn('-PackageRoot "%~dp0"', self.builder)
+        self.assertNotIn('-PackageRoot "%~dp0"', self.builder)
+        self.assertIn('one_click_home_local.ps1" %*', self.builder)
         self.assertIn('Дважды нажмите START_QUANTUM.cmd.', self.builder_ru)
         self.assertIn('package_version = "R3_ONE_CLICK"', self.builder)
 
