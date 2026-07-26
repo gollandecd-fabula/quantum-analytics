@@ -94,6 +94,12 @@ jobs:
           echo 'ARCHIVE_PATH_CHECK=PASS' | tee -a "$diagnostics"
           tar -xzf "$RUNNER_TEMP/qur2-implementation.tar.gz" -C .
           echo 'ARCHIVE_EXTRACTION=PASS' | tee -a "$diagnostics"
+          cp .github/workflows/quantum-universal-relaunch-r2.yml "$RUNNER_TEMP/quantum-universal-relaunch-r2.yml"
+          cp .github/workflows/shortcut-launch-repair-r1.yml "$RUNNER_TEMP/shortcut-launch-repair-r1.yml"
+          sha256sum "$RUNNER_TEMP/quantum-universal-relaunch-r2.yml" "$RUNNER_TEMP/shortcut-launch-repair-r1.yml" | tee -a "$diagnostics"
+          git checkout -- .github/workflows/shortcut-launch-repair-r1.yml
+          rm -f .github/workflows/quantum-universal-relaunch-r2.yml
+          echo 'WORKFLOW_FILES_DEFERRED=PASS' | tee -a "$diagnostics"
           rm -rf .qur2-bootstrap
           echo 'BOOTSTRAP_REMOVAL=PASS' | tee -a "$diagnostics"
           git diff --check 2>&1 | tee -a "$diagnostics"
@@ -113,6 +119,9 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: QUR2-Transport-Diagnostics
-          path: ${{ runner.temp }}/qur2-transport-diagnostics.txt
+          path: |
+            ${{ runner.temp }}/qur2-transport-diagnostics.txt
+            ${{ runner.temp }}/quantum-universal-relaunch-r2.yml
+            ${{ runner.temp }}/shortcut-launch-repair-r1.yml
           if-no-files-found: error
           retention-days: 3
