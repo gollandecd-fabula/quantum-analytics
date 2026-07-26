@@ -2,3 +2,6 @@
 # PyPI wheel provenance: tzdata 2026.3, universal py2.py3-none-any wheel.
 tzdata==2026.3 \
     --hash=sha256:dc096730c87af6cab1b171c9d532be840741ff5d459015e7f6947bd7d7e54931
+# Passive BIFF/XLS reader; charts, VBA modules and embedded objects are ignored.
+xlrd==2.0.2 \
+    --hash=sha256:ea762c3d29f4cca48d82df517b6d89fbce4db3107f9d78713e48cd321d5c9aa9

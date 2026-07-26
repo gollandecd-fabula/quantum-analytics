@@ -79,8 +79,9 @@ class ShortcutLaunchRepairR1Tests(unittest.TestCase):
         for token in (
             "[Environment+SpecialFolder]::DesktopDirectory",
             "[Environment+SpecialFolder]::CommonDesktopDirectory",
-            "$verified.TargetPath",
-            "$verified.WorkingDirectory",
+            'Guid("000214F9-0000-0000-C000-000000000046")',
+            'Guid("0000010B-0000-0000-C000-000000000046")',
+            "[Quantum.NativeShortcut]::CreateAndVerify(",
             "SHORTCUT_VERIFICATION_FAILED",
             "STALE_COMMON_DESKTOP_SHORTCUT_NOT_REMOVED",
         ):

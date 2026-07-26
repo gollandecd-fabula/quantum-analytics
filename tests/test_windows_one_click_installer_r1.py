@@ -40,7 +40,8 @@ class WindowsOneClickInstallerR1Tests(unittest.TestCase):
     def test_package_exposes_one_primary_start_command(self):
         self.assertIn('START_QUANTUM.cmd', self.builder)
         self.assertIn('scripts\\one_click_home_local.ps1', self.builder)
-        self.assertIn('-PackageRoot "%~dp0"', self.builder)
+        self.assertNotIn('-PackageRoot "%~dp0"', self.builder)
+        self.assertIn('one_click_home_local.ps1" %*', self.builder)
         self.assertIn('Дважды нажмите START_QUANTUM.cmd.', self.builder_ru)
         self.assertIn('package_version = "R3_ONE_CLICK"', self.builder)
 
@@ -161,8 +162,11 @@ class WindowsOneClickInstallerR1Tests(unittest.TestCase):
         self.assertIn('[Environment+SpecialFolder]::DesktopDirectory', script)
         self.assertIn('[Environment+SpecialFolder]::CommonDesktopDirectory', script)
         self.assertIn('Remove-Item -LiteralPath $path -Force', script)
-        self.assertIn('$shortcut.TargetPath = [IO.Path]::GetFullPath($Launcher)', script)
-        self.assertIn('$shortcut.Arguments = ""', script)
+        self.assertIn('IShellLinkW', script)
+        self.assertIn('IPersistFile', script)
+        self.assertIn('[Quantum.NativeShortcut]::CreateAndVerify(', script)
+        self.assertIn('SetPath(targetPath)', script)
+        self.assertIn('SetArguments(String.Empty)', script)
         self.assertIn('SHORTCUT_VERIFICATION_FAILED', script)
         self.assertIn('STALE_COMMON_DESKTOP_SHORTCUT_NOT_REMOVED', script)
 
