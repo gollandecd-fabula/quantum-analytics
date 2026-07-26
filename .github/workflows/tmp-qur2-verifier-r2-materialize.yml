@@ -1,23 +1,23 @@
-name: Temporary QUR2 Verifier R2 Materializer
+name: Temporary QUR2 Shell.Application Materializer
 
 on:
   pull_request:
     paths:
       - .github/workflows/tmp-qur2-verifier-r2-materialize.yml
-      - .qur2-verifier-r2-payload/**
 
 permissions:
   contents: write
 
 concurrency:
-  group: qur2-verifier-r2-materialize
+  group: qur2-shellapp-materialize
   cancel-in-progress: false
 
 env:
   BASE_SHA: c412664a653c8b7abca674e8ccfda7ec9f82326d
-  PAYLOAD_SHA256: 34af8cde84104306d308078cfea1aa478b86783be5edccac3eba62db82c3ccf1
-  EXPECTED_TREE_SHA: 2a1b631fc63961be6e4a2bebcaad8085c3dc5f37
-  CANDIDATE_BRANCH: tmp/qur2-verifier-r2-candidate
+  EXPECTED_TREE_SHA: 706c121ef418e65b669bd071eca5472c1700f5fa
+  EXPECTED_WORKFLOW_SHA256: f53fc928e8870e63f0dad3915478a06a734f4ba63c5b30b1714fc1721d7d9cdc
+  EXPECTED_OVERLAY_SHA256: 7245d75033ef098f857f8e90dfd4e91c851907ce7179df5230462e8991532c4c
+  CANDIDATE_BRANCH: tmp/qur2-shellapp-tested-candidate
 
 jobs:
   materialize:
@@ -29,36 +29,74 @@ jobs:
           fetch-depth: 0
           persist-credentials: true
 
-      - name: Verify SHA-bound payload
-        shell: bash
-        run: |
-          set -euo pipefail
-          test "$(git hash-object .qur2-verifier-r2-payload/payload.00)" = "70f280e44a5ce35cf66c093d38fb7e7c59d1db42"
-          test "$(git hash-object .qur2-verifier-r2-payload/payload.01)" = "c59ea7e228696406604d9f702b8fe39dcbba27f0"
-          test "$(git hash-object .qur2-verifier-r2-payload/payload.02)" = "b238da0e9695c580863bffdbc7a82babab8498f3"
-          cat .qur2-verifier-r2-payload/payload.* > "$RUNNER_TEMP/qur2-verifier.b64"
-          base64 --decode "$RUNNER_TEMP/qur2-verifier.b64" > "$RUNNER_TEMP/qur2-verifier.tar.gz"
-          echo "$PAYLOAD_SHA256  $RUNNER_TEMP/qur2-verifier.tar.gz" | sha256sum --check
-
-      - name: Apply exact verifier patch
+      - name: Apply exact marker-based verifier patch
         shell: bash
         run: |
           set -euo pipefail
           git checkout --detach "$BASE_SHA"
           test "$(git rev-parse HEAD)" = "$BASE_SHA"
-          tar -xzf "$RUNNER_TEMP/qur2-verifier.tar.gz"
-          git diff --check
           python3 - <<'PY'
-          import subprocess
-          expected = {
-              '.github/workflows/quantum-universal-relaunch-r2.yml',
-              'docs/evidence/ARTIFACT_MANIFEST_OVERLAY_QUANTUM_UNIVERSAL_RELAUNCH_R2.json',
-          }
-          actual = set(subprocess.check_output(['git','diff','--name-only','HEAD'], text=True).splitlines())
-          if actual != expected:
-              raise SystemExit(f'QUR2_VERIFIER_SCOPE_MISMATCH expected={sorted(expected)} actual={sorted(actual)}')
-          print('QUR2_VERIFIER_SCOPE=PASS')
+          from hashlib import sha256
+          import json
+          from pathlib import Path
+
+          workflow = Path('.github/workflows/quantum-universal-relaunch-r2.yml')
+          text = workflow.read_text(encoding='utf-8')
+          old = '''            $shell = New-Object -ComObject WScript.Shell
+            $shortcut = $shell.CreateShortcut($shortcutPath)
+            $expectedTarget = [IO.Path]::GetFullPath(
+              (Join-Path $target "START_QUANTUM.cmd")
+            )
+            if (
+              -not ([IO.Path]::GetFullPath([string]$shortcut.TargetPath)).Equals(
+                $expectedTarget, [StringComparison]::OrdinalIgnoreCase
+              ) -or
+              -not [string]::IsNullOrWhiteSpace([string]$shortcut.Arguments)
+            ) { throw "Shortcut verification failed." }
+'''
+          new = '''            $shell = New-Object -ComObject Shell.Application
+            $folder = $shell.Namespace((Split-Path -Parent $shortcutPath))
+            if ($null -eq $folder) { throw "Shortcut folder namespace unavailable." }
+            $item = $folder.ParseName((Split-Path -Leaf $shortcutPath))
+            if ($null -eq $item) { throw "Shortcut shell item unavailable." }
+            $shortcut = $item.GetLink
+            if ($null -eq $shortcut) { throw "Shortcut shell link unavailable." }
+            $expectedTarget = [IO.Path]::GetFullPath(
+              (Join-Path $target "START_QUANTUM.cmd")
+            )
+            $actualTarget = [IO.Path]::GetFullPath([string]$shortcut.Path)
+            if (
+              -not $actualTarget.Equals(
+                $expectedTarget, [StringComparison]::OrdinalIgnoreCase
+              ) -or
+              -not [string]::IsNullOrWhiteSpace([string]$shortcut.Arguments)
+            ) { throw "Shortcut verification failed." }
+'''
+          if text.count(old) != 1:
+              raise SystemExit(f'QUR2_OLD_VERIFIER_COUNT={text.count(old)}')
+          workflow.write_text(text.replace(old, new, 1), encoding='utf-8', newline='\n')
+
+          overlay_path = Path('docs/evidence/ARTIFACT_MANIFEST_OVERLAY_QUANTUM_UNIVERSAL_RELAUNCH_R2.json')
+          overlay = json.loads(overlay_path.read_text(encoding='utf-8'))
+          payload = workflow.read_bytes()
+          entry = [workflow.as_posix(), sha256(payload).hexdigest(), len(payload)]
+          matches = 0
+          for index, current in enumerate(overlay['entries']):
+              if current[0] == entry[0]:
+                  overlay['entries'][index] = entry
+                  matches += 1
+          if matches != 1:
+              raise SystemExit(f'QUR2_MANIFEST_ENTRY_COUNT={matches}')
+          overlay_path.write_text(
+              json.dumps(overlay, ensure_ascii=False, indent=2) + '\n',
+              encoding='utf-8',
+              newline='\n',
+          )
           PY
+          test "$(sha256sum .github/workflows/quantum-universal-relaunch-r2.yml | awk '{print $1}')" = "$EXPECTED_WORKFLOW_SHA256"
+          test "$(sha256sum docs/evidence/ARTIFACT_MANIFEST_OVERLAY_QUANTUM_UNIVERSAL_RELAUNCH_R2.json | awk '{print $1}')" = "$EXPECTED_OVERLAY_SHA256"
+          git diff --check
+          test "$(git diff --name-only | sort | paste -sd, -)" = ".github/workflows/quantum-universal-relaunch-r2.yml,docs/evidence/ARTIFACT_MANIFEST_OVERLAY_QUANTUM_UNIVERSAL_RELAUNCH_R2.json"
           git add -A
 
       - name: Run complete source CI
@@ -74,19 +112,19 @@ jobs:
           set -euo pipefail
           git config user.name quantum-ci
           git config user.email quantum-ci@users.noreply.github.com
-          git commit -m 'Use Unicode-native shortcut verifier in QUR2 Windows gate'
+          git commit -m 'Use Shell.Application shortcut verifier in QUR2 Windows gate'
           test "$(git rev-parse 'HEAD^{tree}')" = "$EXPECTED_TREE_SHA"
-          git rev-parse HEAD | tee "$RUNNER_TEMP/qur2-verifier-candidate-commit.txt"
-          git rev-parse 'HEAD^{tree}' | tee "$RUNNER_TEMP/qur2-verifier-candidate-tree.txt"
+          git rev-parse HEAD | tee "$RUNNER_TEMP/qur2-shellapp-candidate-commit.txt"
+          git rev-parse 'HEAD^{tree}' | tee "$RUNNER_TEMP/qur2-shellapp-candidate-tree.txt"
           git push origin "HEAD:refs/heads/$CANDIDATE_BRANCH"
 
       - name: Upload evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: QUR2-Verifier-R2-Materialization
+          name: QUR2-ShellApp-Materialization
           path: |
-            ${{ runner.temp }}/qur2-verifier-candidate-commit.txt
-            ${{ runner.temp }}/qur2-verifier-candidate-tree.txt
+            ${{ runner.temp }}/qur2-shellapp-candidate-commit.txt
+            ${{ runner.temp }}/qur2-shellapp-candidate-tree.txt
           if-no-files-found: warn
           retention-days: 3
