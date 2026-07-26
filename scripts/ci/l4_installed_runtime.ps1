@@ -207,7 +207,7 @@ function Assert-LauncherContracts {
         "START_QUANTUM.cmd" = @(
             "@echo off",
             "setlocal",
-            "powershell.exe -NoProfile -ExecutionPolicy Bypass -File `"%~dp0scripts\one_click_home_local.ps1`" -InstalledRoot `"%~dp0`" -SkipInstall",
+            "powershell.exe -NoProfile -ExecutionPolicy Bypass -File `"%~dp0scripts\one_click_home_local.ps1`" -InstalledRoot `"%~dp0`" -SkipInstall %*",
             "set `"quantum_exit=%errorlevel%`"",
             "if not `"%quantum_exit%`"==`"0`" pause",
             "exit /b %quantum_exit%"
