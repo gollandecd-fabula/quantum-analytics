@@ -76,6 +76,16 @@
       3496
     ],
     [
+      "tests/test_wbr2_m5_closure.py",
+      "b994cbb5c1f454257e80464a213f06571a61fedaf74cc998d642799e2f47aa7d",
+      4806
+    ],
+    [
+      "tests/test_wbr2_m5_closure_corrective_r2.py",
+      "f282e8d72d45ef716aa9d6d646fcc70e88f561d84aced9292d4563bffeedae0f",
+      4391
+    ],
+    [
       "tests/test_windows_one_click_installer_r1.py",
       "ece83290996704ca68257fa53c74d3a563f2cfe07aada549e761f796e252a91f",
       11628
