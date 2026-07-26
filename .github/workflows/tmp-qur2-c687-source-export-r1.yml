@@ -1,0 +1,39 @@
+name: Temporary QUR2 c687 Source Export
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/tmp-qur2-c687-source-export-r1.yml
+
+permissions:
+  contents: read
+
+env:
+  TARGET_SHA: c687a514db1c8446472912ae674ebe4d7e6ba018
+
+jobs:
+  export:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ env.TARGET_SHA }}
+          fetch-depth: 1
+      - name: Export exact target source
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$TARGET_SHA"
+          git archive --format=tar.gz --output="$RUNNER_TEMP/qur2-c687-source.tar.gz" HEAD
+          sha256sum "$RUNNER_TEMP/qur2-c687-source.tar.gz" > "$RUNNER_TEMP/qur2-c687-source.sha256"
+          git rev-parse 'HEAD^{tree}' > "$RUNNER_TEMP/qur2-c687-source.tree-sha"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: QUR2-C687-Source
+          path: |
+            ${{ runner.temp }}/qur2-c687-source.tar.gz
+            ${{ runner.temp }}/qur2-c687-source.sha256
+            ${{ runner.temp }}/qur2-c687-source.tree-sha
+          if-no-files-found: error
+          retention-days: 3
