@@ -73,7 +73,9 @@ class L4InstalledRuntimeContractTests(unittest.TestCase):
 
     def test_runner_locks_installed_launcher_semantics(self) -> None:
         self.assertIn("Assert-LauncherContracts", self.runner)
-        self.assertIn('-InstalledRoot `"%~dp0`" -SkipInstall %*', self.runner)
+        self.assertIn("setlocal EnableExtensions", self.runner)
+        self.assertIn("QUANTUM_ROOT=%%~fI", self.runner)
+        self.assertIn('-InstalledRoot `"%QUANTUM_ROOT%`" -SkipInstall %*', self.runner)
         self.assertIn("INSTALLED_LAUNCHER_CONTENT", self.runner)
         self.assertIn("START_QUANTUM.cmd", self.runner)
         self.assertIn("IMPORT_XLSX.cmd", self.runner)

@@ -27,8 +27,8 @@
     ],
     [
       "scripts/ci/l4_installed_runtime.ps1",
-      "16f052515ab122f2ee09d5a7390e8811353148490a46d9fc3cd6b99a18461e78",
-      23333
+      "c33e974fffacf988892b457d7b829d3d3f440d9bb815a5c321d574a853b24fed",
+      23438
     ],
     [
       "scripts/windows/build_local_production.ps1",
@@ -72,8 +72,8 @@
     ],
     [
       "tests/test_l4_installed_runtime_contract.py",
-      "38eb659eb46eaa7190cf85647ee88112af8217312ffcc1724ae50f83b617c8fe",
-      5505
+      "f5da1f707f6a4ead107a961750e5616640ea8656dd52e99fcacd677ba7bc7dfd",
+      5635
     ],
     [
       "tests/test_quantum_universal_relaunch_r2.py",

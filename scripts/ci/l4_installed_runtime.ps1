@@ -206,8 +206,9 @@ function Assert-LauncherContracts {
     $expected = [ordered]@{
         "START_QUANTUM.cmd" = @(
             "@echo off",
-            "setlocal",
-            "powershell.exe -NoProfile -ExecutionPolicy Bypass -File `"%~dp0scripts\one_click_home_local.ps1`" -InstalledRoot `"%~dp0`" -SkipInstall %*",
+            "setlocal EnableExtensions",
+            "for %%I in (`"%~dp0.`") do set `"QUANTUM_ROOT=%%~fI`"",
+            "powershell.exe -NoProfile -ExecutionPolicy Bypass -File `"%QUANTUM_ROOT%\scripts\one_click_home_local.ps1`" -InstalledRoot `"%QUANTUM_ROOT%`" -SkipInstall %*",
             "set `"quantum_exit=%errorlevel%`"",
             "if not `"%quantum_exit%`"==`"0`" pause",
             "exit /b %quantum_exit%"
