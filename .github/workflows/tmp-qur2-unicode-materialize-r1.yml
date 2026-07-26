@@ -70,6 +70,7 @@ jobs:
               raise SystemExit(f'QUR2_SCOPE_MISMATCH expected={sorted(expected)} actual={sorted(actual)}')
           print('QUR2_SCOPE=PASS')
           PY
+          git add -A
 
       - name: Run focused QUR2 and launcher contracts
         shell: bash
@@ -96,7 +97,6 @@ jobs:
           set -euo pipefail
           git config user.name quantum-ci
           git config user.email quantum-ci@users.noreply.github.com
-          git add -A
           git commit -m 'Fix QUR2 Unicode shortcut under Windows PowerShell 5.1'
           test "$(git rev-parse 'HEAD^{tree}')" = "$EXPECTED_TREE_SHA"
           git rev-parse HEAD | tee "$RUNNER_TEMP/qur2-candidate-commit.txt"
