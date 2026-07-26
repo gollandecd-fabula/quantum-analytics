@@ -1,4 +1,5 @@
 name: Temporary QUR2 L4 Validator Patch
+# Retry from the current branch head after the evidence-path update.
 
 on:
   pull_request:
