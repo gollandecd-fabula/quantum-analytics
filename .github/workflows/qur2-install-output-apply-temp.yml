@@ -1,0 +1,95 @@
+name: Temporary QUR2 Install Output Apply
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - fix/quantum-universal-relaunch-r2
+    paths:
+      - .qur2-install-output-trigger
+
+permissions:
+  contents: write
+
+concurrency:
+  group: qur2-install-output-apply
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: fix/quantum-universal-relaunch-r2
+          fetch-depth: 1
+      - name: Verify and extract exact diagnostic patch
+        shell: bash
+        env:
+          PATCH_SHA256: a8d3c0553e79417f5129c0861d660f92a512db1812c64f5c7deb600f93b06153
+          OLD_WORKFLOW_SHA256: a6f57b64e40e4e8a898fb75addedd12ccc6178b79868d1496e790e1b14e37559
+          OLD_OVERLAY_SHA256: 73798da9cf67b6a652845841b2b73177f61e2abb3cf0e0162539f65f2f635e0b
+          NEW_WORKFLOW_SHA256: d6ca27bfdc09cfb264f6214138428a584fdd13d5467e8412326b190998ca2232
+          NEW_OVERLAY_SHA256: 6a4407817973558832f7a969fbe7772ccf56ed0b972e540394696704276b5721
+        run: |
+          set -euo pipefail
+          test "$(sha256sum .github/workflows/quantum-universal-relaunch-r2.yml | awk '{print $1}')" = "$OLD_WORKFLOW_SHA256"
+          test "$(sha256sum docs/evidence/ARTIFACT_MANIFEST_OVERLAY_QUANTUM_UNIVERSAL_RELAUNCH_R2.json | awk '{print $1}')" = "$OLD_OVERLAY_SHA256"
+          cat .qur2-install-output-payload/payload.00 | base64 --decode > "$RUNNER_TEMP/qur2-install-output.tar.gz"
+          test "$(sha256sum "$RUNNER_TEMP/qur2-install-output.tar.gz" | awk '{print $1}')" = "$PATCH_SHA256"
+          tar -tzf "$RUNNER_TEMP/qur2-install-output.tar.gz" | sort > "$RUNNER_TEMP/members.txt"
+          cat > "$RUNNER_TEMP/expected.txt" <<'EOF'
+          .github/workflows/quantum-universal-relaunch-r2.yml
+          docs/evidence/ARTIFACT_MANIFEST_OVERLAY_QUANTUM_UNIVERSAL_RELAUNCH_R2.json
+          EOF
+          diff -u "$RUNNER_TEMP/expected.txt" "$RUNNER_TEMP/members.txt"
+          tar -xzf "$RUNNER_TEMP/qur2-install-output.tar.gz" -C .
+          test "$(sha256sum .github/workflows/quantum-universal-relaunch-r2.yml | awk '{print $1}')" = "$NEW_WORKFLOW_SHA256"
+          test "$(sha256sum docs/evidence/ARTIFACT_MANIFEST_OVERLAY_QUANTUM_UNIVERSAL_RELAUNCH_R2.json | awk '{print $1}')" = "$NEW_OVERLAY_SHA256"
+          rm -rf .qur2-install-output-payload
+          rm -f .github/workflows/qur2-install-output-apply-temp.yml
+          git diff --check
+          git add -A
+      - name: Run exact source checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PYTHONPATH="$PWD/src"
+          python -m unittest -v \
+            tests.test_l4_installed_runtime_contract \
+            tests.test_quantum_universal_relaunch_r2 \
+            tests.test_windows_one_click_installer_r1 \
+            tests.test_windows_source_package_launchers_r1
+          python -m quantum.scripts.ci
+      - name: Create tested commit and attempt publication
+        shell: bash
+        run: |
+          set -uo pipefail
+          git config user.name quantum-ci
+          git config user.email quantum-ci@users.noreply.github.com
+          git commit -m 'Capture QUR2 PowerShell 5.1 installer output' 2>&1 |
+            tee "$RUNNER_TEMP/qur2-commit.log"
+          commit_status=${PIPESTATUS[0]}
+          git rev-parse HEAD | tee "$RUNNER_TEMP/qur2-commit-sha.txt"
+          git rev-parse 'HEAD^{tree}' | tee "$RUNNER_TEMP/qur2-tree-sha.txt"
+          push_status=0
+          git push origin HEAD:fix/quantum-universal-relaunch-r2 2>&1 |
+            tee "$RUNNER_TEMP/qur2-push.log" || push_status=${PIPESTATUS[0]}
+          printf 'COMMIT_STATUS=%s\nPUSH_STATUS=%s\n' "$commit_status" "$push_status" |
+            tee "$RUNNER_TEMP/qur2-publish-status.txt"
+          test "$commit_status" -eq 0
+          test "$push_status" -eq 0
+      - name: Upload publication evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: QUR2-Install-Output-Publication
+          path: |
+            ${{ runner.temp }}/qur2-commit.log
+            ${{ runner.temp }}/qur2-commit-sha.txt
+            ${{ runner.temp }}/qur2-tree-sha.txt
+            ${{ runner.temp }}/qur2-push.log
+            ${{ runner.temp }}/qur2-publish-status.txt
+          if-no-files-found: error
+          retention-days: 3
