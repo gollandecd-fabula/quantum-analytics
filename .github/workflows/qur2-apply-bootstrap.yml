@@ -84,19 +84,29 @@ jobs:
           printf 'ACTUAL_SHA256=%s\nEXPECTED_SHA256=%s\n' "$actual_sha" "$EXPECTED_SHA256" | tee -a "$diagnostics"
           test "$actual_sha" = "$EXPECTED_SHA256"
           tar -tzf "$RUNNER_TEMP/qur2-implementation.tar.gz" > "$RUNNER_TEMP/qur2-members.txt"
+          printf '%s\n' 'ARCHIVE_MEMBERS_BEGIN' | tee -a "$diagnostics"
+          cat "$RUNNER_TEMP/qur2-members.txt" | tee -a "$diagnostics"
+          printf '%s\n' 'ARCHIVE_MEMBERS_END' | tee -a "$diagnostics"
           if grep -Eq '(^|/)\.\.?(/|$)' "$RUNNER_TEMP/qur2-members.txt"; then
             echo 'Unsafe archive member path' | tee -a "$diagnostics" >&2
             exit 1
           fi
+          echo 'ARCHIVE_PATH_CHECK=PASS' | tee -a "$diagnostics"
           tar -xzf "$RUNNER_TEMP/qur2-implementation.tar.gz" -C .
+          echo 'ARCHIVE_EXTRACTION=PASS' | tee -a "$diagnostics"
           rm -rf .qur2-bootstrap
-          git diff --check
+          echo 'BOOTSTRAP_REMOVAL=PASS' | tee -a "$diagnostics"
+          git diff --check 2>&1 | tee -a "$diagnostics"
+          echo 'GIT_DIFF_CHECK=PASS' | tee -a "$diagnostics"
+          git status --short | tee -a "$diagnostics"
           git config user.name quantum-ci
           git config user.email quantum-ci@users.noreply.github.com
           git add -A
-          git diff --cached --quiet && { echo 'No implementation changes staged' >&2; exit 1; }
-          git commit -m 'Implement universal XLS intake and repeatable Windows launch'
-          git push origin HEAD:fix/quantum-universal-relaunch-r2
+          git diff --cached --quiet && { echo 'No implementation changes staged' | tee -a "$diagnostics" >&2; exit 1; }
+          git commit -m 'Implement universal XLS intake and repeatable Windows launch' 2>&1 | tee -a "$diagnostics"
+          echo 'GIT_COMMIT=PASS' | tee -a "$diagnostics"
+          git push origin HEAD:fix/quantum-universal-relaunch-r2 2>&1 | tee -a "$diagnostics"
+          echo 'GIT_PUSH=PASS' | tee -a "$diagnostics"
 
       - name: Upload transport diagnostics
         if: always()
