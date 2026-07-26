@@ -1,0 +1,83 @@
+name: Temporary QUR2 Cyrillic Install Diagnostic
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/qur2-cyrillic-install-diagnostic-temp.yml
+      - scripts/windows/build_local_production.ps1
+      - scripts/windows/install_home_local.ps1
+      - scripts/windows/one_click_home_local.ps1
+      - requirements/windows-home-local.txt
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: windows-2025
+    timeout-minutes: 30
+    steps:
+      - name: Disable CRLF conversion
+        shell: pwsh
+        run: git config --global core.autocrlf false
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 1
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.13.14"
+      - name: Build and run Cyrillic-path installer
+        id: install
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Continue"
+          $dist = Join-Path $env:RUNNER_TEMP "QUR2 diagnostic dist"
+          $packageRoot = Join-Path $env:RUNNER_TEMP "QUR2 diagnostic package"
+          $target = Join-Path $env:RUNNER_TEMP "QUR2 локально\QuantumLocalProduction"
+          $buildLog = Join-Path $env:RUNNER_TEMP "qur2-build.stdout.txt"
+          $installLog = Join-Path $env:RUNNER_TEMP "qur2-install.stdout.txt"
+          Remove-Item $dist,$packageRoot,$target -Recurse -Force -ErrorAction SilentlyContinue
+          $buildLines = @(
+            powershell.exe -NoProfile -ExecutionPolicy Bypass `
+              -File .\scripts\windows\build_local_production.ps1 `
+              -OutputDirectory $dist 2>&1
+          )
+          $buildExit = $LASTEXITCODE
+          $buildLines | Set-Content $buildLog -Encoding UTF8
+          "BUILD_EXIT=$buildExit" | Set-Content "$env:RUNNER_TEMP\qur2-diagnostic-status.txt" -Encoding ASCII
+          if ($buildExit -ne 0) { exit $buildExit }
+          Expand-Archive `
+            -LiteralPath (Join-Path $dist "QuantumLocalProduction_HOME_LOCAL.zip") `
+            -DestinationPath $packageRoot -Force
+          $installLines = @(
+            powershell.exe -NoProfile -ExecutionPolicy Bypass `
+              -File (Join-Path $packageRoot "scripts\install_home_local.ps1") `
+              -SourceRoot $packageRoot -TargetRoot $target 2>&1
+          )
+          $installExit = $LASTEXITCODE
+          $installLines | Set-Content $installLog -Encoding UTF8
+          "INSTALL_EXIT=$installExit" | Add-Content "$env:RUNNER_TEMP\qur2-diagnostic-status.txt" -Encoding ASCII
+          exit $installExit
+      - name: Upload exact installer diagnostics
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: QUR2-Cyrillic-Install-Diagnostic
+          path: |
+            ${{ runner.temp }}/qur2-build.stdout.txt
+            ${{ runner.temp }}/qur2-install.stdout.txt
+            ${{ runner.temp }}/qur2-diagnostic-status.txt
+          if-no-files-found: warn
+          retention-days: 3
+      - name: Enforce diagnostic outcome
+        if: always()
+        shell: pwsh
+        run: |
+          $status = Get-Content "$env:RUNNER_TEMP\qur2-diagnostic-status.txt" -Raw
+          Write-Host $status
+          if ($status -notmatch "INSTALL_EXIT=0") {
+            throw "QUR2_CYRILLIC_INSTALL_FAILED"
+          }
