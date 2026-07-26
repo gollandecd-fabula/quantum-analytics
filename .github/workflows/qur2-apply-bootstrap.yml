@@ -38,10 +38,16 @@ jobs:
         run: |
           set -euo pipefail
           mapfile -t parts < <(find .qur2-bootstrap -maxdepth 1 -type f -name 'payload.[0-9][0-9]' -print | sort)
+          printf 'PAYLOAD_PART_COUNT=%s\n' "${#parts[@]}"
+          printf '%s\n' "${parts[@]}"
+          wc -c "${parts[@]}"
+          sha256sum "${parts[@]}"
           test "${#parts[@]}" -eq 7
           cat "${parts[@]}" > "$RUNNER_TEMP/qur2-payload.b64"
+          printf 'PAYLOAD_B64_BYTES=%s\n' "$(wc -c < "$RUNNER_TEMP/qur2-payload.b64")"
           base64 --decode "$RUNNER_TEMP/qur2-payload.b64" > "$RUNNER_TEMP/qur2-implementation.tar.gz"
           actual_sha="$(sha256sum "$RUNNER_TEMP/qur2-implementation.tar.gz" | awk '{print $1}')"
+          printf 'ACTUAL_SHA256=%s\nEXPECTED_SHA256=%s\n' "$actual_sha" "$EXPECTED_SHA256"
           test "$actual_sha" = "$EXPECTED_SHA256"
           tar -tzf "$RUNNER_TEMP/qur2-implementation.tar.gz" > "$RUNNER_TEMP/qur2-members.txt"
           if grep -Eq '(^|/)\.\.?(/|$)' "$RUNNER_TEMP/qur2-members.txt"; then
