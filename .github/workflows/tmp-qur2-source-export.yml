@@ -1,0 +1,33 @@
+name: Temporary QUR2 Exact Source Export
+
+on:
+  push:
+    branches:
+      - tmp/qur2-source-export
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          fetch-depth: 1
+      - name: Assert base ancestry and create source archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD^)" = "61f8a8e523ef4f760c48ac4e59606ecde0f3fe7b"
+          git archive --format=zip --output="$RUNNER_TEMP/qur2-exact-source.zip" HEAD^
+          sha256sum "$RUNNER_TEMP/qur2-exact-source.zip" > "$RUNNER_TEMP/qur2-exact-source.sha256"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: QUR2-Exact-Source-61f8a8e
+          path: |
+            ${{ runner.temp }}/qur2-exact-source.zip
+            ${{ runner.temp }}/qur2-exact-source.sha256
+          if-no-files-found: error
+          retention-days: 3
