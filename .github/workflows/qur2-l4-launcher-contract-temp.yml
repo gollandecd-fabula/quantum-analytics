@@ -1,15 +1,10 @@
 name: Temporary QUR2 L4 Launcher Contract Patch
 
 on:
-  push:
-    branches:
-      - fix/quantum-universal-relaunch-r2
-    paths:
-      - .github/workflows/qur2-l4-launcher-contract-temp.yml
   pull_request:
     types: [opened, synchronize, reopened]
     branches:
-      - fix/quantum-shortcut-launch-repair-r1
+      - fix/quantum-universal-relaunch-r2
     paths:
       - .github/workflows/qur2-l4-launcher-contract-temp.yml
 
@@ -22,7 +17,7 @@ concurrency:
 
 jobs:
   apply:
-    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+    if: github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
