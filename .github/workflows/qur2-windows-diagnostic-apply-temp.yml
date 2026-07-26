@@ -98,9 +98,33 @@ jobs:
       - name: Publish exact validated diagnostic split
         shell: bash
         run: |
-          set -euo pipefail
+          set -uo pipefail
           git config user.name quantum-ci
           git config user.email quantum-ci@users.noreply.github.com
           git diff --cached --quiet && { echo 'No diagnostic changes staged' >&2; exit 1; }
-          git commit -m 'Split QUR2 Windows runtime checks and preserve failure evidence'
-          git push origin HEAD:fix/quantum-universal-relaunch-r2
+          git commit -m 'Split QUR2 Windows runtime checks and preserve failure evidence' \
+            2>&1 | tee "$RUNNER_TEMP/qur2-publish-commit.log"
+          commit_status=${PIPESTATUS[0]}
+          git rev-parse HEAD | tee "$RUNNER_TEMP/qur2-publish-commit-sha.txt"
+          git rev-parse 'HEAD^{tree}' | tee "$RUNNER_TEMP/qur2-publish-tree-sha.txt"
+          push_status=0
+          git push origin HEAD:fix/quantum-universal-relaunch-r2 \
+            2>&1 | tee "$RUNNER_TEMP/qur2-publish-push.log" || push_status=${PIPESTATUS[0]}
+          printf 'COMMIT_STATUS=%s\nPUSH_STATUS=%s\n' \
+            "$commit_status" "$push_status" |
+            tee "$RUNNER_TEMP/qur2-publish-status.txt"
+          test "$commit_status" -eq 0
+          test "$push_status" -eq 0
+      - name: Upload QUR2 publication diagnostics
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: QUR2-Publication-Diagnostics
+          path: |
+            ${{ runner.temp }}/qur2-publish-commit.log
+            ${{ runner.temp }}/qur2-publish-commit-sha.txt
+            ${{ runner.temp }}/qur2-publish-tree-sha.txt
+            ${{ runner.temp }}/qur2-publish-push.log
+            ${{ runner.temp }}/qur2-publish-status.txt
+          if-no-files-found: warn
+          retention-days: 3
