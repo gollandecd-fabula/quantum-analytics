@@ -1,12 +1,12 @@
 name: Temporary QUR2 Install Output Apply
 
 on:
-  pull_request:
-    types: [opened, synchronize, reopened]
+  push:
     branches:
       - fix/quantum-universal-relaunch-r2
     paths:
-      - .qur2-install-output-trigger
+      - .github/workflows/qur2-install-output-apply-temp.yml
+      - .qur2-install-output-payload/TRIGGER
 
 permissions:
   contents: write
@@ -17,7 +17,6 @@ concurrency:
 
 jobs:
   apply:
-    if: github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
