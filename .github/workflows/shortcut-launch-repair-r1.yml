@@ -1,0 +1,283 @@
+name: Shortcut Launch Repair R1
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/shortcut-launch-repair-r1.yml"
+      - "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_SHORTCUT_LAUNCH_REPAIR_R1.json"
+      - "docs/evidence/SHORTCUT_LAUNCH_REPAIR_R1_DEFECT_REGISTER.json"
+      - "docs/evidence/SHORTCUT_LAUNCH_REPAIR_R1_RTM.json"
+      - "scripts/windows/install_home_local.ps1"
+      - "scripts/windows/one_click_home_local.ps1"
+      - "tests/integration_manifest_support_m8.py"
+      - "tests/test_shortcut_launch_repair_r1.py"
+      - "tests/test_plateau_m7_release_integration.py"
+      - "tests/test_windows_first_run_finance_center_r74.py"
+      - "tests/test_windows_one_click_installer_r1.py"
+      - "tests/test_wbr2_m5_closure.py"
+      - "tests/test_wbr2_m5_closure_corrective_r2.py"
+
+permissions:
+  contents: read
+
+env:
+  TARGET_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+  BASE_SHA: 30da46cb2e156d8ce8ea4cf8165229d559a5c5b5
+  RTM_SHA: 626fc0f37621fe6b54c459e774ebad0be0e2d859
+  PYTHONDONTWRITEBYTECODE: "1"
+  PYTHONUTF8: "1"
+
+jobs:
+  scope:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ env.TARGET_SHA }}
+          fetch-depth: 3
+      - name: Assert RTM-first exact scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD^)" = "$RTM_SHA"
+          test "$(git rev-parse HEAD^^)" = "$BASE_SHA"
+          test "$(git rev-list --count "$BASE_SHA"..HEAD)" = 2
+          test "$(git diff --name-only HEAD^^..HEAD^)" = \
+            "docs/evidence/SHORTCUT_LAUNCH_REPAIR_R1_RTM.json"
+          mapfile -t actual < <(git diff --name-only "$BASE_SHA"..HEAD | sort)
+          mapfile -t expected <<'EOF'
+          .github/workflows/shortcut-launch-repair-r1.yml
+          docs/evidence/ARTIFACT_MANIFEST_OVERLAY_SHORTCUT_LAUNCH_REPAIR_R1.json
+          docs/evidence/SHORTCUT_LAUNCH_REPAIR_R1_DEFECT_REGISTER.json
+          docs/evidence/SHORTCUT_LAUNCH_REPAIR_R1_RTM.json
+          scripts/windows/install_home_local.ps1
+          scripts/windows/one_click_home_local.ps1
+          tests/integration_manifest_support_m8.py
+          tests/test_shortcut_launch_repair_r1.py
+          tests/test_plateau_m7_release_integration.py
+          tests/test_windows_first_run_finance_center_r74.py
+          tests/test_windows_one_click_installer_r1.py
+          tests/test_wbr2_m5_closure.py
+          tests/test_wbr2_m5_closure_corrective_r2.py
+          EOF
+          diff -u \
+            <(printf '%s\n' "${expected[@]}" | sort) \
+            <(printf '%s\n' "${actual[@]}")
+
+  linux:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ env.TARGET_SHA }}
+          fetch-depth: 1
+      - name: Compile and run launch contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m compileall -q src/quantum tests
+          PYTHONPATH=src python3 -m unittest -v \
+            tests.test_shortcut_launch_repair_r1 \
+            tests.test_windows_first_run_finance_center_r74 \
+            tests.test_plateau_m7_release_integration \
+            tests.test_windows_one_click_installer_r1 \
+            tests.test_tz_correction_and_exe_installer
+          PYTHONPATH=src python3 -m quantum.scripts.ci
+
+  windows-install-repair:
+    runs-on: windows-2025
+    timeout-minutes: 45
+    steps:
+      - shell: pwsh
+        run: git config --global core.autocrlf false
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ env.TARGET_SHA }}
+          fetch-depth: 1
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.13.14"
+      - name: Parse PowerShell and run static contracts
+        shell: pwsh
+        run: |
+          foreach ($path in @(
+            "scripts/windows/install_home_local.ps1",
+            "scripts/windows/one_click_home_local.ps1",
+            "scripts/windows/build_local_production.ps1"
+          )) {
+            $tokens = $null
+            $errors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile(
+              (Resolve-Path $path),
+              [ref]$tokens,
+              [ref]$errors
+            ) | Out-Null
+            if ($errors.Count -gt 0) {
+              $errors | Format-List | Out-String | Write-Error
+              throw "PowerShell parse failed: $path"
+            }
+          }
+          $env:PYTHONPATH = (Resolve-Path "src").Path
+          python -m unittest -v `
+            tests.test_shortcut_launch_repair_r1 `
+            tests.test_windows_first_run_finance_center_r74 `
+            tests.test_plateau_m7_release_integration `
+            tests.test_windows_one_click_installer_r1
+          if ($LASTEXITCODE -ne 0) {
+            throw "Static shortcut contracts failed."
+          }
+      - name: Clean install, stale shortcut repair and direct launch
+        shell: pwsh
+        env:
+          TARGET_SHA: ${{ env.TARGET_SHA }}
+        run: |
+          $ErrorActionPreference = "Stop"
+          $dist = Join-Path $env:RUNNER_TEMP "SLR1 package build"
+          $packageRoot = Join-Path $env:RUNNER_TEMP "SLR1 package extracted"
+          $target = Join-Path $env:RUNNER_TEMP "Quantum тест с пробелом"
+          $partial = Join-Path $env:RUNNER_TEMP "Quantum incomplete"
+          Remove-Item $dist,$packageRoot,$target,$partial -Recurse -Force `
+            -ErrorAction SilentlyContinue
+
+          powershell.exe -NoProfile -ExecutionPolicy Bypass `
+            -File .\scripts\windows\build_local_production.ps1 `
+            -OutputDirectory $dist
+          if ($LASTEXITCODE -ne 0) {
+            throw "HOME_LOCAL package build failed."
+          }
+          Expand-Archive `
+            -LiteralPath (Join-Path $dist "QuantumLocalProduction_HOME_LOCAL.zip") `
+            -DestinationPath $packageRoot -Force
+
+          $desktop = [Environment]::GetFolderPath(
+            [Environment+SpecialFolder]::DesktopDirectory
+          )
+          $shortcutPath = Join-Path $desktop "Центр решений Quantum.lnk"
+          $shell = New-Object -ComObject WScript.Shell
+          $stale = $shell.CreateShortcut($shortcutPath)
+          $stale.TargetPath = Join-Path $target "scripts\one_click_home_local.ps1"
+          $stale.WorkingDirectory = $target
+          $stale.Save()
+
+          & (Join-Path $packageRoot "scripts\install_home_local.ps1") `
+            -SourceRoot $packageRoot -TargetRoot $target
+          if ($LASTEXITCODE -ne 0) {
+            throw "Clean installation failed."
+          }
+
+          foreach ($required in @(
+            "START_QUANTUM.cmd",
+            "scripts\one_click_home_local.ps1",
+            "scripts\import_source.ps1",
+            "scripts\configure_home_local.ps1",
+            "src\quantum\pilot\windows_runner.py",
+            "src\quantum\application\desktop_center.py"
+          )) {
+            if (-not (Test-Path (Join-Path $target $required) -PathType Leaf)) {
+              throw "Installed component missing: $required"
+            }
+          }
+
+          $verified = $shell.CreateShortcut($shortcutPath)
+          $expectedTarget = [IO.Path]::GetFullPath(
+            (Join-Path $target "START_QUANTUM.cmd")
+          )
+          if (
+            -not ([IO.Path]::GetFullPath([string]$verified.TargetPath)).Equals(
+              $expectedTarget,
+              [StringComparison]::OrdinalIgnoreCase
+            )
+          ) {
+            throw "Shortcut target was not repaired."
+          }
+          if (-not [string]::IsNullOrWhiteSpace([string]$verified.Arguments)) {
+            throw "Shortcut contains stale arguments."
+          }
+
+          powershell.exe -NoProfile -ExecutionPolicy Bypass `
+            -File (Join-Path $target "scripts\one_click_home_local.ps1") `
+            -InstallOnly -NoOpenResult
+          if ($LASTEXITCODE -ne 0) {
+            throw "Direct installed-script launch failed."
+          }
+
+          cmd.exe /d /c `
+            "`"$(Join-Path $target 'START_QUANTUM.cmd')`" -InstallOnly -NoOpenResult"
+          if ($LASTEXITCODE -ne 0) {
+            throw "START_QUANTUM.cmd launch failed."
+          }
+
+          foreach ($folder in @("config", "data", "output")) {
+            $path = Join-Path $target "$folder\slr1-sentinel.txt"
+            [IO.File]::WriteAllText($path, "preserve-$folder", [Text.Encoding]::UTF8)
+          }
+          $before = @{}
+          foreach ($folder in @("config", "data", "output")) {
+            $path = Join-Path $target "$folder\slr1-sentinel.txt"
+            $before[$folder] = (Get-FileHash $path -Algorithm SHA256).Hash
+          }
+
+          $stale = $shell.CreateShortcut($shortcutPath)
+          $stale.TargetPath = Join-Path $target "scripts\one_click_home_local.ps1"
+          $stale.WorkingDirectory = $target
+          $stale.Save()
+          & (Join-Path $packageRoot "scripts\install_home_local.ps1") `
+            -SourceRoot $packageRoot -TargetRoot $target
+          if ($LASTEXITCODE -ne 0) {
+            throw "Repair installation failed."
+          }
+
+          foreach ($folder in @("config", "data", "output")) {
+            $path = Join-Path $target "$folder\slr1-sentinel.txt"
+            $after = (Get-FileHash $path -Algorithm SHA256).Hash
+            if ($after -ne $before[$folder]) {
+              throw "User data changed during repair: $folder"
+            }
+          }
+          $verified = $shell.CreateShortcut($shortcutPath)
+          if (
+            -not ([IO.Path]::GetFullPath([string]$verified.TargetPath)).Equals(
+              $expectedTarget,
+              [StringComparison]::OrdinalIgnoreCase
+            )
+          ) {
+            throw "Stale shortcut survived repair."
+          }
+
+          New-Item (Join-Path $partial "scripts") -ItemType Directory -Force |
+            Out-Null
+          Copy-Item `
+            (Join-Path $target "scripts\one_click_home_local.ps1") `
+            (Join-Path $partial "scripts\one_click_home_local.ps1") -Force
+          $partialLog = Join-Path $env:RUNNER_TEMP "slr1-partial.log"
+          powershell.exe -NoProfile -ExecutionPolicy Bypass `
+            -File (Join-Path $partial "scripts\one_click_home_local.ps1") `
+            -InstallOnly -NoOpenResult *> $partialLog
+          if ($LASTEXITCODE -eq 0) {
+            throw "Incomplete installation was accepted."
+          }
+          $partialText = Get-Content $partialLog -Raw
+          if ($partialText -notmatch "HOME_LOCAL_INSTALLATION_INCOMPLETE") {
+            throw "Incomplete installation did not emit the repair code."
+          }
+
+          $evidence = [ordered]@{
+            exact_head = $env:TARGET_SHA
+            clean_install = "PASS"
+            stale_shortcut_repair = "PASS"
+            direct_installed_script = "PASS"
+            start_command = "PASS"
+            cyrillic_space_path = "PASS"
+            user_data_preserved = "PASS"
+            incomplete_install_fail_closed = "PASS"
+          }
+          $evidence | ConvertTo-Json -Depth 5 |
+            Set-Content (Join-Path $env:RUNNER_TEMP "slr1-evidence.json") `
+              -Encoding UTF8
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: Shortcut-Launch-Repair-R1-${{ env.TARGET_SHA }}
+          path: ${{ runner.temp }}/slr1-evidence.json
+          if-no-files-found: error
+          retention-days: 14

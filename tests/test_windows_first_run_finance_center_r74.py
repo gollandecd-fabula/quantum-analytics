@@ -35,36 +35,28 @@ class WindowsFirstRunFinanceCenterR74Tests(unittest.TestCase):
 
     def test_installed_script_self_recovers_if_launcher_loses_skip_install(self) -> None:
         script = self.script
-        recovery = script.index('$installedCandidate =')
+        recovery = script.index('$selfRoot =')
         branch = script.index('if ($SkipInstall) {', recovery)
         recovery_block = script[recovery:branch]
         self.assertLess(recovery, branch)
-        self.assertIn('$installedMarkers = @(', recovery_block)
-        self.assertIn('$hasInstalledMarker = $false', recovery_block)
+        self.assertIn('Test-InstallationPackageLayout -Root $selfRoot', recovery_block)
+        self.assertIn('Get-InstalledRuntimeMissingComponents -Root $selfRoot', recovery_block)
         self.assertIn('$SkipInstall = $true', recovery_block)
-        self.assertIn('install_home_local.ps1', recovery_block)
-        for marker in (
-            'START_QUANTUM.cmd',
-            'scripts\\import_source.ps1',
-            'scripts\\configure_home_local.ps1',
-            'src\\quantum\\pilot\\windows_runner.py',
-        ):
-            self.assertIn(marker, recovery_block)
-        self.assertIn(
-            '$hasInstalledMarker -and -not (Test-Path -LiteralPath $packageInstaller',
-            recovery_block,
-        )
+        self.assertIn('$InstalledRoot = $selfRoot', recovery_block)
+        self.assertIn('Assert-InstalledRuntimeLayout -Root $selfRoot', recovery_block)
+        self.assertNotIn('$hasInstalledMarker', recovery_block)
 
     def test_installed_launcher_always_uses_skip_install(self) -> None:
         installer = self.installer
         self.assertIn(
-            'one_click_home_local.ps1" -InstalledRoot "%~dp0" -SkipInstall',
+            'for %%I in ("%~dp0.") do set "QUANTUM_ROOT=%%~fI"',
             installer,
         )
-        self.assertNotIn(
-            'one_click_home_local.ps1" -InstalledRoot "%~dp0"\n',
+        self.assertIn(
+            'one_click_home_local.ps1" -InstalledRoot "%QUANTUM_ROOT%" -SkipInstall %*',
             installer,
         )
+        self.assertNotIn('-InstalledRoot "%~dp0" -SkipInstall', installer)
 
     def test_explicit_file_and_noninteractive_import_paths_remain_available(self) -> None:
         script = self.script
