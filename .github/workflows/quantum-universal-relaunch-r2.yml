@@ -234,13 +234,19 @@ jobs:
             if ([string]::IsNullOrWhiteSpace([string]$shortcutPath)) {
               throw "No verified user shortcut exists."
             }
-            $shell = New-Object -ComObject WScript.Shell
-            $shortcut = $shell.CreateShortcut($shortcutPath)
+            $shell = New-Object -ComObject Shell.Application
+            $folder = $shell.Namespace((Split-Path -Parent $shortcutPath))
+            if ($null -eq $folder) { throw "Shortcut folder namespace unavailable." }
+            $item = $folder.ParseName((Split-Path -Leaf $shortcutPath))
+            if ($null -eq $item) { throw "Shortcut shell item unavailable." }
+            $shortcut = $item.GetLink
+            if ($null -eq $shortcut) { throw "Shortcut shell link unavailable." }
             $expectedTarget = [IO.Path]::GetFullPath(
               (Join-Path $target "START_QUANTUM.cmd")
             )
+            $actualTarget = [IO.Path]::GetFullPath([string]$shortcut.Path)
             if (
-              -not ([IO.Path]::GetFullPath([string]$shortcut.TargetPath)).Equals(
+              -not $actualTarget.Equals(
                 $expectedTarget, [StringComparison]::OrdinalIgnoreCase
               ) -or
               -not [string]::IsNullOrWhiteSpace([string]$shortcut.Arguments)
