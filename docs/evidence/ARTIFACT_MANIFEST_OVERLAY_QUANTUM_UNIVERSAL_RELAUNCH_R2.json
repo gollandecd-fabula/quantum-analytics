@@ -1,6 +1,11 @@
 {
   "entries": [
     [
+      ".github/workflows/l4-installed-runtime.yml",
+      "2aed5cce56667dfb502e794078e7320c5d74f1d48a654f42581c54edc8ec60cf",
+      2816
+    ],
+    [
       ".github/workflows/quantum-universal-relaunch-r2.yml",
       "b5b1e2029931d9577e28c68d102ee4e3645fc8c75e549bab60c13bbf9808e4f6",
       15131
@@ -19,6 +24,11 @@
       "requirements/windows-home-local.txt",
       "135a6daa63c86e947e5a36c0bd6e9695aa4dcb0665656408e69adb256b84e2ca",
       412
+    ],
+    [
+      "scripts/ci/l4_installed_runtime.ps1",
+      "b75fc411c1223a2a9d7f99112e2b79ce00f2d81dfc23e369a9b2a293e58d8f53",
+      23880
     ],
     [
       "scripts/windows/build_local_production.ps1",
@@ -61,6 +71,11 @@
       5683
     ],
     [
+      "tests/test_l4_installed_runtime_contract.py",
+      "240f3f5c09beeb5c0e79cfac764207a3018c3ef492a7922d780f5835a24aeac2",
+      5811
+    ],
+    [
       "tests/test_quantum_universal_relaunch_r2.py",
       "691bac406e3a9cd6bc22966a22d5fcf6ff3463191908a126c0ce3dcaceb91e76",
       7506
@@ -98,7 +113,7 @@
   ],
   "hash_encoding": "sha256-hex",
   "overlay_version": "QUANTUM-UNIVERSAL-RELAUNCH-R2",
-  "reason": "Corrective milestone adds passive content-first BIFF/XLS extraction, broad safe automatic intake, partial calculation without fabricated values, collision-resistant output names, deterministic installed relaunch without package reinstall, argument forwarding, verified Unicode/ASCII shortcut fallback, repair preservation and exact-head Windows validation. Release scope remains WB_ONLY, marketplace writes remain disabled, Ozon and Gatekeeper remain deferred, and physical L5 remains external.",
+  "reason": "Corrective milestone adds passive content-first BIFF/XLS extraction, broad safe automatic intake, partial calculation without fabricated values, collision-resistant output names, deterministic installed relaunch without package reinstall, argument forwarding, verified Unicode/ASCII shortcut fallback, repair preservation and exact-head Windows validation. It also aligns the installed-runtime validator with argument forwarding and preserves slot-scoped failure evidence. Release scope remains WB_ONLY, marketplace writes remain disabled, Ozon and Gatekeeper remain deferred, and physical L5 remains external.",
   "remove_paths": [],
   "base_shortcut_launch_repair_r1_overlay_git_blob_sha": "907ce148f6cee5ce0446c32ffbba0c2957611d32"
 }
