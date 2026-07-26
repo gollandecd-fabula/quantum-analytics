@@ -338,7 +338,7 @@ jobs:
             @("Артикул;Продажи", "IZ001;12") |
               Set-Content $csv -Encoding UTF8
             $outputDirectory = [IO.Path]::GetFullPath(
-              (Join-Path $env:QUR2_TARGET "output")
+              (Join-Path $env:LOCALAPPDATA "QuantumLocalProduction\output")
             )
             $createdOutputPaths = @()
             foreach ($number in 1..20) {
