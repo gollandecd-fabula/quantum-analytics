@@ -1,0 +1,64 @@
+{
+  "register_id": "QUANTUM-SHORTCUT-LAUNCH-REPAIR-R1",
+  "created_on": "2026-07-26",
+  "base_exact_head": "30da46cb2e156d8ce8ea4cf8165229d559a5c5b5",
+  "defects": [
+    {
+      "id": "SLR1-P1-001",
+      "severity": "P1",
+      "status": "FIXED_PENDING_EXACT_HEAD_VALIDATION",
+      "title": "Installed launcher misclassified installed runtime as source package",
+      "evidence": "Physical Windows screenshot: one_click_home_local.ps1 line 284 searched installed scripts/install_home_local.ps1.",
+      "root_cause": "Installed-mode auto-detection accepted only a loose marker heuristic and did not deterministically separate package layout from installed layout.",
+      "fix": "Package layout is detected by manifest+installer+src. Otherwise a complete installed layout enters SkipInstall automatically; incomplete layout emits HOME_LOCAL_INSTALLATION_INCOMPLETE."
+    },
+    {
+      "id": "SLR1-P1-002",
+      "severity": "P1",
+      "status": "FIXED_PENDING_EXACT_HEAD_VALIDATION",
+      "title": "Stale shortcut could invoke PowerShell script without installed-mode arguments",
+      "evidence": "Physical shortcut launch entered package-install branch with empty InstalledRoot and SkipInstall.",
+      "root_cause": "Legacy or stale .lnk target was not verified after overwrite.",
+      "fix": "Installer removes and recreates the user shortcut, verifies TargetPath/WorkingDirectory/Arguments, and removes a stale common-desktop shortcut when permitted."
+    },
+    {
+      "id": "SLR1-P2-003",
+      "severity": "P2",
+      "status": "FIXED_PENDING_EXACT_HEAD_VALIDATION",
+      "title": "START_QUANTUM.cmd passed a trailing-backslash root inside quotes",
+      "evidence": "Generated command used -InstalledRoot \"%~dp0\".",
+      "root_cause": "%~dp0 always ends in a backslash and relies on fragile native argument parsing.",
+      "fix": "CMD canonicalizes %~dp0. through FOR to a root without trailing slash and forwards optional arguments for deterministic testing."
+    },
+    {
+      "id": "SLR1-P2-004",
+      "severity": "P2",
+      "status": "FIXED_PENDING_EXACT_HEAD_VALIDATION",
+      "title": "Partial installation produced misleading installer-not-found error",
+      "evidence": "Missing installed components caused fallback to package mode.",
+      "root_cause": "Any-marker logic could not distinguish partial install from package.",
+      "fix": "Required installed components are enumerated and reported without modifying config, data or output."
+    }
+  ],
+  "red_team_matrix": [
+    "clean_install",
+    "upgrade_over_previous_layout",
+    "stale_user_shortcut",
+    "stale_common_shortcut",
+    "direct_installed_script",
+    "START_QUANTUM_cmd",
+    "path_with_spaces",
+    "path_with_cyrillic",
+    "partial_install",
+    "config_data_output_preservation",
+    "PowerShell_5_1_parse",
+    "exact_head_installer_native_self_test"
+  ],
+  "boundaries": {
+    "marketplace_writes": "DISABLED",
+    "ozon": "DEFERRED",
+    "gatekeeper": "DISCONNECTED",
+    "main_merge": "NOT_AUTHORIZED",
+    "physical_user_pc_retest": "REQUIRED"
+  }
+}

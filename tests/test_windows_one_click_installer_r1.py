@@ -137,11 +137,34 @@ class WindowsOneClickInstallerR1Tests(unittest.TestCase):
         self.assertIn('START_QUANTUM.cmd', script)
         self.assertIn('$sourceOneClick', script)
         self.assertIn('$oneClickTarget', script)
-        self.assertIn('-InstalledRoot "%~dp0" -SkipInstall', script)
-        self.assertNotIn('-InstalledRoot "%~dp0" -SkipInstall -AuthorityAttested', script)
+        self.assertIn('for %%I in ("%~dp0.") do set "QUANTUM_ROOT=%%~fI"', script)
+        self.assertIn('-InstalledRoot "%QUANTUM_ROOT%" -SkipInstall %*', script)
+        self.assertNotIn('-InstalledRoot "%~dp0" -SkipInstall', script)
+        self.assertNotIn('-InstalledRoot "%QUANTUM_ROOT%" -SkipInstall -AuthorityAttested', script)
         self.assertNotIn('import_source.ps1" -AuthorityAttested', script)
         self.assertIn('New-QuantumShortcut', script)
         self.assertIn('Существующие папки config, data и output сохранены.', self.installer_ru)
+
+    def test_installed_launcher_and_package_modes_are_separated(self):
+        script = self.one_click
+        package_check = script.index('Test-InstallationPackageLayout -Root $selfRoot')
+        installed_check = script.index('Get-InstalledRuntimeMissingComponents -Root $selfRoot')
+        self.assertLess(package_check, installed_check)
+        self.assertIn('$SkipInstall = $true', script)
+        self.assertIn('$InstalledRoot = $selfRoot', script)
+        self.assertIn('HOME_LOCAL_INSTALLATION_INCOMPLETE:', script)
+        self.assertIn('Assert-InstalledRuntimeLayout -Root $TargetRoot', script)
+        self.assertNotIn('$hasInstalledMarker', script)
+
+    def test_shortcut_is_replaced_and_verified(self):
+        script = self.installer
+        self.assertIn('[Environment+SpecialFolder]::DesktopDirectory', script)
+        self.assertIn('[Environment+SpecialFolder]::CommonDesktopDirectory', script)
+        self.assertIn('Remove-Item -LiteralPath $path -Force', script)
+        self.assertIn('$shortcut.TargetPath = [IO.Path]::GetFullPath($Launcher)', script)
+        self.assertIn('$shortcut.Arguments = ""', script)
+        self.assertIn('SHORTCUT_VERIFICATION_FAILED', script)
+        self.assertIn('STALE_COMMON_DESKTOP_SHORTCUT_NOT_REMOVED', script)
 
     def test_package_manifest_is_verified_before_target_mutation(self):
         script = self.installer

@@ -85,6 +85,47 @@ function Assert-LocalPathSafety {
     }
 }
 
+function Get-InstalledRuntimeMissingComponents {
+    param([Parameter(Mandatory = $true)][string]$Root)
+    $required = @(
+        "START_QUANTUM.cmd",
+        "scripts\one_click_home_local.ps1",
+        "scripts\import_source.ps1",
+        "scripts\configure_home_local.ps1",
+        "src\quantum\pilot\windows_runner.py",
+        "src\quantum\application\desktop_center.py"
+    )
+    $missing = @()
+    foreach ($relative in $required) {
+        $candidate = Join-Path $Root $relative
+        if (-not (Test-Path -LiteralPath $candidate -PathType Leaf)) {
+            $missing += $relative
+        }
+    }
+    return @($missing)
+}
+
+function Test-InstallationPackageLayout {
+    param([Parameter(Mandatory = $true)][string]$Root)
+    return (
+        (Test-Path -LiteralPath (Join-Path $Root "manifest.sha256.json") -PathType Leaf) -and
+        (Test-Path -LiteralPath (Join-Path $Root "scripts\install_home_local.ps1") -PathType Leaf) -and
+        (Test-Path -LiteralPath (Join-Path $Root "src") -PathType Container)
+    )
+}
+
+function Assert-InstalledRuntimeLayout {
+    param([Parameter(Mandatory = $true)][string]$Root)
+    $missing = @(Get-InstalledRuntimeMissingComponents -Root $Root)
+    if ($missing.Count -gt 0) {
+        throw ("HOME_LOCAL_INSTALLATION_INCOMPLETE: " + (
+            Get-QuantumRussianText -Encoded "0KPRgdGC0LDQvdC+0LLQutCwIFF1YW50dW0g0L/QvtCy0YDQtdC20LTQtdC90LAg0LjQu9C4INC90LUg0LfQsNCy0LXRgNGI0LXQvdCwLiDQl9Cw0L/Rg9GB0YLQuNGC0LUg0L/QvtGB0LvQtdC00L3QuNC5INGD0YHRgtCw0L3QvtCy0L7Rh9C90YvQuSBFWEUg0L/QvtCy0LXRgNGFINGC0LXQutGD0YnQtdC5INCy0LXRgNGB0LjQuC4g0J7RgtGB0YPRgtGB0YLQstGD0Y7RgiDQutC+0LzQv9C+0L3QtdC90YLRizogezB9" -Arguments @((
+                $missing -join ", "
+            ))
+        ))
+    }
+}
+
 function Test-PythonVersion {
     param(
         [Parameter(Mandatory = $true)][string]$Executable,
@@ -244,24 +285,19 @@ function Open-PilotResult {
 }
 
 if (-not $SkipInstall -and [string]::IsNullOrWhiteSpace($PackageRoot) -and [string]::IsNullOrWhiteSpace($InstalledRoot)) {
-    $installedCandidate = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot "..")).Path
-    $packageInstaller = Join-Path $installedCandidate "scripts\install_home_local.ps1"
-    $installedMarkers = @(
-        (Join-Path $installedCandidate "START_QUANTUM.cmd"),
-        (Join-Path $installedCandidate "scripts\import_source.ps1"),
-        (Join-Path $installedCandidate "scripts\configure_home_local.ps1"),
-        (Join-Path $installedCandidate "src\quantum\pilot\windows_runner.py")
-    )
-    $hasInstalledMarker = $false
-    foreach ($marker in $installedMarkers) {
-        if (Test-Path -LiteralPath $marker -PathType Leaf) {
-            $hasInstalledMarker = $true
-            break
-        }
+    $selfRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot "..")).Path
+    if (Test-InstallationPackageLayout -Root $selfRoot) {
+        $PackageRoot = $selfRoot
     }
-    if ($hasInstalledMarker -and -not (Test-Path -LiteralPath $packageInstaller -PathType Leaf)) {
-        $SkipInstall = $true
-        $InstalledRoot = $installedCandidate
+    else {
+        $missingInstalledComponents = @(Get-InstalledRuntimeMissingComponents -Root $selfRoot)
+        if ($missingInstalledComponents.Count -eq 0) {
+            $SkipInstall = $true
+            $InstalledRoot = $selfRoot
+        }
+        else {
+            Assert-InstalledRuntimeLayout -Root $selfRoot
+        }
     }
 }
 
@@ -270,6 +306,7 @@ if ($SkipInstall) {
         $InstalledRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot "..")).Path
     }
     $TargetRoot = Resolve-FullPath -Path $InstalledRoot -MustExist
+    Assert-InstalledRuntimeLayout -Root $TargetRoot
 }
 else {
     if ([string]::IsNullOrWhiteSpace($PackageRoot)) {
@@ -289,13 +326,9 @@ else {
 
 $TargetRoot = Resolve-FullPath -Path $TargetRoot -MustExist
 Assert-LocalPathSafety -Path $TargetRoot -Purpose (Get-QuantumRussianText -Encoded "0KPRgdGC0LDQvdC+0LLQutCwIEhPTUVfTE9DQUw=")
+Assert-InstalledRuntimeLayout -Root $TargetRoot
 $importer = Join-Path $TargetRoot "scripts\import_source.ps1"
 $configurator = Join-Path $TargetRoot "scripts\configure_home_local.ps1"
-foreach ($required in @($importer, $configurator, (Join-Path $TargetRoot "src\quantum\pilot\windows_runner.py"))) {
-    if (-not (Test-Path -LiteralPath $required -PathType Leaf)) {
-        throw (Get-QuantumRussianText -Encoded "0J/QvtGB0LvQtSDRg9GB0YLQsNC90L7QstC60Lgg0L7RgtGB0YPRgtGB0YLQstGD0LXRgiDQutC+0LzQv9C+0L3QtdC90YIgSE9NRV9MT0NBTDogezB9" -Arguments @($required))
-    }
-}
 Resolve-PythonCommand | Out-Null
 Write-Host (Get-QuantumRussianText -Encoded "WzIvNF0gUHl0aG9uINC4INGD0YHRgtCw0L3QvtCy0LvQtdC90L3QsNGPINGB0YDQtdC00LAg0LPQvtGC0L7QstGLLg==") -ForegroundColor Green
 

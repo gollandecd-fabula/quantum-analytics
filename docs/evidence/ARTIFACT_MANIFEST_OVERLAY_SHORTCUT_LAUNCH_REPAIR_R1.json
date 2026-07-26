@@ -1,0 +1,69 @@
+{
+  "entries": [
+    [
+      ".github/workflows/shortcut-launch-repair-r1.yml",
+      "1312024939b09ec2f5aef28b29296de98879809a95b74ce6b15fb851092301c9",
+      12043
+    ],
+    [
+      "docs/evidence/SHORTCUT_LAUNCH_REPAIR_R1_DEFECT_REGISTER.json",
+      "1055d457d2ec7155bede4a6fda6c426fee82b3fe253e4dae6dea12ec393344ba",
+      3067
+    ],
+    [
+      "docs/evidence/SHORTCUT_LAUNCH_REPAIR_R1_RTM.json",
+      "996740956489ce5095ddc372a5927912e9dfced49e75a37b76027ebd7720b650",
+      4415
+    ],
+    [
+      "scripts/windows/install_home_local.ps1",
+      "f8e43d723a8a3ff17a8524f47f39b469852f5f3ef44e13f00d27cf40f6b902e7",
+      23644
+    ],
+    [
+      "scripts/windows/one_click_home_local.ps1",
+      "b4eff84e74b91a0d38c4c59ccfc6c45fee05972a995de2b5c1ebf1216c786f18",
+      21781
+    ],
+    [
+      "tests/integration_manifest_support_m8.py",
+      "2e232ada7c4785dd9a4bb70210450541435c38f3efac2c8f2e121c1b67ca3e8d",
+      5171
+    ],
+    [
+      "tests/test_plateau_m7_release_integration.py",
+      "1de0e5b576a95bb0a8d4f27c571ded12ba6751ce930c4562ab1498ee3fe376dd",
+      3028
+    ],
+    [
+      "tests/test_shortcut_launch_repair_r1.py",
+      "363170422150730396452723fa85275652d473759c31be64344fcffe35654e00",
+      4082
+    ],
+    [
+      "tests/test_windows_first_run_finance_center_r74.py",
+      "67322f012623a437d4e60b05a26a58eb6df2628e6f82051522c05d9356a05719",
+      3553
+    ],
+    [
+      "tests/test_windows_one_click_installer_r1.py",
+      "dcb3fc467d607ad874a674c1b6e4c28da22945f4bd4ddffafc47fd923aea1cd8",
+      11557
+    ],
+    [
+      "tests/test_wbr2_m5_closure.py",
+      "e7d3a65bf9153aadf8049df064197ecf5479f1b254e6ab6ae2e495eae09b0c25",
+      4491
+    ],
+    [
+      "tests/test_wbr2_m5_closure_corrective_r2.py",
+      "c11b693c72b0d9355b2b96ba6eebae3c773888336ad52b239595163b17da80df",
+      4079
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": "QUANTUM-SHORTCUT-LAUNCH-REPAIR-R1",
+  "reason": "Physical Windows pilot exposed a launcher packaging conflict: a stale or direct shortcut entered package-install mode inside the installed runtime and searched for scripts/install_home_local.ps1. Installed and package layouts are now deterministic, START_QUANTUM.cmd canonicalizes the root and forwards arguments, shortcuts are replaced and verified, partial installations fail with HOME_LOCAL_INSTALLATION_INCOMPLETE, and repair installation preserves config, data and output.",
+  "remove_paths": [],
+  "base_xlsx_namespace_fallback_r1_overlay_git_blob_sha": "18b39aa461f5d180f201029539f3ee01546d196c"
+}
