@@ -274,10 +274,10 @@ jobs:
             foreach ($number in 1..2) {
               $stdout = Join-Path $env:RUNNER_TEMP "qur2-launch-$number.stdout.txt"
               $stderr = Join-Path $env:RUNNER_TEMP "qur2-launch-$number.stderr.txt"
+              $commandLine = '""{0}" -InstallOnly -NoOpenResult"' -f $launcher
               $process = Start-Process -FilePath "cmd.exe" `
                 -ArgumentList @(
-                  "/d", "/s", "/c",
-                  "`"$launcher`" -InstallOnly -NoOpenResult"
+                  "/d", "/s", "/c", $commandLine
                 ) `
                 -RedirectStandardOutput $stdout `
                 -RedirectStandardError $stderr `
