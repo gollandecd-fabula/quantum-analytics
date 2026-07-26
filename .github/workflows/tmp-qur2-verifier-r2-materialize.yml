@@ -1,4 +1,4 @@
-name: Temporary QUR2 Rapid Import Materializer
+name: Temporary QUR2 Rapid Output Evidence Materializer
 
 on:
   pull_request:
@@ -10,15 +10,15 @@ permissions:
   contents: write
 
 concurrency:
-  group: qur2-rapidimport-materialize
+  group: qur2-rapidoutput-materialize
   cancel-in-progress: false
 
 env:
-  BASE_SHA: 96e0914d01db16d5b398f16144925171f760956d
-  EXPECTED_TREE_SHA: a5c2be53157b4b1400f84fbf9a06b1b521ba4142
-  EXPECTED_WORKFLOW_SHA256: 527b363b3293c1e0224649332f7fb7529ec868ada0b84bf0a748dca8d42000b7
-  EXPECTED_OVERLAY_SHA256: 6c097b32de6564b67d1d5d0e5eef32f740b921c3ee88b08ce376207a74e6aa1e
-  CANDIDATE_BRANCH: tmp/qur2-rapidimport-tested-candidate
+  BASE_SHA: 8e626519e6a2145d723283c586be0f86e372436b
+  EXPECTED_TREE_SHA: 908ba8beeca14eabf828b91a3eb3c64e0cd226a2
+  EXPECTED_WORKFLOW_SHA256: a6be6f5f66ee973365c30e2248783a478395e3a1e7a94663571f655a1f043d04
+  EXPECTED_OVERLAY_SHA256: b0ade3d7ad8945f395e268d243dc49b0101f9b2d49fd3c01ddb9691c552ffff4
+  CANDIDATE_BRANCH: tmp/qur2-rapidoutput-tested-candidate
 
 jobs:
   materialize:
@@ -32,7 +32,7 @@ jobs:
 
       - name: Preserve exact patch script
         shell: bash
-        run: cp .qur2-shellapp-materializer/apply.py "$RUNNER_TEMP/qur2-rapidimport-apply.py"
+        run: cp .qur2-shellapp-materializer/apply.py "$RUNNER_TEMP/qur2-rapidoutput-apply.py"
 
       - name: Apply marker patch to immutable base
         shell: bash
@@ -40,7 +40,7 @@ jobs:
           set -euo pipefail
           git checkout --detach "$BASE_SHA"
           test "$(git rev-parse HEAD)" = "$BASE_SHA"
-          python3 "$RUNNER_TEMP/qur2-rapidimport-apply.py"
+          python3 "$RUNNER_TEMP/qur2-rapidoutput-apply.py"
           test "$(sha256sum .github/workflows/quantum-universal-relaunch-r2.yml | awk '{print $1}')" = "$EXPECTED_WORKFLOW_SHA256"
           test "$(sha256sum docs/evidence/ARTIFACT_MANIFEST_OVERLAY_QUANTUM_UNIVERSAL_RELAUNCH_R2.json | awk '{print $1}')" = "$EXPECTED_OVERLAY_SHA256"
           git diff --check
@@ -60,19 +60,19 @@ jobs:
           set -euo pipefail
           git config user.name quantum-ci
           git config user.email quantum-ci@users.noreply.github.com
-          git commit -m 'Fix rapid-import invocation in QUR2 Windows gate'
+          git commit -m 'Verify rapid-import report paths in QUR2 Windows gate'
           test "$(git rev-parse 'HEAD^{tree}')" = "$EXPECTED_TREE_SHA"
-          git rev-parse HEAD | tee "$RUNNER_TEMP/qur2-rapidimport-candidate-commit.txt"
-          git rev-parse 'HEAD^{tree}' | tee "$RUNNER_TEMP/qur2-rapidimport-candidate-tree.txt"
+          git rev-parse HEAD | tee "$RUNNER_TEMP/qur2-rapidoutput-candidate-commit.txt"
+          git rev-parse 'HEAD^{tree}' | tee "$RUNNER_TEMP/qur2-rapidoutput-candidate-tree.txt"
           git push origin "HEAD:refs/heads/$CANDIDATE_BRANCH"
 
       - name: Upload evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: QUR2-RapidImport-Materialization
+          name: QUR2-RapidOutput-Materialization
           path: |
-            ${{ runner.temp }}/qur2-rapidimport-candidate-commit.txt
-            ${{ runner.temp }}/qur2-rapidimport-candidate-tree.txt
+            ${{ runner.temp }}/qur2-rapidoutput-candidate-commit.txt
+            ${{ runner.temp }}/qur2-rapidoutput-candidate-tree.txt
           if-no-files-found: warn
           retention-days: 3
