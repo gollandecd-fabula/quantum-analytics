@@ -66,14 +66,34 @@ jobs:
       - name: Run focused and complete source checks
         shell: bash
         run: |
-          set -euo pipefail
+          set -uo pipefail
           export PYTHONPATH="$PWD/src"
+          focused_status=0
+          complete_status=0
           python -m unittest -v \
             tests.test_l4_installed_runtime_contract \
             tests.test_quantum_universal_relaunch_r2 \
             tests.test_windows_one_click_installer_r1 \
-            tests.test_windows_source_package_launchers_r1
-          python -m quantum.scripts.ci
+            tests.test_windows_source_package_launchers_r1 \
+            2>&1 | tee "$RUNNER_TEMP/qur2-focused-tests.log" || focused_status=${PIPESTATUS[0]}
+          python -m quantum.scripts.ci \
+            2>&1 | tee "$RUNNER_TEMP/qur2-complete-ci.log" || complete_status=${PIPESTATUS[0]}
+          printf 'FOCUSED_STATUS=%s\nCOMPLETE_STATUS=%s\n' \
+            "$focused_status" "$complete_status" |
+            tee "$RUNNER_TEMP/qur2-applier-status.txt"
+          test "$focused_status" -eq 0
+          test "$complete_status" -eq 0
+      - name: Upload QUR2 applier diagnostics
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: QUR2-Diagnostic-Applier-Logs
+          path: |
+            ${{ runner.temp }}/qur2-focused-tests.log
+            ${{ runner.temp }}/qur2-complete-ci.log
+            ${{ runner.temp }}/qur2-applier-status.txt
+          if-no-files-found: warn
+          retention-days: 3
       - name: Publish exact validated diagnostic split
         shell: bash
         run: |
