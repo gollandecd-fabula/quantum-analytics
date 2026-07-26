@@ -194,121 +194,219 @@ jobs:
           if ([int]$value.universal_extraction.tables[0].row_count -ne 2) {
             throw "Real XLS row count mismatch."
           }
-      - name: Build, install, relaunch, repair and preserve
+      - name: Build package, install and verify shortcut
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
-          $env:LOCALAPPDATA = Join-Path $env:RUNNER_TEMP "QUR2 локально"
-          $dist = Join-Path $env:RUNNER_TEMP "QUR2 dist"
-          $packageRoot = Join-Path $env:RUNNER_TEMP "QUR2 package"
-          $target = Join-Path $env:LOCALAPPDATA "QuantumLocalProduction"
-          Remove-Item $dist,$packageRoot,$target -Recurse -Force `
-            -ErrorAction SilentlyContinue
+          $trace = Join-Path $env:RUNNER_TEMP "qur2-windows-trace.log"
+          try {
+            "STEP=BUILD_INSTALL_SHORTCUT START" | Add-Content $trace
+            $localAppData = Join-Path $env:RUNNER_TEMP "QUR2 локально"
+            $dist = Join-Path $env:RUNNER_TEMP "QUR2 dist"
+            $packageRoot = Join-Path $env:RUNNER_TEMP "QUR2 package"
+            $target = Join-Path $localAppData "QuantumLocalProduction"
+            Remove-Item $dist,$packageRoot,$target -Recurse -Force `
+              -ErrorAction SilentlyContinue
 
-          powershell.exe -NoProfile -ExecutionPolicy Bypass `
-            -File .\scripts\windows\build_local_production.ps1 `
-            -OutputDirectory $dist
-          if ($LASTEXITCODE -ne 0) { throw "Package build failed." }
-          Expand-Archive `
-            -LiteralPath (Join-Path $dist "QuantumLocalProduction_HOME_LOCAL.zip") `
-            -DestinationPath $packageRoot -Force
-
-          powershell.exe -NoProfile -ExecutionPolicy Bypass `
-            -File (Join-Path $packageRoot "scripts\install_home_local.ps1") `
-            -SourceRoot $packageRoot -TargetRoot $target
-          if ($LASTEXITCODE -ne 0) { throw "PowerShell 5.1 install failed." }
-
-          $desktop = [Environment]::GetFolderPath(
-            [Environment+SpecialFolder]::DesktopDirectory
-          )
-          $shortcutPaths = @(
-            (Join-Path $desktop "Центр решений Quantum.lnk"),
-            (Join-Path $desktop "Quantum Decision Center.lnk")
-          )
-          $shortcutPath = @(
-            $shortcutPaths | Where-Object { Test-Path $_ -PathType Leaf }
-          ) | Select-Object -First 1
-          if ([string]::IsNullOrWhiteSpace([string]$shortcutPath)) {
-            throw "No verified user shortcut exists."
-          }
-          $shell = New-Object -ComObject WScript.Shell
-          $shortcut = $shell.CreateShortcut($shortcutPath)
-          $expectedTarget = [IO.Path]::GetFullPath(
-            (Join-Path $target "START_QUANTUM.cmd")
-          )
-          if (
-            -not ([IO.Path]::GetFullPath([string]$shortcut.TargetPath)).Equals(
-              $expectedTarget, [StringComparison]::OrdinalIgnoreCase
-            ) -or
-            -not [string]::IsNullOrWhiteSpace([string]$shortcut.Arguments)
-          ) { throw "Shortcut verification failed." }
-
-          foreach ($number in 1..2) {
-            cmd.exe /d /c `
-              "`"$(Join-Path $target 'START_QUANTUM.cmd')`" -InstallOnly -NoOpenResult"
-            if ($LASTEXITCODE -ne 0) {
-              throw "Installed START_QUANTUM.cmd relaunch $number failed."
-            }
-          }
-
-          foreach ($folder in @("config", "data", "output")) {
-            $path = Join-Path $target "$folder\qur2-sentinel.txt"
-            [IO.File]::WriteAllText($path, "preserve-$folder", [Text.Encoding]::UTF8)
-          }
-          $before = @{}
-          foreach ($folder in @("config", "data", "output")) {
-            $path = Join-Path $target "$folder\qur2-sentinel.txt"
-            $before[$folder] = (Get-FileHash $path -Algorithm SHA256).Hash
-          }
-
-          & (Join-Path $packageRoot "scripts\install_home_local.ps1") `
-            -SourceRoot $packageRoot -TargetRoot $target
-          if ($LASTEXITCODE -ne 0) { throw "PowerShell 7 repair failed." }
-          foreach ($folder in @("config", "data", "output")) {
-            $path = Join-Path $target "$folder\qur2-sentinel.txt"
-            if ((Get-FileHash $path -Algorithm SHA256).Hash -ne $before[$folder]) {
-              throw "User data changed during repair: $folder"
-            }
-          }
-
-          $csv = Join-Path $env:RUNNER_TEMP "sales.csv"
-          @("Артикул;Продажи", "IZ001;12") |
-            Set-Content $csv -Encoding UTF8
-          $outputDirectory = Join-Path $target "output"
-          $beforeOutputs = @(Get-ChildItem $outputDirectory -Filter "import_*.json" -File)
-          foreach ($number in 1..20) {
             powershell.exe -NoProfile -ExecutionPolicy Bypass `
-              -File (Join-Path $target "scripts\import_source.ps1") `
-              -File $csv -StorageRoot (Join-Path $target "data") `
-              -NonInteractive -AuthorityAttested -SchemaReviewed `
-              -SkipDefenderScan
-            if ($LASTEXITCODE -ne 0) { throw "Rapid import $number failed." }
+              -File .\scripts\windows\build_local_production.ps1 `
+              -OutputDirectory $dist
+            if ($LASTEXITCODE -ne 0) { throw "Package build failed." }
+            Expand-Archive `
+              -LiteralPath (Join-Path $dist "QuantumLocalProduction_HOME_LOCAL.zip") `
+              -DestinationPath $packageRoot -Force
+
+            powershell.exe -NoProfile -ExecutionPolicy Bypass `
+              -File (Join-Path $packageRoot "scripts\install_home_local.ps1") `
+              -SourceRoot $packageRoot -TargetRoot $target
+            if ($LASTEXITCODE -ne 0) { throw "PowerShell 5.1 install failed." }
+
+            $desktop = [Environment]::GetFolderPath(
+              [Environment+SpecialFolder]::DesktopDirectory
+            )
+            $shortcutPaths = @(
+              (Join-Path $desktop "Центр решений Quantum.lnk"),
+              (Join-Path $desktop "Quantum Decision Center.lnk")
+            )
+            $shortcutPath = @(
+              $shortcutPaths | Where-Object { Test-Path $_ -PathType Leaf }
+            ) | Select-Object -First 1
+            if ([string]::IsNullOrWhiteSpace([string]$shortcutPath)) {
+              throw "No verified user shortcut exists."
+            }
+            $shell = New-Object -ComObject WScript.Shell
+            $shortcut = $shell.CreateShortcut($shortcutPath)
+            $expectedTarget = [IO.Path]::GetFullPath(
+              (Join-Path $target "START_QUANTUM.cmd")
+            )
+            if (
+              -not ([IO.Path]::GetFullPath([string]$shortcut.TargetPath)).Equals(
+                $expectedTarget, [StringComparison]::OrdinalIgnoreCase
+              ) -or
+              -not [string]::IsNullOrWhiteSpace([string]$shortcut.Arguments)
+            ) { throw "Shortcut verification failed." }
+
+            "QUR2_LOCALAPPDATA=$localAppData" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+            "QUR2_DIST=$dist" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+            "QUR2_PACKAGE_ROOT=$packageRoot" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+            "QUR2_TARGET=$target" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+            "STEP=BUILD_INSTALL_SHORTCUT PASS" | Add-Content $trace
           }
-          $afterOutputs = @(Get-ChildItem $outputDirectory -Filter "import_*.json" -File)
-          if (($afterOutputs.Count - $beforeOutputs.Count) -ne 20) {
-            throw "Rapid imports did not create twenty distinct results."
-          }
-          if (@($afterOutputs.Name | Sort-Object -Unique).Count -ne $afterOutputs.Count) {
-            throw "Output filename collision detected."
+          catch {
+            "STEP=BUILD_INSTALL_SHORTCUT FAIL: $($_.Exception.Message)" | Add-Content $trace
+            throw
           }
 
-          $partial = Join-Path $env:RUNNER_TEMP "QUR2 incomplete"
-          Remove-Item $partial -Recurse -Force -ErrorAction SilentlyContinue
-          New-Item (Join-Path $partial "scripts") -ItemType Directory -Force |
-            Out-Null
-          Copy-Item (Join-Path $target "START_QUANTUM.cmd") $partial -Force
-          Copy-Item `
-            (Join-Path $target "scripts\one_click_home_local.ps1") `
-            (Join-Path $partial "scripts\one_click_home_local.ps1") -Force
-          $partialLog = Join-Path $env:RUNNER_TEMP "qur2-partial.log"
-          cmd.exe /d /c `
-            "call `"$(Join-Path $partial 'START_QUANTUM.cmd')`" -InstallOnly -NoOpenResult < NUL > `"$partialLog`" 2>&1"
-          $partialExit = $LASTEXITCODE
-          if ($partialExit -eq 0) { throw "Incomplete installation was accepted." }
-          if ((Get-Content $partialLog -Raw) -notmatch "HOME_LOCAL_INSTALLATION_INCOMPLETE") {
-            throw "Incomplete installation omitted repair diagnostic."
+      - name: Launch installed command twice without reinstalling
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $trace = Join-Path $env:RUNNER_TEMP "qur2-windows-trace.log"
+          try {
+            "STEP=REPEAT_LAUNCH START" | Add-Content $trace
+            $launcher = Join-Path $env:QUR2_TARGET "START_QUANTUM.cmd"
+            foreach ($number in 1..2) {
+              $stdout = Join-Path $env:RUNNER_TEMP "qur2-launch-$number.stdout.txt"
+              $stderr = Join-Path $env:RUNNER_TEMP "qur2-launch-$number.stderr.txt"
+              $process = Start-Process -FilePath "cmd.exe" `
+                -ArgumentList @(
+                  "/d", "/s", "/c",
+                  "`"$launcher`" -InstallOnly -NoOpenResult"
+                ) `
+                -RedirectStandardOutput $stdout `
+                -RedirectStandardError $stderr `
+                -Wait -PassThru
+              "LAUNCH=$number EXIT=$($process.ExitCode)" | Add-Content $trace
+              if ($process.ExitCode -ne 0) {
+                throw "Installed START_QUANTUM.cmd relaunch $number failed."
+              }
+            }
+            "STEP=REPEAT_LAUNCH PASS" | Add-Content $trace
+          }
+          catch {
+            "STEP=REPEAT_LAUNCH FAIL: $($_.Exception.Message)" | Add-Content $trace
+            throw
           }
 
+      - name: Repair installation and preserve user data
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $trace = Join-Path $env:RUNNER_TEMP "qur2-windows-trace.log"
+          try {
+            "STEP=REPAIR_PRESERVE START" | Add-Content $trace
+            foreach ($folder in @("config", "data", "output")) {
+              $path = Join-Path $env:QUR2_TARGET "$folder\qur2-sentinel.txt"
+              [IO.File]::WriteAllText($path, "preserve-$folder", [Text.Encoding]::UTF8)
+            }
+            $before = @{}
+            foreach ($folder in @("config", "data", "output")) {
+              $path = Join-Path $env:QUR2_TARGET "$folder\qur2-sentinel.txt"
+              $before[$folder] = (Get-FileHash $path -Algorithm SHA256).Hash
+            }
+
+            & (Join-Path $env:QUR2_PACKAGE_ROOT "scripts\install_home_local.ps1") `
+              -SourceRoot $env:QUR2_PACKAGE_ROOT -TargetRoot $env:QUR2_TARGET
+            if ($LASTEXITCODE -ne 0) { throw "PowerShell 7 repair failed." }
+            foreach ($folder in @("config", "data", "output")) {
+              $path = Join-Path $env:QUR2_TARGET "$folder\qur2-sentinel.txt"
+              if ((Get-FileHash $path -Algorithm SHA256).Hash -ne $before[$folder]) {
+                throw "User data changed during repair: $folder"
+              }
+            }
+            "STEP=REPAIR_PRESERVE PASS" | Add-Content $trace
+          }
+          catch {
+            "STEP=REPAIR_PRESERVE FAIL: $($_.Exception.Message)" | Add-Content $trace
+            throw
+          }
+
+      - name: Create twenty collision-free rapid import results
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $trace = Join-Path $env:RUNNER_TEMP "qur2-windows-trace.log"
+          try {
+            "STEP=RAPID_IMPORTS START" | Add-Content $trace
+            $csv = Join-Path $env:RUNNER_TEMP "sales.csv"
+            @("Артикул;Продажи", "IZ001;12") |
+              Set-Content $csv -Encoding UTF8
+            $outputDirectory = Join-Path $env:QUR2_TARGET "output"
+            $beforeOutputs = @(Get-ChildItem $outputDirectory -Filter "import_*.json" -File)
+            foreach ($number in 1..20) {
+              $stdout = Join-Path $env:RUNNER_TEMP "qur2-import-$number.stdout.txt"
+              $stderr = Join-Path $env:RUNNER_TEMP "qur2-import-$number.stderr.txt"
+              $process = Start-Process -FilePath "powershell.exe" `
+                -ArgumentList @(
+                  "-NoProfile", "-ExecutionPolicy", "Bypass",
+                  "-File", (Join-Path $env:QUR2_TARGET "scripts\import_source.ps1"),
+                  "-File", $csv,
+                  "-StorageRoot", (Join-Path $env:QUR2_TARGET "data"),
+                  "-NonInteractive", "-AuthorityAttested", "-SchemaReviewed",
+                  "-SkipDefenderScan"
+                ) `
+                -RedirectStandardOutput $stdout `
+                -RedirectStandardError $stderr `
+                -Wait -PassThru
+              "IMPORT=$number EXIT=$($process.ExitCode)" | Add-Content $trace
+              if ($process.ExitCode -ne 0) { throw "Rapid import $number failed." }
+            }
+            $afterOutputs = @(Get-ChildItem $outputDirectory -Filter "import_*.json" -File)
+            $created = $afterOutputs.Count - $beforeOutputs.Count
+            "RAPID_OUTPUTS_CREATED=$created" | Add-Content $trace
+            if ($created -ne 20) {
+              throw "Rapid imports did not create twenty distinct results."
+            }
+            if (@($afterOutputs.Name | Sort-Object -Unique).Count -ne $afterOutputs.Count) {
+              throw "Output filename collision detected."
+            }
+            "STEP=RAPID_IMPORTS PASS" | Add-Content $trace
+          }
+          catch {
+            "STEP=RAPID_IMPORTS FAIL: $($_.Exception.Message)" | Add-Content $trace
+            throw
+          }
+
+      - name: Fail closed for an incomplete installed tree
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $trace = Join-Path $env:RUNNER_TEMP "qur2-windows-trace.log"
+          try {
+            "STEP=INCOMPLETE_INSTALL START" | Add-Content $trace
+            $partial = Join-Path $env:RUNNER_TEMP "QUR2 incomplete"
+            Remove-Item $partial -Recurse -Force -ErrorAction SilentlyContinue
+            New-Item (Join-Path $partial "scripts") -ItemType Directory -Force |
+              Out-Null
+            Copy-Item (Join-Path $env:QUR2_TARGET "START_QUANTUM.cmd") $partial -Force
+            Copy-Item `
+              (Join-Path $env:QUR2_TARGET "scripts\one_click_home_local.ps1") `
+              (Join-Path $partial "scripts\one_click_home_local.ps1") -Force
+            $partialLog = Join-Path $env:RUNNER_TEMP "qur2-partial.log"
+            $process = Start-Process -FilePath "cmd.exe" `
+              -ArgumentList @(
+                "/d", "/s", "/c",
+                "`"$(Join-Path $partial 'START_QUANTUM.cmd')`" -InstallOnly -NoOpenResult < NUL"
+              ) `
+              -RedirectStandardOutput $partialLog `
+              -RedirectStandardError (Join-Path $env:RUNNER_TEMP "qur2-partial.stderr.log") `
+              -Wait -PassThru
+            "INCOMPLETE_EXIT=$($process.ExitCode)" | Add-Content $trace
+            if ($process.ExitCode -eq 0) { throw "Incomplete installation was accepted." }
+            $partialText = Get-Content $partialLog -Raw -ErrorAction SilentlyContinue
+            if ($partialText -notmatch "HOME_LOCAL_INSTALLATION_INCOMPLETE") {
+              throw "Incomplete installation omitted repair diagnostic."
+            }
+            "STEP=INCOMPLETE_INSTALL PASS" | Add-Content $trace
+          }
+          catch {
+            "STEP=INCOMPLETE_INSTALL FAIL: $($_.Exception.Message)" | Add-Content $trace
+            throw
+          }
+
+      - name: Write QUR2 Windows evidence
+        shell: pwsh
+        run: |
           $evidence = [ordered]@{
             exact_head = "${{ github.event.pull_request.head.sha || github.sha }}"
             real_xls = "PASS"
@@ -325,12 +423,20 @@ jobs:
           $evidence | ConvertTo-Json -Depth 6 |
             Set-Content (Join-Path $env:RUNNER_TEMP "qur2-windows-evidence.json") `
               -Encoding UTF8
+
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
         with:
           name: QUR2-Windows-Installed-Runtime
           path: |
             ${{ runner.temp }}/real-xls-report.json
             ${{ runner.temp }}/qur2-windows-evidence.json
+            ${{ runner.temp }}/qur2-windows-trace.log
+            ${{ runner.temp }}/qur2-launch-*.stdout.txt
+            ${{ runner.temp }}/qur2-launch-*.stderr.txt
+            ${{ runner.temp }}/qur2-import-*.stdout.txt
+            ${{ runner.temp }}/qur2-import-*.stderr.txt
             ${{ runner.temp }}/qur2-partial.log
-          if-no-files-found: error
+            ${{ runner.temp }}/qur2-partial.stderr.log
+          if-no-files-found: warn
           retention-days: 14
