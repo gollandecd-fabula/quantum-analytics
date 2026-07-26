@@ -39,21 +39,63 @@ function Reset-ManagedAcl {
 
 function New-QuantumShortcut {
     param([string]$Launcher, [string]$WorkingDirectory)
+    $desktop = [Environment]::GetFolderPath(
+        [Environment+SpecialFolder]::DesktopDirectory
+    )
+    if ([string]::IsNullOrWhiteSpace($desktop)) {
+        throw (Get-QuantumRussianText -Encoded "0J3QtSDRg9C00LDQu9C+0YHRjCDRgdC+0LfQtNCw0YLRjCDQuNC70Lgg0L/RgNC+0LLQtdGA0LjRgtGMINGP0YDQu9GL0LogUXVhbnR1bTogezB9" -Arguments @("DesktopDirectory unavailable"))
+    }
+    $name = Get-QuantumRussianText -Encoded "0KbQtdC90YLRgCDRgNC10YjQtdC90LjQuSBRdWFudHVtLmxuaw=="
+    $path = Join-Path $desktop $name
+    $shell = New-Object -ComObject WScript.Shell
     try {
-        $desktop = [Environment]::GetFolderPath("Desktop")
-        if ([string]::IsNullOrWhiteSpace($desktop)) { return }
-        $path = Join-Path $desktop (Get-QuantumRussianText -Encoded "0KbQtdC90YLRgCDRgNC10YjQtdC90LjQuSBRdWFudHVtLmxuaw==")
-        $shell = New-Object -ComObject WScript.Shell
+        Remove-Item -LiteralPath $path -Force -ErrorAction SilentlyContinue
         $shortcut = $shell.CreateShortcut($path)
-        $shortcut.TargetPath = $Launcher
-        $shortcut.WorkingDirectory = $WorkingDirectory
+        $shortcut.TargetPath = [IO.Path]::GetFullPath($Launcher)
+        $shortcut.Arguments = ""
+        $shortcut.WorkingDirectory = [IO.Path]::GetFullPath($WorkingDirectory)
         $shortcut.Description = Get-QuantumRussianText -Encoded "0KbQtdC90YLRgCDRgNC10YjQtdC90LjQuSBRdWFudHVtIOKAlCDQu9C+0LrQsNC70YzQvdGL0Lkg0LfQsNC/0YPRgdC6"
         $shortcut.IconLocation = "$env:SystemRoot\System32\shell32.dll,167"
         $shortcut.Save()
-        Write-Host (Get-QuantumRussianText -Encoded "0K/RgNC70YvQuiDQvdCwINGA0LDQsdC+0YfQtdC8INGB0YLQvtC70LUg0YHQvtC30LTQsNC9OiB7MH0=" -Arguments @($path))
+
+        $verified = $shell.CreateShortcut($path)
+        $expectedTarget = [IO.Path]::GetFullPath($Launcher)
+        $expectedWorking = [IO.Path]::GetFullPath($WorkingDirectory)
+        if (
+            -not ([IO.Path]::GetFullPath([string]$verified.TargetPath)).Equals(
+                $expectedTarget,
+                [StringComparison]::OrdinalIgnoreCase
+            ) -or
+            -not ([IO.Path]::GetFullPath([string]$verified.WorkingDirectory)).Equals(
+                $expectedWorking,
+                [StringComparison]::OrdinalIgnoreCase
+            ) -or
+            -not [string]::IsNullOrWhiteSpace([string]$verified.Arguments)
+        ) {
+            throw "SHORTCUT_VERIFICATION_FAILED"
+        }
+        Write-Host (Get-QuantumRussianText -Encoded "0K/RgNC70YvQuiDQvdCwINGA0LDQsdC+0YfQtdC8INGB0YLQvtC70LUg0YHQvtC30LTQsNC9INC4INC/0YDQvtCy0LXRgNC10L06IHswfQ==" -Arguments @($path))
     }
     catch {
-        Write-Warning (Get-QuantumRussianText -Encoded "0J3QtSDRg9C00LDQu9C+0YHRjCDRgdC+0LfQtNCw0YLRjCDRj9GA0LvRi9C6INC90LAg0YDQsNCx0L7Rh9C10Lwg0YHRgtC+0LvQtTogezB9" -Arguments @($($_.Exception.GetType().Name)))
+        throw (Get-QuantumRussianText -Encoded "0J3QtSDRg9C00LDQu9C+0YHRjCDRgdC+0LfQtNCw0YLRjCDQuNC70Lgg0L/RgNC+0LLQtdGA0LjRgtGMINGP0YDQu9GL0LogUXVhbnR1bTogezB9" -Arguments @($($_.Exception.Message)))
+    }
+
+    $commonDesktop = [Environment]::GetFolderPath(
+        [Environment+SpecialFolder]::CommonDesktopDirectory
+    )
+    if (
+        -not [string]::IsNullOrWhiteSpace($commonDesktop) -and
+        -not $commonDesktop.Equals($desktop, [StringComparison]::OrdinalIgnoreCase)
+    ) {
+        $staleCommon = Join-Path $commonDesktop $name
+        if (Test-Path -LiteralPath $staleCommon -PathType Leaf) {
+            try {
+                Remove-Item -LiteralPath $staleCommon -Force
+            }
+            catch {
+                Write-Warning "STALE_COMMON_DESKTOP_SHORTCUT_NOT_REMOVED: $staleCommon"
+            }
+        }
     }
 }
 
@@ -218,8 +260,9 @@ if errorlevel 1 pause
     $stagedStartCommand = Join-Path $fileStageRoot "START_QUANTUM.cmd"
     @'
 @echo off
-setlocal
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\one_click_home_local.ps1" -InstalledRoot "%~dp0" -SkipInstall
+setlocal EnableExtensions
+for %%I in ("%~dp0.") do set "QUANTUM_ROOT=%%~fI"
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%QUANTUM_ROOT%\scripts\one_click_home_local.ps1" -InstalledRoot "%QUANTUM_ROOT%" -SkipInstall %*
 set "quantum_exit=%errorlevel%"
 if not "%quantum_exit%"=="0" pause
 exit /b %quantum_exit%

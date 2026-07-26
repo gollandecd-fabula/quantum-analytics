@@ -12,23 +12,14 @@ class PlateauM7ReleaseIntegrationTests(unittest.TestCase):
         text = (
             ROOT / "scripts/windows/one_click_home_local.ps1"
         ).read_text(encoding="ascii")
-        self.assertIn("$installedMarkers = @(", text)
-        self.assertIn("$hasInstalledMarker = $false", text)
-        for marker in (
-            "START_QUANTUM.cmd",
-            "scripts\\import_source.ps1",
-            "scripts\\configure_home_local.ps1",
-            "src\\quantum\\pilot\\windows_runner.py",
-        ):
-            self.assertIn(marker, text)
-        self.assertIn(
-            "$hasInstalledMarker -and -not (Test-Path -LiteralPath $packageInstaller",
-            text,
-        )
-        self.assertNotIn(
-            "(Test-Path -LiteralPath $installedRuntime -PathType Leaf) -and",
-            text,
-        )
+        self.assertIn("function Test-InstallationPackageLayout", text)
+        self.assertIn("function Get-InstalledRuntimeMissingComponents", text)
+        self.assertIn("function Assert-InstalledRuntimeLayout", text)
+        self.assertIn("Test-InstallationPackageLayout -Root $selfRoot", text)
+        self.assertIn("Get-InstalledRuntimeMissingComponents -Root $selfRoot", text)
+        self.assertIn("$SkipInstall = $true", text)
+        self.assertIn("$InstalledRoot = $selfRoot", text)
+        self.assertNotIn("$hasInstalledMarker", text)
 
     def test_release_gate_targets_desktop_not_legacy_http(self) -> None:
         text = (

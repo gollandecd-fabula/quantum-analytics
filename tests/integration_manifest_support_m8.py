@@ -39,6 +39,10 @@ XLSX_NAMESPACE_FALLBACK_R1_OVERLAY = (
     "ARTIFACT_MANIFEST_OVERLAY_XLSX_NAMESPACE_FALLBACK_R1.json",
     "base_universal_partial_r1_overlay_git_blob_sha",
 )
+SHORTCUT_LAUNCH_REPAIR_R1_OVERLAY = (
+    "ARTIFACT_MANIFEST_OVERLAY_SHORTCUT_LAUNCH_REPAIR_R1.json",
+    "base_xlsx_namespace_fallback_r1_overlay_git_blob_sha",
+)
 ALL_OVERLAY_NAMES = tuple(
     name
     for name, _ in (
@@ -54,6 +58,7 @@ ALL_OVERLAY_NAMES = tuple(
     FULL_PROJECT_REDTEAM_R1_OVERLAY[0],
     UNIVERSAL_PARTIAL_R1_OVERLAY[0],
     XLSX_NAMESPACE_FALLBACK_R1_OVERLAY[0],
+    SHORTCUT_LAUNCH_REPAIR_R1_OVERLAY[0],
 )
 CONTROL_PATHS = {
     "docs/evidence/ARTIFACT_MANIFEST.json",
@@ -111,6 +116,10 @@ def load_effective_manifest() -> dict:
     universal_partial_raw = (
         evidence / "ARTIFACT_MANIFEST_OVERLAY_UNIVERSAL_PARTIAL_R1.json"
     ).read_bytes()
+    xnf1_raw = (
+        evidence
+        / "ARTIFACT_MANIFEST_OVERLAY_XLSX_NAMESPACE_FALLBACK_R1.json"
+    ).read_bytes()
 
     _apply_parallel_overlay(artifacts, GOVERNANCE_OVERLAY, r99_raw)
     _apply_parallel_overlay(artifacts, R100_OVERLAY, r99_raw)
@@ -134,6 +143,11 @@ def load_effective_manifest() -> dict:
         artifacts,
         XLSX_NAMESPACE_FALLBACK_R1_OVERLAY,
         universal_partial_raw,
+    )
+    _apply_parallel_overlay(
+        artifacts,
+        SHORTCUT_LAUNCH_REPAIR_R1_OVERLAY,
+        xnf1_raw,
     )
 
     current["artifacts"] = [artifacts[path] for path in sorted(artifacts)]
