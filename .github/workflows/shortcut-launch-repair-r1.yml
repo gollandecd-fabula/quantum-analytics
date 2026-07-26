@@ -158,10 +158,20 @@ jobs:
           $desktop = [Environment]::GetFolderPath(
             [Environment+SpecialFolder]::DesktopDirectory
           )
-          $shortcutPath = Join-Path $desktop "Центр решений Quantum.lnk"
+          $shortcutPaths = @(
+            (Join-Path $desktop "Центр решений Quantum.lnk"),
+            (Join-Path $desktop "Quantum Decision Center.lnk")
+          )
           $shell = New-Object -ComObject WScript.Shell
+          $shortcutPath = $shortcutPaths[1]
+          Remove-Item $shortcutPaths -Force -ErrorAction SilentlyContinue
           $stale = $shell.CreateShortcut($shortcutPath)
-          $stale.TargetPath = Join-Path $target "scripts\one_click_home_local.ps1"
+          $stale.TargetPath = (Get-Command powershell.exe).Source
+          $stale.Arguments = (
+            '-NoProfile -ExecutionPolicy Bypass -File "{0}" -InstalledRoot "{1}" -SkipInstall' -f
+            (Join-Path $target "scripts\one_click_home_local.ps1"),
+            $target
+          )
           $stale.WorkingDirectory = $target
           $stale.Save()
 
@@ -184,6 +194,12 @@ jobs:
             }
           }
 
+          $shortcutPath = @(
+            $shortcutPaths | Where-Object { Test-Path $_ -PathType Leaf }
+          ) | Select-Object -First 1
+          if ([string]::IsNullOrWhiteSpace([string]$shortcutPath)) {
+            throw "Installed shortcut was not created."
+          }
           $verified = $shell.CreateShortcut($shortcutPath)
           $expectedTarget = [IO.Path]::GetFullPath(
             (Join-Path $target "START_QUANTUM.cmd")
@@ -224,7 +240,12 @@ jobs:
           }
 
           $stale = $shell.CreateShortcut($shortcutPath)
-          $stale.TargetPath = Join-Path $target "scripts\one_click_home_local.ps1"
+          $stale.TargetPath = (Get-Command powershell.exe).Source
+          $stale.Arguments = (
+            '-NoProfile -ExecutionPolicy Bypass -File "{0}" -InstalledRoot "{1}" -SkipInstall' -f
+            (Join-Path $target "scripts\one_click_home_local.ps1"),
+            $target
+          )
           $stale.WorkingDirectory = $target
           $stale.Save()
           & (Join-Path $packageRoot "scripts\install_home_local.ps1") `
@@ -239,6 +260,12 @@ jobs:
             if ($after -ne $before[$folder]) {
               throw "User data changed during repair: $folder"
             }
+          }
+          $shortcutPath = @(
+            $shortcutPaths | Where-Object { Test-Path $_ -PathType Leaf }
+          ) | Select-Object -First 1
+          if ([string]::IsNullOrWhiteSpace([string]$shortcutPath)) {
+            throw "Shortcut disappeared during repair."
           }
           $verified = $shell.CreateShortcut($shortcutPath)
           if (
