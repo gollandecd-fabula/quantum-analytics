@@ -179,7 +179,7 @@ class QuantumUniversalRelaunchR2Tests(unittest.TestCase):
         requirements = (ROOT / "requirements/windows-home-local.txt").read_text()
         self.assertIn("xlrd==2.0.2", requirements)
         self.assertIn(
-            "sha256:08b5e25de58f21ce71dc7db3b3b8106c1fa776f3024c54e45b45b374e89234c9",
+            "sha256:ea762c3d29f4cca48d82df517b6d89fbce4db3107f9d78713e48cd321d5c9aa9",
             requirements,
         )
 
