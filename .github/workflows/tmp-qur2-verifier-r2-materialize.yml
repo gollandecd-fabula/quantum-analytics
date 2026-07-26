@@ -1,0 +1,92 @@
+name: Temporary QUR2 Verifier R2 Materializer
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/tmp-qur2-verifier-r2-materialize.yml
+      - .qur2-verifier-r2-payload/**
+
+permissions:
+  contents: write
+
+concurrency:
+  group: qur2-verifier-r2-materialize
+  cancel-in-progress: false
+
+env:
+  BASE_SHA: c412664a653c8b7abca674e8ccfda7ec9f82326d
+  PAYLOAD_SHA256: 34af8cde84104306d308078cfea1aa478b86783be5edccac3eba62db82c3ccf1
+  EXPECTED_TREE_SHA: 2a1b631fc63961be6e4a2bebcaad8085c3dc5f37
+  CANDIDATE_BRANCH: tmp/qur2-verifier-r2-candidate
+
+jobs:
+  materialize:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Verify SHA-bound payload
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object .qur2-verifier-r2-payload/payload.00)" = "70f280e44a5ce35cf66c093d38fb7e7c59d1db42"
+          test "$(git hash-object .qur2-verifier-r2-payload/payload.01)" = "c59ea7e228696406604d9f702b8fe39dcbba27f0"
+          test "$(git hash-object .qur2-verifier-r2-payload/payload.02)" = "b238da0e9695c580863bffdbc7a82babab8498f3"
+          cat .qur2-verifier-r2-payload/payload.* > "$RUNNER_TEMP/qur2-verifier.b64"
+          base64 --decode "$RUNNER_TEMP/qur2-verifier.b64" > "$RUNNER_TEMP/qur2-verifier.tar.gz"
+          echo "$PAYLOAD_SHA256  $RUNNER_TEMP/qur2-verifier.tar.gz" | sha256sum --check
+
+      - name: Apply exact verifier patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git checkout --detach "$BASE_SHA"
+          test "$(git rev-parse HEAD)" = "$BASE_SHA"
+          tar -xzf "$RUNNER_TEMP/qur2-verifier.tar.gz"
+          git diff --check
+          python3 - <<'PY'
+          import subprocess
+          expected = {
+              '.github/workflows/quantum-universal-relaunch-r2.yml',
+              'docs/evidence/ARTIFACT_MANIFEST_OVERLAY_QUANTUM_UNIVERSAL_RELAUNCH_R2.json',
+          }
+          actual = set(subprocess.check_output(['git','diff','--name-only','HEAD'], text=True).splitlines())
+          if actual != expected:
+              raise SystemExit(f'QUR2_VERIFIER_SCOPE_MISMATCH expected={sorted(expected)} actual={sorted(actual)}')
+          print('QUR2_VERIFIER_SCOPE=PASS')
+          PY
+          git add -A
+
+      - name: Run complete source CI
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PYTHONPATH="$PWD/src"
+          python3 -m quantum.scripts.ci
+
+      - name: Commit exact tested tree and publish candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name quantum-ci
+          git config user.email quantum-ci@users.noreply.github.com
+          git commit -m 'Use Unicode-native shortcut verifier in QUR2 Windows gate'
+          test "$(git rev-parse 'HEAD^{tree}')" = "$EXPECTED_TREE_SHA"
+          git rev-parse HEAD | tee "$RUNNER_TEMP/qur2-verifier-candidate-commit.txt"
+          git rev-parse 'HEAD^{tree}' | tee "$RUNNER_TEMP/qur2-verifier-candidate-tree.txt"
+          git push origin "HEAD:refs/heads/$CANDIDATE_BRANCH"
+
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: QUR2-Verifier-R2-Materialization
+          path: |
+            ${{ runner.temp }}/qur2-verifier-candidate-commit.txt
+            ${{ runner.temp }}/qur2-verifier-candidate-tree.txt
+          if-no-files-found: warn
+          retention-days: 3
