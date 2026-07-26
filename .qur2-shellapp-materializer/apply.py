@@ -4,20 +4,36 @@ from pathlib import Path
 
 workflow = Path('.github/workflows/quantum-universal-relaunch-r2.yml')
 text = workflow.read_text(encoding='utf-8')
-old = '''              $process = Start-Process -FilePath "cmd.exe" `
+old = '''              $process = Start-Process -FilePath "powershell.exe" `
                 -ArgumentList @(
-                  "/d", "/s", "/c",
-                  "`"$launcher`" -InstallOnly -NoOpenResult"
+                  "-NoProfile", "-ExecutionPolicy", "Bypass",
+                  "-File", (Join-Path $env:QUR2_TARGET "scripts\\import_source.ps1"),
+                  "-File", $csv,
+                  "-StorageRoot", (Join-Path $env:QUR2_TARGET "data"),
+                  "-NonInteractive", "-AuthorityAttested", "-SchemaReviewed",
+                  "-SkipDefenderScan"
                 ) `
+                -RedirectStandardOutput $stdout `
+                -RedirectStandardError $stderr `
+                -Wait -PassThru
+              "IMPORT=$number EXIT=$($process.ExitCode)" | Add-Content $trace
+              if ($process.ExitCode -ne 0) { throw "Rapid import $number failed." }
 '''
-new = '''              $commandLine = '\"\"{0}\" -InstallOnly -NoOpenResult\"' -f $launcher
-              $process = Start-Process -FilePath "cmd.exe" `
-                -ArgumentList @(
-                  "/d", "/s", "/c", $commandLine
-                ) `
+new = '''              $importScript = Join-Path $env:QUR2_TARGET "scripts\\import_source.ps1"
+              $storageRoot = Join-Path $env:QUR2_TARGET "data"
+              & powershell.exe -NoProfile -ExecutionPolicy Bypass `
+                -File $importScript `
+                -File $csv `
+                -StorageRoot $storageRoot `
+                -NonInteractive -AuthorityAttested -SchemaReviewed `
+                -SkipDefenderScan `
+                1> $stdout 2> $stderr
+              $importExitCode = $LASTEXITCODE
+              "IMPORT=$number EXIT=$importExitCode" | Add-Content $trace
+              if ($importExitCode -ne 0) { throw "Rapid import $number failed." }
 '''
 if text.count(old) != 1:
-    raise SystemExit(f'QUR2_OLD_LAUNCH_BLOCK_COUNT={text.count(old)}')
+    raise SystemExit(f'QUR2_OLD_RAPID_BLOCK_COUNT={text.count(old)}')
 workflow.write_text(text.replace(old, new, 1), encoding='utf-8', newline='\n')
 
 overlay_path = Path('docs/evidence/ARTIFACT_MANIFEST_OVERLAY_QUANTUM_UNIVERSAL_RELAUNCH_R2.json')
