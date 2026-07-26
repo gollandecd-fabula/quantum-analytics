@@ -63,6 +63,7 @@ jobs:
           rm -rf .qur2-diagnostic-payload
           rm -f .github/workflows/qur2-windows-diagnostic-apply-temp.yml
           git diff --check
+          git add -A
       - name: Run focused and complete source checks
         shell: bash
         run: |
@@ -100,7 +101,6 @@ jobs:
           set -euo pipefail
           git config user.name quantum-ci
           git config user.email quantum-ci@users.noreply.github.com
-          git add -A
           git diff --cached --quiet && { echo 'No diagnostic changes staged' >&2; exit 1; }
           git commit -m 'Split QUR2 Windows runtime checks and preserve failure evidence'
           git push origin HEAD:fix/quantum-universal-relaunch-r2
