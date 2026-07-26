@@ -1,0 +1,79 @@
+name: Temporary QUR2 Windows Diagnostic Apply
+
+on:
+  push:
+    branches:
+      - fix/quantum-universal-relaunch-r2
+    paths:
+      - .qur2-diagnostic-payload/APPLY
+
+permissions:
+  contents: write
+
+concurrency:
+  group: qur2-windows-diagnostic-apply
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: fix/quantum-universal-relaunch-r2
+          fetch-depth: 1
+      - name: Verify exact patch and final tree
+        shell: bash
+        env:
+          PATCH_SHA256: f0193040039a147cb0f6594a2eef8da36e947b21f74bf21c9d579dde23b7a717
+          OLD_WORKFLOW_SHA256: b5b1e2029931d9577e28c68d102ee4e3645fc8c75e549bab60c13bbf9808e4f6
+          OLD_OVERLAY_SHA256: 52391aeef77569c0b69c9df0aaf1169a66b8060c58749f8665e0b487fe189650
+          NEW_WORKFLOW_SHA256: a6f57b64e40e4e8a898fb75addedd12ccc6178b79868d1496e790e1b14e37559
+          NEW_OVERLAY_SHA256: 73798da9cf67b6a652845841b2b73177f61e2abb3cf0e0162539f65f2f635e0b
+        run: |
+          set -euo pipefail
+          test "$(sha256sum .github/workflows/quantum-universal-relaunch-r2.yml | awk '{print $1}')" = "$OLD_WORKFLOW_SHA256"
+          test "$(sha256sum docs/evidence/ARTIFACT_MANIFEST_OVERLAY_QUANTUM_UNIVERSAL_RELAUNCH_R2.json | awk '{print $1}')" = "$OLD_OVERLAY_SHA256"
+          mapfile -t parts < <(find .qur2-diagnostic-payload -maxdepth 1 -type f -name 'payload.[0-9][0-9]' -print | sort)
+          test "${#parts[@]}" -eq 2
+          cat "${parts[@]}" | base64 --decode > "$RUNNER_TEMP/qur2-diagnostic.tar.gz"
+          test "$(sha256sum "$RUNNER_TEMP/qur2-diagnostic.tar.gz" | awk '{print $1}')" = "$PATCH_SHA256"
+          tar -tzf "$RUNNER_TEMP/qur2-diagnostic.tar.gz" | sort > "$RUNNER_TEMP/members.txt"
+          cat > "$RUNNER_TEMP/expected.txt" <<'EOF'
+          ./
+          ./.github/
+          ./.github/workflows/
+          ./.github/workflows/quantum-universal-relaunch-r2.yml
+          ./docs/
+          ./docs/evidence/
+          ./docs/evidence/ARTIFACT_MANIFEST_OVERLAY_QUANTUM_UNIVERSAL_RELAUNCH_R2.json
+          EOF
+          sort -o "$RUNNER_TEMP/expected.txt" "$RUNNER_TEMP/expected.txt"
+          diff -u "$RUNNER_TEMP/expected.txt" "$RUNNER_TEMP/members.txt"
+          tar -xzf "$RUNNER_TEMP/qur2-diagnostic.tar.gz" -C .
+          test "$(sha256sum .github/workflows/quantum-universal-relaunch-r2.yml | awk '{print $1}')" = "$NEW_WORKFLOW_SHA256"
+          test "$(sha256sum docs/evidence/ARTIFACT_MANIFEST_OVERLAY_QUANTUM_UNIVERSAL_RELAUNCH_R2.json | awk '{print $1}')" = "$NEW_OVERLAY_SHA256"
+          rm -rf .qur2-diagnostic-payload
+          rm -f .github/workflows/qur2-windows-diagnostic-apply-temp.yml
+          git diff --check
+      - name: Run focused and complete source checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PYTHONPATH="$PWD/src"
+          python -m unittest -v \
+            tests.test_l4_installed_runtime_contract \
+            tests.test_quantum_universal_relaunch_r2 \
+            tests.test_windows_one_click_installer_r1 \
+            tests.test_windows_source_package_launchers_r1
+          python -m quantum.scripts.ci
+      - name: Publish exact validated diagnostic split
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name quantum-ci
+          git config user.email quantum-ci@users.noreply.github.com
+          git add -A
+          git diff --cached --quiet && { echo 'No diagnostic changes staged' >&2; exit 1; }
+          git commit -m 'Split QUR2 Windows runtime checks and preserve failure evidence'
+          git push origin HEAD:fix/quantum-universal-relaunch-r2
