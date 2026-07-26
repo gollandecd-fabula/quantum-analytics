@@ -38,15 +38,16 @@ class UniversalIntakeHardeningR4Tests(unittest.TestCase):
             decision.reason_codes,
         )
 
-    def test_ole_compound_is_quarantined_until_sandbox_adapter_exists(self):
+    def test_non_workbook_ole_is_registered_without_guessed_semantics(self):
         decision = classify_payload(
             b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1" + b"0" * 128,
             ".xls",
         )
-        self.assertEqual(decision.status, "QUARANTINED_SECURITY")
-        self.assertEqual(
-            decision.detected_format,
-            "OLE_COMPOUND_REQUIRES_SANDBOX",
+        self.assertEqual(decision.status, "ACCEPTED_UNPARSED")
+        self.assertEqual(decision.detected_format, "OLE_COMPOUND")
+        self.assertIn(
+            "OLE_FORMAT_REQUIRES_DEDICATED_ADAPTER",
+            decision.reason_codes,
         )
 
     def test_pdf_with_javascript_is_quarantined(self):
@@ -74,10 +75,10 @@ class UniversalIntakeHardeningR4Tests(unittest.TestCase):
         self.assertIsNone(report["calculation"])
         self.assertFalse(report["marketplace_write_enabled"])
 
-    def test_quarantined_file_is_stored_only_in_quarantine_zone(self):
+    def test_unparsed_ole_is_stored_only_in_inbox_zone(self):
         with TemporaryDirectory() as directory:
             root = Path(directory)
-            source = root / "legacy.xls"
+            source = root / "legacy.ole"
             source.write_bytes(
                 b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1" + b"0" * 128
             )
@@ -87,8 +88,8 @@ class UniversalIntakeHardeningR4Tests(unittest.TestCase):
             )
             stored = Path(str(report["stored_path"]))
             self.assertTrue(stored.is_file())
-            self.assertIn("quarantine", stored.parts)
-            self.assertNotIn("inbox", stored.parts)
+            self.assertIn("inbox", stored.parts)
+            self.assertNotIn("quarantine", stored.parts)
 
 
 if __name__ == "__main__":
