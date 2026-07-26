@@ -35,16 +35,47 @@ jobs:
         shell: bash
         env:
           EXPECTED_SHA256: 4b629eede663f1d57520e07125fbc55b1bd8ce5f0c052677e94109b4f44bed6b
+          EXPECTED_PART04_SHA256: 96b0c255016b2362e64dcd159de539c74a10cc6ea9c1ccc77f648333490471ee
         run: |
           set -euo pipefail
           diagnostics="$RUNNER_TEMP/qur2-transport-diagnostics.txt"
+          python - <<'PY' | tee "$diagnostics"
+          from hashlib import sha256
+          from pathlib import Path
+          import os
+
+          path = Path('.qur2-bootstrap/payload.04')
+          target = os.environ['EXPECTED_PART04_SHA256']
+          data = path.read_bytes()
+          current = sha256(data).hexdigest()
+          print(f'PART04_BEFORE_BYTES={len(data)}')
+          print(f'PART04_BEFORE_SHA256={current}')
+          if current != target:
+              matches = []
+              for index in range(len(data)):
+                  candidate = data[:index] + data[index + 1:]
+                  if sha256(candidate).hexdigest() == target:
+                      matches.append((index, data[index], candidate))
+              if len(matches) != 1:
+                  raise SystemExit(f'PART04_REPAIR_AMBIGUOUS matches={len(matches)}')
+              index, removed, candidate = matches[0]
+              path.write_bytes(candidate)
+              print(f'PART04_REMOVED_INDEX={index}')
+              print(f'PART04_REMOVED_BYTE={removed}')
+          repaired = path.read_bytes()
+          repaired_sha = sha256(repaired).hexdigest()
+          print(f'PART04_AFTER_BYTES={len(repaired)}')
+          print(f'PART04_AFTER_SHA256={repaired_sha}')
+          if repaired_sha != target:
+              raise SystemExit('PART04_REPAIR_FAILED')
+          PY
           mapfile -t parts < <(find .qur2-bootstrap -maxdepth 1 -type f -name 'payload.[0-9][0-9]' -print | sort)
           {
             printf 'PAYLOAD_PART_COUNT=%s\n' "${#parts[@]}"
             printf '%s\n' "${parts[@]}"
             wc -c "${parts[@]}"
             sha256sum "${parts[@]}"
-          } | tee "$diagnostics"
+          } | tee -a "$diagnostics"
           test "${#parts[@]}" -eq 7
           cat "${parts[@]}" > "$RUNNER_TEMP/qur2-payload.b64"
           printf 'PAYLOAD_B64_BYTES=%s\n' "$(wc -c < "$RUNNER_TEMP/qur2-payload.b64")" | tee -a "$diagnostics"
