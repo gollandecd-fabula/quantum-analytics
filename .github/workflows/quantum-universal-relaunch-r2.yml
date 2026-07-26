@@ -342,20 +342,18 @@ jobs:
             foreach ($number in 1..20) {
               $stdout = Join-Path $env:RUNNER_TEMP "qur2-import-$number.stdout.txt"
               $stderr = Join-Path $env:RUNNER_TEMP "qur2-import-$number.stderr.txt"
-              $process = Start-Process -FilePath "powershell.exe" `
-                -ArgumentList @(
-                  "-NoProfile", "-ExecutionPolicy", "Bypass",
-                  "-File", (Join-Path $env:QUR2_TARGET "scripts\import_source.ps1"),
-                  "-File", $csv,
-                  "-StorageRoot", (Join-Path $env:QUR2_TARGET "data"),
-                  "-NonInteractive", "-AuthorityAttested", "-SchemaReviewed",
-                  "-SkipDefenderScan"
-                ) `
-                -RedirectStandardOutput $stdout `
-                -RedirectStandardError $stderr `
-                -Wait -PassThru
-              "IMPORT=$number EXIT=$($process.ExitCode)" | Add-Content $trace
-              if ($process.ExitCode -ne 0) { throw "Rapid import $number failed." }
+              $importScript = Join-Path $env:QUR2_TARGET "scripts\import_source.ps1"
+              $storageRoot = Join-Path $env:QUR2_TARGET "data"
+              & powershell.exe -NoProfile -ExecutionPolicy Bypass `
+                -File $importScript `
+                -File $csv `
+                -StorageRoot $storageRoot `
+                -NonInteractive -AuthorityAttested -SchemaReviewed `
+                -SkipDefenderScan `
+                1> $stdout 2> $stderr
+              $importExitCode = $LASTEXITCODE
+              "IMPORT=$number EXIT=$importExitCode" | Add-Content $trace
+              if ($importExitCode -ne 0) { throw "Rapid import $number failed." }
             }
             $afterOutputs = @(Get-ChildItem $outputDirectory -Filter "import_*.json" -File)
             $created = $afterOutputs.Count - $beforeOutputs.Count
