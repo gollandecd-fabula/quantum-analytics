@@ -37,21 +37,24 @@ jobs:
           EXPECTED_SHA256: 4b629eede663f1d57520e07125fbc55b1bd8ce5f0c052677e94109b4f44bed6b
         run: |
           set -euo pipefail
+          diagnostics="$RUNNER_TEMP/qur2-transport-diagnostics.txt"
           mapfile -t parts < <(find .qur2-bootstrap -maxdepth 1 -type f -name 'payload.[0-9][0-9]' -print | sort)
-          printf 'PAYLOAD_PART_COUNT=%s\n' "${#parts[@]}"
-          printf '%s\n' "${parts[@]}"
-          wc -c "${parts[@]}"
-          sha256sum "${parts[@]}"
+          {
+            printf 'PAYLOAD_PART_COUNT=%s\n' "${#parts[@]}"
+            printf '%s\n' "${parts[@]}"
+            wc -c "${parts[@]}"
+            sha256sum "${parts[@]}"
+          } | tee "$diagnostics"
           test "${#parts[@]}" -eq 7
           cat "${parts[@]}" > "$RUNNER_TEMP/qur2-payload.b64"
-          printf 'PAYLOAD_B64_BYTES=%s\n' "$(wc -c < "$RUNNER_TEMP/qur2-payload.b64")"
+          printf 'PAYLOAD_B64_BYTES=%s\n' "$(wc -c < "$RUNNER_TEMP/qur2-payload.b64")" | tee -a "$diagnostics"
           base64 --decode "$RUNNER_TEMP/qur2-payload.b64" > "$RUNNER_TEMP/qur2-implementation.tar.gz"
           actual_sha="$(sha256sum "$RUNNER_TEMP/qur2-implementation.tar.gz" | awk '{print $1}')"
-          printf 'ACTUAL_SHA256=%s\nEXPECTED_SHA256=%s\n' "$actual_sha" "$EXPECTED_SHA256"
+          printf 'ACTUAL_SHA256=%s\nEXPECTED_SHA256=%s\n' "$actual_sha" "$EXPECTED_SHA256" | tee -a "$diagnostics"
           test "$actual_sha" = "$EXPECTED_SHA256"
           tar -tzf "$RUNNER_TEMP/qur2-implementation.tar.gz" > "$RUNNER_TEMP/qur2-members.txt"
           if grep -Eq '(^|/)\.\.?(/|$)' "$RUNNER_TEMP/qur2-members.txt"; then
-            echo 'Unsafe archive member path' >&2
+            echo 'Unsafe archive member path' | tee -a "$diagnostics" >&2
             exit 1
           fi
           tar -xzf "$RUNNER_TEMP/qur2-implementation.tar.gz" -C .
@@ -63,3 +66,12 @@ jobs:
           git diff --cached --quiet && { echo 'No implementation changes staged' >&2; exit 1; }
           git commit -m 'Implement universal XLS intake and repeatable Windows launch'
           git push origin HEAD:fix/quantum-universal-relaunch-r2
+
+      - name: Upload transport diagnostics
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: QUR2-Transport-Diagnostics
+          path: ${{ runner.temp }}/qur2-transport-diagnostics.txt
+          if-no-files-found: error
+          retention-days: 3
