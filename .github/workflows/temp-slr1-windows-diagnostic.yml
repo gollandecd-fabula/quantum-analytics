@@ -1,0 +1,112 @@
+name: Temporary SLR1 Windows Diagnostic
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/temp-slr1-windows-diagnostic.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: windows-2025
+    timeout-minutes: 30
+    env:
+      EXACT_SHA: 09884d7e2176c100bfd5a101e3865b294d479ce6
+    steps:
+      - shell: pwsh
+        run: git config --global core.autocrlf false
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ env.EXACT_SHA }}
+          fetch-depth: 1
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.13.14"
+      - name: Execute diagnostic path
+        id: diagnostic
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $log = Join-Path $env:RUNNER_TEMP "slr1-windows-diagnostic.txt"
+          Start-Transcript -Path $log -Force
+          try {
+            function Mark([string]$Name) { Write-Host "========== $Name ==========" }
+            Mark "BUILD_PACKAGE"
+            $dist = Join-Path $env:RUNNER_TEMP "SLR1 package build"
+            $packageRoot = Join-Path $env:RUNNER_TEMP "SLR1 package extracted"
+            $target = Join-Path $env:RUNNER_TEMP "Quantum тест с пробелом"
+            $partial = Join-Path $env:RUNNER_TEMP "Quantum incomplete"
+            Remove-Item $dist,$packageRoot,$target,$partial -Recurse -Force -ErrorAction SilentlyContinue
+            & .\scripts\windows\build_local_production.ps1 -OutputDirectory $dist
+            if ($LASTEXITCODE -ne 0) { throw "BUILD_EXIT:$LASTEXITCODE" }
+            Get-ChildItem $dist -Recurse | Select-Object FullName,Length | Format-Table | Out-String | Write-Host
+            Expand-Archive -LiteralPath (Join-Path $dist "QuantumLocalProduction_HOME_LOCAL.zip") -DestinationPath $packageRoot -Force
+
+            Mark "SEED_STALE_SHORTCUT"
+            $desktop = [Environment]::GetFolderPath([Environment+SpecialFolder]::DesktopDirectory)
+            $shortcutPath = Join-Path $desktop "Центр решений Quantum.lnk"
+            $shell = New-Object -ComObject WScript.Shell
+            $stale = $shell.CreateShortcut($shortcutPath)
+            $stale.TargetPath = Join-Path $target "scripts\one_click_home_local.ps1"
+            $stale.WorkingDirectory = $target
+            $stale.Save()
+
+            Mark "CLEAN_INSTALL"
+            & (Join-Path $packageRoot "scripts\install_home_local.ps1") -SourceRoot $packageRoot -TargetRoot $target
+            Write-Host "Install LASTEXITCODE=$LASTEXITCODE"
+            Get-ChildItem $target -Recurse | Select-Object FullName,Length | Format-Table | Out-String | Write-Host
+
+            Mark "VERIFY_SHORTCUT"
+            $verified = $shell.CreateShortcut($shortcutPath)
+            $verified | Select-Object TargetPath,Arguments,WorkingDirectory | Format-List | Out-String | Write-Host
+
+            Mark "DIRECT_INSTALLED_PS1"
+            powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $target "scripts\one_click_home_local.ps1") -InstallOnly -NoOpenResult
+            Write-Host "Direct LASTEXITCODE=$LASTEXITCODE"
+            if ($LASTEXITCODE -ne 0) { throw "DIRECT_EXIT:$LASTEXITCODE" }
+
+            Mark "START_CMD"
+            cmd.exe /d /c "`"$(Join-Path $target 'START_QUANTUM.cmd')`" -InstallOnly -NoOpenResult"
+            Write-Host "CMD LASTEXITCODE=$LASTEXITCODE"
+            if ($LASTEXITCODE -ne 0) { throw "CMD_EXIT:$LASTEXITCODE" }
+
+            Mark "SENTINELS_AND_REPAIR"
+            foreach ($folder in @("config", "data", "output")) {
+              $path = Join-Path $target "$folder\slr1-sentinel.txt"
+              [IO.File]::WriteAllText($path, "preserve-$folder", [Text.Encoding]::UTF8)
+            }
+            $stale = $shell.CreateShortcut($shortcutPath)
+            $stale.TargetPath = Join-Path $target "scripts\one_click_home_local.ps1"
+            $stale.WorkingDirectory = $target
+            $stale.Save()
+            & (Join-Path $packageRoot "scripts\install_home_local.ps1") -SourceRoot $packageRoot -TargetRoot $target
+            Write-Host "Repair LASTEXITCODE=$LASTEXITCODE"
+
+            Mark "PARTIAL_INSTALL"
+            New-Item (Join-Path $partial "scripts") -ItemType Directory -Force | Out-Null
+            Copy-Item (Join-Path $target "scripts\one_click_home_local.ps1") (Join-Path $partial "scripts\one_click_home_local.ps1") -Force
+            powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $partial "scripts\one_click_home_local.ps1") -InstallOnly -NoOpenResult
+            Write-Host "Partial LASTEXITCODE=$LASTEXITCODE"
+            if ($LASTEXITCODE -eq 0) { throw "PARTIAL_ACCEPTED" }
+            Mark "DIAGNOSTIC_PASS"
+          }
+          catch {
+            Write-Host "DIAGNOSTIC_EXCEPTION_TYPE=$($_.Exception.GetType().FullName)"
+            Write-Host "DIAGNOSTIC_EXCEPTION_MESSAGE=$($_.Exception.Message)"
+            Write-Host "DIAGNOSTIC_SCRIPT_STACK=$($_.ScriptStackTrace)"
+            Write-Host ($_ | Format-List * -Force | Out-String)
+            $global:diagnosticFailed = $true
+          }
+          finally { Stop-Transcript }
+          if ($global:diagnosticFailed) { exit 1 }
+      - name: Upload diagnostic transcript
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: SLR1-Windows-Diagnostic
+          path: ${{ runner.temp }}/slr1-windows-diagnostic.txt
+          if-no-files-found: error
+          retention-days: 3
