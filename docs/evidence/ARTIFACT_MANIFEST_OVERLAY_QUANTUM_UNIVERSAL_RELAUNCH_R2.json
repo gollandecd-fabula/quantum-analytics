@@ -1,0 +1,94 @@
+{
+  "entries": [
+    [
+      ".github/workflows/quantum-universal-relaunch-r2.yml",
+      "b5b1e2029931d9577e28c68d102ee4e3645fc8c75e549bab60c13bbf9808e4f6",
+      15131
+    ],
+    [
+      ".github/workflows/shortcut-launch-repair-r1.yml",
+      "497d5786e4c3092b3455d5392c7d313f31f3fe3710947de44e9dc59a0e833c35",
+      13233
+    ],
+    [
+      "docs/evidence/QUANTUM_UNIVERSAL_RELAUNCH_R2_RTM.json",
+      "6a3d2c08b4921b8279d83fd0ba20b91443263dcf368db62bf86664c3b47c8b88",
+      11336
+    ],
+    [
+      "requirements/windows-home-local.txt",
+      "135a6daa63c86e947e5a36c0bd6e9695aa4dcb0665656408e69adb256b84e2ca",
+      412
+    ],
+    [
+      "scripts/windows/build_local_production.ps1",
+      "b785d2453849f9da0db484523be19678a912cb2e2c3b14d60f37746222f31831",
+      14810
+    ],
+    [
+      "scripts/windows/import_source.ps1",
+      "2e1cd957acda49a0fd1bf8e924fd8bf7e04abbb6abe20023000938b9b3da0ced",
+      14741
+    ],
+    [
+      "scripts/windows/install_home_local.ps1",
+      "b7290d43f0449a1e1291ba4d0a2da6bf6cd7e98e353b13fe34e5d1dcc916d704",
+      24387
+    ],
+    [
+      "src/quantum/application/_finance_center_auto_inbox.py",
+      "5b950d44d3b245042e7bdcda4fcf1084275ae9769baa350622062fefe4a60345",
+      28339
+    ],
+    [
+      "src/quantum/pilot/import_xlsx_source.ps1",
+      "8e982aca31308397e52754582e85f4863ccad7b21f31e21c5ea5e8dc28b91ae4",
+      20612
+    ],
+    [
+      "src/quantum/pilot/universal_intake.py",
+      "22d1877c01935071782638fc78945a95441e3167ed2ad6ff17ca188e9edafa8a",
+      9451
+    ],
+    [
+      "src/quantum/pilot/universal_tables.py",
+      "876976de8b5de6d00e921a149ab15da76e0d48e180e132bdafd67cc29ef2c8af",
+      37726
+    ],
+    [
+      "tests/integration_manifest_support_m8.py",
+      "59064b4cac6a9829823d3be355dcab589fea206c34a82c5be9a716b279340e8d",
+      5683
+    ],
+    [
+      "tests/test_quantum_universal_relaunch_r2.py",
+      "691bac406e3a9cd6bc22966a22d5fcf6ff3463191908a126c0ce3dcaceb91e76",
+      7506
+    ],
+    [
+      "tests/test_universal_any_file_contract_r4.py",
+      "4905a2e1fe28eea97f859d1c48b27b9216abb6fed55029b54afef74aaa0be5dd",
+      5109
+    ],
+    [
+      "tests/test_universal_intake_hardening_r4.py",
+      "dc4963938300092c9a3401181abc9546d5c6f704d990f7ddfe1b94277fda0099",
+      3496
+    ],
+    [
+      "tests/test_windows_one_click_installer_r1.py",
+      "ece83290996704ca68257fa53c74d3a563f2cfe07aada549e761f796e252a91f",
+      11628
+    ],
+    [
+      "tests/test_windows_source_package_launchers_r1.py",
+      "f5e39a07a2159992c153b1046f1c104e44f88289098023f23cbdfb9abf6cc4ec",
+      2685
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": "QUANTUM-UNIVERSAL-RELAUNCH-R2",
+  "reason": "Corrective milestone adds passive content-first BIFF/XLS extraction, broad safe automatic intake, partial calculation without fabricated values, collision-resistant output names, deterministic installed relaunch without package reinstall, argument forwarding, verified Unicode/ASCII shortcut fallback, repair preservation and exact-head Windows validation. Release scope remains WB_ONLY, marketplace writes remain disabled, Ozon and Gatekeeper remain deferred, and physical L5 remains external.",
+  "remove_paths": [],
+  "base_shortcut_launch_repair_r1_overlay_git_blob_sha": "907ce148f6cee5ce0446c32ffbba0c2957611d32"
+}
