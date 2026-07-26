@@ -1,0 +1,72 @@
+name: Temporary QUR2 L4 Validator Patch
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - fix/quantum-shortcut-launch-repair-r1
+    paths:
+      - .github/workflows/qur2-l4-validator-apply.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: qur2-l4-validator-patch
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: fix/quantum-universal-relaunch-r2
+          fetch-depth: 1
+      - name: Apply exact validated patch
+        shell: python
+        run: |
+          from pathlib import Path
+
+          runner = Path("scripts/ci/l4_installed_runtime.ps1")
+          text = runner.read_text(encoding="ascii")
+          old = 'powershell.exe -NoProfile -ExecutionPolicy Bypass -File `"%~dp0scripts\\one_click_home_local.ps1`" -InstalledRoot `"%~dp0`" -SkipInstall",'
+          new = 'powershell.exe -NoProfile -ExecutionPolicy Bypass -File `"%~dp0scripts\\one_click_home_local.ps1`" -InstalledRoot `"%~dp0`" -SkipInstall %*",'
+          if text.count(old) != 1:
+              raise SystemExit("L4_LAUNCHER_MARKER_MISMATCH")
+          runner.write_text(text.replace(old, new, 1), encoding="ascii", newline="\n")
+
+          contract = Path("tests/test_l4_installed_runtime_contract.py")
+          text = contract.read_text(encoding="utf-8")
+          workflow_marker = '        self.assertIn("quantum-l4-installed-runtime-evidence", self.workflow)\n'
+          workflow_replacement = workflow_marker + '        self.assertIn("artifacts/l4-installed-runtime-*/**", self.workflow)\n'
+          if text.count(workflow_marker) != 1:
+              raise SystemExit("L4_EVIDENCE_ASSERTION_MARKER_MISMATCH")
+          text = text.replace(workflow_marker, workflow_replacement, 1)
+          old_assertion = '        self.assertIn(\'-InstalledRoot `"%~dp0`" -SkipInstall\', self.runner)\n'
+          new_assertion = '        self.assertIn(\'-InstalledRoot `"%~dp0`" -SkipInstall %*\', self.runner)\n'
+          if text.count(old_assertion) != 1:
+              raise SystemExit("L4_ARGUMENT_ASSERTION_MARKER_MISMATCH")
+          contract.write_text(
+              text.replace(old_assertion, new_assertion, 1),
+              encoding="utf-8",
+              newline="\n",
+          )
+      - name: Run focused contracts and publish patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PYTHONPATH="$PWD/src"
+          python -m unittest -v \
+            tests.test_l4_installed_runtime_contract \
+            tests.test_quantum_universal_relaunch_r2 \
+            tests.test_windows_one_click_installer_r1 \
+            tests.test_windows_source_package_launchers_r1
+          git diff --check
+          git config user.name quantum-ci
+          git config user.email quantum-ci@users.noreply.github.com
+          git add scripts/ci/l4_installed_runtime.ps1 tests/test_l4_installed_runtime_contract.py
+          git diff --cached --quiet && { echo "No validator changes staged" >&2; exit 1; }
+          git commit -m "Align L4 validator with repeatable launcher arguments"
+          git push origin HEAD:fix/quantum-universal-relaunch-r2
