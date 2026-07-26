@@ -1,9 +1,10 @@
-name: Temporary QUR2 Shell.Application Materializer Trigger
+name: Temporary QUR2 ShellApp Materializer
 
 on:
   pull_request:
     paths:
       - .github/workflows/tmp-qur2-verifier-r2-materialize.yml
+      - .qur2-shellapp-materializer/apply.py
 
 permissions:
   contents: write
@@ -29,70 +30,17 @@ jobs:
           fetch-depth: 0
           persist-credentials: true
 
-      - name: Apply exact marker-based verifier patch
+      - name: Preserve exact patch script
+        shell: bash
+        run: cp .qur2-shellapp-materializer/apply.py "$RUNNER_TEMP/qur2-shellapp-apply.py"
+
+      - name: Apply marker patch to immutable base
         shell: bash
         run: |
           set -euo pipefail
           git checkout --detach "$BASE_SHA"
           test "$(git rev-parse HEAD)" = "$BASE_SHA"
-          python3 - <<'PY'
-          from hashlib import sha256
-          import json
-          from pathlib import Path
-
-          workflow = Path('.github/workflows/quantum-universal-relaunch-r2.yml')
-          text = workflow.read_text(encoding='utf-8')
-          old = '''            $shell = New-Object -ComObject WScript.Shell
-            $shortcut = $shell.CreateShortcut($shortcutPath)
-            $expectedTarget = [IO.Path]::GetFullPath(
-              (Join-Path $target "START_QUANTUM.cmd")
-            )
-            if (
-              -not ([IO.Path]::GetFullPath([string]$shortcut.TargetPath)).Equals(
-                $expectedTarget, [StringComparison]::OrdinalIgnoreCase
-              ) -or
-              -not [string]::IsNullOrWhiteSpace([string]$shortcut.Arguments)
-            ) { throw "Shortcut verification failed." }
-'''
-          new = '''            $shell = New-Object -ComObject Shell.Application
-            $folder = $shell.Namespace((Split-Path -Parent $shortcutPath))
-            if ($null -eq $folder) { throw "Shortcut folder namespace unavailable." }
-            $item = $folder.ParseName((Split-Path -Leaf $shortcutPath))
-            if ($null -eq $item) { throw "Shortcut shell item unavailable." }
-            $shortcut = $item.GetLink
-            if ($null -eq $shortcut) { throw "Shortcut shell link unavailable." }
-            $expectedTarget = [IO.Path]::GetFullPath(
-              (Join-Path $target "START_QUANTUM.cmd")
-            )
-            $actualTarget = [IO.Path]::GetFullPath([string]$shortcut.Path)
-            if (
-              -not $actualTarget.Equals(
-                $expectedTarget, [StringComparison]::OrdinalIgnoreCase
-              ) -or
-              -not [string]::IsNullOrWhiteSpace([string]$shortcut.Arguments)
-            ) { throw "Shortcut verification failed." }
-'''
-          if text.count(old) != 1:
-              raise SystemExit(f'QUR2_OLD_VERIFIER_COUNT={text.count(old)}')
-          workflow.write_text(text.replace(old, new, 1), encoding='utf-8', newline='\n')
-
-          overlay_path = Path('docs/evidence/ARTIFACT_MANIFEST_OVERLAY_QUANTUM_UNIVERSAL_RELAUNCH_R2.json')
-          overlay = json.loads(overlay_path.read_text(encoding='utf-8'))
-          payload = workflow.read_bytes()
-          entry = [workflow.as_posix(), sha256(payload).hexdigest(), len(payload)]
-          matches = 0
-          for index, current in enumerate(overlay['entries']):
-              if current[0] == entry[0]:
-                  overlay['entries'][index] = entry
-                  matches += 1
-          if matches != 1:
-              raise SystemExit(f'QUR2_MANIFEST_ENTRY_COUNT={matches}')
-          overlay_path.write_text(
-              json.dumps(overlay, ensure_ascii=False, indent=2) + '\n',
-              encoding='utf-8',
-              newline='\n',
-          )
-          PY
+          python3 "$RUNNER_TEMP/qur2-shellapp-apply.py"
           test "$(sha256sum .github/workflows/quantum-universal-relaunch-r2.yml | awk '{print $1}')" = "$EXPECTED_WORKFLOW_SHA256"
           test "$(sha256sum docs/evidence/ARTIFACT_MANIFEST_OVERLAY_QUANTUM_UNIVERSAL_RELAUNCH_R2.json | awk '{print $1}')" = "$EXPECTED_OVERLAY_SHA256"
           git diff --check
@@ -106,7 +54,7 @@ jobs:
           export PYTHONPATH="$PWD/src"
           python3 -m quantum.scripts.ci
 
-      - name: Commit exact tested tree and publish candidate
+      - name: Commit tested tree and publish candidate
         shell: bash
         run: |
           set -euo pipefail
