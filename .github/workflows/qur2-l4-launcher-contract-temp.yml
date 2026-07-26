@@ -1,0 +1,101 @@
+name: Temporary QUR2 L4 Launcher Contract Patch
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - fix/quantum-shortcut-launch-repair-r1
+    paths:
+      - .github/workflows/qur2-l4-launcher-contract-temp.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: qur2-l4-launcher-contract-patch
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: fix/quantum-universal-relaunch-r2
+          fetch-depth: 1
+      - name: Patch validator and exact manifest entries
+        shell: python
+        run: |
+          from hashlib import sha256
+          import json
+          from pathlib import Path
+
+          runner = Path("scripts/ci/l4_installed_runtime.ps1")
+          text = runner.read_text(encoding="ascii")
+          old = '''            "@echo off",
+            "setlocal",
+            "powershell.exe -NoProfile -ExecutionPolicy Bypass -File `"%~dp0scripts\\one_click_home_local.ps1`" -InstalledRoot `"%~dp0`" -SkipInstall %*",
+'''
+          new = '''            "@echo off",
+            "setlocal EnableExtensions",
+            "for %%I in (`"%~dp0.`") do set `"QUANTUM_ROOT=%%~fI`"",
+            "powershell.exe -NoProfile -ExecutionPolicy Bypass -File `"%QUANTUM_ROOT%\\scripts\\one_click_home_local.ps1`" -InstalledRoot `"%QUANTUM_ROOT%`" -SkipInstall %*",
+'''
+          if text.count(old) != 1:
+              raise SystemExit("L4_START_CONTRACT_MARKER_MISMATCH")
+          runner.write_text(text.replace(old, new, 1), encoding="ascii", newline="\n")
+
+          contract = Path("tests/test_l4_installed_runtime_contract.py")
+          text = contract.read_text(encoding="utf-8")
+          old = '        self.assertIn(\'-InstalledRoot `"%~dp0`" -SkipInstall %*\', self.runner)\n'
+          new = '''        self.assertIn('setlocal EnableExtensions', self.runner)
+        self.assertIn('QUANTUM_ROOT=%%~fI', self.runner)
+        self.assertIn('-InstalledRoot `"%QUANTUM_ROOT%`" -SkipInstall %*', self.runner)
+'''
+          if text.count(old) != 1:
+              raise SystemExit("L4_TEST_MARKER_MISMATCH")
+          contract.write_text(text.replace(old, new, 1), encoding="utf-8", newline="\n")
+
+          overlay_path = Path(
+              "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_QUANTUM_UNIVERSAL_RELAUNCH_R2.json"
+          )
+          overlay = json.loads(overlay_path.read_text(encoding="utf-8"))
+          metrics = {}
+          for path in (runner, contract):
+              payload = path.read_bytes()
+              metrics[path.as_posix()] = [
+                  path.as_posix(), sha256(payload).hexdigest(), len(payload)
+              ]
+          found = set()
+          for index, entry in enumerate(overlay["entries"]):
+              if entry[0] in metrics:
+                  overlay["entries"][index] = metrics[entry[0]]
+                  found.add(entry[0])
+          if found != set(metrics):
+              raise SystemExit(f"QUR2_OVERLAY_ENTRY_MISSING:{sorted(set(metrics)-found)}")
+          overlay_path.write_text(
+              json.dumps(overlay, ensure_ascii=False, indent=2) + "\n",
+              encoding="utf-8",
+              newline="\n",
+          )
+      - name: Verify and publish
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PYTHONPATH="$PWD/src"
+          python -m unittest -v \
+            tests.test_l4_installed_runtime_contract \
+            tests.test_quantum_universal_relaunch_r2 \
+            tests.test_windows_one_click_installer_r1 \
+            tests.test_windows_source_package_launchers_r1
+          git diff --check
+          git config user.name quantum-ci
+          git config user.email quantum-ci@users.noreply.github.com
+          git add \
+            scripts/ci/l4_installed_runtime.ps1 \
+            tests/test_l4_installed_runtime_contract.py \
+            docs/evidence/ARTIFACT_MANIFEST_OVERLAY_QUANTUM_UNIVERSAL_RELAUNCH_R2.json
+          git diff --cached --quiet && { echo "No L4 contract changes staged" >&2; exit 1; }
+          git commit -m "Align L4 contract with installed absolute-root launcher"
+          git push origin HEAD:fix/quantum-universal-relaunch-r2
