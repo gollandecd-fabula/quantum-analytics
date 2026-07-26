@@ -4,13 +4,12 @@ on:
   pull_request:
     paths:
       - .github/workflows/tmp-qur2-source-export.yml
-  workflow_dispatch:
 
 permissions:
   contents: read
 
 env:
-  BASE_SHA: 61f8a8e523ef4f760c48ac4e59606ecde0f3fe7b
+  TARGET_SHA: c8b4941151989d5eeed4a59b09094ec37fb0f7bf
 
 jobs:
   export:
@@ -18,20 +17,20 @@ jobs:
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
         with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
-          fetch-depth: 3
+          ref: fix/quantum-universal-relaunch-r2
+          fetch-depth: 1
       - name: Assert and create exact source archive
         shell: bash
         run: |
           set -euo pipefail
-          git cat-file -e "$BASE_SHA^{commit}"
-          git archive --format=zip --output="$RUNNER_TEMP/qur2-exact-source.zip" "$BASE_SHA"
-          sha256sum "$RUNNER_TEMP/qur2-exact-source.zip" > "$RUNNER_TEMP/qur2-exact-source.sha256"
+          test "$(git rev-parse HEAD)" = "$TARGET_SHA"
+          git archive --format=zip --output="$RUNNER_TEMP/qur2-current-source.zip" HEAD
+          sha256sum "$RUNNER_TEMP/qur2-current-source.zip" > "$RUNNER_TEMP/qur2-current-source.sha256"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: QUR2-Exact-Source-61f8a8e
+          name: QUR2-Current-Source-c8b4941
           path: |
-            ${{ runner.temp }}/qur2-exact-source.zip
-            ${{ runner.temp }}/qur2-exact-source.sha256
+            ${{ runner.temp }}/qur2-current-source.zip
+            ${{ runner.temp }}/qur2-current-source.sha256
           if-no-files-found: error
           retention-days: 3
