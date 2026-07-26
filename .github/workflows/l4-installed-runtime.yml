@@ -78,7 +78,7 @@ jobs:
         with:
           name: quantum-l4-installed-runtime-evidence
           path: |
-            artifacts/l4-installed-runtime-*/**
+            artifacts/l4-installed-runtime/**
             l4-installed-runtime.log
             l4-installed-runtime-postcheck.log
           if-no-files-found: error

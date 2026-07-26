@@ -27,7 +27,6 @@ class L4InstalledRuntimeContractTests(unittest.TestCase):
         self.assertIn("scripts\\ci\\l4_installed_runtime.ps1", self.workflow)
         self.assertIn("if: always()", self.workflow)
         self.assertIn("quantum-l4-installed-runtime-evidence", self.workflow)
-        self.assertIn("artifacts/l4-installed-runtime-*/**", self.workflow)
         self.assertIn("src/quantum/application/**", self.workflow)
 
     def test_workflow_actions_are_pinned_to_full_commit_shas(self) -> None:
@@ -73,9 +72,7 @@ class L4InstalledRuntimeContractTests(unittest.TestCase):
 
     def test_runner_locks_installed_launcher_semantics(self) -> None:
         self.assertIn("Assert-LauncherContracts", self.runner)
-        self.assertIn("setlocal EnableExtensions", self.runner)
-        self.assertIn("QUANTUM_ROOT=%%~fI", self.runner)
-        self.assertIn('-InstalledRoot `"%QUANTUM_ROOT%`" -SkipInstall %*', self.runner)
+        self.assertIn('-InstalledRoot `"%~dp0`" -SkipInstall', self.runner)
         self.assertIn("INSTALLED_LAUNCHER_CONTENT", self.runner)
         self.assertIn("START_QUANTUM.cmd", self.runner)
         self.assertIn("IMPORT_XLSX.cmd", self.runner)

@@ -135,10 +135,9 @@ if (Test-Path -LiteralPath $documentation -PathType Leaf) {
 
 $startCommand = @'
 @echo off
-setlocal EnableExtensions
+setlocal
 title Quantum
-for %%I in ("%~dp0.") do set "QUANTUM_ROOT=%%~fI"
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%QUANTUM_ROOT%\scripts\one_click_home_local.ps1" %*
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\one_click_home_local.ps1" -PackageRoot "%~dp0"
 set "quantum_exit=%errorlevel%"
 if not "%quantum_exit%"=="0" pause
 exit /b %quantum_exit%

@@ -14,6 +14,7 @@ from .universal_gateway import (
 from .universal_tables import UniversalTableError, extract_tables
 
 
+_OLE_MAGIC = b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1"
 _PDF_ACTIVE_MARKERS = (
     b"/javascript",
     b"/js",
@@ -28,6 +29,14 @@ _PDF_ACTIVE_MARKERS = (
 
 def classify_payload(payload: bytes, suffix: str) -> IntakeDecision:
     """Apply fail-closed policy around the low-level content classifier."""
+    if payload.startswith(_OLE_MAGIC):
+        return IntakeDecision(
+            "QUARANTINED_SECURITY",
+            "OLE_COMPOUND_REQUIRES_SANDBOX",
+            None,
+            {},
+            ("OLE_COMPOUND_REQUIRES_DEDICATED_ADAPTER",),
+        )
     if payload.startswith(b"%PDF-"):
         lowered = payload.lower()
         if any(marker in lowered for marker in _PDF_ACTIVE_MARKERS):

@@ -285,7 +285,7 @@ if ([string]::IsNullOrWhiteSpace($StorageRoot)) {
 if ([string]::IsNullOrWhiteSpace($Output)) {
     $outputDirectory = Join-Path $env:LOCALAPPDATA "QuantumLocalProduction\output"
     New-Item -ItemType Directory -Path $outputDirectory -Force | Out-Null
-    $Output = Join-Path $outputDirectory ("import_{0}_{1}.json" -f (Get-Date -Format "yyyyMMdd_HHmmss_fff"), ([guid]::NewGuid().ToString("N").Substring(0, 8)))
+    $Output = Join-Path $outputDirectory ("import_{0}.json" -f (Get-Date -Format "yyyyMMdd_HHmmss"))
 }
 
 $scanReceipt = Resolve-ScanReceipt -SourcePath $File

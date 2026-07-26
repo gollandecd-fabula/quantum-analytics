@@ -31,11 +31,6 @@ SLR1_OVERLAY_PATH = (
     / "docs/evidence"
     / "ARTIFACT_MANIFEST_OVERLAY_SHORTCUT_LAUNCH_REPAIR_R1.json"
 )
-QUR2_OVERLAY_PATH = (
-    ROOT
-    / "docs/evidence"
-    / "ARTIFACT_MANIFEST_OVERLAY_QUANTUM_UNIVERSAL_RELAUNCH_R2.json"
-)
 
 
 class Wbr2M5ClosureCorrectiveR2Tests(unittest.TestCase):
@@ -115,10 +110,6 @@ class Wbr2M5ClosureCorrectiveR2Tests(unittest.TestCase):
         slr1 = json.loads(SLR1_OVERLAY_PATH.read_text(encoding="utf-8"))
         final.update(
             {path: [path, digest, size] for path, digest, size in slr1["entries"]}
-        )
-        qur2 = json.loads(QUR2_OVERLAY_PATH.read_text(encoding="utf-8"))
-        final.update(
-            {path: [path, digest, size] for path, digest, size in qur2["entries"]}
         )
         for path, _digest, _size in overlay["entries"]:
             self.assertEqual(rows[path], final[path])

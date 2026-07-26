@@ -43,10 +43,6 @@ SHORTCUT_LAUNCH_REPAIR_R1_OVERLAY = (
     "ARTIFACT_MANIFEST_OVERLAY_SHORTCUT_LAUNCH_REPAIR_R1.json",
     "base_xlsx_namespace_fallback_r1_overlay_git_blob_sha",
 )
-QUANTUM_UNIVERSAL_RELAUNCH_R2_OVERLAY = (
-    "ARTIFACT_MANIFEST_OVERLAY_QUANTUM_UNIVERSAL_RELAUNCH_R2.json",
-    "base_shortcut_launch_repair_r1_overlay_git_blob_sha",
-)
 ALL_OVERLAY_NAMES = tuple(
     name
     for name, _ in (
@@ -63,7 +59,6 @@ ALL_OVERLAY_NAMES = tuple(
     UNIVERSAL_PARTIAL_R1_OVERLAY[0],
     XLSX_NAMESPACE_FALLBACK_R1_OVERLAY[0],
     SHORTCUT_LAUNCH_REPAIR_R1_OVERLAY[0],
-    QUANTUM_UNIVERSAL_RELAUNCH_R2_OVERLAY[0],
 )
 CONTROL_PATHS = {
     "docs/evidence/ARTIFACT_MANIFEST.json",
@@ -72,9 +67,8 @@ CONTROL_PATHS = {
 
 # Historical product evidence remains linear through R99. GOV-R1 and R100 are
 # parallel branches from immutable R99. M5 closure R1, corrective R2 and this
-# full-project Red Team, Universal Partial R1, namespace fallback, shortcut
-# repair and QUR2 overlays form an append-only governance/product-audit chain.
-# No overlay changes marketplace boundaries.
+# full-project Red Team and Universal Partial R1 overlays form an append-only
+# governance/product-audit chain. Neither overlay changes marketplace boundaries.
 _core.FINAL_NAMES = PRODUCT_BASE_NAMES
 _core.FINAL_OVERLAY_R1 = FINAL_OVERLAY_R1
 _core.FINAL_OVERLAYS = PRODUCT_BASE_OVERLAYS
@@ -126,10 +120,6 @@ def load_effective_manifest() -> dict:
         evidence
         / "ARTIFACT_MANIFEST_OVERLAY_XLSX_NAMESPACE_FALLBACK_R1.json"
     ).read_bytes()
-    shortcut_r1_raw = (
-        evidence
-        / "ARTIFACT_MANIFEST_OVERLAY_SHORTCUT_LAUNCH_REPAIR_R1.json"
-    ).read_bytes()
 
     _apply_parallel_overlay(artifacts, GOVERNANCE_OVERLAY, r99_raw)
     _apply_parallel_overlay(artifacts, R100_OVERLAY, r99_raw)
@@ -158,11 +148,6 @@ def load_effective_manifest() -> dict:
         artifacts,
         SHORTCUT_LAUNCH_REPAIR_R1_OVERLAY,
         xnf1_raw,
-    )
-    _apply_parallel_overlay(
-        artifacts,
-        QUANTUM_UNIVERSAL_RELAUNCH_R2_OVERLAY,
-        shortcut_r1_raw,
     )
 
     current["artifacts"] = [artifacts[path] for path in sorted(artifacts)]

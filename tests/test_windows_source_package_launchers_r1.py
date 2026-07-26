@@ -17,8 +17,7 @@ README = "\n".join(
 
 class WindowsSourcePackageLaunchersR1Tests(unittest.TestCase):
     def test_source_start_launcher_never_attests_for_operator(self):
-        self.assertNotIn('-PackageRoot "%~dp0"', BUILDER)
-        self.assertIn('one_click_home_local.ps1" %*', BUILDER)
+        self.assertIn('-PackageRoot "%~dp0"', BUILDER)
         self.assertNotIn(
             '-PackageRoot "%~dp0" -AuthorityAttested -SchemaReviewed',
             BUILDER,
