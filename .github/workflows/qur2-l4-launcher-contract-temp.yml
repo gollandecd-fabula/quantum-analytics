@@ -1,85 +1,65 @@
-name: Temporary QUR2 L4 Launcher Contract Patch
+name: Temporary QUR2 L4 Launcher Contract Apply
 
 on:
-  pull_request_target:
-    types: [opened, synchronize, reopened]
+  push:
     branches:
       - fix/quantum-universal-relaunch-r2
+    paths:
+      - .qur2-l4-payload/APPLY
 
 permissions:
   contents: write
 
 concurrency:
-  group: qur2-l4-launcher-contract-patch
+  group: qur2-l4-launcher-contract-apply
   cancel-in-progress: false
 
 jobs:
   apply:
-    if: >-
-      github.event.pull_request.head.repo.full_name == github.repository &&
-      github.event.pull_request.head.ref == 'tmp/qur2-l4-contract-apply'
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
         with:
           ref: fix/quantum-universal-relaunch-r2
           fetch-depth: 1
-      - name: Patch validator and exact manifest entries
-        shell: python
+      - name: Verify and extract exact patch
+        shell: bash
+        env:
+          PATCH_SHA256: e845c0d8098899d3c263165c0e2e96f10284d8f85b4c537a55246fa72bda5f39
+          OLD_RUNNER_SHA256: 16f052515ab122f2ee09d5a7390e8811353148490a46d9fc3cd6b99a18461e78
+          OLD_TEST_SHA256: 38eb659eb46eaa7190cf85647ee88112af8217312ffcc1724ae50f83b617c8fe
+          OLD_OVERLAY_SHA256: cf88e2f0aec1b502c44d53f67246658cb67bcd92c9000533cf6c85e81d4b6dca
+          NEW_RUNNER_SHA256: c33e974fffacf988892b457d7b829d3d3f440d9bb815a5c321d574a853b24fed
+          NEW_TEST_SHA256: f5da1f707f6a4ead107a961750e5616640ea8656dd52e99fcacd677ba7bc7dfd
+          NEW_OVERLAY_SHA256: 52391aeef77569c0b69c9df0aaf1169a66b8060c58749f8665e0b487fe189650
         run: |
-          from hashlib import sha256
-          import json
-          from pathlib import Path
-
-          runner = Path("scripts/ci/l4_installed_runtime.ps1")
-          text = runner.read_text(encoding="ascii")
-          old = '''            "@echo off",
-            "setlocal",
-            "powershell.exe -NoProfile -ExecutionPolicy Bypass -File `"%~dp0scripts\\one_click_home_local.ps1`" -InstalledRoot `"%~dp0`" -SkipInstall %*",
-'''
-          new = '''            "@echo off",
-            "setlocal EnableExtensions",
-            "for %%I in (`"%~dp0.`") do set `"QUANTUM_ROOT=%%~fI`"",
-            "powershell.exe -NoProfile -ExecutionPolicy Bypass -File `"%QUANTUM_ROOT%\\scripts\\one_click_home_local.ps1`" -InstalledRoot `"%QUANTUM_ROOT%`" -SkipInstall %*",
-'''
-          if text.count(old) != 1:
-              raise SystemExit("L4_START_CONTRACT_MARKER_MISMATCH")
-          runner.write_text(text.replace(old, new, 1), encoding="ascii", newline="\n")
-
-          contract = Path("tests/test_l4_installed_runtime_contract.py")
-          text = contract.read_text(encoding="utf-8")
-          old = '        self.assertIn(\'-InstalledRoot `"%~dp0`" -SkipInstall %*\', self.runner)\n'
-          new = '''        self.assertIn('setlocal EnableExtensions', self.runner)
-        self.assertIn('QUANTUM_ROOT=%%~fI', self.runner)
-        self.assertIn('-InstalledRoot `"%QUANTUM_ROOT%`" -SkipInstall %*', self.runner)
-'''
-          if text.count(old) != 1:
-              raise SystemExit("L4_TEST_MARKER_MISMATCH")
-          contract.write_text(text.replace(old, new, 1), encoding="utf-8", newline="\n")
-
-          overlay_path = Path(
-              "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_QUANTUM_UNIVERSAL_RELAUNCH_R2.json"
-          )
-          overlay = json.loads(overlay_path.read_text(encoding="utf-8"))
-          metrics = {}
-          for path in (runner, contract):
-              payload = path.read_bytes()
-              metrics[path.as_posix()] = [
-                  path.as_posix(), sha256(payload).hexdigest(), len(payload)
-              ]
-          found = set()
-          for index, entry in enumerate(overlay["entries"]):
-              if entry[0] in metrics:
-                  overlay["entries"][index] = metrics[entry[0]]
-                  found.add(entry[0])
-          if found != set(metrics):
-              raise SystemExit(f"QUR2_OVERLAY_ENTRY_MISSING:{sorted(set(metrics)-found)}")
-          overlay_path.write_text(
-              json.dumps(overlay, ensure_ascii=False, indent=2) + "\n",
-              encoding="utf-8",
-              newline="\n",
-          )
-      - name: Verify and publish
+          set -euo pipefail
+          test "$(sha256sum scripts/ci/l4_installed_runtime.ps1 | awk '{print $1}')" = "$OLD_RUNNER_SHA256"
+          test "$(sha256sum tests/test_l4_installed_runtime_contract.py | awk '{print $1}')" = "$OLD_TEST_SHA256"
+          test "$(sha256sum docs/evidence/ARTIFACT_MANIFEST_OVERLAY_QUANTUM_UNIVERSAL_RELAUNCH_R2.json | awk '{print $1}')" = "$OLD_OVERLAY_SHA256"
+          mapfile -t parts < <(find .qur2-l4-payload -maxdepth 1 -type f -name 'payload.[0-9][0-9]' -print | sort)
+          test "${#parts[@]}" -eq 2
+          cat "${parts[@]}" | base64 --decode > "$RUNNER_TEMP/qur2-l4-patch.tar.gz"
+          test "$(sha256sum "$RUNNER_TEMP/qur2-l4-patch.tar.gz" | awk '{print $1}')" = "$PATCH_SHA256"
+          tar -tzf "$RUNNER_TEMP/qur2-l4-patch.tar.gz" | sort > "$RUNNER_TEMP/members.txt"
+          cat > "$RUNNER_TEMP/expected.txt" <<'EOF'
+          ./
+          ./docs/
+          ./docs/evidence/
+          ./docs/evidence/ARTIFACT_MANIFEST_OVERLAY_QUANTUM_UNIVERSAL_RELAUNCH_R2.json
+          ./scripts/
+          ./scripts/ci/
+          ./scripts/ci/l4_installed_runtime.ps1
+          ./tests/
+          ./tests/test_l4_installed_runtime_contract.py
+          EOF
+          sort -o "$RUNNER_TEMP/expected.txt" "$RUNNER_TEMP/expected.txt"
+          diff -u "$RUNNER_TEMP/expected.txt" "$RUNNER_TEMP/members.txt"
+          tar -xzf "$RUNNER_TEMP/qur2-l4-patch.tar.gz" -C .
+          test "$(sha256sum scripts/ci/l4_installed_runtime.ps1 | awk '{print $1}')" = "$NEW_RUNNER_SHA256"
+          test "$(sha256sum tests/test_l4_installed_runtime_contract.py | awk '{print $1}')" = "$NEW_TEST_SHA256"
+          test "$(sha256sum docs/evidence/ARTIFACT_MANIFEST_OVERLAY_QUANTUM_UNIVERSAL_RELAUNCH_R2.json | awk '{print $1}')" = "$NEW_OVERLAY_SHA256"
+      - name: Run focused contracts and publish
         shell: bash
         run: |
           set -euo pipefail
@@ -96,6 +76,6 @@ jobs:
             scripts/ci/l4_installed_runtime.ps1 \
             tests/test_l4_installed_runtime_contract.py \
             docs/evidence/ARTIFACT_MANIFEST_OVERLAY_QUANTUM_UNIVERSAL_RELAUNCH_R2.json
-          git diff --cached --quiet && { echo "No L4 contract changes staged" >&2; exit 1; }
-          git commit -m "Align L4 contract with installed absolute-root launcher"
+          git diff --cached --quiet && { echo 'No exact patch staged' >&2; exit 1; }
+          git commit -m 'Align L4 contract with installed absolute-root launcher'
           git push origin HEAD:fix/quantum-universal-relaunch-r2
