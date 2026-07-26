@@ -1,0 +1,68 @@
+{
+  "rtm_id": "QUANTUM-SHORTCUT-LAUNCH-REPAIR-R1",
+  "created_on": "2026-07-26",
+  "immutable_base_exact_head": "30da46cb2e156d8ce8ea4cf8165229d559a5c5b5",
+  "trigger": "Physical Windows pilot shortcut launched installed scripts/one_click_home_local.ps1 without installed-mode arguments and failed while searching for scripts/install_home_local.ps1 inside the installed runtime.",
+  "purpose": "Make clean install, upgrade, repaired installation, desktop shortcut, START_QUANTUM.cmd and direct installed-script launch converge on the same verified installed-runtime path without treating an installed runtime as an installation package.",
+  "requirements": [
+    {
+      "id": "SLR1-R1",
+      "requirement": "Direct execution of the installed one_click_home_local.ps1 must automatically detect a complete installed runtime and must not search for install_home_local.ps1.",
+      "test": "Install to a temporary Windows path and invoke installed scripts/one_click_home_local.ps1 with -InstallOnly and no PackageRoot, InstalledRoot or SkipInstall arguments.",
+      "pass_criterion": "Exit code 0 and no INSTALLER_PACKAGE_NOT_FOUND-style failure."
+    },
+    {
+      "id": "SLR1-R2",
+      "requirement": "START_QUANTUM.cmd must pass a canonical installed root without a trailing-backslash quoting ambiguity and must forward optional test arguments.",
+      "test": "Invoke START_QUANTUM.cmd -InstallOnly -NoOpenResult from paths containing spaces and Cyrillic characters.",
+      "pass_criterion": "Installed mode is selected and the runtime self-check completes."
+    },
+    {
+      "id": "SLR1-R3",
+      "requirement": "Installation or repair must replace stale user and common-desktop Quantum shortcuts with a verified shortcut targeting START_QUANTUM.cmd in the current installation root.",
+      "test": "Seed stale shortcuts targeting one_click_home_local.ps1 or an obsolete root, reinstall, then inspect TargetPath and WorkingDirectory through WScript.Shell.",
+      "pass_criterion": "Exactly the current START_QUANTUM.cmd target is used and direct-script stale targets are removed."
+    },
+    {
+      "id": "SLR1-R4",
+      "requirement": "A partial or damaged installed runtime must fail with an explicit repair-required diagnostic and must never be misclassified as a source package.",
+      "test": "Remove one required installed component and invoke the installed launcher.",
+      "pass_criterion": "Fail-closed HOME_LOCAL_INSTALLATION_INCOMPLETE diagnostic identifies missing components; config, data and output remain unchanged."
+    },
+    {
+      "id": "SLR1-R5",
+      "requirement": "Upgrade over the previous XNF1 installation must atomically replace launch surfaces while preserving user config, data and output.",
+      "test": "Install old-layout fixture, create sentinel user files, run replacement installer, verify launch and sentinels.",
+      "pass_criterion": "Launcher paths are repaired and all user sentinels retain identical SHA-256."
+    },
+    {
+      "id": "SLR1-R6",
+      "requirement": "The one-click EXE built from the corrected exact head must pass clean-install, upgrade, shortcut, CMD, direct-script, installed-runtime, bundle and native self-test gates on Windows.",
+      "test": "Exact-head Windows workflow and installer workflow.",
+      "pass_criterion": "Downloadable EXE with exact SHA-256 and zero open reproducible P0/P1 defects."
+    }
+  ],
+  "capability_gate": {
+    "repository_patch": "SUPPORTED",
+    "windows_clean_install": "SUPPORTED_HOSTED",
+    "windows_upgrade_repair": "SUPPORTED_HOSTED",
+    "shortcut_com_inspection": "SUPPORTED_HOSTED",
+    "path_with_spaces_and_cyrillic": "SUPPORTED_HOSTED",
+    "installer_exe_build": "SUPPORTED",
+    "physical_user_pc_retest": "EXTERNAL"
+  },
+  "milestones": [
+    {"id": "SLR1-M0", "title": "Reproduce and map launch paths", "status": "COMPLETE"},
+    {"id": "SLR1-M1", "title": "Installed/package mode separation", "status": "NOT_STARTED"},
+    {"id": "SLR1-M2", "title": "CMD and shortcut repair", "status": "NOT_STARTED"},
+    {"id": "SLR1-M3", "title": "Upgrade and conflict Red Team", "status": "NOT_STARTED"},
+    {"id": "SLR1-M4", "title": "Exact-head replacement EXE", "status": "NOT_STARTED"}
+  ],
+  "boundaries": {
+    "marketplace_writes": "DISABLED",
+    "ozon": "DEFERRED",
+    "gatekeeper": "DISCONNECTED",
+    "main_merge": "NOT_AUTHORIZED",
+    "release": "BLOCKED_UNTIL_VALIDATION"
+  }
+}
