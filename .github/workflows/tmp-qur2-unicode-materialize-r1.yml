@@ -1,0 +1,115 @@
+name: Temporary QUR2 Unicode Materializer R1
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/tmp-qur2-unicode-materialize-r1.yml
+      - .qur2-unicode-payload/**
+
+permissions:
+  contents: write
+
+concurrency:
+  group: qur2-unicode-materialize-r1
+  cancel-in-progress: false
+
+env:
+  BASE_SHA: c687a514db1c8446472912ae674ebe4d7e6ba018
+  PAYLOAD_SHA256: 92c43323020fe3858fa6402fa01f08e74a6857cfaa2085f71092f08602903ab2
+  EXPECTED_TREE_SHA: b5698da795d8e62fb934c49c4649d6c9c0584153
+  CANDIDATE_BRANCH: tmp/qur2-unicode-tested-candidate
+
+jobs:
+  materialize:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout transport head
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Verify and preserve SHA-bound payload
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object .qur2-unicode-payload/payload.00)" = "2145a8cefbfb52f08da64794087278b5bf0369f3"
+          test "$(git hash-object .qur2-unicode-payload/payload.01)" = "e57d8e4d09721c144cc5fb05f9452d0198117961"
+          test "$(git hash-object .qur2-unicode-payload/payload.02)" = "1a395643d2102f83d8ce8c4175eed41832234af9"
+          test "$(git hash-object .qur2-unicode-payload/payload.03)" = "624b25d44ca4cefb10dced1e123a50b21fb3228a"
+          cat .qur2-unicode-payload/payload.* > "$RUNNER_TEMP/qur2-patch.b64"
+          base64 --decode "$RUNNER_TEMP/qur2-patch.b64" > "$RUNNER_TEMP/qur2-patch.tar.gz"
+          echo "$PAYLOAD_SHA256  $RUNNER_TEMP/qur2-patch.tar.gz" | sha256sum --check
+
+      - name: Apply patch to immutable QUR2 candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          git checkout --detach "$BASE_SHA"
+          test "$(git rev-parse HEAD)" = "$BASE_SHA"
+          rm -f .github/workflows/qur2-install-output-apply-temp.yml
+          rm -rf .qur2-install-output-payload
+          tar -xzf "$RUNNER_TEMP/qur2-patch.tar.gz"
+          git diff --check
+          python3 - <<'PY'
+          import subprocess
+          expected = {
+              '.github/workflows/qur2-install-output-apply-temp.yml',
+              '.qur2-install-output-payload/payload.00',
+              'docs/evidence/ARTIFACT_MANIFEST_OVERLAY_QUANTUM_UNIVERSAL_RELAUNCH_R2.json',
+              'scripts/windows/install_home_local.ps1',
+              'tests/test_quantum_universal_relaunch_r2.py',
+              'tests/test_shortcut_launch_repair_r1.py',
+              'tests/test_windows_one_click_installer_r1.py',
+          }
+          actual = set(subprocess.check_output(
+              ['git', 'diff', '--name-only', 'HEAD'], text=True
+          ).splitlines())
+          if actual != expected:
+              raise SystemExit(f'QUR2_SCOPE_MISMATCH expected={sorted(expected)} actual={sorted(actual)}')
+          print('QUR2_SCOPE=PASS')
+          PY
+          git add -A
+
+      - name: Run focused QUR2 and launcher contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PYTHONPATH="$PWD/src"
+          python3 -m unittest -v \
+            tests.test_quantum_universal_relaunch_r2 \
+            tests.test_windows_one_click_installer_r1 \
+            tests.test_windows_source_package_launchers_r1 \
+            tests.test_l4_installed_runtime_contract \
+            tests.test_shortcut_launch_repair_r1
+
+      - name: Run complete source CI
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PYTHONPATH="$PWD/src"
+          python3 -m quantum.scripts.ci
+
+      - name: Commit exact tested tree and publish evidence branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name quantum-ci
+          git config user.email quantum-ci@users.noreply.github.com
+          git commit -m 'Fix QUR2 Unicode shortcut under Windows PowerShell 5.1'
+          test "$(git rev-parse 'HEAD^{tree}')" = "$EXPECTED_TREE_SHA"
+          git rev-parse HEAD | tee "$RUNNER_TEMP/qur2-candidate-commit.txt"
+          git rev-parse 'HEAD^{tree}' | tee "$RUNNER_TEMP/qur2-candidate-tree.txt"
+          git push origin "HEAD:refs/heads/$CANDIDATE_BRANCH"
+
+      - name: Upload materialization evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: QUR2-Unicode-Materialization-R1
+          path: |
+            ${{ runner.temp }}/qur2-candidate-commit.txt
+            ${{ runner.temp }}/qur2-candidate-tree.txt
+          if-no-files-found: warn
+          retention-days: 3
