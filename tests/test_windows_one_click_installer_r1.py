@@ -162,8 +162,11 @@ class WindowsOneClickInstallerR1Tests(unittest.TestCase):
         self.assertIn('[Environment+SpecialFolder]::DesktopDirectory', script)
         self.assertIn('[Environment+SpecialFolder]::CommonDesktopDirectory', script)
         self.assertIn('Remove-Item -LiteralPath $path -Force', script)
-        self.assertIn('$shortcut.TargetPath = [IO.Path]::GetFullPath($Launcher)', script)
-        self.assertIn('$shortcut.Arguments = ""', script)
+        self.assertIn('IShellLinkW', script)
+        self.assertIn('IPersistFile', script)
+        self.assertIn('[Quantum.NativeShortcut]::CreateAndVerify(', script)
+        self.assertIn('SetPath(targetPath)', script)
+        self.assertIn('SetArguments(String.Empty)', script)
         self.assertIn('SHORTCUT_VERIFICATION_FAILED', script)
         self.assertIn('STALE_COMMON_DESKTOP_SHORTCUT_NOT_REMOVED', script)
 

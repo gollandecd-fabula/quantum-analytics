@@ -19,6 +19,114 @@ function Get-QuantumRussianText {
     return $text
 }
 
+
+function Initialize-QuantumNativeShortcutType {
+    if ("Quantum.NativeShortcut" -as [type]) { return }
+    Add-Type -TypeDefinition @"
+using System;
+using System.Runtime.InteropServices;
+using System.Text;
+
+namespace Quantum {
+    [ComImport]
+    [Guid("00021401-0000-0000-C000-000000000046")]
+    internal class ShellLink { }
+
+    [ComImport]
+    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    [Guid("000214F9-0000-0000-C000-000000000046")]
+    internal interface IShellLinkW {
+        void GetPath([Out, MarshalAs(UnmanagedType.LPWStr)] StringBuilder file, int size, IntPtr data, uint flags);
+        void GetIDList(out IntPtr idList);
+        void SetIDList(IntPtr idList);
+        void GetDescription([Out, MarshalAs(UnmanagedType.LPWStr)] StringBuilder name, int size);
+        void SetDescription([MarshalAs(UnmanagedType.LPWStr)] string name);
+        void GetWorkingDirectory([Out, MarshalAs(UnmanagedType.LPWStr)] StringBuilder directory, int size);
+        void SetWorkingDirectory([MarshalAs(UnmanagedType.LPWStr)] string directory);
+        void GetArguments([Out, MarshalAs(UnmanagedType.LPWStr)] StringBuilder arguments, int size);
+        void SetArguments([MarshalAs(UnmanagedType.LPWStr)] string arguments);
+        void GetHotkey(out short hotkey);
+        void SetHotkey(short hotkey);
+        void GetShowCmd(out int showCommand);
+        void SetShowCmd(int showCommand);
+        void GetIconLocation([Out, MarshalAs(UnmanagedType.LPWStr)] StringBuilder iconPath, int size, out int iconIndex);
+        void SetIconLocation([MarshalAs(UnmanagedType.LPWStr)] string iconPath, int iconIndex);
+        void SetRelativePath([MarshalAs(UnmanagedType.LPWStr)] string path, uint reserved);
+        void Resolve(IntPtr window, uint flags);
+        void SetPath([MarshalAs(UnmanagedType.LPWStr)] string path);
+    }
+
+    [ComImport]
+    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    [Guid("0000010B-0000-0000-C000-000000000046")]
+    internal interface IPersistFile {
+        void GetClassID(out Guid classId);
+        [PreserveSig] int IsDirty();
+        void Load([MarshalAs(UnmanagedType.LPWStr)] string fileName, uint mode);
+        void Save([MarshalAs(UnmanagedType.LPWStr)] string fileName, bool remember);
+        void SaveCompleted([MarshalAs(UnmanagedType.LPWStr)] string fileName);
+        void GetCurFile([MarshalAs(UnmanagedType.LPWStr)] out string fileName);
+    }
+
+    public static class NativeShortcut {
+        private const int BufferSize = 32768;
+
+        public static void CreateAndVerify(
+            string shortcutPath,
+            string targetPath,
+            string workingDirectory,
+            string description,
+            string iconPath,
+            int iconIndex) {
+            IShellLinkW link = null;
+            IPersistFile persist = null;
+            try {
+                link = (IShellLinkW)new ShellLink();
+                persist = (IPersistFile)link;
+                link.SetPath(targetPath);
+                link.SetArguments(String.Empty);
+                link.SetWorkingDirectory(workingDirectory);
+                link.SetDescription(description);
+                link.SetIconLocation(iconPath, iconIndex);
+                persist.Save(shortcutPath, true);
+            }
+            finally {
+                Release(link);
+            }
+
+            IShellLinkW verifiedLink = null;
+            IPersistFile verifiedPersist = null;
+            try {
+                verifiedLink = (IShellLinkW)new ShellLink();
+                verifiedPersist = (IPersistFile)verifiedLink;
+                verifiedPersist.Load(shortcutPath, 0);
+                var target = new StringBuilder(BufferSize);
+                var working = new StringBuilder(BufferSize);
+                var arguments = new StringBuilder(BufferSize);
+                verifiedLink.GetPath(target, target.Capacity, IntPtr.Zero, 0);
+                verifiedLink.GetWorkingDirectory(working, working.Capacity);
+                verifiedLink.GetArguments(arguments, arguments.Capacity);
+                if (!String.Equals(target.ToString(), targetPath, StringComparison.OrdinalIgnoreCase) ||
+                    !String.Equals(working.ToString(), workingDirectory, StringComparison.OrdinalIgnoreCase) ||
+                    !String.IsNullOrWhiteSpace(arguments.ToString())) {
+                    throw new InvalidOperationException("SHORTCUT_VERIFICATION_FAILED");
+                }
+            }
+            finally {
+                Release(verifiedLink);
+            }
+        }
+
+        private static void Release(object instance) {
+            if (instance != null && Marshal.IsComObject(instance)) {
+                Marshal.FinalReleaseComObject(instance);
+            }
+        }
+    }
+}
+"@
+}
+
 function Invoke-Icacls {
     param([string]$Path, [string[]]$Arguments, [string]$Operation)
     & icacls.exe $Path @Arguments | Out-Host
@@ -48,38 +156,26 @@ function New-QuantumShortcut {
     $primaryName = Get-QuantumRussianText -Encoded "0KbQtdC90YLRgCDRgNC10YjQtdC90LjQuSBRdWFudHVtLmxuaw=="
     $fallbackName = "Quantum Decision Center.lnk"
     $candidateNames = @($primaryName, $fallbackName)
-    $shell = New-Object -ComObject WScript.Shell
     $createdPath = $null
     $shortcutErrors = @()
+    $expectedTarget = [IO.Path]::GetFullPath($Launcher)
+    $expectedWorking = [IO.Path]::GetFullPath($WorkingDirectory)
+    $description = Get-QuantumRussianText -Encoded "0KbQtdC90YLRgCDRgNC10YjQtdC90LjQuSBRdWFudHVtIOKAlCDQu9C+0LrQsNC70YzQvdGL0Lkg0LfQsNC/0YPRgdC6"
+    $iconPath = Join-Path $env:SystemRoot "System32\shell32.dll"
+    Initialize-QuantumNativeShortcutType
 
     foreach ($candidateName in $candidateNames) {
         $path = Join-Path $desktop $candidateName
         try {
             Remove-Item -LiteralPath $path -Force -ErrorAction SilentlyContinue
-            $shortcut = $shell.CreateShortcut($path)
-            $shortcut.TargetPath = [IO.Path]::GetFullPath($Launcher)
-            $shortcut.Arguments = ""
-            $shortcut.WorkingDirectory = [IO.Path]::GetFullPath($WorkingDirectory)
-            $shortcut.Description = Get-QuantumRussianText -Encoded "0KbQtdC90YLRgCDRgNC10YjQtdC90LjQuSBRdWFudHVtIOKAlCDQu9C+0LrQsNC70YzQvdGL0Lkg0LfQsNC/0YPRgdC6"
-            $shortcut.IconLocation = "$env:SystemRoot\System32\shell32.dll,167"
-            $shortcut.Save()
-
-            $verified = $shell.CreateShortcut($path)
-            $expectedTarget = [IO.Path]::GetFullPath($Launcher)
-            $expectedWorking = [IO.Path]::GetFullPath($WorkingDirectory)
-            if (
-                -not ([IO.Path]::GetFullPath([string]$verified.TargetPath)).Equals(
-                    $expectedTarget,
-                    [StringComparison]::OrdinalIgnoreCase
-                ) -or
-                -not ([IO.Path]::GetFullPath([string]$verified.WorkingDirectory)).Equals(
-                    $expectedWorking,
-                    [StringComparison]::OrdinalIgnoreCase
-                ) -or
-                -not [string]::IsNullOrWhiteSpace([string]$verified.Arguments)
-            ) {
-                throw "SHORTCUT_VERIFICATION_FAILED"
-            }
+            [Quantum.NativeShortcut]::CreateAndVerify(
+                $path,
+                $expectedTarget,
+                $expectedWorking,
+                $description,
+                $iconPath,
+                167
+            )
             $createdPath = $path
             break
         }

@@ -163,6 +163,9 @@ class QuantumUniversalRelaunchR2Tests(unittest.TestCase):
         self.assertIn('-InstalledRoot "%QUANTUM_ROOT%" -SkipInstall %*', installer)
         self.assertIn('Quantum Decision Center.lnk', installer)
         self.assertIn('$candidateNames = @($primaryName, $fallbackName)', installer)
+        self.assertIn('IShellLinkW', installer)
+        self.assertIn('IPersistFile', installer)
+        self.assertIn('[Quantum.NativeShortcut]::CreateAndVerify(', installer)
         self.assertIn('SHORTCUT_VERIFICATION_FAILED', installer)
 
     def test_default_output_names_are_collision_resistant(self) -> None:

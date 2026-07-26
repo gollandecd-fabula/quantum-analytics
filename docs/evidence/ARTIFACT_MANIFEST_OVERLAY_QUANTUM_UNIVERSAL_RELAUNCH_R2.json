@@ -42,8 +42,8 @@
     ],
     [
       "scripts/windows/install_home_local.ps1",
-      "b7290d43f0449a1e1291ba4d0a2da6bf6cd7e98e353b13fe34e5d1dcc916d704",
-      24387
+      "42bda019731c329fffec6ffb54218b57f66cdd4bae1b1d9fde68c1e675499b20",
+      28399
     ],
     [
       "src/quantum/application/_finance_center_auto_inbox.py",
@@ -77,8 +77,13 @@
     ],
     [
       "tests/test_quantum_universal_relaunch_r2.py",
-      "691bac406e3a9cd6bc22966a22d5fcf6ff3463191908a126c0ce3dcaceb91e76",
-      7506
+      "ddbbdb43e0cfa4c63f836ec07ae97c86f32c0f83a9e24b415dabd6e1713c2da5",
+      7682
+    ],
+    [
+      "tests/test_shortcut_launch_repair_r1.py",
+      "1cae35b17e195f639d91c859956586e90b48d76a52a0cecaa9a7692e00b114a1",
+      4182
     ],
     [
       "tests/test_universal_any_file_contract_r4.py",
@@ -102,8 +107,8 @@
     ],
     [
       "tests/test_windows_one_click_installer_r1.py",
-      "ece83290996704ca68257fa53c74d3a563f2cfe07aada549e761f796e252a91f",
-      11628
+      "7cc6942a3ac4f4439716d73e52ce722a2f435534718060ea3e00c3c3610585c6",
+      11760
     ],
     [
       "tests/test_windows_source_package_launchers_r1.py",
