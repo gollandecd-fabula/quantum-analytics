@@ -1,0 +1,239 @@
+name: Temporary M0 R7 Binary Exact-Tree Materializer
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/tmp-m0-r7-binary-materializer.yml
+      - .m0-r7-newonly/**
+
+permissions:
+  contents: write
+
+concurrency:
+  group: m0-r7-binary-exact-tree
+  cancel-in-progress: false
+
+env:
+  BASE_SHA: b151e67c2bea8d4d50c5c4a2aeb0695e89921c01
+  HISTORICAL_SHA: 31bf463142a6c0f225b812c033073ae2eac53ffc
+  ARCHIVE_SHA256: 4b861947e9d06cc360cb4cf1d27a7e1d6bbca68715aa93e83c1ad2ae7e1a3158
+  EXPECTED_TREE_SHA: df7aecd89c220dc193dd92238b37c395f33f70e9
+  CANDIDATE_BRANCH: tmp/m0-r7-tested-candidate
+
+jobs:
+  materialize:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Checkout binary transport branch
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Verify binary chunks and archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          declare -A expected=(
+            [chunk.00]=f4e1ed947ee3d4acfdafd39e7bf6e63759eddd66
+            [chunk.01]=5cc629fc42f5fab9856b42653476963b65c6ffce
+            [chunk.02]=570faa86b503c9a310b4d90dd3b8049d666644fc
+            [chunk.03]=db4b04be22ac5998a1a3adcc104cdeb2e43e5663
+            [chunk.04]=62f746505d5d48ebed7350ac5292503e22b6eec2
+            [chunk.05]=9567ed9408f1d409ea5ad8b18196a56c592a2aab
+            [chunk.06]=9d27052c223c0b9fb1296dcfd4f84735eeb38b26
+            [chunk.07]=fea287808d5659116246935977826c9ba507fdc1
+            [chunk.08]=62d4b4bbe5ddcd77f736264f32be59bc73a8d055
+            [chunk.09]=529b1ec078ac8ca129ba132f33010ffc50f8a9c3
+            [chunk.10]=3fdad2a63331ccd3a7ef6522c0d0c02ee467b1eb
+            [chunk.11]=27ef39e02bb3fd15fec60634022064ee5e02dbbe
+            [chunk.12]=aed8512c6d42e202a0e0dda7837ff555312cde63
+            [chunk.13]=783e009b2297e1077bbc40c97583d558f9e12992
+            [chunk.14]=fb511a555cc6cf22d1cb71307b7d3043590d194e
+            [chunk.15]=52cd090f952144d448cfa938a925b1791bbd6f7e
+            [chunk.16]=6365b6dd78fa6ada59cccaa237d05a3677541164
+            [chunk.17]=26dbe93ea0f0bbaac2d3bdfc31b2900996994948
+            [chunk.18]=be56434360620638c4a8b69605708d4b06a0a2bc
+            [chunk.19]=3b01523e412e4256e4b5217c946a6218d175d319
+            [chunk.20]=b23b874958882f717cc94b519582196dadf6b27a
+            [chunk.21a]=1555f0c0d987cbec5f86a2bd3b9042c34d33041f
+            [chunk.21b]=f27b4cce6fb2943e5648cdb2814eb3d662b41ce7
+            [chunk.22]=7fa0429fb8524ed3b802ebe5257ad6e123cadc2a
+          )
+          for file in "${!expected[@]}"; do
+            test "$(git hash-object ".m0-r7-newonly/$file")" = "${expected[$file]}"
+          done
+          cat \
+            .m0-r7-newonly/chunk.00 .m0-r7-newonly/chunk.01 \
+            .m0-r7-newonly/chunk.02 .m0-r7-newonly/chunk.03 \
+            .m0-r7-newonly/chunk.04 .m0-r7-newonly/chunk.05 \
+            .m0-r7-newonly/chunk.06 .m0-r7-newonly/chunk.07 \
+            .m0-r7-newonly/chunk.08 .m0-r7-newonly/chunk.09 \
+            .m0-r7-newonly/chunk.10 .m0-r7-newonly/chunk.11 \
+            .m0-r7-newonly/chunk.12 .m0-r7-newonly/chunk.13 \
+            .m0-r7-newonly/chunk.14 .m0-r7-newonly/chunk.15 \
+            .m0-r7-newonly/chunk.16 .m0-r7-newonly/chunk.17 \
+            .m0-r7-newonly/chunk.18 .m0-r7-newonly/chunk.19 \
+            .m0-r7-newonly/chunk.20 .m0-r7-newonly/chunk.21a \
+            .m0-r7-newonly/chunk.21b .m0-r7-newonly/chunk.22 \
+            > "$RUNNER_TEMP/newonly.tar.gz"
+          echo "$ARCHIVE_SHA256  $RUNNER_TEMP/newonly.tar.gz" | sha256sum --check
+          cat > "$RUNNER_TEMP/old-paths.txt" <<'EOF'
+          docs/evidence/agent_v3_1/AUTONOMOUS_EXECUTION_STATE_M0_R6.json
+          docs/evidence/agent_v3_1/M0_R5_CURRENT_HEAD_INVENTORY_AND_DUPLICATE_RISK_AUDIT.json
+          docs/evidence/agent_v3_1/PROTOCOL_CONFLICT_REGISTER_M0_R6.json
+          docs/evidence/agent_v3_1/PROTOCOL_SOURCE_DISCOVERY.json
+          docs/evidence/agent_v3_1/REQUIREMENTS_TRACEABILITY_MATRIX.json
+          docs/evidence/agent_v3_1/UI_REFERENCE_MANIFEST.json
+          docs/evidence/agent_v3_1/WORK_ORDER_LEDGER_M0_R6.json
+          docs/evidence/agent_v3_1/recursive_tree/RECURSIVE_EXACT_HEAD_TREE.part-001.json
+          docs/evidence/agent_v3_1/recursive_tree/RECURSIVE_EXACT_HEAD_TREE.part-002.json
+          docs/evidence/agent_v3_1/recursive_tree/RECURSIVE_EXACT_HEAD_TREE.part-003.json
+          docs/evidence/agent_v3_1/recursive_tree/RECURSIVE_EXACT_HEAD_TREE.part-004.json
+          docs/evidence/agent_v3_1/recursive_tree/RECURSIVE_EXACT_HEAD_TREE.part-005.json
+          docs/evidence/agent_v3_1/rtm/REQUIREMENTS_TRACEABILITY_MATRIX.part-001.json
+          docs/evidence/agent_v3_1/rtm/REQUIREMENTS_TRACEABILITY_MATRIX.part-002.json
+          docs/evidence/agent_v3_1/rtm/REQUIREMENTS_TRACEABILITY_MATRIX.part-003.json
+          docs/evidence/agent_v3_1/rtm/REQUIREMENTS_TRACEABILITY_MATRIX.part-004.json
+          docs/evidence/agent_v3_1/rtm/REQUIREMENTS_TRACEABILITY_MATRIX.part-005.json
+          docs/evidence/agent_v3_1/rtm/REQUIREMENTS_TRACEABILITY_MATRIX.part-006.json
+          docs/evidence/agent_v3_1/rtm/REQUIREMENTS_TRACEABILITY_MATRIX.part-007.json
+          docs/evidence/agent_v3_1/rtm/REQUIREMENTS_TRACEABILITY_MATRIX.part-008.json
+          docs/evidence/agent_v3_1/rtm/REQUIREMENTS_TRACEABILITY_MATRIX.part-009.json
+          docs/evidence/agent_v3_1/rtm/REQUIREMENTS_TRACEABILITY_MATRIX.part-010.json
+          docs/evidence/agent_v3_1/rtm/REQUIREMENTS_TRACEABILITY_MATRIX.part-011.json
+          docs/evidence/agent_v3_1/rtm/REQUIREMENTS_TRACEABILITY_MATRIX.part-012.json
+          EOF
+          sed -i 's/^          //' "$RUNNER_TEMP/old-paths.txt"
+          cat > "$RUNNER_TEMP/expected-paths.txt" <<'EOF'
+          docs/evidence/ARTIFACT_MANIFEST_OVERLAY_AGENT_V3_1_M0_R7.json
+          docs/evidence/agent_v3_1/ARCHITECTURE_MIGRATION_MAP.json
+          docs/evidence/agent_v3_1/AUTONOMOUS_EXECUTION_STATE.json
+          docs/evidence/agent_v3_1/AUTONOMOUS_EXECUTION_STATE_M0_R6.json
+          docs/evidence/agent_v3_1/CURRENT_ARCHITECTURE_INVENTORY.json
+          docs/evidence/agent_v3_1/DUPLICATE_RISK_ASSESSMENT.json
+          docs/evidence/agent_v3_1/M0_R5_CURRENT_HEAD_INVENTORY_AND_DUPLICATE_RISK_AUDIT.json
+          docs/evidence/agent_v3_1/M0_R7_CURRENT_HEAD_RECONCILIATION.json
+          docs/evidence/agent_v3_1/PROTOCOL_CONFLICT_REGISTER.json
+          docs/evidence/agent_v3_1/PROTOCOL_CONFLICT_REGISTER_M0_R6.json
+          docs/evidence/agent_v3_1/PROTOCOL_SOURCE_DISCOVERY.json
+          docs/evidence/agent_v3_1/RECURSIVE_EXACT_HEAD_TREE.json
+          docs/evidence/agent_v3_1/REQUIREMENTS_TRACEABILITY_MATRIX.json
+          docs/evidence/agent_v3_1/UI_REFERENCE_MANIFEST.json
+          docs/evidence/agent_v3_1/WORK_ORDER_LEDGER.json
+          docs/evidence/agent_v3_1/WORK_ORDER_LEDGER_M0_R6.json
+          docs/evidence/agent_v3_1/recursive_tree/RECURSIVE_EXACT_HEAD_TREE.part-001.json
+          docs/evidence/agent_v3_1/recursive_tree/RECURSIVE_EXACT_HEAD_TREE.part-002.json
+          docs/evidence/agent_v3_1/recursive_tree/RECURSIVE_EXACT_HEAD_TREE.part-003.json
+          docs/evidence/agent_v3_1/recursive_tree/RECURSIVE_EXACT_HEAD_TREE.part-004.json
+          docs/evidence/agent_v3_1/recursive_tree/RECURSIVE_EXACT_HEAD_TREE.part-005.json
+          docs/evidence/agent_v3_1/recursive_tree_m0_r7/RECURSIVE_EXACT_HEAD_TREE.part-001.json
+          docs/evidence/agent_v3_1/recursive_tree_m0_r7/RECURSIVE_EXACT_HEAD_TREE.part-002.json
+          docs/evidence/agent_v3_1/recursive_tree_m0_r7/RECURSIVE_EXACT_HEAD_TREE.part-003.json
+          docs/evidence/agent_v3_1/recursive_tree_m0_r7/RECURSIVE_EXACT_HEAD_TREE.part-004.json
+          docs/evidence/agent_v3_1/recursive_tree_m0_r7/RECURSIVE_EXACT_HEAD_TREE.part-005.json
+          docs/evidence/agent_v3_1/recursive_tree_m0_r7/RECURSIVE_EXACT_HEAD_TREE.part-006.json
+          docs/evidence/agent_v3_1/recursive_tree_m0_r7/RECURSIVE_EXACT_HEAD_TREE.part-007.json
+          docs/evidence/agent_v3_1/recursive_tree_m0_r7/RECURSIVE_EXACT_HEAD_TREE.part-008.json
+          docs/evidence/agent_v3_1/rtm/REQUIREMENTS_TRACEABILITY_MATRIX.part-001.json
+          docs/evidence/agent_v3_1/rtm/REQUIREMENTS_TRACEABILITY_MATRIX.part-002.json
+          docs/evidence/agent_v3_1/rtm/REQUIREMENTS_TRACEABILITY_MATRIX.part-003.json
+          docs/evidence/agent_v3_1/rtm/REQUIREMENTS_TRACEABILITY_MATRIX.part-004.json
+          docs/evidence/agent_v3_1/rtm/REQUIREMENTS_TRACEABILITY_MATRIX.part-005.json
+          docs/evidence/agent_v3_1/rtm/REQUIREMENTS_TRACEABILITY_MATRIX.part-006.json
+          docs/evidence/agent_v3_1/rtm/REQUIREMENTS_TRACEABILITY_MATRIX.part-007.json
+          docs/evidence/agent_v3_1/rtm/REQUIREMENTS_TRACEABILITY_MATRIX.part-008.json
+          docs/evidence/agent_v3_1/rtm/REQUIREMENTS_TRACEABILITY_MATRIX.part-009.json
+          docs/evidence/agent_v3_1/rtm/REQUIREMENTS_TRACEABILITY_MATRIX.part-010.json
+          docs/evidence/agent_v3_1/rtm/REQUIREMENTS_TRACEABILITY_MATRIX.part-011.json
+          docs/evidence/agent_v3_1/rtm/REQUIREMENTS_TRACEABILITY_MATRIX.part-012.json
+          tests/integration_manifest_support_m8.py
+          tests/test_agent_v3_1_m0_r7_reconciliation.py
+          tests/test_wbr2_m5_closure.py
+          tests/test_wbr2_m5_closure_corrective_r2.py
+          EOF
+          sed -i 's/^          //' "$RUNNER_TEMP/expected-paths.txt"
+          LC_ALL=C sort -o "$RUNNER_TEMP/expected-paths.txt" "$RUNNER_TEMP/expected-paths.txt"
+
+      - name: Materialize exact allow-listed tree on immutable base
+        shell: bash
+        run: |
+          set -euo pipefail
+          git cat-file -e "$HISTORICAL_SHA^{commit}" || git fetch --no-tags origin "$HISTORICAL_SHA"
+          git checkout --detach "$BASE_SHA"
+          test "$(git rev-parse HEAD)" = "$BASE_SHA"
+          test -z "$(git status --porcelain)"
+          while IFS= read -r path; do
+            mkdir -p "$(dirname "$path")"
+            git show "$HISTORICAL_SHA:$path" > "$path"
+          done < "$RUNNER_TEMP/old-paths.txt"
+          tar -xzf "$RUNNER_TEMP/newonly.tar.gz"
+          git diff --check
+          git add -A
+          git diff --cached --name-only | LC_ALL=C sort > "$RUNNER_TEMP/actual-paths.txt"
+          diff -u "$RUNNER_TEMP/expected-paths.txt" "$RUNNER_TEMP/actual-paths.txt" | tee "$RUNNER_TEMP/scope-diff.txt"
+          test "$(wc -l < "$RUNNER_TEMP/actual-paths.txt")" -eq 45
+          if grep -E '^(src/|tools/|scripts/|\.github/workflows/|requirements/)' "$RUNNER_TEMP/actual-paths.txt"; then
+            echo M0_SCOPE_VIOLATION >&2
+            exit 1
+          fi
+
+      - name: Run targeted positive negative and historical controls
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PYTHONPATH="$PWD/src"
+          python3 -m unittest -v \
+            tests.test_agent_v3_1_m0_r7_reconciliation \
+            tests.test_wbr2_m5_closure \
+            tests.test_wbr2_m5_closure_corrective_r2 \
+            2>&1 | tee "$RUNNER_TEMP/targeted.log"
+
+      - name: Verify manifest equality
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PYTHONPATH="$PWD/src"
+          python3 -m unittest -v \
+            tests.test_a0_manifest_diagnostic.ManifestDiagnosticTests.test_manifest_diff_is_empty \
+            tests.test_b1a_artifact_manifest.B1aArtifactManifestTests.test_manifest_matches_current_tracked_tree \
+            2>&1 | tee "$RUNNER_TEMP/manifest.log"
+
+      - name: Run complete source CI
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PYTHONPATH="$PWD/src"
+          python3 -m quantum.scripts.ci 2>&1 | tee "$RUNNER_TEMP/full-ci.log"
+
+      - name: Commit exact tested tree and publish candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name quantum-ci
+          git config user.email quantum-ci@users.noreply.github.com
+          git commit -m "Reconcile Protocol v3.1 canonical state on current QUR2 head"
+          test "$(git rev-parse 'HEAD^{tree}')" = "$EXPECTED_TREE_SHA"
+          git rev-parse HEAD | tee "$RUNNER_TEMP/candidate.commit-sha"
+          git rev-parse 'HEAD^{tree}' | tee "$RUNNER_TEMP/candidate.tree-sha"
+          git diff-tree --no-commit-id --name-status -r HEAD > "$RUNNER_TEMP/candidate.name-status"
+          git push origin "HEAD:refs/heads/$CANDIDATE_BRANCH"
+
+      - name: Upload M0 remote-binding evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: M0-R7-Binary-Exact-Tree-Evidence
+          path: |
+            ${{ runner.temp }}/expected-paths.txt
+            ${{ runner.temp }}/actual-paths.txt
+            ${{ runner.temp }}/scope-diff.txt
+            ${{ runner.temp }}/targeted.log
+            ${{ runner.temp }}/manifest.log
+            ${{ runner.temp }}/full-ci.log
+            ${{ runner.temp }}/candidate.commit-sha
+            ${{ runner.temp }}/candidate.tree-sha
+            ${{ runner.temp }}/candidate.name-status
+          if-no-files-found: warn
+          retention-days: 7
