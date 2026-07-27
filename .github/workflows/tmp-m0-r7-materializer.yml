@@ -1,0 +1,178 @@
+name: Temporary M0 R7 Current-Head Reconciliation Materializer
+
+on:
+  push:
+    branches:
+      - tmp/m0-r7-materializer-trigger
+    paths:
+      - .m0-r7-payload/TRIGGER
+  pull_request:
+    paths:
+      - .m0-r7-payload/TRIGGER
+      - .github/workflows/tmp-m0-r7-materializer.yml
+      - .m0-r7-payload/fixed/**
+
+permissions:
+  contents: write
+
+concurrency:
+  group: m0-r7-current-head-reconciliation
+  cancel-in-progress: false
+
+env:
+  BASE_SHA: b151e67c2bea8d4d50c5c4a2aeb0695e89921c01
+  PAYLOAD_SHA256: 3242c6e00b5317ff18795e74f38424aff3b08fd6fa516bcb30a4231b0f48341f
+  EXPECTED_TREE_SHA: df7aecd89c220dc193dd92238b37c395f33f70e9
+  CANDIDATE_BRANCH: tmp/m0-r7-tested-candidate
+
+jobs:
+  materialize:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - name: Checkout transport branch
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Verify immutable transport blobs and preserve inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object .m0-r7-payload/payload.000)" = "274ac4b9caa5dfaa668ea536d94500bfe0ac35dd"
+          test "$(git hash-object .m0-r7-payload/payload.001)" = "0a1ce84df9c7e55254b5377bdb078be0d29f116f"
+          test "$(git hash-object .m0-r7-payload/payload.002)" = "60d9518b8ef3a65d2cc08ef68cf0cef10c600f6f"
+          test "$(git hash-object .m0-r7-payload/payload.003)" = "a49321931cfcaf61b9213e602506fe83d87c49cc"
+          test "$(git hash-object .m0-r7-payload/payload.004)" = "55575e59a5fd9e664b7d4393d024f113036a46b5"
+          test "$(git hash-object .m0-r7-payload/payload.005)" = "a5f5f4154c41a9ce0e5df8c3611860382d78925a"
+          test "$(git hash-object .m0-r7-payload/payload.006)" = "e7bf7d562b4be9b3b77121eed686c1bcb887ac6b"
+          test "$(git hash-object .m0-r7-payload/payload.007)" = "fa61d95c616487d4e701a83539c80331b87d4046"
+          test "$(git hash-object .m0-r7-payload/payload.008)" = "75ad945a1ef64d840c6e372666ff964f1ab003e3"
+          test "$(git hash-object .m0-r7-payload/payload.009)" = "09b29ddbb996374475db9f5721e2712ee145e9d7"
+          test "$(git hash-object .m0-r7-payload/payload.010)" = "3d783c0d43bc401564941690d7a94321dfef5ebb"
+          test "$(git hash-object .m0-r7-payload/payload.011)" = "05c25867a02dc32c073fd05b86c40f50665943b7"
+          test "$(git hash-object .m0-r7-payload/payload.012)" = "ce6ea0f381079b65051a005460313e194afb62d1"
+          test "$(git hash-object .m0-r7-payload/fixed/payload.013.00)" = "e62010cc13ad4b7532a5d20fcb7ab9cab7de236e"
+          test "$(git hash-object .m0-r7-payload/fixed/payload.013.01)" = "f74070cabd1a30eaf3143cdddc29f612ee73f43a"
+          test "$(git hash-object .m0-r7-payload/fixed/payload.013.02)" = "0f32ddf56dd79d57d554d128067913a609158750"
+          test "$(git hash-object .m0-r7-payload/fixed/payload.013.03)" = "88caef75d9447a5a35ff9a4eed8f97a827f20bc8"
+          test "$(git hash-object .m0-r7-payload/fixed/payload.014.00)" = "ef1528b1cb190ba38efedd5dfc07395a19df39ec"
+          test "$(git hash-object .m0-r7-payload/fixed/payload.014.01)" = "88fcd07d760580f6b59705df2801677fc9c05011"
+          test "$(git hash-object .m0-r7-payload/fixed/payload.014.02)" = "5d43f76eeaef1e1dbb902841445911b3b0c9ebba"
+          test "$(git hash-object .m0-r7-payload/fixed/payload.014.03)" = "b3483a1e5f460aad1b3ab0a5a11a502bb03cba03"
+          test "$(git hash-object .m0-r7-payload/fixed/payload.015.00)" = "062b6c07c117cc88d74b81a873a71684c530e7f0"
+          test "$(git hash-object .m0-r7-payload/fixed/payload.015.01)" = "7d4648dffd78144390876256b79710dae70ba46e"
+          test "$(git hash-object .m0-r7-payload/fixed/payload.015.02)" = "85c7b5574926850b30f2e33ce2f8188a4597cf95"
+          test "$(git hash-object .m0-r7-payload/paths.txt)" = "7371d4087ce03876bcae518f799d587bb220c31a"
+          cat \
+            .m0-r7-payload/payload.000 \
+            .m0-r7-payload/payload.001 \
+            .m0-r7-payload/payload.002 \
+            .m0-r7-payload/payload.003 \
+            .m0-r7-payload/payload.004 \
+            .m0-r7-payload/payload.005 \
+            .m0-r7-payload/payload.006 \
+            .m0-r7-payload/payload.007 \
+            .m0-r7-payload/payload.008 \
+            .m0-r7-payload/payload.009 \
+            .m0-r7-payload/payload.010 \
+            .m0-r7-payload/payload.011 \
+            .m0-r7-payload/payload.012 \
+            .m0-r7-payload/fixed/payload.013.00 \
+            .m0-r7-payload/fixed/payload.013.01 \
+            .m0-r7-payload/fixed/payload.013.02 \
+            .m0-r7-payload/fixed/payload.013.03 \
+            .m0-r7-payload/fixed/payload.014.00 \
+            .m0-r7-payload/fixed/payload.014.01 \
+            .m0-r7-payload/fixed/payload.014.02 \
+            .m0-r7-payload/fixed/payload.014.03 \
+            .m0-r7-payload/fixed/payload.015.00 \
+            .m0-r7-payload/fixed/payload.015.01 \
+            .m0-r7-payload/fixed/payload.015.02 \
+            > "$RUNNER_TEMP/m0-r7-payload.b64"
+          base64 --decode "$RUNNER_TEMP/m0-r7-payload.b64" > "$RUNNER_TEMP/m0-r7-payload.tar.gz"
+          echo "$PAYLOAD_SHA256  $RUNNER_TEMP/m0-r7-payload.tar.gz" | sha256sum --check
+          cp .m0-r7-payload/paths.txt "$RUNNER_TEMP/m0-r7-paths.txt"
+          sha256sum "$RUNNER_TEMP/m0-r7-payload.tar.gz" > "$RUNNER_TEMP/payload.sha256"
+          sha256sum "$RUNNER_TEMP/m0-r7-paths.txt" > "$RUNNER_TEMP/paths.sha256"
+
+      - name: Apply exact allow-listed patch to immutable base
+        shell: bash
+        run: |
+          set -euo pipefail
+          git checkout --detach "$BASE_SHA"
+          test "$(git rev-parse HEAD)" = "$BASE_SHA"
+          test -z "$(git status --porcelain)"
+          tar -xzf "$RUNNER_TEMP/m0-r7-payload.tar.gz"
+          git diff --check
+          git add -A
+          git diff --cached --name-only | LC_ALL=C sort > "$RUNNER_TEMP/actual-paths.txt"
+          LC_ALL=C sort "$RUNNER_TEMP/m0-r7-paths.txt" > "$RUNNER_TEMP/expected-paths.txt"
+          diff -u "$RUNNER_TEMP/expected-paths.txt" "$RUNNER_TEMP/actual-paths.txt" | tee "$RUNNER_TEMP/scope-diff.txt"
+          test "$(wc -l < "$RUNNER_TEMP/actual-paths.txt")" -eq 45
+          if git diff --cached --name-only | grep -E '^(src/|tools/|scripts/|\.github/workflows/|requirements/)'; then
+            echo "M0_SCOPE_VIOLATION" >&2
+            exit 1
+          fi
+
+      - name: Run M0 targeted positive negative and historical closure controls
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PYTHONPATH="$PWD/src"
+          python3 -m unittest -v \
+            tests.test_agent_v3_1_m0_r7_reconciliation \
+            tests.test_wbr2_m5_closure \
+            tests.test_wbr2_m5_closure_corrective_r2 \
+            2>&1 | tee "$RUNNER_TEMP/targeted.log"
+
+      - name: Verify manifest equality
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PYTHONPATH="$PWD/src"
+          python3 -m unittest -v \
+            tests.test_a0_manifest_diagnostic.ManifestDiagnosticTests.test_manifest_diff_is_empty \
+            tests.test_b1a_artifact_manifest.B1aArtifactManifestTests.test_manifest_matches_current_tracked_tree \
+            2>&1 | tee "$RUNNER_TEMP/manifest.log"
+
+      - name: Run complete source CI
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PYTHONPATH="$PWD/src"
+          python3 -m quantum.scripts.ci 2>&1 | tee "$RUNNER_TEMP/full-ci.log"
+
+      - name: Commit exact tested tree and publish evidence candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name quantum-ci
+          git config user.email quantum-ci@users.noreply.github.com
+          git commit -m "Reconcile Protocol v3.1 canonical state on current QUR2 head"
+          test "$(git rev-parse 'HEAD^{tree}')" = "$EXPECTED_TREE_SHA"
+          git rev-parse HEAD | tee "$RUNNER_TEMP/candidate.commit-sha"
+          git rev-parse 'HEAD^{tree}' | tee "$RUNNER_TEMP/candidate.tree-sha"
+          git diff-tree --no-commit-id --name-status -r HEAD > "$RUNNER_TEMP/candidate.name-status"
+          git push origin "HEAD:refs/heads/$CANDIDATE_BRANCH"
+
+      - name: Upload materialization evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: M0-R7-Current-Head-Reconciliation-Evidence
+          path: |
+            ${{ runner.temp }}/payload.sha256
+            ${{ runner.temp }}/paths.sha256
+            ${{ runner.temp }}/expected-paths.txt
+            ${{ runner.temp }}/actual-paths.txt
+            ${{ runner.temp }}/scope-diff.txt
+            ${{ runner.temp }}/targeted.log
+            ${{ runner.temp }}/manifest.log
+            ${{ runner.temp }}/full-ci.log
+            ${{ runner.temp }}/candidate.commit-sha
+            ${{ runner.temp }}/candidate.tree-sha
+            ${{ runner.temp }}/candidate.name-status
+          if-no-files-found: warn
+          retention-days: 7
