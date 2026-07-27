@@ -1,106 +1,70 @@
 {
   "artifact_type": "PILOT_DEFECT_REGISTER",
-  "branch": "fix/quantum-pilot-surgical-convergence-v3-p1",
+  "schema_version": "3.0.0",
+  "branch": "fix/quantum-pilot-surgical-convergence-v3-p1-implementation-base",
+  "p1_subject_exact_head": "7b1693e4f0d0fb64ddcd6db514084f8a9fdcf12d",
   "defects": [
     {
-      "classification": "PROTOCOL_SCOPE_FAILURE",
       "defect_id": "PILOT-D-P0-001",
+      "severity": "P0",
+      "classification": "PROTOCOL_SCOPE_FAILURE",
+      "status": "CLOSED_VERIFIED",
       "evidence_ids": [
         "EVD-PILOT-P0-REMOTE-BINDING-001"
       ],
-      "requirement_ids": [
-        "PILOT-P0-001",
-        "PILOT-P0-004"
-      ],
-      "severity": "P0",
-      "status": "CLOSED_VERIFIED",
       "title": "No single canonical pilot line and state owner were declared."
     },
     {
-      "classification": "PROTOCOL_SCOPE_FAILURE",
       "defect_id": "PILOT-D-P0-002",
+      "severity": "P0",
+      "classification": "PROTOCOL_SCOPE_FAILURE",
+      "status": "CLOSED_VERIFIED",
       "evidence_ids": [
         "EVD-PILOT-P0-REMOTE-BINDING-001"
       ],
-      "requirement_ids": [
-        "PILOT-P0-003",
-        "PILOT-P0-005"
-      ],
-      "severity": "P0",
-      "status": "CLOSED_VERIFIED",
       "title": "Pilot applicability overlay and bounded pilot decision state were absent."
     },
     {
-      "classification": "PROTOCOL_SCOPE_FAILURE",
       "defect_id": "PILOT-D-P0-003",
+      "severity": "P0",
+      "classification": "PROTOCOL_SCOPE_FAILURE",
+      "status": "OPEN",
       "evidence_ids": [
         "EVD-M1-SUBJECT-PASS-BBDF",
         "EVD-M1-CLOSURE-FAIL-43D"
       ],
-      "requirement_ids": [
-        "REQ-MP2-0145"
-      ],
-      "severity": "P0",
-      "status": "OPEN",
       "title": "M1 PASS evidence is bound to bbdf8b while current closure head 43d6230 fails exact-head scope validation."
     },
     {
-      "classification": "HARNESS_FAILURE",
       "defect_id": "PILOT-D-P1-001",
-      "evidence_ids": [
-        "EVD-M1-CLOSURE-FAIL-43D"
-      ],
-      "requirement_ids": [
-        "REQ-MP2-0145"
-      ],
       "severity": "P0",
-      "status": "OPEN",
+      "classification": "HARNESS_FAILUREU",
+      "status": "IMPLEMENTATION_AUTHORIZED",
+      "evidence_ids": [
+        "EVD-M1-CLOSURF-FAIL-43D",
+        "EVD-PILOT-P1-FAILING-REGRESSION-001"
+      ],
       "title": "Final M1 gate validates a multi-work-order closure union against only the primary hardcoded work order."
     },
     {
-      "classification": "PRODUCT_FAILURE",
       "defect_id": "PILOT-D-P3-001",
+      "severity": "P0",
+      "classification": "PRODUCT_FAILURE",
+      "status": "OPEN",
       "evidence_ids": [
         "EVD-M8-DESKTOP-DIRECTORY-UNAVAILABLE"
       ],
-      "requirement_ids": [
-        "PILOT-REQ-INSTALL-001"
-      ],
-      "severity": "P0",
-      "status": "OPEN",
       "title": "Windows installer aborts when DesktopDirectory is unavailable and has no verified fallback."
     },
     {
-      "classification": "ENVIRONMENT_UNAVAILABLE",
       "defect_id": "PILOT-D-P5-001",
-      "evidence_ids": [],
-      "requirement_ids": [
-        "PILOT-REQ-L5-001"
-      ],
       "severity": "P0",
-      "status": "BLOCKED_EXTERNAL",
-      "title": "Physical L5 on Dmitry's Windows computer has not been executed."
-    },
-    {
       "classification": "ENVIRONMENT_UNAVAILABLE",
-      "defect_id": "PILOT-D-P0-TRANSPORT-001",
-      "evidence_ids": [
-        "EVD-P0-UPDATE-REF-BLOCKED",
-        "EVD-PILOT-P0-REMOTE-BINDING-001"
-      ],
-      "requirement_ids": [
-        "PILOT-P0-001"
-      ],
-      "severity": "P1",
-      "status": "CLOSED_VERIFIED",
-      "title": "Existing branch ref could not be advanced through the available update-ref tool."
+      "status": "BLOCKED_EXTERNAL",
+      "evidence_ids": [],
+      "title": "Physical L5 on Dmitry's Windows computer has not been executed."
     }
   ],
   "open_p0_count": 4,
-  "parent_exact_head": "43d6230a43ebb4443e98f9ea9ec2746b210dfa3a",
-  "release_authorized": false,
-  "schema_version": "3.0.0",
-  "p0_evidence_subject_exact_head": "089d460eb5a2b5fc384d87afa261a68ea729724f",
-  "p0_scope_open_p0_count": 0,
-  "next_active_milestone": "P1_ATOMIC_M1_CLOSURE"
+  "release_authorized": false
 }

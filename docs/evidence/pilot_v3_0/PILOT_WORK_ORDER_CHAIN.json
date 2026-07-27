@@ -1,74 +1,47 @@
 {
-  "active_lock_count": 0,
-  "active_work_order_id": null,
   "artifact_type": "PILOT_WORK_ORDER_CHAIN",
-  "branch": "fix/quantum-pilot-surgical-convergence-v3-p1",
-  "chain_status": "P0_VERIFIED_P1_NOT_OPENED",
+  "schema_version": "3.0.0",
+  "branch": "fix/quantum-pilot-surgical-convergence-v3-p1-implementation-base",
+  "active_lock_count": 0,
+  "parallel_write_authorized": false,
   "entries": [
     {
-      "actual_changed_paths": [
-        "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_V3_0_P0.json",
-        "docs/evidence/pilot_v3_0/PILOT_APPLICABILITY_OVERLAY.json",
-        "docs/evidence/pilot_v3_0/PILOT_AUTONOMOUS_EXECUTION_STATE.json",
-        "docs/evidence/pilot_v3_0/PILOT_CAPABILITY_GATE.json",
-        "docs/evidence/pilot_v3_0/PILOT_DEFECT_REGISTER.json",
-        "docs/evidence/pilot_v3_0/PILOT_FAILURE_CLASSIFICATION_REGISTER.json",
-        "docs/evidence/pilot_v3_0/PILOT_P0_RTM.json",
-        "docs/evidence/pilot_v3_0/PILOT_WORK_ORDER_CHAIN.json",
-        "docs/evidence/pilot_v3_0/WORK_ORDER_P0_CANONICAL_REANCHOR_002.json"
-      ],
-      "expected_changed_paths": [
-        "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_V3_0_P0.json",
-        "docs/evidence/pilot_v3_0/PILOT_APPLICABILITY_OVERLAY.json",
-        "docs/evidence/pilot_v3_0/PILOT_AUTONOMOUS_EXECUTION_STATE.json",
-        "docs/evidence/pilot_v3_0/PILOT_CAPABILITY_GATE.json",
-        "docs/evidence/pilot_v3_0/PILOT_DEFECT_REGISTER.json",
-        "docs/evidence/pilot_v3_0/PILOT_FAILURE_CLASSIFICATION_REGISTER.json",
-        "docs/evidence/pilot_v3_0/PILOT_P0_RTM.json",
-        "docs/evidence/pilot_v3_0/PILOT_WORK_ORDER_CHAIN.json",
-        "docs/evidence/pilot_v3_0/WORK_ORDER_P0_CANONICAL_REANCHOR_002.json"
-      ],
       "ordinal": 1,
-      "parent_exact_head": "43d6230a43ebb4443e98f9ea9ec2746b210dfa3a",
-      "result_exact_head": "089d460eb5a2b5fc384d87afa261a68ea729724f",
-      "status": "VERIFIED_REMOTE_SUBJECT",
       "work_order_id": "WO-PILOT-P0-CANONICAL-REANCHOR-002",
-      "work_order_sha256": "4b800a07016069a3c7611eb22dc67e343e60e238cf38eef98830fb7747593edf",
-      "evidence_ids": [
-        "EVD-PILOT-P0-REMOTE-BINDING-001"
-      ]
+      "result_exact_head": "089d460eb5a2b5fc384d87afa261a68ea729724f",
+      "status": "VERIFIED_REMOTE_SUBJECT"
     },
     {
       "ordinal": 2,
       "work_order_id": "WO-PILOT-P0-REMOTE-BINDING-CLOSURE-001",
-      "work_order_sha256": "1f1eed10174505b1ec23f6ed557d809ae58645c7aa603ce78e0a22ac818cd9ed",
-      "parent_exact_head": "089d460eb5a2b5fc384d87afa261a68ea729724f",
-      "result_exact_head_binding": "DRAFT_PR_HEAD_METADATA",
-      "expected_changed_paths": [
-        "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_V3_0_P0_CLOSURE.json",
-        "docs/evidence/pilot_v3_0/PILOT_APPLICABILITY_OVERLAY.json",
-        "docs/evidence/pilot_v3_0/PILOT_AUTONOMOUS_EXECUTION_STATE.json",
-        "docs/evidence/pilot_v3_0/PILOT_DEFECT_REGISTER.json",
-        "docs/evidence/pilot_v3_0/PILOT_FAILURE_CLASSIFICATION_REGISTER.json",
-        "docs/evidence/pilot_v3_0/PILOT_P0_REMOTE_BINDING_EVIDENCE.json",
-        "docs/evidence/pilot_v3_0/PILOT_P0_RTM.json",
-        "docs/evidence/pilot_v3_0/PILOT_WORK_ORDER_CHAIN.json",
-        "docs/evidence/pilot_v3_0/WORK_ORDER_P0_REMOTE_BINDING_CLOSURE_001.json"
-      ],
-      "actual_changed_paths": [],
-      "status": "AUTHORIZED_EVIDENCE_INGESTION_IN_PROGRESS"
-    }
-  ],
-  "parallel_write_authorized": false,
-  "release_authorized": false,
-  "schema_version": "3.0.0",
-  "superseded_unpublished_attempts": [
+      "result_exact_head": "b9a2bda375dce1fd7dc643b73d3a5f23f322ca04",
+      "status": "VERIFIED_REMOTE_CLOSURE"
+    },
     {
-      "branch_ref_updated": false,
-      "commit": "292a65c4eb3da242fdab89bd9d6b71e6ce35da86",
-      "status": "NOT_EVIDENCE"
+      "ordinal": 3,
+      "work_order_id": "WO-PILOT-P1-ATOMIC-M1-REGRESSION-001",
+      "result_exact_head": "7b1693e4f0d0fb64ddcd6db514084f8a9fdcf12d",
+      "status": "VERIFIED_EXPECTED_RED",
+      "evidence_ids": [
+        "EVD-PILOT-P1-FAILING-REGRESSION-001"
+      ]
+    },
+    {
+      "ordinal": 4,
+      "work_order_id": "WO-PILOT-P1-FAILING-REGRESSION-EVIDENCE-001",
+      "parent_exact_head": "7b1693e4f0d0fb64ddcd6db514084f8a9fdcf12d",
+      "result_exact_head": "PENDING_REMOTE_EVIDENCE_COMMIT_BINDING",
+      "status": "EVIDENCE_INGESTION_IN_PROGRESS"
+    },
+    {
+      "ordinal": 5,
+      "work_order_id": "WO-PILOT-P1-ATOMIC-M1-IMPLEMENTATION-001",
+      "parent_exact_head": "PENDING_REMOTE_EVIDENCE_COMMIT_BINDING",
+      "result_exact_head": "NOT_STARTED",
+      "status": "AUTHORIZED_NOT_STARTED"
     }
   ],
-  "p0_status": "VERIFIED_SUBJECT",
-  "p1_status": "NOT_OPENED"
+  "p0_status": "VERIFIED",
+  "p1_status": "IN_PROGRESS",
+  "release_authorized": false
 }

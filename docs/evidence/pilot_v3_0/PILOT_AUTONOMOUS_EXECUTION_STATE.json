@@ -2,8 +2,8 @@
   "artifact_type": "PILOT_AUTONOMOUS_EXECUTION_STATE",
   "schema_version": "3.0.0",
   "repository": "gollandecd-fabula/quantum-analytics",
-  "canonical_pilot_branch": "fix/quantum-pilot-surgical-convergence-v3-p1",
-  "state_subject_exact_head": "b9a2bda375dce1fd7dc643b73d3a5f23f322ca04",
+  "canonical_pilot_branch": "fix/quantum-pilot-surgical-convergence-v3-p1-implementation-base",
+  "state_subject_exact_head": "7b1693e4f0d0fb64ddcd6db514084f8a9fdcf12d",
   "closure_state_binding_method": "DRAFT_PR_HEAD_METADATA",
   "canonical_state_owner": "CONTROL_PLANE",
   "active_pilot_milestone": "P1_ATOMIC_M1_CLOSURE",
@@ -16,20 +16,14 @@
   "p0_subject_parent_exact_head": "43d6230a43ebb4443e98f9ea9ec2746b210dfa3a",
   "product_ancestor_exact_head": "b151e67c2bea8d4d50c5c4a2aeb0695e89921c01",
   "product_ancestry_status": "VERIFIED_REMOTE_COMPARE",
-  "active_lock": {
-    "lock_id": "LOCK-PILOT-P1-REGRESSION-001",
-    "owner_role": "IMPLEMENTER",
-    "governing_work_order_id": "WO-PILOT-P1-ATOMIC-M1-REGRESSION-001",
-    "governing_work_order_sha256": "5fe16b32de8cb052f4e4e0c95aa619fbb4f269ea61d2dc9180badb4b99893951",
-    "state": "ACQUIRED_FOR_FAILING_REGRESSION",
-    "parallel_write_authorized": false
-  },
-  "active_lock_count": 1,
+  "active_lock": null,
+  "active_lock_count": 0,
   "p1_lock_required_before_change": true,
   "parallel_write_authorized": false,
   "superseded_noncanonical_branches": [
     "fix/quantum-pilot-surgical-convergence-v3",
-    "fix/quantum-pilot-surgical-convergence-v3-p0"
+    "fix/quantum-pilot-surgical-convergence-v3-p0",
+    "fix/quantum-pilot-surgical-convergence-v3-p1-regression"
   ],
   "marketplace_writes": false,
   "ozon": "DEFERRED",
@@ -41,5 +35,9 @@
   "canonical_registry_set_sha256": "4cd2561b2da074b73ebe9ac8a3ccec6f2c890f7f7bf7998ac1a0ca698ed1037a",
   "release_authorized": false,
   "p1_status": "IN_PROGRESS",
-  "p1_phase": "FAILING_REGRESSION"
+  "p1_phase": "IMPLEMENTATION_AUTHORIZED",
+  "p1_failing_regression_status": "VERIFIED_EXPECTED_RED",
+  "p1_failing_regression_evidence_id": "EVD-PILOT-P1-FAILING-REGRESSION-001",
+  "next_work_order_id": "WO-PILOT-P1-ATOMIC-M1-IMPLEMENTATION-001",
+  "next_work_order_sha256": "430332bea16dc9bd30792b83e6bd62b6b31752624a025ed5dd802f08e0a11567"
 }

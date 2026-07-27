@@ -1,0 +1,55 @@
+{
+  "artifact_type": "SIGNED_WORK_ORDER",
+  "schema_version": "3.0.0",
+  "work_order_id": "WO-PILOT-P1-FAILING-REGRESSION-EVIDENCE-001",
+  "active_pilot_milestone": "P1_ATOMIC_M1_CLOSURE",
+  "assigned_role": "CONTROL_PLANE",
+  "parent_exact_head": "7b1693e4f0d0fb64ddcd6db514084f8a9fdcf12d",
+  "requirement_ids": [
+    "REQ-MP2-0145",
+    "PILOT-P1-001",
+    "PILOT-P1-002",
+    "PILOT-P1-003",
+    "PILOT-P1-004"
+  ],
+  "defect_ids": [
+    "PILOT-D-P1-001"
+  ],
+  "change_boundary": "Ingest immutable evidence that the P1 regression failed for the exact expected missing-validator reason, update P1 state/RTM/defect/work-order chain, and emit the next signed implementation work order. No validator, controller, product, installer, UI, workflow, test or dependency implementation change.",
+  "files_allowed_to_change": [
+    "docs/evidence/pilot_v3_0/WORK_ORDER_P1_FAILING_REGRESSION_EVIDENCE_001.json",
+    "docs/evidence/pilot_v3_0/PILOT_P1_FAILING_REGRESSION_EVIDENCE.json",
+    "docs/evidence/pilot_v3_0/PILOT_P1_FAILING_REGRESSION_RAW.log",
+    "docs/evidence/pilot_v3_0/WORK_ORDER_P1_ATOMIC_M1_IMPLEMENTATION_001.json",
+    "docs/evidence/pilot_v3_0/PILOT_P1_RTM.json",
+    "docs/evidence/pilot_v3_0/PILOT_AUTONOMOUS_EXECUTION_STATE.json",
+    "docs/evidence/pilot_v3_0/PILOT_DEFECT_REGISTER.json",
+    "docs/evidence/pilot_v3_0/PILOT_WORK_ORDER_CHAIN.json",
+    "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_V3_0_P1_REGRESSION_EVIDENCE.json"
+  ],
+  "files_forbidden_to_change": [
+    "src/**",
+    "scripts/**",
+    "requirements/**",
+    "installer/**",
+    "UI implementation paths",
+    "configuration migration paths",
+    "scheduled-report implementation paths",
+    "tools/**",
+    "tests/**",
+    ".github/workflows/**",
+    "docs/evidence/agent_v3_1/rtm/**",
+    "docs/evidence/agent_v3_1/REQUIREMENTS_TRACEABILITY_MATRIX.json",
+    "Protocol v3.1 source/hash",
+    "main"
+  ],
+  "hypothesis": "The exact red workflow and immutable uploaded log are sufficient L1 evidence that the specified behavior is absent for the intended reason, so implementation may be authorized without changing the regression.",
+  "next_test": "After the evidence commit is remotely bound, apply only the signed implementation work order and run the unchanged six-case regression.",
+  "expected_result": "Expected import failure is recorded with exact head/run/job/artifact/raw-log hashes; the regression itself remains unchanged; implementation work order is signed and release remains blocked.",
+  "rollback_condition": "Raw log does not contain the expected ImportError, run/job/head mismatch, artifact digest mismatch, changed path outside the exact allow-list, or any implementation path change.",
+  "rollback_command": "Leave the isolated evidence branch and draft PR unmerged; close/delete only through separate authorized housekeeping. Do not rewrite user worktrees.",
+  "target_evidence_level": "L1_FAILING_REGRESSION",
+  "product_change_authorized": false,
+  "release_authorized": false,
+  "work_order_sha256": "3152ebb84367fd7986e21060a783268570edbd4876bc9c159b2482bf2e1f0b93"
+}

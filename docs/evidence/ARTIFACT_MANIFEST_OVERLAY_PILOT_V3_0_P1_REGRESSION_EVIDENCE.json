@@ -1,0 +1,53 @@
+{
+  "artifact_type": "ARTIFACT_MANIFEST_OVERLAY",
+  "schema_version": "3.0.0",
+  "overlay_id": "PILOT-V3.0-P1-FAILING-REGRESSION-EVIDENCE-001",
+  "branch": "fix/quantum-pilot-surgical-convergence-v3-p1-implementation-base",
+  "parent_exact_head": "7b1693e4f0d0fb64ddcd6db514084f8a9fdcf12d",
+  "governing_work_order_id": "WO-PILOT-P1-FAILING-REGRESSION-EVIDENCE-001",
+  "governing_work_order_sha256": "3152ebb84367fd7986e21060a783268570edbd4876bc9c159b2482bf2e1f0b93",
+  "entries": [
+    {
+      "path": "docs/evidence/pilot_v3_0/WORK_ORDER_P1_FAILING_REGRESSION_EVIDENCE_001.json",
+      "sha256": "3715f057c5fae77f7387af1429a50d42645b35bb98b38ed12c5e2d6c222bede1",
+      "size_bytes": 3084
+    },
+    {
+      "path": "docs/evidence/pilot_v3_0/PILOT_P1_FAILING_REGRESSION_EVIDENCE.json",
+      "sha256": "f95bfae94ff82dbf4e639895ec9a502e5533df8335a918afa9aad739ff1cd492",
+      "size_bytes": 1694
+    },
+    {
+      "path": "docs/evidence/pilot_v3_0/PILOT_P1_FAILING_REGRESSION_RAW.log",
+      "sha256": "d9cc790a9d778ad87df4e6bbf22aa7913df8f4d87cd82263434f17cff1a8187a",
+      "size_bytes": 1058
+    },
+    {
+      "path": "docs/evidence/pilot_v3_0/WORK_ORDER_P1_ATOMIC_M1_IMPLEMENTATION_001.json",
+      "sha256": "366f0b822fc613b8add81ab304452cd7faffa24be489dca43f91720f46edc03f",
+      "size_bytes": 2924
+    },
+    {
+      "path": "docs/evidence/pilot_v3_0/PILOT_P1_RTM.json",
+      "sha256": "f9933175bf2b5099d4fff6bcb9ae800bdfff7ee2265c116fe352bf5a7d4b8e5f",
+      "size_bytes": 2921
+    },
+    {
+      "path": "docs/evidence/pilot_v3_0/PILOT_AUTONOMOUS_EXECUTION_STATE.json",
+      "sha256": "b4810a5b7b5b345a22c76ff2f69dfb735af1ae589545176290ff3e61c9972f2b",
+      "size_bytes": 2060
+    },
+    {
+      "path": "docs/evidence/pilot_v3_0/PILOT_DEFECT_REGISTER.json",
+      "sha256": "1e6552340c2eeaf3b9873e8af23373d1df11ad73fd19049f34ecfc2f7a01ef5a",
+      "size_bytes": 2306
+    },
+    {
+      "path": "docs/evidence/pilot_v3_0/PILOT_WORK_ORDER_CHAIN.json",
+      "sha256": "5cb7151398e02160b5e59c4f6d7d795f22ed9ad68714f65e03fa90625c600673",
+      "size_bytes": 1576
+    }
+  ],
+  "scope": "P1 expected-red evidence ingestion and next implementation authorization only; no implementation or product change.",
+  "release_authorized": false
+}
