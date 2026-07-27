@@ -1,0 +1,54 @@
+{
+  "base_agent_v3_1_m0_r7_overlay_git_blob_sha": "e188e64db4c7687645a65b63d600a905042832c2",
+  "entries": [
+    [
+      "docs/evidence/agent_v3_1/AUTONOMOUS_EXECUTION_STATE_M0_R7_REMOTE_CLOSURE.json",
+      "e52f45355ae3c85986274b23f8126c25dc23e2d9a49533847741bdde95068b01",
+      2493
+    ],
+    [
+      "docs/evidence/agent_v3_1/M0_R7_REMOTE_BINDING_CLOSURE.json",
+      "b9d15128f69f22d67118291696a49a0db421a0e503a811883934ca0d9ec7cb89",
+      4210
+    ],
+    [
+      "docs/evidence/agent_v3_1/M0_R7_REMOTE_CLOSURE_ATTEMPT_001_FAILURE.json",
+      "6f20ebc3240b82cd93052068accd5a8231771f75910204acd0e4cd6792039444",
+      1354
+    ],
+    [
+      "docs/evidence/agent_v3_1/WORK_ORDER_LEDGER_M0_R7_REMOTE_CLOSURE.json",
+      "f7e55600cfc722bd962cb741d016a4e089db14dda193a15b105173181f9b99ca",
+      1513
+    ],
+    [
+      "docs/evidence/agent_v3_1/WORK_ORDER_M0_R7_REMOTE_CLOSURE_CORRECTIVE_001.json",
+      "de54c0b754b4773212ab0cbefa98ab61589b7c084a382682df186ccef64c2e32",
+      2074
+    ],
+    [
+      "tests/integration_manifest_support_m8.py",
+      "5a2aadf215d792441fb4bb26feab5ce5273a554a75b39fbd4c53636cb0ad59b9",
+      6526
+    ],
+    [
+      "tests/test_agent_v3_1_m0_r7_remote_closure.py",
+      "63f4fc0d7b17efbd6e5ecfc9740a2e42f96aaecd4c244baf157043531b4676c7",
+      6566
+    ],
+    [
+      "tests/test_wbr2_m5_closure.py",
+      "ad6bfce64f036a1e7aa0e1158e2f2d68d3f9ddea3effe3a9e6dfc22d37346376",
+      5677
+    ],
+    [
+      "tests/test_wbr2_m5_closure_corrective_r2.py",
+      "dd0acd6b9720fbf3ec60a396823f4096e6822cfd5eb3d35d9444f483daac9b80",
+      5256
+    ]
+  ],
+  "hash_encoding": "sha256-hex",
+  "overlay_version": "AGENT-V3_1-M0-R7-REMOTE-CLOSURE",
+  "reason": "Append-only remote exact-tree binding closure for WO-M0-R7-002, including immutable failed-attempt evidence and a scope-limited historical-test corrective work order. M0 closes at remote L2 governance/source-runtime evidence only. M1, product/UI/config/installer/scheduled-report changes, L3/L4/L5 and release remain unstarted or blocked.",
+  "remove_paths": []
+}

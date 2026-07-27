@@ -41,6 +41,11 @@ AGENT_M0_R7_OVERLAY_PATH = (
     / "docs/evidence"
     / "ARTIFACT_MANIFEST_OVERLAY_AGENT_V3_1_M0_R7.json"
 )
+AGENT_M0_R7_REMOTE_CLOSURE_OVERLAY_PATH = (
+    ROOT
+    / "docs/evidence"
+    / "ARTIFACT_MANIFEST_OVERLAY_AGENT_V3_1_M0_R7_REMOTE_CLOSURE.json"
+)
 
 
 class Wbr2M5ClosureCorrectiveR2Tests(unittest.TestCase):
@@ -132,6 +137,15 @@ class Wbr2M5ClosureCorrectiveR2Tests(unittest.TestCase):
             {
                 path: [path, digest, size]
                 for path, digest, size in agent_m0_r7["entries"]
+            }
+        )
+        agent_m0_r7_remote_closure = json.loads(
+            AGENT_M0_R7_REMOTE_CLOSURE_OVERLAY_PATH.read_text(encoding="utf-8")
+        )
+        final.update(
+            {
+                path: [path, digest, size]
+                for path, digest, size in agent_m0_r7_remote_closure["entries"]
             }
         )
         for path, _digest, _size in overlay["entries"]:

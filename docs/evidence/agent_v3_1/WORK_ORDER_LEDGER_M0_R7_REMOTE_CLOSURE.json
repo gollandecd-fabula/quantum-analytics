@@ -1,0 +1,43 @@
+{
+  "append_only_chain": true,
+  "document_type": "WORK_ORDER_LEDGER_SNAPSHOT",
+  "ledger_snapshot_id": "M0-R7-REMOTE-CLOSURE",
+  "ledger_snapshot_sha256": "8269d66f4a03f86285c280e76b76ccf4684d233b426bc9b0b7b18489e9c0d9e1",
+  "m0_complete": true,
+  "m1_started": false,
+  "next_work_order": {
+    "milestone": "M1",
+    "required": true,
+    "scope": "MIGRATE_EXISTING_M9_AND_LITERAL_712_REQUIREMENT_INGESTION_ONLY",
+    "status": "NOT_YET_ISSUED"
+  },
+  "overall_decision": [
+    "M0_COMPLETE",
+    "M1_NOT_STARTED",
+    "PROTOCOL_IMPLEMENTATION_INCOMPLETE",
+    "RELEASE_BLOCKED"
+  ],
+  "previous_ledger_blob_sha": "fd2247463ef24082eb73edab0b09791771c29b63",
+  "schema_version": "1.0.0",
+  "work_order_result": {
+    "actual_results": {
+      "full_source_ci": "971/971 PASS",
+      "manifest_tests": "2/2 PASS",
+      "scope_paths": "45/45 EXACT",
+      "targeted_controls": "15/15 PASS",
+      "tree_identity": "PASS"
+    },
+    "artifact_digest": "sha256:b4e4331624cda2650fb4e7251f4f1fe1116d6f86f6e9b4fb3f6c3ed3bee66c8a",
+    "artifact_id": 8646665883,
+    "candidate_commit": "ff4b861ee11a5e437091b30b39228bfc97e95a7e",
+    "candidate_tree": "df7aecd89c220dc193dd92238b37c395f33f70e9",
+    "milestone": "M0",
+    "product_runtime_changed": false,
+    "release_authorized": false,
+    "remote_job_id": 89926376856,
+    "remote_run_id": 30250245773,
+    "status": "PASS_REMOTE_L2_CLOSED",
+    "target_product_base_commit": "b151e67c2bea8d4d50c5c4a2aeb0695e89921c01",
+    "work_order_id": "WO-M0-R7-002"
+  }
+}

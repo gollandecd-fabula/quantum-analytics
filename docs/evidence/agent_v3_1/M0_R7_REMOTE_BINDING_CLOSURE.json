@@ -1,0 +1,87 @@
+{
+  "artifact": {
+    "artifact_id": 8646665883,
+    "digest": "sha256:b4e4331624cda2650fb4e7251f4f1fe1116d6f86f6e9b4fb3f6c3ed3bee66c8a",
+    "downloaded_zip_sha256": "b4e4331624cda2650fb4e7251f4f1fe1116d6f86f6e9b4fb3f6c3ed3bee66c8a",
+    "expires_at_utc": "2026-08-03T08:32:03Z",
+    "file_hashes": {
+      "actual-paths.txt": "2ed69eb6503be1bc74617dddc81e3ba0e984592a61ea4475fca1416f40c0646f",
+      "candidate.commit-sha": "6d3ebd0d5c49d2d368dfece90f702c7d731a908daaec1b0cc8a9a179b67c3b42",
+      "candidate.name-status": "1fb1c144452c6bc236a7fc37677cd51cbf672a7c5ebee564225f669f5849c92a",
+      "candidate.tree-sha": "527f3d8fecb4b11ad12c9444f3d8592b3c59329f79e7c884582fe7d80ab4a440",
+      "expected-paths.txt": "2ed69eb6503be1bc74617dddc81e3ba0e984592a61ea4475fca1416f40c0646f",
+      "full-ci.log": "b476dc16cf873e65e4200aecf2c895aecfcdb106e621f0fd2dde55d8e2e906f9",
+      "manifest.log": "475440e26c478a53c6cebc50878515553e5a536201100ff617995baa05d5db69",
+      "scope-diff.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "targeted.log": "59bdf4ebc28602e2efa5b6539d7a40c330a2158819065773f276b7b280b66a84"
+    },
+    "name": "M0-R7-Binary-Exact-Tree-Evidence"
+  },
+  "binding": {
+    "local_equivalent_tree": "df7aecd89c220dc193dd92238b37c395f33f70e9",
+    "product_base_commit": "b151e67c2bea8d4d50c5c4a2aeb0695e89921c01",
+    "remote_candidate_commit": "ff4b861ee11a5e437091b30b39228bfc97e95a7e",
+    "remote_candidate_tree": "df7aecd89c220dc193dd92238b37c395f33f70e9",
+    "transport_commit": "c9e93204230b5e01fdad0c9cf873bdde97b7ca7c",
+    "transport_pull_request": 164,
+    "transport_pull_request_must_not_merge": true,
+    "tree_identity_equal": true
+  },
+  "closed_milestone": "M0",
+  "closure_id": "M0-R7-REMOTE-CLOSURE-001",
+  "closure_of_work_order_id": "WO-M0-R7-002",
+  "closure_record_sha256": "5c0165c06598f2f34eb231f25d51ef5b1fcd9d33f0fa8c053c7d38eb9afcff3d",
+  "document_type": "M0_REMOTE_EXACT_TREE_BINDING_CLOSURE",
+  "next_required_action": "Create a separate deterministic M1 migration work order for in-place migration of the existing M9 control plane; do not touch product/UI/installer/scheduled-report paths.",
+  "recorded_at_utc": "2026-07-27T08:32:04Z",
+  "remote_execution": {
+    "steps": {
+      "binary_chunk_and_archive_integrity": "PASS",
+      "complete_source_ci": "971/971 PASS",
+      "exact_45_path_scope": "PASS",
+      "exact_tree_publication": "PASS",
+      "immutable_base_and_historical_source_binding": "PASS",
+      "manifest_equality": "2/2 PASS",
+      "targeted_positive_negative_historical_controls": "15/15 PASS"
+    },
+    "workflow_conclusion": "success",
+    "workflow_job_id": 89926376856,
+    "workflow_run_id": 30250245773
+  },
+  "result": {
+    "l3_claimed": false,
+    "l4_claimed": false,
+    "m0_milestone_complete": true,
+    "m0_remote_exact_tree_binding": "PASS",
+    "m1_change_authorized_without_signed_work_order": false,
+    "m1_started": false,
+    "maximum_verified_evidence_level": "L2_REMOTE_SOURCE_RUNTIME_GOVERNANCE_ONLY",
+    "overall_decision": [
+      "M0_COMPLETE",
+      "M1_NOT_STARTED",
+      "PROTOCOL_IMPLEMENTATION_INCOMPLETE",
+      "RELEASE_BLOCKED"
+    ],
+    "physical_l5_claimed": false,
+    "release_authorized": false
+  },
+  "schema_version": "1.0.0",
+  "scope_evidence": {
+    "changed_path_count": 45,
+    "controller_code_changed": false,
+    "expected_and_actual_path_list_sha256": "2ed69eb6503be1bc74617dddc81e3ba0e984592a61ea4475fca1416f40c0646f",
+    "installer_changed": false,
+    "marketplace_writes_enabled": false,
+    "product_code_changed": false,
+    "scheduled_report_changed": false,
+    "scope_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "ui_changed": false
+  },
+  "source_of_truth": {
+    "canonical_requirement_count": 712,
+    "canonical_rtm_registry_set_sha256": "4cd2561b2da074b73ebe9ac8a3ccec6f2c890f7f7bf7998ac1a0ca698ed1037a",
+    "master_prompt_sha256": "1008a69ac56e44e6fa1f69c51f1fe43c8e621c161a52241230fa0af88ecd004a",
+    "protocol_sha256": "be69b8f1f919066c67086d6dd4678acf5e3cb3c4f1db9bc587dc540018601a90",
+    "ui_reference_sha256": "2482074aea312b065b4094792c5676445514dd555d50a064a5ae3e189dc60d13"
+  }
+}

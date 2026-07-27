@@ -1,0 +1,41 @@
+{
+  "active_milestone": "M0_CLOSURE",
+  "assigned_role": "CONTROL_PLANE_TEST_HARNESS",
+  "change_boundary": "Exactly two historical test files plus additive failure/work-order evidence and regenerated closure overlay. No product/runtime/controller/UI/config/installer/workflow/dependency change.",
+  "document_type": "WORK_ORDER",
+  "expected_result": "Targeted closure suite passes; manifest equality and full source CI remain green; M0 may proceed to remote closure binding only.",
+  "files_allowed_to_change": [
+    "tests/test_wbr2_m5_closure.py",
+    "tests/test_wbr2_m5_closure_corrective_r2.py",
+    "docs/evidence/agent_v3_1/M0_R7_REMOTE_CLOSURE_ATTEMPT_001_FAILURE.json",
+    "docs/evidence/agent_v3_1/WORK_ORDER_M0_R7_REMOTE_CLOSURE_CORRECTIVE_001.json",
+    "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_AGENT_V3_1_M0_R7_REMOTE_CLOSURE.json"
+  ],
+  "files_forbidden_to_change": [
+    "src/**",
+    "tools/**",
+    "scripts/**",
+    ".github/workflows/**",
+    "requirements/**",
+    "protocol/**",
+    "UI",
+    "installer",
+    "scheduled reports",
+    "main"
+  ],
+  "hypothesis": "Adding the new closure overlay to the expected manifest fold in exactly two historical tests resolves the harness-only terminal-overlay assumption.",
+  "marketplace_writes_enabled": false,
+  "negative_tests": [
+    "closure overlay base mismatch is rejected",
+    "forged release remains rejected",
+    "M1 start without work order remains rejected"
+  ],
+  "parent_work_order_id": "WO-M0-R7-002",
+  "positive_test": "Both historical overlay tests pass while retaining their original closure assertions.",
+  "release_authorized": false,
+  "requirement": "Make the two historical closure tests accept the already-created append-only M0 remote-closure overlay without changing historical evidence assertions.",
+  "rollback_condition": "Any non-allow-listed change or weakening/removal of historical assertions.",
+  "schema_version": "1.0.0",
+  "work_order_id": "WO-M0-R7-CLOSURE-CORRECTIVE-001",
+  "work_order_sha256": "daadf528e478f1f1fab21469e75230e2dd2b38335029c3db808706a64bfb1dd9"
+}

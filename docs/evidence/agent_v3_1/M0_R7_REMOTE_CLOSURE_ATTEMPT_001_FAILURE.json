@@ -1,0 +1,23 @@
+{
+  "attempt_id": "M0-R7-REMOTE-CLOSURE-ATTEMPT-001",
+  "closure_controls": "8/8 PASS",
+  "decision": "FAIL_CLOSED; DO_NOT_COMMIT_ATTEMPT; ISSUE_SCOPE_LIMITED_CORRECTIVE_WORK_ORDER",
+  "document_type": "M0_REMOTE_CLOSURE_FAILED_ATTEMPT",
+  "failed_tests": [
+    "tests.test_wbr2_m5_closure.Wbr2M5ClosureContracts.test_closure_overlay_is_effective",
+    "tests.test_wbr2_m5_closure_corrective_r2.Wbr2M5ClosureCorrectiveR2Tests.test_r2_overlay_is_effective"
+  ],
+  "failure_count": 2,
+  "failure_record_sha256": "03da4faf98dfd823a5eed15305d4f1c25f189668b820146b0d1fe0bf3e18ced6",
+  "failure_stage": "TARGETED_HISTORICAL_CLOSURE_CONTROLS",
+  "historical_controls": "6/8 PASS",
+  "product_change": "NONE",
+  "reason_no_rollback": "All changes remain uncommitted in the isolated local worktree; no product or remote candidate branch was modified.",
+  "reconciliation_controls": "7/7 PASS",
+  "rollback_required": false,
+  "root_cause": "Both historical tests constructed expected manifest rows only through AGENT_V3_1_M0_R7 and treated the prior manifest-loader digest as terminal. The new append-only remote-closure overlay correctly supersedes that loader row.",
+  "schema_version": "1.0.0",
+  "status": "FAILED_NOT_COMMITTED",
+  "targeted_log_sha256": "1856d88238f0d7268b28a4901ddeb23e343ce678c70073f9c268b2c2c33c7003",
+  "work_order_id": "WO-M0-R7-002"
+}

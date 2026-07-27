@@ -1,0 +1,72 @@
+{
+  "active_milestone": "M0_CLOSED_PENDING_M1_WORK_ORDER",
+  "canonical_rtm": {
+    "literal_runtime_ingestion": "NOT_IMPLEMENTED",
+    "registry_set_sha256": "4cd2561b2da074b73ebe9ac8a3ccec6f2c890f7f7bf7998ac1a0ca698ed1037a",
+    "requirement_count": 712
+  },
+  "current_decision": [
+    "M0_COMPLETE",
+    "M1_NOT_STARTED",
+    "PROTOCOL_IMPLEMENTATION_INCOMPLETE",
+    "MILESTONE_NOT_COMPLETE_OVERALL",
+    "RELEASE_BLOCKED"
+  ],
+  "defects": [
+    {
+      "defect_id": "M0-R7-D001",
+      "severity": "P0",
+      "status": "RESOLVED_REMOTE_L2"
+    },
+    {
+      "defect_id": "M0-R7-D002",
+      "severity": "P1",
+      "status": "RESOLVED_REMOTE_L2"
+    },
+    {
+      "defect_id": "M1-D-CONTROLLER-001",
+      "severity": "P0",
+      "status": "OPEN_BLOCKING_M1"
+    },
+    {
+      "defect_id": "L5-D-SCHEDULED-SCOPE-001",
+      "severity": "P0",
+      "status": "OPEN_NOT_AUTHORIZED_BEFORE_M1"
+    }
+  ],
+  "document_type": "AUTONOMOUS_EXECUTION_STATE_SNAPSHOT",
+  "forbidden_until_m1_complete": [
+    "SCHEDULED_REPORT_SCOPE_INVALID repair",
+    "UI changes",
+    "configuration migration",
+    "installer changes",
+    "new EXE",
+    "release"
+  ],
+  "m0": {
+    "closure_record_path": "docs/evidence/agent_v3_1/M0_R7_REMOTE_BINDING_CLOSURE.json",
+    "closure_record_sha256": "b9d15128f69f22d67118291696a49a0db421a0e503a811883934ca0d9ec7cb89",
+    "complete": true,
+    "evidence_level": "L2_REMOTE_SOURCE_RUNTIME_GOVERNANCE_ONLY"
+  },
+  "m1": {
+    "migration_authorized": false,
+    "parallel_controller_authorized": false,
+    "required_target": "EXISTING_M9_IN_PLACE",
+    "signed_work_order_required_before_change": true,
+    "started": false
+  },
+  "marketplace_writes_enabled": false,
+  "merge_to_main_authorized": false,
+  "next_scheduler_action": "Issue and validate a deterministic signed M1 migration work order limited to existing M9 migration and literal 712-requirement ingestion.",
+  "physical_l5_status": "FAILED_OR_UNVERIFIED_CURRENT_ARTIFACT",
+  "previous_state_blob_sha": "1ddd340c9cf7391fb0dc4b8721fbe60d52af4cf9",
+  "release_authorized": false,
+  "schema_version": "1.0.0",
+  "snapshot_id": "M0-R7-REMOTE-CLOSURE",
+  "state_snapshot_sha256": "76f3f323eb50185811de642e2ff0644ce7e7e9559c75116e23f3bbe6d5967fda",
+  "state_version": 8,
+  "subject_product_base_commit": "b151e67c2bea8d4d50c5c4a2aeb0695e89921c01",
+  "validated_governance_commit": "ff4b861ee11a5e437091b30b39228bfc97e95a7e",
+  "validated_governance_tree": "df7aecd89c220dc193dd92238b37c395f33f70e9"
+}
