@@ -1,13 +1,13 @@
 {
   "artifact_type": "PILOT_WORK_ORDER_CHAIN",
-  "canonical_branch": "fix/quanum-pilot-v3-canonical",
+  "canonical_branch": "fix/quantum-pilot-v3-canonical",
   "entries": [
     {
       "ordinal": 1,
       "parent_exact_head": "43d6230a43ebb4443e98f9ea9ec2746b210dfa3a",
       "result_exact_head": "9ddb908c77e033edc7e3712014d6d15da2e5e7d0",
       "status": "REMOTE_COMMIT_VERIFIED_RUNTIME_PENDING",
-      "work_order_id": "WO-PILOT-P0-CANONICAL-REECHOR-001"
+      "work_order_id": "WO-PILOT-P0-CANONICAL-RECOVERY-001"
     },
     {
       "evidence_ids": [
@@ -29,9 +29,16 @@
     {
       "ordinal": 4,
       "parent_exact_head": "9757cb8bee18c5122361b973f321455a040f90c0",
+      "result_exact_head": "92c97e64161a3da5d96b7b68686025f5826fac0a",
+      "status": "REMOTE_COMMIT_VERIFIED_RUNTIME_FAILED_MANIFEST_CLOSURE",
+      "work_order_id": "WO-PILOT-P0-GENERATOR-INVOCATION-CORRECTIVE-004"
+    },
+    {
+      "ordinal": 5,
+      "parent_exact_head": "92c97e64161a3da5d96b7b68686025f5826fac0a",
       "result_exact_head": "SELF_COMMIT_PENDING_REMOTE_BINDING",
       "status": "CORRECTIVE_COMMIT_IN_PROGRESS",
-      "work_order_id": "WO-PILOT-P0-GENERATOR-INVOCATION-CORRECTIVE-004"
+      "work_order_id": "WO-PILOT-P0-MANIFEST-CLOSURE-CORRECTIVE-005"
     }
   ],
   "parallel_write_authorized": false,

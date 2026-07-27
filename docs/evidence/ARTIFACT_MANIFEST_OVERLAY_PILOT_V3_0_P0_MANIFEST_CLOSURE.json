@@ -1,0 +1,55 @@
+{
+  "artifact_type": "ARTIFACT_MANIFEST_OVERLAY",
+  "base_pilot_v3_0_p0_generator_invocation_corrective_overlay_git_blob_sha": "746a97e6cee919446852fbffdf1008fb8cc784ae",
+  "entries": [
+    [
+      "tests/integration_manifest_support_pilot_v3.py",
+      "fde14b9b6b1c838dd5935a7c3342f29fee24c72271f18fb805f2ce62cc1327b6",
+      3561
+    ],
+    [
+      "docs/evidence/pilot_v3_0/WORK_ORDER_P0_MANIFEST_CLOSURE_CORRECTIVE_005.json",
+      "a73c5e1c829998b2d0626bbd52a498957dc4b4201898359a800957c296dd6ed6",
+      3893
+    ],
+    [
+      "docs/evidence/pilot_v3_0/PILOT_P0_ATTEMPT_003_FAILURE.json",
+      "e268e619d32ce1c262c96c44928e927335099d08b4417b6db99b377bbae13fd5",
+      2490
+    ],
+    [
+      "docs/evidence/pilot_v3_0/PILOT_AUTONOMOUS_EXECUTION_STATE.json",
+      "6c906e9fed05d9fe326de6b6273661b4d9fdfb5d97722da00cf274b1b5db9c8f",
+      1755
+    ],
+    [
+      "docs/evidence/pilot_v3_0/PILOT_DEFECT_REGISTER.json",
+      "5da6625c3ff5f9707a51e4529bd19dc20035628dfc35c890da6516d98f7592ff",
+      3177
+    ],
+    [
+      "docs/evidence/pilot_v3_0/PILOT_FAILURE_CLASSIFICATION_REGISTER.json",
+      "e34260ad8908753dc759409f48b16ac28b96cf89cc7ec619a1e94fbd8178c027",
+      2388
+    ],
+    [
+      "docs/evidence/pilot_v3_0/PILOT_WORK_ORDER_CHAIN.json",
+      "64cbd742f8859ad2079a9d96f9c16b4a0428597d443b8bbd28e64febedbd6382",
+      1786
+    ],
+    [
+      "docs/evidence/pilot_v3_0/PILOT_P0_EXECUTION_REGISTER.json",
+      "8a68b1ff3554010d954aeeff61778d21ab486d8a1b6149e7e8095540a4e0536f",
+      3076
+    ],
+    [
+      "docs/evidence/pilot_v3_0/WORK_ORDER_P0_CANONICAL_EXECUTION_002.json",
+      "4a9ea8d96f3ec6b8fe9b9f6f92bd4e226d3ee64473f0c0bb08d2f59cdedc82d1",
+      2980
+    ]
+  ],
+  "overlay_id": "PILOT-V3.0-P0-MANIFEST-CLOSURE",
+  "release_authorized": false,
+  "schema_version": "1.0.0",
+  "scope": "Append-only P0 effective-manifest closure and failed-attempt evidence only; no workflow, generator, generator-test, product, UI, installer, dependency, canonical RTM, Protocol v3.1, M9 controller or release change."
+}

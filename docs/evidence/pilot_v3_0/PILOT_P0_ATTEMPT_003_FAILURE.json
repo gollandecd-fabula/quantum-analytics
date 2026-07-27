@@ -1,0 +1,51 @@
+{
+  "artifact_digest": "sha256:ec4299a699582f0a6a1f210db914cc00fefa1f4a26f553704a3256ac95a335fd",
+  "artifact_id": 8661179241,
+  "artifact_type": "FAILED_ATTEMPT_EVIDENCE",
+  "attempt_id": "PILOT-P0-ATTEMPT-003",
+  "canonical_branch": "fix/quantum-pilot-v3-canonical",
+  "controls_not_run": [
+    "complete source regression"
+  ],
+  "controls_passed": [
+    "exact head checkout",
+    "canonical branch binding",
+    "forbidden-path scope",
+    "six generator unit controls",
+    "module CLI generation",
+    "712 rows",
+    "712 unique IDs",
+    "production status unchanged"
+  ],
+  "failed_step": "Validate overlay and effective manifest",
+  "failure_code": "EFFECTIVE_MANIFEST_CLOSURE_INCOMPLETE",
+  "failure_detail": "Exact head, branch, protected scope, six generator controls, module CLI and 712-row generation passed. Manifest validation found four pilot overlay control files not excluded from the shared tracked-path set and three stale tracked identities. Complete source regression was skipped.",
+  "generated_overlay_sha256": "ef3d831d35ca6e2d2a39228b0974506d48bafae87c622a0f5adfc83271a8b954",
+  "generated_overlay_size_bytes": 434233,
+  "generation_log_sha256": "db9d024511af2270e36c54af6a190c231e477abccd1506a2646a0a282f8403c7",
+  "generator_tests_log_sha256": "1c77b06b2ab0c02e40d0bdc61d3dd0c641f6767328f69d8d600f4dd7565535aa",
+  "job_id": 90046928041,
+  "manifest_findings": {
+    "manifest_artifact_count": 699,
+    "missing_control_paths": [
+      "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_V3_0_CANONICAL_RECOVERY.json",
+      "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_V3_0_P0_EXECUTION.json",
+      "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_V3_0_P0_SIGNATURE_CORRECTIVE.json",
+      "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_V3_0_P0_GENERATOR_INVOCATION_CORRECTIVE.json"
+    ],
+    "stale_tracked_identities": [
+      "docs/evidence/pilot_v3_0/PILOT_AUTONOMOUS_EXECUTION_STATE.json",
+      "docs/evidence/pilot_v3_0/PILOT_WORK_ORDER_CHAIN.json",
+      "docs/evidence/pilot_v3_0/WORK_ORDER_P0_CANONICAL_EXECUTION_002.json"
+    ],
+    "tracked_artifact_count": 703
+  },
+  "manifest_tests_log_sha256": "63ee26900a7ed0291788c2d8b5b7e90e6fa5c2aa7a343d170e55628050b781c2",
+  "pilot_claim_allowed": false,
+  "primary_classification": "PROTOCOL_SCOPE_FAILURE",
+  "product_failure_proven": false,
+  "release_authorized": false,
+  "schema_version": "3.0.0",
+  "subject_exact_head": "92c97e64161a3da5d96b7b68686025f5826fac0a",
+  "workflow_run_id": 30286923412
+}

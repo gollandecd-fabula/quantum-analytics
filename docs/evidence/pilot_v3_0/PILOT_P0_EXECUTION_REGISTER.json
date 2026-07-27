@@ -3,14 +3,15 @@
   "artifact_type": "PILOT_P0_EXECUTION_REGISTER",
   "canonical_branch": "fix/quantum-pilot-v3-canonical",
   "overall_status": "IN_PROGRESS",
-  "parent_exact_head": "9757cb8bee18c5122361b973f321455a040f90c0",
+  "parent_exact_head": "92c97e64161a3da5d96b7b68686025f5826fac0a",
   "release_authorized": false,
   "requirements": [
     {
       "action": "Use one canonical branch and one exact head.",
       "actual_evidence_ids": [
         "EVD-PILOT-P0-ATTEMPT-001",
-        "EVD-PILOT-P0-ATTEMPT-002"
+        "EVD-PILOT-P0-ATTEMPT-002",
+        "EVD-PILOT-P0-ATTEMPT-003"
       ],
       "actual_status": "IN_PROGRESS",
       "artifact": "PILOT_AUTONOMOUS_EXECUTION_STATE.json",
@@ -23,7 +24,8 @@
       "action": "Generate the full applicability overlay from all 712 immutable canonical rows.",
       "actual_evidence_ids": [
         "EVD-PILOT-P0-ATTEMPT-001",
-        "EVD-PILOT-P0-ATTEMPT-002"
+        "EVD-PILOT-P0-ATTEMPT-002",
+        "EVD-PILOT-P0-ATTEMPT-003"
       ],
       "actual_status": "PARTIAL",
       "artifact": "PILOT_APPLICABILITY_OVERLAY.json",
@@ -36,7 +38,8 @@
       "action": "Preserve product ancestry and protected scope.",
       "actual_evidence_ids": [
         "EVD-PILOT-P0-ATTEMPT-001",
-        "EVD-PILOT-P0-ATTEMPT-002"
+        "EVD-PILOT-P0-ATTEMPT-002",
+        "EVD-PILOT-P0-ATTEMPT-003"
       ],
       "actual_status": "PARTIAL",
       "artifact": "P0 changed-path evidence",
@@ -48,7 +51,9 @@
     {
       "action": "Preserve effective manifest equality.",
       "actual_evidence_ids": [
-        "EVD-PILOT-P0-ATTEMPT-002"
+        "EVD-PILOT-P0-ATTEMPT-002",
+        "EVD-PILOT-P0-ATTEMPT-001",
+        "EVD-PILOT-P0-ATTEMPT-003"
       ],
       "actual_status": "NOT_STARTED",
       "artifact": "P0 manifest test log",
@@ -60,7 +65,9 @@
     {
       "action": "Run complete source regression on the exact canonical head.",
       "actual_evidence_ids": [
-        "EVD-PILOT-P0-ATTEMPT-002"
+        "EVD-PILOT-P0-ATTEMPT-002",
+        "EVD-PILOT-P0-ATTEMPT-001",
+        "EVD-PILOT-P0-ATTEMPT-003"
       ],
       "actual_status": "NOT_STARTED",
       "artifact": "P0 full source CI log",
