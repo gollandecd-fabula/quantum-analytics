@@ -1,0 +1,39 @@
+{
+  "artifact_type": "ARTIFACT_MANIFEST_OVERLAY",
+  "schema_version": "3.0.0",
+  "overlay_id": "PILOT-V3.0-P1-FAILING-REGRESSION-001",
+  "branch": "fix/quantum-pilot-surgical-convergence-v3-p1",
+  "parent_exact_head": "b9a2bda375dce1fd7dc643b73d3a5f23f322ca04",
+  "governing_work_order_id": "WO-PILOT-P1-ATOMIC-M1-REGRESSION-001",
+  "governing_work_order_sha256": "5fe16b32de8cb052f4e4e0c95aa619fbb4f269ea61d2dc9180badb4b99893951",
+  "entries": [
+    {
+      "path": "docs/evidence/pilot_v3_0/WORK_ORDER_P1_ATOMIC_M1_REGRESSION_001.json",
+      "sha256": "cd72d70122fad12b7588feb5496d56834cdfc8857259a02d84dd50ae5a8cdd93",
+      "size_bytes": 3010
+    },
+    {
+      "path": "docs/evidence/pilot_v3_0/PILOT_P1_RTM.json",
+      "sha256": "2f22c9e295b8fa8fd022651d56c12d7772946909b10e6f0e251926cbac16bd65",
+      "size_bytes": 2486
+    },
+    {
+      "path": "docs/evidence/pilot_v3_0/PILOT_AUTONOMOUS_EXECUTION_STATE.json",
+      "sha256": "7b249b8d8f124cc887d1e04ab5a5caa01e72733d858d729c8dd4811b8460d5f4",
+      "size_bytes": 2011
+    },
+    {
+      "path": "tests/test_pilot_m1_atomic_work_order_chain.py",
+      "sha256": "1fd7a41710c91692b181e33f9f47ad7e1798d023c58fc7461dd3e0c37edf41ff",
+      "size_bytes": 3753
+    },
+    {
+      "path": ".github/workflows/pilot-p1-atomic-m1-regression.yml",
+      "sha256": "ccad97c833bcaa0536204dd8c30f875e71ed4891fd008973241392bb0f1c05ba",
+      "size_bytes": 1659
+    }
+  ],
+  "expected_runtime_result": "FAIL_MISSING_TOOLS_M9_WORK_ORDER_CHAIN",
+  "scope": "P1 failing regression and evidence only; no validator implementation and no product change.",
+  "release_authorized": false
+}

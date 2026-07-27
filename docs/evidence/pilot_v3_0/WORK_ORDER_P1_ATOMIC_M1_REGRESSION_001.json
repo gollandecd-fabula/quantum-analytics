@@ -1,0 +1,54 @@
+{
+  "artifact_type": "SIGNED_WORK_ORDER",
+  "schema_version": "3.0.0",
+  "work_order_id": "WO-PILOT-P1-ATOMIC-M1-REGRESSION-001",
+  "active_pilot_milestone": "P1_ATOMIC_M1_CLOSURE",
+  "assigned_role": "IMPLEMENTER",
+  "parent_exact_head": "b9a2bda375dce1fd7dc643b73d3a5f23f322ca04",
+  "requirement_ids": [
+    "REQ-MP2-0145",
+    "PILOT-P1-001",
+    "PILOT-P1-002",
+    "PILOT-P1-003",
+    "PILOT-P1-004"
+  ],
+  "defect_ids": [
+    "PILOT-D-P0-003",
+    "PILOT-D-P1-001"
+  ],
+  "change_boundary": "Add only the P1 signed state/RTM, one failing unit regression for ordered commit/work-order-chain validation, and a dedicated regression workflow. Do not implement the validator in this work order and do not modify the existing M9 control plane or product.",
+  "files_allowed_to_change": [
+    "docs/evidence/pilot_v3_0/WORK_ORDER_P1_ATOMIC_M1_REGRESSION_001.json",
+    "docs/evidence/pilot_v3_0/PILOT_P1_RTM.json",
+    "docs/evidence/pilot_v3_0/PILOT_AUTONOMOUS_EXECUTION_STATE.json",
+    "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_V3_0_P1_REGRESSION.json",
+    "tests/test_pilot_m1_atomic_work_order_chain.py",
+    ".github/workflows/pilot-p1-atomic-m1-regression.yml"
+  ],
+  "files_forbidden_to_change": [
+    "src/**",
+    "scripts/**",
+    "requirements/**",
+    "installer/**",
+    "UI implementation paths",
+    "configuration migration paths",
+    "scheduled-report implementation paths",
+    "tools/m9_maximum_assurance_control_plane.py",
+    "tools/m9_work_order_chain.py",
+    "tests/test_m9_*",
+    ".github/workflows/m9-maximum-assurance-control-plane.yml",
+    "docs/evidence/agent_v3_1/rtm/**",
+    "docs/evidence/agent_v3_1/REQUIREMENTS_TRACEABILITY_MATRIX.json",
+    "Protocol v3.1 source/hash",
+    "main"
+  ],
+  "hypothesis": "A pure ordered-chain regression can distinguish valid per-commit signed scopes from the invalid historical union-against-primary check and can fail before implementation without changing product behavior.",
+  "next_test": "Run python -m unittest -v tests.test_pilot_m1_atomic_work_order_chain on Linux. The expected pre-implementation result is import failure because tools.m9_work_order_chain does not yet exist.",
+  "expected_result": "Dedicated regression workflow is red for the expected missing-validator reason; exact changed paths equal the six-file allow-list and product/protected paths are unchanged.",
+  "rollback_condition": "The regression passes without an implementation, fails for an unrelated syntax/workflow error, changes a forbidden path, or does not exercise signatures, parent continuity, exact path scope and product-path rejection.",
+  "rollback_command": "Leave the isolated regression branch and draft PR unmerged; close/delete only through a separate authorized housekeeping operation. Do not rewrite any user worktree.",
+  "target_evidence_level": "L1_FAILING_REGRESSION",
+  "product_change_authorized": false,
+  "release_authorized": false,
+  "work_order_sha256": "5fe16b32de8cb052f4e4e0c95aa619fbb4f269ea61d2dc9180badb4b99893951"
+}

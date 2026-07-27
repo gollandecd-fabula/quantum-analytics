@@ -3,7 +3,7 @@
   "schema_version": "3.0.0",
   "repository": "gollandecd-fabula/quantum-analytics",
   "canonical_pilot_branch": "fix/quantum-pilot-surgical-convergence-v3-p1",
-  "state_subject_exact_head": "089d460eb5a2b5fc384d87afa261a68ea729724f",
+  "state_subject_exact_head": "b9a2bda375dce1fd7dc643b73d3a5f23f322ca04",
   "closure_state_binding_method": "DRAFT_PR_HEAD_METADATA",
   "canonical_state_owner": "CONTROL_PLANE",
   "active_pilot_milestone": "P1_ATOMIC_M1_CLOSURE",
@@ -16,8 +16,15 @@
   "p0_subject_parent_exact_head": "43d6230a43ebb4443e98f9ea9ec2746b210dfa3a",
   "product_ancestor_exact_head": "b151e67c2bea8d4d50c5c4a2aeb0695e89921c01",
   "product_ancestry_status": "VERIFIED_REMOTE_COMPARE",
-  "active_lock": null,
-  "active_lock_count": 0,
+  "active_lock": {
+    "lock_id": "LOCK-PILOT-P1-REGRESSION-001",
+    "owner_role": "IMPLEMENTER",
+    "governing_work_order_id": "WO-PILOT-P1-ATOMIC-M1-REGRESSION-001",
+    "governing_work_order_sha256": "5fe16b32de8cb052f4e4e0c95aa619fbb4f269ea61d2dc9180badb4b99893951",
+    "state": "ACQUIRED_FOR_FAILING_REGRESSION",
+    "parallel_write_authorized": false
+  },
+  "active_lock_count": 1,
   "p1_lock_required_before_change": true,
   "parallel_write_authorized": false,
   "superseded_noncanonical_branches": [
@@ -32,5 +39,7 @@
   "production_release_decision": "RELEASE_BLOCKED",
   "protocol_sha256": "be69b8f1f919066c67086d6dd4678acf5e3cb3c4f1db9bc587dc540018601a90",
   "canonical_registry_set_sha256": "4cd2561b2da074b73ebe9ac8a3ccec6f2c890f7f7bf7998ac1a0ca698ed1037a",
-  "release_authorized": false
+  "release_authorized": false,
+  "p1_status": "IN_PROGRESS",
+  "p1_phase": "FAILING_REGRESSION"
 }

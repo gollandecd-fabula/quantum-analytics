@@ -1,0 +1,56 @@
+{
+  "artifact_type": "PILOT_P1_REQUIREMENTS_TRACEABILITY_MATRIX",
+  "schema_version": "3.0.0",
+  "branch": "fix/quantum-pilot-surgical-convergence-v3-p1",
+  "parent_exact_head": "b9a2bda375dce1fd7dc643b73d3a5f23f322ca04",
+  "active_milestone": "P1_ATOMIC_M1_CLOSURE",
+  "requirements": [
+    {
+      "requirement_id": "PILOT-P1-001",
+      "requirement": "Create a failing regression for valid ordered per-commit work-order chain acceptance.",
+      "action": "Add unit test with two signed contiguous segments.",
+      "test": "Regression import/execution through dedicated workflow.",
+      "evidence_level": "L1",
+      "pass_criterion": "Pre-implementation test is red for missing validator; after implementation the valid chain passes.",
+      "status": "IN_PROGRESS"
+    },
+    {
+      "requirement_id": "PILOT-P1-002",
+      "requirement": "Reject any changed path outside the governing work order for its commit.",
+      "action": "Add unauthorized-path negative case.",
+      "test": "Validator returns WORK_ORDER_SCOPE_VIOLATION.",
+      "evidence_level": "L1",
+      "pass_criterion": "Unauthorized path makes chain red.",
+      "status": "IN_PROGRESS"
+    },
+    {
+      "requirement_id": "PILOT-P1-003",
+      "requirement": "Reject forged signatures and broken parent continuity.",
+      "action": "Add signature and parent-chain negative cases.",
+      "test": "Validator returns signature/parent findings.",
+      "evidence_level": "L1",
+      "pass_criterion": "Both mutations make chain red.",
+      "status": "IN_PROGRESS"
+    },
+    {
+      "requirement_id": "PILOT-P1-004",
+      "requirement": "Reject product changes in a governance-only M1 segment.",
+      "action": "Add src/ path negative case.",
+      "test": "Validator returns PRODUCT_CODE_CHANGED_WITHOUT_REQUIREMENT.",
+      "evidence_level": "L1",
+      "pass_criterion": "Product scope leak is rejected.",
+      "status": "IN_PROGRESS"
+    },
+    {
+      "requirement_id": "REQ-MP2-0145",
+      "requirement": "Validate work-order scope without retroactively expanding the primary work order.",
+      "action": "Implement only after failing regression is observed.",
+      "test": "Exact-head chain verification plus existing M1 tests.",
+      "evidence_level": "L2",
+      "pass_criterion": "Every commit delta is checked against its own signed work order; final chain and M1 source runtime pass.",
+      "status": "FAILED"
+    }
+  ],
+  "overall_status": "IN_PROGRESS",
+  "release_authorized": false
+}
