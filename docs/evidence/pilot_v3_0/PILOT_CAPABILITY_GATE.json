@@ -1,0 +1,42 @@
+{
+  "artifact_type": "PILOT_CAPABILITY_GATE",
+  "branch": "fix/quantum-pilot-surgical-convergence-v3-p0",
+  "capabilities": [
+    {
+      "capability": "Create an isolated fast-forward pilot branch from the exact current M1 candidate",
+      "evidence_level": "REMOTE_REF",
+      "status": "VERIFIED",
+      "supported": true
+    },
+    {
+      "capability": "Create append-only JSON governance/evidence artifacts",
+      "evidence_level": "L0_STATIC",
+      "status": "VERIFIED",
+      "supported": true
+    },
+    {
+      "capability": "Verify product ancestry through exact commit comparison",
+      "evidence_level": "REMOTE_COMPARE",
+      "status": "VERIFIED",
+      "supported": true
+    },
+    {
+      "capability": "Modify product, installer, UI, tests or workflows in P0",
+      "evidence_level": "N/A",
+      "status": "FORBIDDEN_BY_WORK_ORDER",
+      "supported": false
+    },
+    {
+      "capability": "Execute Windows installed runtime or physical user path in P0",
+      "evidence_level": "L4_L5",
+      "status": "NOT_REQUIRED_FOR_P0",
+      "supported": false
+    }
+  ],
+  "decision": "P0_APPEND_ONLY_GOVERNANCE_SUPPORTED",
+  "parent_exact_head": "43d6230a43ebb4443e98f9ea9ec2746b210dfa3a",
+  "protocol_sha256": "be69b8f1f919066c67086d6dd4678acf5e3cb3c4f1db9bc587dc540018601a90",
+  "release_authorized": false,
+  "schema_version": "3.0.0",
+  "transport_note": "Previous empty branch is superseded; canonical ref will be created directly from the P0 opening commit."
+}

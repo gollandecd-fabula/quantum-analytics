@@ -1,0 +1,68 @@
+{
+  "artifact_type": "PILOT_P0_REQUIREMENTS_TRACEABILITY_MATRIX",
+  "branch": "fix/quantum-pilot-surgical-convergence-v3-p0",
+  "canonical_registry_set_sha256": "4cd2561b2da074b73ebe9ac8a3ccec6f2c890f7f7bf7998ac1a0ca698ed1037a",
+  "overall_status": "IN_PROGRESS",
+  "parent_exact_head": "43d6230a43ebb4443e98f9ea9ec2746b210dfa3a",
+  "protocol_sha256": "be69b8f1f919066c67086d6dd4678acf5e3cb3c4f1db9bc587dc540018601a90",
+  "release_authorized": false,
+  "requirements": [
+    {
+      "action": "Anchor one branch to the exact current M1 candidate.",
+      "artifact": "PILOT_AUTONOMOUS_EXECUTION_STATE.json",
+      "evidence_level": "REMOTE_REF",
+      "pass_criterion": "Exactly one canonical pilot branch is declared and no main change occurs.",
+      "requirement": "Re-evaluate the actual repository state and select one canonical pilot branch.",
+      "requirement_id": "PILOT-P0-001",
+      "source": "Master Prompt v3.0 §12 P0",
+      "status": "IN_PROGRESS",
+      "test": "Remote branch ref equals the authorized parent."
+    },
+    {
+      "action": "Compare b151e67... to 43d6230... and record merge-base.",
+      "artifact": "PILOT_AUTONOMOUS_EXECUTION_STATE.json",
+      "evidence_level": "REMOTE_COMPARE",
+      "pass_criterion": "Product ancestry is exact and non-divergent.",
+      "requirement": "Prove that the current pilot line contains the working product head in ancestry.",
+      "requirement_id": "PILOT-P0-002",
+      "source": "Master Prompt v3.0 §5.1",
+      "status": "VERIFIED",
+      "test": "Comparison status ahead; behind_by=0; merge-base equals product ancestor."
+    },
+    {
+      "action": "Create explicit pilot-critical rows plus a fail-closed coverage policy for the 712-row canonical RTM.",
+      "artifact": "PILOT_APPLICABILITY_OVERLAY.json",
+      "evidence_level": "L0_STATIC",
+      "pass_criterion": "No canonical production status is modified or inferred as complete.",
+      "requirement": "Create a pilot applicability overlay without changing production statuses.",
+      "requirement_id": "PILOT-P0-003",
+      "source": "Master Prompt v3.0 §2.1",
+      "status": "IN_PROGRESS",
+      "test": "Overlay binds protocol and registry hashes and contains production_status_unchanged=true."
+    },
+    {
+      "action": "Record a single IMPLEMENTER lock for P0 governance only.",
+      "artifact": "PILOT_AUTONOMOUS_EXECUTION_STATE.json",
+      "evidence_level": "L0_STATIC",
+      "pass_criterion": "No second pilot production write line is active.",
+      "requirement": "Allow one active production writer lock.",
+      "requirement_id": "PILOT-P0-004",
+      "source": "Master Prompt v3.0 §5.2",
+      "status": "IN_PROGRESS",
+      "test": "active_lock_count=1 and parallel_write_authorized=false."
+    },
+    {
+      "action": "Create all P0 registers append-only under pilot_v3_0.",
+      "artifact": "ARTIFACT_MANIFEST_OVERLAY_PILOT_V3_0_P0.json",
+      "evidence_level": "L0_STATIC",
+      "pass_criterion": "All P0 artifacts exist and parse; no protected path changed.",
+      "requirement": "Create pilot defect, failure, work-order and state registers.",
+      "requirement_id": "PILOT-P0-005",
+      "source": "Master Prompt v3.0 §16",
+      "status": "IN_PROGRESS",
+      "test": "Exact file allow-list and manifest hashes validate."
+    }
+  ],
+  "schema_version": "3.0.0",
+  "transport_corrective_work_order_id": "WO-PILOT-P0-CANONICAL-REANCHOR-002"
+}

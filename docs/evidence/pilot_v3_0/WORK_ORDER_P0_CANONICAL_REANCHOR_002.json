@@ -1,0 +1,67 @@
+{
+  "active_pilot_milestone": "P0_CANONICAL_REANCHOR",
+  "artifact_type": "SIGNED_WORK_ORDER",
+  "assigned_role": "IMPLEMENTER",
+  "branch": "fix/quantum-pilot-surgical-convergence-v3-p0",
+  "change_boundary": "Materialize the append-only P0 governance/evidence payload on a new canonical branch after the previous branch-ref update was blocked; no product, installer, UI, workflow, test, dependency, canonical RTM or Protocol v3.1 change.",
+  "created_at_utc": "2026-07-27T00:00:00Z",
+  "defect_ids": [
+    "PILOT-D-P0-001",
+    "PILOT-D-P0-002",
+    "PILOT-D-P0-003",
+    "PILOT-D-P0-TRANSPORT-001"
+  ],
+  "expected_result": "The new canonical pilot branch points directly to one P0 opening commit whose parent is the current M1 candidate; the previous empty branch is recorded as superseded and receives no further writes.",
+  "files_allowed_to_change": [
+    "docs/evidence/pilot_v3_0/WORK_ORDER_P0_CANONICAL_REANCHOR_002.json",
+    "docs/evidence/pilot_v3_0/PILOT_CAPABILITY_GATE.json",
+    "docs/evidence/pilot_v3_0/PILOT_P0_RTM.json",
+    "docs/evidence/pilot_v3_0/PILOT_APPLICABILITY_OVERLAY.json",
+    "docs/evidence/pilot_v3_0/PILOT_DEFECT_REGISTER.json",
+    "docs/evidence/pilot_v3_0/PILOT_AUTONOMOUS_EXECUTION_STATE.json",
+    "docs/evidence/pilot_v3_0/PILOT_WORK_ORDER_CHAIN.json",
+    "docs/evidence/pilot_v3_0/PILOT_FAILURE_CLASSIFICATION_REGISTER.json",
+    "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_V3_0_P0.json"
+  ],
+  "files_forbidden_to_change": [
+    "src/**",
+    "scripts/**",
+    "tests/**",
+    ".github/workflows/**",
+    "requirements/**",
+    "installer/**",
+    "UI implementation paths",
+    "configuration migration paths",
+    "scheduled-report implementation paths",
+    "docs/evidence/agent_v3_1/REQUIREMENTS_TRACEABILITY_MATRIX.json",
+    "docs/evidence/agent_v3_1/rtm/**",
+    "Protocol v3.1 source/hash",
+    "main"
+  ],
+  "hypothesis": "Creating the canonical branch directly at the prepared commit avoids the blocked ref-move operation while preserving the same exact parent and append-only P0 scope.",
+  "next_test": "Verify remote canonical branch ref, exact parent, product ancestry, exact changed-path equality, JSON parseability, work-order signature, manifest hashes, one active lock and no product/protected path changes.",
+  "parent_exact_head": "43d6230a43ebb4443e98f9ea9ec2746b210dfa3a",
+  "product_ancestor_exact_head": "b151e67c2bea8d4d50c5c4a2aeb0695e89921c01",
+  "product_change_authorized": false,
+  "release_authorized": false,
+  "requirement_ids": [
+    "PILOT-P0-001",
+    "PILOT-P0-002",
+    "PILOT-P0-003",
+    "PILOT-P0-004",
+    "PILOT-P0-005"
+  ],
+  "rollback_command": "Leave the new isolated branch unmerged and delete it only through a separate authorized housekeeping operation; do not rewrite or clean any user worktree.",
+  "rollback_condition": "Any parent/ancestry mismatch, changed path outside the exact allow-list, invalid signature/hash, write to the superseded branch, parallel pilot write line, or product/protected path change.",
+  "schema_version": "3.0.0",
+  "superseded_branch": "fix/quantum-pilot-surgical-convergence-v3",
+  "superseded_branch_status": "SUPERSEDED_NON_CANONICAL_NO_WRITES",
+  "target_evidence_level": "L0_STATIC_REMOTE_REF",
+  "transport_failure": {
+    "attempted_commit": "292a65c4eb3da242fdab89bd9d6b71e6ce35da86",
+    "published_to_branch": false,
+    "reason": "UPDATE_REF_BLOCKED_BY_TOOL_SAFETY_LAYER"
+  },
+  "work_order_id": "WO-PILOT-P0-CANONICAL-REANCHOR-002",
+  "work_order_sha256": "4b800a07016069a3c7611eb22dc67e343e60e238cf38eef98830fb7747593edf"
+}

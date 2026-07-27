@@ -1,0 +1,66 @@
+{
+  "artifact_type": "PILOT_FAILURE_CLASSIFICATION_REGISTER",
+  "canonical_pilot_branch": "fix/quantum-pilot-surgical-convergence-v3-p0",
+  "classifications": [
+    {
+      "failed_step": "Validate current closure changed paths against primary work order",
+      "failure_id": "FAIL-M1-GATE-43D",
+      "justification": "Four corrective files were authorized by a separate signed corrective work order but the final gate loaded only the primary hardcoded work order.",
+      "primary_classification": "PROTOCOL_SCOPE_FAILURE",
+      "product_tests_executed": "Targeted M1 tests 19/19 PASS; full regression skipped after gate failure.",
+      "secondary_observation": "HARNESS_FAILURE",
+      "source": "M9 Maximum Assurance Protocol v3.1 Control Plane run 30263207516",
+      "status": "OPEN_P1"
+    },
+    {
+      "failed_step": "Create desktop shortcut during clean install",
+      "failure_id": "FAIL-M8-DESKTOP",
+      "justification": "The runner exposes no DesktopDirectory, but installer robustness requires verified fallback or typed rollback rather than an unhandled prerequisite.",
+      "primary_classification": "PRODUCT_FAILURE",
+      "product_tests_executed": "Install aborted before the full native one-button scenario.",
+      "secondary_observation": "ENVIRONMENT_UNAVAILABLE",
+      "source": "M8 Clean Environment Reproduction run 30263207546",
+      "status": "OPEN_P3"
+    },
+    {
+      "failed_step": "Ancestry/exact-head preflight",
+      "failure_id": "FAIL-M5-ANCESTRY",
+      "justification": "Must be re-evaluated on the canonical pilot head; current red result does not prove scheduled-report product failure.",
+      "primary_classification": "HISTORICAL_GATE_NA",
+      "product_tests_executed": "Skipped after preflight.",
+      "secondary_observation": "HARNESS_FAILURE",
+      "source": "M5 Scheduled Weekly Monthly Reports run 30263207541",
+      "status": "PENDING_P2_RECHECK"
+    },
+    {
+      "failed_step": "Historical ancestry/allow-list assertion",
+      "failure_id": "FAIL-WBR2-ANCESTRY",
+      "justification": "Requires deterministic applicability decision on the pilot head, not suppression.",
+      "primary_classification": "HISTORICAL_GATE_NA",
+      "product_tests_executed": "Governance contracts passed; construction assertion failed.",
+      "secondary_observation": "PROTOCOL_SCOPE_FAILURE",
+      "source": "WB Release R2 Plan Reconciliation run 30263207514",
+      "status": "PENDING_P2_RECHECK"
+    },
+    {
+      "failed_step": "Advance existing pilot branch ref to prepared P0 commit",
+      "failure_id": "FAIL-P0-UPDATE-REF",
+      "justification": "The connected tool safety layer blocked update_ref before the branch changed. A new branch will be created directly at a fresh equivalent commit.",
+      "primary_classification": "ENVIRONMENT_UNAVAILABLE",
+      "product_tests_executed": "None; no product or branch content changed.",
+      "secondary_observation": "HARNESS_FAILURE",
+      "source": "Connected GitHub update_ref action",
+      "status": "CLOSED_BY_SAFE_ALTERNATE_PENDING_VERIFY"
+    }
+  ],
+  "parent_exact_head": "43d6230a43ebb4443e98f9ea9ec2746b210dfa3a",
+  "release_authorized": false,
+  "schema_version": "3.0.0",
+  "taxonomy": [
+    "PRODUCT_FAILURE",
+    "PROTOCOL_SCOPE_FAILURE",
+    "HARNESS_FAILURE",
+    "ENVIRONMENT_UNAVAILABLE",
+    "HISTORICAL_GATE_NA"
+  ]
+}

@@ -1,0 +1,98 @@
+{
+  "artifact_type": "PILOT_DEFECT_REGISTER",
+  "branch": "fix/quantum-pilot-surgical-convergence-v3-p0",
+  "defects": [
+    {
+      "classification": "PROTOCOL_SCOPE_FAILURE",
+      "defect_id": "PILOT-D-P0-001",
+      "evidence_ids": [],
+      "requirement_ids": [
+        "PILOT-P0-001",
+        "PILOT-P0-004"
+      ],
+      "severity": "P0",
+      "status": "IN_PROGRESS",
+      "title": "No single canonical pilot line and state owner were declared."
+    },
+    {
+      "classification": "PROTOCOL_SCOPE_FAILURE",
+      "defect_id": "PILOT-D-P0-002",
+      "evidence_ids": [],
+      "requirement_ids": [
+        "PILOT-P0-003",
+        "PILOT-P0-005"
+      ],
+      "severity": "P0",
+      "status": "IN_PROGRESS",
+      "title": "Pilot applicability overlay and bounded pilot decision state were absent."
+    },
+    {
+      "classification": "PROTOCOL_SCOPE_FAILURE",
+      "defect_id": "PILOT-D-P0-003",
+      "evidence_ids": [
+        "EVD-M1-SUBJECT-PASS-BBDF",
+        "EVD-M1-CLOSURE-FAIL-43D"
+      ],
+      "requirement_ids": [
+        "REQ-MP2-0145"
+      ],
+      "severity": "P0",
+      "status": "OPEN",
+      "title": "M1 PASS evidence is bound to bbdf8b while current closure head 43d6230 fails exact-head scope validation."
+    },
+    {
+      "classification": "HARNESS_FAILURE",
+      "defect_id": "PILOT-D-P1-001",
+      "evidence_ids": [
+        "EVD-M1-CLOSURE-FAIL-43D"
+      ],
+      "requirement_ids": [
+        "REQ-MP2-0145"
+      ],
+      "severity": "P0",
+      "status": "OPEN",
+      "title": "Final M1 gate validates a multi-work-order closure union against only the primary hardcoded work order."
+    },
+    {
+      "classification": "PRODUCT_FAILURE",
+      "defect_id": "PILOT-D-P3-001",
+      "evidence_ids": [
+        "EVD-M8-DESKTOP-DIRECTORY-UNAVAILABLE"
+      ],
+      "requirement_ids": [
+        "PILOT-REQ-INSTALL-001"
+      ],
+      "severity": "P0",
+      "status": "OPEN",
+      "title": "Windows installer aborts when DesktopDirectory is unavailable and has no verified fallback."
+    },
+    {
+      "classification": "ENVIRONMENT_UNAVAILABLE",
+      "defect_id": "PILOT-D-P5-001",
+      "evidence_ids": [],
+      "requirement_ids": [
+        "PILOT-REQ-L5-001"
+      ],
+      "severity": "P0",
+      "status": "BLOCKED_EXTERNAL",
+      "title": "Physical L5 on Dmitry's Windows computer has not been executed."
+    },
+    {
+      "classification": "ENVIRONMENT_UNAVAILABLE",
+      "defect_id": "PILOT-D-P0-TRANSPORT-001",
+      "evidence_ids": [
+        "EVD-P0-UPDATE-REF-BLOCKED"
+      ],
+      "requirement_ids": [
+        "PILOT-P0-001"
+      ],
+      "severity": "P1",
+      "status": "CLOSED_BY_ALTERNATE_SAFE_TRANSPORT_PENDING_REMOTE_VERIFY",
+      "title": "Existing branch ref could not be advanced through the available update-ref tool."
+    }
+  ],
+  "open_p0_count": 6,
+  "parent_exact_head": "43d6230a43ebb4443e98f9ea9ec2746b210dfa3a",
+  "release_authorized": false,
+  "schema_version": "3.0.0"
+}

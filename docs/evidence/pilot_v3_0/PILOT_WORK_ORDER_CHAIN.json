@@ -1,0 +1,39 @@
+{
+  "active_lock_count": 1,
+  "active_work_order_id": "WO-PILOT-P0-CANONICAL-REANCHOR-002",
+  "artifact_type": "PILOT_WORK_ORDER_CHAIN",
+  "branch": "fix/quantum-pilot-surgical-convergence-v3-p0",
+  "chain_status": "OPEN",
+  "entries": [
+    {
+      "actual_changed_paths": [],
+      "expected_changed_paths": [
+        "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_V3_0_P0.json",
+        "docs/evidence/pilot_v3_0/PILOT_APPLICABILITY_OVERLAY.json",
+        "docs/evidence/pilot_v3_0/PILOT_AUTONOMOUS_EXECUTION_STATE.json",
+        "docs/evidence/pilot_v3_0/PILOT_CAPABILITY_GATE.json",
+        "docs/evidence/pilot_v3_0/PILOT_DEFECT_REGISTER.json",
+        "docs/evidence/pilot_v3_0/PILOT_FAILURE_CLASSIFICATION_REGISTER.json",
+        "docs/evidence/pilot_v3_0/PILOT_P0_RTM.json",
+        "docs/evidence/pilot_v3_0/PILOT_WORK_ORDER_CHAIN.json",
+        "docs/evidence/pilot_v3_0/WORK_ORDER_P0_CANONICAL_REANCHOR_002.json"
+      ],
+      "ordinal": 1,
+      "parent_exact_head": "43d6230a43ebb4443e98f9ea9ec2746b210dfa3a",
+      "result_exact_head": "PENDING_REMOTE_COMMIT_BINDING",
+      "status": "AUTHORIZED_IN_PROGRESS",
+      "work_order_id": "WO-PILOT-P0-CANONICAL-REANCHOR-002",
+      "work_order_sha256": "4b800a07016069a3c7611eb22dc67e343e60e238cf38eef98830fb7747593edf"
+    }
+  ],
+  "parallel_write_authorized": false,
+  "release_authorized": false,
+  "schema_version": "3.0.0",
+  "superseded_unpublished_attempts": [
+    {
+      "branch_ref_updated": false,
+      "commit": "292a65c4eb3da242fdab89bd9d6b71e6ce35da86",
+      "status": "NOT_EVIDENCE"
+    }
+  ]
+}

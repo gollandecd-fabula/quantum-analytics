@@ -1,0 +1,55 @@
+{
+  "artifact_type": "ARTIFACT_MANIFEST_OVERLAY",
+  "branch": "fix/quantum-pilot-surgical-convergence-v3-p0",
+  "candidate_exact_head": "PENDING_REMOTE_COMMIT_BINDING",
+  "entries": [
+    {
+      "path": "docs/evidence/pilot_v3_0/PILOT_APPLICABILITY_OVERLAY.json",
+      "sha256": "5f3e3e5208ad61cec7e732154522ab705d39250c9baa3db947138b06422e3e70",
+      "size_bytes": 8170
+    },
+    {
+      "path": "docs/evidence/pilot_v3_0/PILOT_AUTONOMOUS_EXECUTION_STATE.json",
+      "sha256": "15e7252166e983746c62e3491d5c4edf02035426d3682b5460c713573d57e360",
+      "size_bytes": 1701
+    },
+    {
+      "path": "docs/evidence/pilot_v3_0/PILOT_CAPABILITY_GATE.json",
+      "sha256": "20b6cd281a5654f454b1167b6a441e3456363f854aefe6f8996b91053b7500c2",
+      "size_bytes": 1485
+    },
+    {
+      "path": "docs/evidence/pilot_v3_0/PILOT_DEFECT_REGISTER.json",
+      "sha256": "d5a4564cc53661446905fd179f4938a302e4a06932242769f4014ca481705694",
+      "size_bytes": 2960
+    },
+    {
+      "path": "docs/evidence/pilot_v3_0/PILOT_FAILURE_CLASSIFICATION_REGISTER.json",
+      "sha256": "26267e4dd1bc00147f5306f57cc8d9b58a05a70ddbd33f0c2ad79083441a4cd0",
+      "size_bytes": 3353
+    },
+    {
+      "path": "docs/evidence/pilot_v3_0/PILOT_P0_RTM.json",
+      "sha256": "c0d7db2f872ee730208c28074789f803da925790c50c85726a7529615bcadb01",
+      "size_bytes": 3417
+    },
+    {
+      "path": "docs/evidence/pilot_v3_0/PILOT_WORK_ORDER_CHAIN.json",
+      "sha256": "fc713cb9a235321ee6b7c9e7a9d6003a8ba473b1d5fb697a1dac56eca4de5d5b",
+      "size_bytes": 1574
+    },
+    {
+      "path": "docs/evidence/pilot_v3_0/WORK_ORDER_P0_CANONICAL_REANCHOR_002.json",
+      "sha256": "684125a5195e1f23858f089d4e343d9a2a17073cd34101b479c6c0a8e5ce022b",
+      "size_bytes": 3566
+    }
+  ],
+  "governing_work_order_id": "WO-PILOT-P0-CANONICAL-REANCHOR-002",
+  "governing_work_order_sha256": "4b800a07016069a3c7611eb22dc67e343e60e238cf38eef98830fb7747593edf",
+  "overlay_id": "PILOT-V3.0-P0-OPENING-R2",
+  "parent_exact_head": "43d6230a43ebb4443e98f9ea9ec2746b210dfa3a",
+  "release_authorized": false,
+  "schema_version": "3.0.0",
+  "scope": "Append-only P0 canonical pilot re-anchor governance/evidence only; no product or protected path change.",
+  "superseded_branch": "fix/quantum-pilot-surgical-convergence-v3"
+}
