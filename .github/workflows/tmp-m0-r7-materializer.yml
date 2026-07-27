@@ -6,6 +6,10 @@ on:
       - tmp/m0-r7-materializer-trigger
     paths:
       - .m0-r7-payload/TRIGGER
+  pull_request:
+    paths:
+      - .m0-r7-payload/TRIGGER
+      - .github/workflows/tmp-m0-r7-materializer.yml
 
 permissions:
   contents: write
