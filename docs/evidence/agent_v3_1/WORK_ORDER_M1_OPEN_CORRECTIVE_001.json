@@ -1,0 +1,48 @@
+{
+  "active_milestone": "M1",
+  "artifact_type": "SIGNED_WORK_ORDER",
+  "assigned_role": "IMPLEMENTER",
+  "change_boundary": "Correct only the M1 capability-gate literal anti-duplication marker and overlay-aware historical manifest assertion; preserve all prior checks.",
+  "created_at_utc": "2026-07-27T09:07:36.855905+00:00",
+  "defect_ids": [
+    "M1-OPEN-HARNESS-001",
+    "M1-OPEN-HARNESS-002"
+  ],
+  "expected_result": "All governance controls pass and exact scope contains no M9/product path.",
+  "files_allowed_to_change": [
+    "docs/evidence/agent_v3_1/M1_CAPABILITY_GATE.json",
+    "tests/test_agent_v3_1_m0_r7_remote_closure.py",
+    "docs/evidence/agent_v3_1/M1_OPEN_ATTEMPT_001_FAILURE.json",
+    "docs/evidence/agent_v3_1/WORK_ORDER_M1_OPEN_CORRECTIVE_001.json",
+    "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_AGENT_V3_1_M1_OPEN.json",
+    "tests/test_agent_v3_1_m1_opening.py"
+  ],
+  "files_forbidden_to_change": [
+    "tools/**",
+    "src/**",
+    "scripts/**",
+    ".github/workflows/**",
+    "requirements/**",
+    "UI paths",
+    "installer paths",
+    "configuration migration paths",
+    "scheduled-report paths",
+    "canonical RTM index/shards"
+  ],
+  "hypothesis": "Adding the explicit anti-parallel-controller marker and applying the latest overlay in the historical assertion resolves both failures without changing semantics or product code.",
+  "next_test": "Repeat M1 opening, M0 closure, historical closure, manifest equality and full source CI.",
+  "product_change_authorized": false,
+  "release_authorized": false,
+  "requirement_ids": [
+    "REQ-P31-0011",
+    "REQ-MP2-0018",
+    "REQ-MP2-0143",
+    "REQ-MP2-0145"
+  ],
+  "rollback_command": "git reset --hard 3af6a6439a06510dc706810f62003ac6ae17328d && git clean -fd",
+  "rollback_condition": "Any prior assertion removal, scope expansion, manifest mismatch or regression failure.",
+  "schema_version": "2.0.0",
+  "target_evidence_level": "L2_SOURCE_RUNTIME",
+  "work_order_id": "WO-M1-OPEN-CORRECTIVE-001",
+  "work_order_sha256": "4ab524c38eac4e92caeb1365adf9f18b7afa75d908552aa3ea369be3ffcbbe21"
+}

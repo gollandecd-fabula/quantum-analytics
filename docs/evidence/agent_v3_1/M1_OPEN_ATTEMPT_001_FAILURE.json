@@ -1,0 +1,27 @@
+{
+  "artifact_type": "FAILED_ATTEMPT_EVIDENCE",
+  "attempt_id": "M1-OPEN-ATTEMPT-001",
+  "base_commit": "848c3eb847b7812e352ff851d1574de429d23724",
+  "base_tree": "38f178153e39f433a55c57de8401125ba2825d19",
+  "created_at_utc": "2026-07-27T09:07:36.855905+00:00",
+  "failure_evidence_sha256": "fb127dd468f7b1f5c651e13172e0079c3317376b9064c0c64d89264053e89189",
+  "failures": [
+    {
+      "detail": "Gate semantics prohibited a new controller entry point but the negative control required an explicit parallel controller marker.",
+      "id": "M1-OPEN-HARNESS-001",
+      "type": "CAPABILITY_GATE_LITERAL_MARKER_MISSING"
+    },
+    {
+      "detail": "M0 remote closure overlay test did not apply the later M1 opening overlay before comparing the manifest-loader digest.",
+      "id": "M1-OPEN-HARNESS-002",
+      "type": "HISTORICAL_OVERLAY_TERMINAL_ASSUMPTION"
+    }
+  ],
+  "m9_code_changed": false,
+  "product_code_changed": false,
+  "release_authorized": false,
+  "rollback": "No commit created; staged patch retained only for bounded corrective work.",
+  "schema_version": "1.0.0",
+  "status": "FAILED_NOT_COMMITTED",
+  "targeted_result": "24/26 PASS; 2 FAIL"
+}

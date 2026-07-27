@@ -1,0 +1,21 @@
+{
+  "active_work_order_id": "WO-M1-EXISTING-M9-MIGRATION-001",
+  "artifact_type": "WORK_ORDER_LEDGER",
+  "created_at_utc": "2026-07-27T09:04:25.488801+00:00",
+  "entries": [
+    {
+      "allowed_path_count": 20,
+      "base_commit": "848c3eb847b7812e352ff851d1574de429d23724",
+      "base_tree": "38f178153e39f433a55c57de8401125ba2825d19",
+      "milestone": "M1",
+      "product_change_authorized": false,
+      "status": "AUTHORIZED_NOT_STARTED",
+      "work_order_id": "WO-M1-EXISTING-M9-MIGRATION-001",
+      "work_order_sha256": "0b23c5167a2f54d06e6c57076b0a89ffb616aac221d8c6be4134ceb0b22a59b7"
+    }
+  ],
+  "ledger_snapshot_sha256": "0758222a9bc5ab01d1a61c378ca617a263c17b637d7ccd7165e0d47a4e5ec3e6",
+  "previous_ledger_blob_sha": "bed552e8618ee20f4f14f95d7e56faea9624fdf0",
+  "release_authorized": false,
+  "schema_version": "2.0.0"
+}

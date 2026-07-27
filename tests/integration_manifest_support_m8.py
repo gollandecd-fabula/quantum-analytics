@@ -55,6 +55,10 @@ AGENT_V3_1_M0_R7_REMOTE_CLOSURE_OVERLAY = (
     "ARTIFACT_MANIFEST_OVERLAY_AGENT_V3_1_M0_R7_REMOTE_CLOSURE.json",
     "base_agent_v3_1_m0_r7_overlay_git_blob_sha",
 )
+AGENT_V3_1_M1_OPEN_OVERLAY = (
+    "ARTIFACT_MANIFEST_OVERLAY_AGENT_V3_1_M1_OPEN.json",
+    "base_agent_v3_1_m0_r7_remote_closure_overlay_git_blob_sha",
+)
 ALL_OVERLAY_NAMES = tuple(
     name
     for name, _ in (
@@ -74,6 +78,7 @@ ALL_OVERLAY_NAMES = tuple(
     QUANTUM_UNIVERSAL_RELAUNCH_R2_OVERLAY[0],
     AGENT_V3_1_M0_R7_OVERLAY[0],
     AGENT_V3_1_M0_R7_REMOTE_CLOSURE_OVERLAY[0],
+    AGENT_V3_1_M1_OPEN_OVERLAY[0],
 )
 CONTROL_PATHS = {
     "docs/evidence/ARTIFACT_MANIFEST.json",
@@ -147,6 +152,9 @@ def load_effective_manifest() -> dict:
     agent_m0_r7_raw = (
         evidence / "ARTIFACT_MANIFEST_OVERLAY_AGENT_V3_1_M0_R7.json"
     ).read_bytes()
+    agent_m0_r7_remote_closure_raw = (
+        evidence / "ARTIFACT_MANIFEST_OVERLAY_AGENT_V3_1_M0_R7_REMOTE_CLOSURE.json"
+    ).read_bytes()
 
     _apply_parallel_overlay(artifacts, GOVERNANCE_OVERLAY, r99_raw)
     _apply_parallel_overlay(artifacts, R100_OVERLAY, r99_raw)
@@ -190,6 +198,11 @@ def load_effective_manifest() -> dict:
         artifacts,
         AGENT_V3_1_M0_R7_REMOTE_CLOSURE_OVERLAY,
         agent_m0_r7_raw,
+    )
+    _apply_parallel_overlay(
+        artifacts,
+        AGENT_V3_1_M1_OPEN_OVERLAY,
+        agent_m0_r7_remote_closure_raw,
     )
 
     current["artifacts"] = [artifacts[path] for path in sorted(artifacts)]

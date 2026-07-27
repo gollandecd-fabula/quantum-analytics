@@ -1,0 +1,2684 @@
+{
+  "artifact_type": "M1_EXISTING_M9_MIGRATION_RTM",
+  "base_commit": "848c3eb847b7812e352ff851d1574de429d23724",
+  "base_tree": "38f178153e39f433a55c57de8401125ba2825d19",
+  "canonical_rtm": {
+    "master_prompt_sha256": "1008a69ac56e44e6fa1f69c51f1fe43c8e621c161a52241230fa0af88ecd004a",
+    "path": "docs/evidence/agent_v3_1/REQUIREMENTS_TRACEABILITY_MATRIX.json",
+    "protocol_sha256": "be69b8f1f919066c67086d6dd4678acf5e3cb3c4f1db9bc587dc540018601a90",
+    "registry_set_sha256": "4cd2561b2da074b73ebe9ac8a3ccec6f2c890f7f7bf7998ac1a0ca698ed1037a",
+    "requirement_count": 712,
+    "ui_reference_sha256": "2482074aea312b065b4094792c5676445514dd555d50a064a5ae3e189dc60d13"
+  },
+  "created_at_utc": "2026-07-27T09:04:25.488801+00:00",
+  "m1_scope_sha256": "359ef8004d2c4cf56dab5f762db08fcc19224bebc9a6a2c90f3b7d910eddd3e4",
+  "parallel_rtm_authorized": false,
+  "release_authorized": false,
+  "requirements_not_rewritten": true,
+  "schema_version": "1.0.0",
+  "selected_requirement_count": 65,
+  "selected_requirements": [
+    {
+      "canonical_row": {
+        "actual_evidence_ids": [],
+        "actual_status": "UNVERIFIED",
+        "assigned_role": "CONTROL_PLANE",
+        "blockers": [],
+        "dependencies": [],
+        "implementation_action": "Выполнить буквально.",
+        "milestone": "M1",
+        "mutation_ids": [
+          "M:REQ-P31-0009"
+        ],
+        "negative_control_ids": [
+          "N:REQ-P31-0009"
+        ],
+        "original_text": "IMPLEMENTER: воспроизводит дефект и вносит минимальный патч;",
+        "pass_criteria": [
+          "Target evidence met."
+        ],
+        "positive_test_ids": [
+          "P:REQ-P31-0009"
+        ],
+        "priority": "P1",
+        "required_artifacts": [
+          "ROLE_PERMISSION_POLICY.json",
+          "ROLE_TRACE_INDEX.json"
+        ],
+        "requirement_id": "REQ-P31-0009",
+        "residual_risks": [
+          "Open."
+        ],
+        "source_document": "Quantum_Maximum_Assurance_Protocol_v3_1_UI_REFERENCE_LOCK.docx",
+        "source_location": "section 1 / paragraph 39",
+        "target_evidence_level": "L2"
+      },
+      "canonical_row_sha256": "4552e28df2a055f8415fa0dc749188b3ed0aee7bbaa8658f6596e56d4fb6e2c1"
+    },
+    {
+      "canonical_row": {
+        "actual_evidence_ids": [],
+        "actual_status": "UNVERIFIED",
+        "assigned_role": "CONTROL_PLANE",
+        "blockers": [],
+        "dependencies": [],
+        "implementation_action": "Выполнить буквально.",
+        "milestone": "M1",
+        "mutation_ids": [
+          "M:REQ-P31-0010"
+        ],
+        "negative_control_ids": [
+          "N:REQ-P31-0010"
+        ],
+        "original_text": "VERIFIER: не меняет production-код, проверяет требования и evidence;",
+        "pass_criteria": [
+          "Target evidence met."
+        ],
+        "positive_test_ids": [
+          "P:REQ-P31-0010"
+        ],
+        "priority": "P1",
+        "required_artifacts": [
+          "ROLE_PERMISSION_POLICY.json",
+          "ROLE_TRACE_INDEX.json"
+        ],
+        "requirement_id": "REQ-P31-0010",
+        "residual_risks": [
+          "Open."
+        ],
+        "source_document": "Quantum_Maximum_Assurance_Protocol_v3_1_UI_REFERENCE_LOCK.docx",
+        "source_location": "section 1 / paragraph 40",
+        "target_evidence_level": "L2"
+      },
+      "canonical_row_sha256": "d3434377d19d453d39d4f436f691996ddaab3fdc50a3d4a10515aa31a919375c"
+    },
+    {
+      "canonical_row": {
+        "actual_evidence_ids": [],
+        "actual_status": "UNVERIFIED",
+        "assigned_role": "CONTROL_PLANE",
+        "blockers": [],
+        "dependencies": [],
+        "implementation_action": "Выполнить буквально.",
+        "milestone": "M1",
+        "mutation_ids": [
+          "M:REQ-P31-0011"
+        ],
+        "negative_control_ids": [
+          "N:REQ-P31-0011"
+        ],
+        "original_text": "ADVERSARY: пытается опровергнуть claims и найти обход тестов.",
+        "pass_criteria": [
+          "Target evidence met."
+        ],
+        "positive_test_ids": [
+          "P:REQ-P31-0011"
+        ],
+        "priority": "P1",
+        "required_artifacts": [
+          "ROLE_PERMISSION_POLICY.json",
+          "ROLE_TRACE_INDEX.json"
+        ],
+        "requirement_id": "REQ-P31-0011",
+        "residual_risks": [
+          "Open."
+        ],
+        "source_document": "Quantum_Maximum_Assurance_Protocol_v3_1_UI_REFERENCE_LOCK.docx",
+        "source_location": "section 1 / paragraph 41",
+        "target_evidence_level": "L2"
+      },
+      "canonical_row_sha256": "480042faae7086197153e1d01fa1ab03cf592cb794d2bdb6e569ba2b784fa414"
+    },
+    {
+      "canonical_row": {
+        "actual_evidence_ids": [],
+        "actual_status": "UNVERIFIED",
+        "assigned_role": "CONTROL_PLANE",
+        "blockers": [],
+        "dependencies": [],
+        "implementation_action": "Выполнить буквально.",
+        "milestone": "M1",
+        "mutation_ids": [
+          "M:REQ-P31-0012"
+        ],
+        "negative_control_ids": [
+          "N:REQ-P31-0012"
+        ],
+        "original_text": "менять production;",
+        "pass_criteria": [
+          "Target evidence met."
+        ],
+        "positive_test_ids": [
+          "P:REQ-P31-0012"
+        ],
+        "priority": "P1",
+        "required_artifacts": [
+          "ROLE_PERMISSION_POLICY.json",
+          "ROLE_TRACE_INDEX.json"
+        ],
+        "requirement_id": "REQ-P31-0012",
+        "residual_risks": [
+          "Open."
+        ],
+        "source_document": "Quantum_Maximum_Assurance_Protocol_v3_1_UI_REFERENCE_LOCK.docx",
+        "source_location": "section 1 / paragraph 43",
+        "target_evidence_level": "L2"
+      },
+      "canonical_row_sha256": "dae15fd4a518fcfd249b779e3f44277981a197bcc746bd3cde4687d8365059f7"
+    },
+    {
+      "canonical_row": {
+        "actual_evidence_ids": [],
+        "actual_status": "UNVERIFIED",
+        "assigned_role": "CONTROL_PLANE",
+        "blockers": [],
+        "dependencies": [],
+        "implementation_action": "Выполнить буквально.",
+        "milestone": "M1",
+        "mutation_ids": [
+          "M:REQ-P31-0013"
+        ],
+        "negative_control_ids": [
+          "N:REQ-P31-0013"
+        ],
+        "original_text": "менять expected result;",
+        "pass_criteria": [
+          "Target evidence met."
+        ],
+        "positive_test_ids": [
+          "P:REQ-P31-0013"
+        ],
+        "priority": "P1",
+        "required_artifacts": [
+          "ROLE_PERMISSION_POLICY.json",
+          "ROLE_TRACE_INDEX.json"
+        ],
+        "requirement_id": "REQ-P31-0013",
+        "residual_risks": [
+          "Open."
+        ],
+        "source_document": "Quantum_Maximum_Assurance_Protocol_v3_1_UI_REFERENCE_LOCK.docx",
+        "source_location": "section 1 / paragraph 44",
+        "target_evidence_level": "L2"
+      },
+      "canonical_row_sha256": "6a769af0336cd1493e58cf06ca4939fe6c87ca1466df5ce1506c674deda56464"
+    },
+    {
+      "canonical_row": {
+        "actual_evidence_ids": [],
+        "actual_status": "UNVERIFIED",
+        "assigned_role": "CONTROL_PLANE",
+        "blockers": [],
+        "dependencies": [],
+        "implementation_action": "Выполнить буквально.",
+        "milestone": "M1",
+        "mutation_ids": [
+          "M:REQ-P31-0014"
+        ],
+        "negative_control_ids": [
+          "N:REQ-P31-0014"
+        ],
+        "original_text": "закрывать дефект;",
+        "pass_criteria": [
+          "Target evidence met."
+        ],
+        "positive_test_ids": [
+          "P:REQ-P31-0014"
+        ],
+        "priority": "P1",
+        "required_artifacts": [
+          "ROLE_PERMISSION_POLICY.json",
+          "ROLE_TRACE_INDEX.json"
+        ],
+        "requirement_id": "REQ-P31-0014",
+        "residual_risks": [
+          "Open."
+        ],
+        "source_document": "Quantum_Maximum_Assurance_Protocol_v3_1_UI_REFERENCE_LOCK.docx",
+        "source_location": "section 1 / paragraph 45",
+        "target_evidence_level": "L2"
+      },
+      "canonical_row_sha256": "e2c1fcf95beaebed8703bc51542e6410b76ee53dd0c2af13504e54aeef4f00df"
+    },
+    {
+      "canonical_row": {
+        "actual_evidence_ids": [],
+        "actual_status": "UNVERIFIED",
+        "assigned_role": "CONTROL_PLANE",
+        "blockers": [],
+        "dependencies": [],
+        "implementation_action": "Выполнить буквально.",
+        "milestone": "M1",
+        "mutation_ids": [
+          "M:REQ-P31-0015"
+        ],
+        "negative_control_ids": [
+          "N:REQ-P31-0015"
+        ],
+        "original_text": "объявлять plateau.",
+        "pass_criteria": [
+          "Target evidence met."
+        ],
+        "positive_test_ids": [
+          "P:REQ-P31-0015"
+        ],
+        "priority": "P1",
+        "required_artifacts": [
+          "ROLE_PERMISSION_POLICY.json",
+          "ROLE_TRACE_INDEX.json"
+        ],
+        "requirement_id": "REQ-P31-0015",
+        "residual_risks": [
+          "Open."
+        ],
+        "source_document": "Quantum_Maximum_Assurance_Protocol_v3_1_UI_REFERENCE_LOCK.docx",
+        "source_location": "section 1 / paragraph 46",
+        "target_evidence_level": "L2"
+      },
+      "canonical_row_sha256": "8e83085aead2e28af3e82d61c177d7decad66dd8a3ff21d7469cc9a21914c42f"
+    },
+    {
+      "canonical_row": {
+        "actual_evidence_ids": [],
+        "actual_status": "UNVERIFIED",
+        "assigned_role": "CONTROL_PLANE",
+        "blockers": [],
+        "dependencies": [],
+        "implementation_action": "Выполнить буквально.",
+        "milestone": "M1",
+        "mutation_ids": [
+          "M:REQ-P31-0016"
+        ],
+        "negative_control_ids": [
+          "N:REQ-P31-0016"
+        ],
+        "original_text": "Изменение production и expected result в одном патче запрещено без отдельного specification decision record.",
+        "pass_criteria": [
+          "Target evidence met."
+        ],
+        "positive_test_ids": [
+          "P:REQ-P31-0016"
+        ],
+        "priority": "P1",
+        "required_artifacts": [
+          "ROLE_PERMISSION_POLICY.json",
+          "ROLE_TRACE_INDEX.json"
+        ],
+        "requirement_id": "REQ-P31-0016",
+        "residual_risks": [
+          "Open."
+        ],
+        "source_document": "Quantum_Maximum_Assurance_Protocol_v3_1_UI_REFERENCE_LOCK.docx",
+        "source_location": "section 1 / paragraph 47",
+        "target_evidence_level": "L2"
+      },
+      "canonical_row_sha256": "614afa9771877e21de9a9a2fed9f0b8e33ca2ab843fc59bdc19aeea8699f6f6f"
+    },
+    {
+      "canonical_row": {
+        "actual_evidence_ids": [],
+        "actual_status": "NOT_STARTED",
+        "assigned_role": "CONTROL_PLANE",
+        "blockers": [],
+        "dependencies": [
+          "GATE-M0"
+        ],
+        "implementation_action": "Выполнить буквально.",
+        "milestone": "M1",
+        "mutation_ids": [
+          "M:REQ-MP2-0013"
+        ],
+        "negative_control_ids": [
+          "N:REQ-MP2-0013"
+        ],
+        "original_text": "Используй строгую иерархию источников истины:",
+        "pass_criteria": [
+          "Target evidence met."
+        ],
+        "positive_test_ids": [
+          "P:REQ-MP2-0013"
+        ],
+        "priority": "P0",
+        "required_artifacts": [
+          "REQUIREMENTS_TRACEABILITY_MATRIX.json",
+          "ROLE_PERMISSION_POLICY.json",
+          "WORK_ORDER_LEDGER.json",
+          "STATE_TRANSITION_COVERAGE.json"
+        ],
+        "requirement_id": "REQ-MP2-0013",
+        "residual_risks": [
+          "Open."
+        ],
+        "source_document": "Quantum_Autonomous_Release_Agent_Master_Prompt_v2_0(3).docx",
+        "source_location": "2. Источники истины и PROTOCOL LOCK / paragraph block 73",
+        "target_evidence_level": "L2"
+      },
+      "canonical_row_sha256": "20bc937e6e066bdbcb98cacb30d03c81a614b32964a6938808295d93237164ed"
+    },
+    {
+      "canonical_row": {
+        "actual_evidence_ids": [
+          "EVD-M0-PROTOCOL-SHA256"
+        ],
+        "actual_status": "PARTIAL",
+        "assigned_role": "CONTROL_PLANE",
+        "blockers": [
+          "BLK-CONTROL-PLANE-L2-INGESTION-NOT-IMPLEMENTED"
+        ],
+        "dependencies": [
+          "GATE-M0"
+        ],
+        "implementation_action": "Выполнить буквально.",
+        "milestone": "M1",
+        "mutation_ids": [
+          "M:REQ-MP2-0014"
+        ],
+        "negative_control_ids": [
+          "N:REQ-MP2-0014"
+        ],
+        "original_text": "1. Quantum Maximum-Assurance Protocol v3.1 UI Reference Lock и его зафиксированный SHA-256;",
+        "pass_criteria": [
+          "Target evidence met."
+        ],
+        "positive_test_ids": [
+          "P:REQ-MP2-0014"
+        ],
+        "priority": "P0",
+        "required_artifacts": [
+          "REQUIREMENTS_TRACEABILITY_MATRIX.json",
+          "ROLE_PERMISSION_POLICY.json",
+          "WORK_ORDER_LEDGER.json",
+          "STATE_TRANSITION_COVERAGE.json"
+        ],
+        "requirement_id": "REQ-MP2-0014",
+        "residual_risks": [
+          "Open."
+        ],
+        "source_document": "Quantum_Autonomous_Release_Agent_Master_Prompt_v2_0(3).docx",
+        "source_location": "2. Источники истины и PROTOCOL LOCK / paragraph block 74",
+        "target_evidence_level": "L2"
+      },
+      "canonical_row_sha256": "3800bf1d3126a2c292b519323f2d28701ecaf00e6a0cb6f034c9f258922416c0"
+    },
+    {
+      "canonical_row": {
+        "actual_evidence_ids": [],
+        "actual_status": "NOT_STARTED",
+        "assigned_role": "CONTROL_PLANE",
+        "blockers": [],
+        "dependencies": [
+          "GATE-M0"
+        ],
+        "implementation_action": "Выполнить буквально.",
+        "milestone": "M1",
+        "mutation_ids": [
+          "M:REQ-MP2-0015"
+        ],
+        "negative_control_ids": [
+          "N:REQ-MP2-0015"
+        ],
+        "original_text": "2. буквальные требования пользователя, включённые в этот master prompt;",
+        "pass_criteria": [
+          "Target evidence met."
+        ],
+        "positive_test_ids": [
+          "P:REQ-MP2-0015"
+        ],
+        "priority": "P0",
+        "required_artifacts": [
+          "REQUIREMENTS_TRACEABILITY_MATRIX.json",
+          "ROLE_PERMISSION_POLICY.json",
+          "WORK_ORDER_LEDGER.json",
+          "STATE_TRANSITION_COVERAGE.json"
+        ],
+        "requirement_id": "REQ-MP2-0015",
+        "residual_risks": [
+          "Open."
+        ],
+        "source_document": "Quantum_Autonomous_Release_Agent_Master_Prompt_v2_0(3).docx",
+        "source_location": "2. Источники истины и PROTOCOL LOCK / paragraph block 75",
+        "target_evidence_level": "L2"
+      },
+      "canonical_row_sha256": "a40bd665e5afdcd471b1cc333ff72a9e3640e9066a804102263d17a53f411bff"
+    },
+    {
+      "canonical_row": {
+        "actual_evidence_ids": [],
+        "actual_status": "NOT_STARTED",
+        "assigned_role": "CONTROL_PLANE",
+        "blockers": [],
+        "dependencies": [
+          "GATE-M0"
+        ],
+        "implementation_action": "Выполнить буквально.",
+        "milestone": "M1",
+        "mutation_ids": [
+          "M:REQ-MP2-0016"
+        ],
+        "negative_control_ids": [
+          "N:REQ-MP2-0016"
+        ],
+        "original_text": "3. literal Requirements Traceability Matrix, сгенерированная из полного протокола;",
+        "pass_criteria": [
+          "Target evidence met."
+        ],
+        "positive_test_ids": [
+          "P:REQ-MP2-0016"
+        ],
+        "priority": "P0",
+        "required_artifacts": [
+          "REQUIREMENTS_TRACEABILITY_MATRIX.json",
+          "ROLE_PERMISSION_POLICY.json",
+          "WORK_ORDER_LEDGER.json",
+          "STATE_TRANSITION_COVERAGE.json"
+        ],
+        "requirement_id": "REQ-MP2-0016",
+        "residual_risks": [
+          "Open."
+        ],
+        "source_document": "Quantum_Autonomous_Release_Agent_Master_Prompt_v2_0(3).docx",
+        "source_location": "2. Источники истины и PROTOCOL LOCK / paragraph block 76",
+        "target_evidence_level": "L2"
+      },
+      "canonical_row_sha256": "73c5cacee3f5ffed54d4ffd6acc0649de842bd2ff8478708c1a806aca943fb4a"
+    },
+    {
+      "canonical_row": {
+        "actual_evidence_ids": [],
+        "actual_status": "NOT_STARTED",
+        "assigned_role": "CONTROL_PLANE",
+        "blockers": [],
+        "dependencies": [
+          "GATE-M0"
+        ],
+        "implementation_action": "Выполнить буквально.",
+        "milestone": "M1",
+        "mutation_ids": [
+          "M:REQ-MP2-0017"
+        ],
+        "negative_control_ids": [
+          "N:REQ-MP2-0017"
+        ],
+        "original_text": "4. фактическое поведение exact head и exact artifact;",
+        "pass_criteria": [
+          "Target evidence met."
+        ],
+        "positive_test_ids": [
+          "P:REQ-MP2-0017"
+        ],
+        "priority": "P0",
+        "required_artifacts": [
+          "REQUIREMENTS_TRACEABILITY_MATRIX.json",
+          "ROLE_PERMISSION_POLICY.json",
+          "WORK_ORDER_LEDGER.json",
+          "STATE_TRANSITION_COVERAGE.json"
+        ],
+        "requirement_id": "REQ-MP2-0017",
+        "residual_risks": [
+          "Open."
+        ],
+        "source_document": "Quantum_Autonomous_Release_Agent_Master_Prompt_v2_0(3).docx",
+        "source_location": "2. Источники истины и PROTOCOL LOCK / paragraph block 77",
+        "target_evidence_level": "L2"
+      },
+      "canonical_row_sha256": "16aad839530796896537e060180254d86a54d14e07ac2c46497b987eb00f2110"
+    },
+    {
+      "canonical_row": {
+        "actual_evidence_ids": [],
+        "actual_status": "NOT_STARTED",
+        "assigned_role": "CONTROL_PLANE",
+        "blockers": [],
+        "dependencies": [
+          "GATE-M0"
+        ],
+        "implementation_action": "Выполнить буквально.",
+        "milestone": "M1",
+        "mutation_ids": [
+          "M:REQ-MP2-0018"
+        ],
+        "negative_control_ids": [
+          "N:REQ-MP2-0018"
+        ],
+        "original_text": "5. production tests, архитектурные контракты и документация репозитория;",
+        "pass_criteria": [
+          "Target evidence met."
+        ],
+        "positive_test_ids": [
+          "P:REQ-MP2-0018"
+        ],
+        "priority": "P0",
+        "required_artifacts": [
+          "REQUIREMENTS_TRACEABILITY_MATRIX.json",
+          "ROLE_PERMISSION_POLICY.json",
+          "WORK_ORDER_LEDGER.json",
+          "STATE_TRANSITION_COVERAGE.json"
+        ],
+        "requirement_id": "REQ-MP2-0018",
+        "residual_risks": [
+          "Open."
+        ],
+        "source_document": "Quantum_Autonomous_Release_Agent_Master_Prompt_v2_0(3).docx",
+        "source_location": "2. Источники истины и PROTOCOL LOCK / paragraph block 78",
+        "target_evidence_level": "L2"
+      },
+      "canonical_row_sha256": "c4affb2d3164ec701040bd8fb626ff7ce3a7cfea613d4d491d12f4a7e333d232"
+    },
+    {
+      "canonical_row": {
+        "actual_evidence_ids": [],
+        "actual_status": "NOT_STARTED",
+        "assigned_role": "CONTROL_PLANE",
+        "blockers": [],
+        "dependencies": [
+          "GATE-M0"
+        ],
+        "implementation_action": "Выполнить буквально.",
+        "milestone": "M1",
+        "mutation_ids": [
+          "M:REQ-MP2-0019"
+        ],
+        "negative_control_ids": [
+          "N:REQ-MP2-0019"
+        ],
+        "original_text": "6. официальная техническая документация внешних зависимостей.",
+        "pass_criteria": [
+          "Target evidence met."
+        ],
+        "positive_test_ids": [
+          "P:REQ-MP2-0019"
+        ],
+        "priority": "P0",
+        "required_artifacts": [
+          "REQUIREMENTS_TRACEABILITY_MATRIX.json",
+          "ROLE_PERMISSION_POLICY.json",
+          "WORK_ORDER_LEDGER.json",
+          "STATE_TRANSITION_COVERAGE.json"
+        ],
+        "requirement_id": "REQ-MP2-0019",
+        "residual_risks": [
+          "Open."
+        ],
+        "source_document": "Quantum_Autonomous_Release_Agent_Master_Prompt_v2_0(3).docx",
+        "source_location": "2. Источники истины и PROTOCOL LOCK / paragraph block 79",
+        "target_evidence_level": "L2"
+      },
+      "canonical_row_sha256": "38dcfe54f457bd712bb32716ad3cde5fafbec19a65270cac12f9c9820b9c043a"
+    },
+    {
+      "canonical_row": {
+        "actual_evidence_ids": [],
+        "actual_status": "NOT_STARTED",
+        "assigned_role": "CONTROL_PLANE",
+        "blockers": [],
+        "dependencies": [
+          "GATE-M0"
+        ],
+        "implementation_action": "Выполнить буквально.",
+        "milestone": "M1",
+        "mutation_ids": [
+          "M:REQ-MP2-0020"
+        ],
+        "negative_control_ids": [
+          "N:REQ-MP2-0020"
+        ],
+        "original_text": "Нижестоящий источник не может отменить или ослабить вышестоящий. Протокол является неизменяемой исполняемой спецификацией.",
+        "pass_criteria": [
+          "Target evidence met."
+        ],
+        "positive_test_ids": [
+          "P:REQ-MP2-0020"
+        ],
+        "priority": "P0",
+        "required_artifacts": [
+          "REQUIREMENTS_TRACEABILITY_MATRIX.json",
+          "ROLE_PERMISSION_POLICY.json",
+          "WORK_ORDER_LEDGER.json",
+          "STATE_TRANSITION_COVERAGE.json"
+        ],
+        "requirement_id": "REQ-MP2-0020",
+        "residual_risks": [
+          "Open."
+        ],
+        "source_document": "Quantum_Autonomous_Release_Agent_Master_Prompt_v2_0(3).docx",
+        "source_location": "2. Источники истины и PROTOCOL LOCK / paragraph block 80",
+        "target_evidence_level": "L2"
+      },
+      "canonical_row_sha256": "8acac3fa519ff9571d911cf52d46583d913abe03c2087bd3da51753bc99daa29"
+    },
+    {
+      "canonical_row": {
+        "actual_evidence_ids": [],
+        "actual_status": "NOT_STARTED",
+        "assigned_role": "CONTROL_PLANE",
+        "blockers": [],
+        "dependencies": [
+          "GATE-M0"
+        ],
+        "implementation_action": "Выполнить буквально.",
+        "milestone": "M1",
+        "mutation_ids": [
+          "M:REQ-MP2-0021"
+        ],
+        "negative_control_ids": [
+          "N:REQ-MP2-0021"
+        ],
+        "original_text": "Не сокращай, не объединяй и не переименовывай требования так, чтобы терялась семантика.",
+        "pass_criteria": [
+          "Target evidence met."
+        ],
+        "positive_test_ids": [
+          "P:REQ-MP2-0021"
+        ],
+        "priority": "P0",
+        "required_artifacts": [
+          "REQUIREMENTS_TRACEABILITY_MATRIX.json",
+          "ROLE_PERMISSION_POLICY.json",
+          "WORK_ORDER_LEDGER.json",
+          "STATE_TRANSITION_COVERAGE.json"
+        ],
+        "requirement_id": "REQ-MP2-0021",
+        "residual_risks": [
+          "Open."
+        ],
+        "source_document": "Quantum_Autonomous_Release_Agent_Master_Prompt_v2_0(3).docx",
+        "source_location": "2. Источники истины и PROTOCOL LOCK / paragraph block 81",
+        "target_evidence_level": "L2"
+      },
+      "canonical_row_sha256": "3334051290055d25ad57e269056abd8939a3af2cb577f845838d6d979b6c1ad8"
+    },
+    {
+      "canonical_row": {
+        "actual_evidence_ids": [],
+        "actual_status": "NOT_STARTED",
+        "assigned_role": "CONTROL_PLANE",
+        "blockers": [],
+        "dependencies": [
+          "GATE-M0"
+        ],
+        "implementation_action": "Выполнить буквально.",
+        "milestone": "M1",
+        "mutation_ids": [
+          "M:REQ-MP2-0022"
+        ],
+        "negative_control_ids": [
+          "N:REQ-MP2-0022"
+        ],
+        "original_text": "Не переносить обязательное требование в неопределённое будущее.",
+        "pass_criteria": [
+          "Target evidence met."
+        ],
+        "positive_test_ids": [
+          "P:REQ-MP2-0022"
+        ],
+        "priority": "P0",
+        "required_artifacts": [
+          "REQUIREMENTS_TRACEABILITY_MATRIX.json",
+          "ROLE_PERMISSION_POLICY.json",
+          "WORK_ORDER_LEDGER.json",
+          "STATE_TRANSITION_COVERAGE.json"
+        ],
+        "requirement_id": "REQ-MP2-0022",
+        "residual_risks": [
+          "Open."
+        ],
+        "source_document": "Quantum_Autonomous_Release_Agent_Master_Prompt_v2_0(3).docx",
+        "source_location": "2. Источники истины и PROTOCOL LOCK / paragraph block 82",
+        "target_evidence_level": "L2"
+      },
+      "canonical_row_sha256": "042cf6aaaffc73ad841878e7a1ccf4298840c54da667cb60edcf289258667739"
+    },
+    {
+      "canonical_row": {
+        "actual_evidence_ids": [],
+        "actual_status": "NOT_STARTED",
+        "assigned_role": "CONTROL_PLANE",
+        "blockers": [],
+        "dependencies": [
+          "GATE-M0"
+        ],
+        "implementation_action": "Выполнить буквально.",
+        "milestone": "M1",
+        "mutation_ids": [
+          "M:REQ-MP2-0023"
+        ],
+        "negative_control_ids": [
+          "N:REQ-MP2-0023"
+        ],
+        "original_text": "Не заменять выполнение тестом существования файла, schema или validator.",
+        "pass_criteria": [
+          "Target evidence met."
+        ],
+        "positive_test_ids": [
+          "P:REQ-MP2-0023"
+        ],
+        "priority": "P0",
+        "required_artifacts": [
+          "REQUIREMENTS_TRACEABILITY_MATRIX.json",
+          "ROLE_PERMISSION_POLICY.json",
+          "WORK_ORDER_LEDGER.json",
+          "STATE_TRANSITION_COVERAGE.json"
+        ],
+        "requirement_id": "REQ-MP2-0023",
+        "residual_risks": [
+          "Open."
+        ],
+        "source_document": "Quantum_Autonomous_Release_Agent_Master_Prompt_v2_0(3).docx",
+        "source_location": "2. Источники истины и PROTOCOL LOCK / paragraph block 83",
+        "target_evidence_level": "L2"
+      },
+      "canonical_row_sha256": "721b5c624db6798bedbaab6c98c5aef7273e6e8fb231d5a38cf8837870508ef6"
+    },
+    {
+      "canonical_row": {
+        "actual_evidence_ids": [],
+        "actual_status": "NOT_STARTED",
+        "assigned_role": "CONTROL_PLANE",
+        "blockers": [],
+        "dependencies": [
+          "GATE-M0"
+        ],
+        "implementation_action": "Выполнить буквально.",
+        "milestone": "M1",
+        "mutation_ids": [
+          "M:REQ-MP2-0024"
+        ],
+        "negative_control_ids": [
+          "N:REQ-MP2-0024"
+        ],
+        "original_text": "При конфликте создай PROTOCOL_CONFLICT_REGISTER.json, выбери fail-closed и продолжи независимые работы.",
+        "pass_criteria": [
+          "Target evidence met."
+        ],
+        "positive_test_ids": [
+          "P:REQ-MP2-0024"
+        ],
+        "priority": "P0",
+        "required_artifacts": [
+          "REQUIREMENTS_TRACEABILITY_MATRIX.json",
+          "ROLE_PERMISSION_POLICY.json",
+          "WORK_ORDER_LEDGER.json",
+          "STATE_TRANSITION_COVERAGE.json"
+        ],
+        "requirement_id": "REQ-MP2-0024",
+        "residual_risks": [
+          "Open."
+        ],
+        "source_document": "Quantum_Autonomous_Release_Agent_Master_Prompt_v2_0(3).docx",
+        "source_location": "2. Источники истины и PROTOCOL LOCK / paragraph block 84",
+        "target_evidence_level": "L2"
+      },
+      "canonical_row_sha256": "fde929c475b2d5c6c62beb9005e285d1fa9672a330c18db6889c807e8e513579"
+    },
+    {
+      "canonical_row": {
+        "actual_evidence_ids": [
+          "EVD-M0-PROTOCOL-SHA256"
+        ],
+        "actual_status": "PARTIAL",
+        "assigned_role": "CONTROL_PLANE",
+        "blockers": [
+          "BLK-PROTECTED-PATH-POLICY-NOT-ENFORCED"
+        ],
+        "dependencies": [
+          "GATE-M0"
+        ],
+        "implementation_action": "Выполнить буквально.",
+        "milestone": "M1",
+        "mutation_ids": [
+          "M:REQ-MP2-0025"
+        ],
+        "negative_control_ids": [
+          "N:REQ-MP2-0025"
+        ],
+        "original_text": "Ни Orchestrator, ни specialist не имеют права менять protocol file, protocol hash или literal source text.",
+        "pass_criteria": [
+          "Target evidence met."
+        ],
+        "positive_test_ids": [
+          "P:REQ-MP2-0025"
+        ],
+        "priority": "P0",
+        "required_artifacts": [
+          "REQUIREMENTS_TRACEABILITY_MATRIX.json",
+          "ROLE_PERMISSION_POLICY.json",
+          "WORK_ORDER_LEDGER.json",
+          "STATE_TRANSITION_COVERAGE.json"
+        ],
+        "requirement_id": "REQ-MP2-0025",
+        "residual_risks": [
+          "Open."
+        ],
+        "source_document": "Quantum_Autonomous_Release_Agent_Master_Prompt_v2_0(3).docx",
+        "source_location": "2. Источники истины и PROTOCOL LOCK / paragraph block 85",
+        "target_evidence_level": "L2"
+      },
+      "canonical_row_sha256": "9688b943d5a3f74e3b943e8037bf9aea16acc8a61d47259f7930c726e975249d"
+    },
+    {
+      "canonical_row": {
+        "actual_evidence_ids": [],
+        "actual_status": "NOT_STARTED",
+        "assigned_role": "ADVERSARY",
+        "blockers": [],
+        "dependencies": [
+          "GATE-M0"
+        ],
+        "implementation_action": "Выполнить буквально.",
+        "milestone": "M1",
+        "mutation_ids": [
+          "M:REQ-MP2-0026"
+        ],
+        "negative_control_ids": [
+          "N:REQ-MP2-0026"
+        ],
+        "original_text": "пункт протокола → milestone → dependency → role → действие → positive test → negative control → mutation → evidence level → artifact → PASS criterion → actual status",
+        "pass_criteria": [
+          "Target evidence met."
+        ],
+        "positive_test_ids": [
+          "P:REQ-MP2-0026"
+        ],
+        "priority": "P0",
+        "required_artifacts": [
+          "REQUIREMENTS_TRACEABILITY_MATRIX.json",
+          "ROLE_PERMISSION_POLICY.json",
+          "WORK_ORDER_LEDGER.json",
+          "STATE_TRANSITION_COVERAGE.json"
+        ],
+        "requirement_id": "REQ-MP2-0026",
+        "residual_risks": [
+          "Open."
+        ],
+        "source_document": "Quantum_Autonomous_Release_Agent_Master_Prompt_v2_0(3).docx",
+        "source_location": "2.1. Обязательный полный реестр до изменений / table block 87",
+        "target_evidence_level": "L2"
+      },
+      "canonical_row_sha256": "5a41faa146b945252b8e2d9df1e9fe5bd1d25196956424dc79e2610ca9971b20"
+    },
+    {
+      "canonical_row": {
+        "actual_evidence_ids": [],
+        "actual_status": "NOT_STARTED",
+        "assigned_role": "CONTROL_PLANE",
+        "blockers": [],
+        "dependencies": [
+          "GATE-M0"
+        ],
+        "implementation_action": "Выполнить буквально.",
+        "milestone": "M1",
+        "mutation_ids": [
+          "M:REQ-MP2-0027"
+        ],
+        "negative_control_ids": [
+          "N:REQ-MP2-0027"
+        ],
+        "original_text": "Каждый requirement обязан содержать минимум следующие поля:",
+        "pass_criteria": [
+          "Target evidence met."
+        ],
+        "positive_test_ids": [
+          "P:REQ-MP2-0027"
+        ],
+        "priority": "P0",
+        "required_artifacts": [
+          "REQUIREMENTS_TRACEABILITY_MATRIX.json",
+          "ROLE_PERMISSION_POLICY.json",
+          "WORK_ORDER_LEDGER.json",
+          "STATE_TRANSITION_COVERAGE.json"
+        ],
+        "requirement_id": "REQ-MP2-0027",
+        "residual_risks": [
+          "Open."
+        ],
+        "source_document": "Quantum_Autonomous_Release_Agent_Master_Prompt_v2_0(3).docx",
+        "source_location": "2.1. Обязательный полный реестр до изменений / paragraph block 89",
+        "target_evidence_level": "L2"
+      },
+      "canonical_row_sha256": "733496aac8a227383105d758694b35809ea05fffff737353d0d3b08edc99fff9"
+    },
+    {
+      "canonical_row": {
+        "actual_evidence_ids": [
+          "GH-M9-TOOL",
+          "GH-M9-TESTS",
+          "GH-M9-WORKFLOW",
+          "GH-M9-EVIDENCE"
+        ],
+        "actual_status": "PARTIAL",
+        "assigned_role": "ADVERSARY",
+        "blockers": [],
+        "dependencies": [
+          "GATE-M0"
+        ],
+        "implementation_action": "Выполнить буквально.",
+        "milestone": "M1",
+        "mutation_ids": [
+          "M:REQ-MP2-0028"
+        ],
+        "negative_control_ids": [
+          "N:REQ-MP2-0028"
+        ],
+        "original_text": "{\n  \"requirement_id\": \"REQ-...\",\n  \"source_document\": \"...\",\n  \"source_location\": \"...\",\n  \"original_text\": \"...\",\n  \"priority\": \"P0|P1|P2|P3\",\n  \"milestone\": \"M...\",\n  \"dependencies\": [],\n  \"assigned_role\": \"IMPLEMENTER|VERIFIER|ADVERSARY|L4_L5_WORKER|CONTROL_PLANE\",\n  \"implementation_action\": \"...\",\n  \"positive_test_ids\": [],\n  \"negative_control_ids\": [],\n  \"mutation_ids\": [],\n  \"target_evidence_level\": \"L0|L1|L2|L3|L4|L5\",\n  \"required_artifacts\": [],\n  \"pass_criteria\": [],\n  \"actual_status\": \"NOT_STARTED|IN_PROGRESS|PARTIAL|UNVERIFIED|FAILED|BLOCKED|VERIFIED\",\n  \"actual_evidence_ids\": [],\n  \"blockers\": [],\n  \"residual_risks\": []\n}",
+        "pass_criteria": [
+          "Target evidence met."
+        ],
+        "positive_test_ids": [
+          "P:REQ-MP2-0028"
+        ],
+        "priority": "P0",
+        "required_artifacts": [
+          "REQUIREMENTS_TRACEABILITY_MATRIX.json",
+          "ROLE_PERMISSION_POLICY.json",
+          "WORK_ORDER_LEDGER.json",
+          "STATE_TRANSITION_COVERAGE.json"
+        ],
+        "requirement_id": "REQ-MP2-0028",
+        "residual_risks": [
+          "Open."
+        ],
+        "source_document": "Quantum_Autonomous_Release_Agent_Master_Prompt_v2_0(3).docx",
+        "source_location": "2.1. Обязательный полный реестр до изменений / table block 90",
+        "target_evidence_level": "L5"
+      },
+      "canonical_row_sha256": "4e1effce5305da6adf6b68fb1d65b8f128b6d29e8232654667cdbd5a851c626a"
+    },
+    {
+      "canonical_row": {
+        "actual_evidence_ids": [],
+        "actual_status": "NOT_STARTED",
+        "assigned_role": "CONTROL_PLANE",
+        "blockers": [],
+        "dependencies": [
+          "GATE-M0"
+        ],
+        "implementation_action": "Выполнить буквально.",
+        "milestone": "M1",
+        "mutation_ids": [
+          "M:REQ-MP2-0029"
+        ],
+        "negative_control_ids": [
+          "N:REQ-MP2-0029"
+        ],
+        "original_text": "Пока существует хотя бы один обязательный пункт со статусом NOT_STARTED, IN_PROGRESS, PARTIAL, UNVERIFIED, FAILED, BLOCKED или INFERRED, запрещены PASS, ГОТОВО, MILESTONE_COMPLETE, DESIGN_MATCH_PASS, TECHNICAL_PLATEAU_REACHED и RELEASE_READY.",
+        "pass_criteria": [
+          "Target evidence met."
+        ],
+        "positive_test_ids": [
+          "P:REQ-MP2-0029"
+        ],
+        "priority": "P0",
+        "required_artifacts": [
+          "REQUIREMENTS_TRACEABILITY_MATRIX.json",
+          "ROLE_PERMISSION_POLICY.json",
+          "WORK_ORDER_LEDGER.json",
+          "STATE_TRANSITION_COVERAGE.json"
+        ],
+        "requirement_id": "REQ-MP2-0029",
+        "residual_risks": [
+          "Open."
+        ],
+        "source_document": "Quantum_Autonomous_Release_Agent_Master_Prompt_v2_0(3).docx",
+        "source_location": "2.1. Обязательный полный реестр до изменений / paragraph block 92",
+        "target_evidence_level": "L2"
+      },
+      "canonical_row_sha256": "2f4216d2eed1684da4ada4a58ed7eaccac2ea2c36a15fc939804815efc05ff35"
+    },
+    {
+      "canonical_row": {
+        "actual_evidence_ids": [],
+        "actual_status": "NOT_STARTED",
+        "assigned_role": "CONTROL_PLANE",
+        "blockers": [],
+        "dependencies": [
+          "GATE-M0"
+        ],
+        "implementation_action": "Выполнить буквально.",
+        "milestone": "M1",
+        "mutation_ids": [
+          "M:REQ-MP2-0072"
+        ],
+        "negative_control_ids": [
+          "N:REQ-MP2-0072"
+        ],
+        "original_text": "Следующий requirement выбирает не LLM, а deterministic scheduler.",
+        "pass_criteria": [
+          "Target evidence met."
+        ],
+        "positive_test_ids": [
+          "P:REQ-MP2-0072"
+        ],
+        "priority": "P0",
+        "required_artifacts": [
+          "REQUIREMENTS_TRACEABILITY_MATRIX.json",
+          "ROLE_PERMISSION_POLICY.json",
+          "WORK_ORDER_LEDGER.json",
+          "STATE_TRANSITION_COVERAGE.json"
+        ],
+        "requirement_id": "REQ-MP2-0072",
+        "residual_risks": [
+          "Open."
+        ],
+        "source_document": "Quantum_Autonomous_Release_Agent_Master_Prompt_v2_0(3).docx",
+        "source_location": "6. Deterministic scheduler и state ownership / paragraph block 134",
+        "target_evidence_level": "L2"
+      },
+      "canonical_row_sha256": "fcd517532bc18cf750be7c7394fb4443153c2615e2b6649183d7475ee94c2f37"
+    },
+    {
+      "canonical_row": {
+        "actual_evidence_ids": [],
+        "actual_status": "NOT_STARTED",
+        "assigned_role": "CONTROL_PLANE",
+        "blockers": [],
+        "dependencies": [
+          "GATE-M0"
+        ],
+        "implementation_action": "Выполнить буквально.",
+        "milestone": "M1",
+        "mutation_ids": [
+          "M:REQ-MP2-0073"
+        ],
+        "negative_control_ids": [
+          "N:REQ-MP2-0073"
+        ],
+        "original_text": "Scheduler использует:",
+        "pass_criteria": [
+          "Target evidence met."
+        ],
+        "positive_test_ids": [
+          "P:REQ-MP2-0073"
+        ],
+        "priority": "P0",
+        "required_artifacts": [
+          "REQUIREMENTS_TRACEABILITY_MATRIX.json",
+          "ROLE_PERMISSION_POLICY.json",
+          "WORK_ORDER_LEDGER.json",
+          "STATE_TRANSITION_COVERAGE.json"
+        ],
+        "requirement_id": "REQ-MP2-0073",
+        "residual_risks": [
+          "Open."
+        ],
+        "source_document": "Quantum_Autonomous_Release_Agent_Master_Prompt_v2_0(3).docx",
+        "source_location": "6. Deterministic scheduler и state ownership / paragraph block 135",
+        "target_evidence_level": "L2"
+      },
+      "canonical_row_sha256": "1badf7496e601b46458c7e79ec8bddc1b6c8f251dadab50544a13ed23acf891f"
+    },
+    {
+      "canonical_row": {
+        "actual_evidence_ids": [],
+        "actual_status": "NOT_STARTED",
+        "assigned_role": "CONTROL_PLANE",
+        "blockers": [],
+        "dependencies": [
+          "GATE-M0"
+        ],
+        "implementation_action": "Выполнить буквально.",
+        "milestone": "M1",
+        "mutation_ids": [
+          "M:REQ-MP2-0074"
+        ],
+        "negative_control_ids": [
+          "N:REQ-MP2-0074"
+        ],
+        "original_text": "dependency completeness;",
+        "pass_criteria": [
+          "Target evidence met."
+        ],
+        "positive_test_ids": [
+          "P:REQ-MP2-0074"
+        ],
+        "priority": "P0",
+        "required_artifacts": [
+          "REQUIREMENTS_TRACEABILITY_MATRIX.json",
+          "ROLE_PERMISSION_POLICY.json",
+          "WORK_ORDER_LEDGER.json",
+          "STATE_TRANSITION_COVERAGE.json"
+        ],
+        "requirement_id": "REQ-MP2-0074",
+        "residual_risks": [
+          "Open."
+        ],
+        "source_document": "Quantum_Autonomous_Release_Agent_Master_Prompt_v2_0(3).docx",
+        "source_location": "6. Deterministic scheduler и state ownership / paragraph block 136",
+        "target_evidence_level": "L2"
+      },
+      "canonical_row_sha256": "5b60084057567e2a5ed89b9d076c870d5d60727d07b679c8a2d05b9769591dd9"
+    },
+    {
+      "canonical_row": {
+        "actual_evidence_ids": [],
+        "actual_status": "NOT_STARTED",
+        "assigned_role": "CONTROL_PLANE",
+        "blockers": [],
+        "dependencies": [
+          "GATE-M0"
+        ],
+        "implementation_action": "Выполнить буквально.",
+        "milestone": "M1",
+        "mutation_ids": [
+          "M:REQ-MP2-0075"
+        ],
+        "negative_control_ids": [
+          "N:REQ-MP2-0075"
+        ],
+        "original_text": "priority P0 → P1 → P2 → P3;",
+        "pass_criteria": [
+          "Target evidence met."
+        ],
+        "positive_test_ids": [
+          "P:REQ-MP2-0075"
+        ],
+        "priority": "P0",
+        "required_artifacts": [
+          "REQUIREMENTS_TRACEABILITY_MATRIX.json",
+          "ROLE_PERMISSION_POLICY.json",
+          "WORK_ORDER_LEDGER.json",
+          "STATE_TRANSITION_COVERAGE.json"
+        ],
+        "requirement_id": "REQ-MP2-0075",
+        "residual_risks": [
+          "Open."
+        ],
+        "source_document": "Quantum_Autonomous_Release_Agent_Master_Prompt_v2_0(3).docx",
+        "source_location": "6. Deterministic scheduler и state ownership / paragraph block 137",
+        "target_evidence_level": "L2"
+      },
+      "canonical_row_sha256": "b4946f96cd9ab4c2e927a8d23d8ac27ae1a8570afef723955d278b72fa165e0e"
+    },
+    {
+      "canonical_row": {
+        "actual_evidence_ids": [],
+        "actual_status": "NOT_STARTED",
+        "assigned_role": "CONTROL_PLANE",
+        "blockers": [],
+        "dependencies": [
+          "GATE-M0"
+        ],
+        "implementation_action": "Выполнить буквально.",
+        "milestone": "M1",
+        "mutation_ids": [
+          "M:REQ-MP2-0076"
+        ],
+        "negative_control_ids": [
+          "N:REQ-MP2-0076"
+        ],
+        "original_text": "critical path impact;",
+        "pass_criteria": [
+          "Target evidence met."
+        ],
+        "positive_test_ids": [
+          "P:REQ-MP2-0076"
+        ],
+        "priority": "P0",
+        "required_artifacts": [
+          "REQUIREMENTS_TRACEABILITY_MATRIX.json",
+          "ROLE_PERMISSION_POLICY.json",
+          "WORK_ORDER_LEDGER.json",
+          "STATE_TRANSITION_COVERAGE.json"
+        ],
+        "requirement_id": "REQ-MP2-0076",
+        "residual_risks": [
+          "Open."
+        ],
+        "source_document": "Quantum_Autonomous_Release_Agent_Master_Prompt_v2_0(3).docx",
+        "source_location": "6. Deterministic scheduler и state ownership / paragraph block 138",
+        "target_evidence_level": "L2"
+      },
+      "canonical_row_sha256": "07795f351a18b0bdd49757ca70e2a24d83e252f2525b3e2290f1d25d4c1dc626"
+    },
+    {
+      "canonical_row": {
+        "actual_evidence_ids": [],
+        "actual_status": "NOT_STARTED",
+        "assigned_role": "CONTROL_PLANE",
+        "blockers": [],
+        "dependencies": [
+          "GATE-M0"
+        ],
+        "implementation_action": "Выполнить буквально.",
+        "milestone": "M1",
+        "mutation_ids": [
+          "M:REQ-MP2-0077"
+        ],
+        "negative_control_ids": [
+          "N:REQ-MP2-0077"
+        ],
+        "original_text": "required environment availability;",
+        "pass_criteria": [
+          "Target evidence met."
+        ],
+        "positive_test_ids": [
+          "P:REQ-MP2-0077"
+        ],
+        "priority": "P0",
+        "required_artifacts": [
+          "REQUIREMENTS_TRACEABILITY_MATRIX.json",
+          "ROLE_PERMISSION_POLICY.json",
+          "WORK_ORDER_LEDGER.json",
+          "STATE_TRANSITION_COVERAGE.json"
+        ],
+        "requirement_id": "REQ-MP2-0077",
+        "residual_risks": [
+          "Open."
+        ],
+        "source_document": "Quantum_Autonomous_Release_Agent_Master_Prompt_v2_0(3).docx",
+        "source_location": "6. Deterministic scheduler и state ownership / paragraph block 139",
+        "target_evidence_level": "L2"
+      },
+      "canonical_row_sha256": "ff3b2d5650a16b0f3fbdc6e73c7040b939ad4da2beea8f9d110c8578664d1c73"
+    },
+    {
+      "canonical_row": {
+        "actual_evidence_ids": [],
+        "actual_status": "NOT_STARTED",
+        "assigned_role": "CONTROL_PLANE",
+        "blockers": [],
+        "dependencies": [
+          "GATE-M0"
+        ],
+        "implementation_action": "Выполнить буквально.",
+        "milestone": "M1",
+        "mutation_ids": [
+          "M:REQ-MP2-0078"
+        ],
+        "negative_control_ids": [
+          "N:REQ-MP2-0078"
+        ],
+        "original_text": "role readiness;",
+        "pass_criteria": [
+          "Target evidence met."
+        ],
+        "positive_test_ids": [
+          "P:REQ-MP2-0078"
+        ],
+        "priority": "P0",
+        "required_artifacts": [
+          "REQUIREMENTS_TRACEABILITY_MATRIX.json",
+          "ROLE_PERMISSION_POLICY.json",
+          "WORK_ORDER_LEDGER.json",
+          "STATE_TRANSITION_COVERAGE.json"
+        ],
+        "requirement_id": "REQ-MP2-0078",
+        "residual_risks": [
+          "Open."
+        ],
+        "source_document": "Quantum_Autonomous_Release_Agent_Master_Prompt_v2_0(3).docx",
+        "source_location": "6. Deterministic scheduler и state ownership / paragraph block 140",
+        "target_evidence_level": "L2"
+      },
+      "canonical_row_sha256": "1d1c9bd191630c6dff518d5e8e42dd0779ec59837200906f0cb2335cff24533f"
+    },
+    {
+      "canonical_row": {
+        "actual_evidence_ids": [],
+        "actual_status": "NOT_STARTED",
+        "assigned_role": "CONTROL_PLANE",
+        "blockers": [],
+        "dependencies": [
+          "GATE-M0"
+        ],
+        "implementation_action": "Выполнить буквально.",
+        "milestone": "M1",
+        "mutation_ids": [
+          "M:REQ-MP2-0079"
+        ],
+        "negative_control_ids": [
+          "N:REQ-MP2-0079"
+        ],
+        "original_text": "change conflict locks;",
+        "pass_criteria": [
+          "Target evidence met."
+        ],
+        "positive_test_ids": [
+          "P:REQ-MP2-0079"
+        ],
+        "priority": "P0",
+        "required_artifacts": [
+          "REQUIREMENTS_TRACEABILITY_MATRIX.json",
+          "ROLE_PERMISSION_POLICY.json",
+          "WORK_ORDER_LEDGER.json",
+          "STATE_TRANSITION_COVERAGE.json"
+        ],
+        "requirement_id": "REQ-MP2-0079",
+        "residual_risks": [
+          "Open."
+        ],
+        "source_document": "Quantum_Autonomous_Release_Agent_Master_Prompt_v2_0(3).docx",
+        "source_location": "6. Deterministic scheduler и state ownership / paragraph block 141",
+        "target_evidence_level": "L2"
+      },
+      "canonical_row_sha256": "085c818d3a6b47667a8627d0eeebf47dc1de393521456ba9bcb7100451071666"
+    },
+    {
+      "canonical_row": {
+        "actual_evidence_ids": [],
+        "actual_status": "NOT_STARTED",
+        "assigned_role": "CONTROL_PLANE",
+        "blockers": [],
+        "dependencies": [
+          "GATE-M0"
+        ],
+        "implementation_action": "Выполнить буквально.",
+        "milestone": "M1",
+        "mutation_ids": [
+          "M:REQ-MP2-0080"
+        ],
+        "negative_control_ids": [
+          "N:REQ-MP2-0080"
+        ],
+        "original_text": "evidence freshness;",
+        "pass_criteria": [
+          "Target evidence met."
+        ],
+        "positive_test_ids": [
+          "P:REQ-MP2-0080"
+        ],
+        "priority": "P0",
+        "required_artifacts": [
+          "REQUIREMENTS_TRACEABILITY_MATRIX.json",
+          "ROLE_PERMISSION_POLICY.json",
+          "WORK_ORDER_LEDGER.json",
+          "STATE_TRANSITION_COVERAGE.json"
+        ],
+        "requirement_id": "REQ-MP2-0080",
+        "residual_risks": [
+          "Open."
+        ],
+        "source_document": "Quantum_Autonomous_Release_Agent_Master_Prompt_v2_0(3).docx",
+        "source_location": "6. Deterministic scheduler и state ownership / paragraph block 142",
+        "target_evidence_level": "L2"
+      },
+      "canonical_row_sha256": "d0842690560ebb367abbd82e92baf37ad1a8bfb45f9db4c753597ccbaea7a5b3"
+    },
+    {
+      "canonical_row": {
+        "actual_evidence_ids": [],
+        "actual_status": "NOT_STARTED",
+        "assigned_role": "CONTROL_PLANE",
+        "blockers": [],
+        "dependencies": [
+          "GATE-M0"
+        ],
+        "implementation_action": "Выполнить буквально.",
+        "milestone": "M1",
+        "mutation_ids": [
+          "M:REQ-MP2-0081"
+        ],
+        "negative_control_ids": [
+          "N:REQ-MP2-0081"
+        ],
+        "original_text": "retry and budget state.",
+        "pass_criteria": [
+          "Target evidence met."
+        ],
+        "positive_test_ids": [
+          "P:REQ-MP2-0081"
+        ],
+        "priority": "P0",
+        "required_artifacts": [
+          "REQUIREMENTS_TRACEABILITY_MATRIX.json",
+          "ROLE_PERMISSION_POLICY.json",
+          "WORK_ORDER_LEDGER.json",
+          "STATE_TRANSITION_COVERAGE.json"
+        ],
+        "requirement_id": "REQ-MP2-0081",
+        "residual_risks": [
+          "Open."
+        ],
+        "source_document": "Quantum_Autonomous_Release_Agent_Master_Prompt_v2_0(3).docx",
+        "source_location": "6. Deterministic scheduler и state ownership / paragraph block 143",
+        "target_evidence_level": "L2"
+      },
+      "canonical_row_sha256": "f5ef5b3eed0276a4def7892d88bebb6f05f31bfff1424da64d4e851f2fdc9567"
+    },
+    {
+      "canonical_row": {
+        "actual_evidence_ids": [],
+        "actual_status": "NOT_STARTED",
+        "assigned_role": "CONTROL_PLANE",
+        "blockers": [],
+        "dependencies": [
+          "GATE-M0"
+        ],
+        "implementation_action": "Выполнить буквально.",
+        "milestone": "M1",
+        "mutation_ids": [
+          "M:REQ-MP2-0082"
+        ],
+        "negative_control_ids": [
+          "N:REQ-MP2-0082"
+        ],
+        "original_text": "SELECT_NEXT_REQUIREMENT:\n1. filter mandatory requirements with status != VERIFIED\n2. exclude blocked dependencies\n3. sort by priority, critical-path score, risk, age\n4. require role capability and environment readiness\n5. acquire exclusive requirement lock\n6. emit immutable WORK_ORDER.json\n7. reject any action outside WORK_ORDER scope",
+        "pass_criteria": [
+          "Target evidence met."
+        ],
+        "positive_test_ids": [
+          "P:REQ-MP2-0082"
+        ],
+        "priority": "P0",
+        "required_artifacts": [
+          "REQUIREMENTS_TRACEABILITY_MATRIX.json",
+          "ROLE_PERMISSION_POLICY.json",
+          "WORK_ORDER_LEDGER.json",
+          "STATE_TRANSITION_COVERAGE.json"
+        ],
+        "requirement_id": "REQ-MP2-0082",
+        "residual_risks": [
+          "Open."
+        ],
+        "source_document": "Quantum_Autonomous_Release_Agent_Master_Prompt_v2_0(3).docx",
+        "source_location": "6. Deterministic scheduler и state ownership / table block 144",
+        "target_evidence_level": "L2"
+      },
+      "canonical_row_sha256": "cd719b10e2dc8400f4a98216ee8cea900bc619d0001e4f1e92fce283f995eefb"
+    },
+    {
+      "canonical_row": {
+        "actual_evidence_ids": [],
+        "actual_status": "NOT_STARTED",
+        "assigned_role": "CONTROL_PLANE",
+        "blockers": [],
+        "dependencies": [
+          "GATE-M0"
+        ],
+        "implementation_action": "Выполнить буквально.",
+        "milestone": "M1",
+        "mutation_ids": [
+          "M:REQ-MP2-0083"
+        ],
+        "negative_control_ids": [
+          "N:REQ-MP2-0083"
+        ],
+        "original_text": "Единственным владельцем canonical state является control plane. Role output имеет статус PROPOSAL или RAW_EVIDENCE, пока deterministic validator не принял его.",
+        "pass_criteria": [
+          "Target evidence met."
+        ],
+        "positive_test_ids": [
+          "P:REQ-MP2-0083"
+        ],
+        "priority": "P0",
+        "required_artifacts": [
+          "REQUIREMENTS_TRACEABILITY_MATRIX.json",
+          "ROLE_PERMISSION_POLICY.json",
+          "WORK_ORDER_LEDGER.json",
+          "STATE_TRANSITION_COVERAGE.json"
+        ],
+        "requirement_id": "REQ-MP2-0083",
+        "residual_risks": [
+          "Open."
+        ],
+        "source_document": "Quantum_Autonomous_Release_Agent_Master_Prompt_v2_0(3).docx",
+        "source_location": "6. Deterministic scheduler и state ownership / paragraph block 146",
+        "target_evidence_level": "L2"
+      },
+      "canonical_row_sha256": "f808d78708d7f56f80d466a2465e098ffb94852172d7f389fb7064b148e56961"
+    },
+    {
+      "canonical_row": {
+        "actual_evidence_ids": [],
+        "actual_status": "NOT_STARTED",
+        "assigned_role": "CONTROL_PLANE",
+        "blockers": [],
+        "dependencies": [
+          "GATE-M0"
+        ],
+        "implementation_action": "Выполнить буквально.",
+        "milestone": "M1",
+        "mutation_ids": [
+          "M:REQ-MP2-0084"
+        ],
+        "negative_control_ids": [
+          "N:REQ-MP2-0084"
+        ],
+        "original_text": "Оркестратор обязан восстанавливаться только из versioned AUTONOMOUS_EXECUTION_STATE.json. Скрытая память сессии не может быть единственным источником состояния.",
+        "pass_criteria": [
+          "Target evidence met."
+        ],
+        "positive_test_ids": [
+          "P:REQ-MP2-0084"
+        ],
+        "priority": "P0",
+        "required_artifacts": [
+          "REQUIREMENTS_TRACEABILITY_MATRIX.json",
+          "ROLE_PERMISSION_POLICY.json",
+          "WORK_ORDER_LEDGER.json",
+          "STATE_TRANSITION_COVERAGE.json"
+        ],
+        "requirement_id": "REQ-MP2-0084",
+        "residual_risks": [
+          "Open."
+        ],
+        "source_document": "Quantum_Autonomous_Release_Agent_Master_Prompt_v2_0(3).docx",
+        "source_location": "6. Deterministic scheduler и state ownership / paragraph block 147",
+        "target_evidence_level": "L2"
+      },
+      "canonical_row_sha256": "a624e87ab7e37b444c0502164f253efc72fb8df6d01ed20bdbe3fe4384ac908d"
+    },
+    {
+      "canonical_row": {
+        "actual_evidence_ids": [],
+        "actual_status": "NOT_STARTED",
+        "assigned_role": "ADVERSARY",
+        "blockers": [],
+        "dependencies": [
+          "GATE-M0"
+        ],
+        "implementation_action": "Выполнить буквально.",
+        "milestone": "M1",
+        "mutation_ids": [
+          "M:REQ-MP2-0128"
+        ],
+        "negative_control_ids": [
+          "N:REQ-MP2-0128"
+        ],
+        "original_text": "OBSERVE → HYPOTHESES → DIAGNOSTIC TEST → WORK ORDER →\nFAILING REGRESSION → MINIMAL PATCH → TARGETED TEST →\nINDEPENDENT VERIFICATION → ADVERSARIAL FALSIFICATION →\nEVIDENCE INGESTION → DETERMINISTIC DECISION",
+        "pass_criteria": [
+          "Target evidence met."
+        ],
+        "positive_test_ids": [
+          "P:REQ-MP2-0128"
+        ],
+        "priority": "P1",
+        "required_artifacts": [
+          "REQUIREMENTS_TRACEABILITY_MATRIX.json",
+          "ROLE_PERMISSION_POLICY.json",
+          "WORK_ORDER_LEDGER.json",
+          "STATE_TRANSITION_COVERAGE.json"
+        ],
+        "requirement_id": "REQ-MP2-0128",
+        "residual_risks": [
+          "Open."
+        ],
+        "source_document": "Quantum_Autonomous_Release_Agent_Master_Prompt_v2_0(3).docx",
+        "source_location": "11. Универсальный цикл изменения / table block 196",
+        "target_evidence_level": "L2"
+      },
+      "canonical_row_sha256": "43f3b4eea164fd30b79fbab800fefe48cffb2c74e5e867a838af390305c69bab"
+    },
+    {
+      "canonical_row": {
+        "actual_evidence_ids": [],
+        "actual_status": "NOT_STARTED",
+        "assigned_role": "CONTROL_PLANE",
+        "blockers": [],
+        "dependencies": [
+          "GATE-M0"
+        ],
+        "implementation_action": "Выполнить буквально.",
+        "milestone": "M1",
+        "mutation_ids": [
+          "M:REQ-MP2-0129"
+        ],
+        "negative_control_ids": [
+          "N:REQ-MP2-0129"
+        ],
+        "original_text": "Перед каждым изменяющим действием control plane обязан записать:",
+        "pass_criteria": [
+          "Target evidence met."
+        ],
+        "positive_test_ids": [
+          "P:REQ-MP2-0129"
+        ],
+        "priority": "P1",
+        "required_artifacts": [
+          "REQUIREMENTS_TRACEABILITY_MATRIX.json",
+          "ROLE_PERMISSION_POLICY.json",
+          "WORK_ORDER_LEDGER.json",
+          "STATE_TRANSITION_COVERAGE.json"
+        ],
+        "requirement_id": "REQ-MP2-0129",
+        "residual_risks": [
+          "Open."
+        ],
+        "source_document": "Quantum_Autonomous_Release_Agent_Master_Prompt_v2_0(3).docx",
+        "source_location": "11. Универсальный цикл изменения / paragraph block 198",
+        "target_evidence_level": "L2"
+      },
+      "canonical_row_sha256": "bced09ae50a26d8b7b08213549e735d9b2b5bdaaeb79ca4ae1f3ab32c52c5f3c"
+    },
+    {
+      "canonical_row": {
+        "actual_evidence_ids": [],
+        "actual_status": "NOT_STARTED",
+        "assigned_role": "CONTROL_PLANE",
+        "blockers": [],
+        "dependencies": [
+          "GATE-M0"
+        ],
+        "implementation_action": "Выполнить буквально.",
+        "milestone": "M1",
+        "mutation_ids": [
+          "M:REQ-MP2-0130"
+        ],
+        "negative_control_ids": [
+          "N:REQ-MP2-0130"
+        ],
+        "original_text": "ACTIVE_MILESTONE:\nREQUIREMENT_ID:\nDEFECT_ID:\nASSIGNED_ROLE:\nCHANGE_BOUNDARY:\nFILES_ALLOWED_TO_CHANGE:\nFILES_FORBIDDEN_TO_CHANGE:\nHYPOTHESIS:\nNEXT_TEST:\nEXPECTED_RESULT:\nROLLBACK_CONDITION:\nROLLBACK_COMMAND:\nTARGET_EVIDENCE_LEVEL:\nWORK_ORDER_SHA256:",
+        "pass_criteria": [
+          "Target evidence met."
+        ],
+        "positive_test_ids": [
+          "P:REQ-MP2-0130"
+        ],
+        "priority": "P1",
+        "required_artifacts": [
+          "REQUIREMENTS_TRACEABILITY_MATRIX.json",
+          "ROLE_PERMISSION_POLICY.json",
+          "WORK_ORDER_LEDGER.json",
+          "STATE_TRANSITION_COVERAGE.json"
+        ],
+        "requirement_id": "REQ-MP2-0130",
+        "residual_risks": [
+          "Open."
+        ],
+        "source_document": "Quantum_Autonomous_Release_Agent_Master_Prompt_v2_0(3).docx",
+        "source_location": "11. Универсальный цикл изменения / table block 199",
+        "target_evidence_level": "L2"
+      },
+      "canonical_row_sha256": "dc31a68d2c9e5898e2fa401408d168acb1a942b838c497c0033784abeeaeb47e"
+    },
+    {
+      "canonical_row": {
+        "actual_evidence_ids": [],
+        "actual_status": "NOT_STARTED",
+        "assigned_role": "CONTROL_PLANE",
+        "blockers": [],
+        "dependencies": [
+          "GATE-M0"
+        ],
+        "implementation_action": "Выполнить буквально.",
+        "milestone": "M1",
+        "mutation_ids": [
+          "M:REQ-MP2-0131"
+        ],
+        "negative_control_ids": [
+          "N:REQ-MP2-0131"
+        ],
+        "original_text": "После действия записать:",
+        "pass_criteria": [
+          "Target evidence met."
+        ],
+        "positive_test_ids": [
+          "P:REQ-MP2-0131"
+        ],
+        "priority": "P1",
+        "required_artifacts": [
+          "REQUIREMENTS_TRACEABILITY_MATRIX.json",
+          "ROLE_PERMISSION_POLICY.json",
+          "WORK_ORDER_LEDGER.json",
+          "STATE_TRANSITION_COVERAGE.json"
+        ],
+        "requirement_id": "REQ-MP2-0131",
+        "residual_risks": [
+          "Open."
+        ],
+        "source_document": "Quantum_Autonomous_Release_Agent_Master_Prompt_v2_0(3).docx",
+        "source_location": "11. Универсальный цикл изменения / paragraph block 201",
+        "target_evidence_level": "L2"
+      },
+      "canonical_row_sha256": "d1ad359665c68281658a3fb0c42b3dfedb0339bd22ff5be57f3313bd14a40552"
+    },
+    {
+      "canonical_row": {
+        "actual_evidence_ids": [],
+        "actual_status": "NOT_STARTED",
+        "assigned_role": "ADVERSARY",
+        "blockers": [],
+        "dependencies": [
+          "GATE-M0"
+        ],
+        "implementation_action": "Выполнить буквально.",
+        "milestone": "M1",
+        "mutation_ids": [
+          "M:REQ-MP2-0132"
+        ],
+        "negative_control_ids": [
+          "N:REQ-MP2-0132"
+        ],
+        "original_text": "ACTUAL_DIFF_SHA256:\nTEST_COMMAND:\nEXIT_CODE:\nRAW_OUTPUT_SHA256:\nRESULT:\nEVIDENCE_ID:\nVERIFIER_RESULT:\nADVERSARIAL_RESULT:\nREGRESSION_STATUS:\nDECISION:",
+        "pass_criteria": [
+          "Target evidence met."
+        ],
+        "positive_test_ids": [
+          "P:REQ-MP2-0132"
+        ],
+        "priority": "P1",
+        "required_artifacts": [
+          "REQUIREMENTS_TRACEABILITY_MATRIX.json",
+          "ROLE_PERMISSION_POLICY.json",
+          "WORK_ORDER_LEDGER.json",
+          "STATE_TRANSITION_COVERAGE.json"
+        ],
+        "requirement_id": "REQ-MP2-0132",
+        "residual_risks": [
+          "Open."
+        ],
+        "source_document": "Quantum_Autonomous_Release_Agent_Master_Prompt_v2_0(3).docx",
+        "source_location": "11. Универсальный цикл изменения / table block 202",
+        "target_evidence_level": "L2"
+      },
+      "canonical_row_sha256": "cb779c1a70102cf13b74bd7ce72aacb832b801dc718c37d5e898277ff96052c0"
+    },
+    {
+      "canonical_row": {
+        "actual_evidence_ids": [],
+        "actual_status": "NOT_STARTED",
+        "assigned_role": "CONTROL_PLANE",
+        "blockers": [
+          "BLK-FULL-TREE-INVENTORY-CONSTRAINED"
+        ],
+        "dependencies": [
+          "GATE-M0"
+        ],
+        "implementation_action": "Выполнить буквально.",
+        "milestone": "M1",
+        "mutation_ids": [
+          "M:REQ-MP2-0142"
+        ],
+        "negative_control_ids": [
+          "N:REQ-MP2-0142"
+        ],
+        "original_text": "1. Заменить synthetic bootstrap requirements на literal extraction полного Protocol v3.1 без сокращения.",
+        "pass_criteria": [
+          "Target evidence met."
+        ],
+        "positive_test_ids": [
+          "P:REQ-MP2-0142"
+        ],
+        "priority": "P0",
+        "required_artifacts": [
+          "REQUIREMENTS_TRACEABILITY_MATRIX.json",
+          "ROLE_PERMISSION_POLICY.json",
+          "WORK_ORDER_LEDGER.json",
+          "STATE_TRANSITION_COVERAGE.json"
+        ],
+        "requirement_id": "REQ-MP2-0142",
+        "residual_risks": [
+          "Open."
+        ],
+        "source_document": "Quantum_Autonomous_Release_Agent_Master_Prompt_v2_0(3).docx",
+        "source_location": "13. Milestone 1 — protocol/control-plane upgrade / paragraph block 215",
+        "target_evidence_level": "L2"
+      },
+      "canonical_row_sha256": "27142bddf69f88ed471dfb8b654f69499dda4669959119bb7c1ef381f3179248"
+    },
+    {
+      "canonical_row": {
+        "actual_evidence_ids": [
+          "EVD-M0-PROTOCOL-SHA256",
+          "EVD-M0-CANONICAL-RTM"
+        ],
+        "actual_status": "PARTIAL",
+        "assigned_role": "CONTROL_PLANE",
+        "blockers": [
+          "BLK-CONTROL-PLANE-L2-INGESTION-NOT-IMPLEMENTED"
+        ],
+        "dependencies": [
+          "GATE-M0"
+        ],
+        "implementation_action": "Выполнить буквально.",
+        "milestone": "M1",
+        "mutation_ids": [
+          "M:REQ-MP2-0143"
+        ],
+        "negative_control_ids": [
+          "N:REQ-MP2-0143"
+        ],
+        "original_text": "2. Проверить count, source locations, original text и protocol hash.",
+        "pass_criteria": [
+          "Target evidence met."
+        ],
+        "positive_test_ids": [
+          "P:REQ-MP2-0143"
+        ],
+        "priority": "P0",
+        "required_artifacts": [
+          "REQUIREMENTS_TRACEABILITY_MATRIX.json",
+          "ROLE_PERMISSION_POLICY.json",
+          "WORK_ORDER_LEDGER.json",
+          "STATE_TRANSITION_COVERAGE.json"
+        ],
+        "requirement_id": "REQ-MP2-0143",
+        "residual_risks": [
+          "Open."
+        ],
+        "source_document": "Quantum_Autonomous_Release_Agent_Master_Prompt_v2_0(3).docx",
+        "source_location": "13. Milestone 1 — protocol/control-plane upgrade / paragraph block 216",
+        "target_evidence_level": "L2"
+      },
+      "canonical_row_sha256": "42fe06026424181dc9001e888a20a2500614fb3f62bebffdef28cb69eab2b69b"
+    },
+    {
+      "canonical_row": {
+        "actual_evidence_ids": [
+          "EVD-M0-CANONICAL-RTM"
+        ],
+        "actual_status": "PARTIAL",
+        "assigned_role": "CONTROL_PLANE",
+        "blockers": [
+          "BLK-CONTROL-PLANE-L2-INGESTION-NOT-IMPLEMENTED"
+        ],
+        "dependencies": [
+          "GATE-M0"
+        ],
+        "implementation_action": "Выполнить буквально.",
+        "milestone": "M1",
+        "mutation_ids": [
+          "M:REQ-MP2-0144"
+        ],
+        "negative_control_ids": [
+          "N:REQ-MP2-0144"
+        ],
+        "original_text": "3. Добавить все UI Reference Lock requirements как пользовательские P0.",
+        "pass_criteria": [
+          "Target evidence met."
+        ],
+        "positive_test_ids": [
+          "P:REQ-MP2-0144"
+        ],
+        "priority": "P0",
+        "required_artifacts": [
+          "REQUIREMENTS_TRACEABILITY_MATRIX.json",
+          "ROLE_PERMISSION_POLICY.json",
+          "WORK_ORDER_LEDGER.json",
+          "STATE_TRANSITION_COVERAGE.json"
+        ],
+        "requirement_id": "REQ-MP2-0144",
+        "residual_risks": [
+          "Open."
+        ],
+        "source_document": "Quantum_Autonomous_Release_Agent_Master_Prompt_v2_0(3).docx",
+        "source_location": "13. Milestone 1 — protocol/control-plane upgrade / paragraph block 217",
+        "target_evidence_level": "L2"
+      },
+      "canonical_row_sha256": "a776927b66f394b87c5f62bcf7865dfa83c5032917261b99cfee13e189293e0d"
+    },
+    {
+      "canonical_row": {
+        "actual_evidence_ids": [],
+        "actual_status": "NOT_STARTED",
+        "assigned_role": "CONTROL_PLANE",
+        "blockers": [],
+        "dependencies": [
+          "GATE-M0"
+        ],
+        "implementation_action": "Выполнить буквально.",
+        "milestone": "M1",
+        "mutation_ids": [
+          "M:REQ-MP2-0145"
+        ],
+        "negative_control_ids": [
+          "N:REQ-MP2-0145"
+        ],
+        "original_text": "4. Расширить mandatory artifact set новыми architecture/UI/role evidence files.",
+        "pass_criteria": [
+          "Target evidence met."
+        ],
+        "positive_test_ids": [
+          "P:REQ-MP2-0145"
+        ],
+        "priority": "P1",
+        "required_artifacts": [
+          "REQUIREMENTS_TRACEABILITY_MATRIX.json",
+          "ROLE_PERMISSION_POLICY.json",
+          "WORK_ORDER_LEDGER.json",
+          "STATE_TRANSITION_COVERAGE.json"
+        ],
+        "requirement_id": "REQ-MP2-0145",
+        "residual_risks": [
+          "Open."
+        ],
+        "source_document": "Quantum_Autonomous_Release_Agent_Master_Prompt_v2_0(3).docx",
+        "source_location": "13. Milestone 1 — protocol/control-plane upgrade / paragraph block 218",
+        "target_evidence_level": "L2"
+      },
+      "canonical_row_sha256": "9a4e51a0ff70707c406bacfad69f10db3f998966cdbee9b27b2cb90ce424f4c3"
+    },
+    {
+      "canonical_row": {
+        "actual_evidence_ids": [],
+        "actual_status": "NOT_STARTED",
+        "assigned_role": "CONTROL_PLANE",
+        "blockers": [],
+        "dependencies": [
+          "GATE-M0"
+        ],
+        "implementation_action": "Выполнить буквально.",
+        "milestone": "M1",
+        "mutation_ids": [
+          "M:REQ-MP2-0146"
+        ],
+        "negative_control_ids": [
+          "N:REQ-MP2-0146"
+        ],
+        "original_text": "5. Добавить deterministic dependency scheduler и exclusive work-order locks.",
+        "pass_criteria": [
+          "Target evidence met."
+        ],
+        "positive_test_ids": [
+          "P:REQ-MP2-0146"
+        ],
+        "priority": "P1",
+        "required_artifacts": [
+          "REQUIREMENTS_TRACEABILITY_MATRIX.json",
+          "ROLE_PERMISSION_POLICY.json",
+          "WORK_ORDER_LEDGER.json",
+          "STATE_TRANSITION_COVERAGE.json"
+        ],
+        "requirement_id": "REQ-MP2-0146",
+        "residual_risks": [
+          "Open."
+        ],
+        "source_document": "Quantum_Autonomous_Release_Agent_Master_Prompt_v2_0(3).docx",
+        "source_location": "13. Milestone 1 — protocol/control-plane upgrade / paragraph block 219",
+        "target_evidence_level": "L2"
+      },
+      "canonical_row_sha256": "e8b1e7bd1fd5ddacb2a68d9bf47594988f1d4b7776d078240cebfb4f0db33e3b"
+    },
+    {
+      "canonical_row": {
+        "actual_evidence_ids": [],
+        "actual_status": "NOT_STARTED",
+        "assigned_role": "CONTROL_PLANE",
+        "blockers": [],
+        "dependencies": [
+          "GATE-M0"
+        ],
+        "implementation_action": "Выполнить буквально.",
+        "milestone": "M1",
+        "mutation_ids": [
+          "M:REQ-MP2-0147"
+        ],
+        "negative_control_ids": [
+          "N:REQ-MP2-0147"
+        ],
+        "original_text": "6. Добавить role permission policy и protected paths.",
+        "pass_criteria": [
+          "Target evidence met."
+        ],
+        "positive_test_ids": [
+          "P:REQ-MP2-0147"
+        ],
+        "priority": "P1",
+        "required_artifacts": [
+          "REQUIREMENTS_TRACEABILITY_MATRIX.json",
+          "ROLE_PERMISSION_POLICY.json",
+          "WORK_ORDER_LEDGER.json",
+          "STATE_TRANSITION_COVERAGE.json"
+        ],
+        "requirement_id": "REQ-MP2-0147",
+        "residual_risks": [
+          "Open."
+        ],
+        "source_document": "Quantum_Autonomous_Release_Agent_Master_Prompt_v2_0(3).docx",
+        "source_location": "13. Milestone 1 — protocol/control-plane upgrade / paragraph block 220",
+        "target_evidence_level": "L2"
+      },
+      "canonical_row_sha256": "6e1b13aa262bddce5c81f0fd87e7800455ff0e84125c0bd0b69bf87bdb19340c"
+    },
+    {
+      "canonical_row": {
+        "actual_evidence_ids": [],
+        "actual_status": "NOT_STARTED",
+        "assigned_role": "CONTROL_PLANE",
+        "blockers": [],
+        "dependencies": [
+          "GATE-M0"
+        ],
+        "implementation_action": "Выполнить буквально.",
+        "milestone": "M1",
+        "mutation_ids": [
+          "M:REQ-MP2-0148"
+        ],
+        "negative_control_ids": [
+          "N:REQ-MP2-0148"
+        ],
+        "original_text": "7. Запретить LLM-полям изменять canonical status и release decision.",
+        "pass_criteria": [
+          "Target evidence met."
+        ],
+        "positive_test_ids": [
+          "P:REQ-MP2-0148"
+        ],
+        "priority": "P0",
+        "required_artifacts": [
+          "REQUIREMENTS_TRACEABILITY_MATRIX.json",
+          "ROLE_PERMISSION_POLICY.json",
+          "WORK_ORDER_LEDGER.json",
+          "STATE_TRANSITION_COVERAGE.json"
+        ],
+        "requirement_id": "REQ-MP2-0148",
+        "residual_risks": [
+          "Open."
+        ],
+        "source_document": "Quantum_Autonomous_Release_Agent_Master_Prompt_v2_0(3).docx",
+        "source_location": "13. Milestone 1 — protocol/control-plane upgrade / paragraph block 221",
+        "target_evidence_level": "L2"
+      },
+      "canonical_row_sha256": "b3fcbb9c817c2a2684a16a79923f4d1e4b484d94980ed6656d28c9db3eebe985"
+    },
+    {
+      "canonical_row": {
+        "actual_evidence_ids": [],
+        "actual_status": "NOT_STARTED",
+        "assigned_role": "CONTROL_PLANE",
+        "blockers": [
+          "BLK-M1-NEGATIVE-CONTROLS-NOT-IMPLEMENTED"
+        ],
+        "dependencies": [
+          "GATE-M0"
+        ],
+        "implementation_action": "Выполнить буквально.",
+        "milestone": "M1",
+        "mutation_ids": [
+          "M:REQ-MP2-0149"
+        ],
+        "negative_control_ids": [
+          "N:REQ-MP2-0149"
+        ],
+        "original_text": "8. Добавить negative controls: missing requirement, protocol hash swap, role privilege escalation, forged VERIFIED, forged L5, gate modification.",
+        "pass_criteria": [
+          "Target evidence met."
+        ],
+        "positive_test_ids": [
+          "P:REQ-MP2-0149"
+        ],
+        "priority": "P0",
+        "required_artifacts": [
+          "REQUIREMENTS_TRACEABILITY_MATRIX.json",
+          "ROLE_PERMISSION_POLICY.json",
+          "WORK_ORDER_LEDGER.json",
+          "STATE_TRANSITION_COVERAGE.json"
+        ],
+        "requirement_id": "REQ-MP2-0149",
+        "residual_risks": [
+          "Open."
+        ],
+        "source_document": "Quantum_Autonomous_Release_Agent_Master_Prompt_v2_0(3).docx",
+        "source_location": "13. Milestone 1 — protocol/control-plane upgrade / paragraph block 222",
+        "target_evidence_level": "L5"
+      },
+      "canonical_row_sha256": "c53f5378df25bb62d43d8b90ed85d0d154fc4e32adf8349b3c328edd82d18f46"
+    },
+    {
+      "canonical_row": {
+        "actual_evidence_ids": [],
+        "actual_status": "NOT_STARTED",
+        "assigned_role": "CONTROL_PLANE",
+        "blockers": [],
+        "dependencies": [
+          "GATE-M0"
+        ],
+        "implementation_action": "Выполнить буквально.",
+        "milestone": "M1",
+        "mutation_ids": [
+          "M:REQ-MP2-0150"
+        ],
+        "negative_control_ids": [
+          "N:REQ-MP2-0150"
+        ],
+        "original_text": "9. Доказать, что каждый negative control делает gate красным.",
+        "pass_criteria": [
+          "Target evidence met."
+        ],
+        "positive_test_ids": [
+          "P:REQ-MP2-0150"
+        ],
+        "priority": "P1",
+        "required_artifacts": [
+          "REQUIREMENTS_TRACEABILITY_MATRIX.json",
+          "ROLE_PERMISSION_POLICY.json",
+          "WORK_ORDER_LEDGER.json",
+          "STATE_TRANSITION_COVERAGE.json"
+        ],
+        "requirement_id": "REQ-MP2-0150",
+        "residual_risks": [
+          "Open."
+        ],
+        "source_document": "Quantum_Autonomous_Release_Agent_Master_Prompt_v2_0(3).docx",
+        "source_location": "13. Milestone 1 — protocol/control-plane upgrade / paragraph block 223",
+        "target_evidence_level": "L2"
+      },
+      "canonical_row_sha256": "3ec65e09353a8b0c5dfe85cae762ab2b83a293033cfd47a91b3eeda99ca51beb"
+    },
+    {
+      "canonical_row": {
+        "actual_evidence_ids": [],
+        "actual_status": "NOT_STARTED",
+        "assigned_role": "CONTROL_PLANE",
+        "blockers": [
+          "BLK-M1-GATE-NOT-EXECUTED"
+        ],
+        "dependencies": [
+          "GATE-M0"
+        ],
+        "implementation_action": "Выполнить буквально.",
+        "milestone": "M1",
+        "mutation_ids": [
+          "M:REQ-MP2-0151"
+        ],
+        "negative_control_ids": [
+          "N:REQ-MP2-0151"
+        ],
+        "original_text": "Gate M1: literal RTM coverage 100%, protocol hash binding, negative controls PASS, current product code не изменён без отдельного requirement.",
+        "pass_criteria": [
+          "Target evidence met."
+        ],
+        "positive_test_ids": [
+          "P:REQ-MP2-0151"
+        ],
+        "priority": "P0",
+        "required_artifacts": [
+          "REQUIREMENTS_TRACEABILITY_MATRIX.json",
+          "ROLE_PERMISSION_POLICY.json",
+          "WORK_ORDER_LEDGER.json",
+          "STATE_TRANSITION_COVERAGE.json"
+        ],
+        "requirement_id": "REQ-MP2-0151",
+        "residual_risks": [
+          "Open."
+        ],
+        "source_document": "Quantum_Autonomous_Release_Agent_Master_Prompt_v2_0(3).docx",
+        "source_location": "13. Milestone 1 — protocol/control-plane upgrade / paragraph block 224",
+        "target_evidence_level": "L2"
+      },
+      "canonical_row_sha256": "fd768ccff03d654fdce4bd5db514599f54f63eeed5d79654968af4ef91a03862"
+    },
+    {
+      "canonical_row": {
+        "actual_evidence_ids": [],
+        "actual_status": "NOT_STARTED",
+        "assigned_role": "CONTROL_PLANE",
+        "blockers": [],
+        "dependencies": [
+          "GATE-M0"
+        ],
+        "implementation_action": "Выполнить буквально.",
+        "milestone": "M1",
+        "mutation_ids": [
+          "M:REQ-MP2-0242"
+        ],
+        "negative_control_ids": [
+          "N:REQ-MP2-0242"
+        ],
+        "original_text": "CURRENT_ARCHITECTURE_INVENTORY.json",
+        "pass_criteria": [
+          "Target evidence met."
+        ],
+        "positive_test_ids": [
+          "P:REQ-MP2-0242"
+        ],
+        "priority": "P1",
+        "required_artifacts": [
+          "REQUIREMENTS_TRACEABILITY_MATRIX.json",
+          "ROLE_PERMISSION_POLICY.json",
+          "WORK_ORDER_LEDGER.json",
+          "STATE_TRANSITION_COVERAGE.json"
+        ],
+        "requirement_id": "REQ-MP2-0242",
+        "residual_risks": [
+          "Open."
+        ],
+        "source_document": "Quantum_Autonomous_Release_Agent_Master_Prompt_v2_0(3).docx",
+        "source_location": "23. Обязательные артефакты / paragraph block 326",
+        "target_evidence_level": "L2"
+      },
+      "canonical_row_sha256": "11268e589682f00a814ea50ad398c4a8a98fad1b01385eeac9be46d8a08d1af2"
+    },
+    {
+      "canonical_row": {
+        "actual_evidence_ids": [],
+        "actual_status": "NOT_STARTED",
+        "assigned_role": "CONTROL_PLANE",
+        "blockers": [],
+        "dependencies": [
+          "GATE-M0"
+        ],
+        "implementation_action": "Выполнить буквально.",
+        "milestone": "M1",
+        "mutation_ids": [
+          "M:REQ-MP2-0243"
+        ],
+        "negative_control_ids": [
+          "N:REQ-MP2-0243"
+        ],
+        "original_text": "ARCHITECTURE_MIGRATION_MAP.json",
+        "pass_criteria": [
+          "Target evidence met."
+        ],
+        "positive_test_ids": [
+          "P:REQ-MP2-0243"
+        ],
+        "priority": "P1",
+        "required_artifacts": [
+          "REQUIREMENTS_TRACEABILITY_MATRIX.json",
+          "ROLE_PERMISSION_POLICY.json",
+          "WORK_ORDER_LEDGER.json",
+          "STATE_TRANSITION_COVERAGE.json"
+        ],
+        "requirement_id": "REQ-MP2-0243",
+        "residual_risks": [
+          "Open."
+        ],
+        "source_document": "Quantum_Autonomous_Release_Agent_Master_Prompt_v2_0(3).docx",
+        "source_location": "23. Обязательные артефакты / paragraph block 327",
+        "target_evidence_level": "L2"
+      },
+      "canonical_row_sha256": "b660817316b487fa546c7f769e061ceae526dcde8b31501fde57d85cd97b5815"
+    },
+    {
+      "canonical_row": {
+        "actual_evidence_ids": [],
+        "actual_status": "NOT_STARTED",
+        "assigned_role": "CONTROL_PLANE",
+        "blockers": [],
+        "dependencies": [
+          "GATE-M0"
+        ],
+        "implementation_action": "Выполнить буквально.",
+        "milestone": "M1",
+        "mutation_ids": [
+          "M:REQ-MP2-0244"
+        ],
+        "negative_control_ids": [
+          "N:REQ-MP2-0244"
+        ],
+        "original_text": "REQUIREMENTS_TRACEABILITY_MATRIX.json",
+        "pass_criteria": [
+          "Target evidence met."
+        ],
+        "positive_test_ids": [
+          "P:REQ-MP2-0244"
+        ],
+        "priority": "P1",
+        "required_artifacts": [
+          "REQUIREMENTS_TRACEABILITY_MATRIX.json",
+          "ROLE_PERMISSION_POLICY.json",
+          "WORK_ORDER_LEDGER.json",
+          "STATE_TRANSITION_COVERAGE.json"
+        ],
+        "requirement_id": "REQ-MP2-0244",
+        "residual_risks": [
+          "Open."
+        ],
+        "source_document": "Quantum_Autonomous_Release_Agent_Master_Prompt_v2_0(3).docx",
+        "source_location": "23. Обязательные артефакты / paragraph block 328",
+        "target_evidence_level": "L2"
+      },
+      "canonical_row_sha256": "2d93eedc11e524e81b97036d2cef4bcc46075b6b7a22bc3f4fbe461334712fd5"
+    },
+    {
+      "canonical_row": {
+        "actual_evidence_ids": [],
+        "actual_status": "NOT_STARTED",
+        "assigned_role": "CONTROL_PLANE",
+        "blockers": [],
+        "dependencies": [
+          "GATE-M0"
+        ],
+        "implementation_action": "Выполнить буквально.",
+        "milestone": "M1",
+        "mutation_ids": [
+          "M:REQ-MP2-0245"
+        ],
+        "negative_control_ids": [
+          "N:REQ-MP2-0245"
+        ],
+        "original_text": "CLAIM_LEDGER.json",
+        "pass_criteria": [
+          "Target evidence met."
+        ],
+        "positive_test_ids": [
+          "P:REQ-MP2-0245"
+        ],
+        "priority": "P1",
+        "required_artifacts": [
+          "REQUIREMENTS_TRACEABILITY_MATRIX.json",
+          "ROLE_PERMISSION_POLICY.json",
+          "WORK_ORDER_LEDGER.json",
+          "STATE_TRANSITION_COVERAGE.json"
+        ],
+        "requirement_id": "REQ-MP2-0245",
+        "residual_risks": [
+          "Open."
+        ],
+        "source_document": "Quantum_Autonomous_Release_Agent_Master_Prompt_v2_0(3).docx",
+        "source_location": "23. Обязательные артефакты / paragraph block 329",
+        "target_evidence_level": "L2"
+      },
+      "canonical_row_sha256": "894a80a1e2a42224ebca06a7b3a2e55a598ea0de4e2b274538ef98e2703a9a38"
+    },
+    {
+      "canonical_row": {
+        "actual_evidence_ids": [],
+        "actual_status": "NOT_STARTED",
+        "assigned_role": "CONTROL_PLANE",
+        "blockers": [],
+        "dependencies": [
+          "GATE-M0"
+        ],
+        "implementation_action": "Выполнить буквально.",
+        "milestone": "M1",
+        "mutation_ids": [
+          "M:REQ-MP2-0246"
+        ],
+        "negative_control_ids": [
+          "N:REQ-MP2-0246"
+        ],
+        "original_text": "DEFECT_REGISTER.json",
+        "pass_criteria": [
+          "Target evidence met."
+        ],
+        "positive_test_ids": [
+          "P:REQ-MP2-0246"
+        ],
+        "priority": "P1",
+        "required_artifacts": [
+          "REQUIREMENTS_TRACEABILITY_MATRIX.json",
+          "ROLE_PERMISSION_POLICY.json",
+          "WORK_ORDER_LEDGER.json",
+          "STATE_TRANSITION_COVERAGE.json"
+        ],
+        "requirement_id": "REQ-MP2-0246",
+        "residual_risks": [
+          "Open."
+        ],
+        "source_document": "Quantum_Autonomous_Release_Agent_Master_Prompt_v2_0(3).docx",
+        "source_location": "23. Обязательные артефакты / paragraph block 330",
+        "target_evidence_level": "L2"
+      },
+      "canonical_row_sha256": "72786360f2fd3f8c9f2e96d209ccdfcca2cc1cb6449049ad7c2684f8c4cf964e"
+    },
+    {
+      "canonical_row": {
+        "actual_evidence_ids": [],
+        "actual_status": "NOT_STARTED",
+        "assigned_role": "CONTROL_PLANE",
+        "blockers": [],
+        "dependencies": [
+          "GATE-M0"
+        ],
+        "implementation_action": "Выполнить буквально.",
+        "milestone": "M1",
+        "mutation_ids": [
+          "M:REQ-MP2-0247"
+        ],
+        "negative_control_ids": [
+          "N:REQ-MP2-0247"
+        ],
+        "original_text": "PROTOCOL_CONFLICT_REGISTER.json",
+        "pass_criteria": [
+          "Target evidence met."
+        ],
+        "positive_test_ids": [
+          "P:REQ-MP2-0247"
+        ],
+        "priority": "P0",
+        "required_artifacts": [
+          "REQUIREMENTS_TRACEABILITY_MATRIX.json",
+          "ROLE_PERMISSION_POLICY.json",
+          "WORK_ORDER_LEDGER.json",
+          "STATE_TRANSITION_COVERAGE.json"
+        ],
+        "requirement_id": "REQ-MP2-0247",
+        "residual_risks": [
+          "Open."
+        ],
+        "source_document": "Quantum_Autonomous_Release_Agent_Master_Prompt_v2_0(3).docx",
+        "source_location": "23. Обязательные артефакты / paragraph block 331",
+        "target_evidence_level": "L2"
+      },
+      "canonical_row_sha256": "63918cfb740b0fc213f4e18c11702544c46938392e990a2ce216ab7ce49f0a09"
+    },
+    {
+      "canonical_row": {
+        "actual_evidence_ids": [],
+        "actual_status": "NOT_STARTED",
+        "assigned_role": "CONTROL_PLANE",
+        "blockers": [],
+        "dependencies": [
+          "GATE-M0"
+        ],
+        "implementation_action": "Выполнить буквально.",
+        "milestone": "M1",
+        "mutation_ids": [
+          "M:REQ-MP2-0248"
+        ],
+        "negative_control_ids": [
+          "N:REQ-MP2-0248"
+        ],
+        "original_text": "AUTONOMOUS_EXECUTION_STATE.json",
+        "pass_criteria": [
+          "Target evidence met."
+        ],
+        "positive_test_ids": [
+          "P:REQ-MP2-0248"
+        ],
+        "priority": "P1",
+        "required_artifacts": [
+          "REQUIREMENTS_TRACEABILITY_MATRIX.json",
+          "ROLE_PERMISSION_POLICY.json",
+          "WORK_ORDER_LEDGER.json",
+          "STATE_TRANSITION_COVERAGE.json"
+        ],
+        "requirement_id": "REQ-MP2-0248",
+        "residual_risks": [
+          "Open."
+        ],
+        "source_document": "Quantum_Autonomous_Release_Agent_Master_Prompt_v2_0(3).docx",
+        "source_location": "23. Обязательные артефакты / paragraph block 332",
+        "target_evidence_level": "L2"
+      },
+      "canonical_row_sha256": "f9b6f43487ef70d24cdecf1fe4baa8ba0bea699c1e342145c5d596af4579fc72"
+    },
+    {
+      "canonical_row": {
+        "actual_evidence_ids": [],
+        "actual_status": "NOT_STARTED",
+        "assigned_role": "CONTROL_PLANE",
+        "blockers": [],
+        "dependencies": [
+          "GATE-M0"
+        ],
+        "implementation_action": "Выполнить буквально.",
+        "milestone": "M1",
+        "mutation_ids": [
+          "M:REQ-MP2-0249"
+        ],
+        "negative_control_ids": [
+          "N:REQ-MP2-0249"
+        ],
+        "original_text": "ROLE_PERMISSION_POLICY.json",
+        "pass_criteria": [
+          "Target evidence met."
+        ],
+        "positive_test_ids": [
+          "P:REQ-MP2-0249"
+        ],
+        "priority": "P1",
+        "required_artifacts": [
+          "REQUIREMENTS_TRACEABILITY_MATRIX.json",
+          "ROLE_PERMISSION_POLICY.json",
+          "WORK_ORDER_LEDGER.json",
+          "STATE_TRANSITION_COVERAGE.json"
+        ],
+        "requirement_id": "REQ-MP2-0249",
+        "residual_risks": [
+          "Open."
+        ],
+        "source_document": "Quantum_Autonomous_Release_Agent_Master_Prompt_v2_0(3).docx",
+        "source_location": "23. Обязательные артефакты / paragraph block 333",
+        "target_evidence_level": "L2"
+      },
+      "canonical_row_sha256": "5b193e7beed7055908b882681ccd7809ec2e553db1239f11e3339941115ee4be"
+    },
+    {
+      "canonical_row": {
+        "actual_evidence_ids": [],
+        "actual_status": "NOT_STARTED",
+        "assigned_role": "CONTROL_PLANE",
+        "blockers": [],
+        "dependencies": [
+          "GATE-M0"
+        ],
+        "implementation_action": "Выполнить буквально.",
+        "milestone": "M1",
+        "mutation_ids": [
+          "M:REQ-MP2-0250"
+        ],
+        "negative_control_ids": [
+          "N:REQ-MP2-0250"
+        ],
+        "original_text": "WORK_ORDER_LEDGER.json",
+        "pass_criteria": [
+          "Target evidence met."
+        ],
+        "positive_test_ids": [
+          "P:REQ-MP2-0250"
+        ],
+        "priority": "P1",
+        "required_artifacts": [
+          "REQUIREMENTS_TRACEABILITY_MATRIX.json",
+          "ROLE_PERMISSION_POLICY.json",
+          "WORK_ORDER_LEDGER.json",
+          "STATE_TRANSITION_COVERAGE.json"
+        ],
+        "requirement_id": "REQ-MP2-0250",
+        "residual_risks": [
+          "Open."
+        ],
+        "source_document": "Quantum_Autonomous_Release_Agent_Master_Prompt_v2_0(3).docx",
+        "source_location": "23. Обязательные артефакты / paragraph block 334",
+        "target_evidence_level": "L2"
+      },
+      "canonical_row_sha256": "f1717d1655e166f2ef8ffd7e330b9dedeb0003569c0c83622895cd362da02557"
+    },
+    {
+      "canonical_row": {
+        "actual_evidence_ids": [],
+        "actual_status": "NOT_STARTED",
+        "assigned_role": "CONTROL_PLANE",
+        "blockers": [],
+        "dependencies": [
+          "GATE-M0"
+        ],
+        "implementation_action": "Выполнить буквально.",
+        "milestone": "M1",
+        "mutation_ids": [
+          "M:REQ-MP2-0251"
+        ],
+        "negative_control_ids": [
+          "N:REQ-MP2-0251"
+        ],
+        "original_text": "ROLE_TRACE_INDEX.json",
+        "pass_criteria": [
+          "Target evidence met."
+        ],
+        "positive_test_ids": [
+          "P:REQ-MP2-0251"
+        ],
+        "priority": "P1",
+        "required_artifacts": [
+          "REQUIREMENTS_TRACEABILITY_MATRIX.json",
+          "ROLE_PERMISSION_POLICY.json",
+          "WORK_ORDER_LEDGER.json",
+          "STATE_TRANSITION_COVERAGE.json"
+        ],
+        "requirement_id": "REQ-MP2-0251",
+        "residual_risks": [
+          "Open."
+        ],
+        "source_document": "Quantum_Autonomous_Release_Agent_Master_Prompt_v2_0(3).docx",
+        "source_location": "23. Обязательные артефакты / paragraph block 335",
+        "target_evidence_level": "L2"
+      },
+      "canonical_row_sha256": "81976de24cb33f7ae89fbd7cc49074ea2ec83f7def7e206ce113a3d880e69ca5"
+    },
+    {
+      "canonical_row": {
+        "actual_evidence_ids": [],
+        "actual_status": "NOT_STARTED",
+        "assigned_role": "CONTROL_PLANE",
+        "blockers": [],
+        "dependencies": [
+          "GATE-M0"
+        ],
+        "implementation_action": "Выполнить буквально.",
+        "milestone": "M1",
+        "mutation_ids": [
+          "M:REQ-MP2-0252"
+        ],
+        "negative_control_ids": [
+          "N:REQ-MP2-0252"
+        ],
+        "original_text": "STATE_TRANSITION_COVERAGE.json",
+        "pass_criteria": [
+          "Target evidence met."
+        ],
+        "positive_test_ids": [
+          "P:REQ-MP2-0252"
+        ],
+        "priority": "P1",
+        "required_artifacts": [
+          "REQUIREMENTS_TRACEABILITY_MATRIX.json",
+          "ROLE_PERMISSION_POLICY.json",
+          "WORK_ORDER_LEDGER.json",
+          "STATE_TRANSITION_COVERAGE.json"
+        ],
+        "requirement_id": "REQ-MP2-0252",
+        "residual_risks": [
+          "Open."
+        ],
+        "source_document": "Quantum_Autonomous_Release_Agent_Master_Prompt_v2_0(3).docx",
+        "source_location": "23. Обязательные артефакты / paragraph block 336",
+        "target_evidence_level": "L2"
+      },
+      "canonical_row_sha256": "d561afa7f4adf2cb9c23f5ba3eb085b6d5849581c8d203424e5c5092f1fc06af"
+    },
+    {
+      "canonical_row": {
+        "actual_evidence_ids": [],
+        "actual_status": "NOT_STARTED",
+        "assigned_role": "CONTROL_PLANE",
+        "blockers": [],
+        "dependencies": [
+          "GATE-M0"
+        ],
+        "implementation_action": "Выполнить буквально.",
+        "milestone": "M1",
+        "mutation_ids": [
+          "M:REQ-MP2-0279"
+        ],
+        "negative_control_ids": [
+          "N:REQ-MP2-0279"
+        ],
+        "original_text": "Ни один документ не заменяет фактический тест. Evidence-файл, созданный агентом, не считается достоверным без provenance, raw output и deterministic validation.",
+        "pass_criteria": [
+          "Target evidence met."
+        ],
+        "positive_test_ids": [
+          "P:REQ-MP2-0279"
+        ],
+        "priority": "P1",
+        "required_artifacts": [
+          "REQUIREMENTS_TRACEABILITY_MATRIX.json",
+          "ROLE_PERMISSION_POLICY.json",
+          "WORK_ORDER_LEDGER.json",
+          "STATE_TRANSITION_COVERAGE.json"
+        ],
+        "requirement_id": "REQ-MP2-0279",
+        "residual_risks": [
+          "Open."
+        ],
+        "source_document": "Quantum_Autonomous_Release_Agent_Master_Prompt_v2_0(3).docx",
+        "source_location": "23. Обязательные артефакты / paragraph block 363",
+        "target_evidence_level": "L2"
+      },
+      "canonical_row_sha256": "b3ca48e28bfcfaf81d88bfc12c139c242e600b7c7f7ba74323569eeb0582ed0f"
+    }
+  ],
+  "selection_rule": "Exact canonical M1 rows required for existing-M9 migration, literal 712-row ingestion, deterministic scheduler, signed immutable work orders, role isolation, protected paths, negative controls and Gate M1."
+}

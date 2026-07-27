@@ -46,6 +46,11 @@ AGENT_M0_R7_REMOTE_CLOSURE_OVERLAY_PATH = (
     / "docs/evidence"
     / "ARTIFACT_MANIFEST_OVERLAY_AGENT_V3_1_M0_R7_REMOTE_CLOSURE.json"
 )
+AGENT_M1_OPEN_OVERLAY_PATH = (
+    ROOT
+    / "docs/evidence"
+    / "ARTIFACT_MANIFEST_OVERLAY_AGENT_V3_1_M1_OPEN.json"
+)
 
 
 class Wbr2M5ClosureCorrectiveR2Tests(unittest.TestCase):
@@ -147,6 +152,12 @@ class Wbr2M5ClosureCorrectiveR2Tests(unittest.TestCase):
                 path: [path, digest, size]
                 for path, digest, size in agent_m0_r7_remote_closure["entries"]
             }
+        )
+        agent_m1_open = json.loads(
+            AGENT_M1_OPEN_OVERLAY_PATH.read_text(encoding="utf-8")
+        )
+        final.update(
+            {path: [path, digest, size] for path, digest, size in agent_m1_open["entries"]}
         )
         for path, _digest, _size in overlay["entries"]:
             self.assertEqual(rows[path], final[path])

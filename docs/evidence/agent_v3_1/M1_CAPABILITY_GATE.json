@@ -1,0 +1,42 @@
+{
+  "artifact_type": "M1_CAPABILITY_GATE",
+  "assigned_method": "Restore the existing historical tools/m9_maximum_assurance_control_plane.py from PR85 and extend that same component in place to ingest the immutable canonical 712-row RTM and run deterministic scheduling; do not create a parallel controller or RTM.",
+  "base_commit": "848c3eb847b7812e352ff851d1574de429d23724",
+  "base_tree": "38f178153e39f433a55c57de8401125ba2825d19",
+  "capabilities": {
+    "physical_L5": false,
+    "read_historical_git_object": true,
+    "read_json_and_gzip_shards": true,
+    "run_remote_github_actions": true,
+    "run_source_runtime_L2": true,
+    "run_unit_component_tests": true,
+    "verify_sha1_sha256": true,
+    "write_minimal_python_patch": true
+  },
+  "capability_gate_sha256": "f0365dc5a389bec445044210fdb591ecef1239bcbfe960f4b56aa73deb993820",
+  "created_at_utc": "2026-07-27T09:04:25.488801+00:00",
+  "forbidden_substitutions": [
+    "new controller entry point",
+    "parallel controller",
+    "parallel RTM",
+    "synthetic requirements",
+    "existence-only validation",
+    "LLM-selected next requirement",
+    "product/UI/configuration/installer/scheduled-report changes"
+  ],
+  "gate_result": "PASS_METHOD_SUPPORTED",
+  "historical_source": {
+    "commit": "31bf463142a6c0f225b812c033073ae2eac53ffc",
+    "path": "tools/m9_maximum_assurance_control_plane.py"
+  },
+  "implementation_authorized_only_under_signed_work_order": "WO-M1-EXISTING-M9-MIGRATION-001",
+  "preconditions": {
+    "canonical_rtm_count": 712,
+    "canonical_rtm_hash_verified": true,
+    "m0_complete": true,
+    "m0_remote_closure_commit": "848c3eb847b7812e352ff851d1574de429d23724",
+    "m0_remote_closure_tree": "38f178153e39f433a55c57de8401125ba2825d19"
+  },
+  "release_authorized": false,
+  "schema_version": "1.0.0"
+}

@@ -1,0 +1,69 @@
+{
+  "base_agent_v3_1_m0_r7_remote_closure_overlay_git_blob_sha": "1653e1f4289d60f0bc37c4c98acb84eb34998212",
+  "entries": [
+    [
+      "docs/evidence/agent_v3_1/M1_EXISTING_M9_MIGRATION_RTM.json",
+      "cb2e3cfbf116a503ab84de6e656971cc0c784f628af3926a7c325dfd3395dcff",
+      93448
+    ],
+    [
+      "docs/evidence/agent_v3_1/M1_CAPABILITY_GATE.json",
+      "a8bec116831023e2f28d6c08b95cf08b1517b273e7c0253c4342410ca896f807",
+      1802
+    ],
+    [
+      "docs/evidence/agent_v3_1/WORK_ORDER_M1_EXISTING_M9_MIGRATION_001.json",
+      "e3c24e2e729cc1912cd23029acaecd536b320e9aa95445b8a74d41636e827ac8",
+      4865
+    ],
+    [
+      "docs/evidence/agent_v3_1/AUTONOMOUS_EXECUTION_STATE_M1_OPEN.json",
+      "4df347e4b77de4e6c511aa017b1066c75813284598da69073eaa073c0502a224",
+      1327
+    ],
+    [
+      "docs/evidence/agent_v3_1/WORK_ORDER_LEDGER_M1_OPEN.json",
+      "a28946a1f9ffcd910f328c28c87674ed30d5f0df04c6c3af9099174b05d5f9ee",
+      843
+    ],
+    [
+      "docs/evidence/agent_v3_1/M1_OPEN_ATTEMPT_001_FAILURE.json",
+      "e3490b3ef00cdc8afb7469829b82308d5f8aa8ffa379829abc16120e9c3aabfc",
+      1165
+    ],
+    [
+      "docs/evidence/agent_v3_1/WORK_ORDER_M1_OPEN_CORRECTIVE_001.json",
+      "61259cc92ec200c4a90639618b965bddb84310ae95e84e453a9e37361f9add59",
+      2084
+    ],
+    [
+      "tests/integration_manifest_support_m8.py",
+      "db88853435785449547e24cf184f241168096bfa21b734f1c7eb0ff6d8698394",
+      6988
+    ],
+    [
+      "tests/test_agent_v3_1_m1_opening.py",
+      "26075684b819bfda2790a677f77f0b7c5dc674db9393a7d39a95616e7770d1cd",
+      8485
+    ],
+    [
+      "tests/test_agent_v3_1_m0_r7_remote_closure.py",
+      "f740bedc63f1a2ae9aa7b6380d0aacd5f99303679b7392c7255e45db8e6e8898",
+      6877
+    ],
+    [
+      "tests/test_wbr2_m5_closure.py",
+      "291eb6a10b95bd7e3d54626e043ed22740a62077713c463f501313b98321c835",
+      6039
+    ],
+    [
+      "tests/test_wbr2_m5_closure_corrective_r2.py",
+      "f6a3fe8f50f17d34e1d456da417369abd252a59b6f0d24525543fc6380bcd303",
+      5615
+    ]
+  ],
+  "overlay_id": "AGENT-V3.1-M1-OPEN",
+  "release_authorized": false,
+  "schema_version": "1.0.0",
+  "scope": "M1 governance opening and bounded corrective evidence only; no M9 implementation or product changes."
+}

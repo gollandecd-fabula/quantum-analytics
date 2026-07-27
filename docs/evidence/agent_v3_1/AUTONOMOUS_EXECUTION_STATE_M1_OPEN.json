@@ -1,0 +1,42 @@
+{
+  "active_milestone": "M1",
+  "active_work_order_id": "WO-M1-EXISTING-M9-MIGRATION-001",
+  "artifact_type": "AUTONOMOUS_EXECUTION_STATE",
+  "base_commit": "848c3eb847b7812e352ff851d1574de429d23724",
+  "base_tree": "38f178153e39f433a55c57de8401125ba2825d19",
+  "canonical_rtm": {
+    "count": 712,
+    "registry_set_sha256": "4cd2561b2da074b73ebe9ac8a3ccec6f2c890f7f7bf7998ac1a0ca698ed1037a",
+    "runtime_ingestion": "NOT_STARTED"
+  },
+  "created_at_utc": "2026-07-27T09:04:25.488801+00:00",
+  "current_decision": [
+    "FAIL-CLOSED",
+    "PROTOCOL_IMPLEMENTATION_INCOMPLETE",
+    "MILESTONE_NOT_COMPLETE",
+    "RELEASE_BLOCKED"
+  ],
+  "forbidden_until_m1_complete": [
+    "SCHEDULED_REPORT_SCOPE_INVALID fix",
+    "UI changes",
+    "configuration migration",
+    "installer changes"
+  ],
+  "m0": {
+    "complete": true,
+    "remote_bound": true
+  },
+  "m1": {
+    "complete": false,
+    "governance_open": true,
+    "implementation_started": false,
+    "migration_authorized": true,
+    "started": true
+  },
+  "physical_l5_status": "FAILED_OR_UNVERIFIED_CURRENT_ARTIFACT",
+  "previous_state_blob_sha": "351832bae3f3156a019cebfb4149a80bcb277fc8",
+  "release_authorized": false,
+  "schema_version": "2.0.0",
+  "state_snapshot_sha256": "85ccdccc2af56b94a6762afc6452e08921fc168d4ca59e57e9921cc286879fd0",
+  "state_version": 9
+}
