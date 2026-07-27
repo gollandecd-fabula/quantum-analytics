@@ -1,0 +1,54 @@
+{
+  "artifact_type": "SIGNED_WORK_ORDER",
+  "schema_version": "3.0.0",
+  "work_order_id": "WO-PILOT-P1-ATOMIC-M1-IMPLEMENTATION-002",
+  "active_pilot_milestone": "P1_ATOMIC_M1_CLOSURE",
+  "assigned_role": "IMPLEMENTER",
+  "parent_exact_head": "82b6b544e918b52f8e87ab190b5bec87de5e50b2",
+  "requirement_ids": [
+    "REQ-MP2-0145",
+    "PILOT-P1-001",
+    "PILOT-P1-002",
+    "PILOT-P1-003",
+    "PILOT-P1-004"
+  ],
+  "defect_ids": [
+    "PILOT-D-P1-001"
+  ],
+  "change_boundary": "Implement one pure deterministic companion validator for ordered per-commit signed work-order-chain scope. Do not modify the existing M9 controller, regression test, workflows, product, installer, UI, dependencies, canonical RTM or Protocol v3.1.",
+  "files_allowed_to_change": [
+    "docs/evidence/pilot_v3_0/WORK_ORDER_P1_ATOMIC_M1_IMPLEMENTATION_002.json",
+    "tools/m9_work_order_chain.py",
+    "docs/evidence/pilot_v3_0/PILOT_P1_RTM.json",
+    "docs/evidence/pilot_v3_0/PILOT_AUTONOMOUS_EXECUTION_STATE.json",
+    "docs/evidence/pilot_v3_0/PILOT_DEFECT_REGISTER.json",
+    "docs/evidence/pilot_v3_0/PILOT_WORK_ORDER_CHAIN.json",
+    "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_V3_0_P1_IMPLEMENTATION.json"
+  ],
+  "files_forbidden_to_change": [
+    "src/**",
+    "scripts/**",
+    "requirements/**",
+    "installer/**",
+    "UI implementation paths",
+    "configuration migration paths",
+    "scheduled-report implementation paths",
+    "tools/m9_maximum_assurance_control_plane.py",
+    "tests/test_pilot_m1_atomic_work_order_chain.py",
+    "tests/test_m9_*",
+    ".github/workflows/**",
+    "docs/evidence/agent_v3_1/rtm/**",
+    "docs/evidence/agent_v3_1/REQUIREMENTS_TRACEABILITY_MATRIX.json",
+    "Protocol v3.1 source/hash",
+    "main"
+  ],
+  "hypothesis": "A small pure deterministic adapter can validate each atomic segment against its own signed work order, enforce parent continuity, exact allowed paths, forbidden patterns and product authorization without modifying existing M9 scheduler/RTM/release logic.",
+  "next_test": "Run the unchanged six-case P1 regression on Ubuntu, then existing M9 literal/control-plane tests.",
+  "expected_result": "Valid two-segment chain passes; forged signature, broken parent, unlisted path and unauthorized product path fail; regression test and existing M9 controller remain unchanged.",
+  "rollback_condition": "Any P1 test remains red, a negative mutation passes, valid chain fails, duplicate scheduler/RTM/release logic appears, or any forbidden path changes.",
+  "rollback_command": "Leave the isolated implementation branch and draft PR unmerged; do not alter parent branches or user worktrees.",
+  "target_evidence_level": "L1_UNIT",
+  "product_change_authorized": false,
+  "release_authorized": false,
+  "work_order_sha256": "c24fa7150254083928e2e3319cb53d8f0967ea3b20e14d118ccf63d1c123ebf8"
+}

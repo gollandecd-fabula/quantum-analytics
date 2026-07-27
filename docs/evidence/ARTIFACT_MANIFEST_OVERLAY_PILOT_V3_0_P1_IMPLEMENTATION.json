@@ -1,0 +1,43 @@
+{
+  "artifact_type": "ARTIFACT_MANIFEST_OVERLAY",
+  "schema_version": "3.0.0",
+  "overlay_id": "PILOT-V3.0-P1-ATOMIC-M1-IMPLEMENTATION-002",
+  "branch": "fix/quantum-pilot-surgical-convergence-v3-p1-implementation",
+  "parent_exact_head": "82b6b544e918b52f8e87ab190b5bec87de5e50b2",
+  "governing_work_order_id": "WO-PILOT-P1-ATOMIC-M1-IMPLEMENTATION-002",
+  "governing_work_order_sha256": "c24fa7150254083928e2e3319cb53d8f0967ea3b20e14d118ccf63d1c123ebf8",
+  "entries": [
+    {
+      "path": "docs/evidence/pilot_v3_0/WORK_ORDER_P1_ATOMIC_M1_IMPLEMENTATION_002.json",
+      "sha256": "c7759b5d59061a07a73ef605e82b2de38faf1bf7eefe5ceec5035b3f9d29b243",
+      "size_bytes": 2838
+    },
+    {
+      "path": "tools/m9_work_order_chain.py",
+      "sha256": "cd1f480eae3d4416b64a5bc484fedf55dd81bff839ec0e87be2b5775f364b068",
+      "size_bytes": 7788
+    },
+    {
+      "path": "docs/evidence/pilot_v3_0/PILOT_P1_RTM.json",
+      "sha256": "81a3d2d087e531c7a717cc6cf7395cb076b98d2a4a28398ba6a05f4639a9dff8",
+      "size_bytes": 3342
+    },
+    {
+      "path": "docs/evidence/pilot_v3_0/PILOT_AUTONOMOUS_EXECUTION_STATE.json",
+      "sha256": "144ddbcfa39d114caceb065765ae49db4eaa1d35d077f69005ba23be5d8c30f3",
+      "size_bytes": 2429
+    },
+    {
+      "path": "docs/evidence/pilot_v3_0/PILOT_DEFECT_REGISTER.json",
+      "sha256": "f0b7a15476e06777c3a27870a660a37de266fa636a11cc24f8d71f060d1e74e9",
+      "size_bytes": 2380
+    },
+    {
+      "path": "docs/evidence/pilot_v3_0/PILOT_WORK_ORDER_CHAIN.json",
+      "sha256": "bab0a101d7b309dc83734249f040560c58d7e138c8fb89de2fa51518cb3e108b",
+      "size_bytes": 1962
+    }
+  ],
+  "scope": "Atomic work-order-chain companion validator implementation and unverified P1 state only; no existing M9 controller, regression, workflow or product change.",
+  "release_authorized": false
+}

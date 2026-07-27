@@ -1,8 +1,8 @@
 {
   "artifact_type": "PILOT_P1_REQUIREMENTS_TRACEABILITY_MATRIX",
   "schema_version": "3.0.0",
-  "branch": "fix/quantum-pilot-surgical-convergence-v3-p1",
-  "parent_exact_head": "7b1693e4f0d0fb64ddcd6db514084f8a9fdcf12d",
+  "branch": "fix/quantum-pilot-surgical-convergence-v3-p1-implementation",
+  "parent_exact_head": "82b6b544e918b52f8e87ab190b5bec87de5e50b2",
   "active_milestone": "P1_ATOMIC_M1_CLOSURE",
   "requirements": [
     {
@@ -12,10 +12,11 @@
       "test": "Regression import/execution through dedicated workflow.",
       "evidence_level": "L1",
       "pass_criterion": "Pre-implementation test is red for missing validator; after implementation the valid chain passes.",
-      "status": "IN_PROGRESS",
+      "status": "UNVERIFIED",
       "evidence_ids": [
         "EVD-PILOT-P1-FAILING-REGRESSION-001"
-      ]
+      ],
+      "implementation_work_order_id": "WO-PILOT-P1-ATOMIC-M1-IMPLEMENTATION-002"
     },
     {
       "requirement_id": "PILOT-P1-002",
@@ -24,10 +25,11 @@
       "test": "Validator returns WORK_ORDER_SCOPE_VIOLATION.",
       "evidence_level": "L1",
       "pass_criterion": "Unauthorized path makes chain red.",
-      "status": "IN_PROGRESS",
+      "status": "UNVERIFIED",
       "evidence_ids": [
         "EVD-PILOT-P1-FAILING-REGRESSION-001"
-      ]
+      ],
+      "implementation_work_order_id": "WO-PILOT-P1-ATOMIC-M1-IMPLEMENTATION-002"
     },
     {
       "requirement_id": "PILOT-P1-003",
@@ -36,10 +38,11 @@
       "test": "Validator returns signature/parent findings.",
       "evidence_level": "L1",
       "pass_criterion": "Both mutations make chain red.",
-      "status": "IN_PROGRESS",
+      "status": "UNVERIFIED",
       "evidence_ids": [
         "EVD-PILOT-P1-FAILING-REGRESSION-001"
-      ]
+      ],
+      "implementation_work_order_id": "WO-PILOT-P1-ATOMIC-M1-IMPLEMENTATION-002"
     },
     {
       "requirement_id": "PILOT-P1-004",
@@ -48,10 +51,11 @@
       "test": "Validator returns PRODUCT_CODE_CHANGED_WITHOUT_REQUIREMENT.",
       "evidence_level": "L1",
       "pass_criterion": "Product scope leak is rejected.",
-      "status": "IN_PROGRESS",
+      "status": "UNVERIFIED",
       "evidence_ids": [
         "EVD-PILOT-P1-FAILING-REGRESSION-001"
-      ]
+      ],
+      "implementation_work_order_id": "WO-PILOT-P1-ATOMIC-M1-IMPLEMENTATION-002"
     },
     {
       "requirement_id": "REQ-MP2-0145",
@@ -63,10 +67,11 @@
       "status": "FAILED",
       "evidence_ids": [
         "EVD-PILOT-P1-FAILING-REGRESSION-001"
-      ]
+      ],
+      "implementation_work_order_id": "WO-PILOT-P1-ATOMIC-M1-IMPLEMENTATION-002"
     }
   ],
   "overall_status": "IN_PROGRESS",
   "release_authorized": false,
-  "phase": "IMPLEMENTATION_AUTHORIZED"
+  "phase": "UNIT_VERIFICATION_PENDING"
 }
