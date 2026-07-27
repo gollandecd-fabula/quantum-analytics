@@ -32,10 +32,22 @@
     {
       "classification": "PROTOCOL_SCOPE_FAILURE",
       "defect_id": "PILOT-D-P0-003",
-      "evidence_ids": [],
+      "evidence_ids": [
+        "EVD-PILOT-P0-ATTEMPT-001"
+      ],
       "severity": "P0",
       "status": "OPEN",
       "title": "P0 exact-head source verification and immutable evidence are not complete."
+    },
+    {
+      "classification": "PROTOCOL_SCOPE_FAILURE",
+      "defect_id": "PILOT-D-P0-005",
+      "evidence_ids": [
+        "EVD-PILOT-P0-ATTEMPT-001"
+      ],
+      "severity": "P0",
+      "status": "CORRECTIVE_IN_PROGRESS",
+      "title": "WO-PILOT-P0-CANONICAL-EXECUTION-002 stored signature does not match its canonical payload."
     },
     {
       "classification": "HARNESS_FAILURE",
@@ -60,5 +72,5 @@
   ],
   "release_authorized": false,
   "schema_version": "3.0.0",
-  "subject_parent_exact_head": "9ddb908c77e033edc7e3712014d6d15da2e5e7d0"
+  "subject_parent_exact_head": "46da62cd078ca4be328b0096b682703d8e91f73f"
 }

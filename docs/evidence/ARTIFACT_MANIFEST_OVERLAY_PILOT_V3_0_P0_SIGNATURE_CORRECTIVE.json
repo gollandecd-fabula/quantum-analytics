@@ -1,0 +1,55 @@
+{
+  "artifact_type": "ARTIFACT_MANIFEST_OVERLAY",
+  "base_pilot_v3_0_p0_execution_overlay_git_blob_sha": "48b273d09bf099aa9d661c24996ac3e60b398358",
+  "entries": [
+    [
+      "docs/evidence/pilot_v3_0/PILOT_AUTONOMOUS_EXECUTION_STATE.json",
+      "37e4ea2de76bf158976bec98bbad9708e2a8b0384002c356214db177f137dcba",
+      1567
+    ],
+    [
+      "docs/evidence/pilot_v3_0/PILOT_DEFECT_REGISTER.json",
+      "23d2afa94f740db9694769b5eb7124ccfed542211d936ce79692382a83bdbf2e",
+      2394
+    ],
+    [
+      "docs/evidence/pilot_v3_0/PILOT_FAILURE_CLASSIFICATION_REGISTER.json",
+      "67fe14786a7399e06b7a91241aa0ecb9becd97e0af16bb2907942fc25038c03d",
+      1504
+    ],
+    [
+      "docs/evidence/pilot_v3_0/PILOT_P0_ATTEMPT_001_FAILURE.json",
+      "443826f0cb6a17be6f5a5e6878a80791ffbe1f1fbbdb71f70c54f06ec19688b8",
+      1395
+    ],
+    [
+      "docs/evidence/pilot_v3_0/PILOT_P0_EXECUTION_REGISTER.json",
+      "19ea15f5627688176c3592b26beb3c0013600c54282c7142be80135679fcba2c",
+      2632
+    ],
+    [
+      "docs/evidence/pilot_v3_0/PILOT_WORK_ORDER_CHAIN.json",
+      "03599d0cf58cbfb6547d97cd7a92f1eefdb7bc54c23a250d39c3e22a30713032",
+      1142
+    ],
+    [
+      "docs/evidence/pilot_v3_0/WORK_ORDER_P0_SIGNATURE_CORRECTIVE_003.json",
+      "508a8a5247551bc33960c7223da98611f500844256a55a544cf5817ab97700e9",
+      3163
+    ],
+    [
+      "tests/integration_manifest_support_pilot_v3.py",
+      "2773b985e365307fb6e56cba67ccc422733ad6f431a2785623216f3999112388",
+      2329
+    ],
+    [
+      "tests/test_pilot_v3_generate_overlay.py",
+      "781f29983f6f69482e45339b736f1d1143e78d786e9060738f85573c31dae951",
+      3746
+    ]
+  ],
+  "overlay_id": "PILOT-V3.0-P0-SIGNATURE-CORRECTIVE",
+  "release_authorized": false,
+  "schema_version": "1.0.0",
+  "scope": "Append-only P0 failed-attempt evidence and work-order signature corrective only; no historical WO rewrite, product, UI, installer, dependency, canonical RTM, Protocol v3.1 or release change."
+}

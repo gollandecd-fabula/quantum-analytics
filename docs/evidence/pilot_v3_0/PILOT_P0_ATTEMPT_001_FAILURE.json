@@ -1,0 +1,35 @@
+{
+  "artifact_digest": "sha256:14e98c14c21ffd5e0a08906a7d57a56765e4fd34c0b0de00e61c5f432480353e",
+  "artifact_id": 8660239797,
+  "artifact_type": "FAILED_ATTEMPT_EVIDENCE",
+  "attempt_id": "PILOT-P0-ATTEMPT-001",
+  "canonical_branch": "fix/quantum-pilot-v3-canonical",
+  "controls_not_run": [
+    "generated artifact write",
+    "effective manifest equality",
+    "complete source regression"
+  ],
+  "controls_passed_before_failure": [
+    "exact head checkout",
+    "canonical branch binding",
+    "forbidden-path scope",
+    "712-row generation",
+    "712 unique requirement IDs",
+    "deterministic generator",
+    "literal overlay schema",
+    "production status unchanged"
+  ],
+  "expected_signature": "7e5d94c15db91fb706dc21833cccc0c6eac33d4e761b95bf9e4a4bb131884d10",
+  "failed_step": "Run P0 unit controls and generate full overlay",
+  "failure_code": "WORK_ORDER_SIGNATURE_MISMATCH",
+  "job_id": 90039161939,
+  "pilot_claim_allowed": false,
+  "primary_classification": "PROTOCOL_SCOPE_FAILURE",
+  "product_failure_proven": false,
+  "raw_generator_test_log_sha256": "16858098faf7e6acdf48a9884a9af65a3a9e659c91fd710d3ef69a4a07301960",
+  "release_authorized": false,
+  "schema_version": "3.0.0",
+  "stored_signature": "7f02d0b4b594438ff812902179fa9a9f4fe3711803880bb589c95c2dbc722c2c",
+  "subject_exact_head": "46da62cd078ca4be328b0096b682703d8e91f73f",
+  "workflow_run_id": 30284603190
+}

@@ -25,6 +25,17 @@
       "primary_classification": "PRODUCT_FAILURE",
       "product_failure_proven": true,
       "subject": "DesktopDirectory unavailable in Windows clean-room installer path"
+    },
+    {
+      "classification_id": "PILOT-FC-004",
+      "decision": "FAILED_ATTEMPT_PRESERVED_CORRECTIVE_WO_003_ACTIVE",
+      "evidence_ids": [
+        "EVD-PILOT-P0-ATTEMPT-001"
+      ],
+      "pilot_claim_allowed": false,
+      "primary_classification": "PROTOCOL_SCOPE_FAILURE",
+      "product_failure_proven": false,
+      "subject": "WO-PILOT-P0-CANONICAL-EXECUTION-002 signature mismatch"
     }
   ],
   "release_authorized": false,

@@ -12,6 +12,18 @@ from tools import pilot_v3_generate_overlay as pilot
 class PilotV3GenerateOverlayTests(unittest.TestCase):
     repo_root = Path(__file__).resolve().parents[1]
 
+    @staticmethod
+    def _signature(work_order: dict) -> str:
+        unsigned = copy.deepcopy(work_order)
+        unsigned.pop("work_order_sha256", None)
+        canonical = json.dumps(
+            unsigned,
+            ensure_ascii=False,
+            sort_keys=True,
+            separators=(",", ":"),
+        ).encode("utf-8")
+        return hashlib.sha256(canonical).hexdigest()
+
     def test_generates_all_712_canonical_requirements(self) -> None:
         payload = pilot.generate(self.repo_root)
         entries = payload["entries"]
@@ -54,27 +66,33 @@ class PilotV3GenerateOverlayTests(unittest.TestCase):
             )
 
     def test_generator_is_deterministic(self) -> None:
-        first = pilot.generate(self.repo_root)
-        second = pilot.generate(self.repo_root)
-        self.assertEqual(first, second)
+        self.assertEqual(
+            pilot.generate(self.repo_root),
+            pilot.generate(self.repo_root),
+        )
 
-    def test_governing_work_order_signature_and_parent_are_exact(self) -> None:
+    def test_failed_work_order_signature_is_preserved_and_rejected(self) -> None:
         path = (
             self.repo_root
             / "docs/evidence/pilot_v3_0/WORK_ORDER_P0_CANONICAL_EXECUTION_002.json"
         )
         work_order = json.loads(path.read_text(encoding="utf-8"))
-        actual = work_order["work_order_sha256"]
-        unsigned = copy.deepcopy(work_order)
-        unsigned.pop("work_order_sha256")
-        canonical = json.dumps(
-            unsigned,
-            ensure_ascii=False,
-            sort_keys=True,
-            separators=(",", ":"),
-        ).encode("utf-8")
-        self.assertEqual(actual, hashlib.sha256(canonical).hexdigest())
-        self.assertEqual(work_order["parent_exact_head"], "9ddb908c77e033edc7e3712014d6d15da2e5e7d0")
+        self.assertNotEqual(
+            work_order["work_order_sha256"],
+            self._signature(work_order),
+        )
+
+    def test_corrective_work_order_signature_and_parent_are_exact(self) -> None:
+        path = (
+            self.repo_root
+            / "docs/evidence/pilot_v3_0/WORK_ORDER_P0_SIGNATURE_CORRECTIVE_003.json"
+        )
+        work_order = json.loads(path.read_text(encoding="utf-8"))
+        self.assertEqual(
+            work_order["work_order_sha256"],
+            self._signature(work_order),
+        )
+        self.assertEqual(work_order["parent_exact_head"], "46da62cd078ca4be328b0096b682703d8e91f73f")
         self.assertEqual(work_order["canonical_branch"], "fix/quantum-pilot-v3-canonical")
         self.assertFalse(work_order["release_authorized"])
 

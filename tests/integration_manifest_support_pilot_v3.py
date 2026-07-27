@@ -10,16 +10,22 @@ PILOT_V3_P0_EXECUTION_OVERLAY = (
     "ARTIFACT_MANIFEST_OVERLAY_PILOT_V3_0_P0_EXECUTION.json",
     "base_pilot_v3_0_canonical_recovery_overlay_git_blob_sha",
 )
+PILOT_V3_P0_SIGNATURE_CORRECTIVE_OVERLAY = (
+    "ARTIFACT_MANIFEST_OVERLAY_PILOT_V3_0_P0_SIGNATURE_CORRECTIVE.json",
+    "base_pilot_v3_0_p0_execution_overlay_git_blob_sha",
+)
 ALL_OVERLAY_NAMES = (
     *_base.ALL_OVERLAY_NAMES,
     PILOT_V3_RECOVERY_OVERLAY[0],
     PILOT_V3_P0_EXECUTION_OVERLAY[0],
+    PILOT_V3_P0_SIGNATURE_CORRECTIVE_OVERLAY[0],
 )
 CONTROL_PATHS = {
     *_base.CONTROL_PATHS,
     *(f"docs/evidence/{name}" for name in (
         PILOT_V3_RECOVERY_OVERLAY[0],
         PILOT_V3_P0_EXECUTION_OVERLAY[0],
+        PILOT_V3_P0_SIGNATURE_CORRECTIVE_OVERLAY[0],
     )),
 }
 ARTIFACT_FIELDS = _base.ARTIFACT_FIELDS
@@ -50,7 +56,16 @@ def load_effective_manifest() -> dict:
         evidence / "ARTIFACT_MANIFEST_OVERLAY_AGENT_V3_1_M1.json"
     ).read_bytes()
     recovery_raw = _apply(artifacts, PILOT_V3_RECOVERY_OVERLAY, m1_raw)
-    _apply(artifacts, PILOT_V3_P0_EXECUTION_OVERLAY, recovery_raw)
+    execution_raw = _apply(
+        artifacts,
+        PILOT_V3_P0_EXECUTION_OVERLAY,
+        recovery_raw,
+    )
+    _apply(
+        artifacts,
+        PILOT_V3_P0_SIGNATURE_CORRECTIVE_OVERLAY,
+        execution_raw,
+    )
     current["artifacts"] = [artifacts[path] for path in sorted(artifacts)]
     current["artifact_count"] = len(current["artifacts"])
     return current

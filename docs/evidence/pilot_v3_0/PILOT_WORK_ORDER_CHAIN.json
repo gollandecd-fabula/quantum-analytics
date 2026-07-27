@@ -10,11 +10,21 @@
       "work_order_id": "WO-PILOT-P0-CANONICAL-RECOVERY-001"
     },
     {
+      "evidence_ids": [
+        "EVD-PILOT-P0-ATTEMPT-001"
+      ],
       "ordinal": 2,
       "parent_exact_head": "9ddb908c77e033edc7e3712014d6d15da2e5e7d0",
-      "result_exact_head": "SELF_COMMIT_PENDING_REMOTE_BINDING",
-      "status": "ATOMIC_COMMIT_IN_PROGRESS",
+      "result_exact_head": "46da62cd078ca4be328b0096b682703d8e91f73f",
+      "status": "FAILED_SIGNATURE_INVALID",
       "work_order_id": "WO-PILOT-P0-CANONICAL-EXECUTION-002"
+    },
+    {
+      "ordinal": 3,
+      "parent_exact_head": "46da62cd078ca4be328b0096b682703d8e91f73f",
+      "result_exact_head": "SELF_COMMIT_PENDING_REMOTE_BINDING",
+      "status": "CORRECTIVE_COMMIT_IN_PROGRESS",
+      "work_order_id": "WO-PILOT-P0-SIGNATURE-CORRECTIVE-003"
     }
   ],
   "parallel_write_authorized": false,

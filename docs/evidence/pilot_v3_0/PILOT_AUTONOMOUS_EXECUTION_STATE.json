@@ -1,10 +1,10 @@
 {
   "active_lock": {
-    "governing_work_order_id": "WO-PILOT-P0-CANONICAL-EXECUTION-002",
-    "lock_id": "LOCK-PILOT-P0-EXECUTION-002",
+    "governing_work_order_id": "WO-PILOT-P0-SIGNATURE-CORRECTIVE-003",
+    "lock_id": "LOCK-PILOT-P0-SIGNATURE-CORRECTIVE-003",
     "owner_role": "IMPLEMENTER",
     "parallel_write_authorized": false,
-    "state": "ACQUIRED_FOR_ATOMIC_COMMIT"
+    "state": "ACQUIRED_FOR_CORRECTIVE_COMMIT"
   },
   "active_lock_count": 1,
   "active_pilot_milestone": "P0_CANONICAL_REANCHOR_RECOVERY",
@@ -14,10 +14,13 @@
   "canonical_registry_set_sha256": "4cd2561b2da074b73ebe9ac8a3ccec6f2c890f7f7bf7998ac1a0ca698ed1037a",
   "canonical_requirement_count": 712,
   "canonical_state_owner": "CONTROL_PLANE",
+  "failed_attempt_evidence_ids": [
+    "EVD-PILOT-P0-ATTEMPT-001"
+  ],
   "gatekeeper": "DISCONNECTED",
   "marketplace_writes": false,
   "ozon": "DEFERRED",
-  "p0_phase": "RUNTIME_GENERATION_AND_SOURCE_VERIFICATION_PENDING",
+  "p0_phase": "SIGNATURE_CORRECTIVE_AND_SOURCE_VERIFICATION_PENDING",
   "p0_status": "IN_PROGRESS",
   "parallel_write_authorized": false,
   "physical_l5_status": "UNVERIFIED",
@@ -27,7 +30,7 @@
   "production_release_decision": "RELEASE_BLOCKED",
   "protocol_sha256": "be69b8f1f919066c67086d6dd4678acf5e3cb3c4f1db9bc587dc540018601a90",
   "release_authorized": false,
-  "repository": "gollanecd-fabula/quantum-analytics",
+  "repository": "gollandecd-fabula/quantum-analytics",
   "schema_version": "3.0.0",
-  "state_subject_parent_exact_head": "9ddb908c77e033edc7e3712014d6d15da2e5e7d0"
+  "state_subject_parent_exact_head": "46da62cd078ca4be328b0096b682703d8e91f73f"
 }
