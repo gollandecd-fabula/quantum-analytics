@@ -1,0 +1,35 @@
+{
+  "artifact_type": "PILOT_CAPABILITY_GATE",
+  "canonical_branch": "fix/quantum-pilot-v3-canonical",
+  "capabilities": [
+    {
+      "capability": "Read immutable canonical RTM through existing M9 ingestion",
+      "supported": true,
+      "target_evidence": "L2"
+    },
+    {
+      "capability": "Generate 712-row pilot applicability overlay deterministically",
+      "supported": true,
+      "target_evidence": "L1/L2"
+    },
+    {
+      "capability": "Keep effective manifest exact in the same candidate commit",
+      "supported": true,
+      "target_evidence": "L1"
+    },
+    {
+      "capability": "Close historical invalid PR contours",
+      "supported": true,
+      "target_evidence": "REMOTE_METADATA"
+    },
+    {
+      "capability": "Prove Windows L4/L5 during P0",
+      "status": "NOT_APPLICABLE_TO_P0",
+      "supported": false
+    }
+  ],
+  "decision": "P0_RECOVERY_EXECUTION_ALLOWED",
+  "release_authorized": false,
+  "schema_version": "3.0.0",
+  "subject_parent_exact_head": "43d6230a43ebb4443e98f9ea9ec2746b210dfa3a"
+}

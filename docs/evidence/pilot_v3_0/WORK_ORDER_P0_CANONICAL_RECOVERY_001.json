@@ -1,0 +1,62 @@
+{
+  "active_pilot_milestone": "P0_CANONICAL_REANCHOR_RECOVERY",
+  "artifact_type": "SIGNED_WORK_ORDER",
+  "canonical_branch": "fix/quantum-pilot-v3-canonical",
+  "change_boundary": "Create one canonical pilot recovery line, materialize the full 712-row pilot applicability overlay from the immutable canonical RTM, preserve the effective tracked-tree manifest, and keep all product/UI/installer/release behavior unchanged.",
+  "defect_ids": [
+    "PILOT-D-P0-001",
+    "PILOT-D-P0-002",
+    "PILOT-D-P0-003",
+    "PILOT-D-P0-004"
+  ],
+  "expected_result": "Setup tests and the existing effective manifest remain green; the workflow produces one schema-valid 712-row PILOT_APPLICABILITY_OVERLAY artifact. P0 remains IN_PROGRESS until that artifact is committed and reverified on the same branch.",
+  "files_allowed_to_change": [
+    ".github/workflows/pilot-v3-canonical-recovery.yml",
+    "tools/pilot_v3_generate_overlay.py",
+    "tests/integration_manifest_support_pilot_v3.py",
+    "tests/test_pilot_v3_generate_overlay.py",
+    "tests/test_a0_manifest_diagnostic.py",
+    "tests/test_b1a_artifact_manifest.py",
+    "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_V3_0_CANONICAL_RECOVERY.json",
+    "docs/evidence/pilot_v3_0/WORK_ORDER_P0_CANONICAL_RECOVERY_001.json",
+    "docs/evidence/pilot_v3_0/PILOT_CAPABILITY_GATE.json",
+    "docs/evidence/pilot_v3_0/PILOT_AUTONOMOUS_EXECUTION_STATE.json",
+    "docs/evidence/pilot_v3_0/PILOT_DEFECT_REGISTER.json",
+    "docs/evidence/pilot_v3_0/PILOT_FAILURE_CLASSIFICATION_REGISTER.json",
+    "docs/evidence/pilot_v3_0/PILOT_WORK_ORDER_CHAIN.json",
+    "docs/evidence/pilot_v3_0/PILOT_P0_EXECUTION_REGISTER.json"
+  ],
+  "files_forbidden_to_change": [
+    "src/**",
+    "scripts/**",
+    "installer/**",
+    "requirements/**",
+    "docs/evidence/agent_v3_1/REQUIREMENTS_TRACEABILITY_MATRIX.json",
+    "docs/evidence/agent_v3_1/rtm/**",
+    "tools/m9_maximum_assurance_control_plane.py",
+    ".github/workflows/m9-maximum-assurance-control-plane.yml",
+    "main"
+  ],
+  "hypothesis": "A single direct branch with deterministic generation from the immutable 712-row RTM removes the invalid multi-branch contour without changing product behavior or weakening Protocol v3.1.",
+  "marketplace_writes": false,
+  "next_test": [
+    "python -m unittest -v tests.test_pilot_v3_generate_overlay",
+    "python -m unittest -v tests.test_a0_manifest_diagnostic tests.test_b1a_artifact_manifest",
+    "PYTHONPATH=src python -m quantum.scripts.ci"
+  ],
+  "parent_exact_head": "43d6230a43ebb4443e98f9ea9ec2746b210dfa3a",
+  "release_authorized": false,
+  "requirement_ids": [
+    "PILOT-P0-001",
+    "PILOT-P0-002",
+    "PILOT-P0-003",
+    "PILOT-P0-004",
+    "PILOT-P0-005"
+  ],
+  "rollback_action": "Do not advance or merge the canonical branch; abandon the candidate commit and retain parent exact head.",
+  "rollback_condition": "Any forbidden path changes, requirement count other than 712, duplicate requirement IDs, manifest mismatch, product regression, or branch other than the canonical branch is used.",
+  "schema_version": "3.0.0",
+  "target_evidence_level": "L1_UNIT_THEN_L2_SOURCE_RUNTIME",
+  "work_order_id": "WO-PILOT-P0-CANONICAL-RECOVERY-001",
+  "work_order_sha256": "c6d5b9755e882ca0af08500f779130f5f4db2e552c60d287c45ad07633ca962c"
+}
