@@ -43,11 +43,22 @@
       "classification": "PROTOCOL_SCOPE_FAILURE",
       "defect_id": "PILOT-D-P0-005",
       "evidence_ids": [
-        "EVD-PILOT-P0-ATTEMPT-001"
+        "EVD-PILOT-P0-ATTEMPT-001",
+        "EVD-PILOT-P0-ATTEMPT-002"
+      ],
+      "severity": "P0",
+      "status": "CORRECTED_VERIFICATION_PENDING",
+      "title": "WO-PILOT-P0-CANONICAL-EXECUTION-002 stored signature does not match its canonical payload."
+    },
+    {
+      "classification": "HARNESS_FAILURE",
+      "defect_id": "PILOT-D-P0-006",
+      "evidence_ids": [
+        "EVD-PILOT-P0-ATTEMPT-002"
       ],
       "severity": "P0",
       "status": "CORRECTIVE_IN_PROGRESS",
-      "title": "WO-PILOT-P0-CANONICAL-EXECUTION-002 stored signature does not match its canonical payload."
+      "title": "P0 workflow invoked the package generator as a path script, preventing repository-root package resolution."
     },
     {
       "classification": "HARNESS_FAILURE",
@@ -72,5 +83,5 @@
   ],
   "release_authorized": false,
   "schema_version": "3.0.0",
-  "subject_parent_exact_head": "46da62cd078ca4be328b0096b682703d8e91f73f"
+  "subject_parent_exact_head": "9757cb8bee18c5122361b973f321455a040f90c0"
 }

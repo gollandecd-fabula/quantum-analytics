@@ -14,11 +14,16 @@ PILOT_V3_P0_SIGNATURE_CORRECTIVE_OVERLAY = (
     "ARTIFACT_MANIFEST_OVERLAY_PILOT_V3_0_P0_SIGNATURE_CORRECTIVE.json",
     "base_pilot_v3_0_p0_execution_overlay_git_blob_sha",
 )
+PILOT_V3_P0_GENERATOR_INVOCATION_CORRECTIVE_OVERLAY = (
+    "ARTIFACT_MANIFEST_OVERLAY_PILOT_V3_0_P0_GENERATOR_INVOCATION_CORRECTIVE.json",
+    "base_pilot_v3_0_p0_signature_corrective_overlay_git_blob_sha",
+)
 ALL_OVERLAY_NAMES = (
     *_base.ALL_OVERLAY_NAMES,
     PILOT_V3_RECOVERY_OVERLAY[0],
     PILOT_V3_P0_EXECUTION_OVERLAY[0],
     PILOT_V3_P0_SIGNATURE_CORRECTIVE_OVERLAY[0],
+    PILOT_V3_P0_GENERATOR_INVOCATION_CORRECTIVE_OVERLAY[0],
 )
 CONTROL_PATHS = {
     *_base.CONTROL_PATHS,
@@ -26,6 +31,7 @@ CONTROL_PATHS = {
         PILOT_V3_RECOVERY_OVERLAY[0],
         PILOT_V3_P0_EXECUTION_OVERLAY[0],
         PILOT_V3_P0_SIGNATURE_CORRECTIVE_OVERLAY[0],
+        PILOT_V3_P0_GENERATOR_INVOCATION_CORRECTIVE_OVERLAY[0],
     )),
 }
 ARTIFACT_FIELDS = _base.ARTIFACT_FIELDS
@@ -61,10 +67,15 @@ def load_effective_manifest() -> dict:
         PILOT_V3_P0_EXECUTION_OVERLAY,
         recovery_raw,
     )
-    _apply(
+    signature_corrective_raw = _apply(
         artifacts,
         PILOT_V3_P0_SIGNATURE_CORRECTIVE_OVERLAY,
         execution_raw,
+    )
+    _apply(
+        artifacts,
+        PILOT_V3_P0_GENERATOR_INVOCATION_CORRECTIVE_OVERLAY,
+        signature_corrective_raw,
     )
     current["artifacts"] = [artifacts[path] for path in sorted(artifacts)]
     current["artifact_count"] = len(current["artifacts"])

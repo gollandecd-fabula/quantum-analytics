@@ -36,6 +36,17 @@
       "primary_classification": "PROTOCOL_SCOPE_FAILURE",
       "product_failure_proven": false,
       "subject": "WO-PILOT-P0-CANONICAL-EXECUTION-002 signature mismatch"
+    },
+    {
+      "classification_id": "PILOT-FC-005",
+      "decision": "FAILED_ATTEMPT_PRESERVED_MODULE_INVOCATION_CORRECTIVE_004_ACTIVE",
+      "evidence_ids": [
+        "EVD-PILOT-P0-ATTEMPT-002"
+      ],
+      "pilot_claim_allowed": false,
+      "primary_classification": "HARNESS_FAILURE",
+      "product_failure_proven": false,
+      "subject": "P0 generator path-script invocation at exact head 9757cb8bee18c5122361b973f321455a040f90c0"
     }
   ],
   "release_authorized": false,

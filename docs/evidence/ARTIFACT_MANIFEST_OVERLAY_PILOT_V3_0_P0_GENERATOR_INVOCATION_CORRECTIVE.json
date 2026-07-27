@@ -1,0 +1,60 @@
+{
+  "artifact_type": "ARTIFACT_MANIFEST_OVERLAY",
+  "base_pilot_v3_0_p0_signature_corrective_overlay_git_blob_sha": "a7fb6bf53bf5969975cf648a3dfba1abc7f45e71",
+  "entries": [
+    [
+      ".github/workflows/pilot-v3-canonical-recovery.yml",
+      "16fcd4fa74876239475c2bfad8e5a1b4069c921cfd56d76e428cf6a767799401",
+      5778
+    ],
+    [
+      "tests/integration_manifest_support_pilot_v3.py",
+      "ac867180a0787d0b74e8c8dfc3f76683f55f0f3e4ac4004ad4fb22f8fde4549d",
+      2822
+    ],
+    [
+      "tests/test_pilot_v3_generate_overlay.py",
+      "2ff2f9a75a002ae0cb7efe824a9b0aeee821883df2b0e2d01109a0f0f8ba0637",
+      4811
+    ],
+    [
+      "docs/evidence/pilot_v3_0/WORK_ORDER_P0_GENERATOR_INVOCATION_CORRECTIVE_004.json",
+      "b3ffd6ea2e91ac34c31e56fe83e23e56df5d0d21a01c4bac869cb9dcc7fc17d6",
+      3472
+    ],
+    [
+      "docs/evidence/pilot_v3_0/PILOT_P0_ATTEMPT_002_FAILURE.json",
+      "f383c94bc032e3ec17839d32fcdb6c34b3b7eb6cc43eacaa73b6a6a65d42199c",
+      1682
+    ],
+    [
+      "docs/evidence/pilot_v3_0/PILOT_AUTONOMOUS_EXECUTION_STATE.json",
+      "42742b18f0db36e3a617bc9aac45ebb7af7a605f4676e28593551dbcfceb213a",
+      1735
+    ],
+    [
+      "docs/evidence/pilot_v3_0/PILOT_DEFECT_REGISTER.json",
+      "5b381d35693614320ace8bac6d6718c899f7f59382f6e62dd61462aed5236f04",
+      2789
+    ],
+    [
+      "docs/evidence/pilot_v3_0/PILOT_FAILURE_CLASSIFICATION_REGISTER.json",
+      "36b5626aa91b8f4f8d769d96b3059fdaaf5b3e2af80cb20b853d064cf0f31bf1",
+      1950
+    ],
+    [
+      "docs/evidence/pilot_v3_0/PILOT_WORK_ORDER_CHAIN.json",
+      "9bd4c323d191b9af5b0d7bf760ceeb935cc37b40c20fd26ca745b83e19fc6bd8",
+      1468
+    ],
+    [
+      "docs/evidence/pilot_v3_0/PILOT_P0_EXECUTION_REGISTER.json",
+      "d3f806634b59b418c4511a4f4a333d54a16cbda5057446e521a70a033b708283",
+      2824
+    ]
+  ],
+  "overlay_id": "PILOT-V3.0-P0-GENERATOR-INVOCATION-CORRECTIVE",
+  "release_authorized": false,
+  "schema_version": "1.0.0",
+  "scope": "Append-only P0 generator invocation corrective and failed-attempt evidence only; no generator implementation, product, UI, installer, dependency, canonical RTM, Protocol v3.1, M9 controller or release change."
+}
