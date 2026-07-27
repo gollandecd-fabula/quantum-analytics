@@ -1,0 +1,10 @@
+teral_rtm_control_plane \
+  2>&1 | tee "$EVIDENCE/targeted.log"
+git config user.name quantum-ci
+git config user.email quantum-ci@users.noreply.github.com
+git commit -m "Migrate existing M9 control plane to literal Protocol v3.1"
+test "$(git rev-parse 'HEAD^{tree}')" = "$EXPECTED_TREE_SHA"
+git rev-parse HEAD | tee "$EVIDENCE/candidate.commit-sha"
+git rev-parse 'HEAD^{tree}' | tee "$EVIDENCE/candidate.tree-sha"
+git diff-tree --no-commit-id --name-status -r HEAD > "$EVIDENCE/candidate.name-status"
+git push ori

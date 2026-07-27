@@ -1,0 +1,11 @@
+.txt"
+git diff --cached --name-only | LC_ALL=C sort > "$EVIDENCE/actual-paths.txt"
+diff -u "$EVIDENCE/expected-paths.txt" "$EVIDENCE/actual-paths.txt" | tee "$EVIDENCE/scope-diff.txt"
+test "$(wc -l < "$EVIDENCE/actual-paths.txt")" -eq 4
+if grep -E '^(src/|scripts/windows/|requirements/|installer/)' "$EVIDENCE/actual-paths.txt"; then
+  echo M1_PRODUCT_SCOPE_VIOLATION >&2
+  exit 1
+fi
+PYTHONPATH="$GITHUB_WORKSPACE/src" python -m unittest -v \
+  tests.test_m9_maximum_assurance_control_plane \
+  tests.test_m9_li

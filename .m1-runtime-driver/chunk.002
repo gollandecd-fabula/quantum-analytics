@@ -1,0 +1,13 @@
+parse HEAD)" = "$BASE_SHA"
+test "$(git rev-parse 'HEAD^{tree}')" = "$BASE_TREE_SHA"
+test -z "$(git status --porcelain)"
+tar -xzf "$RUNNER_TEMP/m1-implementation.tar.gz"
+git diff --check
+git add -A
+cat > "$EVIDENCE/expected-paths.txt" <<'EOF'
+.github/workflows/m9-maximum-assurance-control-plane.yml
+tests/test_m9_literal_rtm_control_plane.py
+tests/test_m9_maximum_assurance_control_plane.py
+tools/m9_maximum_assurance_control_plane.py
+EOF
+LC_ALL=C sort -o "$EVIDENCE/expected-paths.txt" "$EVIDENCE/expected-paths

@@ -1,0 +1,36 @@
+name: Temporary M1 Runtime Implementation Materializer
+on:
+  pull_request:
+    paths:
+      - .github/workflows/tmp-m1-runtime-bootstrap.yml
+      - .m1-runtime-payload/**
+      - .m1-runtime-driver/**
+permissions:
+  contents: write
+concurrency:
+  group: m1-runtime-implementation-materializer
+  cancel-in-progress: false
+jobs:
+  materialize:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+      - name: Run content-addressed materializer
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat .m1-runtime-driver/chunk.* > "$RUNNER_TEMP/materialize.sh"
+          test "$(wc -c < "$RUNNER_TEMP/materialize.sh")" -eq 2600
+          echo "5c5b65bc0f56a2dc022131904e6a2885b2733c37daa9b890f6789e0fc3958207  $RUNNER_TEMP/materialize.sh" | sha256sum --check
+          bash "$RUNNER_TEMP/materialize.sh"
+      - if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: M1-Runtime-Implementation-Subject-Evidence
+          path: ${{ runner.temp }}/m1-runtime-subject
+          if-no-files-found: warn
+          retention-days: 7

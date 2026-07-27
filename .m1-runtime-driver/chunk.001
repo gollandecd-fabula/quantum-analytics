@@ -1,0 +1,9 @@
+IDENCE"
+cat .m1-runtime-payload/chunk.* > "$RUNNER_TEMP/payload.b64"
+test "$(wc -c < "$RUNNER_TEMP/payload.b64")" -eq "$PAYLOAD_BASE64_SIZE"
+echo "$PAYLOAD_BASE64_SHA256  $RUNNER_TEMP/payload.b64" | sha256sum --check
+base64 --decode "$RUNNER_TEMP/payload.b64" > "$RUNNER_TEMP/m1-implementation.tar.gz"
+test "$(wc -c < "$RUNNER_TEMP/m1-implementation.tar.gz")" -eq "$ARCHIVE_SIZE"
+echo "$ARCHIVE_SHA256  $RUNNER_TEMP/m1-implementation.tar.gz" | sha256sum --check
+git checkout --detach "$BASE_SHA"
+test "$(git rev-
