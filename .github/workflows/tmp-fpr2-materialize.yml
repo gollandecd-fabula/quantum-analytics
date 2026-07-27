@@ -1,0 +1,151 @@
+name: Temporary Full Project Red Team R2 Materializer
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/tmp-fpr2-materialize.yml
+      - .fpr2-payload/**
+
+permissions:
+  contents: write
+
+concurrency:
+  group: fpr2-materialize
+  cancel-in-progress: false
+
+env:
+  BASE_SHA: b151e67c2bea8d4d50c5c4a2aeb0695e89921c01
+  PATCH_SHA256: b1420af544597661f026dcd7ce1d7bb5d281b0a73398ac8ade764c5e31cca307
+  EXPECTED_TREE_SHA: a00bb87f3064452e10563779264b11adc3f59e5c
+  CANDIDATE_BRANCH: audit/quantum-full-project-redteam-r2
+
+jobs:
+  materialize:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Verify all transport chunks and reconstruct patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "998d3ba8d9b11b4b75963bbb3d3d6a71c79d6c013e106bd4ba85a6dd2d795e3c  .fpr2-payload/payload.00" | sha256sum --check
+          echo "4f243c3a5f7bac7d8f95722d9b226b7bd3f27c7a027c690fe9b88cc7db285934  .fpr2-payload/payload.01" | sha256sum --check
+          echo "d7896ac8a2275c81fdc01415ba226bef9a54a140e74345f8be2313355fa4d859  .fpr2-payload/payload.02" | sha256sum --check
+          echo "b47fd0e408f13f99d34079940366a3d85af3ce5518ab1c5e563adbd62db23e1d  .fpr2-payload/payload.03" | sha256sum --check
+          echo "5e0ab1f364ace34907b0bbedb8ab516e8e07f639024b1ba6647246a33bc09340  .fpr2-payload/payload.04" | sha256sum --check
+          echo "7567b51c23cbc21cbf6cab4fb189f79a3665f2945d61d12a93c500f6747f12bb  .fpr2-payload/payload.05" | sha256sum --check
+          echo "d5378420b57c90f18f747d8292a0eb7cb557070f6ed737ce7e4df1d697424b73  .fpr2-payload/payload.06" | sha256sum --check
+          echo "3f0f19d5dc935b9c4f019b85762c372961e7dbd5c3a5f73d67a6773e0b1ca933  .fpr2-payload/payload.07" | sha256sum --check
+          echo "9910be85f7b6b2ea56683cc3f243727d239d7be1befa57f8bc21e3270ff6052f  .fpr2-payload/payload.08" | sha256sum --check
+          echo "d0884b6ae896e9cb0b122ba4eba9885dbb1317de751b3edd4c068420fa17df52  .fpr2-payload/payload.09" | sha256sum --check
+          echo "f8342dc63a593e74140ecfd683641240c849fbd2377edae17574008d6633a710  .fpr2-payload/payload.10" | sha256sum --check
+          echo "c80619872f472594e83f724c20ae3959c98666a80641d5f0ef9e18c32263bbbd  .fpr2-payload/payload.11" | sha256sum --check
+          echo "609c52a77f50b329fe3fb1caea74b66cc0682c40c49e7d95876321f36aed7fe7  .fpr2-payload/payload.12" | sha256sum --check
+          echo "349f58999c87a228d885a39d3d960f7718d5ebc846446395d01b56f47daaa701  .fpr2-payload/payload.13" | sha256sum --check
+          echo "5e73ef54a7504f2db6e912a177efab295c4964002ce3f54589a172ec1e6368c8  .fpr2-payload/payload.14" | sha256sum --check
+          echo "ac3a687ddc74c777e318efb6394fd934adc6cf033053e3555cf5cf2c69213b2f  .fpr2-payload/payload.15" | sha256sum --check
+          echo "3d09485327806e4bd0c1c23204e3edc7b307c8166890a9677a2d5db34e6cd4d1  .fpr2-payload/payload.16" | sha256sum --check
+          cat .fpr2-payload/payload.* > "$RUNNER_TEMP/fpr2-patch.b64"
+          base64 --decode "$RUNNER_TEMP/fpr2-patch.b64" > "$RUNNER_TEMP/fpr2-patch.tar.gz"
+          echo "$PATCH_SHA256  $RUNNER_TEMP/fpr2-patch.tar.gz" | sha256sum --check
+
+      - name: Apply patch to immutable frozen base
+        shell: bash
+        run: |
+          set -euo pipefail
+          git checkout --detach "$BASE_SHA"
+          test "$(git rev-parse HEAD)" = "$BASE_SHA"
+          tar -xzf "$RUNNER_TEMP/fpr2-patch.tar.gz"
+          git diff --check
+          git add -A
+          cat > "$RUNNER_TEMP/expected-paths.txt" <<'EOF'
+          .github/workflows/build-one-button-redteam-r3.yml
+          .github/workflows/build-two-installer-bundles-r2.yml
+          .github/workflows/debug-inner-package-inventory.yml
+          .github/workflows/full-project-redteam-r2.yml
+          .github/workflows/m1-baseline-audit.yml
+          .github/workflows/m3-consolidated-ci.yml
+          .github/workflows/m7-security-performance-one-click.yml
+          .github/workflows/m8-clean-environment-reproduction.yml
+          .github/workflows/windows-local-acl-recovery.yml
+          .github/workflows/windows-local-production.yml
+          .github/workflows/windows-release-gate.yml
+          .github/workflows/windows-source-package-launchers-r1.yml
+          .github/workflows/windows-universal-any-file-corpus-r4.yml
+          config/home-local.template.json
+          docs/evidence/ARTIFACT_MANIFEST_OVERLAY_FULL_PROJECT_REDTEAM_R2.json
+          docs/evidence/QUANTUM_FULL_PROJECT_REDTEAM_R2_AUDIT_REPORT.md
+          docs/evidence/QUANTUM_FULL_PROJECT_REDTEAM_R2_DEFECT_REGISTER.json
+          docs/evidence/QUANTUM_FULL_PROJECT_REDTEAM_R2_RTM.json
+          scripts/configure_home_local.ps1
+          scripts/windows/configure_home_local.ps1
+          scripts/windows/one_click_home_local.ps1
+          src/quantum/application/_finance_center_calculation.py
+          src/quantum/application/_finance_center_pages.py
+          src/quantum/application/_finance_center_scheduled_reports.py
+          src/quantum/application/_finance_center_self_test.py
+          src/quantum/application/_finance_center_shared.py
+          src/quantum/application/_finance_center_shell.py
+          src/quantum/application/config_policy.py
+          src/quantum/application/desktop_center.py
+          src/quantum/application/finance_center.py
+          src/quantum/application/local_app.py
+          src/quantum/application/scheduled_reports.py
+          src/quantum/application/user_messages.py
+          tests/integration_manifest_support_m8.py
+          tests/test_full_project_redteam_r1.py
+          tests/test_m5_scheduled_reports.py
+          tests/test_plateau_m5_self_test.py
+          tests/test_quantum_full_audit_plateau_r2.py
+          tests/test_wbr2_m5_closure.py
+          tests/test_wbr2_m5_closure_corrective_r2.py
+          EOF
+          git diff --cached --name-only | sort > "$RUNNER_TEMP/actual-paths.txt"
+          diff -u "$RUNNER_TEMP/expected-paths.txt" "$RUNNER_TEMP/actual-paths.txt"
+
+      - name: Run complete source CI plateau verification
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PYTHONPATH="$PWD/src"
+          python3 -m quantum.scripts.ci | tee "$RUNNER_TEMP/fpr2-source-ci.log"
+
+      - name: Commit exact tested tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name quantum-ci
+          git config user.email quantum-ci@users.noreply.github.com
+          git commit -m 'Full-project Red Team R2 plateau corrections'
+          test "$(git rev-parse 'HEAD^{tree}')" = "$EXPECTED_TREE_SHA"
+          git rev-parse HEAD | tee "$RUNNER_TEMP/fpr2-candidate-commit.txt"
+          git rev-parse 'HEAD^{tree}' | tee "$RUNNER_TEMP/fpr2-candidate-tree.txt"
+          git archive --format=tar.gz --output="$RUNNER_TEMP/fpr2-tested-source.tar.gz" HEAD
+          sha256sum "$RUNNER_TEMP/fpr2-tested-source.tar.gz" > "$RUNNER_TEMP/fpr2-tested-source.sha256"
+
+      - name: Publish candidate branch
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -o pipefail
+          git push origin "HEAD:refs/heads/$CANDIDATE_BRANCH" 2>&1 | tee "$RUNNER_TEMP/fpr2-push.log"
+
+      - name: Upload materialization evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: FPR2-Materialization-Evidence
+          path: |
+            ${{ runner.temp }}/fpr2-candidate-commit.txt
+            ${{ runner.temp }}/fpr2-candidate-tree.txt
+            ${{ runner.temp }}/fpr2-source-ci.log
+            ${{ runner.temp }}/fpr2-tested-source.tar.gz
+            ${{ runner.temp }}/fpr2-tested-source.sha256
+            ${{ runner.temp }}/fpr2-push.log
+          if-no-files-found: warn
+          retention-days: 3
