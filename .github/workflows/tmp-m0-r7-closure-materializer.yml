@@ -1,0 +1,137 @@
+name: Temporary M0 R7 Append-Only Closure Materializer
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/tmp-m0-r7-closure-materializer.yml
+      - .m0-r7-closure-payload/**
+
+permissions:
+  contents: write
+
+concurrency:
+  group: m0-r7-append-only-closure
+  cancel-in-progress: false
+
+env:
+  BASE_SHA: ff4b861ee11a5e437091b30b39228bfc97e95a7e
+  ARCHIVE_SHA256: c30b023e1b4b03e49bb2eaa017ffb85d1d6ba5166b697b54865b9b7bd3da7c40
+  EXPECTED_TREE_SHA: 38f17815ad5f01e682f292a1c4aa3bf6ea6e8a29
+  CANDIDATE_BRANCH: tmp/m0-r7-closure-candidate
+
+jobs:
+  close-m0:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Checkout closure transport
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Verify exact binary closure payload
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object .m0-r7-closure-payload/chunk.00)" = "4b8fe8fc112b845f4b3fff5cdb5d165af6cd063d"
+          test "$(git hash-object .m0-r7-closure-payload/chunk.01)" = "f402427816bc5c60fbedaea2caf9d3db7681775a"
+          test "$(git hash-object .m0-r7-closure-payload/chunk.02)" = "4eaedac4a86e1e0fb5bf93dd7615bf56396e64cc"
+          cat .m0-r7-closure-payload/chunk.00 \
+              .m0-r7-closure-payload/chunk.01 \
+              .m0-r7-closure-payload/chunk.02 \
+              > "$RUNNER_TEMP/closure.tar.gz"
+          echo "$ARCHIVE_SHA256  $RUNNER_TEMP/closure.tar.gz" | sha256sum --check
+          cat > "$RUNNER_TEMP/expected-paths.txt" <<'EOF'
+          docs/evidence/ARTIFACT_MANIFEST_OVERLAY_AGENT_V3_1_M0_R7_REMOTE_CLOSURE.json
+          docs/evidence/agent_v3_1/AUTONOMOUS_EXECUTION_STATE_M0_R7_REMOTE_CLOSURE.json
+          docs/evidence/agent_v3_1/M0_R7_REMOTE_BINDING_CLOSURE.json
+          docs/evidence/agent_v3_1/M0_R7_REMOTE_CLOSURE_ATTEMPT_001_FAILURE.json
+          docs/evidence/agent_v3_1/WORK_ORDER_LEDGER_M0_R7_REMOTE_CLOSURE.json
+          docs/evidence/agent_v3_1/WORK_ORDER_M0_R7_REMOTE_CLOSURE_CORRECTIVE_001.json
+          tests/integration_manifest_support_m8.py
+          tests/test_agent_v3_1_m0_r7_remote_closure.py
+          tests/test_wbr2_m5_closure.py
+          tests/test_wbr2_m5_closure_corrective_r2.py
+          EOF
+          sed -i 's/^          //' "$RUNNER_TEMP/expected-paths.txt"
+          LC_ALL=C sort -o "$RUNNER_TEMP/expected-paths.txt" "$RUNNER_TEMP/expected-paths.txt"
+
+      - name: Materialize append-only closure on remote-bound M0 tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          git checkout --detach "$BASE_SHA"
+          test "$(git rev-parse HEAD)" = "$BASE_SHA"
+          test "$(git rev-parse 'HEAD^{tree}')" = "df7aecd89c220dc193dd92238b37c395f33f70e9"
+          test -z "$(git status --porcelain)"
+          tar -xzf "$RUNNER_TEMP/closure.tar.gz"
+          git diff --check
+          git add -A
+          git diff --cached --name-only | LC_ALL=C sort > "$RUNNER_TEMP/actual-paths.txt"
+          diff -u "$RUNNER_TEMP/expected-paths.txt" "$RUNNER_TEMP/actual-paths.txt" | tee "$RUNNER_TEMP/scope-diff.txt"
+          test "$(wc -l < "$RUNNER_TEMP/actual-paths.txt")" -eq 10
+          if grep -E '^(src/|tools/|scripts/|\.github/workflows/|requirements/)' "$RUNNER_TEMP/actual-paths.txt"; then
+            echo M0_CLOSURE_SCOPE_VIOLATION >&2
+            exit 1
+          fi
+
+      - name: Run closure positive negative and historical controls
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PYTHONPATH="$PWD/src"
+          python3 -m unittest -v \
+            tests.test_agent_v3_1_m0_r7_remote_closure \
+            tests.test_agent_v3_1_m0_r7_reconciliation \
+            tests.test_wbr2_m5_closure \
+            tests.test_wbr2_m5_closure_corrective_r2 \
+            2>&1 | tee "$RUNNER_TEMP/targeted.log"
+
+      - name: Verify manifest equality
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PYTHONPATH="$PWD/src"
+          python3 -m unittest -v \
+            tests.test_a0_manifest_diagnostic.ManifestDiagnosticTests.test_manifest_diff_is_empty \
+            tests.test_b1a_artifact_manifest.B1aArtifactManifestTests.test_manifest_matches_current_tracked_tree \
+            2>&1 | tee "$RUNNER_TEMP/manifest.log"
+
+      - name: Run complete source CI
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PYTHONPATH="$PWD/src"
+          python3 -m quantum.scripts.ci 2>&1 | tee "$RUNNER_TEMP/full-ci.log"
+
+      - name: Commit exact closure tree and publish candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name quantum-ci
+          git config user.email quantum-ci@users.noreply.github.com
+          git commit -m "Close M0 remote exact-tree binding append-only"
+          test "$(git rev-parse 'HEAD^{tree}')" = "$EXPECTED_TREE_SHA"
+          git rev-parse HEAD | tee "$RUNNER_TEMP/candidate.commit-sha"
+          git rev-parse 'HEAD^{tree}' | tee "$RUNNER_TEMP/candidate.tree-sha"
+          git diff-tree --no-commit-id --name-status -r HEAD > "$RUNNER_TEMP/candidate.name-status"
+          git push origin "HEAD:refs/heads/$CANDIDATE_BRANCH"
+
+      - name: Upload M0 closure evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: M0-R7-Append-Only-Closure-Evidence
+          path: |
+            ${{ runner.temp }}/expected-paths.txt
+            ${{ runner.temp }}/actual-paths.txt
+            ${{ runner.temp }}/scope-diff.txt
+            ${{ runner.temp }}/targeted.log
+            ${{ runner.temp }}/manifest.log
+            ${{ runner.temp }}/full-ci.log
+            ${{ runner.temp }}/candidate.commit-sha
+            ${{ runner.temp }}/candidate.tree-sha
+            ${{ runner.temp }}/candidate.name-status
+          if-no-files-found: warn
+          retention-days: 7
