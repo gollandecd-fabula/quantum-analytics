@@ -1,0 +1,41 @@
+name: Temporary M0 PR85 Exact Source Export
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/tmp-m0-pr85-exact-export.yml
+
+permissions:
+  contents: read
+
+env:
+  TARGET_SHA: 31bf463142a6c0f225b812c033073ae2eac53ffc
+
+jobs:
+  export:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ env.TARGET_SHA }}
+          fetch-depth: 1
+      - name: Verify and export immutable source
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$TARGET_SHA"
+          git rev-parse HEAD > "$RUNNER_TEMP/pr85.commit-sha"
+          git rev-parse 'HEAD^{tree}' > "$RUNNER_TEMP/pr85.tree-sha"
+          git archive --format=tar.gz --output="$RUNNER_TEMP/pr85-source.tar.gz" HEAD
+          sha256sum "$RUNNER_TEMP/pr85-source.tar.gz" > "$RUNNER_TEMP/pr85-source.sha256"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: M0-PR85-Exact-Source-31bf463
+          path: |
+            ${{ runner.temp }}/pr85-source.tar.gz
+            ${{ runner.temp }}/pr85-source.sha256
+            ${{ runner.temp }}/pr85.tree-sha
+            ${{ runner.temp }}/pr85.commit-sha
+          if-no-files-found: error
+          retention-days: 3
