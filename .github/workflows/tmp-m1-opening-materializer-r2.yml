@@ -1,0 +1,162 @@
+name: Temporary M1 Opening Exact-Tree Materializer R2
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/tmp-m1-opening-materializer-r2.yml
+      - .m1-opening-payload-r2/**
+
+permissions:
+  contents: write
+
+concurrency:
+  group: m1-opening-exact-tree-r2
+  cancel-in-progress: false
+
+env:
+  BASE_SHA: 848c3eb847b7812e352ff851d1574de429d23724
+  BASE_TREE_SHA: 38f178153e39f433a55c57de8401125ba2825d19
+  B64_SHA256: 069ce42a578c47932160b780ccc2d61b342654aac6b0188ee9678123e90f3a91
+  ARCHIVE_SHA256: 3a73597bf07cdde79e9e9eab0b6adc314ec531e92915776312761ebf63b1a58b
+  EXPECTED_TREE_SHA: 9bb6908174aff756b0310f92d44c4f96ccf10edb
+  CANDIDATE_BRANCH: tmp/m1-opening-candidate-r2
+
+jobs:
+  bind-m1-opening:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Checkout M1 opening transport
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Verify exact segmented M1 opening payload
+        shell: bash
+        run: |
+          set -euo pipefail
+          declare -A expected=(
+            [seg.00]=64d542269f73428e05062537d70285be1a8b8a01
+            [seg.01]=427d8352c1a27b820ab3ec6191d36db1d7023bea
+            [seg.02]=2cd6297782c0d54af63187dc68e322378bc29214
+            [seg.03]=b4005cee9cd6ef19a6dabc9ac7f31105c00c3776
+            [seg.04]=095238cd93a56d698a3e6110b6729b83b50debab
+            [seg.05]=ed0c95045f56d811baa2d10b0e0347e3062255e5
+            [seg.06]=0410bfd1376b55b8df7d4e4c3bcb62fc02609d49
+            [seg.07]=96c584366fc137fe6ec4358a820f1d68a947e632
+            [seg.08]=48b5ddec683cc70f44a21b440b2b85384e8d3dc7
+            [seg.09]=a8dbba1d28c0f9b9bccee27b4dd723ce3d090567
+            [seg.10]=74684840745d5d197ee76c8c0c7cc9a7085aeca3
+            [seg.11]=fb16a971a13ca1fb49586032af1677ddf917c0f7
+            [seg.12]=33baa3bea219c5d5032ac0f758590fb4e6683825
+            [seg.13]=8b18cf6744dd59cf0829ef4f9a41e500f814320a
+            [seg.14]=527be981fedf1c4f431afffb7d8c2237f157fd49
+          )
+          for file in "${!expected[@]}"; do
+            test "$(git hash-object ".m1-opening-payload-r2/$file")" = "${expected[$file]}"
+          done
+          cat .m1-opening-payload-r2/seg.{00..14} > "$RUNNER_TEMP/m1-opening.b64"
+          echo "$B64_SHA256  $RUNNER_TEMP/m1-opening.b64" | sha256sum --check
+          base64 --decode "$RUNNER_TEMP/m1-opening.b64" > "$RUNNER_TEMP/m1-opening.tar.gz"
+          echo "$ARCHIVE_SHA256  $RUNNER_TEMP/m1-opening.tar.gz" | sha256sum --check
+          cat > "$RUNNER_TEMP/expected-paths.txt" <<'PATHS'
+          docs/evidence/ARTIFACT_MANIFEST_OVERLAY_AGENT_V3_1_M1_OPEN.json
+          docs/evidence/agent_v3_1/AUTONOMOUS_EXECUTION_STATE_M1_OPEN.json
+          docs/evidence/agent_v3_1/M1_CAPABILITY_GATE.json
+          docs/evidence/agent_v3_1/M1_EXISTING_M9_MIGRATION_RTM.json
+          docs/evidence/agent_v3_1/M1_OPEN_ATTEMPT_001_FAILURE.json
+          docs/evidence/agent_v3_1/WORK_ORDER_LEDGER_M1_OPEN.json
+          docs/evidence/agent_v3_1/WORK_ORDER_M1_EXISTING_M9_MIGRATION_001.json
+          docs/evidence/agent_v3_1/WORK_ORDER_M1_OPEN_CORRECTIVE_001.json
+          tests/integration_manifest_support_m8.py
+          tests/test_agent_v3_1_m0_r7_remote_closure.py
+          tests/test_agent_v3_1_m1_opening.py
+          tests/test_wbr2_m5_closure.py
+          tests/test_wbr2_m5_closure_corrective_r2.py
+          PATHS
+          sed -i 's/^          //' "$RUNNER_TEMP/expected-paths.txt"
+          LC_ALL=C sort -o "$RUNNER_TEMP/expected-paths.txt" "$RUNNER_TEMP/expected-paths.txt"
+
+      - name: Materialize signed M1 opening on immutable M0 closure
+        shell: bash
+        run: |
+          set -euo pipefail
+          git checkout --detach "$BASE_SHA"
+          test "$(git rev-parse HEAD)" = "$BASE_SHA"
+          test "$(git rev-parse 'HEAD^{tree}')" = "$BASE_TREE_SHA"
+          test -z "$(git status --porcelain)"
+          tar -xzf "$RUNNER_TEMP/m1-opening.tar.gz"
+          git diff --check
+          git add -A
+          git diff --cached --name-only | LC_ALL=C sort > "$RUNNER_TEMP/actual-paths.txt"
+          diff -u "$RUNNER_TEMP/expected-paths.txt" "$RUNNER_TEMP/actual-paths.txt" | tee "$RUNNER_TEMP/scope-diff.txt"
+          test "$(wc -l < "$RUNNER_TEMP/actual-paths.txt")" -eq 13
+          if grep -E '^(src/|tools/|scripts/|\.github/workflows/|requirements/)' "$RUNNER_TEMP/actual-paths.txt"; then
+            echo M1_OPENING_SCOPE_VIOLATION >&2
+            exit 1
+          fi
+          if grep -Ei '(scheduled_report|desktop_center|installer|one_click|home_local)' "$RUNNER_TEMP/actual-paths.txt"; then
+            echo M1_FORBIDDEN_PRODUCT_PATH >&2
+            exit 1
+          fi
+
+      - name: Run M1 opening positive negative and historical controls
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PYTHONPATH="$PWD/src"
+          python3 -m unittest -v \
+            tests.test_agent_v3_1_m1_opening \
+            tests.test_agent_v3_1_m0_r7_remote_closure \
+            tests.test_wbr2_m5_closure \
+            tests.test_wbr2_m5_closure_corrective_r2 \
+            2>&1 | tee "$RUNNER_TEMP/targeted.log"
+
+      - name: Verify manifest equality
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PYTHONPATH="$PWD/src"
+          python3 -m unittest -v \
+            tests.test_a0_manifest_diagnostic.ManifestDiagnosticTests.test_manifest_diff_is_empty \
+            tests.test_b1a_artifact_manifest.B1aArtifactManifestTests.test_manifest_matches_current_tracked_tree \
+            2>&1 | tee "$RUNNER_TEMP/manifest.log"
+
+      - name: Run complete source CI
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PYTHONPATH="$PWD/src"
+          python3 -m quantum.scripts.ci 2>&1 | tee "$RUNNER_TEMP/full-ci.log"
+
+      - name: Commit exact M1 opening tree and publish candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name quantum-ci
+          git config user.email quantum-ci@users.noreply.github.com
+          git commit -m "Open M1 existing M9 migration under signed work order"
+          test "$(git rev-parse 'HEAD^{tree}')" = "$EXPECTED_TREE_SHA"
+          git rev-parse HEAD | tee "$RUNNER_TEMP/candidate.commit-sha"
+          git rev-parse 'HEAD^{tree}' | tee "$RUNNER_TEMP/candidate.tree-sha"
+          git diff-tree --no-commit-id --name-status -r HEAD > "$RUNNER_TEMP/candidate.name-status"
+          git push origin "HEAD:refs/heads/$CANDIDATE_BRANCH"
+
+      - name: Upload M1 opening evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: M1-Opening-Exact-Tree-Evidence-R2
+          path: |
+            ${{ runner.temp }}/expected-paths.txt
+            ${{ runner.temp }}/actual-paths.txt
+            ${{ runner.temp }}/scope-diff.txt
+            ${{ runner.temp }}/targeted.log
+            ${{ runner.temp }}/manifest.log
+            ${{ runner.temp }}/full-ci.log
+            ${{ runner.temp }}/candidate.commit-sha
+            ${{ runner.temp }}/candidate.tree-sha
+            ${{ runner.temp }}/candidate.name-status
+          if-no-files-found: warn
+          retention-days: 7
