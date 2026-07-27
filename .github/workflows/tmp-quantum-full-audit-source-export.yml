@@ -1,0 +1,41 @@
+name: Temporary Quantum Full Audit Source Export
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/tmp-quantum-full-audit-source-export.yml
+
+permissions:
+  contents: read
+
+env:
+  TARGET_SHA: b151e67c2bea8d4d50c5c4a2aeb0695e89921c01
+
+jobs:
+  export:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ env.TARGET_SHA }}
+          fetch-depth: 1
+      - name: Verify and export exact source tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$TARGET_SHA"
+          git rev-parse HEAD > "$RUNNER_TEMP/quantum-audit-source.commit-sha"
+          git rev-parse 'HEAD^{tree}' > "$RUNNER_TEMP/quantum-audit-source.tree-sha"
+          git archive --format=tar.gz --output="$RUNNER_TEMP/quantum-audit-source.tar.gz" HEAD
+          sha256sum "$RUNNER_TEMP/quantum-audit-source.tar.gz" > "$RUNNER_TEMP/quantum-audit-source.sha256"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: Quantum-Full-Audit-Source-b151e67c
+          path: |
+            ${{ runner.temp }}/quantum-audit-source.tar.gz
+            ${{ runner.temp }}/quantum-audit-source.sha256
+            ${{ runner.temp }}/quantum-audit-source.tree-sha
+            ${{ runner.temp }}/quantum-audit-source.commit-sha
+          if-no-files-found: error
+          retention-days: 3
