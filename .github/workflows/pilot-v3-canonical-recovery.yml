@@ -7,9 +7,22 @@ on:
     paths:
       - "tools/pilot_v3_generate_overlay.py"
       - "tests/integration_manifest_support_pilot_v3.py"
+      - "tests/test_pilot_v3_generate_overlay.py"
       - "tests/test_a0_manifest_diagnostic.py"
       - "tests/test_b1a_artifact_manifest.py"
       - "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_V3_0_CANONICAL_RECOVERY.json"
+      - "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_V3_0_P0_EXECUTION.json"
+      - "docs/evidence/pilot_v3_0/**"
+      - ".github/workflows/pilot-v3-canonical-recovery.yml"
+  pull_request:
+    paths:
+      - "tools/pilot_v3_generate_overlay.py"
+      - "tests/integration_manifest_support_pilot_v3.py"
+      - "tests/test_pilot_v3_generate_overlay.py"
+      - "tests/test_a0_manifest_diagnostic.py"
+      - "tests/test_b1a_artifact_manifest.py"
+      - "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_V3_0_CANONICAL_RECOVERY.json"
+      - "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_V3_0_P0_EXECUTION.json"
       - "docs/evidence/pilot_v3_0/**"
       - ".github/workflows/pilot-v3-canonical-recovery.yml"
   workflow_dispatch:
@@ -18,8 +31,12 @@ permissions:
   contents: read
 
 concurrency:
-  group: quantum-pilot-v3-canonical-${{ github.sha }}
+  group: quantum-pilot-v3-canonical-${{ github.event.pull_request.head.sha || github.sha }}
   cancel-in-progress: false
+
+env:
+  TARGET_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+  TARGET_BRANCH: ${{ github.event.pull_request.head.ref || github.ref_name }}
 
 jobs:
   p0-canonical-recovery:
@@ -29,7 +46,7 @@ jobs:
       - name: Checkout exact canonical head
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
-          ref: ${{ github.sha }}
+          ref: ${{ env.TARGET_SHA }}
           clean: true
           fetch-depth: 0
 
@@ -38,23 +55,27 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Verify exact branch and protected scope
+      - name: Verify exact branch, head and protected scope
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
-          test "$GITHUB_REF_NAME" = "fix/quantum-pilot-v3-canonical"
+          test "$(git rev-parse HEAD)" = "$TARGET_SHA"
+          test "$TARGET_BRANCH" = "fix/quantum-pilot-v3-canonical"
           git diff --name-only HEAD^ HEAD | LC_ALL=C sort > "$RUNNER_TEMP/p0-changed-paths.txt"
-          if grep -E '^(src/|scripts/|installer/|requirements/|docs/evidence/agent_v3_1/rtm/|docs/evidence/agent_v3_1/REQUIREMENTS_TRACEABILITY_MATRIX.json|tools/m9_maximum_assurance_control_plane.py|.github/workflows/m9-maximum-assurance-control-plane.yml)$' "$RUNNER_TEMP/p0-changed-paths.txt"; then
+          if grep -E '^(src/|scripts/|installer/|requirements/|docs/evidence/agent_v3_1/rtm/|docs/evidence/agent_v3_1/REQUIREMENTS_TRACEABILITY_MATRIX.json|tools/m9_maximum_assurance_control_plane.py|.github/workflows/m9-maximum-assurance-control-plane.yml)' "$RUNNER_TEMP/p0-changed-paths.txt"; then
             echo P0_FORBIDDEN_SCOPE_CHANGE >&2
             exit 1
           fi
 
-      - name: Generate full pilot applicability overlay
+      - name: Run P0 unit controls and generate full overlay
         shell: bash
+        env:
+          PYTHONPATH: ${{ github.workspace }}/src
         run: |
           set -euo pipefail
           mkdir -p "$RUNNER_TEMP/pilot-v3-p0"
+          python -m unittest -v tests.test_pilot_v3_generate_overlay \
+            2>&1 | tee "$RUNNER_TEMP/pilot-v3-p0/generator-tests.log"
           python tools/pilot_v3_generate_overlay.py \
             --repo-root "$GITHUB_WORKSPACE" \
             --output "$RUNNER_TEMP/pilot-v3-p0/PILOT_APPLICABILITY_OVERLAY.json" \
@@ -71,15 +92,24 @@ jobs:
           payload = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
           entries = payload["entries"]
           ids = [item["requirement_id"] for item in entries]
+          required = {
+              "requirement_id", "pilot_applicability", "pilot_priority",
+              "pilot_dependency", "pilot_action", "pilot_test",
+              "pilot_target_evidence_level", "pilot_evidence_ids",
+              "pilot_status", "justification", "production_status_unchanged",
+          }
           assert len(entries) == 712
           assert len(set(ids)) == 712
+          assert all(set(item) == required for item in entries)
           assert all(item["production_status_unchanged"] is True for item in entries)
           assert payload["release_authorized"] is False
+          assert payload["pilot_decision"] == "PILOT_BLOCKED"
+          assert payload["production_release_decision"] == "RELEASE_BLOCKED"
           PY
           python -m unittest -v \
             tests.test_a0_manifest_diagnostic \
             tests.test_b1a_artifact_manifest \
-            2>&1 | tee "$RUNNER_TEMP/pilot-v3-p0/targeted-tests.log"
+            2>&1 | tee "$RUNNER_TEMP/pilot-v3-p0/manifest-tests.log"
 
       - name: Run complete source regression
         shell: bash
@@ -93,7 +123,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: Quantum-Pilot-v3-P0-${{ github.sha }}
+          name: Quantum-Pilot-v3-P0-${{ env.TARGET_SHA }}
           path: |
             ${{ runner.temp }}/p0-changed-paths.txt
             ${{ runner.temp }}/pilot-v3-p0/**

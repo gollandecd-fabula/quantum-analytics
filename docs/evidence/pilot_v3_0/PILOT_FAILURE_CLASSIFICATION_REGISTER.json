@@ -1,0 +1,32 @@
+{
+  "artifact_type": "PILOT_FAILURE_CLASSIFICATION_REGISTER",
+  "canonical_branch": "fix/quantum-pilot-v3-canonical",
+  "entries": [
+    {
+      "classification_id": "PILOT-FC-001",
+      "decision": "CLOSED_AND_EXCLUDED_FROM_CANONICAL_EVIDENCE",
+      "pilot_claim_allowed": false,
+      "primary_classification": "PROTOCOL_SCOPE_FAILURE",
+      "product_failure_proven": false,
+      "subject": "Historical PR contours 165-174"
+    },
+    {
+      "classification_id": "PILOT-FC-002",
+      "decision": "OPEN_FOR_P1_AFTER_P0",
+      "pilot_claim_allowed": false,
+      "primary_classification": "HARNESS_FAILURE",
+      "product_failure_proven": false,
+      "subject": "M1 union-against-primary work-order validation at 43d6230"
+    },
+    {
+      "classification_id": "PILOT-FC-003",
+      "decision": "OPEN_FOR_P3",
+      "pilot_claim_allowed": false,
+      "primary_classification": "PRODUCT_FAILURE",
+      "product_failure_proven": true,
+      "subject": "DesktopDirectory unavailable in Windows clean-room installer path"
+    }
+  ],
+  "release_authorized": false,
+  "schema_version": "3.0.0"
+}

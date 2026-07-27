@@ -1,0 +1,23 @@
+{
+  "artifact_type": "PILOT_WORK_ORDER_CHAIN",
+  "canonical_branch": "fix/quantum-pilot-v3-canonical",
+  "entries": [
+    {
+      "ordinal": 1,
+      "parent_exact_head": "43d6230a43ebb4443e98f9ea9ec2746b210dfa3a",
+      "result_exact_head": "9ddb908c77e033edc7e3712014d6d15da2e5e7d0",
+      "status": "REMOTE_COMMIT_VERIFIED_RUNTIME_PENDING",
+      "work_order_id": "WO-PILOT-P0-CANONICAL-RECOVERY-001"
+    },
+    {
+      "ordinal": 2,
+      "parent_exact_head": "9ddb908c77e033edc7e3712014d6d15da2e5e7d0",
+      "result_exact_head": "SELF_COMMIT_PENDING_REMOTE_BINDING",
+      "status": "ATOMIC_COMMIT_IN_PROGRESS",
+      "work_order_id": "WO-PILOT-P0-CANONICAL-EXECUTION-002"
+    }
+  ],
+  "parallel_write_authorized": false,
+  "release_authorized": false,
+  "schema_version": "3.0.0"
+}
