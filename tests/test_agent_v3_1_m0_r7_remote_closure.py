@@ -18,6 +18,7 @@ FAILED_ATTEMPT = AGENT / "M0_R7_REMOTE_CLOSURE_ATTEMPT_001_FAILURE.json"
 CORRECTIVE_WORK_ORDER = AGENT / "WORK_ORDER_M0_R7_REMOTE_CLOSURE_CORRECTIVE_001.json"
 OVERLAY = EVIDENCE / "ARTIFACT_MANIFEST_OVERLAY_AGENT_V3_1_M0_R7_REMOTE_CLOSURE.json"
 M1_OPEN_OVERLAY = EVIDENCE / "ARTIFACT_MANIFEST_OVERLAY_AGENT_V3_1_M1_OPEN.json"
+M1_RUNTIME_OVERLAY = EVIDENCE / "ARTIFACT_MANIFEST_OVERLAY_AGENT_V3_1_M1.json"
 BASE_OVERLAY = EVIDENCE / "ARTIFACT_MANIFEST_OVERLAY_AGENT_V3_1_M0_R7.json"
 EXPECTED_COMMIT = "ff4b861ee11a5e437091b30b39228bfc97e95a7e"
 EXPECTED_TREE = "df7aecd89c220dc193dd92238b37c395f33f70e9"
@@ -100,9 +101,11 @@ class AgentV31M0R7RemoteClosureTests(unittest.TestCase):
     def test_closure_overlay_is_effective_and_product_paths_are_absent(self) -> None:
         self.assertEqual(self.overlay["base_agent_v3_1_m0_r7_overlay_git_blob_sha"], _git_blob(BASE_OVERLAY.read_bytes()))
         rows = {row[0]: row for row in load_effective_manifest()["artifacts"]}
-        latest = _read(M1_OPEN_OVERLAY)
+        opening = _read(M1_OPEN_OVERLAY)
+        runtime = _read(M1_RUNTIME_OVERLAY)
         expected = {path: [path, digest, size] for path, digest, size in self.overlay["entries"]}
-        expected.update({path: [path, digest, size] for path, digest, size in latest["entries"]})
+        expected.update({path: [path, digest, size] for path, digest, size in opening["entries"]})
+        expected.update({path: [path, digest, size] for path, digest, size in runtime["entries"]})
         for path, digest, size in self.overlay["entries"]:
             self.assertEqual(rows[path], expected[path])
             self.assertFalse(path.startswith(("src/", "tools/", "scripts/", ".github/workflows/", "requirements/")))

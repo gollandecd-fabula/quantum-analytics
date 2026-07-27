@@ -20,6 +20,7 @@ STATE = AGENT / "AUTONOMOUS_EXECUTION_STATE_M1_OPEN.json"
 LEDGER = AGENT / "WORK_ORDER_LEDGER_M1_OPEN.json"
 INDEX = AGENT / "REQUIREMENTS_TRACEABILITY_MATRIX.json"
 OVERLAY = EVIDENCE / "ARTIFACT_MANIFEST_OVERLAY_AGENT_V3_1_M1_OPEN.json"
+M1_RUNTIME_OVERLAY = EVIDENCE / "ARTIFACT_MANIFEST_OVERLAY_AGENT_V3_1_M1.json"
 BASE_OVERLAY = EVIDENCE / "ARTIFACT_MANIFEST_OVERLAY_AGENT_V3_1_M0_R7_REMOTE_CLOSURE.json"
 EXPECTED_BASE_COMMIT = "848c3eb847b7812e352ff851d1574de429d23724"
 EXPECTED_BASE_TREE = "38f178153e39f433a55c57de8401125ba2825d19"
@@ -155,8 +156,19 @@ class AgentV31M1OpeningTests(unittest.TestCase):
     def test_opening_overlay_is_effective(self) -> None:
         self.assertEqual(self.overlay["base_agent_v3_1_m0_r7_remote_closure_overlay_git_blob_sha"], _git_blob(BASE_OVERLAY.read_bytes()))
         rows = {row[0]: row for row in load_effective_manifest()["artifacts"]}
-        for path, digest, size in self.overlay["entries"]:
-            self.assertEqual(rows[path], [path, digest, size])
+        latest = _read(M1_RUNTIME_OVERLAY)
+        expected = {
+            path: [path, digest, size]
+            for path, digest, size in self.overlay["entries"]
+        }
+        expected.update(
+            {
+                path: [path, digest, size]
+                for path, digest, size in latest["entries"]
+            }
+        )
+        for path, _digest, _size in self.overlay["entries"]:
+            self.assertEqual(rows[path], expected[path])
             self.assertFalse(path.startswith(("src/", "tools/", "scripts/", ".github/workflows/", "requirements/")))
 
 

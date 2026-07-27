@@ -1,0 +1,47 @@
+{
+  "active_milestone": "M1",
+  "artifact_type": "SIGNED_WORK_ORDER",
+  "assigned_role": "IMPLEMENTER",
+  "change_boundary": "Correct only two historical append-only overlay assertions so they apply the later M1 runtime overlay before comparing paths replaced by that overlay; preserve every prior assertion.",
+  "created_at_utc": "2026-07-27T11:21:42.436094+00:00",
+  "defect_ids": [
+    "M1-EVIDENCE-HARNESS-001",
+    "M1-EVIDENCE-HARNESS-002"
+  ],
+  "expected_result": "M1 runtime controls, historical controls, manifest equality and full source regression pass without product-path changes.",
+  "files_allowed_to_change": [
+    "tests/test_agent_v3_1_m1_opening.py",
+    "tests/test_agent_v3_1_m0_r7_remote_closure.py",
+    "docs/evidence/agent_v3_1/M1_EVIDENCE_INGESTION_ATTEMPT_001_FAILURE.json",
+    "docs/evidence/agent_v3_1/WORK_ORDER_M1_EVIDENCE_MANIFEST_CORRECTIVE_001.json",
+    "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_AGENT_V3_1_M1.json"
+  ],
+  "files_forbidden_to_change": [
+    "tools/**",
+    "src/**",
+    "scripts/**",
+    ".github/workflows/**",
+    "requirements/**",
+    "UI paths",
+    "installer paths",
+    "configuration migration paths",
+    "scheduled-report paths",
+    "canonical RTM index/shards",
+    "M1 runtime evidence semantics"
+  ],
+  "hypothesis": "Applying the append-only M1 runtime overlay in the two historical assertions resolves the harness-only failures without changing control-plane behavior or weakening any check.",
+  "next_test": "Repeat all M1 runtime, M1 opening, M0 closure, historical closure, manifest equality and full source CI controls.",
+  "product_change_authorized": false,
+  "release_authorized": false,
+  "requirement_ids": [
+    "REQ-P31-0011",
+    "REQ-MP2-0018",
+    "REQ-MP2-0145"
+  ],
+  "rollback_command": "Discard only the five files listed in this corrective work order from the isolated worktree; do not use destructive cleanup outside this worktree.",
+  "rollback_condition": "Any assertion removal, scope expansion, manifest mismatch, M1 runtime regression or product-path modification.",
+  "schema_version": "2.0.0",
+  "target_evidence_level": "L2_SOURCE_RUNTIME",
+  "work_order_id": "WO-M1-EVIDENCE-MANIFEST-CORRECTIVE-001",
+  "work_order_sha256": "83e1c036f970ee7aa76410db2b3b0ac35bb4f59ec353594439c17b8a59f5d6e4"
+}

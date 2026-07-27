@@ -1,0 +1,104 @@
+{
+  "artifact_type": "CLAIM_LEDGER",
+  "claims": [
+    {
+      "actual_command_line": null,
+      "artifact_sha256": null,
+      "claim": "The immutable canonical RTM was ingested literally at source runtime.",
+      "claim_id": "CLM-M1-001",
+      "entry_point": "tools/m9_maximum_assurance_control_plane.py",
+      "environment_id": "SOURCE_RUNTIME_L2",
+      "evidence_ids": [
+        "EVD-M1-LITERAL-RTM"
+      ],
+      "exact_head": "bbdf8b14ccfb8480304549943d418abb0254386c",
+      "falsification_attempts": [],
+      "installed_root": null,
+      "level": "L2",
+      "limitations": [
+        "No L3, L4, L5 or release claim is made by Gate M1."
+      ],
+      "requirement_ids": [
+        "REQ-MP2-0142",
+        "REQ-MP2-0143",
+        "REQ-MP2-0144"
+      ],
+      "status": "VERIFIED",
+      "test_ids": []
+    },
+    {
+      "actual_command_line": null,
+      "artifact_sha256": null,
+      "claim": "The scheduler, lock and signed work order are deterministic.",
+      "claim_id": "CLM-M1-002",
+      "entry_point": "tools/m9_maximum_assurance_control_plane.py",
+      "environment_id": "SOURCE_RUNTIME_L2",
+      "evidence_ids": [
+        "EVD-M1-SCHEDULER"
+      ],
+      "exact_head": "bbdf8b14ccfb8480304549943d418abb0254386c",
+      "falsification_attempts": [],
+      "installed_root": null,
+      "level": "L2",
+      "limitations": [
+        "No L3, L4, L5 or release claim is made by Gate M1."
+      ],
+      "requirement_ids": [
+        "REQ-MP2-0146",
+        "REQ-MP2-0072",
+        "REQ-MP2-0082"
+      ],
+      "status": "VERIFIED",
+      "test_ids": []
+    },
+    {
+      "actual_command_line": null,
+      "artifact_sha256": null,
+      "claim": "All mandatory M1 negative controls make the gate red.",
+      "claim_id": "CLM-M1-003",
+      "entry_point": "tools/m9_maximum_assurance_control_plane.py",
+      "environment_id": "SOURCE_RUNTIME_L2",
+      "evidence_ids": [
+        "EVD-M1-NEGATIVE-CONTROLS"
+      ],
+      "exact_head": "bbdf8b14ccfb8480304549943d418abb0254386c",
+      "falsification_attempts": [],
+      "installed_root": null,
+      "level": "L2",
+      "limitations": [
+        "No L3, L4, L5 or release claim is made by Gate M1."
+      ],
+      "requirement_ids": [
+        "REQ-MP2-0149",
+        "REQ-MP2-0150"
+      ],
+      "status": "VERIFIED",
+      "test_ids": []
+    },
+    {
+      "actual_command_line": null,
+      "artifact_sha256": null,
+      "claim": "Quantum is authorized for release.",
+      "claim_id": "CLM-M1-004",
+      "entry_point": "tools/m9_maximum_assurance_control_plane.py",
+      "environment_id": "SOURCE_RUNTIME_L2",
+      "evidence_ids": [],
+      "exact_head": "bbdf8b14ccfb8480304549943d418abb0254386c",
+      "falsification_attempts": [],
+      "installed_root": null,
+      "level": "L0",
+      "limitations": [
+        "No L3, L4, L5 or release claim is made by Gate M1."
+      ],
+      "requirement_ids": [
+        "REQ-MP2-0151"
+      ],
+      "status": "UNVERIFIED",
+      "test_ids": []
+    }
+  ],
+  "exact_head": "bbdf8b14ccfb8480304549943d418abb0254386c",
+  "protocol_version": "3.1",
+  "release_authorized": false,
+  "schema_version": "1.0.0"
+}

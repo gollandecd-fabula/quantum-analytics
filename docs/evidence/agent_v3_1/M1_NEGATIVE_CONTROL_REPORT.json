@@ -1,0 +1,103 @@
+{
+  "all_controls_make_gate_red": true,
+  "artifact_type": "M1_NEGATIVE_CONTROL_REPORT",
+  "controls": [
+    {
+      "actual_findings": [
+        "RTM_INDEX_BINDING_MISMATCH:protocol_sha256"
+      ],
+      "control_id": "NEG-M1-001-PROTOCOL-HASH-SWAP",
+      "expected_finding": "RTM_INDEX_BINDING_MISMATCH:protocol_sha256",
+      "status": "PASS"
+    },
+    {
+      "actual_findings": [
+        "RTM_COUNT_MISMATCH",
+        "RTM_SHARD_COUNT_MISMATCH:docs/evidence/agent_v3_1/rtm/REQUIREMENTS_TRACEABILITY_MATRIX.part-001.json",
+        "RTM_SHARD_GIT_BLOB_MISMATCH:docs/evidence/agent_v3_1/rtm/REQUIREMENTS_TRACEABILITY_MATRIX.part-001.json",
+        "RTM_SHARD_LAST_ID_MISMATCH:docs/evidence/agent_v3_1/rtm/REQUIREMENTS_TRACEABILITY_MATRIX.part-001.json",
+        "RTM_SHARD_SHA256_MISMATCH:docs/evidence/agent_v3_1/rtm/REQUIREMENTS_TRACEABILITY_MATRIX.part-001.json",
+        "RTM_SHARD_SIZE_MISMATCH:docs/evidence/agent_v3_1/rtm/REQUIREMENTS_TRACEABILITY_MATRIX.part-001.json",
+        "RTM_SOURCE_LAYER_COUNT_MISMATCH",
+        "RTM_STATUS_COUNT_MISMATCH",
+        "RTM_UNIQUE_ID_COUNT_MISMATCH"
+      ],
+      "control_id": "NEG-M1-002-MISSING-REQUIREMENT",
+      "expected_finding": "RTM_SHARD_SHA256_MISMATCH:docs/evidence/agent_v3_1/rtm/REQUIREMENTS_TRACEABILITY_MATRIX.part-001.json",
+      "status": "PASS"
+    },
+    {
+      "actual_findings": [
+        "ROLE_PRIVILEGE_ESCALATION:VERIFIER:modify_production"
+      ],
+      "control_id": "NEG-M1-003-ROLE-PRIVILEGE-ESCALATION",
+      "expected_finding": "ROLE_PRIVILEGE_ESCALATION:VERIFIER:modify_production",
+      "status": "PASS"
+    },
+    {
+      "actual_findings": [
+        "FORGED_VERIFIED_REJECTED:REQ-P31-0001"
+      ],
+      "control_id": "NEG-M1-004-FORGED-VERIFIED",
+      "expected_finding": "FORGED_VERIFIED_REJECTED:REQ-P31-0001",
+      "status": "PASS"
+    },
+    {
+      "actual_findings": [
+        "FORGED_L5_REJECTED"
+      ],
+      "control_id": "NEG-M1-005-FORGED-L5",
+      "expected_finding": "FORGED_L5_REJECTED",
+      "status": "PASS"
+    },
+    {
+      "actual_findings": [
+        "GATE_POLICY_HASH_MISMATCH"
+      ],
+      "control_id": "NEG-M1-006-GATE-MODIFICATION",
+      "expected_finding": "GATE_POLICY_HASH_MISMATCH",
+      "status": "PASS"
+    },
+    {
+      "actual_findings": [
+        "PARALLEL_REQUIREMENT_LOCK_REJECTED"
+      ],
+      "control_id": "NEG-M1-007-PARALLEL-LOCK",
+      "expected_finding": "PARALLEL_REQUIREMENT_LOCK_REJECTED",
+      "status": "PASS"
+    },
+    {
+      "actual_findings": [
+        "RUNTIME_WORK_ORDER_SIGNATURE_INVALID"
+      ],
+      "control_id": "NEG-M1-008-WORK-ORDER-TAMPER",
+      "expected_finding": "RUNTIME_WORK_ORDER_SIGNATURE_INVALID",
+      "status": "PASS"
+    },
+    {
+      "actual_findings": [
+        "PRODUCT_CODE_CHANGED_WITHOUT_REQUIREMENT:src/quantum/application/desktop_center.py",
+        "WORK_ORDER_SCOPE_VIOLATION:src/quantum/application/desktop_center.py"
+      ],
+      "control_id": "NEG-M1-009-WORK-ORDER-SCOPE",
+      "expected_finding": "WORK_ORDER_SCOPE_VIOLATION:src/quantum/application/desktop_center.py",
+      "status": "PASS"
+    },
+    {
+      "actual_findings": [
+        "ROLE_POLICY_SIGNATURE_INVALID"
+      ],
+      "control_id": "NEG-M1-010-ROLE-POLICY-TAMPER",
+      "expected_finding": "ROLE_POLICY_SIGNATURE_INVALID",
+      "status": "PASS"
+    }
+  ],
+  "controls_passed": 10,
+  "controls_total": 10,
+  "exact_head": "bbdf8b14ccfb8480304549943d418abb0254386c",
+  "protocol_version": "3.1",
+  "release_authorized": false,
+  "report_sha256": "5a0635437633d9548ee8f5ac54a9a83a5d4a4dfc5479d46ffb28363ecbdd7893",
+  "schema_version": "1.0.0",
+  "status": "PASS"
+}

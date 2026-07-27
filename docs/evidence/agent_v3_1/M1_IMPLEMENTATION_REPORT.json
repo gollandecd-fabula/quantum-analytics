@@ -1,0 +1,26 @@
+{
+  "artifact_type": "M1_IMPLEMENTATION_REPORT",
+  "changed_paths": [
+    ".github/workflows/m9-maximum-assurance-control-plane.yml",
+    "tests/test_m9_literal_rtm_control_plane.py",
+    "tests/test_m9_maximum_assurance_control_plane.py",
+    "tools/m9_maximum_assurance_control_plane.py"
+  ],
+  "exact_head": "bbdf8b14ccfb8480304549943d418abb0254386c",
+  "exclusive_lock_count": 1,
+  "findings": [],
+  "gate": "GATE-M1",
+  "gate_policy_sha256": "6adf52e5934f6a8ea19330b3c08312188fa6f99d0e7a760f1aabece7a01e3e2c",
+  "literal_rtm_coverage": 1.0,
+  "negative_controls_status": "PASS",
+  "product_code_unchanged": true,
+  "protocol_hash_bound": true,
+  "protocol_version": "3.1",
+  "release_authorized": false,
+  "requirement_count": 712,
+  "runtime_work_order_sha256": "e61499e7fd659b7b160e7f14c41a58d962162fdd4226e5cbdebdcfc980c676fd",
+  "scheduler_deterministic": true,
+  "schema_version": "1.0.0",
+  "selected_requirement_id": "REQ-MP2-0142",
+  "status": "PASS"
+}

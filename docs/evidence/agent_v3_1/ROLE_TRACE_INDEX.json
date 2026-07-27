@@ -1,0 +1,29 @@
+{
+  "artifact_type": "ROLE_TRACE_INDEX",
+  "exact_head": "bbdf8b14ccfb8480304549943d418abb0254386c",
+  "production_code_modified_by_verifier_or_adversary": false,
+  "release_authorized": false,
+  "schema_version": "1.0.0",
+  "traces": [
+    {
+      "action": "minimal existing-M9 migration",
+      "result_type": "PROPOSAL",
+      "role": "IMPLEMENTER"
+    },
+    {
+      "action": "independent literal/hash/scope verification",
+      "result_type": "RAW_EVIDENCE",
+      "role": "VERIFIER"
+    },
+    {
+      "action": "negative and mutation controls",
+      "result_type": "RAW_EVIDENCE",
+      "role": "ADVERSARY"
+    },
+    {
+      "action": "Gate M1 decision",
+      "result_type": "DETERMINISTIC_DECISION",
+      "role": "CONTROL_PLANE"
+    }
+  ]
+}

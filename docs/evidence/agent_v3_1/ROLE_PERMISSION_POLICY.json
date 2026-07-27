@@ -1,0 +1,53 @@
+{
+  "artifact_type": "ROLE_PERMISSION_POLICY",
+  "canonical_state_owner": "CONTROL_PLANE",
+  "policy_sha256": "c2137a0780fa6aab8bfd3b28669a3a73635f8746c82f7775d4fcc5a3063d3360",
+  "protected_paths": [
+    "docs/evidence/agent_v3_1/rtm/",
+    "docs/evidence/agent_v3_1/REQUIREMENTS_TRACEABILITY_MATRIX.json"
+  ],
+  "protocol_version": "3.1",
+  "release_authorized": false,
+  "role_outputs_are": [
+    "PROPOSAL",
+    "RAW_EVIDENCE"
+  ],
+  "roles": {
+    "ADVERSARY": {
+      "may_change_canonical_status": false,
+      "may_change_release_decision": false,
+      "may_close_defect": false,
+      "may_modify_expected_result": false,
+      "may_modify_production": false
+    },
+    "CONTROL_PLANE": {
+      "may_change_canonical_status": true,
+      "may_change_release_decision": true,
+      "may_close_defect": true,
+      "may_modify_expected_result": false,
+      "may_modify_production": false
+    },
+    "IMPLEMENTER": {
+      "may_change_canonical_status": false,
+      "may_change_release_decision": false,
+      "may_close_defect": false,
+      "may_modify_expected_result": false,
+      "may_modify_production": true
+    },
+    "L4_L5_WORKER": {
+      "may_change_canonical_status": false,
+      "may_change_release_decision": false,
+      "may_close_defect": false,
+      "may_modify_expected_result": false,
+      "may_modify_production": false
+    },
+    "VERIFIER": {
+      "may_change_canonical_status": false,
+      "may_change_release_decision": false,
+      "may_close_defect": false,
+      "may_modify_expected_result": false,
+      "may_modify_production": false
+    }
+  },
+  "schema_version": "1.0.0"
+}

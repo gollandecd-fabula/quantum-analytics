@@ -1,0 +1,21 @@
+{
+  "artifact_type": "M1_SCHEDULER_DECISION",
+  "context_sha256": "f4bc4f936989dc06d8d5b3a4d82e5507b55793b4bf6064dc56b139d620a1971a",
+  "decision_sha256": "d3c85b45afb046ae395aec89f5f6906fe844ddecaf0adf3e6cf4bddd33af7201",
+  "eligible_count": 93,
+  "excluded_count": 619,
+  "release_authorized": false,
+  "scheduler": "DETERMINISTIC_NO_LLM_SELECTION",
+  "schema_version": "1.0.0",
+  "selected_canonical_ordinal": 528,
+  "selected_critical_path_score": 100000,
+  "selected_priority": "P0",
+  "selected_requirement_id": "REQ-MP2-0142",
+  "selected_role": "CONTROL_PLANE",
+  "sort_policy": [
+    "priority",
+    "critical_path_score_desc",
+    "canonical_age",
+    "requirement_id"
+  ]
+}

@@ -56,6 +56,11 @@ AGENT_M1_OPEN_OVERLAY_PATH = (
     / "docs/evidence"
     / "ARTIFACT_MANIFEST_OVERLAY_AGENT_V3_1_M1_OPEN.json"
 )
+AGENT_M1_OVERLAY_PATH = (
+    ROOT
+    / "docs/evidence"
+    / "ARTIFACT_MANIFEST_OVERLAY_AGENT_V3_1_M1.json"
+)
 
 
 class Wbr2M5ClosureContracts(unittest.TestCase):
@@ -165,6 +170,12 @@ class Wbr2M5ClosureContracts(unittest.TestCase):
         )
         expected.update(
             {path: [path, digest, size] for path, digest, size in agent_m1_open["entries"]}
+        )
+        agent_m1 = json.loads(
+            AGENT_M1_OVERLAY_PATH.read_text(encoding="utf-8")
+        )
+        expected.update(
+            {path: [path, digest, size] for path, digest, size in agent_m1["entries"]}
         )
         for path in (entry[0] for entry in overlay["entries"]):
             self.assertEqual(rows[path], expected[path])

@@ -1,0 +1,28 @@
+{
+  "artifact_type": "FAILED_ATTEMPT_EVIDENCE",
+  "attempt_id": "M1-EVIDENCE-INGESTION-ATTEMPT-001",
+  "created_at_utc": "2026-07-27T11:21:42.436094+00:00",
+  "failure_evidence_sha256": "e2c0ca0b6c66f48430cd01a4498e4c6ae82cfb3db2704f0c8ded67ed19a91d2a",
+  "failures": [
+    {
+      "detail": "M1 opening overlay assertion compared its historical integration-manifest-support digest after the later M1 runtime overlay had legitimately replaced that path.",
+      "id": "M1-EVIDENCE-HARNESS-001",
+      "type": "M1_OPEN_OVERLAY_TERMINAL_ASSUMPTION"
+    },
+    {
+      "detail": "M0 remote closure assertion applied M1 opening but not the later M1 runtime overlay before comparing the integration-manifest-support path.",
+      "id": "M1-EVIDENCE-HARNESS-002",
+      "type": "M0_CLOSURE_OVERLAY_TERMINAL_ASSUMPTION"
+    }
+  ],
+  "m1_runtime_controls": "19/19 PASS",
+  "manifest_equality": "2/2 PASS",
+  "product_code_changed": false,
+  "release_authorized": false,
+  "rollback": "No evidence-closure commit created; staged primary-scope patch retained for bounded corrective work.",
+  "schema_version": "1.0.0",
+  "status": "FAILED_NOT_COMMITTED",
+  "subject_commit": "bbdf8b14ccfb8480304549943d418abb0254386c",
+  "subject_tree": "d593b6c9f801110135f1f303ce1b6a4b00e95abc",
+  "targeted_result": "45/47 PASS; 2 FAIL"
+}

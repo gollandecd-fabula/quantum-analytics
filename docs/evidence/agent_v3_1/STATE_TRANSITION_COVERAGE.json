@@ -1,0 +1,17 @@
+{
+  "artifact_type": "STATE_TRANSITION_COVERAGE",
+  "covered_transition_count": 6,
+  "exact_head": "bbdf8b14ccfb8480304549943d418abb0254386c",
+  "release_authorized": false,
+  "required_transition_count": 6,
+  "schema_version": "1.0.0",
+  "status": "COMPLETE",
+  "transitions": [
+    "M1_OPEN_TO_LITERAL_INGESTED",
+    "LITERAL_INGESTED_TO_REQUIREMENT_SELECTED",
+    "REQUIREMENT_SELECTED_TO_LOCK_ACQUIRED",
+    "LOCK_ACQUIRED_TO_WORK_ORDER_EMITTED",
+    "WORK_ORDER_EMITTED_TO_NEGATIVE_CONTROLS_PASS",
+    "NEGATIVE_CONTROLS_PASS_TO_GATE_M1_DECIDED"
+  ]
+}

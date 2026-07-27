@@ -1,0 +1,16 @@
+{
+  "active_lock_count": 0,
+  "artifact_type": "WORK_ORDER_LEDGER",
+  "entries": [
+    {
+      "exclusive_lock_state": "RELEASED_AFTER_DETERMINISTIC_DECISION",
+      "requirement_id": "REQ-MP2-0142",
+      "status": "EVIDENCE_ACCEPTED",
+      "work_order_id": "WO-M1-RUNTIME-REQ-MP2-0142",
+      "work_order_sha256": "e61499e7fd659b7b160e7f14c41a58d962162fdd4226e5cbdebdcfc980c676fd"
+    }
+  ],
+  "exact_head": "bbdf8b14ccfb8480304549943d418abb0254386c",
+  "release_authorized": false,
+  "schema_version": "3.1.0"
+}

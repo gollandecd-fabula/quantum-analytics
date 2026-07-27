@@ -1,0 +1,20 @@
+{
+  "active_milestone": "M2",
+  "artifact_type": "AUTONOMOUS_EXECUTION_STATE",
+  "canonical_rtm": {
+    "count": 712,
+    "registry_set_sha256": "4cd2561b2da074b73ebe9ac8a3ccec6f2c890f7f7bf7998ac1a0ca698ed1037a",
+    "runtime_ingestion": "PASS"
+  },
+  "canonical_state_owner": "CONTROL_PLANE",
+  "current_decision": [
+    "FAIL-CLOSED",
+    "RELEASE_BLOCKED"
+  ],
+  "exact_head": "bbdf8b14ccfb8480304549943d418abb0254386c",
+  "gate_m1": "PASS",
+  "physical_l5_status": "UNVERIFIED",
+  "release_authorized": false,
+  "schema_version": "3.1.0",
+  "selected_requirement_id": "REQ-MP2-0142"
+}

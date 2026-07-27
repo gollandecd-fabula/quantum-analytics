@@ -1,0 +1,19 @@
+{
+  "artifact_type": "DEFECT_REGISTER",
+  "defects": [
+    {
+      "defect_id": "M1-D-CONTROLLER-001",
+      "evidence_ids": [
+        "EVD-M1-LITERAL-RTM",
+        "EVD-M1-SCHEDULER",
+        "EVD-M1-NEGATIVE-CONTROLS"
+      ],
+      "severity": "P0",
+      "status": "CLOSED_VERIFIED",
+      "title": "Protocol v3.1 literal RTM control-plane runtime was absent"
+    }
+  ],
+  "exact_head": "bbdf8b14ccfb8480304549943d418abb0254386c",
+  "release_authorized": false,
+  "schema_version": "1.0.0"
+}

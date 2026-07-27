@@ -1,0 +1,170 @@
+{
+  "artifact_type": "M1_LITERAL_RTM_INGESTION_REPORT",
+  "canonical_index_path": "docs/evidence/agent_v3_1/REQUIREMENTS_TRACEABILITY_MATRIX.json",
+  "canonical_index_sha256": "28bb3b9b8f9733eb1e6310271af987513c25c28ad676c494b3ed61bb49b3a983",
+  "findings": [],
+  "m1_requirement_count": 100,
+  "mandatory_field_count": 19,
+  "master_prompt_sha256": "1008a69ac56e44e6fa1f69c51f1fe43c8e621c161a52241230fa0af88ecd004a",
+  "priority_counts": {
+    "P0": 390,
+    "P1": 289,
+    "P2": 33,
+    "P3": 0
+  },
+  "protocol_sha256": "be69b8f1f919066c67086d6dd4678acf5e3cb3c4f1db9bc587dc540018601a90",
+  "protocol_version": "3.1",
+  "registry_set_sha256": "4cd2561b2da074b73ebe9ac8a3ccec6f2c890f7f7bf7998ac1a0ca698ed1037a",
+  "release_authorized": false,
+  "requirement_count": 712,
+  "row_fields": [
+    "requirement_id",
+    "source_document",
+    "source_location",
+    "original_text",
+    "priority",
+    "milestone",
+    "dependencies",
+    "assigned_role",
+    "implementation_action",
+    "positive_test_ids",
+    "negative_control_ids",
+    "mutation_ids",
+    "target_evidence_level",
+    "required_artifacts",
+    "pass_criteria",
+    "actual_status",
+    "actual_evidence_ids",
+    "blockers",
+    "residual_risks"
+  ],
+  "schema_version": "1.0.0",
+  "shards": [
+    {
+      "git_blob_sha": "5ad4ee8fe68a140080b10b066af6056490a70e3a",
+      "part_number": 1,
+      "path": "docs/evidence/agent_v3_1/rtm/REQUIREMENTS_TRACEABILITY_MATRIX.part-001.json",
+      "payload_encoding": "plain-json-tuples",
+      "requirement_count": 40,
+      "sha256": "f7c8b2638940ffe380da3002f5343ceb26b390932d1e48010744552951a4f70f",
+      "status": "PASS"
+    },
+    {
+      "git_blob_sha": "0ff6a0a45c9d1237fdd79d5c03fb8ded85af4779",
+      "part_number": 2,
+      "path": "docs/evidence/agent_v3_1/rtm/REQUIREMENTS_TRACEABILITY_MATRIX.part-002.json",
+      "payload_encoding": "plain-json-tuples",
+      "requirement_count": 48,
+      "sha256": "e14f2340d2f0db4d862d5e6a328feef7256437f1df60e0a28da71bb9a4ba6d3b",
+      "status": "PASS"
+    },
+    {
+      "git_blob_sha": "ddfeb5b02e532e2fefcf6e22b780c0ea7a261f57",
+      "part_number": 3,
+      "path": "docs/evidence/agent_v3_1/rtm/REQUIREMENTS_TRACEABILITY_MATRIX.part-003.json",
+      "payload_encoding": "plain-json-tuples",
+      "requirement_count": 48,
+      "sha256": "37c91c08ba29cb4afd8610551ad8fe3d5b281beb001f7e423efd068a5ca317de",
+      "status": "PASS"
+    },
+    {
+      "git_blob_sha": "596dafcd12c8805cecca244bf28ee3c28c60e5a9",
+      "part_number": 4,
+      "path": "docs/evidence/agent_v3_1/rtm/REQUIREMENTS_TRACEABILITY_MATRIX.part-004.json",
+      "payload_encoding": "plain-json-tuples",
+      "requirement_count": 25,
+      "sha256": "43ec50d42a369eeaa67342be70b80975ed5a687256e16594845f59ed15c366ee",
+      "status": "PASS"
+    },
+    {
+      "git_blob_sha": "c17fcb9a50f76a17e6e0087cef3dba134bb59e7e",
+      "part_number": 5,
+      "path": "docs/evidence/agent_v3_1/rtm/REQUIREMENTS_TRACEABILITY_MATRIX.part-005.json",
+      "payload_encoding": "plain-json-tuples",
+      "requirement_count": 25,
+      "sha256": "b4170bc1bede253bfd4bda9a147fed2663d348e5f227e257dbb1b5ad3d699066",
+      "status": "PASS"
+    },
+    {
+      "git_blob_sha": "6be5e38b6198aa715964745c139ae50b1496f2b7",
+      "part_number": 6,
+      "path": "docs/evidence/agent_v3_1/rtm/REQUIREMENTS_TRACEABILITY_MATRIX.part-006.json",
+      "payload_encoding": "plain-json-tuples",
+      "requirement_count": 25,
+      "sha256": "4125fe1f1e6e2e9eed2a18e9fc4ab0937e852fd26b334e4134364818a325e2a2",
+      "status": "PASS"
+    },
+    {
+      "git_blob_sha": "6bd5239d63a2c282ecf3d42b3f4b60295ed15b65",
+      "part_number": 7,
+      "path": "docs/evidence/agent_v3_1/rtm/REQUIREMENTS_TRACEABILITY_MATRIX.part-007.json",
+      "payload_encoding": "gzip+base64",
+      "requirement_count": 84,
+      "sha256": "90d6230644f23f4be6d3a67677b6cc0f58b35aba3b604d5015c4d3efe0f69f65",
+      "status": "PASS"
+    },
+    {
+      "git_blob_sha": "31e027fbf955d275ce97b0c4c69fbb25769a3a1b",
+      "part_number": 8,
+      "path": "docs/evidence/agent_v3_1/rtm/REQUIREMENTS_TRACEABILITY_MATRIX.part-008.json",
+      "payload_encoding": "gzip+base64",
+      "requirement_count": 84,
+      "sha256": "49f99b81cce8c72283216074f20cce6835db75fdb31eae14e1d8f6ad537d9b54",
+      "status": "PASS"
+    },
+    {
+      "git_blob_sha": "ea6e06d34ee9e0ec78c986a03c95746ebebaf4b6",
+      "part_number": 9,
+      "path": "docs/evidence/agent_v3_1/rtm/REQUIREMENTS_TRACEABILITY_MATRIX.part-009.json",
+      "payload_encoding": "gzip+base64",
+      "requirement_count": 84,
+      "sha256": "daa149541f90469a136e269ae2a9afb83d5ea59f55e949d3c675f2bc48f24c64",
+      "status": "PASS"
+    },
+    {
+      "git_blob_sha": "60fc650f76a0fe06352a8b2dfcaeba8b22a413f9",
+      "part_number": 10,
+      "path": "docs/evidence/agent_v3_1/rtm/REQUIREMENTS_TRACEABILITY_MATRIX.part-010.json",
+      "payload_encoding": "gzip+base64",
+      "requirement_count": 83,
+      "sha256": "fe7966b65638fdf3ecd036f205d4968a826d53221f35db547d5970b9394835d0",
+      "status": "PASS"
+    },
+    {
+      "git_blob_sha": "7901badd35fec599471fe2c27e92272f83a9dbe5",
+      "part_number": 11,
+      "path": "docs/evidence/agent_v3_1/rtm/REQUIREMENTS_TRACEABILITY_MATRIX.part-011.json",
+      "payload_encoding": "gzip+base64",
+      "requirement_count": 83,
+      "sha256": "bb9833b8d453efbb6deb209682388ef0f0e9c6d77891e1b57748fa512b1cb5b6",
+      "status": "PASS"
+    },
+    {
+      "git_blob_sha": "d39aa4f72d1b6db07429957e0189211d52cb433f",
+      "part_number": 12,
+      "path": "docs/evidence/agent_v3_1/rtm/REQUIREMENTS_TRACEABILITY_MATRIX.part-012.json",
+      "payload_encoding": "gzip+base64",
+      "requirement_count": 83,
+      "sha256": "7490ee0aa17eef6bb7881e49bc6992d1d56494a5e4c5f65f9adabd624341a5b9",
+      "status": "PASS"
+    }
+  ],
+  "shards_validated": 12,
+  "source_layer_counts": {
+    "Quantum_Autonomous_Release_Agent_Master_Prompt_v2_0(3).docx": 325,
+    "Quantum_Maximum_Assurance_Protocol_v3_1_UI_REFERENCE_LOCK.docx": 387
+  },
+  "status": "PASS",
+  "status_counts": {
+    "BLOCKED": 0,
+    "FAILED": 0,
+    "IN_PROGRESS": 6,
+    "NOT_STARTED": 216,
+    "PARTIAL": 27,
+    "UNVERIFIED": 460,
+    "VERIFIED": 3
+  },
+  "ui_reference_p0_count": 24,
+  "ui_reference_sha256": "2482074aea312b065b4094792c5676445514dd555d50a064a5ae3e189dc60d13",
+  "unique_requirement_count": 712
+}
