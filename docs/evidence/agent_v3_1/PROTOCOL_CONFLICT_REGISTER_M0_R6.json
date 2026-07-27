@@ -1,0 +1,85 @@
+{
+  "schema_version": "1.4.0",
+  "artifact_type": "PROTOCOL_CONFLICT_REGISTER_SUCCESSOR",
+  "repository": "gollandecd-fabula/quantum-analytics",
+  "branch": "fix/quantum-one-click-stable-release",
+  "subject_exact_head": "2703d76c199a9b64ff430aeb776bba45094e07a3",
+  "generated_at_utc": "2026-07-16T11:36:45Z",
+  "work_order_id": "WO-M0-014",
+  "append_only_chain": {
+    "previous_register_path": "docs/evidence/agent_v3_1/PROTOCOL_CONFLICT_REGISTER.json",
+    "previous_register_blob_sha": "86d546c7c2c1a4b3c8546efdb0af7bda3cebaacf",
+    "previous_register_preserved": true,
+    "inherited_conflicts": [
+      "PCON-001",
+      "PCON-002",
+      "PCON-003",
+      "PCON-004",
+      "PCON-005"
+    ]
+  },
+  "conflict_events": [
+    {
+      "conflict_id": "PCON-006",
+      "type": "CURRENT_HEAD_INVENTORY_AND_DUPLICATE_RISK",
+      "severity": "P1",
+      "status": "RESOLVED_L0_TRACKED_SCOPE",
+      "requirement": "Inventory every tracked runtime/control component by content before creating an equivalent.",
+      "observed": "All 195 tracked runtime/config paths at exact head were content-bound; existing controller, audit, Red Team, marketplace and packaging ownership was identified.",
+      "evidence": [
+        {
+          "path": "docs/evidence/agent_v3_1/M0_R5_CURRENT_HEAD_INVENTORY_AND_DUPLICATE_RISK_AUDIT.json",
+          "git_blob_sha": "8f7266f8cc9537bed1f70d8e07f4920c81c6902c",
+          "sha256": "fc895813c3150b7474a95893ea72fd4512c231345a8f04859acbfc8a7e6a84c3"
+        }
+      ],
+      "decision": "NO_PARALLEL_CONTROL_PLANE_RTM_ADAPTER_FRAMEWORK_OR_PACKAGING_STACK; EXTEND_EXISTING_M9_AND_EXISTING_OWNERSHIP_PATHS"
+    },
+    {
+      "conflict_id": "PCON-007",
+      "type": "DYNAMIC_EXTERNAL_DUPLICATE_ABSENCE",
+      "severity": "P1",
+      "status": "OPEN_UNVERIFIED",
+      "requirement": "Do not elevate tracked repository absence to global absence.",
+      "observed": "Dynamic generated code, external services, untracked local files and prior installations were outside M0-R5 evidence.",
+      "decision": "FAIL_CLOSED; NO_GLOBAL_DUPLICATE_ABSENCE_CLAIM"
+    },
+    {
+      "conflict_id": "PCON-008",
+      "type": "AUTONOMOUS_WRITE_PATH_WITHOUT_PROTOCOL_V3_1_GATE",
+      "severity": "P1",
+      "status": "OPEN",
+      "requirement": "Repository writes require authorized stage, signed work order and immutable boundary.",
+      "observed": "The M1 push-only manifest-reconcile job has contents:write and can commit and push.",
+      "decision": "PRESERVE_BUT_BLOCK_FUTURE_USE_UNTIL_PROTOCOL_GATED",
+      "path": ".github/workflows/m1-baseline-audit.yml"
+    },
+    {
+      "conflict_id": "PCON-009",
+      "type": "PR_METADATA_STALE",
+      "severity": "P1",
+      "status": "OPEN_PENDING_POST_CI_UPDATE",
+      "requirement": "PR metadata must bind the factual repository exact head and evidence limitations.",
+      "observed": "PR #85 body still cites exact head 789ceb... while branch head is 2703d76... before M0-R6.",
+      "decision": "UPDATE_ONLY_AFTER_M0_R6_COMMIT_AND_CI_PASS"
+    }
+  ],
+  "open_conflicts": [
+    "PCON-002",
+    "PCON-007",
+    "PCON-008",
+    "PCON-009"
+  ],
+  "resolved_current_head_conflicts": [
+    "PCON-006"
+  ],
+  "maximum_evidence_level": "L0_STATIC_CURRENT_HEAD",
+  "release_authorized": false,
+  "milestone_complete": false,
+  "current_decision": [
+    "FAIL-CLOSED",
+    "PROTOCOL_IMPLEMENTATION_INCOMPLETE",
+    "MILESTONE_NOT_COMPLETE",
+    "RELEASE_BLOCKED"
+  ]
+}

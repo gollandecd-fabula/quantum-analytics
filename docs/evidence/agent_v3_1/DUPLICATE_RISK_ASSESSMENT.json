@@ -1,0 +1,78 @@
+{
+  "branch": "fix/quantum-universal-relaunch-r2",
+  "candidate_groups": {
+    "control_plane": [],
+    "installer": [
+      ".github/workflows/build-two-installer-bundles-r2.yml",
+      "docs/architecture/ONE_CLICK_HOME_LOCAL_R1.md",
+      "scripts/windows/build_exe_installer.ps1",
+      "scripts/windows/build_two_installer_bundles.ps1",
+      "scripts/windows/install_home_local.ps1",
+      "scripts/windows/one_click_home_local.ps1",
+      "tests/test_tz_correction_and_exe_installer.py",
+      "tests/test_windows_one_click_installer_r1.py"
+    ],
+    "l4": [
+      ".github/workflows/l4-installed-runtime.yml",
+      "scripts/ci/l4_installed_runtime.ps1",
+      "scripts/ci/l4_installed_runtime_postcheck.ps1",
+      "tests/test_l4_installed_runtime_contract.py",
+      "tests/test_l4_installed_runtime_postcheck_contract.py"
+    ],
+    "l5": [],
+    "orchestrator": [],
+    "redteam": [
+      ".github/workflows/build-one-button-redteam-r3.yml",
+      ".github/workflows/full-project-redteam-r1.yml",
+      "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_FULL_PROJECT_REDTEAM_R1.json",
+      "docs/evidence/FULL_PROJECT_REDTEAM_R1_DEFECT_REGISTER.json",
+      "docs/evidence/FULL_PROJECT_REDTEAM_R1_RTM.json",
+      "docs/evidence/M5_BROWSER_RED_TEAM.json",
+      "docs/evidence/M9_PLATEAU_RED_TEAM_REPORT.md",
+      "docs/redteam_home_local_r6.md",
+      "tests/test_b1b_redteam_runtime_regressions.py",
+      "tests/test_full_project_redteam_r1.py",
+      "tests/test_m0_attestation_redteam.py",
+      "tests/test_windows_redteam_hardening.py"
+    ],
+    "release_gate": [
+      ".github/workflows/windows-release-gate.yml"
+    ],
+    "scheduled_reports": [
+      "docs/evidence/M5_SCHEDULED_REPORTS_RTM.json",
+      "src/quantum/application/_finance_center_scheduled_reports.py",
+      "src/quantum/application/scheduled_reports.py",
+      "tests/test_m5_scheduled_reports.py"
+    ],
+    "scheduler": [],
+    "ui": [
+      "docs/architecture/INTERACTIVE_DASHBOARD_R1.md",
+      "src/quantum/application/desktop_center.py",
+      "src/quantum/outputs/dashboard_style.py",
+      "tests/test_interactive_dashboard_r1.py"
+    ],
+    "work_order": []
+  },
+  "decisions": {
+    "m9_reuse_decision": "RESTORE_HISTORY_THEN_EXTEND_IN_PLACE_UNDER_M1",
+    "manager_runtime_limit": "AT_MOST_ONE_UNDER_EXISTING_M9_OWNERSHIP",
+    "parallel_control_plane_authorized": false,
+    "parallel_release_gate_authorized": false,
+    "parallel_rtm_authorized": false
+  },
+  "document_type": "DUPLICATE_RISK_ASSESSMENT",
+  "findings": [
+    "No tracked tools/m9_maximum_assurance_control_plane.py exists at the current exact head.",
+    "No tracked canonical agent_v3_1 RTM/state exists at the current exact head before this reconciliation.",
+    "No tracked executable Release Orchestrator, signed work-order scheduler or isolated specialist process was found.",
+    "Existing Red Team, L4, installer, finance, UI and reporting capabilities must be reused rather than duplicated.",
+    "The Windows release-gate workflow is not a substitute for the Protocol v3.1 Deterministic Release Gate."
+  ],
+  "release_authorized": false,
+  "repository": "gollandecd-fabula/quantum-analytics",
+  "schema_version": "2.0.0",
+  "status": "RESOLVED_L0_STATIC_CURRENT_HEAD",
+  "subject_exact_head": "b151e67c2bea8d4d50c5c4a2aeb0695e89921c01",
+  "tracked_entry_count": 760,
+  "work_order_id": "WO-M0-R7-002"
+}

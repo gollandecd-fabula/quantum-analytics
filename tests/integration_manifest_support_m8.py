@@ -47,6 +47,10 @@ QUANTUM_UNIVERSAL_RELAUNCH_R2_OVERLAY = (
     "ARTIFACT_MANIFEST_OVERLAY_QUANTUM_UNIVERSAL_RELAUNCH_R2.json",
     "base_shortcut_launch_repair_r1_overlay_git_blob_sha",
 )
+AGENT_V3_1_M0_R7_OVERLAY = (
+    "ARTIFACT_MANIFEST_OVERLAY_AGENT_V3_1_M0_R7.json",
+    "base_qur2_overlay_git_blob_sha",
+)
 ALL_OVERLAY_NAMES = tuple(
     name
     for name, _ in (
@@ -64,6 +68,7 @@ ALL_OVERLAY_NAMES = tuple(
     XLSX_NAMESPACE_FALLBACK_R1_OVERLAY[0],
     SHORTCUT_LAUNCH_REPAIR_R1_OVERLAY[0],
     QUANTUM_UNIVERSAL_RELAUNCH_R2_OVERLAY[0],
+    AGENT_V3_1_M0_R7_OVERLAY[0],
 )
 CONTROL_PATHS = {
     "docs/evidence/ARTIFACT_MANIFEST.json",
@@ -130,6 +135,10 @@ def load_effective_manifest() -> dict:
         evidence
         / "ARTIFACT_MANIFEST_OVERLAY_SHORTCUT_LAUNCH_REPAIR_R1.json"
     ).read_bytes()
+    qur2_raw = (
+        evidence
+        / "ARTIFACT_MANIFEST_OVERLAY_QUANTUM_UNIVERSAL_RELAUNCH_R2.json"
+    ).read_bytes()
 
     _apply_parallel_overlay(artifacts, GOVERNANCE_OVERLAY, r99_raw)
     _apply_parallel_overlay(artifacts, R100_OVERLAY, r99_raw)
@@ -163,6 +172,11 @@ def load_effective_manifest() -> dict:
         artifacts,
         QUANTUM_UNIVERSAL_RELAUNCH_R2_OVERLAY,
         shortcut_r1_raw,
+    )
+    _apply_parallel_overlay(
+        artifacts,
+        AGENT_V3_1_M0_R7_OVERLAY,
+        qur2_raw,
     )
 
     current["artifacts"] = [artifacts[path] for path in sorted(artifacts)]

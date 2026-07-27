@@ -1,0 +1,57 @@
+{
+  "base_head": "61f8a8e523ef4f760c48ac4e59606ecde0f3fe7b",
+  "baseline": {
+    "source_ci_exit_code": 0,
+    "source_ci_tests": 964,
+    "tracked_files": 760,
+    "worktree_clean": true
+  },
+  "branch": "fix/quantum-universal-relaunch-r2",
+  "current_decision": [
+    "FAIL-CLOSED",
+    "PROTOCOL_IMPLEMENTATION_INCOMPLETE",
+    "MILESTONE_NOT_COMPLETE",
+    "RELEASE_BLOCKED"
+  ],
+  "document_type": "M0_CURRENT_HEAD_RECONCILIATION",
+  "generated_at_utc": "2026-07-27T06:27:52.540237+00:00",
+  "historical_current_relationship": "DIVERGED",
+  "historical_merge_base": "7f7240aef05065aaf1dc396a54c7aed7f8eff6ae",
+  "historical_pr85_head": "31bf463142a6c0f225b812c033073ae2eac53ffc",
+  "local_validation": {
+    "evidence_sha256": "24a6f196dcb07a4eb712db25cfffc98a79c7c0bcc5eda8406a63687cf37c1731",
+    "full_source_ci": "971/971 PASS",
+    "git_diff_check": "PASS",
+    "manifest_tests": "2/2 PASS",
+    "targeted_tests": "9/9 PASS"
+  },
+  "merge_base": "61f8a8e523ef4f760c48ac4e59606ecde0f3fe7b",
+  "prior_attempt": {
+    "product_change": "NONE",
+    "reason": "Historical overlay terminal-assumption tests rejected a later valid overlay.",
+    "status": "FAILED_ROLLED_BACK",
+    "work_order_id": "WO-M0-R7-001"
+  },
+  "release_authorized": false,
+  "repository": "gollandecd-fabula/quantum-analytics",
+  "restored_immutable_sources": {
+    "canonical_rtm_registry_set_sha256": "4cd2561b2da074b73ebe9ac8a3ccec6f2c890f7f7bf7998ac1a0ca698ed1037a",
+    "canonical_rtm_requirement_count": 712,
+    "canonical_rtm_shards": 12,
+    "master_prompt_sha256": "1008a69ac56e44e6fa1f69c51f1fe43c8e621c161a52241230fa0af88ecd004a",
+    "protocol_sha256": "be69b8f1f919066c67086d6dd4678acf5e3cb3c4f1db9bc587dc540018601a90",
+    "ui_reference_sha256": "2482074aea312b065b4094792c5676445514dd555d50a064a5ae3e189dc60d13"
+  },
+  "schema_version": "1.0.0",
+  "scope": {
+    "controller_code_changed": false,
+    "main_changed": false,
+    "marketplace_writes_enabled": false,
+    "product_code_changed": false,
+    "workflow_changed": false
+  },
+  "status": "PASS_LOCAL_L0_PENDING_REMOTE_BINDING",
+  "subject_exact_head": "b151e67c2bea8d4d50c5c4a2aeb0695e89921c01",
+  "work_order_id": "WO-M0-R7-002",
+  "work_order_sha256": "0a0ff2b2b79928d00985f117b74d3345c7aa1923203b7f2ce7333903c9370ee8"
+}

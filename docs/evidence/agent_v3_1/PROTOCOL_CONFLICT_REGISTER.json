@@ -1,0 +1,69 @@
+{
+  "branch": "fix/quantum-universal-relaunch-r2",
+  "conflicts": [
+    {
+      "conflict_id": "PCON-R7-001",
+      "decision": "RESTORE_IMMUTABLE_EVIDENCE_ONLY_IN_M0; CONTROLLER_CODE_REQUIRES_SEPARATE_M1_WORK_ORDER",
+      "evidence": [
+        "RECURSIVE_EXACT_HEAD_TREE.json",
+        "CURRENT_ARCHITECTURE_INVENTORY.json",
+        "DUPLICATE_RISK_ASSESSMENT.json"
+      ],
+      "observed": "PR148 diverged from PR85 and current exact head contained no M9 tool/workflow/test or agent_v3_1 canonical RTM/state.",
+      "requirement": "Preserve and reuse the existing M9/712-row RTM rather than create parallel components.",
+      "severity": "P0",
+      "status": "RESOLVED_LOCAL_L0_PENDING_REMOTE",
+      "type": "CONTROL_PLANE_HISTORY_DROPPED_ON_DIVERGED_BRANCH"
+    },
+    {
+      "conflict_id": "PCON-R7-002",
+      "decision": "REVOKE_READY_CLAIM; PRESERVE FAIL_CLOSED; REPAIR ONLY AFTER M0/M1 CONTROL-PLANE GATES",
+      "observed": "User screenshots from the previously issued EXE show SCHEDULED_REPORT_SCOPE_INVALID and incomplete analytics data/raw-code dialogs.",
+      "requirement": "User-visible P0 paths, scheduled reports and UI Reference Lock require physical L5 on the same artifact.",
+      "resolution_required": "Reproduce on update path, add regression, minimally migrate legacy config, rebuild one artifact, run L4 and user L5.",
+      "severity": "P0",
+      "status": "OPEN",
+      "type": "PHYSICAL_L5_PRODUCT_FAILURE"
+    },
+    {
+      "conflict_id": "PCON-R7-003",
+      "decision": "PRESERVE HISTORICAL BYTES AND BLOB SHAS; CREATE NEW CURRENT-HEAD STATE; DO NOT REBIND OLD PASS.",
+      "observed": "PR85 evidence is bound to historical heads and current product head is b151e67c.",
+      "requirement": "Results from different commits and artifacts must not be combined.",
+      "severity": "P0",
+      "status": "RESOLVED_L0",
+      "type": "HISTORICAL_EVIDENCE_HEAD_MISMATCH"
+    },
+    {
+      "conflict_id": "PCON-R7-004",
+      "decision": "NEXT SCHEDULER CANDIDATE AFTER M0 IS MINIMAL M1 RESTORE_AND_INGEST WORK ORDER.",
+      "observed": "Historical M9 remains Protocol 3.0 synthetic bootstrap and is absent from current head.",
+      "requirement": "Existing M9 must ingest/enforce Protocol v3.1 and canonical 712-row RTM at runtime.",
+      "severity": "P0",
+      "status": "OPEN",
+      "type": "M1_RUNTIME_INGESTION_ABSENT"
+    }
+  ],
+  "current_decision": [
+    "FAIL-CLOSED",
+    "PROTOCOL_IMPLEMENTATION_INCOMPLETE",
+    "MILESTONE_NOT_COMPLETE",
+    "RELEASE_BLOCKED"
+  ],
+  "generated_at_utc": "2026-07-27T06:27:52.540237+00:00",
+  "maximum_evidence_level": "L0_STATIC_LOCAL_CURRENT_HEAD_PENDING_REMOTE_BINDING",
+  "open_conflicts": [
+    "PCON-R7-002",
+    "PCON-R7-004"
+  ],
+  "previous_pr85_conflict_register_blob_sha": "86d546c7c2c1a4b3c8546efdb0af7bda3cebaacf",
+  "release_authorized": false,
+  "repository": "gollandecd-fabula/quantum-analytics",
+  "resolved_conflicts": [
+    "PCON-R7-001",
+    "PCON-R7-003"
+  ],
+  "schema_version": "2.0.0",
+  "subject_exact_head": "b151e67c2bea8d4d50c5c4a2aeb0695e89921c01",
+  "work_order_id": "WO-M0-R7-002"
+}

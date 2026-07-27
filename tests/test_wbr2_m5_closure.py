@@ -41,6 +41,11 @@ QUR2_OVERLAY_PATH = (
     / "docs/evidence"
     / "ARTIFACT_MANIFEST_OVERLAY_QUANTUM_UNIVERSAL_RELAUNCH_R2.json"
 )
+AGENT_M0_R7_OVERLAY_PATH = (
+    ROOT
+    / "docs/evidence"
+    / "ARTIFACT_MANIFEST_OVERLAY_AGENT_V3_1_M0_R7.json"
+)
 
 
 class Wbr2M5ClosureContracts(unittest.TestCase):
@@ -126,6 +131,15 @@ class Wbr2M5ClosureContracts(unittest.TestCase):
         qur2 = json.loads(QUR2_OVERLAY_PATH.read_text(encoding="utf-8"))
         expected.update(
             {path: [path, digest, size] for path, digest, size in qur2["entries"]}
+        )
+        agent_m0_r7 = json.loads(
+            AGENT_M0_R7_OVERLAY_PATH.read_text(encoding="utf-8")
+        )
+        expected.update(
+            {
+                path: [path, digest, size]
+                for path, digest, size in agent_m0_r7["entries"]
+            }
         )
         for path in (entry[0] for entry in overlay["entries"]):
             self.assertEqual(rows[path], expected[path])

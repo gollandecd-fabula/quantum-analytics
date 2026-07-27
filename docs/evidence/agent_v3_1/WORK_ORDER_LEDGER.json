@@ -1,0 +1,279 @@
+{
+  "append_only_chain": {
+    "earlier_history_is_preserved_transitively": true,
+    "history_preservation": "PREDECESSOR_BLOB_IMMUTABLE_REFERENCE",
+    "previous_pr85_ledger_blob_sha": "167d96c5ba59f3ebcf6d546622c0ffd9e7c4833f",
+    "previous_work_order_ids": [
+      "WO-M0-008",
+      "WO-M0-009",
+      "WO-M0-010",
+      "WO-M0-011"
+    ]
+  },
+  "branch": "fix/quantum-universal-relaunch-r2",
+  "current_decision": [
+    "FAIL-CLOSED",
+    "PROTOCOL_IMPLEMENTATION_INCOMPLETE",
+    "MILESTONE_NOT_COMPLETE",
+    "RELEASE_BLOCKED"
+  ],
+  "document_type": "WORK_ORDER_LEDGER",
+  "generated_at_utc": "2026-07-27T06:27:52.540237+00:00",
+  "maximum_evidence_level": "L0_STATIC_CURRENT_HEAD",
+  "milestone_complete": false,
+  "release_authorized": false,
+  "repository": "gollandecd-fabula/quantum-analytics",
+  "schema_version": "2.0.0",
+  "subject_exact_head": "b151e67c2bea8d4d50c5c4a2aeb0695e89921c01",
+  "work_orders": [
+    {
+      "active_milestone": "M0",
+      "actual_evidence": {
+        "complete_tree_paths_scanned": 682,
+        "duplicate_risk_blob_sha": "fab2429958677ab72ef8630bb53c2c75b03d8482",
+        "packaged_files_scanned_supplementary": 813,
+        "packaged_python_files_scanned": 185
+      },
+      "actual_status": "RESOLVED_L0",
+      "artifacts": [
+        "DUPLICATE_RISK_ASSESSMENT.json"
+      ],
+      "change_boundary": "Read-only repository and artifact inspection; no production, test, tool or workflow changes.",
+      "decision": "NO_PARALLEL_CONTROL_PLANE_OR_RTM; EXTEND_EXISTING_M9; ADAPT_EXISTING_ROLE_CAPABILITIES",
+      "evidence_level": "L0_STATIC",
+      "pass_criteria": "All 682 tracked paths classified; existing overlapping components assigned reuse/extend ownership; no unexamined equivalent manager or specialist path.",
+      "requirement": "Classify every tracked exact-head component and determine duplicate ownership before adding an orchestrator or specialist runtime.",
+      "residual_risk": "Untracked local files and external systems are outside repository-tree scope.",
+      "rollback_condition": "Any missed tracked equivalent component or wrong exact-head binding reopens the gate.",
+      "target_exact_head": "d5afcf5e4a28a5ce3cc144cf25db649aceda8b1f",
+      "test": "Complete-path token classification plus exact-head inspection of M9, M1, M7, M8, Red Team, worker and dispatcher ownership.",
+      "work_order_id": "WO-M0-008"
+    },
+    {
+      "active_milestone": "M0",
+      "actual_evidence": {
+        "canonical_entries_sha256": "44af77d30a2501157b75d13e0c495f8982cdfc1499b57bf8af28fdd6522f76db",
+        "entry_count": 682,
+        "linux_windows_entry_equality": true,
+        "path_list_sha256": "c52894cde474c22fc960b6bd5cb86505874c14ae0ee196a1badac98993732783",
+        "raw_ls_tree_sha256": "b11ff768c45e6805fa7b0d18e0262bb627881249a65e496a78284521dbe4bc31",
+        "unique_path_count": 682
+      },
+      "actual_status": "RESOLVED_WITH_ROLLBACK",
+      "artifacts": [
+        {
+          "artifact_id": 8366619203,
+          "digest": "sha256:1a721cc5c25dacce1d17c102e5b64b0e10f503f0096c71ac0b8c30718b8ea84a",
+          "platform": "linux"
+        },
+        {
+          "artifact_id": 8366648754,
+          "digest": "sha256:7a243378c34d2e3c46c0a92e77dbbd9e8b68373d6c7aec7ed2ffdc8798abaa94",
+          "platform": "windows"
+        }
+      ],
+      "change_boundary": "Temporary change only to tools/m1_baseline_audit.py; mandatory restoration to original blob after artifact capture.",
+      "evidence_level": "L0_STATIC",
+      "instrumentation_commit": "ebf186d6991f2dc5108b69c6693d1e8f5aa8450e",
+      "net_tree_effect_after_rollback": "NONE",
+      "pass_criteria": "Both platforms bind the same parent head and produce identical complete entry arrays; temporary patch leaves zero resulting tree change.",
+      "requirement": "Obtain a complete recursive tree for the frozen exact head through a full repository checkout.",
+      "residual_risk": "Evidence is static and does not execute the future manager-specialist runtime.",
+      "restored_tool_blob_sha": "ffc87cb1601c1301ff6cc023ab82ce54bcc2e79d",
+      "rollback_commit": "d42a935417a3a335d5b9cc3de41ce72490ba648e",
+      "rollback_condition": "Target mismatch, platform disagreement, truncation or original-tool blob mismatch.",
+      "target_exact_head": "d5afcf5e4a28a5ce3cc144cf25db649aceda8b1f",
+      "test": "Linux and Windows full-depth checkout; git ls-tree -r --full-tree --long -z HEAD^; compare entry arrays and hashes; verify rollback tree equality.",
+      "work_order_id": "WO-M0-009"
+    },
+    {
+      "active_milestone": "M0",
+      "actual_status": "RESOLVED_L0",
+      "artifacts": [
+        {
+          "blob_sha": "448269b137117142ff6b6ef520176ac044bd1f0a",
+          "commit_sha": "28884b56e53b78c79a9ffa5020225a2d7efd742f",
+          "path": "recursive_tree/RECURSIVE_EXACT_HEAD_TREE.part-001.json"
+        },
+        {
+          "blob_sha": "474104e2533f117ffef984766699e4028696cf7c",
+          "commit_sha": "c0c4d3f06252cbc565937cd8d8ae650be41a934f",
+          "path": "recursive_tree/RECURSIVE_EXACT_HEAD_TREE.part-002.json"
+        },
+        {
+          "blob_sha": "98d90fee4eb5ab1fd96a8b2def43844708b23731",
+          "commit_sha": "78a7e91829daafd22ffe52f3c371ae0645eed043",
+          "path": "recursive_tree/RECURSIVE_EXACT_HEAD_TREE.part-003.json"
+        },
+        {
+          "blob_sha": "c03e1bcbbb968054195b0b4ff3dc56a9e0065a31",
+          "commit_sha": "7b203778e282dd645a6b2a5ae9cffc85e6090892",
+          "path": "recursive_tree/RECURSIVE_EXACT_HEAD_TREE.part-004.json"
+        },
+        {
+          "blob_sha": "485cbd618d9569566a3186a35952feed5dab2ff3",
+          "commit_sha": "1ff511eb908d8c1d74327c924b465ea969d3b5bc",
+          "path": "recursive_tree/RECURSIVE_EXACT_HEAD_TREE.part-005.json"
+        },
+        {
+          "blob_sha": "f8d34060a68e2aae6a9c2de08b34f95b918bfd15",
+          "commit_sha": "31fbaa205d621453bccc783ada7d2356b5bfb824",
+          "path": "RECURSIVE_EXACT_HEAD_TREE.json"
+        },
+        {
+          "blob_sha": "fab2429958677ab72ef8630bb53c2c75b03d8482",
+          "commit_sha": "2afdfd62830deac54c9159831c9812284c4f530a",
+          "path": "DUPLICATE_RISK_ASSESSMENT.json"
+        }
+      ],
+      "change_boundary": "Only docs/evidence/agent_v3_1/RECURSIVE_EXACT_HEAD_TREE.json, recursive_tree fragments and DUPLICATE_RISK_ASSESSMENT.json.",
+      "evidence_level": "L0_STATIC",
+      "pass_criteria": "Permanent artifacts bind exact head, dual-platform source evidence and duplicate decisions without release or runtime claim.",
+      "requirement": "Persist the recursive-tree identity and duplicate-risk decision as immutable GitHub evidence.",
+      "residual_risk": "Text reader truncates complete reread of long parts 001 and 002; primary completeness remains independently established by dual-platform Actions artifacts.",
+      "rollback_condition": "Malformed index, wrong target, missing fragment or claim elevation.",
+      "test": "Bind five fragment Git blobs, committed index, artifact digests, entry counts and fail-closed claim boundary.",
+      "work_order_id": "WO-M0-010"
+    },
+    {
+      "active_milestone": "M0",
+      "actual_status": "IN_PROGRESS_PENDING_PR_METADATA",
+      "artifacts": [
+        {
+          "blob_sha": "86d546c7c2c1a4b3c8546efdb0af7bda3cebaacf",
+          "commit_sha": "56e9df2e00c6914776d202927a7fe096b7e75ebb",
+          "path": "PROTOCOL_CONFLICT_REGISTER.json"
+        },
+        {
+          "blob_sha": "2e2ece868b5097820f84198206528aaf38287f45",
+          "commit_sha": "e2fdf35f19e070f3b882395cb248fce9e02ccf41",
+          "path": "CURRENT_ARCHITECTURE_INVENTORY.json"
+        },
+        {
+          "blob_sha": "a922c9d1282713d0f6aaa7d0bed0cd035ec56b19",
+          "commit_sha": "76e66da65aea7ed2d4d79d7715f00027ee219339",
+          "path": "ARCHITECTURE_MIGRATION_MAP.json"
+        },
+        {
+          "blob_sha": "06516801e670986d0198b77b16ec883aa8ef5b32",
+          "commit_sha": "096ca74f54603428bce412280dc6f225e272d582",
+          "path": "AUTONOMOUS_EXECUTION_STATE.json"
+        }
+      ],
+      "change_boundary": "Existing M0 evidence files and PR metadata only.",
+      "evidence_level": "L0_STATIC",
+      "pass_criteria": "State records inventory and duplicate risk as resolved L0 while controller runtime, L2 ingestion, L4/L5, RUN A/RUN B and physical pilot remain open.",
+      "requirement": "Reconcile control state after the recursive inventory and duplicate-risk gate.",
+      "residual_risk": "PR metadata remains to be bound to the final evidence head.",
+      "rollback_condition": "Any false milestone/release completion or parallel-component authorization.",
+      "test": "Remove only the inventory blocker; preserve runtime and L4/L5 blockers; enforce no-parallel migration rules.",
+      "work_order_id": "WO-M0-011"
+    },
+    {
+      "active_milestone": "M0",
+      "actual_evidence_ids": [
+        "failed_wo_m0_r7_001/test_evidence"
+      ],
+      "actual_status": "FAILED_ROLLED_BACK",
+      "assigned_role": "CONTROL_PLANE",
+      "change_boundary": "Restore immutable historical agent_v3_1 evidence and create append-only current-head M0 reconciliation. No product/runtime/controller implementation.",
+      "created_at_utc": "2026-07-27T06:24:18.729051+00:00",
+      "decision": "ROLLBACK_COMPLETE; OPEN_SEPARATE_HARNESS_DEFECT",
+      "defect_id": "M0-R7-D001",
+      "document_type": "WORK_ORDER",
+      "expected_result": "M0 current-head inventory and preservation become VERIFIED_L0 while M1 controller runtime, product P0/P1, L4/L5 and release remain blocked.",
+      "failure_reason": "Historical closure tests treated QUR2 as terminal and rejected the valid append-only M0 overlay.",
+      "files_allowed_to_change": [
+        "docs/evidence/agent_v3_1/**",
+        "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_AGENT_V3_1_M0_R7.json",
+        "tests/integration_manifest_support_m8.py",
+        "tests/test_agent_v3_1_m0_r7_reconciliation.py"
+      ],
+      "files_forbidden_to_change": [
+        "src/**",
+        "tools/**",
+        ".github/workflows/**",
+        "scripts/**",
+        "requirements/**",
+        "protocol/**",
+        "main"
+      ],
+      "hypothesis": "The current QUR2 branch diverged from PR85 and lost the existing M9/712-row RTM state. Restoring immutable evidence plus a new current-head inventory preserves working architecture without creating a parallel control plane.",
+      "marketplace_writes_enabled": false,
+      "next_test": "Validate 12 RTM shards, protocol/UI hashes, 760-entry exact-head inventory, anti-duplication decisions, fail-closed state, negative controls, manifest equality and complete source CI.",
+      "related_requirement_ids": [
+        "REQ-MP2-0033",
+        "REQ-MP2-0034",
+        "REQ-MP2-0035",
+        "REQ-MP2-0115",
+        "REQ-MP2-0134",
+        "REQ-MP2-0317"
+      ],
+      "release_authorized": false,
+      "requirement_id": "REQ-MP2-0030",
+      "rollback_command": "git revert <candidate-commit>",
+      "rollback_condition": "Any product/runtime change, stale-head claim, RTM hash mismatch, duplicate controller authorization, manifest mismatch or source-CI regression.",
+      "schema_version": "1.0.0",
+      "target_evidence_level": "L0_STATIC_CURRENT_HEAD",
+      "target_exact_head": "b151e67c2bea8d4d50c5c4a2aeb0695e89921c01",
+      "work_order_id": "WO-M0-R7-001"
+    },
+    {
+      "active_milestone": "M0",
+      "actual_evidence_ids": [
+        "m0_r7_002_test_evidence/SHA256SUMS:24a6f196dcb07a4eb712db25cfffc98a79c7c0bcc5eda8406a63687cf37c1731"
+      ],
+      "actual_results": {
+        "full_source_ci": "971/971 PASS",
+        "git_diff_check": "PASS",
+        "manifest_tests": "2/2 PASS",
+        "targeted_tests": "9/9 PASS"
+      },
+      "actual_status": "PASS_LOCAL_L0_PENDING_REMOTE_BINDING",
+      "assigned_role": "CONTROL_PLANE",
+      "change_boundary": "Restore immutable historical agent_v3_1 evidence, create append-only current-head M0 reconciliation, and correct two historical manifest tests that reject a valid later overlay. No product/runtime/controller implementation.",
+      "created_at_utc": "2026-07-27T06:27:52.540237+00:00",
+      "decision": "ALLOW_EXACT_TREE_MATERIALIZATION_ONLY; M1_AND_PRODUCT_CHANGES_REMAIN_BLOCKED",
+      "defect_id": "M0-R7-D002",
+      "document_type": "WORK_ORDER",
+      "expected_result": "M0 current-head inventory and preservation become VERIFIED_L0 while M1 controller runtime, product P0/P1, L4/L5 and release remain blocked.",
+      "files_allowed_to_change": [
+        "docs/evidence/agent_v3_1/**",
+        "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_AGENT_V3_1_M0_R7.json",
+        "tests/integration_manifest_support_m8.py",
+        "tests/test_agent_v3_1_m0_r7_reconciliation.py",
+        "tests/test_wbr2_m5_closure.py",
+        "tests/test_wbr2_m5_closure_corrective_r2.py"
+      ],
+      "files_forbidden_to_change": [
+        "src/**",
+        "tools/**",
+        ".github/workflows/**",
+        "scripts/**",
+        "requirements/**",
+        "protocol/**",
+        "main"
+      ],
+      "hypothesis": "The current QUR2 branch diverged from PR85 and lost the existing M9/712-row RTM state. Restoring immutable evidence plus a new current-head inventory preserves working architecture without creating a parallel control plane; two historical tests must include the new append-only overlay rather than treating QUR2 as terminal.",
+      "marketplace_writes_enabled": false,
+      "next_test": "Validate 12 RTM shards, protocol/UI hashes, 760-entry exact-head inventory, anti-duplication decisions, fail-closed state, negative controls, manifest equality and complete source CI.",
+      "related_requirement_ids": [
+        "REQ-MP2-0033",
+        "REQ-MP2-0034",
+        "REQ-MP2-0035",
+        "REQ-MP2-0115",
+        "REQ-MP2-0134",
+        "REQ-MP2-0317"
+      ],
+      "release_authorized": false,
+      "requirement_id": "REQ-MP2-0030",
+      "rollback_command": "git revert <candidate-commit>",
+      "rollback_condition": "Any product/runtime change, stale-head claim, RTM hash mismatch, duplicate controller authorization, manifest mismatch or source-CI regression.",
+      "schema_version": "1.0.0",
+      "target_evidence_level": "L0_STATIC_CURRENT_HEAD",
+      "target_exact_head": "b151e67c2bea8d4d50c5c4a2aeb0695e89921c01",
+      "work_order_id": "WO-M0-R7-002",
+      "work_order_sha256": "0a0ff2b2b79928d00985f117b74d3345c7aa1923203b7f2ce7333903c9370ee8"
+    }
+  ]
+}

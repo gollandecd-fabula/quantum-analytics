@@ -1,0 +1,114 @@
+{
+  "schema_version": "1.4.0",
+  "document_type": "WORK_ORDER_LEDGER_SUCCESSOR",
+  "repository": "gollandecd-fabula/quantum-analytics",
+  "branch": "fix/quantum-one-click-stable-release",
+  "subject_exact_head": "2703d76c199a9b64ff430aeb776bba45094e07a3",
+  "generated_at_utc": "2026-07-16T11:36:45Z",
+  "append_only_chain": {
+    "previous_ledger_path": "docs/evidence/agent_v3_1/WORK_ORDER_LEDGER.json",
+    "previous_ledger_blob_sha": "167d96c5ba59f3ebcf6d546622c0ffd9e7c4833f",
+    "previous_ledger_preserved": true,
+    "earlier_history_preserved_transitively": true
+  },
+  "identifier_policy": {
+    "reserved_invalid_history_ids": [
+      "WO-M0-012"
+    ],
+    "reason": "WO-M0-012 occurred in rolled-back unauthorized remediation history and is not reused."
+  },
+  "work_orders": [
+    {
+      "work_order_id": "WO-M0-013",
+      "stage": "M0-R5: REPRODUCIBLE_CURRENT_HEAD_INVENTORY_AND_DUPLICATE_RISK_AUDIT",
+      "active_milestone": "M0",
+      "authorization": "EXPLICIT_USER_AUTHORIZATION_AFTER_EXACT_NAMED_STAGE",
+      "requirement_ids": [
+        "REQ-P31-0002",
+        "REQ-P31-0005",
+        "REQ-P31-0006",
+        "REQ-P31-0010",
+        "REQ-P31-0017",
+        "REQ-P31-0018",
+        "REQ-P31-0028",
+        "REQ-MP2-0003",
+        "REQ-MP2-0004",
+        "REQ-MP2-0006",
+        "REQ-MP2-0009",
+        "REQ-MP2-0017",
+        "REQ-MP2-0116",
+        "REQ-MP2-0135",
+        "REQ-MP2-0140",
+        "REQ-MP2-0141",
+        "REQ-MP2-0317",
+        "REQ-MP2-0319"
+      ],
+      "change_boundary": "Read-only repository files, commits, workflow logs and artifacts plus local text and archive analysis. No repository, PR or workflow writes.",
+      "target_exact_head": "2703d76c199a9b64ff430aeb776bba45094e07a3",
+      "test": "Reconstruct tracked runtime scope, bind exact-head package content, inspect repository-only sources, execute neutral-filename negative control and recheck final PR head.",
+      "negative_control": "Dangerous content must produce identical findings under neutral and suggestive filenames; benign neutral-name content must produce zero findings.",
+      "evidence_level": "L0_STATIC_CURRENT_HEAD",
+      "artifacts": [
+        {
+          "path": "docs/evidence/agent_v3_1/M0_R5_CURRENT_HEAD_INVENTORY_AND_DUPLICATE_RISK_AUDIT.json",
+          "git_blob_sha": "8f7266f8cc9537bed1f70d8e07f4920c81c6902c",
+          "sha256": "fc895813c3150b7474a95893ea72fd4512c231345a8f04859acbfc8a7e6a84c3"
+        }
+      ],
+      "pass_criteria": "All 195 tracked runtime/config paths content-bound; duplicate ownership decisions based on content; filename-independent control passes; limitations remain explicit.",
+      "actual_status": "PASS_L0_TRACKED_RUNTIME_SCOPE",
+      "rollback_condition": "Any missed tracked path, exact-head mismatch, unresolved shared content difference or filename-dependent control reopens the audit.",
+      "residual_risk": "Dynamic generated code, external systems, untracked local files and prior installations remain unverified."
+    },
+    {
+      "work_order_id": "WO-M0-014",
+      "stage": "M0-R6: APPEND_ONLY_M0_EVIDENCE_AND_PR_RECONCILIATION",
+      "active_milestone": "M0",
+      "authorization": "EXPLICIT_USER_AUTHORIZATION_AFTER_EXACT_NAMED_STAGE",
+      "requirement_ids": [
+        "REQ-P31-0002",
+        "REQ-P31-0005",
+        "REQ-P31-0006",
+        "REQ-P31-0010",
+        "REQ-P31-0017",
+        "REQ-P31-0018",
+        "REQ-P31-0028",
+        "REQ-MP2-0003",
+        "REQ-MP2-0004",
+        "REQ-MP2-0006",
+        "REQ-MP2-0009",
+        "REQ-MP2-0017",
+        "REQ-MP2-0116",
+        "REQ-MP2-0135",
+        "REQ-MP2-0140",
+        "REQ-MP2-0141",
+        "REQ-MP2-0317",
+        "REQ-MP2-0319"
+      ],
+      "change_boundary": "New immutable M0 successor evidence, manifest overlay/support pointer and PR #85 metadata only. No src, tools, workflows, product tests, main, merge, deployment or release.",
+      "target_exact_head": "2703d76c199a9b64ff430aeb776bba45094e07a3",
+      "test": "Candidate commit diff must contain only authorized paths; manifest-targeted tests and Foundation CI must pass before PR metadata update.",
+      "negative_control": "Branch ref must not move when candidate diff contains any unauthorized path or the PR head changes before fast-forward.",
+      "evidence_level": "L0_REPOSITORY_EVIDENCE",
+      "planned_artifacts": [
+        "docs/evidence/agent_v3_1/M0_R5_CURRENT_HEAD_INVENTORY_AND_DUPLICATE_RISK_AUDIT.json",
+        "docs/evidence/agent_v3_1/AUTONOMOUS_EXECUTION_STATE_M0_R6.json",
+        "docs/evidence/agent_v3_1/PROTOCOL_CONFLICT_REGISTER_M0_R6.json",
+        "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R82.json"
+      ],
+      "pass_criteria": "Immutable predecessors preserved; only superseding records added; R82 chain valid; exact-head tests pass; PR remains draft and release blocked.",
+      "actual_status": "IN_PROGRESS_PENDING_CI_AND_PR_METADATA",
+      "rollback_condition": "Head mismatch, manifest chain failure, unauthorized diff, CI failure or claim elevation.",
+      "residual_risk": "M0 remains incomplete after reconciliation because Protocol v3.1 runtime, signed work orders and L4/L5 evidence are absent."
+    }
+  ],
+  "maximum_evidence_level": "L0_STATIC_CURRENT_HEAD",
+  "release_authorized": false,
+  "milestone_complete": false,
+  "current_decision": [
+    "FAIL-CLOSED",
+    "PROTOCOL_IMPLEMENTATION_INCOMPLETE",
+    "MILESTONE_NOT_COMPLETE",
+    "RELEASE_BLOCKED"
+  ]
+}

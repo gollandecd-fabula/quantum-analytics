@@ -1,0 +1,106 @@
+{
+  "active_milestone": "M0",
+  "active_work_order_id": "WO-M0-R7-002",
+  "base_head": "61f8a8e523ef4f760c48ac4e59606ecde0f3fe7b",
+  "branch": "fix/quantum-universal-relaunch-r2",
+  "canonical_rtm": {
+    "immutable_shards_validated": 12,
+    "path": "docs/evidence/agent_v3_1/REQUIREMENTS_TRACEABILITY_MATRIX.json",
+    "registry_set_sha256": "4cd2561b2da074b73ebe9ac8a3ccec6f2c890f7f7bf7998ac1a0ca698ed1037a",
+    "requirement_count": 712,
+    "runtime_ingestion": "NOT_IMPLEMENTED"
+  },
+  "completed_observations": [
+    "Current exact head, base head and merge-base frozen.",
+    "Current 760-entry recursive tree captured before modification.",
+    "Canonical 712-row RTM and 12 shard hashes revalidated.",
+    "PR85 and PR148 are diverged; cherry-picking whole historical branch is prohibited.",
+    "Current head lacks M9 control-plane runtime and isolated manager-specialist processes.",
+    "Baseline source CI passed 964 tests but user screenshots demonstrate an unresolved physical L5 defect."
+  ],
+  "current_decision": [
+    "FAIL-CLOSED",
+    "PROTOCOL_IMPLEMENTATION_INCOMPLETE",
+    "MILESTONE_NOT_COMPLETE",
+    "RELEASE_BLOCKED"
+  ],
+  "current_head_inventory": {
+    "canonical_entries_sha256": "db56df5e83111096778ae956ab8c437797b8efc74996075531c8f619b99ce605",
+    "entry_count": 760,
+    "path": "docs/evidence/agent_v3_1/RECURSIVE_EXACT_HEAD_TREE.json",
+    "status": "VALIDATED_L0_STATIC_CURRENT_HEAD"
+  },
+  "defects": [
+    {
+      "defect_id": "M0-R7-D001",
+      "severity": "P0",
+      "status": "RESOLVED_LOCAL_L0_PENDING_REMOTE",
+      "title": "Existing M9/712-row control-plane history absent from current branch."
+    },
+    {
+      "defect_id": "M0-R7-D002",
+      "severity": "P1",
+      "status": "RESOLVED_LOCAL_L0_PENDING_REMOTE",
+      "title": "Historical closure tests reject valid append-only overlays after QUR2."
+    },
+    {
+      "defect_id": "L5-D-SCHEDULED-SCOPE-001",
+      "severity": "P0",
+      "status": "OPEN",
+      "title": "Updated installation preserves legacy config that fails scheduled report scope validation."
+    },
+    {
+      "defect_id": "M1-D-CONTROLLER-001",
+      "severity": "P0",
+      "status": "OPEN",
+      "title": "Protocol v3.1 and 712-row RTM runtime ingestion/enforcement absent."
+    }
+  ],
+  "existing_m9_control_plane_changed": false,
+  "local_validation": {
+    "evidence_sha256": "24a6f196dcb07a4eb712db25cfffc98a79c7c0bcc5eda8406a63687cf37c1731",
+    "full_source_ci": "971/971 PASS",
+    "manifest_tests": "2/2 PASS",
+    "targeted_tests": "9/9 PASS"
+  },
+  "marketplace_writes_enabled": false,
+  "master_prompt": {
+    "sha256": "1008a69ac56e44e6fa1f69c51f1fe43c8e621c161a52241230fa0af88ecd004a",
+    "source_identity": "VERIFIED_L0",
+    "version": "2.0"
+  },
+  "maximum_verified_evidence_level": "L0_STATIC_CURRENT_HEAD; L2_BASELINE_SOURCE_RUNTIME_NO_RELEASE_CLAIM",
+  "merge_base": "61f8a8e523ef4f760c48ac4e59606ecde0f3fe7b",
+  "merge_to_main_authorized": false,
+  "milestone_complete": false,
+  "next_scheduler_action": "Materialize the exact locally tested M0-R7 tree on a temporary remote branch, rerun exact-head tests, and append remote commit/tree/workflow evidence. M1 and all product changes remain blocked.",
+  "open_blockers": [
+    "BLK-M0-RECONCILIATION-NOT-YET-REMOTE-BOUND",
+    "BLK-DETERMINISTIC-CONTROLLER-RUNTIME-NOT-IMPLEMENTED",
+    "BLK-CONTROL-PLANE-L2-INGESTION-NOT-IMPLEMENTED",
+    "BLK-PHYSICAL-L5-SCHEDULED-REPORT-FAILED",
+    "BLK-SAME-ARTIFACT-RUN-A-RUN-B-NOT-EXECUTED"
+  ],
+  "previous_pr85_state_blob_sha": "06516801e670986d0198b77b16ec883aa8ef5b32",
+  "production_code_changed": false,
+  "protocol": {
+    "production_control_plane_ingestion": "NOT_IMPLEMENTED",
+    "sha256": "be69b8f1f919066c67086d6dd4678acf5e3cb3c4f1db9bc587dc540018601a90",
+    "source_identity": "VERIFIED_L0",
+    "version": "3.1"
+  },
+  "release_authorized": false,
+  "repository": "gollandecd-fabula/quantum-analytics",
+  "schema_version": "2.0.0",
+  "state_version": 7,
+  "status": "PASS_LOCAL_L0_PENDING_REMOTE_BINDING",
+  "subject_exact_head": "b151e67c2bea8d4d50c5c4a2aeb0695e89921c01",
+  "tests_changed": true,
+  "ui_reference": {
+    "physical_l5_status": "FAILED_OR_UNVERIFIED_CURRENT_ARTIFACT",
+    "sha256": "2482074aea312b065b4094792c5676445514dd555d50a064a5ae3e189dc60d13",
+    "technical_freeze_status": "UI_SPEC_FROZEN_L0"
+  },
+  "updated_at_utc": "2026-07-27T06:30:49.333326+00:00",
+  "workflows_changed": false
+}

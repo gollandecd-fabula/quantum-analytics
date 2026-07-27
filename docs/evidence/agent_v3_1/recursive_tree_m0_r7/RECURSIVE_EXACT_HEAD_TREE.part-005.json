@@ -1,0 +1,710 @@
+{
+  "document_type": "RECURSIVE_EXACT_HEAD_TREE_PART",
+  "entries": [
+    {
+      "blob_sha": "e839aa1cfbaf01edcaced2a1c885f6b21038803e",
+      "mode": "100644",
+      "path": "src/quantum/adapters/wildberries/adapter.py",
+      "size_bytes": 966,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "e9e871b035f7142b8a6d66026dcf4c9e3e867d70",
+      "mode": "100644",
+      "path": "src/quantum/adapters/wildberries/detailed_financial.py",
+      "size_bytes": 23620,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "7e43ef231feeb5aa54c7c81312a7200b71cbb9ae",
+      "mode": "100644",
+      "path": "src/quantum/adapters/wildberries/detailed_xlsx.py",
+      "size_bytes": 7897,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "dff17772154303e7c69fbce45bfe8e551efb6c54",
+      "mode": "100644",
+      "path": "src/quantum/adapters/wildberries/dispatcher.py",
+      "size_bytes": 9077,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "36dbcb9aa9414ec13f8a8c16ed77afd082751b5b",
+      "mode": "100644",
+      "path": "src/quantum/adapters/wildberries/source_bridge.py",
+      "size_bytes": 17905,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "1695cf5ed9556cd10de50273fa649c96a5c54644",
+      "mode": "100644",
+      "path": "src/quantum/adapters/wildberries/synthetic.py",
+      "size_bytes": 6434,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "6e077ba1aee4c218295cf3d62edf2fe6d5c17d33",
+      "mode": "100644",
+      "path": "src/quantum/adapters/wildberries/weekly_summary.py",
+      "size_bytes": 14068,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "mode": "100644",
+      "path": "src/quantum/api/__init__.py",
+      "size_bytes": 0,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "f4f6bb56687106ca40f87bbefda8687ea0a81bd6",
+      "mode": "100644",
+      "path": "src/quantum/api/main.py",
+      "size_bytes": 1757,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "mode": "100644",
+      "path": "src/quantum/application/__init__.py",
+      "size_bytes": 0,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "a1020fa9570c4b90f77d74ab850aa0286a7557c6",
+      "mode": "100644",
+      "path": "src/quantum/application/_finance_center_auto_inbox.py",
+      "size_bytes": 28339,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "5b0ce4c0c59c82f4691d1b33c0f68ce062087e32",
+      "mode": "100644",
+      "path": "src/quantum/application/_finance_center_auto_inbox_corrective.py",
+      "size_bytes": 5026,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "4475fdd6270e6e5d3c121b66184f1ad606f666a4",
+      "mode": "100644",
+      "path": "src/quantum/application/_finance_center_calculation.py",
+      "size_bytes": 29810,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "2b93883098afed0498ec1b5a5177a693ed0c0350",
+      "mode": "100644",
+      "path": "src/quantum/application/_finance_center_dialog.py",
+      "size_bytes": 19194,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "de7546828423479cb8946a4634f8f3ce728ed92c",
+      "mode": "100644",
+      "path": "src/quantum/application/_finance_center_import.py",
+      "size_bytes": 5106,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "8e7bbe80546de519ad768606a07d065a58b85c3b",
+      "mode": "100644",
+      "path": "src/quantum/application/_finance_center_pages.py",
+      "size_bytes": 38420,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "d9c300852163deaaaf629941eb6202d52d6ecd5b",
+      "mode": "100644",
+      "path": "src/quantum/application/_finance_center_persistence.py",
+      "size_bytes": 15995,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "505be6f3dbb666e8a11a30a822e270bab05d1981",
+      "mode": "100644",
+      "path": "src/quantum/application/_finance_center_queue.py",
+      "size_bytes": 2605,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "d0dd6b6e1f708922765366203909784976e11d90",
+      "mode": "100644",
+      "path": "src/quantum/application/_finance_center_queue_runtime.py",
+      "size_bytes": 18966,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "f0cd582344bfd20a2dc88521defc96eb8e6ed2ac",
+      "mode": "100644",
+      "path": "src/quantum/application/_finance_center_reports.py",
+      "size_bytes": 8986,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "aff2a791b7afaf6efcb3e0e942be4dfe3a96e3ed",
+      "mode": "100644",
+      "path": "src/quantum/application/_finance_center_scheduled_reports.py",
+      "size_bytes": 5649,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "d902a7290ae92ad4d3b1886332abd7ab8c69b707",
+      "mode": "100644",
+      "path": "src/quantum/application/_finance_center_self_test.py",
+      "size_bytes": 9157,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "082dbb192a8af4e72fdd9fd34a026264d6eabaf4",
+      "mode": "100644",
+      "path": "src/quantum/application/_finance_center_shared.py",
+      "size_bytes": 6232,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "22c2fe9ff4bdf8a26b3de0149c98b597f4f66ce0",
+      "mode": "100644",
+      "path": "src/quantum/application/_finance_center_shell.py",
+      "size_bytes": 12160,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "24e5eb74dce712cd2064f7aa0b30468797f45042",
+      "mode": "100644",
+      "path": "src/quantum/application/_finance_generic_tabular.py",
+      "size_bytes": 21722,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "b706aec42444953e981959be5e4c515c2f7eb439",
+      "mode": "100644",
+      "path": "src/quantum/application/_finance_profile_engine.py",
+      "size_bytes": 29758,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "5156c073792344487243e6d4037cc6712234f082",
+      "mode": "100644",
+      "path": "src/quantum/application/_finance_profile_financial_rows.py",
+      "size_bytes": 11492,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "f1dec7d2b37f837f238adec7309fa86d7ba7c403",
+      "mode": "100644",
+      "path": "src/quantum/application/_finance_profile_groups.py",
+      "size_bytes": 10857,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "2f8dd40d9c008c72582d227120fbc344bd9550ee",
+      "mode": "100644",
+      "path": "src/quantum/application/_finance_profile_model.py",
+      "size_bytes": 11539,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "ce50b4f00372c23b7cd428b891b515b0be44a2cc",
+      "mode": "100644",
+      "path": "src/quantum/application/_finance_profile_outputs.py",
+      "size_bytes": 21738,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "927983e8048c01afbbb8b6d0a7770f351239320a",
+      "mode": "100644",
+      "path": "src/quantum/application/_finance_profile_template.py",
+      "size_bytes": 4598,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "133137201612988771fed4f5a95f57a1cf17386c",
+      "mode": "100644",
+      "path": "src/quantum/application/_finance_profile_xlsx.py",
+      "size_bytes": 6888,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "0f2a651f5e68463a3792dcb8c56fc77a8f2a53a3",
+      "mode": "100644",
+      "path": "src/quantum/application/_finance_schema_review.py",
+      "size_bytes": 7897,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "6ad0c2740bfb93dd4be7147102abd3811ccbc973",
+      "mode": "100644",
+      "path": "src/quantum/application/_finance_verified_rows.py",
+      "size_bytes": 1430,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "64d95805aab48e210696b7bf73b87d6f70598a47",
+      "mode": "100644",
+      "path": "src/quantum/application/_single_instance.py",
+      "size_bytes": 1700,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "1979242486c3e1040d25cdf2390fe3736a5208c2",
+      "mode": "100644",
+      "path": "src/quantum/application/desktop_center.py",
+      "size_bytes": 3480,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "dddf9651b0726406f03e0267bbaf2d54bb070778",
+      "mode": "100644",
+      "path": "src/quantum/application/finance_center.py",
+      "size_bytes": 3468,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "4b9e738ef1dabc58606ee44ff17e4df8daa114f8",
+      "mode": "100644",
+      "path": "src/quantum/application/finance_profile.py",
+      "size_bytes": 9331,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "6c08d3e0b8af96f4aa3f2c52f961c08d3471a90c",
+      "mode": "100644",
+      "path": "src/quantum/application/local_app.py",
+      "size_bytes": 17613,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "9d48db4f9f85e1752cf424c49ee18a6907c3f160",
+      "mode": "100644",
+      "path": "src/quantum/application/local_app_utils.py",
+      "size_bytes": 35,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "9d48db4f9f85e1752cf424c49ee18a6907c3f160",
+      "mode": "100644",
+      "path": "src/quantum/application/local_page.py",
+      "size_bytes": 35,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "cde6923505c44af549d0ed70310ba1267e7cc6a6",
+      "mode": "100644",
+      "path": "src/quantum/application/local_processing.py",
+      "size_bytes": 144,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "6f8453f42d39c54df0fbf68f5b4845ad1bacbe23",
+      "mode": "100644",
+      "path": "src/quantum/application/local_runtime.py",
+      "size_bytes": 157,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "4bb4cc12d77e165dc2e0feb3cb87713f2bbde518",
+      "mode": "100644",
+      "path": "src/quantum/application/ports.py",
+      "size_bytes": 1332,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "9d48db4f9f85e1752cf424c49ee18a6907c3f160",
+      "mode": "100644",
+      "path": "src/quantum/application/report_center.py",
+      "size_bytes": 35,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "7487dc2515fe26365178aafec7f1d62d09822093",
+      "mode": "100644",
+      "path": "src/quantum/application/scheduled_reports.py",
+      "size_bytes": 42852,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "2e76aa2ed9107b3bd1c63b0349adf1e4abb1e77f",
+      "mode": "100644",
+      "path": "src/quantum/application/shortcut_repair.py",
+      "size_bytes": 5659,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "cdac4e5340c886e464aebab80dbc058e5124dbea",
+      "mode": "100644",
+      "path": "src/quantum/dependencies/__init__.py",
+      "size_bytes": 6758,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "9c176a257beb4384a2eee8ba5442c67fb56f7870",
+      "mode": "100644",
+      "path": "src/quantum/dependencies/admission.py",
+      "size_bytes": 12484,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "5c8d7b312388496ae2b675020d643a9902a31945",
+      "mode": "100644",
+      "path": "src/quantum/domain/__init__.py",
+      "size_bytes": 291,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "82b1ae9a27fdcb7ec310f74652d56078ccd75c72",
+      "mode": "100644",
+      "path": "src/quantum/domain/events.py",
+      "size_bytes": 3058,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "3fd330133003ab0cdb9d9122ad2d2a69d8772206",
+      "mode": "100644",
+      "path": "src/quantum/domain/idempotency.py",
+      "size_bytes": 1541,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "bfb352a13fa3501ce441b1416a464edee85e007b",
+      "mode": "100644",
+      "path": "src/quantum/domain/source_rows.py",
+      "size_bytes": 5946,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "47301110e66caf4f6c448ce09554ec610e1a9c52",
+      "mode": "100644",
+      "path": "src/quantum/domain/states.py",
+      "size_bytes": 2771,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "0298da1ac5ba87ba325919cae338a76fc3ec61dd",
+      "mode": "100644",
+      "path": "src/quantum/evidence/__init__.py",
+      "size_bytes": 1566,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "a82e7b189393d4fb5ff7e104264dc28d7a5697d5",
+      "mode": "100644",
+      "path": "src/quantum/evidence/runtime_validation.py",
+      "size_bytes": 7798,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "bacfd16a38b411fde3536473c7aeabc48a7e8048",
+      "mode": "100644",
+      "path": "src/quantum/evidence/verification.py",
+      "size_bytes": 24995,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "22c505b1b3e32af7b26546c17606cf0b5748d5d1",
+      "mode": "100644",
+      "path": "src/quantum/finance/__init__.py",
+      "size_bytes": 362,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "3ffb45151cf5c18137ccca47b8a01ef6e09b7cd2",
+      "mode": "100644",
+      "path": "src/quantum/finance/_calculation_core.py",
+      "size_bytes": 5352,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "88e7261197829298a923d8287021c6e4603e1c90",
+      "mode": "100644",
+      "path": "src/quantum/finance/_calculation_expenses.py",
+      "size_bytes": 3050,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "70dc3e9ab38741d43174ecd13df195b43d599259",
+      "mode": "100644",
+      "path": "src/quantum/finance/_calculation_profit.py",
+      "size_bytes": 8097,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "a090d8068e6908a0530c084b8ce632abe7c8f326",
+      "mode": "100644",
+      "path": "src/quantum/finance/_common.py",
+      "size_bytes": 10732,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "d03b5ef765483423dd0fb3b9a23d1e0602f84919",
+      "mode": "100644",
+      "path": "src/quantum/finance/_expression.py",
+      "size_bytes": 215,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "4e593b9bd2d2ac9f51f5273690dc38e87433fb66",
+      "mode": "100644",
+      "path": "src/quantum/finance/_expression_eager.py",
+      "size_bytes": 15376,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "9bc3f6425ba8bac4836d0ee5ed77beab33fc24f1",
+      "mode": "100644",
+      "path": "src/quantum/finance/_expression_lazy.py",
+      "size_bytes": 4595,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "57c17f0805fc950874ca026fd1ed400f92d1bad7",
+      "mode": "100644",
+      "path": "src/quantum/finance/_expression_limits.py",
+      "size_bytes": 1458,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "6daef1b3c3f29c4db2cfda97f4de5a4502fec6d8",
+      "mode": "100644",
+      "path": "src/quantum/finance/_expression_validation.py",
+      "size_bytes": 5537,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "15986da99a57005f2d43495cdce4fdf56ff4f40e",
+      "mode": "100644",
+      "path": "src/quantum/finance/_metrics.py",
+      "size_bytes": 3630,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "52731cba09ac01f09b3ee5366d63e651404684ea",
+      "mode": "100644",
+      "path": "src/quantum/finance/_rounding.py",
+      "size_bytes": 8842,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "227262cd0e250769e7821fff9e899dbbba22399f",
+      "mode": "100644",
+      "path": "src/quantum/finance/_rules.py",
+      "size_bytes": 18024,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "a6992b89f60b336bc4bbfb425f2ba84e0db05b15",
+      "mode": "100644",
+      "path": "src/quantum/finance/_rules_hardening.py",
+      "size_bytes": 8297,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "6828dd003bb989f413b30e9c376e64b93159816b",
+      "mode": "100644",
+      "path": "src/quantum/finance/_runtime_core.py",
+      "size_bytes": 10924,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "dd30acdef492f40726192d529c539bdf2e05d978",
+      "mode": "100644",
+      "path": "src/quantum/finance/_runtime_legacy.py",
+      "size_bytes": 1341,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "fa57a9a3a26c8f3e4e7fcb1216d67c789ea7d38e",
+      "mode": "100644",
+      "path": "src/quantum/finance/oracle.py",
+      "size_bytes": 3802,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "8b351566d0469947d77d14e33c0faa71f5c5b3e2",
+      "mode": "100644",
+      "path": "src/quantum/finance/runtime.py",
+      "size_bytes": 631,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "874174eca6f25d156c6b9a3033dab79d563b0c5d",
+      "mode": "100644",
+      "path": "src/quantum/infrastructure/__init__.py",
+      "size_bytes": 257,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "b217968aee6ed2f382eadbc32188dd5019031401",
+      "mode": "100644",
+      "path": "src/quantum/infrastructure/in_memory_canonical_ledger.py",
+      "size_bytes": 19820,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "81b0cbd56e928e7dc4617f982947b508ca8b9a4d",
+      "mode": "100644",
+      "path": "src/quantum/infrastructure/json_event_ledger.py",
+      "size_bytes": 4820,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "e564cb39dd89a845804fa7a7906d4572e85ee1ca",
+      "mode": "100644",
+      "path": "src/quantum/infrastructure/local_raw_storage.py",
+      "size_bytes": 3227,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "62d9546c4a8290c07a637ae05f9fb1337e7b1288",
+      "mode": "100644",
+      "path": "src/quantum/ingestion/__init__.py",
+      "size_bytes": 1686,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "cddb2ee3c3febeb8d7994fd82cbf4252ba35f0f5",
+      "mode": "100644",
+      "path": "src/quantum/ingestion/_admission_access_v2.py",
+      "size_bytes": 4896,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "3c7326abebe239fb2e881fd68ccdd47627cc88da",
+      "mode": "100644",
+      "path": "src/quantum/ingestion/_admission_contracts.py",
+      "size_bytes": 10885,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "3e75ddc366cc98a05c13333742c2cf6a81fd8bf6",
+      "mode": "100644",
+      "path": "src/quantum/ingestion/_admission_contracts_v2.py",
+      "size_bytes": 13216,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "40b2fa42972fa690a1718948471f5e356d19d26e",
+      "mode": "100644",
+      "path": "src/quantum/ingestion/_admission_decisions.py",
+      "size_bytes": 8220,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "67b046e6bf46de5f6c511181af04e9844f7b1a35",
+      "mode": "100644",
+      "path": "src/quantum/ingestion/_admission_evidence_checks_v2.py",
+      "size_bytes": 3966,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "bbb40254b775b90171adf4175afafa6d08473602",
+      "mode": "100644",
+      "path": "src/quantum/ingestion/_admission_finalize_v2.py",
+      "size_bytes": 1884,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "1336d1ae66eab0954c3dacde3ea6069af8df9401",
+      "mode": "100644",
+      "path": "src/quantum/ingestion/_admission_reference_contract.py",
+      "size_bytes": 2048,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "66a2bec2689d73d745ee2dfd245d46ec5ea7c86e",
+      "mode": "100644",
+      "path": "src/quantum/ingestion/_admission_registry_base.py",
+      "size_bytes": 5301,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "5e6184d82112aa9b34295e80536a936b9b3a6f52",
+      "mode": "100644",
+      "path": "src/quantum/ingestion/_admission_registry_base_v2.py",
+      "size_bytes": 7153,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "e26f8b872db61814d5c253af939c116a2347226b",
+      "mode": "100644",
+      "path": "src/quantum/ingestion/_admission_validation.py",
+      "size_bytes": 4845,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "b315a82bf22a926d7ac9ed734589be86357125bd",
+      "mode": "100644",
+      "path": "src/quantum/ingestion/_admission_validation_v2.py",
+      "size_bytes": 5296,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "6fe58512e168bc5d0f40d132ecc6f66ae68e8985",
+      "mode": "100644",
+      "path": "src/quantum/ingestion/_storage_contracts_v3.py",
+      "size_bytes": 2954,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "1bb48064bd9663ca57934b2f4ca547b663318817",
+      "mode": "100644",
+      "path": "src/quantum/ingestion/_xlsx_archive.py",
+      "size_bytes": 12393,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "398768497aa15212615063e1f7ab4b4d41f8e670",
+      "mode": "100644",
+      "path": "src/quantum/ingestion/_xlsx_auxiliary_content.py",
+      "size_bytes": 18427,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "b0810df2515862848be9ae2c4f09175df0c6ad74",
+      "mode": "100644",
+      "path": "src/quantum/ingestion/_xlsx_cell_structure.py",
+      "size_bytes": 4451,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "b89aa4a63f708521032853bdf3592ff083554a3f",
+      "mode": "100644",
+      "path": "src/quantum/ingestion/_xlsx_content_model.py",
+      "size_bytes": 12874,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "739cd7ff6b425456759ac305f30540bb3bb6bbe6",
+      "mode": "100644",
+      "path": "src/quantum/ingestion/_xlsx_contracts.py",
+      "size_bytes": 498,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "b9e67122725997b2257294678297c5a0b922250f",
+      "mode": "100644",
+      "path": "src/quantum/ingestion/_xlsx_contracts_v2.py",
+      "size_bytes": 8879,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "484a54367005c7f3f0b54d95be2cfbd2e3978fc2",
+      "mode": "100644",
+      "path": "src/quantum/ingestion/_xlsx_formula_validation.py",
+      "size_bytes": 3180,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "b1bd1e7665aa7cc3cb9ac7fd5e8905fb4c87eebf",
+      "mode": "100644",
+      "path": "src/quantum/ingestion/_xlsx_inspection_v3.py",
+      "size_bytes": 7650,
+      "type": "blob"
+    }
+  ],
+  "entry_count": 100,
+  "part_number": 5,
+  "schema_version": "1.0.0",
+  "subject_exact_head": "b151e67c2bea8d4d50c5c4a2aeb0695e89921c01",
+  "work_order_id": "WO-M0-R7-002"
+}

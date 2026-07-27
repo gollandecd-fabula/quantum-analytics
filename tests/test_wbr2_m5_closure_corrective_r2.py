@@ -36,6 +36,11 @@ QUR2_OVERLAY_PATH = (
     / "docs/evidence"
     / "ARTIFACT_MANIFEST_OVERLAY_QUANTUM_UNIVERSAL_RELAUNCH_R2.json"
 )
+AGENT_M0_R7_OVERLAY_PATH = (
+    ROOT
+    / "docs/evidence"
+    / "ARTIFACT_MANIFEST_OVERLAY_AGENT_V3_1_M0_R7.json"
+)
 
 
 class Wbr2M5ClosureCorrectiveR2Tests(unittest.TestCase):
@@ -119,6 +124,15 @@ class Wbr2M5ClosureCorrectiveR2Tests(unittest.TestCase):
         qur2 = json.loads(QUR2_OVERLAY_PATH.read_text(encoding="utf-8"))
         final.update(
             {path: [path, digest, size] for path, digest, size in qur2["entries"]}
+        )
+        agent_m0_r7 = json.loads(
+            AGENT_M0_R7_OVERLAY_PATH.read_text(encoding="utf-8")
+        )
+        final.update(
+            {
+                path: [path, digest, size]
+                for path, digest, size in agent_m0_r7["entries"]
+            }
         )
         for path, _digest, _size in overlay["entries"]:
             self.assertEqual(rows[path], final[path])

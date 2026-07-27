@@ -1,0 +1,96 @@
+{
+  "base_head": "61f8a8e523ef4f760c48ac4e59606ecde0f3fe7b",
+  "branch": "fix/quantum-universal-relaunch-r2",
+  "canonical_entries_sha256": "db56df5e83111096778ae956ab8c437797b8efc74996075531c8f619b99ce605",
+  "document_type": "RECURSIVE_EXACT_HEAD_TREE",
+  "entry_count": 760,
+  "generated_at_utc": "2026-07-27T06:27:52.540237+00:00",
+  "merge_base": "61f8a8e523ef4f760c48ac4e59606ecde0f3fe7b",
+  "parts": [
+    {
+      "entry_count": 100,
+      "first_path": ".github/CODEOWNERS",
+      "last_path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_P13.json",
+      "part_number": 1,
+      "path": "docs/evidence/agent_v3_1/recursive_tree_m0_r7/RECURSIVE_EXACT_HEAD_TREE.part-001.json",
+      "sha256": "0b9b17fd6910f1ee6b5213ef3db8d8b3435084efd946b1a01e1e694e6dc62123",
+      "size_bytes": 20978
+    },
+    {
+      "entry_count": 100,
+      "first_path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_P13_CLOSURE.json",
+      "last_path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R84.json",
+      "part_number": 2,
+      "path": "docs/evidence/agent_v3_1/recursive_tree_m0_r7/RECURSIVE_EXACT_HEAD_TREE.part-002.json",
+      "sha256": "8201573a12baf8e7b1a4816f290252ceec40f09dc51aa982e73bb4052b882ce3",
+      "size_bytes": 23149
+    },
+    {
+      "entry_count": 100,
+      "first_path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R85.json",
+      "last_path": "docs/governance/MIGRATION_NOTES.md",
+      "part_number": 3,
+      "path": "docs/evidence/agent_v3_1/recursive_tree_m0_r7/RECURSIVE_EXACT_HEAD_TREE.part-003.json",
+      "sha256": "7d6af437ea9a93c95b6cc87f4381be415058bc4bd30bac90566212ddd972f8a4",
+      "size_bytes": 21686
+    },
+    {
+      "entry_count": 100,
+      "first_path": "docs/governance/RISK_REGISTER.md",
+      "last_path": "src/quantum/adapters/wildberries/__init__.py",
+      "part_number": 4,
+      "path": "docs/evidence/agent_v3_1/recursive_tree_m0_r7/RECURSIVE_EXACT_HEAD_TREE.part-004.json",
+      "sha256": "4e8351cf3efb26abb74ba7b125e3c5967c511760c673242511b7fe0c8352c2a9",
+      "size_bytes": 20986
+    },
+    {
+      "entry_count": 100,
+      "first_path": "src/quantum/adapters/wildberries/adapter.py",
+      "last_path": "src/quantum/ingestion/_xlsx_inspection_v3.py",
+      "part_number": 5,
+      "path": "docs/evidence/agent_v3_1/recursive_tree_m0_r7/RECURSIVE_EXACT_HEAD_TREE.part-005.json",
+      "sha256": "a320c99bfe1acc29b608c2975bfad21d7968df63bf58339b32ca057a6324683f",
+      "size_bytes": 20980
+    },
+    {
+      "entry_count": 100,
+      "first_path": "src/quantum/ingestion/_xlsx_package_parts.py",
+      "last_path": "tests/test_b1a_artifact_manifest.py",
+      "part_number": 6,
+      "path": "docs/evidence/agent_v3_1/recursive_tree_m0_r7/RECURSIVE_EXACT_HEAD_TREE.part-006.json",
+      "sha256": "677639132790bb547d843c0e5fc643ee25c6379b7b92a3342d08ec65dee2af2c",
+      "size_bytes": 20272
+    },
+    {
+      "entry_count": 100,
+      "first_path": "tests/test_b1a_contract_alignment.py",
+      "last_path": "tests/test_p16_rt_tenth_review_followup.py",
+      "part_number": 7,
+      "path": "docs/evidence/agent_v3_1/recursive_tree_m0_r7/RECURSIVE_EXACT_HEAD_TREE.part-007.json",
+      "sha256": "22b52c1e35be9fcf6420e47b9b9e89272c37d4e6cec0beae01c37caa0692e87d",
+      "size_bytes": 20386
+    },
+    {
+      "entry_count": 60,
+      "first_path": "tests/test_p16_rt_thirteenth_review_followup.py",
+      "last_path": "tools/m8_clean_environment_reproduction.py",
+      "part_number": 8,
+      "path": "docs/evidence/agent_v3_1/recursive_tree_m0_r7/RECURSIVE_EXACT_HEAD_TREE.part-008.json",
+      "sha256": "358bba180556cb3ffd9e4979a1ced9110296d00f216b0d7d93c33cbe0ac0f024",
+      "size_bytes": 12436
+    }
+  ],
+  "path_list_sha256": "dbd960e98f8c1ab182f17021b13dfe6125a7c309f70779888670d33c5042ebd5",
+  "previous_pr85_index_blob_sha": "f8d34060a68e2aae6a9c2de08b34f95b918bfd15",
+  "repository": "gollandecd-fabula/quantum-analytics",
+  "schema_version": "2.0.0",
+  "source_artifact": {
+    "archive_sha256": "frozen-in-local-evidence",
+    "artifact_digest": "sha256:d69cf29559034af66f3688a29f791c3b8309c27189dcf5c48686456f36cd84c1",
+    "name": "Quantum-Full-Audit-Source-b151e67c"
+  },
+  "status": "VALIDATED_L0_STATIC_CURRENT_HEAD",
+  "subject_exact_head": "b151e67c2bea8d4d50c5c4a2aeb0695e89921c01",
+  "unique_path_count": 760,
+  "work_order_id": "WO-M0-R7-002"
+}

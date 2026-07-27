@@ -1,0 +1,86 @@
+{
+  "actual_status": "PARTIAL_M0_RECONCILED_M1_NOT_STARTED",
+  "anti_duplication_rule": [
+    "Restore immutable canonical 712-row RTM and source manifests.",
+    "Extend the historical M9 control plane in place under a separate M1 work order.",
+    "Do not create a parallel gate, RTM, orchestrator stack or product runtime.",
+    "Reuse current QUR2 product fixes, L4 tooling, Red Team, finance, UI and reporting runtimes."
+  ],
+  "artifact_type": "ARCHITECTURE_MIGRATION_MAP",
+  "branch": "fix/quantum-universal-relaunch-r2",
+  "components": [
+    {
+      "decision": "RESTORE_EXISTING_HISTORY_THEN_EXTEND_IN_PLACE_NO_DUPLICATE",
+      "existing_components": [
+        "CMP-001",
+        "CMP-002"
+      ],
+      "minimal_migration": [
+        "ingest exact Protocol v3.1 hash",
+        "ingest canonical 712-row RTM",
+        "own canonical state",
+        "deterministic scheduler",
+        "exclusive signed work-order locks",
+        "role/protected-path policy"
+      ],
+      "next_milestone": "M1",
+      "status": "NOT_IMPLEMENTED_CURRENT_HEAD",
+      "target_component": "Deterministic Protocol Controller"
+    },
+    {
+      "decision": "ADD_ONE_MANAGER_ONLY_AS_M9_EXTENSION_AFTER_M1_CONTROLLER",
+      "existing_components": [
+        "CMP-001",
+        "CMP-007"
+      ],
+      "status": "NOT_IMPLEMENTED",
+      "target_component": "Release Orchestrator"
+    },
+    {
+      "decision": "ADAPT_EXISTING_CAPABILITIES_BEHIND_SIGNED_ROLE_WORK_ORDERS",
+      "existing_components": [
+        "CMP-003",
+        "CMP-005",
+        "CMP-006",
+        "CMP-008"
+      ],
+      "status": "NOT_IMPLEMENTED_AS_ISOLATED_PROCESSES",
+      "target_component": "Implementer Verifier Adversary"
+    },
+    {
+      "decision": "EXTEND_EXISTING_WINDOWS_PATHS",
+      "existing_components": [
+        "CMP-004",
+        "CMP-006"
+      ],
+      "status": "L4_AUTOMATED_EXISTS_L5_FAILED_OR_UNVERIFIED",
+      "target_component": "Windows L4/L5 Worker"
+    },
+    {
+      "decision": "RESTORE_AND_EXTEND_EXISTING_GATE_NO_DUPLICATE",
+      "existing_components": [
+        "CMP-001"
+      ],
+      "status": "ABSENT_CURRENT_HEAD",
+      "target_component": "Deterministic Release Gate"
+    }
+  ],
+  "current_decision": [
+    "FAIL-CLOSED",
+    "PROTOCOL_IMPLEMENTATION_INCOMPLETE",
+    "MILESTONE_NOT_COMPLETE",
+    "RELEASE_BLOCKED"
+  ],
+  "generated_at_utc": "2026-07-27T06:27:52.540237+00:00",
+  "milestone_complete": false,
+  "minimal_migration_authorized": true,
+  "parallel_component_creation_authorized": false,
+  "previous_pr85_migration_map_blob_sha": "a922c9d1282713d0f6aaa7d0bed0cd035ec56b19",
+  "release_authorized": false,
+  "repository": "gollandecd-fabula/quantum-analytics",
+  "schema_version": "2.0.0",
+  "source_architecture": "Current QUR2 product branch with fragmented milestone evidence and no tracked M9/agent_v3_1 control-plane runtime",
+  "subject_exact_head": "b151e67c2bea8d4d50c5c4a2aeb0695e89921c01",
+  "target_architecture": "Deterministic Manager-Specialist Architecture under restored existing M9 ownership",
+  "work_order_id": "WO-M0-R7-002"
+}

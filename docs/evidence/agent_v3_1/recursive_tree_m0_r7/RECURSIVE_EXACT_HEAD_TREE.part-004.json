@@ -1,0 +1,710 @@
+{
+  "document_type": "RECURSIVE_EXACT_HEAD_TREE_PART",
+  "entries": [
+    {
+      "blob_sha": "263ecd60469a326357ee8188f4a5926584d03b70",
+      "mode": "100644",
+      "path": "docs/governance/RISK_REGISTER.md",
+      "size_bytes": 6379,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "78abdc971794a55d7e5aacf9ac114f97eafc2b10",
+      "mode": "100644",
+      "path": "docs/governance/RUNTIME_PROTOCOL.md",
+      "size_bytes": 1063,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "e09f9d129085466c7a40282eaae2e06ed3dd60d7",
+      "mode": "100644",
+      "path": "docs/governance/SCOPE.md",
+      "size_bytes": 974,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "a26e85dfc76d3b87d3163c550dd17a4ecef4005c",
+      "mode": "100644",
+      "path": "docs/operations/BOOTSTRAP_IMPORT_INSTRUCTIONS.md",
+      "size_bytes": 569,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "f31abe8db1740ee287a8611d003e113f642a109a",
+      "mode": "100644",
+      "path": "docs/operations/CI_BASELINE.md",
+      "size_bytes": 640,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "fe23e603292e1fc3a53b9acd5985ed0aaa7d8e2c",
+      "mode": "100644",
+      "path": "docs/operations/LOCAL_RUNBOOK.md",
+      "size_bytes": 476,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "a17ad672fc16de772c23a0c603d5b85fbf8be79b",
+      "mode": "100644",
+      "path": "docs/operations/MAIN_BRANCH_PROTECTION_PLAN.md",
+      "size_bytes": 2080,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "3e2cd80c96c735097dad847b3cbe66b39806d6ed",
+      "mode": "100644",
+      "path": "docs/pilot/LOCAL_PILOT_RUNNER_R1.md",
+      "size_bytes": 5281,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "e2c44caf5d4cb8ea604409e60c96bb60dc83cdf9",
+      "mode": "100644",
+      "path": "docs/pilot/WINDOWS_HOME_LOCAL_PACKAGE.md",
+      "size_bytes": 4634,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "804ac928fb67a6503c0ff230d9a10de9c0fdb75c",
+      "mode": "100644",
+      "path": "docs/qa/A6_DATA_PROOF_PLAN.md",
+      "size_bytes": 711,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "6d6f53ab21a5dc5f032040517bb1dd7bd8e5e539",
+      "mode": "100644",
+      "path": "docs/qa/ACCEPTANCE_BASELINE.md",
+      "size_bytes": 419,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "7f2a6f8cb5a4ce69c37273024bd8e6dafff617e7",
+      "mode": "100644",
+      "path": "docs/qa/ACCEPTANCE_PLAN_BUILD.md",
+      "size_bytes": 6706,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "3bc86a3805932f143a0d11cac6b5ca55704926e9",
+      "mode": "100644",
+      "path": "docs/qa/ACCEPTANCE_PLAN_FOUNDATION.md",
+      "size_bytes": 2575,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "ba974d3d6da3c1130db1525f70796f5a2c03e190",
+      "mode": "100644",
+      "path": "docs/recovery/checkpoints/QCP-2026-07-01-R1/ARTIFACT_MANIFEST.sha256",
+      "size_bytes": 1333,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "f18ffa8ca4a836b72651f5fae77ee8496b1cd1ac",
+      "mode": "100644",
+      "path": "docs/recovery/checkpoints/QCP-2026-07-01-R1/CHECKPOINT.yaml",
+      "size_bytes": 1889,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "6caa781e772609062645d212dd66a3aaec030b8a",
+      "mode": "100644",
+      "path": "docs/recovery/checkpoints/QCP-2026-07-01-R1/CI_AND_REVIEW_EVIDENCE.md",
+      "size_bytes": 1280,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "e22f4c0c86e62020da0004c71320e0ef9f0ea1f4",
+      "mode": "100644",
+      "path": "docs/recovery/checkpoints/QCP-2026-07-01-R1/DECISIONS_LOG.md",
+      "size_bytes": 1583,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "4a54b883b68d99b586e2462891cd1ac24367883d",
+      "mode": "100644",
+      "path": "docs/recovery/checkpoints/QCP-2026-07-01-R1/DEPENDENCY_SNAPSHOT.md",
+      "size_bytes": 795,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "5462f9a4c2c05bae9f6075f021557d7611360090",
+      "mode": "100644",
+      "path": "docs/recovery/checkpoints/QCP-2026-07-01-R1/EXCLUSIONS_AND_SECURITY.md",
+      "size_bytes": 690,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "d9d68577c3540fb60f5fecdfb5c853165844ecaa",
+      "mode": "100644",
+      "path": "docs/recovery/checkpoints/QCP-2026-07-01-R1/EXECUTION_STATE_SNAPSHOT.yaml",
+      "size_bytes": 985,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "cf412a8c9970506894e497bee0e594d851c23b7b",
+      "mode": "100644",
+      "path": "docs/recovery/checkpoints/QCP-2026-07-01-R1/OPEN_WORK_AND_BLOCKERS.md",
+      "size_bytes": 1306,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "e9760d91de7502bfce5600efebf2ba1ab9edbfe0",
+      "mode": "100644",
+      "path": "docs/recovery/checkpoints/QCP-2026-07-01-R1/POST_MERGE_CLOSURE.yaml",
+      "size_bytes": 2632,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "417dec4ce9a21f41e1d0095714f05772c48753e7",
+      "mode": "100644",
+      "path": "docs/recovery/checkpoints/QCP-2026-07-01-R1/PROJECT_RULES_MASTER.md",
+      "size_bytes": 6763,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "14c80fc7312dd0552f89046127060ee8b368f355",
+      "mode": "100644",
+      "path": "docs/recovery/checkpoints/QCP-2026-07-01-R1/PROJECT_RULES_MASTER.yaml",
+      "size_bytes": 4495,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "504e86cc52236d99e64e7c884bb4977b0cd83e18",
+      "mode": "100644",
+      "path": "docs/recovery/checkpoints/QCP-2026-07-01-R1/README.md",
+      "size_bytes": 1956,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "2c808d0494d51513a1165f7fba76dc957fd07c3c",
+      "mode": "100644",
+      "path": "docs/recovery/checkpoints/QCP-2026-07-01-R1/RECOVERY_RUNBOOK.md",
+      "size_bytes": 2145,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "f0f11d9c27fa22f40147642dd0ef33b4b1ddcb08",
+      "mode": "100644",
+      "path": "docs/recovery/checkpoints/QCP-2026-07-01-R1/RECOVERY_VERIFICATION_REPORT.md",
+      "size_bytes": 2820,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "8b5091ab91bf96f9a6203398ebbd00ea682b1b92",
+      "mode": "100644",
+      "path": "docs/recovery/checkpoints/QCP-2026-07-01-R1/REPOSITORY_MAP.md",
+      "size_bytes": 1097,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "9db46eabbdf76020e16910806acd18e712ecb4de",
+      "mode": "100644",
+      "path": "docs/recovery/checkpoints/QCP-2026-07-01-R1/WIP_STATE_SNAPSHOT.yaml",
+      "size_bytes": 2187,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "5508f01074e215baf7c9ae27eec56382cdd95f31",
+      "mode": "100644",
+      "path": "docs/redteam_home_local_r6.md",
+      "size_bytes": 749,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "e06294e06424795b1ae0131f6cae900d167977da",
+      "mode": "100644",
+      "path": "docs/reporting/REPORTING_API_EXPORT_CONTRACT.md",
+      "size_bytes": 4416,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "ed8b007b5dbb3e0fc400b8196c56d1ed9da85afa",
+      "mode": "100644",
+      "path": "docs/requirements/BUILD_REQUIREMENTS_SNAPSHOT.md",
+      "size_bytes": 7091,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "1b45cee42f7cdeaac8df64910303edc2da79eec8",
+      "mode": "100644",
+      "path": "docs/requirements/Q-DEPLOY-001.md",
+      "size_bytes": 3649,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "c5603f5cc3b73d8822d70718cafa94f323b6dfd7",
+      "mode": "100644",
+      "path": "docs/requirements/Q-METRICS-001.md",
+      "size_bytes": 1338,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "ef6016e6a9f3f05935ebd14cfabb9c45b29d7330",
+      "mode": "100644",
+      "path": "docs/requirements/REQUIREMENTS_SNAPSHOT.md",
+      "size_bytes": 1299,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "d4ec2ae6f5fb12219cf62feed8531050504c1c3c",
+      "mode": "100644",
+      "path": "docs/research/M2_COMPETITIVE_BENCHMARK_2026_07_11.json",
+      "size_bytes": 16786,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "daf9fa2dc082982ed026b9c10c7b9ffd529a8ac2",
+      "mode": "100644",
+      "path": "docs/research/M2_COMPETITIVE_BENCHMARK_2026_07_11.md",
+      "size_bytes": 9409,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "648dcb51774b93f5d13dfada11054ae71614c645",
+      "mode": "100644",
+      "path": "docs/security/REAL_COMMERCIAL_DATA_ADMISSION_CONTRACT_2026_07_08.md",
+      "size_bytes": 7938,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "79cd5b54253bdbb87c7903bced47aa4ca6f6a9e5",
+      "mode": "100644",
+      "path": "docs/security/SECURITY_BASELINE.md",
+      "size_bytes": 500,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "cc137a46f3764594f513527ba548b8bd2584af00",
+      "mode": "100644",
+      "path": "docs/security/SUPPLY_CHAIN_POLICY.md",
+      "size_bytes": 2343,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "58584f97261d3251319877380e5a33eaafd9d1ce",
+      "mode": "100644",
+      "path": "docs/stage-contracts/STAGE-A-FOUNDATION-v1.md",
+      "size_bytes": 2026,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "37d6f4ddf38d39634cec0e35741ceee6751cfff8",
+      "mode": "100644",
+      "path": "docs/stage-contracts/STAGE-B-BUILD-v1.md",
+      "size_bytes": 14549,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "a78fc41a73c2f93f830e81589283ef1f000f69ba",
+      "mode": "100644",
+      "path": "docs/ux/UX_ONBOARDING_EXCEPTION_INBOX_CONTRACT.md",
+      "size_bytes": 8008,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "mode": "100644",
+      "path": "migrations/.gitkeep",
+      "size_bytes": 1,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "2810f34ef9a038a5282e93578d681fe68017bd31",
+      "mode": "100644",
+      "path": "migrations/0001_foundation.sql",
+      "size_bytes": 3705,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "fc1bbe50cd3910df1df878f964200f8f75ee1193",
+      "mode": "100644",
+      "path": "migrations/README.md",
+      "size_bytes": 388,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "mode": "100644",
+      "path": "modules/.gitkeep",
+      "size_bytes": 1,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "9daa78a93982842b3e66b315400ac8daca9b9eba",
+      "mode": "100644",
+      "path": "proof/a6/ledger/events.json",
+      "size_bytes": 8407,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "d66e6e3fd9dbced9a8b8e44190fa72a791b779fc",
+      "mode": "100644",
+      "path": "proof/a6/ledger/source-records.jsonl",
+      "size_bytes": 3498,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "5663e40393ed3b7ea04b1f2c1bc0182ed95da4a2",
+      "mode": "100644",
+      "path": "proof/a6/proof-summary.json",
+      "size_bytes": 8532,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "c8fda3cc8bd4c4c3c6e974a0844f50096b5b13d0",
+      "mode": "100644",
+      "path": "proof/a6/quarantine/0528c6f2959e6474b4330078d0a38c0e0610396d0b10e1ec419213a85bc79048/diagnostics.json",
+      "size_bytes": 888,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "e83a79ef6d454ccf50e54bc36390b9a45a419476",
+      "mode": "100644",
+      "path": "proof/a6/quarantine/0528c6f2959e6474b4330078d0a38c0e0610396d0b10e1ec419213a85bc79048/wb-synthetic-unknown-schema.csv",
+      "size_bytes": 263,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "f98d5424535ce2f5c89e11f4b794082a92cabb56",
+      "mode": "100644",
+      "path": "proof/a6/quarantine/1b960a29b69da2010d89c453a279c95cfbefa99b82996cb5ce495951cf7d8db9/diagnostics.json",
+      "size_bytes": 1918,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "4b48cb3c6b4c80b823cf597b1c69273ca8c380f1",
+      "mode": "100644",
+      "path": "proof/a6/quarantine/1b960a29b69da2010d89c453a279c95cfbefa99b82996cb5ce495951cf7d8db9/wb-synthetic-semantic-drift.csv",
+      "size_bytes": 569,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "4a4d2c78a4542473f3d4d09d916593ff53b43e27",
+      "mode": "100644",
+      "path": "proof/a6/raw/sha256/b9/b9eb38af52a26f3d90eb4dbd26cc0667c1f55f5670398fb4c8f1b38643cf9ea1",
+      "size_bytes": 567,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "7b090d4ecc1ccf1950acc489d9e4ff9258b970ea",
+      "mode": "100644",
+      "path": "pyproject.toml",
+      "size_bytes": 849,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "ec21eeb1eb076775d6cbb01b041c5993f82542e6",
+      "mode": "100644",
+      "path": "quantum_build_backend.py",
+      "size_bytes": 811,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "9de57495a5b24ae65d2877ea7ae8a2f5c31cbc17",
+      "mode": "100644",
+      "path": "requirements/windows-home-local.txt",
+      "size_bytes": 412,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "mode": "100644",
+      "path": "schemas/.gitkeep",
+      "size_bytes": 1,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "c1a7eed0ec9316cb6399ea8b3bdc742f85cc4cee",
+      "mode": "100644",
+      "path": "schemas/calculation-profile.schema.json",
+      "size_bytes": 2568,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "9bc5523efff2b9705b54527467a9bc7b6d6c62b6",
+      "mode": "100644",
+      "path": "schemas/canonical-event.schema.json",
+      "size_bytes": 3736,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "a09ed080b836366e73316e394c62c48da70e41d7",
+      "mode": "100644",
+      "path": "schemas/configuration-rule.schema.json",
+      "size_bytes": 5278,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "7e4c0d656cecbce0218b51961b7fad0aab5b2645",
+      "mode": "100644",
+      "path": "schemas/evidence-chain.schema.json",
+      "size_bytes": 6266,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "b1be2c70e48e195e533144f9110a3a12b7be2751",
+      "mode": "100644",
+      "path": "schemas/exception-inbox.schema.json",
+      "size_bytes": 3796,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "e787d80e9265c5666b974bab6e6c7a71465d84f2",
+      "mode": "100644",
+      "path": "schemas/financial-kernel-result.schema.json",
+      "size_bytes": 4117,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "1bf649f00bf22c24ec6228ae5d0afa384373742a",
+      "mode": "100644",
+      "path": "schemas/import-batch.schema.json",
+      "size_bytes": 1747,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "0f7dca5274c484e080a9db174a2e5089e4ca2c4b",
+      "mode": "100644",
+      "path": "schemas/metric-definition.schema.json",
+      "size_bytes": 3421,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "4a3def56ca9ba6925e007d7732c4fef31bc81599",
+      "mode": "100644",
+      "path": "schemas/metric-result.schema.json",
+      "size_bytes": 12640,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "1091905ae28ff53be9e9af45aa6b24fee5267bca",
+      "mode": "100644",
+      "path": "schemas/report-export-bundle.schema.json",
+      "size_bytes": 1417,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "1e30264117cb7c411ee9f4023b4de4b6ce1c191e",
+      "mode": "100644",
+      "path": "schemas/report-record.schema.json",
+      "size_bytes": 5834,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "b8854ee25eab5a98bf3a5424628b2a8f18947c2a",
+      "mode": "100644",
+      "path": "schemas/rounding-policy.schema.json",
+      "size_bytes": 3421,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "c5a660986067a873f9977d146dd2d21ffc800060",
+      "mode": "100644",
+      "path": "schemas/rule-resolution-result.schema.json",
+      "size_bytes": 4206,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "f40cd7f169ad8d4690a8e3c8a4c3655d90e63d95",
+      "mode": "100644",
+      "path": "schemas/safe-expression.schema.json",
+      "size_bytes": 6481,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "a4e4b5814179688284ce8e6b1c28735d72e3e531",
+      "mode": "100644",
+      "path": "schemas/source-record.schema.json",
+      "size_bytes": 1673,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "6252a390a456cafcf5954a7f9c575d6fbad10e03",
+      "mode": "100644",
+      "path": "schemas/typed-value.schema.json",
+      "size_bytes": 1912,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "2f2a94245a218bf379806d10800f70530e3e6bd5",
+      "mode": "100644",
+      "path": "schemas/ux-configuration-form.schema.json",
+      "size_bytes": 7177,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "c854a5fe4cb40a28f5028fca79b7ec226eea7829",
+      "mode": "100644",
+      "path": "schemas/ux-view.schema.json",
+      "size_bytes": 5940,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "mode": "100644",
+      "path": "scripts/.gitkeep",
+      "size_bytes": 1,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "add504d2efadf09f2b132c71e9860940670bb810",
+      "mode": "100644",
+      "path": "scripts/ci/l4_installed_runtime.ps1",
+      "size_bytes": 23438,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "5453269edb9330c4fc2265d3cb1713243584ebbe",
+      "mode": "100644",
+      "path": "scripts/ci/l4_installed_runtime_postcheck.ps1",
+      "size_bytes": 10088,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "efd4e0014715700d194698623cffa123f1cf85bd",
+      "mode": "100644",
+      "path": "scripts/ci/native_one_button_r37.ps1",
+      "size_bytes": 15622,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "9ba08cff0ee087cc3add9773c14e52da61a825bd",
+      "mode": "100644",
+      "path": "scripts/ci/windows_local_production_r37.ps1",
+      "size_bytes": 11771,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "8a42e63bbc96d918b0ca5e472137dfad09395e4a",
+      "mode": "100644",
+      "path": "scripts/configure_home_local.ps1",
+      "size_bytes": 9788,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "af3d6bdf9e4c2040b1f4f09f7abdae90f036ac5b",
+      "mode": "100644",
+      "path": "scripts/windows/build_exe_installer.ps1",
+      "size_bytes": 16331,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "d24fee2404b1720d32fde59e1a146c5b2af511ba",
+      "mode": "100644",
+      "path": "scripts/windows/build_local_production.ps1",
+      "size_bytes": 14810,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "67accddf07c5a329f833c3a151e3cadc16f54db9",
+      "mode": "100644",
+      "path": "scripts/windows/build_two_installer_bundles.ps1",
+      "size_bytes": 19884,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "425796c2678867d907587b01fa53f7f624eb04ab",
+      "mode": "100644",
+      "path": "scripts/windows/configure_home_local.ps1",
+      "size_bytes": 8844,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "cde03cc571fd1952115499fed3c2172380abcc37",
+      "mode": "100644",
+      "path": "scripts/windows/import_source.ps1",
+      "size_bytes": 14741,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "20cab6a4139274456481e2b537778b81d5244c05",
+      "mode": "100644",
+      "path": "scripts/windows/install_home_local.ps1",
+      "size_bytes": 28399,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "4f0a0f3599d009098648bab68601d6e3e2b6e090",
+      "mode": "100644",
+      "path": "scripts/windows/one_click_home_local.ps1",
+      "size_bytes": 21781,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "c81e0626b7e27dc94356ba7c4820bdabce7dc5cb",
+      "mode": "100644",
+      "path": "src/quantum/__init__.py",
+      "size_bytes": 48,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "a1da1ccc394a264e0de92bd4ba43e01acae11981",
+      "mode": "100644",
+      "path": "src/quantum/access/__init__.py",
+      "size_bytes": 284,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "55569149561212267f5436933a6c6afdb64c5ad1",
+      "mode": "100644",
+      "path": "src/quantum/access/contracts.py",
+      "size_bytes": 7084,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "ae2a4cd8f9e238a26143f834b84147684ada096e",
+      "mode": "100644",
+      "path": "src/quantum/adapters/__init__.py",
+      "size_bytes": 610,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "2fe95e6820f456729134a6ca94f084fb8a2ad2bf",
+      "mode": "100644",
+      "path": "src/quantum/adapters/contracts.py",
+      "size_bytes": 3538,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "1d66e8a1da66eaea466afba9ed45e8fae8220b49",
+      "mode": "100644",
+      "path": "src/quantum/adapters/defaults.py",
+      "size_bytes": 1135,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "73bb4d6db9d003c9d2b6a74fbfda38f8ea3aa8c7",
+      "mode": "100644",
+      "path": "src/quantum/adapters/ozon/__init__.py",
+      "size_bytes": 143,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "6db406c3c1c5da46e9cf511230fcd2c42ef6cf15",
+      "mode": "100644",
+      "path": "src/quantum/adapters/ozon/adapter.py",
+      "size_bytes": 2112,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "860e8f68a5f7f1c326996d60e49e652d14d40d1c",
+      "mode": "100644",
+      "path": "src/quantum/adapters/registry.py",
+      "size_bytes": 2590,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "d0ab9f7866e74a7ed13680a43bec01be0b82a2fd",
+      "mode": "100644",
+      "path": "src/quantum/adapters/wildberries/__init__.py",
+      "size_bytes": 1169,
+      "type": "blob"
+    }
+  ],
+  "entry_count": 100,
+  "part_number": 4,
+  "schema_version": "1.0.0",
+  "subject_exact_head": "b151e67c2bea8d4d50c5c4a2aeb0695e89921c01",
+  "work_order_id": "WO-M0-R7-002"
+}

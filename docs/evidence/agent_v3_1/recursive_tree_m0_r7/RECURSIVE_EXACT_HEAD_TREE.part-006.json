@@ -1,0 +1,710 @@
+{
+  "document_type": "RECURSIVE_EXACT_HEAD_TREE_PART",
+  "entries": [
+    {
+      "blob_sha": "f0da5ae36358a0bd891b1439818484d0287fd919",
+      "mode": "100644",
+      "path": "src/quantum/ingestion/_xlsx_package_parts.py",
+      "size_bytes": 5428,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "e994f7f1142428c34287c6611b56b0e0a42aadec",
+      "mode": "100644",
+      "path": "src/quantum/ingestion/_xlsx_passive_auxiliary_compat.py",
+      "size_bytes": 4584,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "c23becd900c427cbe473bb83db4800e5ffaf3cb4",
+      "mode": "100644",
+      "path": "src/quantum/ingestion/_xlsx_r19_hardening.py",
+      "size_bytes": 8094,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "65f49a81d15265f3b3a5c80a1c9b460cfeb07172",
+      "mode": "100644",
+      "path": "src/quantum/ingestion/_xlsx_relationships.py",
+      "size_bytes": 3257,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "2e1771e5a0a611fccaece155d82f612545951954",
+      "mode": "100644",
+      "path": "src/quantum/ingestion/_xlsx_relationships_core.py",
+      "size_bytes": 10717,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "f9389482b028409ed7d6ac75f9a0f1511bd3f64a",
+      "mode": "100644",
+      "path": "src/quantum/ingestion/_xlsx_workbook.py",
+      "size_bytes": 14138,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "a86f625560469b4e1a1940a78856b81b256ed2f6",
+      "mode": "100644",
+      "path": "src/quantum/ingestion/_xlsx_workbook_content.py",
+      "size_bytes": 8127,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "ce006d889fc9d437285770ce1b40a7befe56b1b1",
+      "mode": "100644",
+      "path": "src/quantum/ingestion/_xlsx_worksheet_attributes.py",
+      "size_bytes": 8198,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "912782e950531670617b877d85b6bf9445d72a3e",
+      "mode": "100644",
+      "path": "src/quantum/ingestion/_xlsx_xml_lexical.py",
+      "size_bytes": 10505,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "2bcb2117b190bca28a7dcac8572fff915f6e8d6a",
+      "mode": "100644",
+      "path": "src/quantum/ingestion/_xlsx_zip_coverage.py",
+      "size_bytes": 7865,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "828f04845bb236e0d75686c30dfb2996a489ffd8",
+      "mode": "100644",
+      "path": "src/quantum/ingestion/admission.py",
+      "size_bytes": 184,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "fa3b264bd7d3875b46b143c6716e08fc07fa8dd9",
+      "mode": "100644",
+      "path": "src/quantum/ingestion/admission_v2.py",
+      "size_bytes": 3267,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "50425e444b04bac62613fab45875ff677a60239f",
+      "mode": "100644",
+      "path": "src/quantum/ingestion/canonical_pipeline.py",
+      "size_bytes": 16187,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "910ae313577fe2e6305e166ac885f490b537c73b",
+      "mode": "100644",
+      "path": "src/quantum/ingestion/fingerprints.py",
+      "size_bytes": 2495,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "50eb8a59a2a5f8ac3d7df9ae1cc50361f7b16d3e",
+      "mode": "100644",
+      "path": "src/quantum/ingestion/proof_pipeline.py",
+      "size_bytes": 8715,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "718c50a2bb98bf5796b6466c3000685437d10c20",
+      "mode": "100644",
+      "path": "src/quantum/ingestion/receipts.py",
+      "size_bytes": 3936,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "6a3c49f34e7d59477ce51856736109a1896f6097",
+      "mode": "100644",
+      "path": "src/quantum/ingestion/schema_registry.py",
+      "size_bytes": 2108,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "2f6082c3ae39001b55dbc3e6e910c944c0f468ea",
+      "mode": "100644",
+      "path": "src/quantum/ingestion/storage.py",
+      "size_bytes": 21043,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "6377e71050fd5b0f7ded9d1bd3db85eac62bcfc5",
+      "mode": "100644",
+      "path": "src/quantum/ingestion/xlsx_inspection.py",
+      "size_bytes": 76,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "997a2f2d5b58d4a091369a4ea19a0281bf4ca6bb",
+      "mode": "100644",
+      "path": "src/quantum/insights/__init__.py",
+      "size_bytes": 1528,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "2312a292726f6ae1df778af6bc7a65d651cd6b39",
+      "mode": "100644",
+      "path": "src/quantum/insights/contracts.py",
+      "size_bytes": 8877,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "70d07be4c47874953e264cbc5bc79fb7cbb708ef",
+      "mode": "100644",
+      "path": "src/quantum/insights/enrichment.py",
+      "size_bytes": 3227,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "02f141ee72589b87eb7adf741f0547aad8195e1b",
+      "mode": "100644",
+      "path": "src/quantum/insights/financial.py",
+      "size_bytes": 7023,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "45fe4af7650abeed7befc642975abdc349dd2590",
+      "mode": "100644",
+      "path": "src/quantum/insights/recommendations.py",
+      "size_bytes": 25472,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "b9b12173e0ea91dc9244de6d0be631e30210d783",
+      "mode": "100644",
+      "path": "src/quantum/outputs/__init__.py",
+      "size_bytes": 807,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "031fdc10b182aaf7de50832239b6ef2a8e6892f1",
+      "mode": "100644",
+      "path": "src/quantum/outputs/dashboard.py",
+      "size_bytes": 2285,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "c37a794a566ef90beb3b728332cc70712b612640",
+      "mode": "100644",
+      "path": "src/quantum/outputs/dashboard_script_controls.py",
+      "size_bytes": 7538,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "a473f756aaa7e15270581f9c63e7afaa43101f19",
+      "mode": "100644",
+      "path": "src/quantum/outputs/dashboard_script_core.py",
+      "size_bytes": 22928,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "85e793f12a1b4fb5c9d436d98e9fc16231aacfce",
+      "mode": "100644",
+      "path": "src/quantum/outputs/dashboard_script_data.py",
+      "size_bytes": 7418,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "3f31228a75323a26e8df6f62a50a41655f49b202",
+      "mode": "100644",
+      "path": "src/quantum/outputs/dashboard_shell.py",
+      "size_bytes": 15249,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "f8004baa8a69deeaebdff4f0f56ef0ccab16b695",
+      "mode": "100644",
+      "path": "src/quantum/outputs/dashboard_style.py",
+      "size_bytes": 25401,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "ee7afa67516fa2f650083b46cd2f3a08c0ecaa56",
+      "mode": "100644",
+      "path": "src/quantum/outputs/local_bundle.py",
+      "size_bytes": 20178,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "b108dea5d680bcb0bc638310ef848f8582b92783",
+      "mode": "100644",
+      "path": "src/quantum/outputs/writer.py",
+      "size_bytes": 13858,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "e0ecd3dff1b81cb4190fb3afc0622b09e1fa7f85",
+      "mode": "100644",
+      "path": "src/quantum/outputs/xlsx_chart.py",
+      "size_bytes": 5532,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "82157724e506adc4d7543ab2d87d4cb4ab9493e4",
+      "mode": "100644",
+      "path": "src/quantum/outputs/xlsx_ooxml.py",
+      "size_bytes": 18036,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "29f1dfb8c25ec762dcb0cff9287ea077307d33be",
+      "mode": "100644",
+      "path": "src/quantum/outputs/xlsx_report.py",
+      "size_bytes": 26105,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "bed79a6a7d2acf64979c78eb45deb9160bb49422",
+      "mode": "100644",
+      "path": "src/quantum/outputs/xlsx_rows.py",
+      "size_bytes": 17135,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "09ca111e00f30747944e09103261d6f31afd7a65",
+      "mode": "100644",
+      "path": "src/quantum/pilot/__init__.py",
+      "size_bytes": 548,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "c80a035efc320a91858dfc413e994b7644d233c1",
+      "mode": "100644",
+      "path": "src/quantum/pilot/hash_compat.ps1",
+      "size_bytes": 1647,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "41001f309da49f568374df59b0d5e444e810816c",
+      "mode": "100644",
+      "path": "src/quantum/pilot/import_xlsx_source.ps1",
+      "size_bytes": 20612,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "9a020287694633055ee300a3141bb31a0db34a4c",
+      "mode": "100644",
+      "path": "src/quantum/pilot/local_runner.py",
+      "size_bytes": 20659,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "5f64f09973b0827bb6a7b5a371225ac00b34bb66",
+      "mode": "100644",
+      "path": "src/quantum/pilot/reconciliation_guard.py",
+      "size_bytes": 6750,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "6ae37e3eb6b3c7d1f31f62e732cb86928fc981c7",
+      "mode": "100644",
+      "path": "src/quantum/pilot/universal_gateway.py",
+      "size_bytes": 24882,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "3ae080521979537b4751f0e7e1c63500fa3b6080",
+      "mode": "100644",
+      "path": "src/quantum/pilot/universal_import.py",
+      "size_bytes": 423,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "e74ef965b87b55e75309d63ebac07ca728116616",
+      "mode": "100644",
+      "path": "src/quantum/pilot/universal_intake.py",
+      "size_bytes": 9451,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "5d20290b04ec71e50a9acaa7f5970eaffb2c6ad5",
+      "mode": "100644",
+      "path": "src/quantum/pilot/universal_tables.py",
+      "size_bytes": 37726,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "602a5c01ed56de01ae17aef88e15405ea98418ff",
+      "mode": "100644",
+      "path": "src/quantum/pilot/windows_outputs.py",
+      "size_bytes": 1904,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "5f0de6ecf12e040d98999c3e40046f0742c232f4",
+      "mode": "100644",
+      "path": "src/quantum/pilot/windows_runner.py",
+      "size_bytes": 22769,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "e152c5723b7c309ccdd5335ff0fffa5be5f610ff",
+      "mode": "100644",
+      "path": "src/quantum/pilot/windows_source_bridge.py",
+      "size_bytes": 8168,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "8fc3a64c2d862387682420aff8676d6eede34dfb",
+      "mode": "100644",
+      "path": "src/quantum/pilot/windows_storage_compat.py",
+      "size_bytes": 939,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "9e9e9244892c4f10e26e5a30fefafb5a83a347b8",
+      "mode": "100644",
+      "path": "src/quantum/recommendations/__init__.py",
+      "size_bytes": 475,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "bc1d404a450c185ab48e1f14d7c7499f87fd0aa5",
+      "mode": "100644",
+      "path": "src/quantum/recommendations/engine.py",
+      "size_bytes": 4787,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "eab1864cafed60bafd1a987dbb0eb433414c999d",
+      "mode": "100644",
+      "path": "src/quantum/reconciliation/__init__.py",
+      "size_bytes": 128,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "45370ca50fafccaade64eaabb5a778184b82686a",
+      "mode": "100644",
+      "path": "src/quantum/reconciliation/_runtime_core.py",
+      "size_bytes": 10090,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "47c46d719719ce07237c49815579c9e079d598e8",
+      "mode": "100644",
+      "path": "src/quantum/reconciliation/runtime.py",
+      "size_bytes": 1564,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "eb52eecce477fde5bde618cb3c06dbe383a83c89",
+      "mode": "100644",
+      "path": "src/quantum/reporting/__init__.py",
+      "size_bytes": 930,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "94071fabb44048309d6cb58976be18f720ece820",
+      "mode": "100644",
+      "path": "src/quantum/reporting/runtime.py",
+      "size_bytes": 29353,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "mode": "100644",
+      "path": "src/quantum/scripts/__init__.py",
+      "size_bytes": 0,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "7fb854ba7afe35b5de6b3068bbebcacf61f849e2",
+      "mode": "100644",
+      "path": "src/quantum/scripts/a6_proof.py",
+      "size_bytes": 1941,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "e4e4ff51c7c4f3a0b5e83bedc728500088b2e9b8",
+      "mode": "100644",
+      "path": "src/quantum/scripts/ci.py",
+      "size_bytes": 5574,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "c8f74b578986b27db496121aee2322578041da54",
+      "mode": "100644",
+      "path": "src/quantum/scripts/oss_admission_scan.py",
+      "size_bytes": 10457,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "a355b46b2620d313ece01a5597fcaef5aa2abedf",
+      "mode": "100644",
+      "path": "src/quantum/ux/__init__.py",
+      "size_bytes": 5474,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "decacde3f777e2edcf53b9a20f509408ed1a307a",
+      "mode": "100644",
+      "path": "src/quantum/ux/runtime.py",
+      "size_bytes": 31812,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "94680a1a5662734f90dafced93b5acd54319dc93",
+      "mode": "100644",
+      "path": "src/quantum/ux/validation.py",
+      "size_bytes": 8298,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "mode": "100644",
+      "path": "src/quantum/worker/__init__.py",
+      "size_bytes": 0,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "6b7c6477533d6a8dada813ef83e9c9bc4278561d",
+      "mode": "100644",
+      "path": "src/quantum/worker/main.py",
+      "size_bytes": 838,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "9d48db4f9f85e1752cf424c49ee18a6907c3f160",
+      "mode": "100644",
+      "path": "tests/__init__.py",
+      "size_bytes": 35,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "67d89fa63c4bb08ac9158364ce83a95ed82ffd1b",
+      "mode": "100644",
+      "path": "tests/b1a_artifact_manifest_r8.py",
+      "size_bytes": 6103,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "ecdade166319fe0e3c2ddf57ac3d523a2f891398",
+      "mode": "100644",
+      "path": "tests/b1b_manifest_support_v2.py",
+      "size_bytes": 4993,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "ae49f55dc1c2e2176c21d897a5eb03a1c517db91",
+      "mode": "100644",
+      "path": "tests/b3_helpers.py",
+      "size_bytes": 4857,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "mode": "100644",
+      "path": "tests/contracts/.gitkeep",
+      "size_bytes": 1,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "4b48cb3c6b4c80b823cf597b1c69273ca8c380f1",
+      "mode": "100644",
+      "path": "tests/contracts/fixtures/a6/wb-synthetic-semantic-drift.csv",
+      "size_bytes": 569,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "e83a79ef6d454ccf50e54bc36390b9a45a419476",
+      "mode": "100644",
+      "path": "tests/contracts/fixtures/a6/wb-synthetic-unknown-schema.csv",
+      "size_bytes": 263,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "4a4d2c78a4542473f3d4d09d916593ff53b43e27",
+      "mode": "100644",
+      "path": "tests/contracts/fixtures/a6/wb-synthetic-valid.csv",
+      "size_bytes": 567,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "c6085583c657a9093151ffec00d7664345dc5046",
+      "mode": "100644",
+      "path": "tests/contracts/fixtures/b1a-rule-resolution-vectors.json",
+      "size_bytes": 5925,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "7559eaa1bf166f2d497ec3aecef1b8ed87f6d2df",
+      "mode": "100644",
+      "path": "tests/contracts/fixtures/b3-evidence-chain-vectors.json",
+      "size_bytes": 9943,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "d580687a5e3002cfc7cadae50aa2ac8f13064125",
+      "mode": "100644",
+      "path": "tests/contracts/fixtures/invalid-empty-as-zero.json",
+      "size_bytes": 215,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "cf2971f3234cd8027eaeee4c72347b0fe00adb72",
+      "mode": "100644",
+      "path": "tests/contracts/fixtures/valid-canonical-event.json",
+      "size_bytes": 1564,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "584537e0a0129d75bc81ae9997dee5732d3ff478",
+      "mode": "100644",
+      "path": "tests/contracts/fixtures/valid-typed-zero.json",
+      "size_bytes": 207,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "bbf2a520fae1c251624a4d978a6890e0bff4a8bf",
+      "mode": "100644",
+      "path": "tests/contracts/fixtures/valid-unavailable.json",
+      "size_bytes": 239,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "mode": "100644",
+      "path": "tests/e2e/.gitkeep",
+      "size_bytes": 1,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "mode": "100644",
+      "path": "tests/golden/.gitkeep",
+      "size_bytes": 1,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "658f0b489fd012a60ea91d731f2530570d5a3e0e",
+      "mode": "100644",
+      "path": "tests/integration_manifest_support.py",
+      "size_bytes": 7845,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "26618902644a22e5212dbc9a10b824b589697a22",
+      "mode": "100644",
+      "path": "tests/integration_manifest_support_m6.py",
+      "size_bytes": 1059,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "963c9972af052ac516dc1883ae8a1e2e03a74360",
+      "mode": "100644",
+      "path": "tests/integration_manifest_support_m7.py",
+      "size_bytes": 1144,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "10ca9dbf07c7c01f3647d9766a96f5a13e27cbed",
+      "mode": "100644",
+      "path": "tests/integration_manifest_support_m8.py",
+      "size_bytes": 5683,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "77b88e0adfdba71ceaeb89f50f49ec73109e8c6d",
+      "mode": "100644",
+      "path": "tests/p16_fixtures.py",
+      "size_bytes": 73,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "f319f00c9a071360bcca1d10b9043c9e06fbd174",
+      "mode": "100644",
+      "path": "tests/p16_fixtures_v2.py",
+      "size_bytes": 11590,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "9d885e4d3f7473d5648cb58538d37ab4794882e7",
+      "mode": "100644",
+      "path": "tests/p16_test_support.py",
+      "size_bytes": 406,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "mode": "100644",
+      "path": "tests/properties/.gitkeep",
+      "size_bytes": 1,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "mode": "100644",
+      "path": "tests/reconciliation/.gitkeep",
+      "size_bytes": 1,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "mode": "100644",
+      "path": "tests/security/.gitkeep",
+      "size_bytes": 1,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "94f4b168f1762976fc4cf9d93d8bac0b82b5b822",
+      "mode": "100644",
+      "path": "tests/test_a0_b1b_rescue_preflight.py",
+      "size_bytes": 95,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "8f5facad66d336e42ff936fd7abf29189a67a54a",
+      "mode": "100644",
+      "path": "tests/test_a0_manifest_diagnostic.py",
+      "size_bytes": 2003,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "757c262ee2ddf2261b1d40df437744a69cd004ef",
+      "mode": "100644",
+      "path": "tests/test_a0_p15_manifest_payload.py",
+      "size_bytes": 670,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "b89834500db5e6711dc4139f3f87cb2e7a159c4e",
+      "mode": "100644",
+      "path": "tests/test_a6_fingerprints.py",
+      "size_bytes": 1121,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "6ada80760c0226dd07024ffbb20df5630d8f34d9",
+      "mode": "100644",
+      "path": "tests/test_a6_normalization.py",
+      "size_bytes": 1679,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "240d3de5d8f6cdbf143bf3c452dcfd3e5c6c44cf",
+      "mode": "100644",
+      "path": "tests/test_a6_proof_pipeline.py",
+      "size_bytes": 2999,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "49c5ccb80c0fd08a8c69640e23d1456c173f8a32",
+      "mode": "100644",
+      "path": "tests/test_a6_schema_detection.py",
+      "size_bytes": 982,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "d27c51732faf94ab454b5797690ae21bcd6c0776",
+      "mode": "100644",
+      "path": "tests/test_b1a_artifact_manifest.py",
+      "size_bytes": 1014,
+      "type": "blob"
+    }
+  ],
+  "entry_count": 100,
+  "part_number": 6,
+  "schema_version": "1.0.0",
+  "subject_exact_head": "b151e67c2bea8d4d50c5c4a2aeb0695e89921c01",
+  "work_order_id": "WO-M0-R7-002"
+}

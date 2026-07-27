@@ -1,0 +1,710 @@
+{
+  "document_type": "RECURSIVE_EXACT_HEAD_TREE_PART",
+  "entries": [
+    {
+      "blob_sha": "c87d143f3dfb34bba1d1fcad2d49771dd40e58fe",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R85.json",
+      "size_bytes": 869,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "e6676acd96a35031c0dceef112216cf406c51bec",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R86.json",
+      "size_bytes": 1287,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "cb844ba02e1e2847a6ab3f939208e74b28b0d350",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R87.json",
+      "size_bytes": 791,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "9df919862ea82e22b8ff83aa202f4053d9d97d4a",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R88.json",
+      "size_bytes": 1185,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "39e5bc6e85afb8ef006c23f1ce114e2829be3ca5",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R89.json",
+      "size_bytes": 1261,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "696283135a98699306031b4c0e6df242eb6399c0",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R9.json",
+      "size_bytes": 342,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "4d5ad47c0fec0dfb9a516deae03fd6406c0260e9",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R90.json",
+      "size_bytes": 951,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "6956b6319cc35ce155a7099285acd451852d642b",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R91.json",
+      "size_bytes": 2243,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "c384be98f1b87ac1646bde4f12508b5c548f6919",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R92.json",
+      "size_bytes": 16452,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "974585793e0aad7d02f30b81814cfc9774c5ad60",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R93.json",
+      "size_bytes": 1136,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "9e3e5c1a1a4373b85d2a790b191434d4c568831d",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R94.json",
+      "size_bytes": 1307,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "3c1f25920c6897e76466b6e29873b46364116592",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R95.json",
+      "size_bytes": 4199,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "43c043cbb53aed8e7b880ab40bcbd7d4665a6d9f",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R96.json",
+      "size_bytes": 1947,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "28e98f5b56aaab65eb45cd0582590a19c81ea1db",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R97.json",
+      "size_bytes": 1765,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "5d09a0e22c0e58e5ff7c9f3662ccfa34a01f30a1",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R98.json",
+      "size_bytes": 1898,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "b52af806361e29c9e6be6842007b066ac22223a1",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R99.json",
+      "size_bytes": 1330,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "cddf6e6928deead02cf94aa22e120362b761e805",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_QUANTUM_UNIVERSAL_RELAUNCH_R2.json",
+      "size_bytes": 4311,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "7e3a0a7838f5ac79f494d9d40430ada459eab70e",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_REAL_DATA_PILOT_2026_07_08.json",
+      "size_bytes": 1689,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "fd0a94ab809d399cdb896f5c11fcd386058359f2",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_RECOVERY_QCP_2026_07_01_R1.json",
+      "size_bytes": 2987,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "907ce148f6cee5ce0446c32ffbba0c2957611d32",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_SHORTCUT_LAUNCH_REPAIR_R1.json",
+      "size_bytes": 2552,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "4020b849d8c80601b1fb131b34cead75ba3e9af6",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_UNIVERSAL_PARTIAL_R1.json",
+      "size_bytes": 7447,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "8323094c94b08894063b7e89b033c640a38e6910",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_WBR2_M5_CLOSURE_R1.json",
+      "size_bytes": 1369,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "308126071b049df00c5ad579628bd687e151591c",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_WBR2_M5_CLOSURE_R2.json",
+      "size_bytes": 1568,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "f46c29dff8fc9826bf0473edc8ce6b579269e736",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_WB_RELEASE_R2_GOV_R1.json",
+      "size_bytes": 1370,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "18b39aa461f5d180f201029539f3ee01546d196c",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_XLSX_NAMESPACE_FALLBACK_R1.json",
+      "size_bytes": 2880,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "e67e896f2e4f3aad39e93f45fa61aa2f098fbfba",
+      "mode": "100644",
+      "path": "docs/evidence/EVIDENCE_CHAIN_CONTRACT.md",
+      "size_bytes": 6989,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "cbd36bb9088dbaff4771174b4610fa3b8c183168",
+      "mode": "100644",
+      "path": "docs/evidence/FOUNDATION_CLOSURE_GAP_REPORT.json",
+      "size_bytes": 1338,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "27285c9fabf975c4649f17a110c8bc2e80a04b4b",
+      "mode": "100644",
+      "path": "docs/evidence/FULL_PROJECT_REDTEAM_R1_DEFECT_REGISTER.json",
+      "size_bytes": 6827,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "3616417dcb8e77b038efddb40d290cf05af70cc9",
+      "mode": "100644",
+      "path": "docs/evidence/FULL_PROJECT_REDTEAM_R1_RTM.json",
+      "size_bytes": 12385,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "9bdc532b1bfcf592dd77acce90f8b7649f9b962c",
+      "mode": "100644",
+      "path": "docs/evidence/M2_RUNTIME_DEPENDENCY_MODERNIZATION_CORRECTION_R95.json",
+      "size_bytes": 1571,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "6e84f14ba0fa9f52aebe5d9a5288a3fe820ef44b",
+      "mode": "100644",
+      "path": "docs/evidence/M2_RUNTIME_DEPENDENCY_MODERNIZATION_CORRECTION_R96.json",
+      "size_bytes": 1713,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "6fff381ebad449ba4f3915e28a7fdcd51d15ea3a",
+      "mode": "100644",
+      "path": "docs/evidence/M2_RUNTIME_DEPENDENCY_MODERNIZATION_RTM.json",
+      "size_bytes": 2207,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "99d1563c900452d7f94def7b30e6839cccb824fc",
+      "mode": "100644",
+      "path": "docs/evidence/M3_CI_CONSOLIDATION_RTM.json",
+      "size_bytes": 1622,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "972f6c34df93c2172ff43f71b353a098d8bc9b54",
+      "mode": "100644",
+      "path": "docs/evidence/M3_DEFECT_REGISTER.json",
+      "size_bytes": 2146,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "a38ba13df844936e6f91b9ef9aa7c2bdda6941c8",
+      "mode": "100644",
+      "path": "docs/evidence/M3_P0_P1_STABILIZATION_REPORT.md",
+      "size_bytes": 4250,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "2e2313c93a0819347c4bcf0cd42549624f16dbee",
+      "mode": "100644",
+      "path": "docs/evidence/M4_AUTO_INBOX_RTM.json",
+      "size_bytes": 2769,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "4454c7861b9aa2a66f1e306e7efda070e529d1e8",
+      "mode": "100644",
+      "path": "docs/evidence/M4_CORRECTIVE_EXECUTION_REGISTER_R99.json",
+      "size_bytes": 5163,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "1a37f93a9eb28e92ea26f0bccd08ebc13e718af3",
+      "mode": "100644",
+      "path": "docs/evidence/M4_DEFECT_REGISTER.json",
+      "size_bytes": 2985,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "13aa032b72637b458b60d7002c8f3bc22b8672e0",
+      "mode": "100644",
+      "path": "docs/evidence/M4_FINANCIAL_DATA_CORRECTNESS_REPORT.md",
+      "size_bytes": 6434,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "33ef014c78b01bf22244e4685618e6e9631d40bd",
+      "mode": "100644",
+      "path": "docs/evidence/M5_BROWSER_RED_TEAM.json",
+      "size_bytes": 877,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "7153f67d0ee607e6606f6126ff12092db5398490",
+      "mode": "100644",
+      "path": "docs/evidence/M5_CI_TRIGGER.txt",
+      "size_bytes": 25,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "a7e25564ab4a2dc0e92142388b796297d10997b8",
+      "mode": "100644",
+      "path": "docs/evidence/M5_COLOR_UI_GRAPH_QUALITY_REPORT.md",
+      "size_bytes": 4200,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "0e232a469fd2d068eb29ee64ef827417c9c23b98",
+      "mode": "100644",
+      "path": "docs/evidence/M5_CONTRAST_AUDIT.json",
+      "size_bytes": 1388,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "9963b741929a6b885dd922d51f37a2bb89cc0e3f",
+      "mode": "100644",
+      "path": "docs/evidence/M5_DEFECT_REGISTER.json",
+      "size_bytes": 3233,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "657a6248f10021d2fac6d0a0529724b99d051886",
+      "mode": "100644",
+      "path": "docs/evidence/M5_SCHEDULED_REPORTS_RTM.json",
+      "size_bytes": 14113,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "dd225db1bcb8a2bb9bf3f51442b0bf56727d22ac",
+      "mode": "100644",
+      "path": "docs/evidence/M6_DEFECT_REGISTER.json",
+      "size_bytes": 3561,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "3c02eecad3113751519d3aca7205992d4e3f6526",
+      "mode": "100644",
+      "path": "docs/evidence/M6_MARKETPLACE_NEUTRAL_CORE_ADAPTERS_REPORT.md",
+      "size_bytes": 4229,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "3cd7d16832a4b153c988b53fe35726c570b1d03b",
+      "mode": "100644",
+      "path": "docs/evidence/M7_DEFECT_REGISTER.json",
+      "size_bytes": 5038,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "ae564a7bb23f8ed555ec8b2f23404c3bcff97ba2",
+      "mode": "100644",
+      "path": "docs/evidence/M7_PERFORMANCE_BUDGET.json",
+      "size_bytes": 524,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "cad0d0419119bf7fe7c42a9df5f215ecfa9e72ef",
+      "mode": "100644",
+      "path": "docs/evidence/M7_SECURITY_PERFORMANCE_ONE_CLICK_REPORT.md",
+      "size_bytes": 4173,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "892cf9d9dd374fbf4732399b32e67ff1970a0c0a",
+      "mode": "100644",
+      "path": "docs/evidence/M8_CLEAN_ENVIRONMENT_REPRODUCTION.json",
+      "size_bytes": 4369,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "10ebbc8dcd46b4c1a737aed3fb9df6d0d07d1e46",
+      "mode": "100644",
+      "path": "docs/evidence/M9_DEFECT_REGISTER.json",
+      "size_bytes": 3771,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "8266fbdf81c1efb30b3d431f2acfdaa7c99795f5",
+      "mode": "100644",
+      "path": "docs/evidence/M9_PLATEAU_RED_TEAM_REPORT.md",
+      "size_bytes": 4325,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "6e64538230356761f42f1ec902cced2f97f81f79",
+      "mode": "100644",
+      "path": "docs/evidence/METRIC_SNAPSHOT_CONTRACT.md",
+      "size_bytes": 6184,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "0a99028bfe4ec0ce274a0085f65ea1049d25bb03",
+      "mode": "100644",
+      "path": "docs/evidence/OSS_DEPENDENCY_ADMISSION_STATE.yaml",
+      "size_bytes": 1222,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "336ea6fd3f168b52d9d0c0db35cd51d704cd37d7",
+      "mode": "100644",
+      "path": "docs/evidence/OSS_DEPENDENCY_ADMISSION_VALIDATION.json",
+      "size_bytes": 629,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "8888471d25e828ced3933032097d83fe7e19adb0",
+      "mode": "100644",
+      "path": "docs/evidence/QUANTUM_UNIVERSAL_RELAUNCH_R2_RTM.json",
+      "size_bytes": 11336,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "47d95c0c21edd5d8160866ceae080a4da2448ca2",
+      "mode": "100644",
+      "path": "docs/evidence/SHORTCUT_LAUNCH_REPAIR_R1_DEFECT_REGISTER.json",
+      "size_bytes": 3067,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "6c75910d6b74d529f14272c6fa2b4c55b8685555",
+      "mode": "100644",
+      "path": "docs/evidence/SHORTCUT_LAUNCH_REPAIR_R1_RTM.json",
+      "size_bytes": 4415,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "f8e15e76898b81916e323c3824caa4ff5205225c",
+      "mode": "100644",
+      "path": "docs/evidence/STAGE_A_A3_EVIDENCE.yaml",
+      "size_bytes": 856,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "1e550fcf7d347724deec6805688cc7e4d0e16a26",
+      "mode": "100644",
+      "path": "docs/evidence/STAGE_A_A4_EVIDENCE.yaml",
+      "size_bytes": 1341,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "b4bb5f705a70b1306fb606d49cb5a8abcb11471e",
+      "mode": "100644",
+      "path": "docs/evidence/STAGE_A_A5_EVIDENCE.yaml",
+      "size_bytes": 1008,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "eea1f4757917fbbad77537e7319762128d30aa99",
+      "mode": "100644",
+      "path": "docs/evidence/STAGE_A_A6_EVIDENCE.json",
+      "size_bytes": 2905,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "016bf2126fdeebb5d9f97c424bd69e473b354054",
+      "mode": "100644",
+      "path": "docs/evidence/STAGE_A_BOOTSTRAP_EVIDENCE.yaml",
+      "size_bytes": 1020,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "0d15b3693e2383b97775f2588aa04fd05ed0e770",
+      "mode": "100644",
+      "path": "docs/evidence/STAGE_B_B0_READINESS.yaml",
+      "size_bytes": 5311,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "3993f45922e63dde0c8e56d15c125363d36a30f0",
+      "mode": "100644",
+      "path": "docs/evidence/STAGE_B_B1A_CONTRACT_EVIDENCE.yaml",
+      "size_bytes": 1253,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "8ab57812ad64c5dff8a420bbf322de263b992f57",
+      "mode": "100644",
+      "path": "docs/evidence/STAGE_B_B3_CONTRACT_EVIDENCE.yaml",
+      "size_bytes": 2982,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "cc3fc555452153129e920c3ad88c42ad62d251fe",
+      "mode": "100644",
+      "path": "docs/evidence/STAGE_B_B3_EXECUTION_STATE.yaml",
+      "size_bytes": 1611,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "e132b51f2dae47777d379304731e1b7738d47aac",
+      "mode": "100644",
+      "path": "docs/evidence/STAGE_B_EXECUTION_STATE.yaml",
+      "size_bytes": 5836,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "370ebe46644669108b43b787b29dd9d0945431c7",
+      "mode": "100644",
+      "path": "docs/evidence/STAGE_P1_2_EXECUTION_STATE.yaml",
+      "size_bytes": 1984,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "ab4d4302bce2722686d119e8d9c165cbe5a8e4a7",
+      "mode": "100644",
+      "path": "docs/evidence/STAGE_P1_3_EXECUTION_STATE.yaml",
+      "size_bytes": 2083,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "a4be5316339476f2766fbea8ec4052cd4f22ecc3",
+      "mode": "100644",
+      "path": "docs/evidence/STAGE_P1_4_EXECUTION_STATE.yaml",
+      "size_bytes": 2221,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "c019eb32fb4ff2d1b4a1cb8cf756a420a02b5bbc",
+      "mode": "100644",
+      "path": "docs/evidence/STAGE_P1_5_EXECUTION_STATE.yaml",
+      "size_bytes": 3480,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "26d4e14820b3f823102ff32ca98d591094b02fd6",
+      "mode": "100644",
+      "path": "docs/evidence/STAGE_P1_6_EXECUTION_STATE.yaml",
+      "size_bytes": 2664,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "10669e167745ec0c1874463837f056d900da3d1d",
+      "mode": "100644",
+      "path": "docs/evidence/STAGE_P1_EXECUTION_STATE.yaml",
+      "size_bytes": 1425,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "b800980dd7eee5bade0b20add6ce430652b1bb8e",
+      "mode": "100644",
+      "path": "docs/evidence/UNIVERSAL_PARTIAL_R1_DEFECT_REGISTER.json",
+      "size_bytes": 8123,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "37132ee544ffa882d56a6a3e6bc5be10bf7bfe4d",
+      "mode": "100644",
+      "path": "docs/evidence/UNIVERSAL_PARTIAL_R1_RTM.json",
+      "size_bytes": 9295,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "ec5445db4d880e384cb533313af4c61bb7e1833f",
+      "mode": "100644",
+      "path": "docs/evidence/WBR2_M5_CLOSURE_CORRECTIVE_R2_RTM.json",
+      "size_bytes": 2914,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "d0f9ef057b19a466c950aa828e78837e59c53e91",
+      "mode": "100644",
+      "path": "docs/evidence/WBR2_M5_CLOSURE_RTM.json",
+      "size_bytes": 3208,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "eb78ea164c9ce316c1837e7358d8eb1a1dffa076",
+      "mode": "100644",
+      "path": "docs/evidence/WB_RELEASE_R2_EXECUTION_STATE.yaml",
+      "size_bytes": 7035,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "a49c78b0ebce5691c7c2abc5611dde15e12e763d",
+      "mode": "100644",
+      "path": "docs/evidence/WB_RELEASE_R2_PLAN_RECONCILIATION_RTM.json",
+      "size_bytes": 9210,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "ea3da1a201ffa094991d6bce5c2aeba52d163714",
+      "mode": "100644",
+      "path": "docs/evidence/XLSX_NAMESPACE_FALLBACK_R1_DEFECT_REGISTER.json",
+      "size_bytes": 1703,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "5d600e012827667a1fd1a448f9a300bed076ce01",
+      "mode": "100644",
+      "path": "docs/evidence/XLSX_NAMESPACE_FALLBACK_R1_RTM.json",
+      "size_bytes": 3607,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "2430c35d669b2a03448a0646ecb0b3d356d7a503",
+      "mode": "100644",
+      "path": "docs/finance/CALCULATION_PROFILE_CONTRACT.md",
+      "size_bytes": 5283,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "8576404bfff520f6eddab77ce2b79f256828f487",
+      "mode": "100644",
+      "path": "docs/finance/CONFIGURATION_RULE_CONTRACT.md",
+      "size_bytes": 6947,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "9506e88e538404c2f769260d70c5c737d46aac54",
+      "mode": "100644",
+      "path": "docs/finance/GOLDEN_ORACLE_PLAN.md",
+      "size_bytes": 2979,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "2a4cc9c0aed71f485cbb977fafa32aa288d3a3dd",
+      "mode": "100644",
+      "path": "docs/finance/METRIC_CATALOGUE.md",
+      "size_bytes": 6330,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "26dd0c1c69349d5458ea0abb34ba1d55fc9e856f",
+      "mode": "100644",
+      "path": "docs/finance/ROUNDING_POLICY.md",
+      "size_bytes": 5136,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "60d4979fc3204df6fd8791c21716fe061de9de20",
+      "mode": "100644",
+      "path": "docs/finance/RULE_RESOLUTION_CONTRACT.md",
+      "size_bytes": 6194,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "31dac31e7ebfc3a16387c53a5c793b26984c7b0f",
+      "mode": "100644",
+      "path": "docs/finance/SAFE_EXPRESSION_CONTRACT.md",
+      "size_bytes": 7744,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "05ddb9b0c96de644c342db665d6ded8b3082239e",
+      "mode": "100644",
+      "path": "docs/governance/ASSURANCE_EXECUTION_PLAN_2026_07_08.md",
+      "size_bytes": 14521,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "e392d723e715af814528d8e9db346bb86a9cbf0e",
+      "mode": "100644",
+      "path": "docs/governance/ASSURANCE_EXECUTION_PLAN_2026_07_08.yaml",
+      "size_bytes": 6029,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "63df977a401c7c592cb18a89a5532034cf2cc436",
+      "mode": "100644",
+      "path": "docs/governance/ASSURANCE_EXECUTION_PLAN_2026_07_08_LOCAL_STORAGE_AMENDMENT.md",
+      "size_bytes": 1796,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "cd59a729ff96b86e7fb078e0d956d6a80462214b",
+      "mode": "100644",
+      "path": "docs/governance/CONFLICT_REGISTER.md",
+      "size_bytes": 500,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "9454c9122f8dd3b5e911dfc918714652617204d7",
+      "mode": "100644",
+      "path": "docs/governance/CONSTITUTION.md",
+      "size_bytes": 23991,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "ca4655bf3632807c5e1128aff12a20584e1bf762",
+      "mode": "100644",
+      "path": "docs/governance/CURRENT_STATE.md",
+      "size_bytes": 6694,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "0f17ca382aa08e5d029c3084e04909704ea05ba6",
+      "mode": "100644",
+      "path": "docs/governance/CURRENT_STATE_B3.md",
+      "size_bytes": 1676,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "5a34b285a57e076162327ea4953e06a20085566f",
+      "mode": "100644",
+      "path": "docs/governance/DECISION_LEDGER.md",
+      "size_bytes": 2910,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "c365863bcc80a5a6a9621c06cf4e95a4be62b603",
+      "mode": "100644",
+      "path": "docs/governance/LEGACY_REUSE_MATRIX.md",
+      "size_bytes": 2243,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "7d7b7aafabd2cba7e8aef1bda656da441f8de909",
+      "mode": "100644",
+      "path": "docs/governance/MIGRATION_NOTES.md",
+      "size_bytes": 628,
+      "type": "blob"
+    }
+  ],
+  "entry_count": 100,
+  "part_number": 3,
+  "schema_version": "1.0.0",
+  "subject_exact_head": "b151e67c2bea8d4d50c5c4a2aeb0695e89921c01",
+  "work_order_id": "WO-M0-R7-002"
+}

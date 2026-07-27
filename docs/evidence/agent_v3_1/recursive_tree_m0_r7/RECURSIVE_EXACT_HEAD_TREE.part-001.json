@@ -1,0 +1,710 @@
+{
+  "document_type": "RECURSIVE_EXACT_HEAD_TREE_PART",
+  "entries": [
+    {
+      "blob_sha": "90f64c1d2c7409a1ec7f401597e031f8e15247c6",
+      "mode": "100644",
+      "path": ".github/CODEOWNERS",
+      "size_bytes": 124,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "d9cf3567c8dbb048b504b6a346d1ebf3eaa9edbe",
+      "mode": "100644",
+      "path": ".github/ISSUE_TEMPLATE/adapter-drift.yml",
+      "size_bytes": 858,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "a9f681fad40331c10341c08a09168acb0862edc3",
+      "mode": "100644",
+      "path": ".github/ISSUE_TEMPLATE/conflict.yml",
+      "size_bytes": 853,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "fe24bbcfe0c8f672d7695091840b0aeaab179cf2",
+      "mode": "100644",
+      "path": ".github/ISSUE_TEMPLATE/defect.yml",
+      "size_bytes": 846,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "0d96e64e163ebf9d45b75bfea827d28c7d1ca057",
+      "mode": "100644",
+      "path": ".github/ISSUE_TEMPLATE/incident.yml",
+      "size_bytes": 852,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "4a7e1affe0bb1bc62c54e1c65b31639806efa648",
+      "mode": "100644",
+      "path": ".github/ISSUE_TEMPLATE/requirement.yml",
+      "size_bytes": 857,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "d5c67ff2668b0e4070ebe8bae87e10a3598426a6",
+      "mode": "100644",
+      "path": ".github/ISSUE_TEMPLATE/risk.yml",
+      "size_bytes": 854,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "e6cdbdf45057c2652089cc0640ce92a73e0c2255",
+      "mode": "100644",
+      "path": ".github/pull_request_template.md",
+      "size_bytes": 238,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "ea9bf09e3bfa23a614229f8dd1d2fe7b35bd8708",
+      "mode": "100644",
+      "path": ".github/workflows/build-one-button-redteam-r3.yml",
+      "size_bytes": 2839,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "4b8ab886f55bcf1e1e70aaee6eaee7ffcabc46a5",
+      "mode": "100644",
+      "path": ".github/workflows/build-two-installer-bundles-r2.yml",
+      "size_bytes": 14661,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "4c7247168efebd1695d6930fc35fc13ed0eaf780",
+      "mode": "100644",
+      "path": ".github/workflows/debug-inner-package-inventory.yml",
+      "size_bytes": 3580,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "033a19936543a824bcca52e9d63b7260ebd02e9c",
+      "mode": "100644",
+      "path": ".github/workflows/foundation-ci.yml",
+      "size_bytes": 1478,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "69e3fde9e3f3bdc8e0d67a904665fc56a3749879",
+      "mode": "100644",
+      "path": ".github/workflows/full-project-redteam-r1.yml",
+      "size_bytes": 5895,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "68634c998fb4b97038a2486a461d5306e2be5512",
+      "mode": "100644",
+      "path": ".github/workflows/l4-installed-runtime.yml",
+      "size_bytes": 2916,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "c6e71bf19ca0551caee9057e3afaaf289584870f",
+      "mode": "100644",
+      "path": ".github/workflows/m1-baseline-audit.yml",
+      "size_bytes": 9606,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "90b5f581f7326bec49fa45fc8cdd54f4633c6658",
+      "mode": "100644",
+      "path": ".github/workflows/m3-consolidated-ci.yml",
+      "size_bytes": 11731,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "ddae01e0a339ef0da10cfcc5c133efee5d38fe5d",
+      "mode": "100644",
+      "path": ".github/workflows/m4-auto-inbox.yml",
+      "size_bytes": 6301,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "eb2bf270a4aed7625e6cd27f80dc7d373c1c6afd",
+      "mode": "100644",
+      "path": ".github/workflows/m4-corrective-r99.yml",
+      "size_bytes": 3098,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "10c414f37a2b1499c64f6622b73c0ac5eb1cafe1",
+      "mode": "100644",
+      "path": ".github/workflows/m5-scheduled-reports.yml",
+      "size_bytes": 12963,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "40f3ff0b40fbad50229d9814da3fb0a785449873",
+      "mode": "100644",
+      "path": ".github/workflows/m7-security-performance-one-click.yml",
+      "size_bytes": 7484,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "ba475d348601725f68aed6516789672b908cb35a",
+      "mode": "100644",
+      "path": ".github/workflows/m8-clean-environment-reproduction.yml",
+      "size_bytes": 13286,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "67300c3d28fc0d46ddd19e038a05232c24042b23",
+      "mode": "100644",
+      "path": ".github/workflows/oss-admission-ci.yml",
+      "size_bytes": 1669,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "55d343c1931d676fa12a4b021be4472c837f3e80",
+      "mode": "100644",
+      "path": ".github/workflows/quantum-universal-relaunch-r2.yml",
+      "size_bytes": 21382,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "23304b818fb14805e628e960f4cef3bb62476587",
+      "mode": "100644",
+      "path": ".github/workflows/shortcut-launch-repair-r1.yml",
+      "size_bytes": 13233,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "a57e8920145a87aae8cd8432f81f24a532d958f3",
+      "mode": "100644",
+      "path": ".github/workflows/universal-partial-r1.yml",
+      "size_bytes": 7163,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "d65832417b8d7fde47d315bd7ddecbb1166d0873",
+      "mode": "100644",
+      "path": ".github/workflows/wb-release-r2-plan-reconciliation.yml",
+      "size_bytes": 4085,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "361f4f090e91f8eb9a38f7b7bd060016e298aa15",
+      "mode": "100644",
+      "path": ".github/workflows/wbr2-m5-closure-corrective-r2.yml",
+      "size_bytes": 3963,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "523dc41a30945e858c0500ccf577f4db2fb6db8b",
+      "mode": "100644",
+      "path": ".github/workflows/wbr2-m5-closure.yml",
+      "size_bytes": 3884,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "8dbbbca816c114fcac1c240847b81c9657e02d7e",
+      "mode": "100644",
+      "path": ".github/workflows/windows-local-acl-recovery.yml",
+      "size_bytes": 9034,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "fe6720180c464b488f528908a51bb019edec78da",
+      "mode": "100644",
+      "path": ".github/workflows/windows-local-production.yml",
+      "size_bytes": 3516,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "3c0697f8d6ea7dfc8435da1a796292cb3299cd5a",
+      "mode": "100644",
+      "path": ".github/workflows/windows-release-gate.yml",
+      "size_bytes": 11106,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "a5582f5bbeaecc44a131338a03cfaf0b088db83c",
+      "mode": "100644",
+      "path": ".github/workflows/windows-source-package-launchers-r1.yml",
+      "size_bytes": 4352,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "7598334ec315b422b93764c3cdf8b1f2d0d2a221",
+      "mode": "100644",
+      "path": ".github/workflows/windows-universal-any-file-corpus-r4.yml",
+      "size_bytes": 7778,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "f569b1405532ae113ca2b1847c04bd082364878f",
+      "mode": "100644",
+      "path": ".github/workflows/xlsx-namespace-fallback-r1.yml",
+      "size_bytes": 4886,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "3a578bea429acea2f72dee3efc3ed2e18692da96",
+      "mode": "100644",
+      "path": ".gitignore",
+      "size_bytes": 99,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "51047941ddb8ec2c5f2f5b7e9a7bfcc234de0eb4",
+      "mode": "100644",
+      "path": "README.md",
+      "size_bytes": 4983,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "mode": "100644",
+      "path": "adapters/wildberries/.gitkeep",
+      "size_bytes": 1,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "mode": "100644",
+      "path": "apps/api/.gitkeep",
+      "size_bytes": 1,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "mode": "100644",
+      "path": "apps/worker/.gitkeep",
+      "size_bytes": 1,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "459bc050db331cd20b2c2c158890bf519bd6bb78",
+      "mode": "100644",
+      "path": "config/home-local.template.json",
+      "size_bytes": 2331,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "5481c08ea03b146e9ffda5a8f733e5a6041e0d3c",
+      "mode": "100644",
+      "path": "docs/adr/ADR-001-CANONICAL-EVENT-LEDGER.md",
+      "size_bytes": 1196,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "0667c9b0ea5247698144fc90488a909aa3c1c5cc",
+      "mode": "100644",
+      "path": "docs/adr/ADR-002-TYPED-MISSING-STATES.md",
+      "size_bytes": 493,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "25653d3498ea77904a36936b159cc929bc4765d5",
+      "mode": "100644",
+      "path": "docs/adr/ADR-003-TECHNOLOGY-BASELINE.md",
+      "size_bytes": 1368,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "2d16b99a46288a65ba31428a6b961d0bf0af7a16",
+      "mode": "100644",
+      "path": "docs/architecture/ARCHITECTURE_BASELINE.md",
+      "size_bytes": 2106,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "09c349e442ce905d568f81da47adc08950189322",
+      "mode": "100644",
+      "path": "docs/architecture/DEPLOYMENT_PLATFORM_EVALUATION.md",
+      "size_bytes": 1510,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "3fabdb394d2c7650d67d0808994a389bb6d2b7cf",
+      "mode": "100644",
+      "path": "docs/architecture/EXCEL_REPORT_R1.md",
+      "size_bytes": 3872,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "57bdc69b15e80c0446a020497a9bb18983d8894f",
+      "mode": "100644",
+      "path": "docs/architecture/INTERACTIVE_DASHBOARD_R1.md",
+      "size_bytes": 4275,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "f8413bb7d7055f89ef0ad6736271730e54080e98",
+      "mode": "100644",
+      "path": "docs/architecture/LOCAL_OUTPUT_BUNDLE_R1.md",
+      "size_bytes": 4588,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "6babd853f8044a9e3f97b4f095a1d2083975e746",
+      "mode": "100644",
+      "path": "docs/architecture/MODULE_BOUNDARIES.md",
+      "size_bytes": 707,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "a7bf956cb0afff2f684e888538fd94dbe06f73f7",
+      "mode": "100644",
+      "path": "docs/architecture/ONE_CLICK_HOME_LOCAL_R1.md",
+      "size_bytes": 4330,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "9afa3915b012dadf92d59e65b6c6f7f51416b01b",
+      "mode": "100644",
+      "path": "docs/architecture/RECOMMENDATION_ENGINE_R1.md",
+      "size_bytes": 1786,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "aa9631d0d673c88e2582dd17f61418de3f8a799a",
+      "mode": "100644",
+      "path": "docs/architecture/WB_DETAILED_FINANCIAL_R1.md",
+      "size_bytes": 1492,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "d6a28adb18f3d5b91ad77862ca16baaee08cb1b6",
+      "mode": "100644",
+      "path": "docs/architecture/WB_DETAILED_XLSX_R1.md",
+      "size_bytes": 1109,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "9217ab672a51e1dd271400a2645e72eba8d4be6f",
+      "mode": "100644",
+      "path": "docs/architecture/WB_SOURCE_BRIDGE_R1.md",
+      "size_bytes": 271,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "11d6532090eca36b52c215168f814e312eda4768",
+      "mode": "100644",
+      "path": "docs/architecture/WB_WINDOWS_SOURCE_DISPATCH_R1.md",
+      "size_bytes": 1553,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "9f284f32bf13f628777ab3deed92c2956c3f9119",
+      "mode": "100644",
+      "path": "docs/data/CANONICAL_EVENT_CONTRACT.md",
+      "size_bytes": 434,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "cc55053b3ba01d00ddd13fe21f920dee939833df",
+      "mode": "100644",
+      "path": "docs/data/DATA_CONTRACT_SUMMARY.json",
+      "size_bytes": 930,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "721163ac41ea7fbacb86b683599b832cd9963349",
+      "mode": "100644",
+      "path": "docs/data/DATA_QUALITY_STATE_MODEL.md",
+      "size_bytes": 830,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "c12c463901ecea7748313f795c812274d8ae373b",
+      "mode": "100644",
+      "path": "docs/data/IDEMPOTENCY_CONTRACT.md",
+      "size_bytes": 1720,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "e15032e79bfabc319284e40fa671d2b309495640",
+      "mode": "100644",
+      "path": "docs/data/PROVENANCE_CONTRACT.md",
+      "size_bytes": 1574,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "da1590bce06d35a56dac9a76be11b30890170b8b",
+      "mode": "100644",
+      "path": "docs/data/REVISION_REVERSAL_SUPERSESSION_CONTRACT.md",
+      "size_bytes": 1743,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "ad576b59165e464d537793a4290b10e565c80eb7",
+      "mode": "100644",
+      "path": "docs/data/SOURCE_AUTHORITY_MATRIX.md",
+      "size_bytes": 2787,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "a5079cbcae02f258276509d889b1ed3ce59f0fdb",
+      "mode": "100644",
+      "path": "docs/data/SOURCE_INVENTORY.md",
+      "size_bytes": 1693,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "a68d4990f02263a3b1a294144c61b8257fec025c",
+      "mode": "100644",
+      "path": "docs/data/TYPED_STATE_CONTRACT.md",
+      "size_bytes": 2354,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "0844c04f730a500f79aa8780216ef5e2b9cc5f79",
+      "mode": "100644",
+      "path": "docs/data/WB_SYNTHETIC_SCHEMA_CONTRACT.md",
+      "size_bytes": 1133,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "d7ad3a18b2825f951d4d525afdb8df705ec38d11",
+      "mode": "100644",
+      "path": "docs/decisions/DR-2026-07-01-REAL-COMMERCIAL-DATA-PILOT.md",
+      "size_bytes": 2898,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "bbeae0ec60a1a7ec2709657fe6bcab5548c7aaf8",
+      "mode": "100644",
+      "path": "docs/decisions/DR-2026-07-02-LOCAL-DISK-ENCRYPTION-NOT-REQUIRED.md",
+      "size_bytes": 2519,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "53a981067a97f37ab24c74e863fd4785e9471434",
+      "mode": "100644",
+      "path": "docs/decisions/RETURN_MONETARY_SEMANTICS_LOCAL_PILOT.md",
+      "size_bytes": 3032,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "1566498740bb62fbc1af8e0830e2a1ea86e7f2aa",
+      "mode": "100644",
+      "path": "docs/defender_fallback_r6.md",
+      "size_bytes": 964,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "6aad07840de3c35bb3835cff7d2705df546618fc",
+      "mode": "100644",
+      "path": "docs/dependencies/LICENSE_ALLOWLIST.yaml",
+      "size_bytes": 767,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "7a386c5bfb19ec9cd42d252757d63244d645cc6d",
+      "mode": "100644",
+      "path": "docs/dependencies/OSS_DEPENDENCY_REGISTER.yaml",
+      "size_bytes": 8064,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "6099d3778f42e054940444aa25970af07124ba9c",
+      "mode": "100644",
+      "path": "docs/dependencies/SBOM.spdx.json",
+      "size_bytes": 7702,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "b5f0346fa31511bc690c2b71d85db906dce451fd",
+      "mode": "100644",
+      "path": "docs/dependencies/THIRD_PARTY_NOTICES.md",
+      "size_bytes": 2021,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "b519fffba05a00d71f5f6c0028ea79c45f588be5",
+      "mode": "100644",
+      "path": "docs/evidence/A5_LOCAL_CI_LOG.txt",
+      "size_bytes": 4429,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "10e7fd4818e0f22fd42783a7158561d760f4f12c",
+      "mode": "100644",
+      "path": "docs/evidence/A6_LOCAL_CI_LOG.txt",
+      "size_bytes": 5861,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "498f5cd7440b1bc2c361dd940dead8fc06cd2c1d",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST.json",
+      "size_bytes": 18187,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "8096ceffbb549e774fef8f59ab4f61f564208595",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY.json",
+      "size_bytes": 2874,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "028d398be4d21a2577ca42ff6c0014e91579f11e",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_ASSURANCE_PLAN_2026_07_08.json",
+      "size_bytes": 916,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "332149495b03e2d95de780480221a8be8448acdf",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_B1B_CONTROL.json",
+      "size_bytes": 264,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "61de841462aed9a0146d4288b10d8f0142b10f2d",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_B1B_FINAL.json",
+      "size_bytes": 397,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "31bbf4d4591996ea3b41710cc84848d63739c7e3",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_B1B_NEXT.json",
+      "size_bytes": 294,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "efaae9f5755bcb49a41a27171b90dfd6738d1fca",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_B1B_R10.json",
+      "size_bytes": 862,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "ce1afc0cde7c243aa4f6d06cb967220b2248c5d8",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_B1B_R11.json",
+      "size_bytes": 1068,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "dd9cdb38f756443dc810a233d7587f7e8db4b7ae",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_B1B_R12.json",
+      "size_bytes": 599,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "fa14e2f5f31b3a131f58717e7e199976358d602f",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_B1B_R13.json",
+      "size_bytes": 623,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "e6fae08c4135e4a2a25273559663e7b85321ae46",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_B1B_R14.json",
+      "size_bytes": 488,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "e6e0b1f7f3c753c83b2de3d411624fb3a01ff223",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_B1B_R15.json",
+      "size_bytes": 1060,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "ce2e552761a88e2657112c1347f791465c152156",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_B1B_R6.json",
+      "size_bytes": 523,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "9182775b2f19f482497f8856d2225796fb2629b3",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_B1B_R7.json",
+      "size_bytes": 281,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "96551b4f8fc12dc5bc8acb1014b7e5f8aa4dd31c",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_B1B_R8.json",
+      "size_bytes": 426,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "9133dd6f3a7bce6f3c66aa439eac7a00b5622d9a",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_B1B_R9.json",
+      "size_bytes": 603,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "a09a02e4145e14c1ad9a9d9df6b08bc227129fbf",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_B1B_RESCUE.json",
+      "size_bytes": 2131,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "d00ab0ab6d1cd1e7ecdd5e0e47e0acfd9d24fad6",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_B1B_RESCUE_V2.json",
+      "size_bytes": 322,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "88ca4a3b42a330cb46704842b244a3fde6129f5c",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_B3_FINAL.json",
+      "size_bytes": 1615,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "ad4d931c098c3568bff23e7a60a1df805f572c02",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_B3_RUNTIME.json",
+      "size_bytes": 2013,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "d76f62ebf23bcdf7099a8f89a50a44b2c5b91ef0",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_FULL_PROJECT_REDTEAM_R1.json",
+      "size_bytes": 2971,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "6aceccfd58ae8a05957edc7a08107ad63f91975c",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_LOCAL_STORAGE_POLICY_2026_07_02.json",
+      "size_bytes": 1825,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "06f44fcc88684c0e46806f88bbeb22a147dbdfc7",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_OSS_ADMISSION.json",
+      "size_bytes": 1662,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "43d460774b65e88efb24a1a0982d11677de75355",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_P1.json",
+      "size_bytes": 1798,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "d656b3843743f74dc03dc2cc802181c50268f977",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_P13.json",
+      "size_bytes": 1690,
+      "type": "blob"
+    }
+  ],
+  "entry_count": 100,
+  "part_number": 1,
+  "schema_version": "1.0.0",
+  "subject_exact_head": "b151e67c2bea8d4d50c5c4a2aeb0695e89921c01",
+  "work_order_id": "WO-M0-R7-002"
+}

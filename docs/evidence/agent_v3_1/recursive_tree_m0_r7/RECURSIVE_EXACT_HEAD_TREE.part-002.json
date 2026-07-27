@@ -1,0 +1,710 @@
+{
+  "document_type": "RECURSIVE_EXACT_HEAD_TREE_PART",
+  "entries": [
+    {
+      "blob_sha": "11176dedc0502d92bc8d6ea0b6c898453c9cd644",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_P13_CLOSURE.json",
+      "size_bytes": 663,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "c5c5116c65ed9026568440abed2398b587f57ebd",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_P13_MERGE_GATE.json",
+      "size_bytes": 784,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "bdcf969c73f07e48aa0a355a2e335b94d91ab436",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_P14.json",
+      "size_bytes": 1590,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "b5a7134ddbdad6ae720ad22f49792eb063033aaf",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_P14_CLOSURE.json",
+      "size_bytes": 668,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "b70f7a97ea0b87172479476872d60818117d3037",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_P15.json",
+      "size_bytes": 2388,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "33c32292050762759aeb89c647bf91f2072b8493",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_P15_CLOSURE.json",
+      "size_bytes": 1083,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "6ae1c951022fe87f71a10738f4d5577fa15ad5f9",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_P16_REAL_XLSX_ADMISSION.json",
+      "size_bytes": 5544,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "55071d5caefa192a88f945bd02f2becd31ee8eb3",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_P16_REAL_XLSX_ADMISSION_R2.json",
+      "size_bytes": 888,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "a138589ad0accf5426abc56c13d617bf4f8b52db",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_P16_REAL_XLSX_ADMISSION_R3.json",
+      "size_bytes": 664,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "77c138c9788652ea12c9be5ed9cc5329cf878320",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_P16_REAL_XLSX_ADMISSION_R4.json",
+      "size_bytes": 786,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "a1799c130b901967698692d4b7a8214ef3d4e548",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_P16_REAL_XLSX_ADMISSION_R5.json",
+      "size_bytes": 734,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "1848502e29077044d3d1b4c8950bbb4086f7ed4a",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_P16_REAL_XLSX_ADMISSION_R6.json",
+      "size_bytes": 1062,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "23ddb820c40b0c0292002dce5ae67292f9f4f8ff",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_P16_REAL_XLSX_ADMISSION_R7.json",
+      "size_bytes": 917,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "6d5e8e10e72d46810401b5cda98816a933853b9f",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_P16_REAL_XLSX_ADMISSION_R8.json",
+      "size_bytes": 1326,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "9e2032e3b7df56a0242c9e2be42becc31a7efb27",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_P16_REAL_XLSX_ADMISSION_R9.json",
+      "size_bytes": 599,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "7cdaa8362ef1ee0d286c7a884e87c32150411645",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_P1_CLOSURE.json",
+      "size_bytes": 681,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "70ff0043f6e24312ccf9f19385ed364166250b83",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R1.json",
+      "size_bytes": 2253,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "5fe4c5a2c18930405b8911514e1afad0838ed09f",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R10.json",
+      "size_bytes": 347,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "914a10017125e025eb86968a52b028dfabb05ef2",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R100.json",
+      "size_bytes": 2610,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "1809f43cb677021db0de1ff002b5965f7c26dced",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R11.json",
+      "size_bytes": 364,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "214d6e56e807973249fcf63539d445ae93ffbc27",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R12.json",
+      "size_bytes": 358,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "8161cca824b2f7f28df57219f51df1e58684d8f2",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R13.json",
+      "size_bytes": 369,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "5ac338a66a02f1b7a14b319b4c46ea4c38f02afa",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R14.json",
+      "size_bytes": 342,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "258647d5b3647cb279b865eda510130072da34d5",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R15.json",
+      "size_bytes": 349,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "7183453a7ed50e0711419c282dbba192a3420196",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R16.json",
+      "size_bytes": 2659,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "383069e1fffff527cf0e5530381f501bc01f5fd4",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R17.json",
+      "size_bytes": 2132,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "c0c54bd4b1cce4817259b79de0597cf080fbf455",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R18.json",
+      "size_bytes": 653,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "83f85f56d14b27dee95cf9d5a7750064ebea631e",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R19.json",
+      "size_bytes": 840,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "99cf0e3f6d96e3af4b343f989811adb44e5976b7",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R2.json",
+      "size_bytes": 340,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "b4558093ed0f126a17bf0fd4e5a411dcadbd4532",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R20.json",
+      "size_bytes": 1705,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "551607888d9371ae24ab1cb30b6a51b3c63ac87d",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R21.json",
+      "size_bytes": 965,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "5943d46a2245389a38e369ab35109a94ae36297a",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R22.json",
+      "size_bytes": 642,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "f45f5e2bf9ed50858a3ef6c39211cfbc817ddc18",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R23.json",
+      "size_bytes": 4392,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "dd696c3f547bb31cd00f273aeb0ecb1fccc4a980",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R24.json",
+      "size_bytes": 794,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "9c85f6da97c82f7856a36a81245907f7da0e2008",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R25.json",
+      "size_bytes": 821,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "7167a3cdc84009c5264ea690909907f76257fe6c",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R26.json",
+      "size_bytes": 816,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "a86b86280c1332d14a8aa31269727c95160db84f",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R27.json",
+      "size_bytes": 1583,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "8eb341b8149b890a41446b399dbda1896f152308",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R28.json",
+      "size_bytes": 2335,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "428ac59d11867e4d2cdc6822d95cdb0981def36f",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R29.json",
+      "size_bytes": 1108,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "7a7261f22510c4b8149a580e9bd3a7b3bb6163a0",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R3.json",
+      "size_bytes": 341,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "689039353a696617591082beb04477cd5f5cd22b",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R30.json",
+      "size_bytes": 2082,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "3ea0e6687bba3967c9ecb3434b3667a28092aeac",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R31.json",
+      "size_bytes": 1508,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "15ba619e218546248f7beecc45e92e8f9c2b72bd",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R32.json",
+      "size_bytes": 1523,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "e1093257ebc13ffa0e940af137d2f7802e4b9847",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R33.json",
+      "size_bytes": 6071,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "f46234d677900df621aa1d9d95f502aab5950323",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R34.json",
+      "size_bytes": 2411,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "bb94341c452df1dea1d59ec35d9d4a6e165899c9",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R35.json",
+      "size_bytes": 689,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "75876f8d34639e9a9dde7484b131cc873f4534ae",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R36.json",
+      "size_bytes": 852,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "eb7d4fe14ced7413989948cb8d9bff188e329af3",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R37.json",
+      "size_bytes": 1265,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "ecf93756079b1a8d0a567d05474daecd31025113",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R38.json",
+      "size_bytes": 1040,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "82a2f5350e3efe3b662d4e58c6dd729b4f391d8b",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R39.json",
+      "size_bytes": 892,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "4aa3159ebd52e724d279c216fd10d4147a77724f",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R4.json",
+      "size_bytes": 342,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "910afe7c254b22e076e8ecada75e6d1f3a1fa7dc",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R40.json",
+      "size_bytes": 887,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "78c8763f0d6bb8678867959310b6f7776934e1fd",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R41.json",
+      "size_bytes": 906,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "827f772ee0cd34d97a8f8572fa6826f97ee50fa2",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R42.json",
+      "size_bytes": 747,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "c355aefb7050e9a7e78ebae1e4a70688b07e4530",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R43.json",
+      "size_bytes": 630,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "1bd3e9fc08f42282a9c1e351d5c38bf0123615be",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R44.json",
+      "size_bytes": 649,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "8cfa124babeb9a424bfa1086f0313dd1bd762f3c",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R45.json",
+      "size_bytes": 657,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "3c68c187866d85ac95a9c3dcc4cd7ebaa2b8237f",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R46.json",
+      "size_bytes": 1413,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "81399c80922d1e46ee5913c9652e38babf69af55",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R47.json",
+      "size_bytes": 1018,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "32890125e8f346a8daec7fc3350d318d9643c436",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R48.json",
+      "size_bytes": 966,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "50e2ec5b240a5e9b46e9a40b13f267ddb1b91302",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R49.json",
+      "size_bytes": 1661,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "234935dae51c747a1b70922f4cce094fb9a48655",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R5.json",
+      "size_bytes": 336,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "ca6631c14e1e54ecd2e82a2c81163419e8555855",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R50.json",
+      "size_bytes": 1246,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "9f20c684d5d3445c12f6dca54c4bd8d27db2599e",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R51.json",
+      "size_bytes": 2382,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "751c9a16e0c580521c3af9d4b8763cb81718c63c",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R52.json",
+      "size_bytes": 2405,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "d4d1e4f6f47e2f6168f9c6ac34393144b6834b4c",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R53.json",
+      "size_bytes": 1053,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "4039b8f6e305a51f3f38fc85ce9369549e210f41",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R54.json",
+      "size_bytes": 1049,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "f2873c06b65ea559ded7cdbe4e7a333e7c40af61",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R55.json",
+      "size_bytes": 1734,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "a22637fb4e38f4377c0ed5b53fdf58ec7cdcfbce",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R56.json",
+      "size_bytes": 410,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "5f6a1e0a6ca8e7e80e30b31d75ff0d92a72af877",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R57.json",
+      "size_bytes": 1094,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "5586d2ddcaa943750f8981524fa4ef2623289d90",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R58.json",
+      "size_bytes": 899,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "eb4c340bf69fded56df286fc09f95d0af6e97b17",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R59.json",
+      "size_bytes": 743,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "f44ada0f01e62060b3f19cddc62ac8ef3c86139a",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R6.json",
+      "size_bytes": 336,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "02e235a95898421ee6487a1d002de23a9918dac8",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R60.json",
+      "size_bytes": 904,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "af2feef37565a4d83d7249ee7d016957361d3b6a",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R61.json",
+      "size_bytes": 875,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "4b24e7d441ef799510dc4e8e1fff702a630dcaf6",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R62.json",
+      "size_bytes": 1374,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "743e4a069e9935f07fd143d8032e3148b7ba16a5",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R63.json",
+      "size_bytes": 728,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "89a52353b6b647c0de726baa653affbc49a1d7b4",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R64.json",
+      "size_bytes": 715,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "6e9bb4102f5219da163725f802371f2e07d98641",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R65.json",
+      "size_bytes": 1814,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "6862f03a6567816f09ac899ce0f9b81c1fb1f613",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R66.json",
+      "size_bytes": 1077,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "78ca1e70eff485e63a6a16feba738a17e74bd640",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R67.json",
+      "size_bytes": 2558,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "1bacd9b99d31cd3affa83ea88c0b044c4940858c",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R68.json",
+      "size_bytes": 758,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "099713cf9c044fc1d3d600230f9d07e6816f18e5",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R69.json",
+      "size_bytes": 917,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "a78b01f41be2c1234162fab7862a6fdb3933d662",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R7.json",
+      "size_bytes": 341,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "16ee9a50e70fa54d30186f6f8a9cd558da9a949d",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R70.json",
+      "size_bytes": 1170,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "6612a344aece76437500762ccbec9d4b9929a0d1",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R71.json",
+      "size_bytes": 4720,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "79f52b56e77c132f82b817c109bc2a0faeb2c32f",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R72.json",
+      "size_bytes": 1032,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "8167fc07e54f4121b999bd3191485090ccc76609",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R73.json",
+      "size_bytes": 3995,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "1ad057eee7cba6446b74e6f18c1d7009bceb9608",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R74.json",
+      "size_bytes": 2529,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "59f4fa23906e49a6cc18e8578ed90d6cbd03b015",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R75.json",
+      "size_bytes": 814,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "173e6725864bbb99d5d2fb8d9d8f4398f39f4f6f",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R76.json",
+      "size_bytes": 1385,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "092f369a1a1d763cf6199680aff1fb919916250a",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R77.json",
+      "size_bytes": 1599,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "2eb460df19a092557da9b510dc820bf08762a74e",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R78.json",
+      "size_bytes": 701,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "fd1ad0d03d342d63803ac0404346744806d8ec31",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R79.json",
+      "size_bytes": 1755,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "a1ba2fbfe4d63042e85ea678b127cc18385ed7c9",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R8.json",
+      "size_bytes": 348,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "d6d6e7dc8ded91bb3d031a16537713480067522e",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R80.json",
+      "size_bytes": 2981,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "c900b722b01413f1749a68527651d95410d52d1e",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R81.json",
+      "size_bytes": 3087,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "f1e8badfde4ee77a248154539eaecb64a643e804",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R82.json",
+      "size_bytes": 1571,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "38115b175a256065f3e4ce909688092b6acc2d13",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R83.json",
+      "size_bytes": 1318,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "82ee813043ee1cd9bbe07d88eceaa697aa52922b",
+      "mode": "100644",
+      "path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_INTEGRATION_R84.json",
+      "size_bytes": 1522,
+      "type": "blob"
+    }
+  ],
+  "entry_count": 100,
+  "part_number": 2,
+  "schema_version": "1.0.0",
+  "subject_exact_head": "b151e67c2bea8d4d50c5c4a2aeb0695e89921c01",
+  "work_order_id": "WO-M0-R7-002"
+}

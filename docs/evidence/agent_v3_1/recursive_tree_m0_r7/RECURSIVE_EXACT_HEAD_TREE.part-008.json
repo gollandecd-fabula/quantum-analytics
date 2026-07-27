@@ -1,0 +1,430 @@
+{
+  "document_type": "RECURSIVE_EXACT_HEAD_TREE_PART",
+  "entries": [
+    {
+      "blob_sha": "fd23620a89b114fba49e8b98f244c0dcf0cbf29d",
+      "mode": "100644",
+      "path": "tests/test_p16_rt_thirteenth_review_followup.py",
+      "size_bytes": 3234,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "a217404baef4ec5bc422e61fb2ed89d1063f3da5",
+      "mode": "100644",
+      "path": "tests/test_p16_rt_topology.py",
+      "size_bytes": 3306,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "27c3bba804152eda8c8b67d5175dc9bf115c2062",
+      "mode": "100644",
+      "path": "tests/test_p16_rt_twelfth_review_followup.py",
+      "size_bytes": 3253,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "5838c0d43f0e4977fe36a4db833cc9704a602c88",
+      "mode": "100644",
+      "path": "tests/test_p16_storage_type_consistency.py",
+      "size_bytes": 898,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "961c6771982cace6ed6ed2c4343c25e66b6a30e0",
+      "mode": "100644",
+      "path": "tests/test_p16_xlsx_inspection.py",
+      "size_bytes": 10024,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "3de34622f154a53ab5b14de69bb2f635a27c17c4",
+      "mode": "100644",
+      "path": "tests/test_p1_access_ingestion.py",
+      "size_bytes": 5532,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "11aea97df9f96113657c73a1cb6ba9fa51d3e929",
+      "mode": "100644",
+      "path": "tests/test_p1_concurrency.py",
+      "size_bytes": 2062,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "ab1b78c1b717c8f5bd31c7b22a9c7d23353573dd",
+      "mode": "100644",
+      "path": "tests/test_plateau_m1_runtime_integration.py",
+      "size_bytes": 6106,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "b729783c2ed141cbb5b314d85716fdb97e6e08c1",
+      "mode": "100644",
+      "path": "tests/test_plateau_m2_financial_integration.py",
+      "size_bytes": 6828,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "84b88353564b9cee9133bb43cce4b81a5f156393",
+      "mode": "100644",
+      "path": "tests/test_plateau_m3_storage_integrity.py",
+      "size_bytes": 2974,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "beae3d0707477f1f234b1a8e248f31f79e433abd",
+      "mode": "100644",
+      "path": "tests/test_plateau_m4_schema_review.py",
+      "size_bytes": 5827,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "f5f5b0aaa20afb07f10642fc2b0815bec294deb5",
+      "mode": "100644",
+      "path": "tests/test_plateau_m5_self_test.py",
+      "size_bytes": 3715,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "cd9a8cce1f6a5763b5622a79732554ccee9e02b8",
+      "mode": "100644",
+      "path": "tests/test_plateau_m6_build_metadata.py",
+      "size_bytes": 4590,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "7ae1b354b5bad68f9e64a3b1bef7e976eb5fa467",
+      "mode": "100644",
+      "path": "tests/test_plateau_m7_release_integration.py",
+      "size_bytes": 3028,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "c97789fef21ba9ac72a2cc94ca1fc319d8027ec0",
+      "mode": "100644",
+      "path": "tests/test_profile_save_and_shortcut_hotfix.py",
+      "size_bytes": 7029,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "70214f818461d71912534361744482380ae2929b",
+      "mode": "100644",
+      "path": "tests/test_quantum_reaudit_plateau_r1.py",
+      "size_bytes": 18244,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "037962059a1cd67b98d9b1b460b71979ddd17a8f",
+      "mode": "100644",
+      "path": "tests/test_quantum_universal_relaunch_r2.py",
+      "size_bytes": 7682,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "fcee83deda608e660fcc0ab3beaab38e6b148af1",
+      "mode": "100644",
+      "path": "tests/test_real_commercial_data_pilot_contract.py",
+      "size_bytes": 3683,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "25afe8135ba0704aa2f70a950649ff128a702fac",
+      "mode": "100644",
+      "path": "tests/test_recommendation_contract_r1.py",
+      "size_bytes": 5613,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "e86d669564909f94bac308bfe2af2770a99e0870",
+      "mode": "100644",
+      "path": "tests/test_recommendation_engine_compat_r1.py",
+      "size_bytes": 846,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "e73af459da578948521e0f55311a740eee6bb6f5",
+      "mode": "100644",
+      "path": "tests/test_recommendation_engine_r1.py",
+      "size_bytes": 7260,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "acbe70f56bb2a48b29c6b907002783b228473826",
+      "mode": "100644",
+      "path": "tests/test_recommendation_public_api_r1.py",
+      "size_bytes": 1514,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "aa2c3be657151f864a78e5fa49a5004637f6e2a7",
+      "mode": "100644",
+      "path": "tests/test_review_regressions.py",
+      "size_bytes": 5181,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "28941803dab5f3a5f0ba0aeaf2364cc4c82d70ea",
+      "mode": "100644",
+      "path": "tests/test_runtime_health.py",
+      "size_bytes": 655,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "96014d88d5f0ca4ee2e5412c184da1fcaefac4bb",
+      "mode": "100644",
+      "path": "tests/test_russian_home_local_release.py",
+      "size_bytes": 4887,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "2d37d40edc08e261fe66a7a3af1e4729a1bac290",
+      "mode": "100644",
+      "path": "tests/test_shortcut_launch_repair_r1.py",
+      "size_bytes": 4182,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "a34cb84f7b4ae5443994857c62a5436b7e6cdab9",
+      "mode": "100644",
+      "path": "tests/test_typed_states.py",
+      "size_bytes": 1178,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "d4edcef7c17aec18cf10bd9d40008df959819ed2",
+      "mode": "100644",
+      "path": "tests/test_tz_correction_and_exe_installer.py",
+      "size_bytes": 5007,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "1153fa3fc145f80ef09082fb6d6aa0452e87dd5f",
+      "mode": "100644",
+      "path": "tests/test_universal_any_file_contract_r4.py",
+      "size_bytes": 5109,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "68847fbe1fbc0e0a43a5f8e227f00c99b5833789",
+      "mode": "100644",
+      "path": "tests/test_universal_ingestion_r4.py",
+      "size_bytes": 10284,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "e4cc2ac0474cf7c701992a3ad42f37fdbdbbbcbc",
+      "mode": "100644",
+      "path": "tests/test_universal_intake_hardening_r4.py",
+      "size_bytes": 3496,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "16b3438c6c420d7c7acddf16c6fa7227172bd82c",
+      "mode": "100644",
+      "path": "tests/test_universal_partial_r1.py",
+      "size_bytes": 23310,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "4122729101b2ca82b39248f86ac9174d38e09839",
+      "mode": "100644",
+      "path": "tests/test_wb_detailed_financial_r1.py",
+      "size_bytes": 6895,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "8e5a7a8b04ee155ad466c1c7a839cabd2d9d2dd1",
+      "mode": "100644",
+      "path": "tests/test_wb_detailed_xlsx_context_r1.py",
+      "size_bytes": 2377,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "2a6c4382a7e886b8804195f84373f875e1c72a37",
+      "mode": "100644",
+      "path": "tests/test_wb_detailed_xlsx_r1.py",
+      "size_bytes": 8667,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "2abd199b2c7cf4b226c2d3d87f8c883bb6212f67",
+      "mode": "100644",
+      "path": "tests/test_wb_dispatcher_r1.py",
+      "size_bytes": 2977,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "a09bcdea94b6634986701efa624784483a8cdb83",
+      "mode": "100644",
+      "path": "tests/test_wb_release_r2_plan_reconciliation.py",
+      "size_bytes": 5535,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "d22a18750a601166b0f01bd80012e424363bca96",
+      "mode": "100644",
+      "path": "tests/test_wb_source_bridge_r1.py",
+      "size_bytes": 10431,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "d9be97ffdf0aae02f064524ab727caa9326bb832",
+      "mode": "100644",
+      "path": "tests/test_wb_supplier_goods_result_schema_r5.py",
+      "size_bytes": 2174,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "9d1a68b0d06f02ff065da00819adf6a679bff423",
+      "mode": "100644",
+      "path": "tests/test_wb_weekly_summary_bridge_r5.py",
+      "size_bytes": 5363,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "27c5c2ea17207877646bb58eeba9768a6f2180e2",
+      "mode": "100644",
+      "path": "tests/test_wbr2_m5_closure.py",
+      "size_bytes": 4806,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "26c5afd5436b52aa72b82d7a70dc37b3e16e0a2f",
+      "mode": "100644",
+      "path": "tests/test_wbr2_m5_closure_corrective_r2.py",
+      "size_bytes": 4391,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "84e79de68540b224ddd9a390899ca9b31215a38b",
+      "mode": "100644",
+      "path": "tests/test_windows_first_run_finance_center_r74.py",
+      "size_bytes": 3553,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "de3e4212263109fda74fefe9b952cf639f9e60a2",
+      "mode": "100644",
+      "path": "tests/test_windows_hash_compat_r4.py",
+      "size_bytes": 2333,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "4c9618d2c8b30ac0cfc0a9a522663c4f80e281c0",
+      "mode": "100644",
+      "path": "tests/test_windows_local_runner.py",
+      "size_bytes": 8749,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "bd10d2b939b922491335e666c4dd959bb0228ccc",
+      "mode": "100644",
+      "path": "tests/test_windows_one_click_installer_r1.py",
+      "size_bytes": 11760,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "98fb0827bc1847ce5a7c929946505ea2e1e8f00b",
+      "mode": "100644",
+      "path": "tests/test_windows_outputs_r1.py",
+      "size_bytes": 2442,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "3da5d43cf0f9f1259f5170d96ef50039e8aa81b0",
+      "mode": "100644",
+      "path": "tests/test_windows_recommendation_attachment_r1.py",
+      "size_bytes": 3908,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "bfc589ba0e6e434f5055ab73fecf14432eb7b9c9",
+      "mode": "100644",
+      "path": "tests/test_windows_redteam_hardening.py",
+      "size_bytes": 9672,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "3873e0f583c4b2e26ea6b1659e6bb81571982cfb",
+      "mode": "100644",
+      "path": "tests/test_windows_reviewed_file_hash.py",
+      "size_bytes": 4526,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "0a7c99768bbf13e6d455ac13e308adc94e2a17b3",
+      "mode": "100644",
+      "path": "tests/test_windows_runner_outputs_r1.py",
+      "size_bytes": 4230,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "0de6e95a698cdb94347966af4b82eb4e1757154c",
+      "mode": "100644",
+      "path": "tests/test_windows_source_bridge_r1.py",
+      "size_bytes": 7605,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "3872fba052590768b4f553120939591c6b972124",
+      "mode": "100644",
+      "path": "tests/test_windows_source_package_launchers_r1.py",
+      "size_bytes": 2685,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "fe44c5ee03d8e99ef107693967c9d16486c1823f",
+      "mode": "100644",
+      "path": "tests/test_windows_storage_compat.py",
+      "size_bytes": 1921,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "fc4c3dbf35c793ecef3b0d1020caaddb80f9c3f2",
+      "mode": "100644",
+      "path": "tests/test_xlsx_namespace_fallback_r1.py",
+      "size_bytes": 8649,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "946f2da406dea8c87b2f2582ddccf45057c312cc",
+      "mode": "100644",
+      "path": "tests/test_xlsx_real_office_compat.py",
+      "size_bytes": 8786,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "ffc87cb1601c1301ff6cc023ab82ce54bcc2e79d",
+      "mode": "100644",
+      "path": "tools/m1_baseline_audit.py",
+      "size_bytes": 21640,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "0d5b8b83ea48ce68e35ad6098e6ec5590bc16c56",
+      "mode": "100644",
+      "path": "tools/m3_same_artifact_compare.py",
+      "size_bytes": 4008,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "0fb3ebf2a600a04ccc1164f64e873431f1ac2ba5",
+      "mode": "100644",
+      "path": "tools/m7_security_performance_one_click.py",
+      "size_bytes": 20636,
+      "type": "blob"
+    },
+    {
+      "blob_sha": "9f923b3dca02791c58dc99773e1431a2e3c5c97e",
+      "mode": "100644",
+      "path": "tools/m8_clean_environment_reproduction.py",
+      "size_bytes": 7864,
+      "type": "blob"
+    }
+  ],
+  "entry_count": 60,
+  "part_number": 8,
+  "schema_version": "1.0.0",
+  "subject_exact_head": "b151e67c2bea8d4d50c5c4a2aeb0695e89921c01",
+  "work_order_id": "WO-M0-R7-002"
+}
