@@ -1,0 +1,55 @@
+{
+  "artifact_type": "ARTIFACT_MANIFEST_OVERLAY",
+  "schema_version": "3.0.0",
+  "overlay_id": "PILOT-V3.0-P0-REMOTE-CLOSURE-001",
+  "branch": "fix/quantum-pilot-surgical-convergence-v3-p1",
+  "parent_exact_head": "089d460eb5a2b5fc384d87afa261a68ea729724f",
+  "p0_evidence_subject_exact_head": "089d460eb5a2b5fc384d87afa261a68ea729724f",
+  "closure_commit_binding_method": "DRAFT_PR_HEAD_METADATA",
+  "governing_work_order_id": "WO-PILOT-P0-REMOTE-BINDING-CLOSURE-001",
+  "governing_work_order_sha256": "1f1eed10174505b1ec23f6ed557d809ae58645c7aa603ce78e0a22ac818cd9ed",
+  "entries": [
+    {
+      "path": "docs/evidence/pilot_v3_0/WORK_ORDER_P0_REMOTE_BINDING_CLOSURE_001.json",
+      "sha256": "dd3e456d1cad10835766390ba68651d0ef4373c60e56b07409ddea5b36b323d8",
+      "size_bytes": 3637
+    },
+    {
+      "path": "docs/evidence/pilot_v3_0/PILOT_P0_REMOTE_BINDING_EVIDENCE.json",
+      "sha256": "3f85ff9cfe2626197237479117d829fe481f833e9122e7a6c9a2cda821f02741",
+      "size_bytes": 2004
+    },
+    {
+      "path": "docs/evidence/pilot_v3_0/PILOT_P0_RTM.json",
+      "sha256": "b54f4be7351a9749199aaf83776c1fee635e8bdf607d026d41c68b18bd538ce6",
+      "size_bytes": 2943
+    },
+    {
+      "path": "docs/evidence/pilot_v3_0/PILOT_APPLICABILITY_OVERLAY.json",
+      "sha256": "cc6305a6d1030beacccc1425a97cec895ef643ca6f0663db0846bb27c9c9149c",
+      "size_bytes": 8323
+    },
+    {
+      "path": "docs/evidence/pilot_v3_0/PILOT_DEFECT_REGISTER.json",
+      "sha256": "2d58a4ed6b58f755e00f8ce5ca22e39c9f28f9cd12a2dc0020f1c05ef101846f",
+      "size_bytes": 3230
+    },
+    {
+      "path": "docs/evidence/pilot_v3_0/PILOT_AUTONOMOUS_EXECUTION_STATE.json",
+      "sha256": "fd9a7591e01e8a199b23708089e96349e59ace2342cfb838984510d82388614b",
+      "size_bytes": 1603
+    },
+    {
+      "path": "docs/evidence/pilot_v3_0/PILOT_WORK_ORDER_CHAIN.json",
+      "sha256": "ec4abdf9034813a087bf41bfe0e8faf3c30c57dcb686c594059a3d6841ba8193",
+      "size_bytes": 3432
+    },
+    {
+      "path": "docs/evidence/pilot_v3_0/PILOT_FAILURE_CLASSIFICATION_REGISTER.json",
+      "sha256": "bfd9c9ccefa00fbb9272bfc5418990704184c7096bab9aea6461d81959928176",
+      "size_bytes": 3506
+    }
+  ],
+  "scope": "Append-only P0 remote-binding closure and activation of P1 only; no product or protected path change.",
+  "release_authorized": false
+}

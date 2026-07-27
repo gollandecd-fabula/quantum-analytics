@@ -1,0 +1,61 @@
+{
+  "active_pilot_milestone": "P0_CANONICAL_REANCHOR",
+  "artifact_type": "SIGNED_WORK_ORDER",
+  "assigned_role": "IMPLEMENTER",
+  "branch": "fix/quantum-pilot-surgical-convergence-v3-p1",
+  "change_boundary": "Ingest immutable remote verification of the P0 opening subject, close only P0 branch/ancestry/state defects, release the P0 writer lock and activate P1. No product, installer, UI, workflow, test, dependency, canonical RTM or Protocol v3.1 change.",
+  "created_at_utc": "2026-07-27T00:00:00Z",
+  "defect_ids": [
+    "PILOT-D-P0-001",
+    "PILOT-D-P0-002",
+    "PILOT-D-P0-TRANSPORT-001"
+  ],
+  "expected_result": "P0 subject 089d460... is remotely bound to the P0 branch, has the exact authorized nine-file delta, preserves product ancestry, modifies no protected path, closes P0 branch/state defects and activates P1 while pilot and production release remain blocked.",
+  "files_allowed_to_change": [
+    "docs/evidence/pilot_v3_0/WORK_ORDER_P0_REMOTE_BINDING_CLOSURE_001.json",
+    "docs/evidence/pilot_v3_0/PILOT_P0_REMOTE_BINDING_EVIDENCE.json",
+    "docs/evidence/pilot_v3_0/PILOT_P0_RTM.json",
+    "docs/evidence/pilot_v3_0/PILOT_APPLICABILITY_OVERLAY.json",
+    "docs/evidence/pilot_v3_0/PILOT_DEFECT_REGISTER.json",
+    "docs/evidence/pilot_v3_0/PILOT_AUTONOMOUS_EXECUTION_STATE.json",
+    "docs/evidence/pilot_v3_0/PILOT_WORK_ORDER_CHAIN.json",
+    "docs/evidence/pilot_v3_0/PILOT_FAILURE_CLASSIFICATION_REGISTER.json",
+    "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_V3_0_P0_CLOSURE.json"
+  ],
+  "files_forbidden_to_change": [
+    "src/**",
+    "scripts/**",
+    "tests/**",
+    ".github/workflows/**",
+    "requirements/**",
+    "installer/**",
+    "UI implementation paths",
+    "configuration migration paths",
+    "scheduled-report implementation paths",
+    "docs/evidence/agent_v3_1/REQUIREMENTS_TRACEABILITY_MATRIX.json",
+    "docs/evidence/agent_v3_1/rtm/**",
+    "Protocol v3.1 source/hash",
+    "main"
+  ],
+  "hypothesis": "Remote ref and exact commit comparison are sufficient to close P0 because the P0 implementation subject is the already-published opening commit; this closure commit is append-only evidence ingestion and does not alter the verified subject.",
+  "next_test": "Create the closure commit and direct canonical P1 branch, verify its parent is the P0 subject, compare the closure delta to this exact allow-list, verify all JSON and manifest hashes, then bind the closure commit through draft PR head metadata without merge.",
+  "parent_exact_head": "089d460eb5a2b5fc384d87afa261a68ea729724f",
+  "p0_evidence_subject_exact_head": "089d460eb5a2b5fc384d87afa261a68ea729724f",
+  "p0_evidence_subject_branch": "fix/quantum-pilot-surgical-convergence-v3-p0",
+  "product_ancestor_exact_head": "b151e67c2bea8d4d50c5c4a2aeb0695e89921c01",
+  "product_change_authorized": false,
+  "release_authorized": false,
+  "requirement_ids": [
+    "PILOT-P0-001",
+    "PILOT-P0-002",
+    "PILOT-P0-003",
+    "PILOT-P0-004",
+    "PILOT-P0-005"
+  ],
+  "rollback_command": "Leave the isolated P1 branch and draft binding PR unmerged and close/delete them only through a separate authorized housekeeping operation; do not rewrite or clean any user worktree.",
+  "rollback_condition": "Any parent/ancestry mismatch, changed path outside the exact allow-list, invalid signature/hash, product/protected path change, missing remote P0 subject, or evidence-binding PR head mismatch.",
+  "schema_version": "3.0.0",
+  "target_evidence_level": "L0_STATIC_REMOTE_REF",
+  "work_order_id": "WO-PILOT-P0-REMOTE-BINDING-CLOSURE-001",
+  "work_order_sha256": "1f1eed10174505b1ec23f6ed557d809ae58645c7aa603ce78e0a22ac818cd9ed"
+}

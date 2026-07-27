@@ -1,0 +1,45 @@
+{
+  "artifact_type": "PILOT_P0_REMOTE_BINDING_EVIDENCE",
+  "schema_version": "3.0.0",
+  "repository": "gollandecd-fabula/quantum-analytics",
+  "canonical_p0_branch": "fix/quantum-pilot-surgical-convergence-v3-p0",
+  "p0_subject_exact_head": "089d460eb5a2b5fc384d87afa261a68ea729724f",
+  "p0_subject_parent_exact_head": "43d6230a43ebb4443e98f9ea9ec2746b210dfa3a",
+  "p0_subject_comparison": {
+    "status": "ahead",
+    "ahead_by": 1,
+    "behind_by": 0,
+    "merge_base": "43d6230a43ebb4443e98f9ea9ec2746b210dfa3a",
+    "total_commits": 1
+  },
+  "actual_changed_paths": [
+    "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_V3_0_P0.json",
+    "docs/evidence/pilot_v3_0/PILOT_APPLICABILITY_OVERLAY.json",
+    "docs/evidence/pilot_v3_0/PILOT_AUTONOMOUS_EXECUTION_STATE.json",
+    "docs/evidence/pilot_v3_0/PILOT_CAPABILITY_GATE.json",
+    "docs/evidence/pilot_v3_0/PILOT_DEFECT_REGISTER.json",
+    "docs/evidence/pilot_v3_0/PILOT_FAILURE_CLASSIFICATION_REGISTER.json",
+    "docs/evidence/pilot_v3_0/PILOT_P0_RTM.json",
+    "docs/evidence/pilot_v3_0/PILOT_WORK_ORDER_CHAIN.json",
+    "docs/evidence/pilot_v3_0/WORK_ORDER_P0_CANONICAL_REANCHOR_002.json"
+  ],
+  "expected_changed_path_count": 9,
+  "actual_changed_path_count": 9,
+  "product_paths_changed": false,
+  "protected_paths_changed": false,
+  "product_ancestry": {
+    "product_ancestor_exact_head": "b151e67c2bea8d4d50c5c4a2aeb0695e89921c01",
+    "candidate_exact_head": "089d460eb5a2b5fc384d87afa261a68ea729724f",
+    "status": "ahead",
+    "ahead_by": 6,
+    "behind_by": 0,
+    "merge_base": "b151e67c2bea8d4d50c5c4a2aeb0695e89921c01"
+  },
+  "branch_fetch_verified": true,
+  "json_parseability": "VERIFIED_BY_CONTENT_API_AND_LOCAL_GENERATION",
+  "manifest_hash_verification": "PENDING_CLOSURE_VERIFIER",
+  "governing_work_order_id": "WO-PILOT-P0-REMOTE-BINDING-CLOSURE-001",
+  "governing_work_order_sha256": "1f1eed10174505b1ec23f6ed557d809ae58645c7aa603ce78e0a22ac818cd9ed",
+  "status": "VERIFIED_REMOTE_SUBJECT",
+  "release_authorized": false
+}

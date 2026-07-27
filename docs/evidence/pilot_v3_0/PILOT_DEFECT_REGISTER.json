@@ -1,29 +1,33 @@
 {
   "artifact_type": "PILOT_DEFECT_REGISTER",
-  "branch": "fix/quantum-pilot-surgical-convergence-v3-p0",
+  "branch": "fix/quantum-pilot-surgical-convergence-v3-p1",
   "defects": [
     {
       "classification": "PROTOCOL_SCOPE_FAILURE",
       "defect_id": "PILOT-D-P0-001",
-      "evidence_ids": [],
+      "evidence_ids": [
+        "EVD-PILOT-P0-REMOTE-BINDING-001"
+      ],
       "requirement_ids": [
         "PILOT-P0-001",
         "PILOT-P0-004"
       ],
       "severity": "P0",
-      "status": "IN_PROGRESS",
+      "status": "CLOSED_VERIFIED",
       "title": "No single canonical pilot line and state owner were declared."
     },
     {
       "classification": "PROTOCOL_SCOPE_FAILURE",
       "defect_id": "PILOT-D-P0-002",
-      "evidence_ids": [],
+      "evidence_ids": [
+        "EVD-PILOT-P0-REMOTE-BINDING-001"
+      ],
       "requirement_ids": [
         "PILOT-P0-003",
         "PILOT-P0-005"
       ],
       "severity": "P0",
-      "status": "IN_PROGRESS",
+      "status": "CLOSED_VERIFIED",
       "title": "Pilot applicability overlay and bounded pilot decision state were absent."
     },
     {
@@ -81,18 +85,22 @@
       "classification": "ENVIRONMENT_UNAVAILABLE",
       "defect_id": "PILOT-D-P0-TRANSPORT-001",
       "evidence_ids": [
-        "EVD-P0-UPDATE-REF-BLOCKED"
+        "EVD-P0-UPDATE-REF-BLOCKED",
+        "EVD-PILOT-P0-REMOTE-BINDING-001"
       ],
       "requirement_ids": [
         "PILOT-P0-001"
       ],
       "severity": "P1",
-      "status": "CLOSED_BY_ALTERNATE_SAFE_TRANSPORT_PENDING_REMOTE_VERIFY",
+      "status": "CLOSED_VERIFIED",
       "title": "Existing branch ref could not be advanced through the available update-ref tool."
     }
   ],
-  "open_p0_count": 6,
+  "open_p0_count": 4,
   "parent_exact_head": "43d6230a43ebb4443e98f9ea9ec2746b210dfa3a",
   "release_authorized": false,
-  "schema_version": "3.0.0"
+  "schema_version": "3.0.0",
+  "p0_evidence_subject_exact_head": "089d460eb5a2b5fc384d87afa261a68ea729724f",
+  "p0_scope_open_p0_count": 0,
+  "next_active_milestone": "P1_ATOMIC_M1_CLOSURE"
 }

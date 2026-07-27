@@ -1,40 +1,36 @@
 {
-  "active_lock": {
-    "governing_work_order_id": "WO-PILOT-P0-CANONICAL-REANCHOR-002",
-    "governing_work_order_sha256": "4b800a07016069a3c7611eb22dc67e343e60e238cf38eef98830fb7747593edf",
-    "lock_id": "LOCK-PILOT-P0-001",
-    "owner_role": "IMPLEMENTER",
-    "parallel_write_authorized": false,
-    "state": "ACQUIRED_FOR_P0_GOVERNANCE"
-  },
-  "active_pilot_milestone": "P0_CANONICAL_REANCHOR",
   "artifact_type": "PILOT_AUTONOMOUS_EXECUTION_STATE",
-  "candidate_exact_head": "PENDING_REMOTE_COMMIT_BINDING",
-  "canonical_pilot_branch": "fix/quantum-pilot-surgical-convergence-v3-p0",
-  "canonical_registry_set_sha256": "4cd2561b2da074b73ebe9ac8a3ccec6f2c890f7f7bf7998ac1a0ca698ed1037a",
+  "schema_version": "3.0.0",
+  "repository": "gollandecd-fabula/quantum-analytics",
+  "canonical_pilot_branch": "fix/quantum-pilot-surgical-convergence-v3-p1",
+  "state_subject_exact_head": "089d460eb5a2b5fc384d87afa261a68ea729724f",
+  "closure_state_binding_method": "DRAFT_PR_HEAD_METADATA",
   "canonical_state_owner": "CONTROL_PLANE",
-  "gatekeeper": "DISCONNECTED",
+  "active_pilot_milestone": "P1_ATOMIC_M1_CLOSURE",
+  "p0_status": "VERIFIED",
+  "p0_evidence_ids": [
+    "EVD-PILOT-P0-REMOTE-BINDING-001"
+  ],
+  "p0_subject_branch": "fix/quantum-pilot-surgical-convergence-v3-p0",
+  "p0_subject_exact_head": "089d460eb5a2b5fc384d87afa261a68ea729724f",
+  "p0_subject_parent_exact_head": "43d6230a43ebb4443e98f9ea9ec2746b210dfa3a",
+  "product_ancestor_exact_head": "b151e67c2bea8d4d50c5c4a2aeb0695e89921c01",
+  "product_ancestry_status": "VERIFIED_REMOTE_COMPARE",
+  "active_lock": null,
+  "active_lock_count": 0,
+  "p1_lock_required_before_change": true,
+  "parallel_write_authorized": false,
+  "superseded_noncanonical_branches": [
+    "fix/quantum-pilot-surgical-convergence-v3",
+    "fix/quantum-pilot-surgical-convergence-v3-p0"
+  ],
   "marketplace_writes": false,
   "ozon": "DEFERRED",
-  "p0_status": "IN_PROGRESS",
-  "parent_exact_head": "43d6230a43ebb4443e98f9ea9ec2746b210dfa3a",
+  "gatekeeper": "DISCONNECTED",
   "physical_l5_status": "UNVERIFIED",
   "pilot_decision": "PILOT_BLOCKED",
-  "product_ancestor_exact_head": "b151e67c2bea8d4d50c5c4a2aeb0695e89921c01",
-  "product_ancestry": {
-    "ahead_by": 5,
-    "behind_by": 0,
-    "comparison_status": "ahead",
-    "merge_base": "b151e67c2bea8d4d50c5c4a2aeb0695e89921c01",
-    "status": "VERIFIED_REMOTE_COMPARE"
-  },
   "production_release_decision": "RELEASE_BLOCKED",
   "protocol_sha256": "be69b8f1f919066c67086d6dd4678acf5e3cb3c4f1db9bc587dc540018601a90",
-  "release_authorized": false,
-  "repository": "gollandecd-fabula/quantum-analytics",
-  "schema_version": "3.0.0",
-  "superseded_noncanonical_branches": [
-    "fix/quantum-pilot-surgical-convergence-v3"
-  ],
-  "transport_state": "DIRECT_BRANCH_CREATION_FROM_RESULT_COMMIT_PENDING"
+  "canonical_registry_set_sha256": "4cd2561b2da074b73ebe9ac8a3ccec6f2c890f7f7bf7998ac1a0ca698ed1037a",
+  "release_authorized": false
 }

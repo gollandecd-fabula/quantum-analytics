@@ -1,6 +1,6 @@
 {
   "artifact_type": "PILOT_APPLICABILITY_OVERLAY",
-  "canonical_pilot_branch": "fix/quantum-pilot-surgical-convergence-v3-p0",
+  "canonical_pilot_branch": "fix/quantum-pilot-surgical-convergence-v3-p1",
   "canonical_registry_set_sha256": "4cd2561b2da074b73ebe9ac8a3ccec6f2c890f7f7bf7998ac1a0ca698ed1037a",
   "canonical_requirement_count": 712,
   "coverage_policy": {
@@ -88,7 +88,7 @@
       "pilot_priority": "P1",
       "pilot_status": "IN_PROGRESS",
       "pilot_target_evidence_level": "L2",
-      "pilot_test": "Evidence-bound verification under the active milestone.",
+      "pilot_est": "Evidence-bound verification under the active milestone.",
       "production_status_unchanged": true,
       "requirement_id": "REQ-MP2-0149"
     },
@@ -114,7 +114,7 @@
       "pilot_priority": "P3",
       "pilot_status": "UNVERIFIED",
       "pilot_target_evidence_level": "L5",
-      "pilot_test": "Evidence-bound verification under the active milestone.",
+      "pilot_est": "Evidence-bound verification under the active milestone.",
       "production_status_unchanged": true,
       "requirement_id": "REQ-MP2-0151"
     },
@@ -123,9 +123,11 @@
       "pilot_action": "Bind scope in state and gate.",
       "pilot_applicability": "REQUIRED",
       "pilot_dependency": [],
-      "pilot_evidence_ids": [],
+      "pilot_evidence_ids": [
+        "EVD-PILOT-P0-REMOTE-BINDING-001"
+      ],
       "pilot_priority": "P0",
-      "pilot_status": "IN_PROGRESS",
+      "pilot_status": "VERIFIED",
       "pilot_target_evidence_level": "L0",
       "pilot_test": "Evidence-bound verification under the active milestone.",
       "production_status_unchanged": true,
@@ -184,5 +186,7 @@
       "requirement_id": "PILOT-REQ-M2-001"
     }
   ],
-  "schema_version": "3.0.0"
+  "schema_version": "3.0.0",
+  "p0_evidence_subject_exact_head": "089d460eb5a2b5fc384d87afa261a68ea729724f",
+  "p0_status": "VERIFIED"
 }

@@ -1,6 +1,6 @@
 {
   "artifact_type": "PILOT_FAILURE_CLASSIFICATION_REGISTER",
-  "canonical_pilot_branch": "fix/quantum-pilot-surgical-convergence-v3-p0",
+  "canonical_pilot_branch": "fix/quantum-pilot-surgical-convergence-v3-p1",
   "classifications": [
     {
       "failed_step": "Validate current closure changed paths against primary work order",
@@ -50,7 +50,8 @@
       "product_tests_executed": "None; no product or branch content changed.",
       "secondary_observation": "HARNESS_FAILURE",
       "source": "Connected GitHub update_ref action",
-      "status": "CLOSED_BY_SAFE_ALTERNATE_PENDING_VERIFY"
+      "status": "CLOSED_BY_SAFE_ALTERNATE",
+      "evidence_id": "EVD-PILOT-P0-REMOTE-BINDING-001"
     }
   ],
   "parent_exact_head": "43d6230a43ebb4443e98f9ea9ec2746b210dfa3a",
@@ -62,5 +63,7 @@
     "HARNESS_FAILURE",
     "ENVIRONMENT_UNAVAILABLE",
     "HISTORICAL_GATE_NA"
-  ]
+  ],
+  "p0_transport_status": "CLOSED_BY_DIRECT_BRANCH_CREATION",
+  "next_active_milestone": "P1_ATOMIC_M1_CLOSURE"
 }
