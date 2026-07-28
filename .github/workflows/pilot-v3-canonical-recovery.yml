@@ -1,9 +1,10 @@
-name: Quantum Pilot v3 Canonical Overlay Materialization Scope Corrective
+name: Quantum Pilot v3 Canonical Overlay Materialization PR Preflight Corrective
 
 on:
-  push:
+  pull_request:
     branches:
-      - fix/quantum-pilot-v3-canonical
+      - fix/quantum-pilot-v3-canonical-base
+    types: [opened, synchronize, reopened]
     paths:
       - ".github/workflows/pilot-v3-canonical-recovery.yml"
       - ".pilot-v3-p0-overlay-transport/**"
@@ -19,15 +20,15 @@ permissions:
   contents: write
 
 concurrency:
-  group: quantum-pilot-v3-canonical-overlay
+  group: quantum-pilot-v3-canonical-overlay-pr
   cancel-in-progress: false
 
 env:
-  TARGET_SHA: ${{ github.sha }}
-  TARGET_BRANCH: ${{ github.ref_name }}
+  TARGET_SHA: ${{ github.event.pull_request.head.sha }}
+  TARGET_BRANCH: ${{ github.event.pull_request.head.ref }}
   CANONICAL_BRANCH: fix/quantum-pilot-v3-canonical
-  AUTHORIZATION_BASE_HEAD: fcf8826ebd20b4ce52fdbb48ee0253344cce36c4
-  WORK_ORDER_PATH: docs/evidence/pilot_v3_0/WORK_ORDER_P0_OVERLAY_SCOPE_CORRECTIVE_008.json
+  AUTHORIZATION_BASE_HEAD: 69e3b113f69a2e49d4c255613a3eb1b6baed2896
+  WORK_ORDER_PATH: docs/evidence/pilot_v3_0/WORK_ORDER_P0_OVERLAY_PR_PREFLIGHT_CORRECTIVE_010.json
   TRANSPORT_MANIFEST_PATH: docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_V3_0_P0_OVERLAY_TRANSPORT.json
   BINDING_PATH: docs/evidence/pilot_v3_0/PILOT_P0_OVERLAY_TRANSPORT_BINDING.json
   COMMITTED_OVERLAY: docs/evidence/pilot_v3_0/PILOT_APPLICABILITY_OVERLAY.json
@@ -35,7 +36,7 @@ env:
 
 jobs:
   p0-overlay-materialization:
-    if: "${{ github.event.head_commit.message != 'P0: commit and reread full pilot applicability overlay via scope corrective' }}"
+    if: "${{ github.event.pull_request.head.ref == 'fix/quantum-pilot-v3-canonical' }}"
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     steps:
@@ -47,7 +48,7 @@ jobs:
           fetch-depth: 0
           persist-credentials: true
 
-      - name: Verify runtime and signed two-phase work order
+      - name: Verify runtime and signed PR preflight corrective work order
         shell: bash
         run: |
           set -euo pipefail
@@ -61,6 +62,7 @@ jobs:
           PY
           test "$(git rev-parse HEAD)" = "$TARGET_SHA"
           test "$TARGET_BRANCH" = "$CANONICAL_BRANCH"
+          test "$GITHUB_EVENT_NAME" = "pull_request"
           authorization_sha="$(git rev-parse HEAD^^)"
           manifest_sha="$(git rev-parse HEAD^)"
           base_sha="$(git rev-parse HEAD^^^)"
@@ -71,7 +73,7 @@ jobs:
           python3 - "$RUNNER_TEMP/authorization-paths.txt" "$RUNNER_TEMP/manifest-stage-paths.txt" "$RUNNER_TEMP/execution-stage-paths.txt" <<'PY'
           import copy, hashlib, json, pathlib, sys
           root = pathlib.Path.cwd()
-          work_order_path = root / pathlib.Path("docs/evidence/pilot_v3_0/WORK_ORDER_P0_OVERLAY_SCOPE_CORRECTIVE_008.json")
+          work_order_path = root / pathlib.Path("docs/evidence/pilot_v3_0/WORK_ORDER_P0_OVERLAY_PR_PREFLIGHT_CORRECTIVE_010.json")
           work_order = json.loads(work_order_path.read_text(encoding="utf-8"))
           unsigned = copy.deepcopy(work_order)
           stored = unsigned.pop("work_order_sha256")
@@ -80,7 +82,7 @@ jobs:
               raise SystemExit("ACTIVE_WORK_ORDER_SIGNATURE_INVALID")
           if work_order["canonical_branch"] != "fix/quantum-pilot-v3-canonical":
               raise SystemExit("ACTIVE_WORK_ORDER_BRANCH_INVALID")
-          if work_order["authorization_parent_exact_head"] != "fcf8826ebd20b4ce52fdbb48ee0253344cce36c4":
+          if work_order["authorization_parent_exact_head"] != "69e3b113f69a2e49d4c255613a3eb1b6baed2896":
               raise SystemExit("ACTIVE_WORK_ORDER_PARENT_INVALID")
           actual_sets = [set(pathlib.Path(arg).read_text(encoding="utf-8").splitlines()) for arg in sys.argv[1:]]
           expected_sets = [
@@ -108,7 +110,7 @@ jobs:
           gate = json.loads((root / "docs/evidence/pilot_v3_0/PILOT_CAPABILITY_GATE.json").read_text(encoding="utf-8"))
           if gate["decision"] != "P0_OVERLAY_MATERIALIZATION_ALLOWED" or gate["largest_artifact_delivery_gate"]["status"] != "PASS":
               raise SystemExit("CAPABILITY_GATE_NOT_PASSED")
-          print("SIGNED_SCOPE_CORRECTIVE_CHAIN_VERIFIED")
+          print("SIGNED_PR_PREFLIGHT_CORRECTIVE_CHAIN_VERIFIED")
           PY
 
       - name: Reconstruct and verify transport archive
@@ -188,9 +190,9 @@ jobs:
           import json, pathlib, sys
           transport_sha, authorization_sha, manifest_sha = sys.argv[1:]
           root = pathlib.Path.cwd()
-          evidence_id = "EVD-PILOT-P0-ATTEMPT-006"
-          work_order_id = "WO-PILOT-P0-OVERLAY-SCOPE-CORRECTIVE-008"
-          base_head = "fcf8826ebd20b4ce52fdbb48ee0253344cce36c4"
+          evidence_id = "EVD-PILOT-P0-ATTEMPT-008"
+          work_order_id = "WO-PILOT-P0-OVERLAY-PR-PREFLIGHT-CORRECTIVE-010"
+          base_head = "69e3b113f69a2e49d4c255613a3eb1b6baed2896"
           def load(name):
               path = root / "docs/evidence/pilot_v3_0" / name
               return path, json.loads(path.read_text(encoding="utf-8"))
@@ -198,8 +200,8 @@ jobs:
               path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n")
           path, state = load("PILOT_AUTONOMOUS_EXECUTION_STATE.json")
           state["active_lock"]["governing_work_order_id"] = work_order_id
-          state["active_lock"]["lock_id"] = "LOCK-PILOT-P0-OVERLAY-SCOPE-CORRECTIVE-008"
-          state["active_lock"]["state"] = "RELEASED_AFTER_GUARDED_SCOPE_CORRECTIVE_MATERIALIZATION"
+          state["active_lock"]["lock_id"] = "LOCK-PILOT-P0-OVERLAY-PR-PREFLIGHT-CORRECTIVE-010"
+          state["active_lock"]["state"] = "RELEASED_AFTER_GUARDED_PR_PREFLIGHT_CORRECTIVE_MATERIALIZATION"
           state["evidence_ids"] = list(dict.fromkeys([*state.get("evidence_ids", []), evidence_id]))
           state["result_exact_head_binding"] = "REMOTE_CANONICAL_REF_READBACK_RECORDED_BY_" + evidence_id
           state["work_order_base_exact_head"] = base_head
@@ -216,38 +218,65 @@ jobs:
           evidence["governing_work_order_id"] = work_order_id
           evidence["guarded_materialization"]["transport_parent_exact_head"] = transport_sha
           evidence["corrective_provenance"] = {
-              "failed_work_order_id": "WO-PILOT-P0-OVERLAY-MATERIALIZATION-007",
+              "failed_work_order_id": "WO-PILOT-P0-OVERLAY-PR-EXECUTION-CORRECTIVE-009",
               "failed_transport_exact_head": base_head,
-              "failure_class": "PHASE_B_SCOPE_COLLECTION_OMITTED_UNTRACKED_FILES",
+              "failure_class": "STATIC_PREFLIGHT_REFERENCED_MISSING_ROOT_CAUSE_REGRESSION_KEY",
+              "failure_detected_before_execution_workflow_commit": True,
+              "preserved_scope_root_cause": "PHASE_B_SCOPE_COLLECTION_OMITTED_UNTRACKED_FILES",
+              "scope_regression_source": "signed WO-PILOT-P0-OVERLAY-SCOPE-CORRECTIVE-008",
               "old_collector": "git diff --name-only",
               "corrected_collector": "union(git diff --name-only, git ls-files --others --exclude-standard)",
-              "omitted_paths_reproduced": [
-                  "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_V3_0_P0_OVERLAY_CLOSURE.json",
-                  "docs/evidence/pilot_v3_0/PILOT_APPLICABILITY_OVERLAY.json",
-                  "docs/evidence/pilot_v3_0/PILOT_P0_OVERLAY_BINDING_EVIDENCE.json"
-              ],
+              "execution_event": "same-repository pull_request synchronize",
               "authorization_commit": authorization_sha,
               "transport_manifest_commit": manifest_sha,
               "execution_transport_commit": transport_sha,
-              "status": "VERIFIED_BY_NEGATIVE_AND_POSITIVE_SCOPE_CONTROL"
+              "status": "VERIFIED_BY_DISCOVERABLE_PR_RUN_STATIC_CONTRACT_NEGATIVE_POSITIVE_SCOPE_CONTROL_AND_REMOTE_READBACK"
           }
-          evidence["status"] = "VERIFIED_BY_GUARDED_SCOPE_CORRECTIVE_MATERIALIZATION"
+          evidence["status"] = "VERIFIED_BY_GUARDED_PR_PREFLIGHT_CORRECTIVE_MATERIALIZATION"
           write(path, evidence)
           path, chain = load("PILOT_WORK_ORDER_CHAIN.json")
           for item in chain["entries"]:
               if item["work_order_id"] == "WO-PILOT-P0-OVERLAY-MATERIALIZATION-007":
-                  item["result_exact_head"] = base_head
+                  item["result_exact_head"] = "fcf8826ebd20b4ce52fdbb48ee0253344cce36c4"
                   item["status"] = "REMOTE_COMMIT_VERIFIED_RUNTIME_FAILED_PHASE_B_SCOPE_COLLECTION"
                   item["evidence_ids"] = ["EVD-PILOT-P0-ATTEMPT-005"]
-          chain["entries"] = [item for item in chain["entries"] if item["work_order_id"] != work_order_id]
+          chain["entries"] = [item for item in chain["entries"] if item["work_order_id"] not in {
+              "WO-PILOT-P0-OVERLAY-SCOPE-CORRECTIVE-008",
+              "WO-PILOT-P0-OVERLAY-PR-EXECUTION-CORRECTIVE-009",
+              work_order_id
+          }]
           chain["entries"].append({
               "ordinal": 8,
+              "parent_exact_head": "fcf8826ebd20b4ce52fdbb48ee0253344cce36c4",
+              "authorization_commit": "7117304668f4629110bd426a2b11761820e33bcc",
+              "transport_manifest_commit": "b471064a379c67153601a21c442fa31b21d0ad08",
+              "execution_transport_commit": "743bf7ed38a3fd3eaf68f7364f2c38e82eb0cd96",
+              "result_exact_head": "743bf7ed38a3fd3eaf68f7364f2c38e82eb0cd96",
+              "status": "REMOTE_TRANSPORT_COMMIT_VERIFIED_FINAL_SELF_COMMIT_NOT_OBSERVED",
+              "evidence_ids": ["EVD-PILOT-P0-ATTEMPT-006"],
+              "two_phase_transport": True,
+              "work_order_id": "WO-PILOT-P0-OVERLAY-SCOPE-CORRECTIVE-008"
+          })
+          chain["entries"].append({
+              "ordinal": 9,
+              "parent_exact_head": "743bf7ed38a3fd3eaf68f7364f2c38e82eb0cd96",
+              "authorization_commit": "0dab5ff49e053311b44cf24e7bfc73d1635c426f",
+              "transport_manifest_commit": "69e3b113f69a2e49d4c255613a3eb1b6baed2896",
+              "execution_transport_commit": None,
+              "result_exact_head": "69e3b113f69a2e49d4c255613a3eb1b6baed2896",
+              "status": "STATIC_PREFLIGHT_FAILED_BEFORE_EXECUTION_WORKFLOW_COMMIT",
+              "evidence_ids": ["EVD-PILOT-P0-ATTEMPT-007"],
+              "two_phase_transport": True,
+              "work_order_id": "WO-PILOT-P0-OVERLAY-PR-EXECUTION-CORRECTIVE-009"
+          })
+          chain["entries"].append({
+              "ordinal": 10,
               "parent_exact_head": base_head,
               "authorization_commit": authorization_sha,
               "transport_manifest_commit": manifest_sha,
               "execution_transport_commit": transport_sha,
               "result_exact_head": "CURRENT_CANONICAL_HEAD_BOUND_BY_REMOTE_READBACK",
-              "status": "GUARDED_SCOPE_CORRECTIVE_OVERLAY_MATERIALIZATION_VERIFIED",
+              "status": "GUARDED_PR_PREFLIGHT_CORRECTIVE_OVERLAY_MATERIALIZATION_VERIFIED",
               "evidence_ids": [evidence_id],
               "two_phase_transport": True,
               "work_order_id": work_order_id
@@ -273,7 +302,7 @@ jobs:
               "release_authorized": False,
               "remove_paths": sorted(binding["phase_b_delete_paths"]),
               "schema_version": "1.0.0",
-              "scope": "Commit and reread the deterministic 712-row pilot applicability overlay after the verified scope-collector corrective; synchronize P0 evidence state; remove temporary binary transport files; no product, UI, installer, dependency, canonical RTM, Protocol v3.1, M9 controller, marketplace-write or release change.",
+              "scope": "Commit and reread the deterministic 712-row pilot applicability overlay after the verified scope-collector, PR-execution and PR-preflight corrective; synchronize P0 evidence state; remove temporary binary transport files; no product, UI, installer, dependency, canonical RTM, Protocol v3.1, M9 controller, marketplace-write or release change.",
           }
           pathlib.Path("docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_V3_0_P0_OVERLAY_CLOSURE.json").write_text(
               json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n"
@@ -310,7 +339,8 @@ jobs:
           old = set(pathlib.Path(sys.argv[2]).read_text(encoding="utf-8").splitlines())
           actual = set(pathlib.Path(sys.argv[3]).read_text(encoding="utf-8").splitlines())
           expected = set(work_order["phase_b_final_files_allowed_to_change"])
-          expected_old_missing = set(work_order["root_cause_regression"]["old_collector_omitted_paths"])
+          scope_order = json.loads(pathlib.Path("docs/evidence/pilot_v3_0/WORK_ORDER_P0_OVERLAY_SCOPE_CORRECTIVE_008.json").read_text(encoding="utf-8"))
+          expected_old_missing = set(scope_order["root_cause_regression"]["old_collector_omitted_paths"])
           if expected - old != expected_old_missing:
               raise SystemExit("OLD_COLLECTOR_NEGATIVE_CONTROL_INVALID:" + json.dumps({"expected_missing": sorted(expected_old_missing), "actual_missing": sorted(expected-old)}, sort_keys=True))
           if actual != expected:
@@ -327,7 +357,7 @@ jobs:
           git diff --cached --name-only | LC_ALL=C sort > "$RUNNER_TEMP/pilot-v3-p0/staged-final-paths.txt"
           cmp "$RUNNER_TEMP/pilot-v3-p0/phase-b-paths.txt" "$RUNNER_TEMP/pilot-v3-p0/staged-final-paths.txt"
           git diff --cached --check
-          git commit -m "P0: commit and reread full pilot applicability overlay via scope corrective"
+          git commit -m "P0: commit and reread full pilot applicability overlay via PR preflight corrective"
           final_sha="$(git rev-parse HEAD)"
           test "$(git rev-parse HEAD^)" = "$transport_sha"
           git show "$final_sha:$COMMITTED_OVERLAY" > "$RUNNER_TEMP/pilot-v3-p0/commit-readback-overlay.json"
@@ -373,7 +403,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: Quantum-Pilot-v3-P0-Overlay-${{ env.TARGET_SHA }}
+          name: Quantum-Pilot-v3-P0-Overlay-PR-Preflight-${{ env.TARGET_SHA }}
           path: ${{ runner.temp }}/pilot-v3-p0/**
           if-no-files-found: error
           retention-days: 30
