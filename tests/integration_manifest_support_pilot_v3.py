@@ -30,6 +30,10 @@ PILOT_V3_P0_OVERLAY_TRANSPORT_OVERLAY = (
     "ARTIFACT_MANIFEST_OVERLAY_PILOT_V3_0_P0_OVERLAY_TRANSPORT.json",
     "base_pilot_v3_0_p0_source_runtime_env_corrective_overlay_git_blob_sha",
 )
+PILOT_V3_P0_OVERLAY_CLOSURE_OVERLAY = (
+    "ARTIFACT_MANIFEST_OVERLAY_PILOT_V3_0_P0_OVERLAY_CLOSURE.json",
+    "base_pilot_v3_0_p0_overlay_transport_overlay_git_blob_sha",
+)
 ALL_OVERLAY_NAMES = (
     *_base.ALL_OVERLAY_NAMES,
     PILOT_V3_RECOVERY_OVERLAY[0],
@@ -39,6 +43,7 @@ ALL_OVERLAY_NAMES = (
     PILOT_V3_P0_MANIFEST_CLOSURE_OVERLAY[0],
     PILOT_V3_P0_SOURCE_RUNTIME_ENV_CORRECTIVE_OVERLAY[0],
     PILOT_V3_P0_OVERLAY_TRANSPORT_OVERLAY[0],
+    PILOT_V3_P0_OVERLAY_CLOSURE_OVERLAY[0],
 )
 CONTROL_PATHS = {
     *_base.CONTROL_PATHS,
@@ -50,7 +55,8 @@ CONTROL_PATHS = {
         PILOT_V3_P0_MANIFEST_CLOSURE_OVERLAY[0],
         PILOT_V3_P0_SOURCE_RUNTIME_ENV_CORRECTIVE_OVERLAY[0],
         PILOT_V3_P0_OVERLAY_TRANSPORT_OVERLAY[0],
-        )),
+        PILOT_V3_P0_OVERLAY_CLOSURE_OVERLAY[0],
+    )),
 }
 
 _base._core.ALL_OVERLAY_NAMES = ALL_OVERLAY_NAMES
@@ -83,7 +89,8 @@ def load_effective_manifest() -> dict:
     generator_raw = _apply(artifacts, PILOT_V3_P0_GENERATOR_INVOCATION_CORRECTIVE_OVERLAY, signature_raw)
     manifest_raw = _apply(artifacts, PILOT_V3_P0_MANIFEST_CLOSURE_OVERLAY, generator_raw)
     runtime_raw = _apply(artifacts, PILOT_V3_P0_SOURCE_RUNTIME_ENV_CORRECTIVE_OVERLAY, manifest_raw)
-    _apply(artifacts, PILOT_V3_P0_OVERLAY_TRANSPORT_OVERLAY, runtime_raw)
+    transport_raw = _apply(artifacts, PILOT_V3_P0_OVERLAY_TRANSPORT_OVERLAY, runtime_raw)
+    _apply(artifacts, PILOT_V3_P0_OVERLAY_CLOSURE_OVERLAY, transport_raw)
     current["artifacts"] = [artifacts[path] for path in sorted(artifacts)]
     current["artifact_count"] = len(current["artifacts"])
     return current

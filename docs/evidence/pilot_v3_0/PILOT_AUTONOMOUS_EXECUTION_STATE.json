@@ -1,31 +1,31 @@
 {
   "active_lock": {
-    "governing_work_order_id": "WO-PILOT-P0-SOURCE-RUNTIME-ENV-CORRECTIVE-006",
-    "governing_work_order_sha256": "0d78711bc379e0a7b882d205c5121c3fd30da7658d909af9dd96a877bb3f89a0",
-    "lock_id": "LOCK-PILOT-P0-SOURCE-RUNTIME-ENV-CORRECTIVE-006",
+    "governing_work_order_id": "WO-PILOT-P0-OVERLAY-FINAL-MANIFEST-STAGING-CORRECTIVE-011",
+    "lock_id": "LOCK-PILOT-P0-OVERLAY-FINAL-MANIFEST-STAGING-CORRECTIVE-011",
     "owner_role": "IMPLEMENTER",
     "parallel_write_authorized": false,
-    "state": "ACQUIRED_FOR_CORRECTIVE_COMMIT"
+    "state": "RELEASED_AFTER_GUARDED_FINAL_MANIFEST_STAGING_CORRECTIVE_MATERIALIZATION"
   },
-  "active_lock_count": 1,
+  "active_lock_count": 0,
   "active_pilot_milestone": "P0_CANONICAL_REANCHOR_RECOVERY",
   "artifact_type": "PILOT_AUTONOMOUS_EXECUTION_STATE",
-  "candidate_exact_head": "SELF_COMMIT_PENDING_REMOTE_BINDING",
   "canonical_pilot_branch": "fix/quantum-pilot-v3-canonical",
   "canonical_registry_set_sha256": "4cd2561b2da074b73ebe9ac8a3ccec6f2c890f7f7bf7998ac1a0ca698ed1037a",
   "canonical_requirement_count": 712,
   "canonical_state_owner": "CONTROL_PLANE",
-  "failed_attempt_evidence_ids": [
+  "evidence_ids": [
     "EVD-PILOT-P0-ATTEMPT-001",
     "EVD-PILOT-P0-ATTEMPT-002",
     "EVD-PILOT-P0-ATTEMPT-003",
-    "EVD-PILOT-P0-ATTEMPT-004"
+    "EVD-PILOT-P0-ATTEMPT-004",
+    "EVD-PILOT-P0-ATTEMPT-005",
+    "EVD-PILOT-P0-ATTEMPT-009"
   ],
   "gatekeeper": "DISCONNECTED",
   "marketplace_writes": false,
   "ozon": "DEFERRED",
-  "p0_phase": "SOURCE_RUNTIME_ENV_CORRECTIVE_AND_EXACT_HEAD_REVERIFICATION_PENDING",
-  "p0_status": "IN_PROGRESS",
+  "p0_phase": "CANONICAL_OVERLAY_COMMITTED_AND_REVERIFIED",
+  "p0_status": "VERIFIED",
   "parallel_write_authorized": false,
   "physical_l5_status": "UNVERIFIED",
   "pilot_decision": "PILOT_BLOCKED",
@@ -35,6 +35,7 @@
   "protocol_sha256": "be69b8f1f919066c67086d6dd4678acf5e3cb3c4f1db9bc587dc540018601a90",
   "release_authorized": false,
   "repository": "gollandecd-fabula/quantum-analytics",
+  "result_exact_head_binding": "REMOTE_CANONICAL_REF_READBACK_RECORDED_BY_EVD-PILOT-P0-ATTEMPT-009",
   "schema_version": "3.0.0",
-  "state_subject_parent_exact_head": "825c1a4325b24fbae8ce8b616113ba087874a1ea"
+  "work_order_base_exact_head": "22b404e5bcacc509ca463b0c3a83e714b80b0aee"
 }

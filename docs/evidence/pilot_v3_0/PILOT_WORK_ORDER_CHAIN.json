@@ -44,11 +44,83 @@
       "work_order_id": "WO-PILOT-P0-MANIFEST-CLOSURE-CORRECTIVE-005"
     },
     {
+      "evidence_ids": [
+        "EVD-PILOT-P0-ATTEMPT-004"
+      ],
       "ordinal": 6,
       "parent_exact_head": "825c1a4325b24fbae8ce8b616113ba087874a1ea",
-      "result_exact_head": "SELF_COMMIT_PENDING_REMOTE_BINDING",
-      "status": "CORRECTIVE_COMMIT_IN_PROGRESS",
+      "result_exact_head": "d65ad8e01672365a35aeff4791ee8800a5f1a27f",
+      "status": "REMOTE_COMMIT_AND_1016_TEST_SOURCE_RUNTIME_VERIFIED",
       "work_order_id": "WO-PILOT-P0-SOURCE-RUNTIME-ENV-CORRECTIVE-006"
+    },
+    {
+      "evidence_ids": [
+        "EVD-PILOT-P0-ATTEMPT-005"
+      ],
+      "ordinal": 7,
+      "parent_exact_head": "d65ad8e01672365a35aeff4791ee8800a5f1a27f",
+      "result_exact_head": "fcf8826ebd20b4ce52fdbb48ee0253344cce36c4",
+      "status": "REMOTE_COMMIT_VERIFIED_RUNTIME_FAILED_PHASE_B_SCOPE_COLLECTION",
+      "two_phase_transport": true,
+      "work_order_id": "WO-PILOT-P0-OVERLAY-MATERIALIZATION-007"
+    },
+    {
+      "ordinal": 8,
+      "parent_exact_head": "fcf8826ebd20b4ce52fdbb48ee0253344cce36c4",
+      "authorization_commit": "7117304668f4629110bd426a2b11761820e33bcc",
+      "transport_manifest_commit": "b471064a379c67153601a21c442fa31b21d0ad08",
+      "execution_transport_commit": "743bf7ed38a3fd3eaf68f7364f2c38e82eb0cd96",
+      "result_exact_head": "743bf7ed38a3fd3eaf68f7364f2c38e82eb0cd96",
+      "status": "REMOTE_TRANSPORT_COMMIT_VERIFIED_FINAL_SELF_COMMIT_NOT_OBSERVED",
+      "evidence_ids": [
+        "EVD-PILOT-P0-ATTEMPT-006"
+      ],
+      "two_phase_transport": true,
+      "work_order_id": "WO-PILOT-P0-OVERLAY-SCOPE-CORRECTIVE-008"
+    },
+    {
+      "ordinal": 9,
+      "parent_exact_head": "743bf7ed38a3fd3eaf68f7364f2c38e82eb0cd96",
+      "authorization_commit": "0dab5ff49e053311b44cf24e7bfc73d1635c426f",
+      "transport_manifest_commit": "69e3b113f69a2e49d4c255613a3eb1b6baed2896",
+      "execution_transport_commit": null,
+      "result_exact_head": "69e3b113f69a2e49d4c255613a3eb1b6baed2896",
+      "status": "STATIC_PREFLIGHT_FAILED_BEFORE_EXECUTION_WORKFLOW_COMMIT",
+      "evidence_ids": [
+        "EVD-PILOT-P0-ATTEMPT-007"
+      ],
+      "two_phase_transport": true,
+      "work_order_id": "WO-PILOT-P0-OVERLAY-PR-EXECUTION-CORRECTIVE-009"
+    },
+    {
+      "ordinal": 10,
+      "parent_exact_head": "69e3b113f69a2e49d4c255613a3eb1b6baed2896",
+      "authorization_commit": "bca04bec78814ddf4d7c93a661a1aba3249f3592",
+      "transport_manifest_commit": "727e16d9f22ca5b9e826c4a672cbeb1f81d178da",
+      "execution_transport_commit": "22b404e5bcacc509ca463b0c3a83e714b80b0aee",
+      "result_exact_head": "22b404e5bcacc509ca463b0c3a83e714b80b0aee",
+      "status": "DISCOVERABLE_PR_RUNTIME_FAILED_FINAL_MANIFEST_TESTS_BEFORE_COMMIT",
+      "evidence_ids": [
+        "EVD-PILOT-P0-ATTEMPT-008"
+      ],
+      "run_id": 30392936134,
+      "artifact_id": 8701646475,
+      "two_phase_transport": true,
+      "work_order_id": "WO-PILOT-P0-OVERLAY-PR-PREFLIGHT-CORRECTIVE-010"
+    },
+    {
+      "ordinal": 11,
+      "parent_exact_head": "22b404e5bcacc509ca463b0c3a83e714b80b0aee",
+      "authorization_commit": "5c3535ce7d73d58fe9de3b9dd8cfdd7afebb8c07",
+      "transport_manifest_commit": "a6075cb1e143c1606342003a591959ba77587f24",
+      "execution_transport_commit": "75c00a5e2acfa8dc4da208dd169edc45a7d4364e",
+      "result_exact_head": "CURRENT_CANONICAL_HEAD_BOUND_BY_REMOTE_READBACK",
+      "status": "GUARDED_FINAL_MANIFEST_STAGING_CORRECTIVE_OVERLAY_MATERIALIZATION_VERIFIED",
+      "evidence_ids": [
+        "EVD-PILOT-P0-ATTEMPT-009"
+      ],
+      "two_phase_transport": true,
+      "work_order_id": "WO-PILOT-P0-OVERLAY-FINAL-MANIFEST-STAGING-CORRECTIVE-011"
     }
   ],
   "parallel_write_authorized": false,

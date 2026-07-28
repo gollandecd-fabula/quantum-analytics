@@ -1,0 +1,44 @@
+{
+  "artifact_type": "ARTIFACT_MANIFEST_OVERLAY",
+  "base_pilot_v3_0_p0_overlay_transport_overlay_git_blob_sha": "1831997b5ced57c3744b568964b1e50adc295b01",
+  "entries": [
+    [
+      "docs/evidence/pilot_v3_0/PILOT_APPLICABILITY_OVERLAY.json",
+      "ef3d831d35ca6e2d2a39228b0974506d48bafae87c622a0f5adfc83271a8b954",
+      434233
+    ],
+    [
+      "docs/evidence/pilot_v3_0/PILOT_AUTONOMOUS_EXECUTION_STATE.json",
+      "de15c9615d31f638cffc1d4c2719486be11af4ddde282b82da9970a2a6309764",
+      1815
+    ],
+    [
+      "docs/evidence/pilot_v3_0/PILOT_P0_EXECUTION_REGISTER.json",
+      "ab10ce1907193e09579728821bd66036aba4b9c68e5b93a66f862409aef1d72a",
+      2970
+    ],
+    [
+      "docs/evidence/pilot_v3_0/PILOT_P0_OVERLAY_BINDING_EVIDENCE.json",
+      "37a707828245b704545460699f9b4b0a2524021126f0515eddc0ecb9c76b6bc3",
+      2862
+    ],
+    [
+      "docs/evidence/pilot_v3_0/PILOT_WORK_ORDER_CHAIN.json",
+      "3674418f20cdd4edd1dccf128ab45b7c6af287b4e0fcf6e420f2dd58d13636c8",
+      5407
+    ],
+    [
+      "tests/integration_manifest_support_pilot_v3.py",
+      "6794b8b3ea400cfcbe1991d04ca654d91ab9810f62577f791b3879987d611df6",
+      4304
+    ]
+  ],
+  "overlay_id": "PILOT-V3.0-P0-OVERLAY-CLOSURE",
+  "release_authorized": false,
+  "remove_paths": [
+    ".pilot-v3-p0-overlay-transport/chunk.00",
+    ".pilot-v3-p0-overlay-transport/chunk.01"
+  ],
+  "schema_version": "1.0.0",
+  "scope": "Commit and reread the deterministic 712-row pilot applicability overlay after the verified scope-collector, PR-execution, PR-preflight and final-manifest-staging correctives; synchronize P0 evidence state; remove temporary binary transport files; no product, UI, installer, dependency, canonical RTM, Protocol v3.1, M9 controller, marketplace-write or release change."
+}

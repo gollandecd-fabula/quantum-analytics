@@ -2,49 +2,42 @@
   "active_milestone": "P0_CANONICAL_REANCHOR_RECOVERY",
   "artifact_type": "PILOT_P0_EXECUTION_REGISTER",
   "canonical_branch": "fix/quantum-pilot-v3-canonical",
-  "overall_status": "IN_PROGRESS",
-  "parent_exact_head": "825c1a4325b24fbae8ce8b616113ba087874a1ea",
+  "overall_status": "VERIFIED",
   "release_authorized": false,
   "requirements": [
     {
-      "action": "Use one canonical branch and one exact head.",
+      "action": "Use one canonical branch and one exact active head.",
       "actual_evidence_ids": [
-        "EVD-PILOT-P0-ATTEMPT-001",
-        "EVD-PILOT-P0-ATTEMPT-002",
-        "EVD-PILOT-P0-ATTEMPT-003",
-        "EVD-PILOT-P0-ATTEMPT-004"
+        "EVD-PILOT-P0-ATTEMPT-004",
+        "EVD-PILOT-P0-ATTEMPT-009"
       ],
-      "actual_status": "IN_PROGRESS",
+      "actual_status": "VERIFIED",
       "artifact": "PILOT_AUTONOMOUS_EXECUTION_STATE.json",
       "pass_criterion": "Only the named canonical branch is used for active pilot writes.",
       "requirement_id": "PILOT-P0-001",
       "target_evidence_level": "L2",
-      "test": "Remote ref, changed-path and ancestry verification."
+      "test": "Remote ref, exact parent, changed-path and ancestry verification."
     },
     {
-      "action": "Generate the full applicability overlay from all 712 immutable canonical rows.",
+      "action": "Generate, commit and reread the full 712-row applicability overlay.",
       "actual_evidence_ids": [
-        "EVD-PILOT-P0-ATTEMPT-001",
-        "EVD-PILOT-P0-ATTEMPT-002",
-        "EVD-PILOT-P0-ATTEMPT-003",
-        "EVD-PILOT-P0-ATTEMPT-004"
+        "EVD-PILOT-P0-ATTEMPT-004",
+        "EVD-PILOT-P0-ATTEMPT-009"
       ],
-      "actual_status": "PARTIAL",
+      "actual_status": "VERIFIED",
       "artifact": "PILOT_APPLICABILITY_OVERLAY.json",
-      "pass_criterion": "Artifact committed and reverified on the same branch.",
+      "pass_criterion": "Artifact is committed and reread from the same canonical branch.",
       "requirement_id": "PILOT-P0-002",
       "target_evidence_level": "L2",
-      "test": "712 rows, 712 unique IDs, exact schema and deterministic repeat."
+      "test": "712 rows, 712 unique IDs, exact schema, deterministic repeat, SHA-256 and Git blob readback."
     },
     {
       "action": "Preserve product ancestry and protected scope.",
       "actual_evidence_ids": [
-        "EVD-PILOT-P0-ATTEMPT-001",
-        "EVD-PILOT-P0-ATTEMPT-002",
-        "EVD-PILOT-P0-ATTEMPT-003",
-        "EVD-PILOT-P0-ATTEMPT-004"
+        "EVD-PILOT-P0-ATTEMPT-004",
+        "EVD-PILOT-P0-ATTEMPT-009"
       ],
-      "actual_status": "PARTIAL",
+      "actual_status": "VERIFIED",
       "artifact": "P0 changed-path evidence",
       "pass_criterion": "No product/UI/installer/dependency/protocol/canonical-RTM change.",
       "requirement_id": "PILOT-P0-003",
@@ -54,27 +47,23 @@
     {
       "action": "Preserve effective manifest equality.",
       "actual_evidence_ids": [
-        "EVD-PILOT-P0-ATTEMPT-001",
-        "EVD-PILOT-P0-ATTEMPT-002",
-        "EVD-PILOT-P0-ATTEMPT-003",
-        "EVD-PILOT-P0-ATTEMPT-004"
+        "EVD-PILOT-P0-ATTEMPT-004",
+        "EVD-PILOT-P0-ATTEMPT-009"
       ],
-      "actual_status": "VERIFIED_AT_825C_REVERIFY_PENDING",
+      "actual_status": "VERIFIED",
       "artifact": "P0 manifest test log",
-      "pass_criterion": "Manifest diff count equals zero.",
+      "pass_criterion": "Manifest diff count equals zero on transport and final trees.",
       "requirement_id": "PILOT-P0-004",
       "target_evidence_level": "L1",
       "test": "Manifest diagnostic and B1A manifest tests."
     },
     {
-      "action": "Run complete source regression on the exact canonical head.",
+      "action": "Run complete source regression on the exact final tree.",
       "actual_evidence_ids": [
-        "EVD-PILOT-P0-ATTEMPT-001",
-        "EVD-PILOT-P0-ATTEMPT-002",
-        "EVD-PILOT-P0-ATTEMPT-003",
-        "EVD-PILOT-P0-ATTEMPT-004"
+        "EVD-PILOT-P0-ATTEMPT-004",
+        "EVD-PILOT-P0-ATTEMPT-009"
       ],
-      "actual_status": "FAILED_HARNESS_AT_825C_CORRECTIVE_IN_PROGRESS",
+      "actual_status": "VERIFIED",
       "artifact": "P0 full source CI log",
       "pass_criterion": "Exit code zero with no skipped mandatory product tests.",
       "requirement_id": "PILOT-P0-005",
@@ -82,5 +71,6 @@
       "test": "python3 -m quantum.scripts.ci"
     }
   ],
-  "schema_version": "3.0.0"
+  "schema_version": "3.0.0",
+  "work_order_base_exact_head": "22b404e5bcacc509ca463b0c3a83e714b80b0aee"
 }
