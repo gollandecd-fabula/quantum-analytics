@@ -4,8 +4,8 @@
   "entries": [
     [
       ".github/workflows/pilot-v3-canonical-recovery.yml",
-      "7e691a3293a44de5c62dc3c33fc1faf17bb49af8fb73145fc6ee84c93fe307f8",
-      23960
+      "570cf1b2959627dad8bfeb5a6b5b9286990be3b8f58900dfe2b1babfa6ccdc61",
+      25235
     ],
     [
       ".pilot-v3-p0-overlay-transport/chunk.00",
@@ -38,6 +38,11 @@
       8022
     ],
     [
+      "docs/evidence/pilot_v3_0/WORK_ORDER_P0_OVERLAY_PR_PREFLIGHT_CORRECTIVE_010.json",
+      "a857b12971ee1d0f32e275fdae8392f318215617cebd3a77e053d7c4d631e26a",
+      7722
+    ],
+    [
       "docs/evidence/pilot_v3_0/WORK_ORDER_P0_OVERLAY_SCOPE_CORRECTIVE_008.json",
       "d50fc30d3cc7b17cc63e00a7b5338ee524fb594ccf8f4739a7a615e37f294a79",
       8044
@@ -51,5 +56,5 @@
   "overlay_id": "PILOT-V3.0-P0-OVERLAY-TRANSPORT",
   "release_authorized": false,
   "schema_version": "1.0.0",
-  "scope": "Manifest-valid immutable binary transport plus signed scope-collector and PR-execution corrective authorization and exact workflow; no product, UI, installer, dependency, canonical RTM, Protocol v3.1, M9 controller, marketplace-write or release change."
+  "scope": "Manifest-valid immutable binary transport plus signed scope-collector, PR-execution and PR-preflight corrective authorizations and exact workflow; no product, UI, installer, dependency, canonical RTM, Protocol v3.1, M9 controller, marketplace-write or release change."
 }
