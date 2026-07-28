@@ -1,4 +1,4 @@
-name: Quantum Pilot v3 Canonical Overlay Materialization
+name: Quantum Pilot v3 Canonical Overlay Materialization Scope Corrective
 
 on:
   push:
@@ -26,14 +26,16 @@ env:
   TARGET_SHA: ${{ github.sha }}
   TARGET_BRANCH: ${{ github.ref_name }}
   CANONICAL_BRANCH: fix/quantum-pilot-v3-canonical
-  BASE_EXACT_HEAD: d65ad8e01672365a35aeff4791ee8800a5f1a27f
-  WORK_ORDER_PATH: docs/evidence/pilot_v3_0/WORK_ORDER_P0_OVERLAY_MATERIALIZATION_007.json
+  AUTHORIZATION_BASE_HEAD: fcf8826ebd20b4ce52fdbb48ee0253344cce36c4
+  WORK_ORDER_PATH: docs/evidence/pilot_v3_0/WORK_ORDER_P0_OVERLAY_SCOPE_CORRECTIVE_008.json
+  TRANSPORT_MANIFEST_PATH: docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_V3_0_P0_OVERLAY_TRANSPORT.json
   BINDING_PATH: docs/evidence/pilot_v3_0/PILOT_P0_OVERLAY_TRANSPORT_BINDING.json
   COMMITTED_OVERLAY: docs/evidence/pilot_v3_0/PILOT_APPLICABILITY_OVERLAY.json
   CLOSURE_OVERLAY: docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_V3_0_P0_OVERLAY_CLOSURE.json
 
 jobs:
   p0-overlay-materialization:
+    if: "${{ github.event.head_commit.message != 'P0: commit and reread full pilot applicability overlay via scope corrective' }}"
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     steps:
@@ -59,12 +61,18 @@ jobs:
           PY
           test "$(git rev-parse HEAD)" = "$TARGET_SHA"
           test "$TARGET_BRANCH" = "$CANONICAL_BRANCH"
-          test "$(git rev-parse HEAD^)" = "$BASE_EXACT_HEAD"
-          git diff --name-only HEAD^ HEAD | LC_ALL=C sort > "$RUNNER_TEMP/phase-a-paths.txt"
-          python3 - "$RUNNER_TEMP/phase-a-paths.txt" <<'PY'
+          authorization_sha="$(git rev-parse HEAD^^)"
+          manifest_sha="$(git rev-parse HEAD^)"
+          base_sha="$(git rev-parse HEAD^^^)"
+          test "$base_sha" = "$AUTHORIZATION_BASE_HEAD"
+          git diff --name-only "$base_sha" "$authorization_sha" | LC_ALL=C sort > "$RUNNER_TEMP/authorization-paths.txt"
+          git diff --name-only "$authorization_sha" "$manifest_sha" | LC_ALL=C sort > "$RUNNER_TEMP/manifest-stage-paths.txt"
+          git diff --name-only "$manifest_sha" HEAD | LC_ALL=C sort > "$RUNNER_TEMP/execution-stage-paths.txt"
+          python3 - "$RUNNER_TEMP/authorization-paths.txt" "$RUNNER_TEMP/manifest-stage-paths.txt" "$RUNNER_TEMP/execution-stage-paths.txt" <<'PY'
           import copy, hashlib, json, pathlib, sys
           root = pathlib.Path.cwd()
-          work_order = json.loads((root / pathlib.Path("docs/evidence/pilot_v3_0/WORK_ORDER_P0_OVERLAY_MATERIALIZATION_007.json")).read_text(encoding="utf-8"))
+          work_order_path = root / pathlib.Path("docs/evidence/pilot_v3_0/WORK_ORDER_P0_OVERLAY_SCOPE_CORRECTIVE_008.json")
+          work_order = json.loads(work_order_path.read_text(encoding="utf-8"))
           unsigned = copy.deepcopy(work_order)
           stored = unsigned.pop("work_order_sha256")
           canonical = json.dumps(unsigned, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
@@ -72,20 +80,35 @@ jobs:
               raise SystemExit("ACTIVE_WORK_ORDER_SIGNATURE_INVALID")
           if work_order["canonical_branch"] != "fix/quantum-pilot-v3-canonical":
               raise SystemExit("ACTIVE_WORK_ORDER_BRANCH_INVALID")
-          if work_order["parent_exact_head"] != "d65ad8e01672365a35aeff4791ee8800a5f1a27f":
+          if work_order["authorization_parent_exact_head"] != "fcf8826ebd20b4ce52fdbb48ee0253344cce36c4":
               raise SystemExit("ACTIVE_WORK_ORDER_PARENT_INVALID")
+          actual_sets = [set(pathlib.Path(arg).read_text(encoding="utf-8").splitlines()) for arg in sys.argv[1:]]
+          expected_sets = [
+              set(work_order["authorization_stage_files_allowed_to_change"]),
+              set(work_order["manifest_stage_files_allowed_to_change"]),
+              set(work_order["execution_stage_files_allowed_to_change"]),
+          ]
+          labels = ["AUTHORIZATION", "MANIFEST", "EXECUTION"]
+          for label, actual, expected in zip(labels, actual_sets, expected_sets):
+              if actual != expected:
+                  raise SystemExit(label + "_STAGE_SCOPE_MISMATCH:" + json.dumps({"missing": sorted(expected-actual), "extra": sorted(actual-expected)}, sort_keys=True))
           binding_path = root / work_order["transport_binding_path"]
           binding_raw = binding_path.read_bytes()
           if hashlib.sha256(binding_raw).hexdigest() != work_order["transport_binding_sha256"]:
               raise SystemExit("TRANSPORT_BINDING_HASH_INVALID")
-          actual = set(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8").splitlines())
-          expected = set(work_order["phase_a_transport_files_allowed_to_change"])
-          if actual != expected:
-              raise SystemExit("PHASE_A_SCOPE_MISMATCH:" + json.dumps({"missing": sorted(expected-actual), "extra": sorted(actual-expected)}, sort_keys=True))
+          workflow_raw = (root / ".github/workflows/pilot-v3-canonical-recovery.yml").read_bytes()
+          if hashlib.sha256(workflow_raw).hexdigest() != work_order["corrected_workflow_sha256"]:
+              raise SystemExit("CORRECTED_WORKFLOW_HASH_INVALID")
+          manifest_path = root / "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_V3_0_P0_OVERLAY_TRANSPORT.json"
+          manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+          for path_text, expected_sha, expected_size in manifest["entries"]:
+              raw = (root / path_text).read_bytes()
+              if len(raw) != expected_size or hashlib.sha256(raw).hexdigest() != expected_sha:
+                  raise SystemExit("TRANSPORT_MANIFEST_ENTRY_MISMATCH:" + path_text)
           gate = json.loads((root / "docs/evidence/pilot_v3_0/PILOT_CAPABILITY_GATE.json").read_text(encoding="utf-8"))
           if gate["decision"] != "P0_OVERLAY_MATERIALIZATION_ALLOWED" or gate["largest_artifact_delivery_gate"]["status"] != "PASS":
               raise SystemExit("CAPABILITY_GATE_NOT_PASSED")
-          print("SIGNED_TWO_PHASE_WORK_ORDER_VERIFIED")
+          print("SIGNED_SCOPE_CORRECTIVE_CHAIN_VERIFIED")
           PY
 
       - name: Reconstruct and verify transport archive
@@ -143,6 +166,8 @@ jobs:
         run: |
           set -euo pipefail
           transport_sha="$(git rev-parse HEAD)"
+          authorization_sha="$(git rev-parse HEAD^^)"
+          manifest_sha="$(git rev-parse HEAD^)"
           tar -xJf "$RUNNER_TEMP/pilot-v3-p0/final-payload.tar.xz" -C "$GITHUB_WORKSPACE"
           python3 - "$BINDING_PATH" <<'PY'
           import hashlib, json, pathlib, sys
@@ -157,6 +182,77 @@ jobs:
               raw = path.read_bytes()
               if len(raw) != item["size_bytes"] or hashlib.sha256(raw).hexdigest() != item["sha256"]:
                   raise SystemExit("FINAL_PAYLOAD_FILE_MISMATCH:" + item["path"])
+          PY
+          git checkout "$transport_sha" -- .github/workflows/pilot-v3-canonical-recovery.yml
+          python3 - "$transport_sha" "$authorization_sha" "$manifest_sha" <<'PY'
+          import json, pathlib, sys
+          transport_sha, authorization_sha, manifest_sha = sys.argv[1:]
+          root = pathlib.Path.cwd()
+          evidence_id = "EVD-PILOT-P0-ATTEMPT-006"
+          work_order_id = "WO-PILOT-P0-OVERLAY-SCOPE-CORRECTIVE-008"
+          base_head = "fcf8826ebd20b4ce52fdbb48ee0253344cce36c4"
+          def load(name):
+              path = root / "docs/evidence/pilot_v3_0" / name
+              return path, json.loads(path.read_text(encoding="utf-8"))
+          def write(path, payload):
+              path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n")
+          path, state = load("PILOT_AUTONOMOUS_EXECUTION_STATE.json")
+          state["active_lock"]["governing_work_order_id"] = work_order_id
+          state["active_lock"]["lock_id"] = "LOCK-PILOT-P0-OVERLAY-SCOPE-CORRECTIVE-008"
+          state["active_lock"]["state"] = "RELEASED_AFTER_GUARDED_SCOPE_CORRECTIVE_MATERIALIZATION"
+          state["evidence_ids"] = list(dict.fromkeys([*state.get("evidence_ids", []), evidence_id]))
+          state["result_exact_head_binding"] = "REMOTE_CANONICAL_REF_READBACK_RECORDED_BY_" + evidence_id
+          state["work_order_base_exact_head"] = base_head
+          write(path, state)
+          path, register = load("PILOT_P0_EXECUTION_REGISTER.json")
+          for item in register["requirements"]:
+              item["actual_evidence_ids"] = ["EVD-PILOT-P0-ATTEMPT-004", evidence_id]
+              item["actual_status"] = "VERIFIED"
+          register["overall_status"] = "VERIFIED"
+          register["work_order_base_exact_head"] = base_head
+          write(path, register)
+          path, evidence = load("PILOT_P0_OVERLAY_BINDING_EVIDENCE.json")
+          evidence["evidence_id"] = evidence_id
+          evidence["governing_work_order_id"] = work_order_id
+          evidence["guarded_materialization"]["transport_parent_exact_head"] = transport_sha
+          evidence["corrective_provenance"] = {
+              "failed_work_order_id": "WO-PILOT-P0-OVERLAY-MATERIALIZATION-007",
+              "failed_transport_exact_head": base_head,
+              "failure_class": "PHASE_B_SCOPE_COLLECTION_OMITTED_UNTRACKED_FILES",
+              "old_collector": "git diff --name-only",
+              "corrected_collector": "union(git diff --name-only, git ls-files --others --exclude-standard)",
+              "omitted_paths_reproduced": [
+                  "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_V3_0_P0_OVERLAY_CLOSURE.json",
+                  "docs/evidence/pilot_v3_0/PILOT_APPLICABILITY_OVERLAY.json",
+                  "docs/evidence/pilot_v3_0/PILOT_P0_OVERLAY_BINDING_EVIDENCE.json"
+              ],
+              "authorization_commit": authorization_sha,
+              "transport_manifest_commit": manifest_sha,
+              "execution_transport_commit": transport_sha,
+              "status": "VERIFIED_BY_NEGATIVE_AND_POSITIVE_SCOPE_CONTROL"
+          }
+          evidence["status"] = "VERIFIED_BY_GUARDED_SCOPE_CORRECTIVE_MATERIALIZATION"
+          write(path, evidence)
+          path, chain = load("PILOT_WORK_ORDER_CHAIN.json")
+          for item in chain["entries"]:
+              if item["work_order_id"] == "WO-PILOT-P0-OVERLAY-MATERIALIZATION-007":
+                  item["result_exact_head"] = base_head
+                  item["status"] = "REMOTE_COMMIT_VERIFIED_RUNTIME_FAILED_PHASE_B_SCOPE_COLLECTION"
+                  item["evidence_ids"] = ["EVD-PILOT-P0-ATTEMPT-005"]
+          chain["entries"] = [item for item in chain["entries"] if item["work_order_id"] != work_order_id]
+          chain["entries"].append({
+              "ordinal": 8,
+              "parent_exact_head": base_head,
+              "authorization_commit": authorization_sha,
+              "transport_manifest_commit": manifest_sha,
+              "execution_transport_commit": transport_sha,
+              "result_exact_head": "CURRENT_CANONICAL_HEAD_BOUND_BY_REMOTE_READBACK",
+              "status": "GUARDED_SCOPE_CORRECTIVE_OVERLAY_MATERIALIZATION_VERIFIED",
+              "evidence_ids": [evidence_id],
+              "two_phase_transport": True,
+              "work_order_id": work_order_id
+          })
+          write(path, chain)
           PY
           python3 - "$BINDING_PATH" <<'PY'
           import hashlib, json, pathlib, sys
@@ -177,7 +273,7 @@ jobs:
               "release_authorized": False,
               "remove_paths": sorted(binding["phase_b_delete_paths"]),
               "schema_version": "1.0.0",
-              "scope": "Commit and reread the deterministic 712-row pilot applicability overlay; synchronize P0 evidence state; remove temporary binary transport files; no product, UI, installer, dependency, canonical RTM, Protocol v3.1, M9 controller, marketplace-write or release change.",
+              "scope": "Commit and reread the deterministic 712-row pilot applicability overlay after the verified scope-collector corrective; synchronize P0 evidence state; remove temporary binary transport files; no product, UI, installer, dependency, canonical RTM, Protocol v3.1, M9 controller, marketplace-write or release change.",
           }
           pathlib.Path("docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_V3_0_P0_OVERLAY_CLOSURE.json").write_text(
               json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n"
@@ -203,14 +299,23 @@ jobs:
           assert payload["production_release_decision"] == "RELEASE_BLOCKED"
           PY
           git diff --check
-          git diff --name-only | LC_ALL=C sort > "$RUNNER_TEMP/pilot-v3-p0/phase-b-paths.txt"
-          python3 - "$WORK_ORDER_PATH" "$RUNNER_TEMP/pilot-v3-p0/phase-b-paths.txt" <<'PY'
+          git diff --name-only | LC_ALL=C sort -u > "$RUNNER_TEMP/pilot-v3-p0/phase-b-tracked-only.txt"
+          {
+            git diff --name-only
+            git ls-files --others --exclude-standard
+          } | LC_ALL=C sort -u > "$RUNNER_TEMP/pilot-v3-p0/phase-b-paths.txt"
+          python3 - "$WORK_ORDER_PATH" "$RUNNER_TEMP/pilot-v3-p0/phase-b-tracked-only.txt" "$RUNNER_TEMP/pilot-v3-p0/phase-b-paths.txt" <<'PY'
           import json, pathlib, sys
           work_order = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
-          actual = set(pathlib.Path(sys.argv[2]).read_text(encoding="utf-8").splitlines())
+          old = set(pathlib.Path(sys.argv[2]).read_text(encoding="utf-8").splitlines())
+          actual = set(pathlib.Path(sys.argv[3]).read_text(encoding="utf-8").splitlines())
           expected = set(work_order["phase_b_final_files_allowed_to_change"])
+          expected_old_missing = set(work_order["root_cause_regression"]["old_collector_omitted_paths"])
+          if expected - old != expected_old_missing:
+              raise SystemExit("OLD_COLLECTOR_NEGATIVE_CONTROL_INVALID:" + json.dumps({"expected_missing": sorted(expected_old_missing), "actual_missing": sorted(expected-old)}, sort_keys=True))
           if actual != expected:
               raise SystemExit("PHASE_B_SCOPE_MISMATCH:" + json.dumps({"missing": sorted(expected-actual), "extra": sorted(actual-expected)}, sort_keys=True))
+          print("PHASE_B_SCOPE_COLLECTOR_NEGATIVE_AND_POSITIVE_CONTROLS_PASSED")
           PY
           python3 -m unittest -v tests.test_pilot_v3_generate_overlay 2>&1 | tee "$RUNNER_TEMP/pilot-v3-p0/final-generator-tests.log"
           python3 -m unittest -v tests.test_a0_manifest_diagnostic tests.test_b1a_artifact_manifest 2>&1 | tee "$RUNNER_TEMP/pilot-v3-p0/final-manifest-tests.log"
@@ -221,7 +326,8 @@ jobs:
           git add -A
           git diff --cached --name-only | LC_ALL=C sort > "$RUNNER_TEMP/pilot-v3-p0/staged-final-paths.txt"
           cmp "$RUNNER_TEMP/pilot-v3-p0/phase-b-paths.txt" "$RUNNER_TEMP/pilot-v3-p0/staged-final-paths.txt"
-          git commit -m "P0: commit and reread full pilot applicability overlay"
+          git diff --cached --check
+          git commit -m "P0: commit and reread full pilot applicability overlay via scope corrective"
           final_sha="$(git rev-parse HEAD)"
           test "$(git rev-parse HEAD^)" = "$transport_sha"
           git show "$final_sha:$COMMITTED_OVERLAY" > "$RUNNER_TEMP/pilot-v3-p0/commit-readback-overlay.json"
@@ -235,6 +341,29 @@ jobs:
           test "$remote_after" = "$final_sha"
           git show "refs/remotes/origin/$TARGET_BRANCH:$COMMITTED_OVERLAY" > "$RUNNER_TEMP/pilot-v3-p0/remote-readback-overlay.json"
           cmp "$COMMITTED_OVERLAY" "$RUNNER_TEMP/pilot-v3-p0/remote-readback-overlay.json"
+          python3 - "$WORK_ORDER_PATH" > "$RUNNER_TEMP/pilot-v3-p0/final-existing-paths.txt" <<'PY'
+          import json, pathlib, sys
+          payload = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
+          for path in payload["phase_b_final_files_allowed_to_change"]:
+              if path not in payload["phase_b_delete_paths"]:
+                  print(path)
+          PY
+          while IFS= read -r path; do
+            mkdir -p "$RUNNER_TEMP/pilot-v3-p0/remote-files/$(dirname "$path")"
+            git show "refs/remotes/origin/$TARGET_BRANCH:$path" > "$RUNNER_TEMP/pilot-v3-p0/remote-files/$path"
+            cmp "$path" "$RUNNER_TEMP/pilot-v3-p0/remote-files/$path"
+          done < "$RUNNER_TEMP/pilot-v3-p0/final-existing-paths.txt"
+          python3 - "$WORK_ORDER_PATH" > "$RUNNER_TEMP/pilot-v3-p0/final-deleted-paths.txt" <<'PY'
+          import json, pathlib, sys
+          payload = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
+          print("\n".join(payload["phase_b_delete_paths"]))
+          PY
+          while IFS= read -r path; do
+            if git cat-file -e "refs/remotes/origin/$TARGET_BRANCH:$path" 2>/dev/null; then
+              echo "REMOTE_DELETED_PATH_STILL_PRESENT:$path" >&2
+              exit 1
+            fi
+          done < "$RUNNER_TEMP/pilot-v3-p0/final-deleted-paths.txt"
           printf '%s\n' "$transport_sha" > "$RUNNER_TEMP/pilot-v3-p0/transport-head.txt"
           printf '%s\n' "$final_sha" > "$RUNNER_TEMP/pilot-v3-p0/final-head.txt"
           sha256sum "$RUNNER_TEMP/pilot-v3-p0/remote-readback-overlay.json" > "$RUNNER_TEMP/pilot-v3-p0/remote-readback-sha256.txt"
