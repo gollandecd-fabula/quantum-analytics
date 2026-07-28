@@ -8,28 +8,71 @@
       "target_evidence": "L2"
     },
     {
-      "capability": "Generate 712-row pilot applicability overlay deterministically",
+      "capability": "Generate the complete 712-row applicability overlay deterministically",
       "supported": true,
       "target_evidence": "L1/L2"
     },
     {
-      "capability": "Keep effective manifest exact in the same candidate commit",
+      "capability": "Transport the largest mandatory artifact through content-addressed binary chunks",
+      "supported": true,
+      "practical_proof": {
+        "run_id": 30250245773,
+        "job_id": 89926376856,
+        "result": "PASS"
+      },
+      "target_evidence": "L2"
+    },
+    {
+      "capability": "Test, commit, push and reread a materialized tree through GitHub Actions with contents:write",
+      "supported": true,
+      "practical_proof": {
+        "run_id": 30250245773,
+        "job_id": 89926376856,
+        "result": "PASS"
+      },
+      "target_evidence": "L2"
+    },
+    {
+      "capability": "Preserve exact effective manifest on transport and final trees",
       "supported": true,
       "target_evidence": "L1"
     },
     {
-      "capability": "Close historical invalid PR contours",
-      "supported": true,
-      "target_evidence": "REMOTE_METADATA"
-    },
-    {
       "capability": "Prove Windows L4/L5 during P0",
-      "status": "NOT_APPLICABLE_TO_P0",
-      "supported": false
+      "supported": false,
+      "status": "NOT_APPLICABLE_TO_P0"
     }
   ],
-  "decision": "P0_RECOVERY_EXECUTION_ALLOWED",
+  "decision": "P0_OVERLAY_MATERIALIZATION_ALLOWED",
+  "largest_artifact_delivery_gate": {
+    "artifact_path": "docs/evidence/pilot_v3_0/PILOT_APPLICABILITY_OVERLAY.json",
+    "creation": {
+      "run_id": 30378198636,
+      "artifact_id": 8695839574,
+      "status": "PASS"
+    },
+    "transfer": {
+      "method": "content-addressed tar.xz binary chunks",
+      "historical_end_to_end_run_id": 30250245773,
+      "status": "PASS"
+    },
+    "fixation": {
+      "method": "guarded tested fast-forward commit to the same canonical branch",
+      "historical_end_to_end_job_id": 89926376856,
+      "status": "PASS"
+    },
+    "reread": {
+      "method": "commit readback before push and remote-ref readback after push",
+      "status": "REQUIRED_BY_WORK_ORDER_007"
+    },
+    "size_bytes": 434233,
+    "sha256": "ef3d831d35ca6e2d2a39228b0974506d48bafae87c622a0f5adfc83271a8b954",
+    "git_blob_sha": "ae15ad67c55105798e6346a5e34d263f65826393",
+    "status": "PASS"
+  },
+  "mandatory_rule": "No repository modification is allowed unless the full creation-transfer-fixation-reread path is practically proven for every mandatory artifact, including the largest and most technically difficult.",
   "release_authorized": false,
   "schema_version": "3.0.0",
-  "subject_parent_exact_head": "43d6230a43ebb4443e98f9ea9ec2746b210dfa3a"
+  "subject_parent_exact_head": "d65ad8e01672365a35aeff4791ee8800a5f1a27f",
+  "work_order_id": "WO-PILOT-P0-OVERLAY-MATERIALIZATION-007"
 }

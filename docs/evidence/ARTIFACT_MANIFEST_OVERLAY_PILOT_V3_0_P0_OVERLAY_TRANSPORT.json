@@ -1,0 +1,45 @@
+{
+  "artifact_type": "ARTIFACT_MANIFEST_OVERLAY",
+  "base_pilot_v3_0_p0_source_runtime_env_corrective_overlay_git_blob_sha": "a7a4d579c2c0c06c9917975cf21e689f48a46a4e",
+  "entries": [
+    [
+      ".github/workflows/pilot-v3-canonical-recovery.yml",
+      "337df9e787288b713528ad7a802339b534fb3a756384b4048f38ceaa634dedd3",
+      14407
+    ],
+    [
+      ".pilot-v3-p0-overlay-transport/chunk.00",
+      "4bc9f968e3e7674b660d491b2a1a3ea47166639be206cf942be179a1cd3548f1",
+      8192
+    ],
+    [
+      ".pilot-v3-p0-overlay-transport/chunk.01",
+      "a3c19ac03f970cf9d141e9866ff1553a5552864695ddbd905d27ea0ad374c2fc",
+      4128
+    ],
+    [
+      "docs/evidence/pilot_v3_0/PILOT_CAPABILITY_GATE.json",
+      "178ee43bf83e3cb02a4e5692e66b50255ddcb76c63a2e239ebf4285fa3d80cef",
+      2716
+    ],
+    [
+      "docs/evidence/pilot_v3_0/PILOT_P0_OVERLAY_TRANSPORT_BINDING.json",
+      "4a15260c51e1afc7766b63d645e08aea5429e58e9b66b4101b0f2092fed31f9c",
+      4076
+    ],
+    [
+      "docs/evidence/pilot_v3_0/WORK_ORDER_P0_OVERLAY_MATERIALIZATION_007.json",
+      "15db0873ea20fd48434585726aec0d7e0f713d85f9e1f1d8f3a563dbc55b3409",
+      4520
+    ],
+    [
+      "tests/integration_manifest_support_pilot_v3.py",
+      "3371231c4818ebc9f29017eb18abdfa34162cabbf309039e6d37522c9a70b64d",
+      3951
+    ]
+  ],
+  "overlay_id": "PILOT-V3.0-P0-OVERLAY-TRANSPORT",
+  "release_authorized": false,
+  "schema_version": "1.0.0",
+  "scope": "Manifest-valid binary transport and signed guarded materialization only; no product, UI, installer, dependency, canonical RTM, Protocol v3.1, M9 controller, marketplace-write or release change."
+}

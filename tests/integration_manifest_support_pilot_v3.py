@@ -26,6 +26,10 @@ PILOT_V3_P0_SOURCE_RUNTIME_ENV_CORRECTIVE_OVERLAY = (
     "ARTIFACT_MANIFEST_OVERLAY_PILOT_V3_0_P0_SOURCE_RUNTIME_ENV_CORRECTIVE.json",
     "base_pilot_v3_0_p0_manifest_closure_overlay_git_blob_sha",
 )
+PILOT_V3_P0_OVERLAY_TRANSPORT_OVERLAY = (
+    "ARTIFACT_MANIFEST_OVERLAY_PILOT_V3_0_P0_OVERLAY_TRANSPORT.json",
+    "base_pilot_v3_0_p0_source_runtime_env_corrective_overlay_git_blob_sha",
+)
 ALL_OVERLAY_NAMES = (
     *_base.ALL_OVERLAY_NAMES,
     PILOT_V3_RECOVERY_OVERLAY[0],
@@ -34,6 +38,7 @@ ALL_OVERLAY_NAMES = (
     PILOT_V3_P0_GENERATOR_INVOCATION_CORRECTIVE_OVERLAY[0],
     PILOT_V3_P0_MANIFEST_CLOSURE_OVERLAY[0],
     PILOT_V3_P0_SOURCE_RUNTIME_ENV_CORRECTIVE_OVERLAY[0],
+    PILOT_V3_P0_OVERLAY_TRANSPORT_OVERLAY[0],
 )
 CONTROL_PATHS = {
     *_base.CONTROL_PATHS,
@@ -44,12 +49,10 @@ CONTROL_PATHS = {
         PILOT_V3_P0_GENERATOR_INVOCATION_CORRECTIVE_OVERLAY[0],
         PILOT_V3_P0_MANIFEST_CLOSURE_OVERLAY[0],
         PILOT_V3_P0_SOURCE_RUNTIME_ENV_CORRECTIVE_OVERLAY[0],
-    )),
+        PILOT_V3_P0_OVERLAY_TRANSPORT_OVERLAY[0],
+        )),
 }
 
-# The canonical manifest implementation reads CONTROL_PATHS from the shared
-# base module globals. Mutate those globals exactly as historical M7/M8
-# extensions do, rather than keeping an ineffective local-only set.
 _base._core.ALL_OVERLAY_NAMES = ALL_OVERLAY_NAMES
 _base._core.CONTROL_PATHS = CONTROL_PATHS
 
@@ -58,11 +61,7 @@ B1A_SCHEMAS = _base.B1A_SCHEMAS
 expected_manifest = _base.expected_manifest
 
 
-def _apply(
-    artifacts: dict[str, list],
-    spec: tuple[str, str],
-    anchor_raw: bytes,
-) -> bytes:
+def _apply(artifacts: dict[str, list], spec: tuple[str, str], anchor_raw: bytes) -> bytes:
     name, field = spec
     evidence = _base._core.ROOT / "docs/evidence"
     raw = (evidence / name).read_bytes()
@@ -77,35 +76,14 @@ def load_effective_manifest() -> dict:
     current = _base.load_effective_manifest()
     artifacts = {row[0]: row for row in current["artifacts"]}
     evidence = _base._core.ROOT / "docs/evidence"
-    m1_raw = (
-        evidence / "ARTIFACT_MANIFEST_OVERLAY_AGENT_V3_1_M1.json"
-    ).read_bytes()
+    m1_raw = (evidence / "ARTIFACT_MANIFEST_OVERLAY_AGENT_V3_1_M1.json").read_bytes()
     recovery_raw = _apply(artifacts, PILOT_V3_RECOVERY_OVERLAY, m1_raw)
-    execution_raw = _apply(
-        artifacts,
-        PILOT_V3_P0_EXECUTION_OVERLAY,
-        recovery_raw,
-    )
-    signature_corrective_raw = _apply(
-        artifacts,
-        PILOT_V3_P0_SIGNATURE_CORRECTIVE_OVERLAY,
-        execution_raw,
-    )
-    generator_corrective_raw = _apply(
-        artifacts,
-        PILOT_V3_P0_GENERATOR_INVOCATION_CORRECTIVE_OVERLAY,
-        signature_corrective_raw,
-    )
-    manifest_closure_raw = _apply(
-        artifacts,
-        PILOT_V3_P0_MANIFEST_CLOSURE_OVERLAY,
-        generator_corrective_raw,
-    )
-    _apply(
-        artifacts,
-        PILOT_V3_P0_SOURCE_RUNTIME_ENV_CORRECTIVE_OVERLAY,
-        manifest_closure_raw,
-    )
+    execution_raw = _apply(artifacts, PILOT_V3_P0_EXECUTION_OVERLAY, recovery_raw)
+    signature_raw = _apply(artifacts, PILOT_V3_P0_SIGNATURE_CORRECTIVE_OVERLAY, execution_raw)
+    generator_raw = _apply(artifacts, PILOT_V3_P0_GENERATOR_INVOCATION_CORRECTIVE_OVERLAY, signature_raw)
+    manifest_raw = _apply(artifacts, PILOT_V3_P0_MANIFEST_CLOSURE_OVERLAY, generator_raw)
+    runtime_raw = _apply(artifacts, PILOT_V3_P0_SOURCE_RUNTIME_ENV_CORRECTIVE_OVERLAY, manifest_raw)
+    _apply(artifacts, PILOT_V3_P0_OVERLAY_TRANSPORT_OVERLAY, runtime_raw)
     current["artifacts"] = [artifacts[path] for path in sorted(artifacts)]
     current["artifact_count"] = len(current["artifacts"])
     return current
