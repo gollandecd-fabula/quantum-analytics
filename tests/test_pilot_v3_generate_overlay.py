@@ -95,10 +95,45 @@ class PilotV3GenerateOverlayTests(unittest.TestCase):
             work_order["work_order_sha256"],
             self._signature(work_order),
         )
-        self.assertEqual(work_order["parent_exact_head"], "46da62cd078ca4be328b0096b682703d8e91f73f")
-        self.assertEqual(work_order["canonical_branch"], "fix/quantum-pilot-v3-canonical")
+        self.assertEqual(
+            work_order["parent_exact_head"],
+            "46da62cd078ca4be328b0096b682703d8e91f73f",
+        )
+        self.assertEqual(
+            work_order["canonical_branch"],
+            "fix/quantum-pilot-v3-canonical",
+        )
         self.assertFalse(work_order["release_authorized"])
 
+    def test_active_source_runtime_work_order_signature_and_parent_are_exact(self) -> None:
+        path = (
+            self.repo_root
+            / "docs/evidence/pilot_v3_0/WORK_ORDER_P0_SOURCE_RUNTIME_ENV_CORRECTIVE_006.json"
+        )
+        work_order = json.loads(path.read_text(encoding="utf-8"))
+        self.assertEqual(
+            work_order["work_order_sha256"],
+            self._signature(work_order),
+        )
+        self.assertEqual(
+            work_order["parent_exact_head"],
+            "825c1a4325b24fbae8ce8b616113ba087874a1ea",
+        )
+        self.assertEqual(
+            work_order["canonical_branch"],
+            "fix/quantum-pilot-v3-canonical",
+        )
+        self.assertFalse(work_order["release_authorized"])
+
+    def test_source_runtime_contract_uses_preloaded_backend(self) -> None:
+        workflow = (
+            self.repo_root
+            / ".github/workflows/pilot-v3-canonical-recovery.yml"
+        ).read_text(encoding="utf-8")
+        self.assertNotIn("actions/setup-python", workflow)
+        self.assertIn("import setuptools.build_meta", workflow)
+        self.assertIn("python3 -m quantum.scripts.ci", workflow)
+        self.assertNotIn("python -m quantum.scripts.ci", workflow)
 
     def test_module_cli_invocation_generates_overlay(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
@@ -123,7 +158,6 @@ class PilotV3GenerateOverlayTests(unittest.TestCase):
             self.assertEqual(len(payload["entries"]), 712)
             self.assertEqual(payload["pilot_decision"], "PILOT_BLOCKED")
             self.assertFalse(payload["release_authorized"])
-
 
 
 if __name__ == "__main__":

@@ -33,7 +33,8 @@
       "classification": "PROTOCOL_SCOPE_FAILURE",
       "defect_id": "PILOT-D-P0-003",
       "evidence_ids": [
-        "EVD-PILOT-P0-ATTEMPT-001"
+        "EVD-PILOT-P0-ATTEMPT-001",
+        "EVD-PILOT-P0-ATTEMPT-004"
       ],
       "severity": "P0",
       "status": "OPEN",
@@ -65,11 +66,22 @@
       "classification": "PROTOCOL_SCOPE_FAILURE",
       "defect_id": "PILOT-D-P0-007",
       "evidence_ids": [
-        "EVD-PILOT-P0-ATTEMPT-003"
+        "EVD-PILOT-P0-ATTEMPT-003",
+        "EVD-PILOT-P0-ATTEMPT-004"
+      ],
+      "severity": "P0",
+      "status": "CORRECTED_VERIFIED_AT_825C",
+      "title": "Pilot manifest extension kept CONTROL_PATHS local and left seven exact tracked-tree discrepancies."
+    },
+    {
+      "classification": "HARNESS_FAILURE",
+      "defect_id": "PILOT-D-P0-008",
+      "evidence_ids": [
+        "EVD-PILOT-P0-ATTEMPT-004"
       ],
       "severity": "P0",
       "status": "CORRECTIVE_IN_PROGRESS",
-      "title": "Pilot manifest extension kept CONTROL_PATHS local and left seven exact tracked-tree discrepancies."
+      "title": "Canonical P0 actions/setup-python runtime lacks the declared setuptools.build_meta backend required by the no-build-isolation wheel regression."
     },
     {
       "classification": "HARNESS_FAILURE",
@@ -94,5 +106,5 @@
   ],
   "release_authorized": false,
   "schema_version": "3.0.0",
-  "subject_parent_exact_head": "92c97e64161a3da5d96b7b68686025f5826fac0a"
+  "subject_parent_exact_head": "825c1a4325b24fbae8ce8b616113ba087874a1ea"
 }

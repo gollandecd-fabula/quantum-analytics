@@ -58,6 +58,17 @@
       "primary_classification": "PROTOCOL_SCOPE_FAILURE",
       "product_failure_proven": false,
       "subject": "P0 effective manifest at exact head 92c97e64161a3da5d96b7b68686025f5826fac0a"
+    },
+    {
+      "classification_id": "PILOT-FC-007",
+      "decision": "FAILED_ATTEMPT_PRESERVED_SOURCE_RUNTIME_ENV_CORRECTIVE_006_ACTIVE",
+      "evidence_ids": [
+        "EVD-PILOT-P0-ATTEMPT-004"
+      ],
+      "pilot_claim_allowed": false,
+      "primary_classification": "HARNESS_FAILURE",
+      "product_failure_proven": false,
+      "subject": "P0 source runtime at exact head 825c1a4325b24fbae8ce8b616113ba087874a1ea"
     }
   ],
   "release_authorized": false,

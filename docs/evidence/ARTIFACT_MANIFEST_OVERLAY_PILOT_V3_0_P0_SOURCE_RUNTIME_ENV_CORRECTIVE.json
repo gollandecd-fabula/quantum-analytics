@@ -1,0 +1,60 @@
+{
+  "artifact_type": "ARTIFACT_MANIFEST_OVERLAY",
+  "base_pilot_v3_0_p0_manifest_closure_overlay_git_blob_sha": "77678c90a0cd0a3815e05410e65fb0f9211393c4",
+  "entries": [
+    [
+      ".github/workflows/pilot-v3-canonical-recovery.yml",
+      "4560e9140f25743ade5d5f29f533f8240b608efa2ebfed06cc75dad0c69099b9",
+      8221
+    ],
+    [
+      "docs/evidence/pilot_v3_0/PILOT_AUTONOMOUS_EXECUTION_STATE.json",
+      "77e584ac2d15ecbdb7ad54ee8d2d75c4286b052684a5999aebb3403c64f11caf",
+      1799
+    ],
+    [
+      "docs/evidence/pilot_v3_0/PILOT_DEFECT_REGISTER.json",
+      "69b9e6a2c8bcf267811b6d6795fa60e968c9a6a9fc34378e36af0c4841f84eef",
+      3641
+    ],
+    [
+      "docs/evidence/pilot_v3_0/PILOT_FAILURE_CLASSIFICATION_REGISTER.json",
+      "bb2ecd5287ff81929dd36cf621de4eef431cf2f1c981d232557a812be069275b",
+      2817
+    ],
+    [
+      "docs/evidence/pilot_v3_0/PILOT_P0_ATTEMPT_004_FAILURE.json",
+      "3a5d410ff09e8cee87289859de47e881ef9e2062fd7d3d6b5ff478364a893058",
+      2417
+    ],
+    [
+      "docs/evidence/pilot_v3_0/PILOT_P0_EXECUTION_REGISTER.json",
+      "492eb341730aaa61df1037b22aa2e403fc82357b2c8796d6c2bd18ecd4893457",
+      3313
+    ],
+    [
+      "docs/evidence/pilot_v3_0/PILOT_WORK_ORDER_CHAIN.json",
+      "8f897cf67ab809af7d205fab0853da905e580a36eddcc53270ee5a3320d9a62e",
+      2176
+    ],
+    [
+      "docs/evidence/pilot_v3_0/WORK_ORDER_P0_SOURCE_RUNTIME_ENV_CORRECTIVE_006.json",
+      "067017a901d36b2f986705ea96f8bc2c2426f6aa564fd28da3dd7f75d6c7ed48",
+      4740
+    ],
+    [
+      "tests/integration_manifest_support_pilot_v3.py",
+      "1f18b4c137224f037d3a238eec8817f1fb8c185f5b7eac7cd5e887c0501f88b7",
+      4032
+    ],
+    [
+      "tests/test_pilot_v3_generate_overlay.py",
+      "cd8f4dd81b30d7159d2b99143fae63dfe4f11525a5cbdbdbb6b33b68631e331a",
+      6113
+    ]
+  ],
+  "overlay_id": "PILOT-V3.0-P0-SOURCE-RUNTIME-ENV-CORRECTIVE",
+  "release_authorized": false,
+  "schema_version": "1.0.0",
+  "scope": "Append-only P0 source-runtime harness corrective and failed-attempt evidence only; no product, UI, installer, dependency, pyproject, canonical RTM, Protocol v3.1, M9 controller, marketplace-write or release change."
+}

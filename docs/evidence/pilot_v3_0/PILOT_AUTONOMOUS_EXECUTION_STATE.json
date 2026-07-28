@@ -1,8 +1,8 @@
 {
   "active_lock": {
-    "governing_work_order_id": "WO-PILOT-P0-MANIFEST-CLOSURE-CORRECTIVE-005",
-    "governing_work_order_sha256": "74070b2823997153f16f555784dd7eb385400b772141264342852d5eb41e22cc",
-    "lock_id": "LOCK-PILOT-P0-MANIFEST-CLOSURE-CORRECTIVE-005",
+    "governing_work_order_id": "WO-PILOT-P0-SOURCE-RUNTIME-ENV-CORRECTIVE-006",
+    "governing_work_order_sha256": "0d78711bc379e0a7b882d205c5121c3fd30da7658d909af9dd96a877bb3f89a0",
+    "lock_id": "LOCK-PILOT-P0-SOURCE-RUNTIME-ENV-CORRECTIVE-006",
     "owner_role": "IMPLEMENTER",
     "parallel_write_authorized": false,
     "state": "ACQUIRED_FOR_CORRECTIVE_COMMIT"
@@ -18,12 +18,13 @@
   "failed_attempt_evidence_ids": [
     "EVD-PILOT-P0-ATTEMPT-001",
     "EVD-PILOT-P0-ATTEMPT-002",
-    "EVD-PILOT-P0-ATTEMPT-003"
+    "EVD-PILOT-P0-ATTEMPT-003",
+    "EVD-PILOT-P0-ATTEMPT-004"
   ],
   "gatekeeper": "DISCONNECTED",
   "marketplace_writes": false,
   "ozon": "DEFERRED",
-  "p0_phase": "MANIFEST_CLOSURE_CORRECTIVE_AND_SOURCE_VERIFICATION_PENDING",
+  "p0_phase": "SOURCE_RUNTIME_ENV_CORRECTIVE_AND_EXACT_HEAD_REVERIFICATION_PENDING",
   "p0_status": "IN_PROGRESS",
   "parallel_write_authorized": false,
   "physical_l5_status": "UNVERIFIED",
@@ -35,5 +36,5 @@
   "release_authorized": false,
   "repository": "gollandecd-fabula/quantum-analytics",
   "schema_version": "3.0.0",
-  "state_subject_parent_exact_head": "92c97e64161a3da5d96b7b68686025f5826fac0a"
+  "state_subject_parent_exact_head": "825c1a4325b24fbae8ce8b616113ba087874a1ea"
 }

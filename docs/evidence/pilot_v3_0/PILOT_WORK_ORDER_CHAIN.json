@@ -34,11 +34,21 @@
       "work_order_id": "WO-PILOT-P0-GENERATOR-INVOCATION-CORRECTIVE-004"
     },
     {
+      "evidence_ids": [
+        "EVD-PILOT-P0-ATTEMPT-004"
+      ],
       "ordinal": 5,
       "parent_exact_head": "92c97e64161a3da5d96b7b68686025f5826fac0a",
+      "result_exact_head": "825c1a4325b24fbae8ce8b616113ba087874a1ea",
+      "status": "REMOTE_COMMIT_VERIFIED_RUNTIME_FAILED_SOURCE_ENVIRONMENT",
+      "work_order_id": "WO-PILOT-P0-MANIFEST-CLOSURE-CORRECTIVE-005"
+    },
+    {
+      "ordinal": 6,
+      "parent_exact_head": "825c1a4325b24fbae8ce8b616113ba087874a1ea",
       "result_exact_head": "SELF_COMMIT_PENDING_REMOTE_BINDING",
       "status": "CORRECTIVE_COMMIT_IN_PROGRESS",
-      "work_order_id": "WO-PILOT-P0-MANIFEST-CLOSURE-CORRECTIVE-005"
+      "work_order_id": "WO-PILOT-P0-SOURCE-RUNTIME-ENV-CORRECTIVE-006"
     }
   ],
   "parallel_write_authorized": false,

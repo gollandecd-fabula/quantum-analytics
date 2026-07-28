@@ -22,6 +22,10 @@ PILOT_V3_P0_MANIFEST_CLOSURE_OVERLAY = (
     "ARTIFACT_MANIFEST_OVERLAY_PILOT_V3_0_P0_MANIFEST_CLOSURE.json",
     "base_pilot_v3_0_p0_generator_invocation_corrective_overlay_git_blob_sha",
 )
+PILOT_V3_P0_SOURCE_RUNTIME_ENV_CORRECTIVE_OVERLAY = (
+    "ARTIFACT_MANIFEST_OVERLAY_PILOT_V3_0_P0_SOURCE_RUNTIME_ENV_CORRECTIVE.json",
+    "base_pilot_v3_0_p0_manifest_closure_overlay_git_blob_sha",
+)
 ALL_OVERLAY_NAMES = (
     *_base.ALL_OVERLAY_NAMES,
     PILOT_V3_RECOVERY_OVERLAY[0],
@@ -29,6 +33,7 @@ ALL_OVERLAY_NAMES = (
     PILOT_V3_P0_SIGNATURE_CORRECTIVE_OVERLAY[0],
     PILOT_V3_P0_GENERATOR_INVOCATION_CORRECTIVE_OVERLAY[0],
     PILOT_V3_P0_MANIFEST_CLOSURE_OVERLAY[0],
+    PILOT_V3_P0_SOURCE_RUNTIME_ENV_CORRECTIVE_OVERLAY[0],
 )
 CONTROL_PATHS = {
     *_base.CONTROL_PATHS,
@@ -38,6 +43,7 @@ CONTROL_PATHS = {
         PILOT_V3_P0_SIGNATURE_CORRECTIVE_OVERLAY[0],
         PILOT_V3_P0_GENERATOR_INVOCATION_CORRECTIVE_OVERLAY[0],
         PILOT_V3_P0_MANIFEST_CLOSURE_OVERLAY[0],
+        PILOT_V3_P0_SOURCE_RUNTIME_ENV_CORRECTIVE_OVERLAY[0],
     )),
 }
 
@@ -90,10 +96,15 @@ def load_effective_manifest() -> dict:
         PILOT_V3_P0_GENERATOR_INVOCATION_CORRECTIVE_OVERLAY,
         signature_corrective_raw,
     )
-    _apply(
+    manifest_closure_raw = _apply(
         artifacts,
         PILOT_V3_P0_MANIFEST_CLOSURE_OVERLAY,
         generator_corrective_raw,
+    )
+    _apply(
+        artifacts,
+        PILOT_V3_P0_SOURCE_RUNTIME_ENV_CORRECTIVE_OVERLAY,
+        manifest_closure_raw,
     )
     current["artifacts"] = [artifacts[path] for path in sorted(artifacts)]
     current["artifact_count"] = len(current["artifacts"])
