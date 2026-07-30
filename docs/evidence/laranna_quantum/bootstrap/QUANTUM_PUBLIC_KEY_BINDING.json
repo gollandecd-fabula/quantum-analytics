@@ -1,0 +1,15 @@
+{
+  "branch": "fix/quantum-pilot-v3-canonical",
+  "campaign_id": "QI-M2-BOOTSTRAP-002",
+  "issued_utc": "2026-07-30T08:25:30.179208Z",
+  "key_id": "49f2c8f2b18deae2",
+  "policy_digest": "8851e177d152028a4e1d0680489a38ae6231001e5c3118a3bcf733a3bb1d8cdd",
+  "project_id": "quantum",
+  "public_key_b64": "RTfl6PP9XQQLGbUBus7qZ1IZ4HoLvBNrfdXAJGJOX8I=",
+  "public_key_sha256": "49f2c8f2b18deae24882de345a0f83db99d0f143fcfc8bd138a72f4f7910d1ec",
+  "release_authorized": false,
+  "repo": "gollandecd-fabula/quantum-analytics",
+  "schema": "laranna.quantum.public-key-binding.v1",
+  "signature": "RlADxjwgRW3XbNlUaeEEnm/yNQ81zVlYeMs8MrhK8X0ge7OXwMFLwO+IqCL7V4/4QX0kdD9LcpZAwqrmIUM+AQ==",
+  "signature_algorithm": "Ed25519"
+}
