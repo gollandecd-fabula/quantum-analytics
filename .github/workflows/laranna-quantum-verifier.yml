@@ -1,0 +1,75 @@
+name: LarannA Quantum Verifier
+
+on:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Exact Quantum commit SHA or ref to verify"
+        required: true
+        default: "fix/quantum-pilot-v3-canonical"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: laranna-quantum-verifier-${{ github.event.pull_request.head.sha || inputs.ref || github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  quantum-verifier:
+    name: laranna/quantum-verifier
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      TARGET_SHA: ${{ github.event.pull_request.head.sha || inputs.ref || github.sha }}
+    steps:
+      - name: Checkout exact transaction head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TARGET_SHA }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Python 3.13.14
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13.14"
+
+      - name: Assert exact head
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$(git rev-parse "${TARGET_SHA}^{commit}")"
+
+      - name: Install hash-locked verifier runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install \
+            --disable-pip-version-check \
+            --only-binary=:all: \
+            --require-hashes \
+            -r requirements/laranna-quantum-verifier.txt
+
+      - name: Verify signed authorization, topology, diff and final receipt
+        shell: bash
+        run: |
+          set -euo pipefail
+          python tools/laranna_quantum_verifier_gate.py \
+            verify-final \
+            --root . \
+            --head HEAD
+
+      - name: Preserve existing M9 authority
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH=src python -m unittest \
+            tests.test_m9_maximum_assurance_control_plane -v
+
+      - name: Run complete Quantum source CI
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH=src python -m quantum.scripts.ci

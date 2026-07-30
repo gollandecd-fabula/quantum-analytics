@@ -45,6 +45,25 @@ jobs:
           printf 'selected_ref=%s\nexact_sha=%s\n' '${{ inputs.ref }}' "$exact_sha" \
             | tee dist/RELEASE_REF_INSPECTION.txt
 
+      - name: Install hash-locked LarannA verifier runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install \
+            --disable-pip-version-check \
+            --only-binary=:all: \
+            --require-hashes \
+            -r requirements/laranna-quantum-verifier.txt
+
+      - name: Require release-specific LarannA authorization
+        shell: bash
+        run: |
+          set -euo pipefail
+          python tools/laranna_quantum_verifier_gate.py \
+            verify-release \
+            --root . \
+            --head '${{ steps.inspect.outputs.exact_sha }}'
+
       - name: Run complete Foundation suite
         shell: bash
         run: |

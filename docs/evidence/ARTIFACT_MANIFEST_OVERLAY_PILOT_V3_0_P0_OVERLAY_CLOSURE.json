@@ -3,6 +3,46 @@
   "base_pilot_v3_0_p0_overlay_transport_overlay_git_blob_sha": "1831997b5ced57c3744b568964b1e50adc295b01",
   "entries": [
     [
+      ".github/workflows/laranna-quantum-verifier.yml",
+      "c82319e1e11d05e870c85b93b69795437c2046f1cfa8d015afa66c3dcee50822",
+      2094
+    ],
+    [
+      ".github/workflows/windows-release-gate.yml",
+      "25759af2425c4807f227305c055a560e0421d5e6264f6d416d2201e5f8d3495c",
+      11722
+    ],
+    [
+      "AGENTS.md",
+      "0b3f56d62312e11bf66b8b8203f935503463aa8bfb503494a2e9fc6cf2a87e32",
+      2005
+    ],
+    [
+      "docs/evidence/laranna_quantum/OSS_BOM.md",
+      "9e64bfe156e1b6636a0105248e6c63aa3490c21a3a235dcf6baf0344d5991b73",
+      1443
+    ],
+    [
+      "docs/evidence/laranna_quantum/bootstrap/BOOTSTRAP_CHANGE_PERMIT.json",
+      "9648b993b10b2c87443b9d852a1341dc09e7f666ce6145fd586c92c868ea875f",
+      2188
+    ],
+    [
+      "docs/evidence/laranna_quantum/bootstrap/BOOTSTRAP_CHANGE_REQUEST.json",
+      "7b8b3a462553332082b294ef5d492f72e5c7f30f9afd53a3f6df465b93af90b2",
+      2967
+    ],
+    [
+      "docs/evidence/laranna_quantum/bootstrap/BOOTSTRAP_WORK_ORDER.json",
+      "061e0ba9f170a94c07dbd491d0934aefb493b7356b052cb407d63237945b8a3c",
+      4930
+    ],
+    [
+      "docs/evidence/laranna_quantum/bootstrap/QUANTUM_PUBLIC_KEY_BINDING.json",
+      "6fc46bd9ef22fd055bb6748f3a9ab7280c715e4bdae761fe9f7557d14bd51299",
+      717
+    ],
+    [
       "docs/evidence/pilot_v3_0/PILOT_APPLICABILITY_OVERLAY.json",
       "ef3d831d35ca6e2d2a39228b0974506d48bafae87c622a0f5adfc83271a8b954",
       434233
@@ -28,9 +68,24 @@
       5407
     ],
     [
+      "requirements/laranna-quantum-verifier.txt",
+      "ee2d6b17da3ee783e676cb83dada09fc51d0108c447a8ed3eb2a6a52d866c8c7",
+      416
+    ],
+    [
       "tests/integration_manifest_support_pilot_v3.py",
       "6794b8b3ea400cfcbe1991d04ca654d91ab9810f62577f791b3879987d611df6",
       4304
+    ],
+    [
+      "tests/test_laranna_quantum_verifier_gate.py",
+      "99ebc1c3229adbd59999ff63c07c36a4b7e2afdc2e2f6dd3dd959c53885df5f5",
+      7578
+    ],
+    [
+      "tools/laranna_quantum_verifier_gate.py",
+      "b042c3cfeb2113893246c82ef65694afc3d5170f0b6072440bc61592d88cd4b7",
+      26963
     ]
   ],
   "overlay_id": "PILOT-V3.0-P0-OVERLAY-CLOSURE",
@@ -40,5 +95,5 @@
     ".pilot-v3-p0-overlay-transport/chunk.01"
   ],
   "schema_version": "1.0.0",
-  "scope": "Commit and reread the deterministic 712-row pilot applicability overlay after the verified scope-collector, PR-execution, PR-preflight and final-manifest-staging correctives; synchronize P0 evidence state; remove temporary binary transport files; no product, UI, installer, dependency, canonical RTM, Protocol v3.1, M9 controller, marketplace-write or release change."
+  "scope": "Install the Quantum-only LarannA authorization and evidence adapter around the unchanged M9 control plane; record the signed authorization-first commit; add the read-only GitHub and Codex gates, exact OSS lock, release denial guard and tests; keep product, ImageLab, M9 authority, marketplace-write, merge, ruleset and release state unchanged."
 }
