@@ -87,26 +87,73 @@ class LarannAQuantumVerifierGateTests(unittest.TestCase):
             {"PROJECT_MISMATCH", "REQUEST_HASH_INVALID", "ACTION_HASH_INVALID"},
         )
 
-    def test_exact_two_commit_implementation_topology_is_valid(self) -> None:
-        verdict = gate.execute(ROOT, "verify-implementation", "HEAD")
+    def transaction_phase(self) -> tuple[str, str]:
+        authorization = self.authorization(enforce_unexpired=False)
+        base = gate.resolve_commit(ROOT, authorization.base_head)
+        head = gate.resolve_commit(ROOT, "HEAD")
+        chain_text = str(
+            gate.run_git(
+                ROOT,
+                "rev-list",
+                "--first-parent",
+                "--reverse",
+                f"{base}..{head}",
+            )
+        )
+        chain = [line for line in chain_text.splitlines() if line]
+        if len(chain) == 2:
+            return "implementation", chain[1]
+        if len(chain) == 3:
+            return "final", chain[2]
+        self.fail(f"Unexpected transaction length: {len(chain)}")
+
+    def test_current_transaction_topology_is_valid(self) -> None:
+        phase, _ = self.transaction_phase()
+        command = "verify-final" if phase == "final" else "verify-implementation"
+        verdict = gate.execute(ROOT, command, "HEAD")
         self.assertEqual("VERIFIED", verdict["status"])
-        self.assertEqual("implementation", verdict["phase"])
+        self.assertEqual(phase, verdict["phase"])
         self.assertRegex(verdict["diff_sha256"], r"^[0-9a-f]{64}$")
 
     def test_extra_path_in_authorization_commit_is_rejected(self) -> None:
-        authorization = self.authorization()
+        authorization = self.authorization(enforce_unexpired=False)
+        base = gate.resolve_commit(ROOT, authorization.base_head)
+        head = gate.resolve_commit(ROOT, "HEAD")
+        chain_text = str(
+            gate.run_git(
+                ROOT,
+                "rev-list",
+                "--first-parent",
+                "--reverse",
+                f"{base}..{head}",
+            )
+        )
+        chain = [line for line in chain_text.splitlines() if line]
+        self.assertGreaterEqual(len(chain), 2)
+        implementation_head = chain[1]
         bad = tuple(authorization.work_order["authorization_commit_paths"]) + (
             "src/quantum/forbidden.py",
         )
         with mock.patch.object(gate, "changed_paths", return_value=bad):
             with self.assertRaises(gate.GateError) as caught:
-                gate.validate_topology(ROOT, authorization, "HEAD", "implementation")
+                gate.validate_topology(
+                    ROOT,
+                    authorization,
+                    implementation_head,
+                    "implementation",
+                )
         self.assertEqual("COMMIT_SCOPE_MISMATCH", caught.exception.code)
 
-    def test_final_gate_fails_closed_before_windows_receipt(self) -> None:
-        with self.assertRaises(gate.GateError) as caught:
-            gate.execute(ROOT, "verify-final", "HEAD")
-        self.assertEqual("TOPOLOGY_INVALID", caught.exception.code)
+    def test_final_gate_matches_current_transaction_phase(self) -> None:
+        phase, _ = self.transaction_phase()
+        if phase == "implementation":
+            with self.assertRaises(gate.GateError) as caught:
+                gate.execute(ROOT, "verify-final", "HEAD")
+            self.assertEqual("TOPOLOGY_INVALID", caught.exception.code)
+            return
+        verdict = gate.execute(ROOT, "verify-final", "HEAD")
+        self.assertEqual("VERIFIED", verdict["status"])
+        self.assertEqual("final", verdict["phase"])
 
     def test_diff_digest_is_deterministic(self) -> None:
         authorization = self.authorization()
