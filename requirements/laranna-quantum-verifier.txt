@@ -1,5 +1,7 @@
 # Ubuntu 24.04 x86_64, CPython 3.13.14.
 # Install only binary wheels and require every transitive artifact hash.
+setuptools==80.9.0 \
+    --hash=sha256:062d34222ad13e0cc312a4c02d73f059e86a4acbfbdea8f8f76b28c99f306922
 cryptography==49.0.0 \
     --hash=sha256:cbc77da8c523d5abd028635ba850a6966fcee2c82e2bf65a41d1d8afe0f98be9
 cffi==2.1.0 \

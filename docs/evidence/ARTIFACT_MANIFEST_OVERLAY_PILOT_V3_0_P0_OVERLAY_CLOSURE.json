@@ -3,9 +3,24 @@
   "base_pilot_v3_0_p0_overlay_transport_overlay_git_blob_sha": "1831997b5ced57c3744b568964b1e50adc295b01",
   "entries": [
     [
+      ".github/workflows/foundation-ci.yml",
+      "2241c8a7258637a7828d20422a53531baeb49ba98245aeba6ca37b81c95b7b49",
+      1527
+    ],
+    [
       ".github/workflows/laranna-quantum-verifier.yml",
       "c82319e1e11d05e870c85b93b69795437c2046f1cfa8d015afa66c3dcee50822",
       2094
+    ],
+    [
+      ".github/workflows/oss-admission-ci.yml",
+      "f555f2c294ae0a3d59452326c3e23e84f8be62464f7a25095df7c8da0977d129",
+      1718
+    ],
+    [
+      ".github/workflows/pilot-v3-canonical-recovery.yml",
+      "4b7d0e6af1316e456329d95338bab1ac8b3a34e5d21aef280c0e393bf379b540",
+      1610
     ],
     [
       ".github/workflows/windows-release-gate.yml",
@@ -19,18 +34,18 @@
     ],
     [
       "docs/evidence/laranna_quantum/OSS_BOM.md",
-      "9e64bfe156e1b6636a0105248e6c63aa3490c21a3a235dcf6baf0344d5991b73",
-      1443
+      "28f86b1d5439614480d70645d8921abcd44b07401f84766a158114ac35d1396b",
+      1612
     ],
     [
       "docs/evidence/laranna_quantum/bootstrap/BOOTSTRAP_CHANGE_PERMIT.json",
-      "751fd11ec9db71e13c3ebe09e6f2f90130ca4fec5d770400d4bbbc7d1af1837e",
-      1948
+      "5e26f87ff8e9300cf6cace565c78ab71e5b3861f384ccda9dcff205bc41dc374",
+      2135
     ],
     [
       "docs/evidence/laranna_quantum/bootstrap/BOOTSTRAP_CHANGE_REQUEST.json",
-      "b63df1df44662164a1ec7b5364978178462fc07c5b29573fa294fb454187dd27",
-      3016
+      "083c5e10dd2b15400003fc2dbb615524a54e672159c553b8ebb2877fde434cc8",
+      3528
     ],
     [
       "docs/evidence/laranna_quantum/bootstrap/BOOTSTRAP_RESULT.json",
@@ -39,13 +54,13 @@
     ],
     [
       "docs/evidence/laranna_quantum/bootstrap/BOOTSTRAP_WORK_ORDER.json",
-      "820435c376a5e291e0dc274ff60656f5bebeb1b30e9614cc1b3c4d942db9081f",
-      4915
+      "2c1eaf5387ce9d5dc31690f925c856255d46d86b3a087faa38e9a54b55c66223",
+      5651
     ],
     [
       "docs/evidence/laranna_quantum/bootstrap/QUANTUM_PUBLIC_KEY_BINDING.json",
-      "11f29e1c76bc7caed37d02911dc4dbab3417c9c6de1637ba3b4287977796330c",
-      729
+      "a14d78938523e59d11dbf45dab4ecb39c5fd32fed5235dd6ffdc150bf4d53793",
+      733
     ],
     [
       "docs/evidence/laranna_quantum/bootstrap/VERIFIER_RECEIPT.json",
@@ -79,8 +94,8 @@
     ],
     [
       "requirements/laranna-quantum-verifier.txt",
-      "ee2d6b17da3ee783e676cb83dada09fc51d0108c447a8ed3eb2a6a52d866c8c7",
-      416
+      "1e7a5c343ced14c08427c7dc0e025d66345c3fa43fd5fa343ae418635784342e",
+      520
     ],
     [
       "tests/integration_manifest_support_pilot_v3.py",
