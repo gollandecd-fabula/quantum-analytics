@@ -33,6 +33,11 @@
       3016
     ],
     [
+      "docs/evidence/laranna_quantum/bootstrap/BOOTSTRAP_RESULT.json",
+      "2f3a409307cf881c3b92a1ba2f42349944697f442a274f7909ee1427f2a5ccca",
+      1471
+    ],
+    [
       "docs/evidence/laranna_quantum/bootstrap/BOOTSTRAP_WORK_ORDER.json",
       "820435c376a5e291e0dc274ff60656f5bebeb1b30e9614cc1b3c4d942db9081f",
       4915
@@ -41,6 +46,11 @@
       "docs/evidence/laranna_quantum/bootstrap/QUANTUM_PUBLIC_KEY_BINDING.json",
       "11f29e1c76bc7caed37d02911dc4dbab3417c9c6de1637ba3b4287977796330c",
       729
+    ],
+    [
+      "docs/evidence/laranna_quantum/bootstrap/VERIFIER_RECEIPT.json",
+      "f4229d053fe4ef8ea4f10f70986e6fb235947f38d5f09d67c8b7662c67dfdfa8",
+      1471
     ],
     [
       "docs/evidence/pilot_v3_0/PILOT_APPLICABILITY_OVERLAY.json",

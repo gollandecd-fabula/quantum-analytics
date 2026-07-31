@@ -1,0 +1,39 @@
+{
+  "schema": "laranna.quantum.change-result.v2",
+  "project_id": "quantum",
+  "request_id": "2173049d-f556-4daa-aeb0-9f872ae67675",
+  "permit_nonce": "ff6fbd1e-c577-4e8d-a254-1b3945d5a7df",
+  "base_head": "38ad70524b1d8e3ee0f56525c99a189a53085d53",
+  "result_head": "b111b09d62416da841cd57cef0fc8db4e4ddc965",
+  "work_order_sha256": "f1c9ec701fedb84a8528c12fd9222615db97a40683724a136b053c5ce62cfe8f",
+  "diff_sha256": "c3e236953fd5d0a1081bd203e9db7c45abfaa55061f2cb52eefbf71449673125",
+  "test_results": [
+    {
+      "id": "laranna-gate-exact-remote-head",
+      "status": "PASS",
+      "evidence_sha256": "01d26896731ee46809e848c7bbc3ad5f5be664972515cb0bb350effba7dd2904"
+    },
+    {
+      "id": "laranna-quantum-verifier-suite-12",
+      "status": "PASS",
+      "evidence_sha256": "5b4b142fa9ffd2f16a790b35f9cb4fe7874343b5c5dbf5f6b446a836a16d488f"
+    },
+    {
+      "id": "m9-maximum-assurance-control-plane-suite-6",
+      "status": "PASS",
+      "evidence_sha256": "9e0faf8c7aea0f7b4b4d97f810f9860f7cdbbcf58d039ae8f6f1f6626c1ca32b"
+    },
+    {
+      "id": "quantum-complete-source-ci-suite-1028",
+      "status": "PASS",
+      "evidence_sha256": "669771c998a4b63a769ef2b979a464e10e2eb48220313e7a9d869bd315132b6e"
+    },
+    {
+      "id": "python-compileall-verifier-and-tests",
+      "status": "PASS",
+      "evidence_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "evidence_level": "L2",
+  "release_requested": false
+}
