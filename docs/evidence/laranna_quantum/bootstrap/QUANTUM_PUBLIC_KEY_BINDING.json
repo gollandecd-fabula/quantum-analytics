@@ -1,15 +1,15 @@
 {
   "branch": "fix/quantum-pilot-v3-canonical",
-  "campaign_id": "QI-M2-FINAL-TEST-CORRECTIVE-003",
-  "issued_utc": "2026-07-30T10:42:28.305858Z",
+  "campaign_id": "QI-M2-CI-ENVIRONMENT-CORRECTIVE-004",
+  "issued_utc": "2026-07-31T07:43:37.391344Z",
   "key_id": "49f2c8f2b18deae2",
-  "policy_digest": "ef17b11e6bc119ab9735c2da24932f66e25d735f099911c1b1b095aab2e42009",
+  "policy_digest": "969603cbc76f0ded94860e8b5a773feb28f65a9d863d11b6311aeff8f04d4f22",
   "project_id": "quantum",
   "public_key_b64": "RTfl6PP9XQQLGbUBus7qZ1IZ4HoLvBNrfdXAJGJOX8I=",
   "public_key_sha256": "49f2c8f2b18deae24882de345a0f83db99d0f143fcfc8bd138a72f4f7910d1ec",
   "release_authorized": false,
   "repo": "gollandecd-fabula/quantum-analytics",
   "schema": "laranna.quantum.public-key-binding.v1",
-  "signature": "ofq7fBWLbWGXNQG4M21ZVisl7n7Fck5fLCjoFTN2tT1+dv9MjzTh2l2t9UCFzto7NXlpT8p6KGJHPi508Q5nAw==",
+  "signature": "DA+EUTFz4CA0zs6l9XOJPd7qTQXw9ExezTMLTJFOfTChxhFgEtRb2KI9SCZbitQjfq5BShKDCqttCymNh3eqCA==",
   "signature_algorithm": "Ed25519"
 }
