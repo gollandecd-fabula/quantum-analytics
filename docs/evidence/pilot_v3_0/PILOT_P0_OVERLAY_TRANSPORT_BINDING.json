@@ -1,0 +1,100 @@
+{
+  "artifact_type": "PILOT_P0_OVERLAY_TRANSPORT_BINDING",
+  "active_milestone": "P0_CANONICAL_REANCHOR_RECOVERY",
+  "canonical_branch": "fix/quantum-pilot-v3-canonical",
+  "work_order_id": "WO-PILOT-P0-OVERLAY-MATERIALIZATION-007",
+  "archive": {
+    "compression": "tar.xz",
+    "members": [
+      ".github/workflows/pilot-v3-canonical-recovery.yml",
+      "docs/evidence/pilot_v3_0/PILOT_APPLICABILITY_OVERLAY.json",
+      "docs/evidence/pilot_v3_0/PILOT_AUTONOMOUS_EXECUTION_STATE.json",
+      "docs/evidence/pilot_v3_0/PILOT_P0_EXECUTION_REGISTER.json",
+      "docs/evidence/pilot_v3_0/PILOT_P0_OVERLAY_BINDING_EVIDENCE.json",
+      "docs/evidence/pilot_v3_0/PILOT_WORK_ORDER_CHAIN.json",
+      "tests/integration_manifest_support_pilot_v3.py"
+    ],
+    "size_bytes": 12320,
+    "sha256": "0b08a6467044e510caf17e01a25975a0028b417d09c76c083708da2f433804fc"
+  },
+  "chunks": [
+    {
+      "path": ".pilot-v3-p0-overlay-transport/chunk.00",
+      "size_bytes": 8192,
+      "sha256": "4bc9f968e3e7674b660d491b2a1a3ea47166639be206cf942be179a1cd3548f1",
+      "git_blob_sha": "82fc329ff6ba07ad0d0e6cafeb437d10f786b4d3"
+    },
+    {
+      "path": ".pilot-v3-p0-overlay-transport/chunk.01",
+      "size_bytes": 4128,
+      "sha256": "a3c19ac03f970cf9d141e9866ff1553a5552864695ddbd905d27ea0ad374c2fc",
+      "git_blob_sha": "a3e0abaa2b316fd261776c72bd30f5ab82d09127"
+    }
+  ],
+  "committed_overlay": {
+    "path": "docs/evidence/pilot_v3_0/PILOT_APPLICABILITY_OVERLAY.json",
+    "size_bytes": 434233,
+    "sha256": "ef3d831d35ca6e2d2a39228b0974506d48bafae87c622a0f5adfc83271a8b954",
+    "git_blob_sha": "ae15ad67c55105798e6346a5e34d263f65826393"
+  },
+  "final_payload_files": [
+    {
+      "path": ".github/workflows/pilot-v3-canonical-recovery.yml",
+      "size_bytes": 14407,
+      "sha256": "337df9e787288b713528ad7a802339b534fb3a756384b4048f38ceaa634dedd3"
+    },
+    {
+      "path": "docs/evidence/pilot_v3_0/PILOT_APPLICABILITY_OVERLAY.json",
+      "size_bytes": 434233,
+      "sha256": "ef3d831d35ca6e2d2a39228b0974506d48bafae87c622a0f5adfc83271a8b954"
+    },
+    {
+      "path": "docs/evidence/pilot_v3_0/PILOT_AUTONOMOUS_EXECUTION_STATE.json",
+      "size_bytes": 1713,
+      "sha256": "feb4fc0e90446e888c2396515402bbe34e1fdd64cb4d9060a4b59787045cbbfd"
+    },
+    {
+      "path": "docs/evidence/pilot_v3_0/PILOT_P0_EXECUTION_REGISTER.json",
+      "size_bytes": 2970,
+      "sha256": "3142c0756f2f9456c2ca85b9388ad25e10214aa7073f1702d9071e08d7fef168"
+    },
+    {
+      "path": "docs/evidence/pilot_v3_0/PILOT_P0_OVERLAY_BINDING_EVIDENCE.json",
+      "size_bytes": 1601,
+      "sha256": "8049cf7f699bd72a59d926f1ebbebbe2a51fcb2a1a6f9c58622c9378f4331a31"
+    },
+    {
+      "path": "docs/evidence/pilot_v3_0/PILOT_WORK_ORDER_CHAIN.json",
+      "size_bytes": 2682,
+      "sha256": "e93c1992f1fea582f27539b534512b7be81fef21a0c8810d1e0b95adefc09a79"
+    },
+    {
+      "path": "tests/integration_manifest_support_pilot_v3.py",
+      "size_bytes": 4304,
+      "sha256": "6794b8b3ea400cfcbe1991d04ca654d91ab9810f62577f791b3879987d611df6"
+    }
+  ],
+  "closure_manifest_path": "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_V3_0_P0_OVERLAY_CLOSURE.json",
+  "closure_manifest_entry_paths": [
+    "docs/evidence/pilot_v3_0/PILOT_APPLICABILITY_OVERLAY.json",
+    "docs/evidence/pilot_v3_0/PILOT_AUTONOMOUS_EXECUTION_STATE.json",
+    "docs/evidence/pilot_v3_0/PILOT_P0_EXECUTION_REGISTER.json",
+    "docs/evidence/pilot_v3_0/PILOT_P0_OVERLAY_BINDING_EVIDENCE.json",
+    "docs/evidence/pilot_v3_0/PILOT_WORK_ORDER_CHAIN.json",
+    "tests/integration_manifest_support_pilot_v3.py"
+  ],
+  "phase_b_delete_paths": [
+    ".pilot-v3-p0-overlay-transport/chunk.00",
+    ".pilot-v3-p0-overlay-transport/chunk.01"
+  ],
+  "practical_delivery_proof": {
+    "historical_binary_materializer_run_id": 30250245773,
+    "historical_binary_materializer_job_id": 89926376856,
+    "historical_result": "PASS",
+    "source_overlay_run_id": 30378198636,
+    "source_overlay_artifact_id": 8695839574,
+    "source_overlay_result": "PASS"
+  },
+  "release_authorized": false,
+  "schema_version": "3.0.0"
+}

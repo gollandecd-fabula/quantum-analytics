@@ -1,0 +1,57 @@
+{
+  "active_pilot_milestone": "P0_CANONICAL_REANCHOR_RECOVERY",
+  "artifact_type": "SIGNED_WORK_ORDER",
+  "canonical_branch": "fix/quantum-pilot-v3-canonical",
+  "change_boundary": "Preserve the invalid WO-002 as failed-attempt evidence, add one correctly signed corrective work order, update only the unchanged generator test's work-order assertions and the exact append-only manifest/state registers required for the corrective commit.",
+  "defect_ids": [
+    "PILOT-D-P0-005"
+  ],
+  "expected_result": "The unchanged 712-row, determinism and schema controls remain green; WO-002 is explicitly rejected; WO-003 signature and exact parent pass; effective manifest and full source regression then execute.",
+  "files_allowed_to_change": [
+    "tests/integration_manifest_support_pilot_v3.py",
+    "tests/test_pilot_v3_generate_overlay.py",
+    "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_V3_0_P0_SIGNATURE_CORRECTIVE.json",
+    "docs/evidence/pilot_v3_0/WORK_ORDER_P0_SIGNATURE_CORRECTIVE_003.json",
+    "docs/evidence/pilot_v3_0/PILOT_P0_ATTEMPT_001_FAILURE.json",
+    "docs/evidence/pilot_v3_0/PILOT_AUTONOMOUS_EXECUTION_STATE.json",
+    "docs/evidence/pilot_v3_0/PILOT_DEFECT_REGISTER.json",
+    "docs/evidence/pilot_v3_0/PILOT_FAILURE_CLASSIFICATION_REGISTER.json",
+    "docs/evidence/pilot_v3_0/PILOT_WORK_ORDER_CHAIN.json",
+    "docs/evidence/pilot_v3_0/PILOT_P0_EXECUTION_REGISTER.json"
+  ],
+  "files_forbidden_to_change": [
+    "docs/evidence/pilot_v3_0/WORK_ORDER_P0_CANONICAL_EXECUTION_002.json",
+    ".github/workflows/pilot-v3-canonical-recovery.yml",
+    "tools/pilot_v3_generate_overlay.py",
+    "src/**",
+    "scripts/**",
+    "installer/**",
+    "requirements/**",
+    "docs/evidence/agent_v3_1/REQUIREMENTS_TRACEABILITY_MATRIX.json",
+    "docs/evidence/agent_v3_1/rtm/**",
+    "tools/m9_maximum_assurance_control_plane.py",
+    ".github/workflows/m9-maximum-assurance-control-plane.yml",
+    "main"
+  ],
+  "hypothesis": "Preserving the invalid historical work order and validating a new append-only corrective work order restores signature integrity without rewriting history or changing product behavior.",
+  "marketplace_writes": false,
+  "next_test": [
+    "python -m unittest -v tests.test_pilot_v3_generate_overlay",
+    "python -m unittest -v tests.test_a0_manifest_diagnostic tests.test_b1a_artifact_manifest",
+    "PYTHONPATH=src python -m quantum.scripts.ci"
+  ],
+  "parent_exact_head": "46da62cd078ca4be328b0096b682703d8e91f73f",
+  "release_authorized": false,
+  "requirement_ids": [
+    "PILOT-P0-002",
+    "PILOT-P0-003",
+    "PILOT-P0-004",
+    "PILOT-P0-005"
+  ],
+  "rollback_action": "Do not advance or merge the canonical branch; retain exact head 46da62cd078ca4be328b0096b682703d8e91f73f.",
+  "rollback_condition": "WO-003 signature mismatch, WO-002 rewritten, any forbidden path change, generator regression, manifest mismatch, source regression failure or noncanonical branch use.",
+  "schema_version": "3.0.0",
+  "target_evidence_level": "L1_UNIT_THEN_L2_SOURCE_RUNTIME",
+  "work_order_id": "WO-PILOT-P0-SIGNATURE-CORRECTIVE-003",
+  "work_order_sha256": "89ae15271187624f3d9fad4457b1fceb2e52a6450a65f700971a10a75fd26b90"
+}

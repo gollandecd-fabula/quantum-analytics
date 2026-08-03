@@ -1,0 +1,110 @@
+{
+  "artifact_type": "PILOT_DEFECT_REGISTER",
+  "canonical_branch": "fix/quantum-pilot-v3-canonical",
+  "defects": [
+    {
+      "classification": "PROTOCOL_SCOPE_FAILURE",
+      "defect_id": "PILOT-D-P0-001",
+      "evidence_ids": [
+        "PR-165-CLOSED",
+        "PR-166-CLOSED",
+        "PR-167-CLOSED",
+        "PR-168-CLOSED",
+        "PR-169-CLOSED",
+        "PR-170-CLOSED",
+        "PR-171-CLOSED",
+        "PR-172-CLOSED",
+        "PR-173-CLOSED",
+        "PR-174-CLOSED"
+      ],
+      "severity": "P0",
+      "status": "MITIGATED_PENDING_CANONICAL_SOURCE_VERIFICATION",
+      "title": "Multiple historical transport and pilot contours were open."
+    },
+    {
+      "classification": "PROTOCOL_SCOPE_FAILURE",
+      "defect_id": "PILOT-D-P0-002",
+      "evidence_ids": [],
+      "severity": "P0",
+      "status": "OPEN",
+      "title": "Full pilot applicability overlay for all 712 canonical requirements is not yet committed."
+    },
+    {
+      "classification": "PROTOCOL_SCOPE_FAILURE",
+      "defect_id": "PILOT-D-P0-003",
+      "evidence_ids": [
+        "EVD-PILOT-P0-ATTEMPT-001",
+        "EVD-PILOT-P0-ATTEMPT-004"
+      ],
+      "severity": "P0",
+      "status": "OPEN",
+      "title": "P0 exact-head source verification and immutable evidence are not complete."
+    },
+    {
+      "classification": "PROTOCOL_SCOPE_FAILURE",
+      "defect_id": "PILOT-D-P0-005",
+      "evidence_ids": [
+        "EVD-PILOT-P0-ATTEMPT-001",
+        "EVD-PILOT-P0-ATTEMPT-002"
+      ],
+      "severity": "P0",
+      "status": "CORRECTED_VERIFIED_AT_92C97",
+      "title": "WO-PILOT-P0-CANONICAL-EXECUTION-002 stored signature does not match its canonical payload."
+    },
+    {
+      "classification": "HARNESS_FAILURE",
+      "defect_id": "PILOT-D-P0-006",
+      "evidence_ids": [
+        "EVD-PILOT-P0-ATTEMPT-002",
+        "EVD-PILOT-P0-ATTEMPT-003"
+      ],
+      "severity": "P0",
+      "status": "CORRECTED_VERIFIED_AT_92C97",
+      "title": "P0 workflow invoked the package generator as a path script, preventing repository-root package resolution."
+    },
+    {
+      "classification": "PROTOCOL_SCOPE_FAILURE",
+      "defect_id": "PILOT-D-P0-007",
+      "evidence_ids": [
+        "EVD-PILOT-P0-ATTEMPT-003",
+        "EVD-PILOT-P0-ATTEMPT-004"
+      ],
+      "severity": "P0",
+      "status": "CORRECTED_VERIFIED_AT_825C",
+      "title": "Pilot manifest extension kept CONTROL_PATHS local and left seven exact tracked-tree discrepancies."
+    },
+    {
+      "classification": "HARNESS_FAILURE",
+      "defect_id": "PILOT-D-P0-008",
+      "evidence_ids": [
+        "EVD-PILOT-P0-ATTEMPT-004"
+      ],
+      "severity": "P0",
+      "status": "CORRECTIVE_IN_PROGRESS",
+      "title": "Canonical P0 actions/setup-python runtime lacks the declared setuptools.build_meta backend required by the no-build-isolation wheel regression."
+    },
+    {
+      "classification": "HARNESS_FAILURE",
+      "defect_id": "PILOT-D-P1-001",
+      "evidence_ids": [
+        "EVD-M1-CLOSURE-FAIL-43D"
+      ],
+      "severity": "P0",
+      "status": "OPEN_NOT_ACTIVE_UNTIL_P0_PASS",
+      "title": "Existing M1 closure validates a multi-work-order union against one primary work order."
+    },
+    {
+      "classification": "PRODUCT_FAILURE",
+      "defect_id": "PILOT-D-P3-001",
+      "evidence_ids": [
+        "EVD-M8-DESKTOPDIRECTORY-UNAVAILABLE"
+      ],
+      "severity": "P0",
+      "status": "OPEN_NOT_ACTIVE_UNTIL_P3",
+      "title": "Windows installer fails when DesktopDirectory is unavailable."
+    }
+  ],
+  "release_authorized": false,
+  "schema_version": "3.0.0",
+  "subject_parent_exact_head": "825c1a4325b24fbae8ce8b616113ba087874a1ea"
+}

@@ -1,0 +1,45 @@
+{
+  "artifact_type": "ARTIFACT_MANIFEST_OVERLAY",
+  "base_agent_v3_1_m1_overlay_git_blob_sha": "9fc6b88631e05dba8d9a8cd58205b76bf69da4cf",
+  "entries": [
+    [
+      ".github/workflows/pilot-v3-canonical-recovery.yml",
+      "0e27a6d5fd1f403c597c90e1c517c52a0821ff9d1493cc9135d27e02054bd4e9",
+      3810
+    ],
+    [
+      "docs/evidence/pilot_v3_0/PILOT_CAPABILITY_GATE.json",
+      "b9c01d5683fb3260773521ddbedb924df04a7d6881d68ba45c8d19b4f9161ab1",
+      1038
+    ],
+    [
+      "docs/evidence/pilot_v3_0/WORK_ORDER_P0_CANONICAL_RECOVERY_001.json",
+      "15ec963bfa48ba2f8e64282ccb9a3b4d127f163fe0ad3ffbea3ea9f2d3213339",
+      3281
+    ],
+    [
+      "tests/integration_manifest_support_pilot_v3.py",
+      "22df05612454304009bed3ff1a1a8e4a35eb49522a05729a4f5809d8c7bb1c8c",
+      1253
+    ],
+    [
+      "tests/test_a0_manifest_diagnostic.py",
+      "69ad074855378aa46e3d263e8a656ffb2fc671c5b1c85a184cbf4e4e12c35a10",
+      2003
+    ],
+    [
+      "tests/test_b1a_artifact_manifest.py",
+      "a073cee0bf5510950252165b20417d0b1087623f7cf4d8899a0317829ffa2acb",
+      1020
+    ],
+    [
+      "tools/pilot_v3_generate_overlay.py",
+      "f90a2b1c707ace8223d17c277c67f52302e6d5ad3172a7ec2e64ed3053a69bc0",
+      5096
+    ]
+  ],
+  "overlay_id": "PILOT-V3.0-CANONICAL-RECOVERY",
+  "release_authorized": false,
+  "schema_version": "1.0.0",
+  "scope": "Atomic P0 canonical recovery setup only; no product, UI, installer, dependency, canonical RTM, Protocol v3.1 or release change."
+}

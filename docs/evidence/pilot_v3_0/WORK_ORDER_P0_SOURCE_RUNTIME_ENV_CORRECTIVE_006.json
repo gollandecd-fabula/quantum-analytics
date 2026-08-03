@@ -1,0 +1,67 @@
+{
+  "active_pilot_milestone": "P0_CANONICAL_REANCHOR_RECOVERY",
+  "artifact_type": "SIGNED_WORK_ORDER",
+  "canonical_branch": "fix/quantum-pilot-v3-canonical",
+  "change_boundary": "Preserve all prior failed attempts, signed work orders and product state; correct only the canonical P0 source-runtime harness by replacing the isolated actions/setup-python interpreter with the Ubuntu 24.04 system python3 runtime already proven by Foundation CI, verify Python 3.12+ and importability of setuptools.build_meta before tests, use python3 consistently, and add only the append-only manifest/evidence records required for this corrective.",
+  "defect_ids": [
+    "PILOT-D-P0-008"
+  ],
+  "expected_result": "Eight focused generator/work-order/runtime controls, deterministic 712-row generation, effective manifest equality and the complete 1014-test source regression execute on the same exact canonical head. Product code and production statuses remain unchanged. P0 remains IN_PROGRESS until the generated applicability overlay and successful immutable runtime evidence are committed and reverified on the same canonical branch.",
+  "files_allowed_to_change": [
+    ".github/workflows/pilot-v3-canonical-recovery.yml",
+    "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_V3_0_P0_SOURCE_RUNTIME_ENV_CORRECTIVE.json",
+    "docs/evidence/pilot_v3_0/PILOT_AUTONOMOUS_EXECUTION_STATE.json",
+    "docs/evidence/pilot_v3_0/PILOT_DEFECT_REGISTER.json",
+    "docs/evidence/pilot_v3_0/PILOT_FAILURE_CLASSIFICATION_REGISTER.json",
+    "docs/evidence/pilot_v3_0/PILOT_P0_ATTEMPT_004_FAILURE.json",
+    "docs/evidence/pilot_v3_0/PILOT_P0_EXECUTION_REGISTER.json",
+    "docs/evidence/pilot_v3_0/PILOT_WORK_ORDER_CHAIN.json",
+    "docs/evidence/pilot_v3_0/WORK_ORDER_P0_SOURCE_RUNTIME_ENV_CORRECTIVE_006.json",
+    "tests/integration_manifest_support_pilot_v3.py",
+    "tests/test_pilot_v3_generate_overlay.py"
+  ],
+  "files_forbidden_to_change": [
+    "tools/pilot_v3_generate_overlay.py",
+    "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_V3_0_CANONICAL_RECOVERY.json",
+    "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_V3_0_P0_EXECUTION.json",
+    "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_V3_0_P0_SIGNATURE_CORRECTIVE.json",
+    "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_V3_0_P0_GENERATOR_INVOCATION_CORRECTIVE.json",
+    "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_V3_0_P0_MANIFEST_CLOSURE.json",
+    "docs/evidence/pilot_v3_0/WORK_ORDER_P0_CANONICAL_EXECUTION_002.json",
+    "docs/evidence/pilot_v3_0/WORK_ORDER_P0_SIGNATURE_CORRECTIVE_003.json",
+    "docs/evidence/pilot_v3_0/WORK_ORDER_P0_GENERATOR_INVOCATION_CORRECTIVE_004.json",
+    "docs/evidence/pilot_v3_0/WORK_ORDER_P0_MANIFEST_CLOSURE_CORRECTIVE_005.json",
+    "src/**",
+    "scripts/**",
+    "installer/**",
+    "requirements/**",
+    "pyproject.toml",
+    "docs/evidence/agent_v3_1/REQUIREMENTS_TRACEABILITY_MATRIX.json",
+    "docs/evidence/agent_v3_1/rtm/**",
+    "tools/m9_maximum_assurance_control_plane.py",
+    ".github/workflows/m9-maximum-assurance-control-plane.yml",
+    "main"
+  ],
+  "hypothesis": "The exact-head source regression failure is caused solely by actions/setup-python providing an isolated interpreter without the declared setuptools.build_meta backend. Foundation CI passed the identical source regression on the same head with Ubuntu's system python3; binding the canonical P0 workflow to that source-compatible runtime will remove the harness failure without changing product or dependency state.",
+  "marketplace_writes": false,
+  "next_test": [
+    "python3 -m unittest -v tests.test_pilot_v3_generate_overlay",
+    "python3 -m tools.pilot_v3_generate_overlay --repo-root . --output <temp>/PILOT_APPLICABILITY_OVERLAY.json",
+    "python3 -m unittest -v tests.test_a0_manifest_diagnostic tests.test_b1a_artifact_manifest",
+    "PYTHONPATH=src python3 -m quantum.scripts.ci"
+  ],
+  "parent_exact_head": "825c1a4325b24fbae8ce8b616113ba087874a1ea",
+  "release_authorized": false,
+  "requirement_ids": [
+    "PILOT-P0-001",
+    "PILOT-P0-003",
+    "PILOT-P0-004",
+    "PILOT-P0-005"
+  ],
+  "rollback_action": "Do not advance or merge the canonical branch; retain exact head 825c1a4325b24fbae8ce8b616113ba087874a1ea.",
+  "rollback_condition": "Any changed path outside files_allowed_to_change, invalid work-order signature, runtime below Python 3.12, unavailable setuptools.build_meta, generator regression, manifest mismatch, source regression failure, product-state change or noncanonical branch use.",
+  "schema_version": "3.0.0",
+  "target_evidence_level": "L1_UNIT_THEN_L2_SOURCE_RUNTIME",
+  "work_order_id": "WO-PILOT-P0-SOURCE-RUNTIME-ENV-CORRECTIVE-006",
+  "work_order_sha256": "0d78711bc379e0a7b882d205c5121c3fd30da7658d909af9dd96a877bb3f89a0"
+}

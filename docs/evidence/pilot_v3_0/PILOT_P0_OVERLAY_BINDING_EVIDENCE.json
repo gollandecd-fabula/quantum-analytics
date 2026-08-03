@@ -1,0 +1,58 @@
+{
+  "artifact_type": "PILOT_P0_OVERLAY_BINDING_EVIDENCE",
+  "evidence_id": "EVD-PILOT-P0-ATTEMPT-009",
+  "active_milestone": "P0_CANONICAL_REANCHOR_RECOVERY",
+  "canonical_branch": "fix/quantum-pilot-v3-canonical",
+  "governing_work_order_id": "WO-PILOT-P0-OVERLAY-FINAL-MANIFEST-STAGING-CORRECTIVE-011",
+  "source_generation": {
+    "exact_head": "d65ad8e01672365a35aeff4791ee8800a5f1a27f",
+    "workflow_run_id": 30378198636,
+    "artifact_id": 8695839574,
+    "artifact_digest": "sha256:9fca6f4b750d2df916ca2d4dfc32f22a49d55db8d0a97112b9b0f44462e35939",
+    "full_source_test_count": 1016,
+    "status": "PASS"
+  },
+  "committed_artifact": {
+    "path": "docs/evidence/pilot_v3_0/PILOT_APPLICABILITY_OVERLAY.json",
+    "size_bytes": 434233,
+    "sha256": "ef3d831d35ca6e2d2a39228b0974506d48bafae87c622a0f5adfc83271a8b954",
+    "git_blob_sha": "ae15ad67c55105798e6346a5e34d263f65826393",
+    "row_count": 712,
+    "unique_requirement_id_count": 712
+  },
+  "guarded_materialization": {
+    "transport_parent_exact_head": "75c00a5e2acfa8dc4da208dd169edc45a7d4364e",
+    "same_canonical_branch_only": true,
+    "parallel_branch_created": false,
+    "transport_tree_manifest_test_required": true,
+    "final_tree_manifest_test_required": true,
+    "final_tree_complete_source_ci_required": true,
+    "commit_readback_before_remote_update_required": true,
+    "remote_ref_readback_after_update_required": true,
+    "failure_behavior": "FAIL_CLOSED_WITHOUT_FINAL_REF_UPDATE"
+  },
+  "marketplace_writes": false,
+  "release_authorized": false,
+  "status": "VERIFIED_BY_GUARDED_FINAL_MANIFEST_STAGING_CORRECTIVE_MATERIALIZATION",
+  "schema_version": "3.0.0",
+  "corrective_provenance": {
+    "failed_work_order_id": "WO-PILOT-P0-OVERLAY-PR-PREFLIGHT-CORRECTIVE-010",
+    "failed_transport_exact_head": "22b404e5bcacc509ca463b0c3a83e714b80b0aee",
+    "failed_run_id": 30392936134,
+    "failed_artifact_id": 8701646475,
+    "failed_artifact_sha256": "f9fadbc82f497bb8511b95c0937204519185f79bd43fb8f84aebf24b12813db2",
+    "failure_class": "FINAL_MANIFEST_TESTS_READ_UNSTAGED_DELETED_TRANSPORT_CHUNKS",
+    "transport_tree_source_ci_tests": 1016,
+    "transport_tree_source_ci_status": "PASS",
+    "scope_negative_positive_control_status": "PASS",
+    "final_generator_tests": 8,
+    "final_generator_status": "PASS",
+    "corrective_action": "stage exact signed phase-B set after scope controls and before final manifest tests",
+    "test_criteria_changed": false,
+    "execution_event": "same-repository pull_request synchronize",
+    "authorization_commit": "5c3535ce7d73d58fe9de3b9dd8cfdd7afebb8c07",
+    "transport_manifest_commit": "a6075cb1e143c1606342003a591959ba77587f24",
+    "execution_transport_commit": "75c00a5e2acfa8dc4da208dd169edc45a7d4364e",
+    "status": "VERIFIED_BY_DISCOVERABLE_PR_RUN_STAGED_INDEX_MANIFEST_TESTS_SOURCE_CI_AND_REMOTE_READBACK"
+  }
+}

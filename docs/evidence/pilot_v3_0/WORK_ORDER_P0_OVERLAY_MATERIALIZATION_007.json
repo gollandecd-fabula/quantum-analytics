@@ -1,0 +1,65 @@
+{
+  "active_pilot_milestone": "P0_CANONICAL_REANCHOR_RECOVERY",
+  "artifact_type": "SIGNED_WORK_ORDER",
+  "canonical_branch": "fix/quantum-pilot-v3-canonical",
+  "change_boundary": "Use one canonical branch and one guarded two-phase fast-forward chain. Phase A adds only a manifest-valid binary transport, signed work order, capability evidence and loader extension. The workflow must test Phase A, reconstruct the fixed archive, generate the closure manifest, compare the committed overlay byte-for-byte with a fresh deterministic generation, test the final tree, commit it, reread it locally, push it as a fast-forward to the same canonical branch and reread it from the remote ref. No parallel branch, product, UI, installer, dependency, canonical RTM, Protocol v3.1, M9 controller, marketplace-write or release change is allowed.",
+  "expected_result": "PILOT_APPLICABILITY_OVERLAY.json is committed with 712 rows and 712 unique requirement IDs, SHA-256 ef3d831d35ca6e2d2a39228b0974506d48bafae87c622a0f5adfc83271a8b954 and Git blob ae15ad67c55105798e6346a5e34d263f65826393; transport and final manifest equality pass; complete source CI passes on both trees; the remote canonical ref is reread after the final fast-forward. P0 becomes VERIFIED while PILOT_BLOCKED and RELEASE_BLOCKED remain in force.",
+  "files_forbidden_to_change": [
+    "src/**",
+    "scripts/**",
+    "installer/**",
+    "requirements/**",
+    "pyproject.toml",
+    "docs/evidence/agent_v3_1/REQUIREMENTS_TRACEABILITY_MATRIX.json",
+    "docs/evidence/agent_v3_1/rtm/**",
+    "tools/m9_maximum_assurance_control_plane.py",
+    ".github/workflows/m9-maximum-assurance-control-plane.yml",
+    "main"
+  ],
+  "marketplace_writes": false,
+  "next_test": [
+    "python3 -m unittest -v tests.test_pilot_v3_generate_overlay",
+    "python3 -m unittest -v tests.test_a0_manifest_diagnostic tests.test_b1a_artifact_manifest",
+    "python3 -m quantum.scripts.ci",
+    "python3 -m tools.pilot_v3_generate_overlay --repo-root . --output <temp>/PILOT_APPLICABILITY_OVERLAY.json && cmp committed generated",
+    "git commit readback and remote canonical ref readback of PILOT_APPLICABILITY_OVERLAY.json"
+  ],
+  "parent_exact_head": "d65ad8e01672365a35aeff4791ee8800a5f1a27f",
+  "phase_a_transport_files_allowed_to_change": [
+    ".github/workflows/pilot-v3-canonical-recovery.yml",
+    ".pilot-v3-p0-overlay-transport/chunk.00",
+    ".pilot-v3-p0-overlay-transport/chunk.01",
+    "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_V3_0_P0_OVERLAY_TRANSPORT.json",
+    "docs/evidence/pilot_v3_0/PILOT_CAPABILITY_GATE.json",
+    "docs/evidence/pilot_v3_0/PILOT_P0_OVERLAY_TRANSPORT_BINDING.json",
+    "docs/evidence/pilot_v3_0/WORK_ORDER_P0_OVERLAY_MATERIALIZATION_007.json",
+    "tests/integration_manifest_support_pilot_v3.py"
+  ],
+  "phase_b_final_files_allowed_to_change": [
+    ".pilot-v3-p0-overlay-transport/chunk.00",
+    ".pilot-v3-p0-overlay-transport/chunk.01",
+    "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_V3_0_P0_OVERLAY_CLOSURE.json",
+    "docs/evidence/pilot_v3_0/PILOT_APPLICABILITY_OVERLAY.json",
+    "docs/evidence/pilot_v3_0/PILOT_AUTONOMOUS_EXECUTION_STATE.json",
+    "docs/evidence/pilot_v3_0/PILOT_P0_EXECUTION_REGISTER.json",
+    "docs/evidence/pilot_v3_0/PILOT_P0_OVERLAY_BINDING_EVIDENCE.json",
+    "docs/evidence/pilot_v3_0/PILOT_WORK_ORDER_CHAIN.json",
+    "tests/integration_manifest_support_pilot_v3.py"
+  ],
+  "release_authorized": false,
+  "requirement_ids": [
+    "PILOT-P0-001",
+    "PILOT-P0-002",
+    "PILOT-P0-003",
+    "PILOT-P0-004",
+    "PILOT-P0-005"
+  ],
+  "rollback_action": "If Phase A verification fails, do not materialize or push a final commit. If any final-tree test, scope check, commit readback or remote precondition fails, retain the manifest-valid Phase A transport head and keep P0 IN_PROGRESS. Never force-update the canonical ref.",
+  "rollback_condition": "Any signature, binding, chunk, archive, path-set, overlay byte, 712-row schema, manifest, complete-source-CI, commit-readback, remote-ref precondition or remote-readback failure.",
+  "schema_version": "3.0.0",
+  "target_evidence_level": "L1_MANIFEST_AND_UNIT_THEN_L2_SOURCE_RUNTIME_REMOTE_READBACK",
+  "transport_binding_path": "docs/evidence/pilot_v3_0/PILOT_P0_OVERLAY_TRANSPORT_BINDING.json",
+  "transport_binding_sha256": "4a15260c51e1afc7766b63d645e08aea5429e58e9b66b4101b0f2092fed31f9c",
+  "work_order_id": "WO-PILOT-P0-OVERLAY-MATERIALIZATION-007",
+  "work_order_sha256": "3e8c988086608f35c1b0237358d51aafa2142e9dbb95fb5582baab55f2e76663"
+}

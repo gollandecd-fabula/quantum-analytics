@@ -1,0 +1,33 @@
+{
+  "schema": "laranna.quantum.change-request.v2",
+  "request_id": "a6bd7ec9-0bf0-48f9-8883-73c9f031e638",
+  "project_id": "quantum",
+  "campaign_id": "QI-M2-CI-ENVIRONMENT-CORRECTIVE-004",
+  "repo": "gollandecd-fabula/quantum-analytics",
+  "branch": "fix/quantum-pilot-v3-canonical",
+  "base_head": "86325c106e73092e4250e5ab1c17a95e169f9fe4",
+  "risk_class": "R2",
+  "action": "Correct only the Quantum CI execution environment: add the exact setuptools 80.9.0 wheel hash to the existing LarannA verifier runtime lock and OSS BOM; replace depth-one fetches in Foundation CI and OSS Admission CI with exact full-ancestry fetches required by the signed transaction tests; constrain the completed historical P0 materializer to its immutable historical head; and update the deterministic closure manifest. Preserve product source, tests, verifier code, M9 authority, ImageLab isolation, repository rules, merge state and release state.",
+  "action_hash": "2e9e4239939ea293cf866fd07c755ad33c899a4947a5b34463f1712e6ac9cd33",
+  "test": "Verify the official setuptools 80.9.0 wheel SHA-256; run signed authorization preflight; run verify-implementation, the 12 LarannA tests, the unchanged 6 M9 tests, compileall and all 1028 Quantum source tests; verify exact workflow YAML scope and full-ancestry commands; after a Windows-signed L2 result, create one receipt-only final commit, run verify-final and the same complete test set, reread every GitHub blob, perform a non-force ref update, then require the LarannA Verifier, Foundation CI and OSS Admission CI to complete successfully while the historical P0 materializer is non-applicable.",
+  "rollback": "Do not move the canonical branch unless all local and connector-backed mandatory checks pass. On any signature, hash, scope, topology, manifest, test, workflow or readback failure, discard the candidate and unreferenced Git objects and leave the branch at 86325c106e73092e4250e5ab1c17a95e169f9fe4.",
+  "expires_utc": "2026-08-01T07:43:37.7220224Z",
+  "work_order_id": "WO-QUANTUM-CI-ENVIRONMENT-CORRECTIVE-004",
+  "work_order_sha256": "76ee116290c2cee4249a5d4ae2ccc1b4775a49d3ae94feb12133fe331e9c6d34",
+  "protocol_sha256": "be69b8f1f919066c67086d6dd4678acf5e3cb3c4f1db9bc587dc540018601a90",
+  "allowed_paths": [
+    ".github/workflows/foundation-ci.yml",
+    ".github/workflows/oss-admission-ci.yml",
+    ".github/workflows/pilot-v3-canonical-recovery.yml",
+    "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_V3_0_P0_OVERLAY_CLOSURE.json",
+    "docs/evidence/laranna_quantum/OSS_BOM.md",
+    "docs/evidence/laranna_quantum/bootstrap/BOOTSTRAP_CHANGE_PERMIT.json",
+    "docs/evidence/laranna_quantum/bootstrap/BOOTSTRAP_CHANGE_REQUEST.json",
+    "docs/evidence/laranna_quantum/bootstrap/BOOTSTRAP_RESULT.json",
+    "docs/evidence/laranna_quantum/bootstrap/BOOTSTRAP_WORK_ORDER.json",
+    "docs/evidence/laranna_quantum/bootstrap/QUANTUM_PUBLIC_KEY_BINDING.json",
+    "docs/evidence/laranna_quantum/bootstrap/VERIFIER_RECEIPT.json",
+    "requirements/laranna-quantum-verifier.txt"
+  ],
+  "expected_result": "The exact Quantum branch advances by one authorization commit, one CI-environment implementation commit and one receipt-only final commit. The real GitHub runners retain the signed transaction ancestry, install the exact hash-locked build backend, pass the LarannA gate, M9 and all 1028 source tests, and do not re-run the completed historical P0 materialization transaction. No product, test, verifier, M9, ImageLab, ruleset, merge or release authority changes occur."
+}

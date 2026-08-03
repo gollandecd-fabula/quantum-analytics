@@ -1,0 +1,143 @@
+{
+  "active_pilot_milestone": "P0_CANONICAL_REANCHOR_RECOVERY",
+  "artifact_type": "SIGNED_WORK_ORDER",
+  "canonical_branch": "fix/quantum-pilot-v3-canonical",
+  "change_boundary": "Correct only the confirmed final-manifest index-order defect: after exact old/new phase-B scope controls, stage the complete signed phase-B set before final manifest tests so the index represents chunk deletions and new artifacts. Preserve all test criteria, the GitHub Actions PR method, immutable transport bytes, generated 712-row overlay bytes, product code, UI, installer, dependencies, canonical RTM, Protocol v3.1, M9 controller, marketplace-write and release state.",
+  "authorization_parent_exact_head": "22b404e5bcacc509ca463b0c3a83e714b80b0aee",
+  "authorization_stage_files_allowed_to_change": [
+    "docs/evidence/pilot_v3_0/WORK_ORDER_P0_OVERLAY_FINAL_MANIFEST_STAGING_CORRECTIVE_011.json"
+  ],
+  "manifest_stage_files_allowed_to_change": [
+    "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_V3_0_P0_OVERLAY_TRANSPORT.json"
+  ],
+  "execution_stage_files_allowed_to_change": [
+    ".github/workflows/pilot-v3-canonical-recovery.yml"
+  ],
+  "phase_b_final_files_allowed_to_change": [
+    ".pilot-v3-p0-overlay-transport/chunk.00",
+    ".pilot-v3-p0-overlay-transport/chunk.01",
+    "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_V3_0_P0_OVERLAY_CLOSURE.json",
+    "docs/evidence/pilot_v3_0/PILOT_APPLICABILITY_OVERLAY.json",
+    "docs/evidence/pilot_v3_0/PILOT_AUTONOMOUS_EXECUTION_STATE.json",
+    "docs/evidence/pilot_v3_0/PILOT_P0_EXECUTION_REGISTER.json",
+    "docs/evidence/pilot_v3_0/PILOT_P0_OVERLAY_BINDING_EVIDENCE.json",
+    "docs/evidence/pilot_v3_0/PILOT_WORK_ORDER_CHAIN.json",
+    "tests/integration_manifest_support_pilot_v3.py"
+  ],
+  "phase_b_delete_paths": [
+    ".pilot-v3-p0-overlay-transport/chunk.00",
+    ".pilot-v3-p0-overlay-transport/chunk.01"
+  ],
+  "transport_binding_path": "docs/evidence/pilot_v3_0/PILOT_P0_OVERLAY_TRANSPORT_BINDING.json",
+  "transport_binding_sha256": "4a15260c51e1afc7766b63d645e08aea5429e58e9b66b4101b0f2092fed31f9c",
+  "corrected_workflow_sha256": "038817083fb7944503e939cd5ecafd49322ff6e492f6e0101584076af4c1a2ab",
+  "failed_runtime_evidence": {
+    "failed_work_order_id": "WO-PILOT-P0-OVERLAY-PR-PREFLIGHT-CORRECTIVE-010",
+    "failed_execution_transport_commit": "22b404e5bcacc509ca463b0c3a83e714b80b0aee",
+    "failed_run_id": 30392936134,
+    "failed_job_id": 90388791446,
+    "failed_artifact_id": 8701646475,
+    "failed_artifact_sha256": "f9fadbc82f497bb8511b95c0937204519185f79bd43fb8f84aebf24b12813db2",
+    "failure_class": "FINAL_MANIFEST_TESTS_READ_UNSTAGED_DELETED_TRANSPORT_CHUNKS",
+    "confirmed_causal_sequence": [
+      "phase-B delete paths were removed from the worktree",
+      "exact old-collector negative and union-collector positive scope controls passed",
+      "the Git index was not yet updated",
+      "manifest tests enumerated tracked chunks from the old index and attempted to read missing worktree files",
+      "the run failed before git commit and before git push"
+    ],
+    "preserved_passed_controls": {
+      "contents_write_permission": "PASS",
+      "signed_chain_manifest_binding_capability_gate": "PASS",
+      "transport_archive_binding": "PASS",
+      "transport_tree_generator_tests": "PASS",
+      "transport_tree_manifest_tests": "PASS",
+      "transport_tree_full_source_ci": "PASS_1016_TESTS",
+      "phase_b_scope_negative_positive_controls": "PASS",
+      "final_overlay_712_rows_exact_bytes": "PASS",
+      "final_generator_tests": "PASS_8_TESTS"
+    },
+    "minimal_corrective_action": "Run git add -A only after exact scope controls and before final generator/manifest/full-source tests; after tests prove no unstaged or untracked mutation and prove the cached path set remains exactly the signed nine-path phase-B set.",
+    "test_criteria_changed": false,
+    "rollback_condition": "Any event, permission, ancestry, stage path, signature, workflow hash, immutable binding, exact scope set, staged path set, manifest test, source test, commit readback, remote precondition or remote readback failure.",
+    "rollback_action": "Do not create or push the final materialized commit; retain the latest manifest-valid corrective transport head and keep P0 IN_PROGRESS, PILOT_BLOCKED and RELEASE_BLOCKED."
+  },
+  "expected_result": "The unchanged deterministic 712-row overlay is committed and byte-for-byte reread from the same canonical branch. Source-runtime evidence may reach L2; physical L5 remains UNVERIFIED and PILOT_BLOCKED/RELEASE_BLOCKED remain in force.",
+  "marketplace_writes": false,
+  "release_authorized": false,
+  "requirements": [
+    {
+      "requirement_id": "CORR-011-001",
+      "milestone": "P0_CANONICAL_REANCHOR_RECOVERY",
+      "action": "Preserve one canonical branch and prove exact three-commit corrective ancestry from head 22b404e.",
+      "test": "Verify HEAD^^^ equals authorization_parent_exact_head and each stage diff equals its signed one-file set.",
+      "evidence_level": "L1 then L2",
+      "artifact": "WORK_ORDER_P0_OVERLAY_FINAL_MANIFEST_STAGING_CORRECTIVE_011.json",
+      "pass_criterion": "No parallel branch, force update, unexplained path or parent mismatch.",
+      "actual_status": "NOT_STARTED"
+    },
+    {
+      "requirement_id": "CORR-011-002",
+      "milestone": "P0_CANONICAL_REANCHOR_RECOVERY",
+      "action": "Preserve WO010 failure evidence and prove the final-manifest defect is an index-order cause, not a test or payload defect.",
+      "test": "Run 30392936134 logs/artifact show exact passed controls, chunk FileNotFoundError before commit/push, and no canonical head movement.",
+      "evidence_level": "L2",
+      "artifact": "run 30392936134, artifact 8701646475 and PILOT_WORK_ORDER_CHAIN.json",
+      "pass_criterion": "Failure is preserved; no test is deleted, weakened, bypassed or reclassified.",
+      "actual_status": "NOT_STARTED"
+    },
+    {
+      "requirement_id": "CORR-011-003",
+      "milestone": "P0_CANONICAL_REANCHOR_RECOVERY",
+      "action": "Stage exactly the signed nine-path phase-B set after scope controls and before final manifest tests.",
+      "test": "Compare cached paths to saved phase-b-paths before tests and again after tests; prove unstaged and untracked sets are empty.",
+      "evidence_level": "L1/L2",
+      "artifact": "workflow staged-path and cleanliness logs",
+      "pass_criterion": "Cached set equals exactly nine signed paths; tests create no extra mutation.",
+      "actual_status": "NOT_STARTED"
+    },
+    {
+      "requirement_id": "CORR-011-004",
+      "milestone": "P0_CANONICAL_REANCHOR_RECOVERY",
+      "action": "Preserve immutable chunks/archive/payload, exact old/new scope controls and effective manifest equality on transport and staged final trees.",
+      "test": "Chunk/archive/member/payload hashes; old collector exact three omissions; union exact nine; manifest diagnostic and B1A tests on both trees.",
+      "evidence_level": "L1/L2",
+      "artifact": "transport binding, transport/closure overlays and workflow logs",
+      "pass_criterion": "All byte, set and manifest comparisons pass without criterion change.",
+      "actual_status": "NOT_STARTED"
+    },
+    {
+      "requirement_id": "CORR-011-005",
+      "milestone": "P0_CANONICAL_REANCHOR_RECOVERY",
+      "action": "Run focused controls and complete source regression before and after materialization.",
+      "test": "Generator tests, manifest tests and python3 -m quantum.scripts.ci on transport and staged final trees.",
+      "evidence_level": "L1/L2",
+      "artifact": "immutable PR-run logs and artifact",
+      "pass_criterion": "All mandatory tests exit zero without removal, weakening, suppression or timeout acceptance.",
+      "actual_status": "NOT_STARTED"
+    },
+    {
+      "requirement_id": "CORR-011-006",
+      "milestone": "P0_CANONICAL_REANCHOR_RECOVERY",
+      "action": "Commit, locally reread, guarded non-force push and remotely reread every final phase-B artifact.",
+      "test": "Commit parent/blob, remote precondition, non-force push, remote ref equality, byte-for-byte reread and deleted-path absence.",
+      "evidence_level": "L2",
+      "artifact": "PILOT_P0_OVERLAY_BINDING_EVIDENCE.json and immutable Actions artifact",
+      "pass_criterion": "Remote canonical ref contains the exact tested final tree; L5 remains UNVERIFIED and PILOT_BLOCKED/RELEASE_BLOCKED remain.",
+      "actual_status": "NOT_STARTED"
+    }
+  ],
+  "next_test": [
+    "verify signed three-commit ancestry and exact one-file stage paths",
+    "verify WO010 failure evidence and unchanged canonical head",
+    "verify transport archive, manifest and exact scope controls",
+    "stage exact nine paths and prove cached set",
+    "run focused and complete source tests on staged final tree",
+    "prove no test-created unstaged or untracked changes",
+    "commit readback, guarded non-force push and remote byte-for-byte readback"
+  ],
+  "target_evidence_level": "L1_STAGED_INDEX_CONTROLS_THEN_L2_PR_RUNTIME_REMOTE_READBACK",
+  "schema_version": "3.0.0",
+  "work_order_id": "WO-PILOT-P0-OVERLAY-FINAL-MANIFEST-STAGING-CORRECTIVE-011",
+  "work_order_sha256": "c1ba6f6a78d2edfcdc20e60417edf629356e107359df44588e8d4bb9cee1a8bc"
+}

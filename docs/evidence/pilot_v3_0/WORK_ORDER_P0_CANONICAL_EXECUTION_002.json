@@ -1,0 +1,57 @@
+{
+  "active_pilot_milestone": "P0_CANONICAL_REANCHOR_RECOVERY",
+  "artifact_type": "SIGNED_WORK_ORDER",
+  "canonical_branch": "fix/quantum-pilot-v3-canonical",
+  "change_boundary": "Advance the single canonical branch by one atomic P0 execution commit containing only deterministic overlay tests, P0 state/register artifacts, and the exact manifest-chain update required to keep the tracked tree green.",
+  "defect_ids": [
+    "PILOT-D-P0-001",
+    "PILOT-D-P0-002",
+    "PILOT-D-P0-003"
+  ],
+  "expected_result": "Generator controls pass, effective manifest matches the tracked tree, full source CI passes, and a 712-row applicability overlay is produced as immutable workflow evidence. P0 remains IN_PROGRESS until that generated artifact is committed and reverified.",
+  "files_allowed_to_change": [
+    ".github/workflows/pilot-v3-canonical-recovery.yml",
+    "tests/integration_manifest_support_pilot_v3.py",
+    "tests/test_pilot_v3_generate_overlay.py",
+    "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_V3_0_P0_EXECUTION.json",
+    "docs/evidence/pilot_v3_0/WORK_ORDER_P0_CANONICAL_EXECUTION_002.json",
+    "docs/evidence/pilot_v3_0/PILOT_AUTONOMOUS_EXECUTION_STATE.json",
+    "docs/evidence/pilot_v3_0/PILOT_DEFECT_REGISTER.json",
+    "docs/evidence/pilot_v3_0/PILOT_FAILURE_CLASSIFICATION_REGISTER.json",
+    "docs/evidence/pilot_v3_0/PILOT_WORK_ORDER_CHAIN.json",
+    "docs/evidence/pilot_v3_0/PILOT_P0_EXECUTION_REGISTER.json"
+  ],
+  "files_forbidden_to_change": [
+    "src/**",
+    "scripts/**",
+    "installer/**",
+    "requirements/**",
+    "docs/evidence/agent_v3_1/REQUIREMENTS_TRACEABILITY_MATRIX.json",
+    "docs/evidence/agent_v3_1/rtm/**",
+    "tools/m9_maximum_assurance_control_plane.py",
+    ".github/workflows/m9-maximum-assurance-control-plane.yml",
+    "main"
+  ],
+  "hypothesis": "The generator and manifest chain can be verified on the single canonical line without changing product behavior or weakening Protocol v3.1.",
+  "marketplace_writes": false,
+  "next_test": [
+    "python -m unittest -v tests.test_pilot_v3_generate_overlay",
+    "python -m unittest -v tests.test_a0_manifest_diagnostic tests.test_b1a_artifact_manifest",
+    "PYTHONPATH=src python -m quantum.scripts.ci"
+  ],
+  "parent_exact_head": "9ddb908c77e033edc7e3712014d6d15da2e5e7d0",
+  "release_authorized": false,
+  "requirement_ids": [
+    "PILOT-P0-001",
+    "PILOT-P0-002",
+    "PILOT-P0-003",
+    "PILOT-P0-004",
+    "PILOT-P0-005"
+  ],
+  "rollback_action": "Do not advance or merge the canonical branch; retain the parent exact head.",
+  "rollback_condition": "Any forbidden path change, invalid work-order signature, requirement count other than 712, duplicate Is, manifest mismatch, product regression or noncanonical branch use.",
+  "schema_version": "3.0.0",
+  "target_evidence_level": "L1_UNIT_THEN_L2_SOURCE_RUNTIME",
+  "work_order_id": "WO-PILOT-P0-CANONICAL-EXECUTION-002",
+  "work_order_sha256": "7f02d0b4b594438ff812902179fa9a9f4fe3711803880bb589c95c2dbc722c2c"
+}

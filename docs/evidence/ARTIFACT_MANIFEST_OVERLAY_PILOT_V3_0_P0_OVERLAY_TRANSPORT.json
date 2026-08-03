@@ -1,0 +1,65 @@
+{
+  "artifact_type": "ARTIFACT_MANIFEST_OVERLAY",
+  "base_pilot_v3_0_p0_source_runtime_env_corrective_overlay_git_blob_sha": "a7a4d579c2c0c06c9917975cf21e689f48a46a4e",
+  "entries": [
+    [
+      ".github/workflows/pilot-v3-canonical-recovery.yml",
+      "038817083fb7944503e939cd5ecafd49322ff6e492f6e0101584076af4c1a2ab",
+      26848
+    ],
+    [
+      ".pilot-v3-p0-overlay-transport/chunk.00",
+      "4bc9f968e3e7674b660d491b2a1a3ea47166639be206cf942be179a1cd3548f1",
+      8192
+    ],
+    [
+      ".pilot-v3-p0-overlay-transport/chunk.01",
+      "a3c19ac03f970cf9d141e9866ff1553a5552864695ddbd905d27ea0ad374c2fc",
+      4128
+    ],
+    [
+      "docs/evidence/pilot_v3_0/PILOT_CAPABILITY_GATE.json",
+      "178ee43bf83e3cb02a4e5692e66b50255ddcb76c63a2e239ebf4285fa3d80cef",
+      2716
+    ],
+    [
+      "docs/evidence/pilot_v3_0/PILOT_P0_OVERLAY_TRANSPORT_BINDING.json",
+      "4a15260c51e1afc7766b63d645e08aea5429e58e9b66b4101b0f2092fed31f9c",
+      4076
+    ],
+    [
+      "docs/evidence/pilot_v3_0/WORK_ORDER_P0_OVERLAY_FINAL_MANIFEST_STAGING_CORRECTIVE_011.json",
+      "a4e03de0e7e25acb251a7db6ef8dfc20b2f8e24f218a3b2b7249dafc77ca3549",
+      9225
+    ],
+    [
+      "docs/evidence/pilot_v3_0/WORK_ORDER_P0_OVERLAY_MATERIALIZATION_007.json",
+      "15db0873ea20fd48434585726aec0d7e0f713d85f9e1f1d8f3a563dbc55b3409",
+      4520
+    ],
+    [
+      "docs/evidence/pilot_v3_0/WORK_ORDER_P0_OVERLAY_PR_EXECUTION_CORRECTIVE_009.json",
+      "c76f64bae1d674301e8922e26b37227590b30b4b886f955b77623372f12b5682",
+      8022
+    ],
+    [
+      "docs/evidence/pilot_v3_0/WORK_ORDER_P0_OVERLAY_PR_PREFLIGHT_CORRECTIVE_010.json",
+      "a857b12971ee1d0f32e275fdae8392f318215617cebd3a77e053d7c4d631e26a",
+      7722
+    ],
+    [
+      "docs/evidence/pilot_v3_0/WORK_ORDER_P0_OVERLAY_SCOPE_CORRECTIVE_008.json",
+      "d50fc30d3cc7b17cc63e00a7b5338ee524fb594ccf8f4739a7a615e37f294a79",
+      8044
+    ],
+    [
+      "tests/integration_manifest_support_pilot_v3.py",
+      "3371231c4818ebc9f29017eb18abdfa34162cabbf309039e6d37522c9a70b64d",
+      3951
+    ]
+  ],
+  "overlay_id": "PILOT-V3.0-P0-OVERLAY-TRANSPORT",
+  "release_authorized": false,
+  "schema_version": "1.0.0",
+  "scope": "Manifest-valid immutable binary transport plus signed scope-collector, PR-execution, PR-preflight and final-manifest-staging corrective authorizations and exact workflow; no product, UI, installer, dependency, canonical RTM, Protocol v3.1, M9 controller, marketplace-write or release change."
+}

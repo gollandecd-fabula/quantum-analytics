@@ -1,0 +1,122 @@
+{
+  "active_pilot_milestone": "P0_CANONICAL_REANCHOR_RECOVERY",
+  "artifact_type": "SIGNED_WORK_ORDER",
+  "canonical_branch": "fix/quantum-pilot-v3-canonical",
+  "change_boundary": "Correct only the statically confirmed missing-key defect in the not-yet-applied PR execution workflow. Read the old-collector omitted-path set from the already signed WO008 instead of an absent WO009 key. Preserve the same GitHub Actions method, PR trigger, immutable transport, verified scope collector, generated overlay bytes, product code, UI, installer, dependencies, canonical RTM, Protocol v3.1, M9 controller, marketplace-write and release state.",
+  "authorization_parent_exact_head": "69e3b113f69a2e49d4c255613a3eb1b6baed2896",
+  "authorization_stage_files_allowed_to_change": [
+    "docs/evidence/pilot_v3_0/WORK_ORDER_P0_OVERLAY_PR_PREFLIGHT_CORRECTIVE_010.json"
+  ],
+  "manifest_stage_files_allowed_to_change": [
+    "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_V3_0_P0_OVERLAY_TRANSPORT.json"
+  ],
+  "execution_stage_files_allowed_to_change": [
+    ".github/workflows/pilot-v3-canonical-recovery.yml"
+  ],
+  "phase_b_final_files_allowed_to_change": [
+    ".pilot-v3-p0-overlay-transport/chunk.00",
+    ".pilot-v3-p0-overlay-transport/chunk.01",
+    "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_V3_0_P0_OVERLAY_CLOSURE.json",
+    "docs/evidence/pilot_v3_0/PILOT_APPLICABILITY_OVERLAY.json",
+    "docs/evidence/pilot_v3_0/PILOT_AUTONOMOUS_EXECUTION_STATE.json",
+    "docs/evidence/pilot_v3_0/PILOT_P0_EXECUTION_REGISTER.json",
+    "docs/evidence/pilot_v3_0/PILOT_P0_OVERLAY_BINDING_EVIDENCE.json",
+    "docs/evidence/pilot_v3_0/PILOT_WORK_ORDER_CHAIN.json",
+    "tests/integration_manifest_support_pilot_v3.py"
+  ],
+  "phase_b_delete_paths": [
+    ".pilot-v3-p0-overlay-transport/chunk.00",
+    ".pilot-v3-p0-overlay-transport/chunk.01"
+  ],
+  "transport_binding_path": "docs/evidence/pilot_v3_0/PILOT_P0_OVERLAY_TRANSPORT_BINDING.json",
+  "transport_binding_sha256": "4a15260c51e1afc7766b63d645e08aea5429e58e9b66b4101b0f2092fed31f9c",
+  "corrected_workflow_sha256": "570cf1b2959627dad8bfeb5a6b5b9286990be3b8f58900dfe2b1babfa6ccdc61",
+  "preflight_correction": {
+    "failed_work_order_id": "WO-PILOT-P0-OVERLAY-PR-EXECUTION-CORRECTIVE-009",
+    "failed_authorization_commit": "0dab5ff49e053311b44cf24e7bfc73d1635c426f",
+    "failed_transport_manifest_commit": "69e3b113f69a2e49d4c255613a3eb1b6baed2896",
+    "failure_class": "STATIC_PREFLIGHT_REFERENCED_MISSING_ROOT_CAUSE_REGRESSION_KEY",
+    "execution_workflow_commit_created": false,
+    "correct_source": "docs/evidence/pilot_v3_0/WORK_ORDER_P0_OVERLAY_SCOPE_CORRECTIVE_008.json#root_cause_regression.old_collector_omitted_paths",
+    "rollback_condition": "Any event, permission, ancestry, stage path, signature, workflow hash, signed WO008 regression-source, binary binding, manifest, source test, commit readback, remote precondition or remote readback failure.",
+    "rollback_action": "Do not create or push the final materialized commit; retain the latest manifest-valid corrective transport head and keep P0 IN_PROGRESS, PILOT_BLOCKED and RELEASE_BLOCKED."
+  },
+  "expected_result": "The unchanged 712-row overlay is committed and byte-for-byte reread from the same canonical branch by a connector-visible same-repository PR run after the static contract defect is corrected. P0 source recovery may become VERIFIED at L2 while physical L5 remains UNVERIFIED and PILOT_BLOCKED/RELEASE_BLOCKED remain in force.",
+  "marketplace_writes": false,
+  "release_authorized": false,
+  "requirements": [
+    {
+      "requirement_id": "CORR-010-001",
+      "milestone": "P0_CANONICAL_REANCHOR_RECOVERY",
+      "action": "Preserve one canonical branch and prove exact three-commit corrective ancestry from manifest head 69e3b113.",
+      "test": "HEAD^^^ equals authorization_parent_exact_head and each stage diff equals its signed one-file set.",
+      "evidence_level": "L1/L2",
+      "artifact": "docs/evidence/pilot_v3_0/WORK_ORDER_P0_OVERLAY_PR_PREFLIGHT_CORRECTIVE_010.json",
+      "pass_criterion": "No parallel branch, force update, unexplained path or parent mismatch.",
+      "actual_status": "NOT_STARTED"
+    },
+    {
+      "requirement_id": "CORR-010-002",
+      "milestone": "P0_CANONICAL_REANCHOR_RECOVERY",
+      "action": "Prove WO009 failed only static preflight before its workflow was committed, and source omitted paths from signed WO008.",
+      "test": "WO009 execution_transport_commit remains null; manifest verifies WO008 bytes; runtime reads exact three omitted paths from WO008.",
+      "evidence_level": "L1/L2",
+      "artifact": "WO008, WO009, WO010 and work-order chain",
+      "pass_criterion": "No rewrite of WO009; exact signed WO008 source resolves missing-key defect.",
+      "actual_status": "NOT_STARTED"
+    },
+    {
+      "requirement_id": "CORR-010-003",
+      "milestone": "P0_CANONICAL_REANCHOR_RECOVERY",
+      "action": "Execute the materializer as a discoverable same-repository pull_request synchronize run.",
+      "test": "Assert pull_request event, exact head branch/SHA and requested contents:write before materialization.",
+      "evidence_level": "L2",
+      "artifact": "workflow and Actions run",
+      "pass_criterion": "Connector-visible run uses exact workflow/head; any permission failure blocks push.",
+      "actual_status": "NOT_STARTED"
+    },
+    {
+      "requirement_id": "CORR-010-004",
+      "milestone": "P0_CANONICAL_REANCHOR_RECOVERY",
+      "action": "Preserve immutable transport, old negative/new positive scope controls and manifest equality.",
+      "test": "Chunk/archive/member/payload hashes; old collector exact three omissions; union exact nine; manifest tests on both trees.",
+      "evidence_level": "L1/L2",
+      "artifact": "transport binding, scope logs, transport and closure overlays",
+      "pass_criterion": "All exact byte and set comparisons pass.",
+      "actual_status": "NOT_STARTED"
+    },
+    {
+      "requirement_id": "CORR-010-005",
+      "milestone": "P0_CANONICAL_REANCHOR_RECOVERY",
+      "action": "Run focused controls and full source regression before and after materialization.",
+      "test": "Generator tests, manifest tests and python3 -m quantum.scripts.ci twice.",
+      "evidence_level": "L1/L2",
+      "artifact": "immutable PR-run logs",
+      "pass_criterion": "All mandatory tests exit zero without weakening or suppression.",
+      "actual_status": "NOT_STARTED"
+    },
+    {
+      "requirement_id": "CORR-010-006",
+      "milestone": "P0_CANONICAL_REANCHOR_RECOVERY",
+      "action": "Commit, locally reread, guarded non-force push and remotely reread every final phase-B artifact.",
+      "test": "Commit parent/blob, remote precondition/ref equality, byte reread and deleted-path absence.",
+      "evidence_level": "L2",
+      "artifact": "binding evidence and immutable Actions artifact",
+      "pass_criterion": "Remote branch contains exact tested final tree; L5 remains UNVERIFIED and PILOT_BLOCKED/RELEASE_BLOCKED remain.",
+      "actual_status": "NOT_STARTED"
+    }
+  ],
+  "next_test": [
+    "verify signed three-commit ancestry and exact stage paths",
+    "verify signed WO008 regression-source and PR event/head",
+    "verify transport archive and manifest",
+    "run focused/full source tests on transport tree",
+    "run exact old/new scope controls",
+    "repeat focused/full source tests on final tree",
+    "commit and remote byte readback"
+  ],
+  "target_evidence_level": "L1_STATIC_CONTRACT_AND_SCOPE_CONTROLS_THEN_L2_PR_RUNTIME_REMOTE_READBACK",
+  "schema_version": "3.0.0",
+  "work_order_id": "WO-PILOT-P0-OVERLAY-PR-PREFLIGHT-CORRECTIVE-010",
+  "work_order_sha256": "22c6d0a5625654f652f07d5c23daff956f242c163fe6a0017823a9a3ba6432d8"
+}

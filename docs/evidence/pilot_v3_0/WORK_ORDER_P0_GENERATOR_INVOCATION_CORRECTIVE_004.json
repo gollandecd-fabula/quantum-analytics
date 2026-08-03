@@ -1,0 +1,59 @@
+{
+  "active_pilot_milestone": "P0_CANONICAL_REANCHOR_RECOVERY",
+  "artifact_type": "SIGNED_WORK_ORDER",
+  "canonical_branch": "fix/quantum-pilot-v3-canonical",
+  "change_boundary": "Preserve prior failed attempts; correct only the workflow invocation from path-script execution to module execution, add the exact module-CLI regression control, and update append-only P0 manifest/state/evidence required for the same canonical branch.",
+  "defect_ids": [
+    "PILOT-D-P0-006"
+  ],
+  "expected_result": "Six generator controls pass; module CLI produces a 712-row overlay; effective manifest equals the tracked tree; complete source regression executes. P0 remains IN_PROGRESS until generated overlay and runtime evidence are committed and reverified.",
+  "files_allowed_to_change": [
+    ".github/workflows/pilot-v3-canonical-recovery.yml",
+    "tests/integration_manifest_support_pilot_v3.py",
+    "tests/test_pilot_v3_generate_overlay.py",
+    "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_V3_0_P0_GENERATOR_INVOCATION_CORRECTIVE.json",
+    "docs/evidence/pilot_v3_0/WORK_ORDER_P0_GENERATOR_INVOCATION_CORRECTIVE_004.json",
+    "docs/evidence/pilot_v3_0/PILOT_P0_ATTEMPT_002_FAILURE.json",
+    "docs/evidence/pilot_v3_0/PILOT_AUTONOMOUS_EXECUTION_STATE.json",
+    "docs/evidence/pilot_v3_0/PILOT_DEFECT_REGISTER.json",
+    "docs/evidence/pilot_v3_0/PILOT_FAILURE_CLASSIFICATION_REGISTER.json",
+    "docs/evidence/pilot_v3_0/PILOT_WORK_ORDER_CHAIN.json",
+    "docs/evidence/pilot_v3_0/PILOT_P0_EXECUTION_REGISTER.json"
+  ],
+  "files_forbidden_to_change": [
+    "tools/pilot_v3_generate_overlay.py",
+    "docs/evidence/pilot_v3_0/WORK_ORDER_P0_CANONICAL_EXECUTION_002.json",
+    "docs/evidence/pilot_v3_0/WORK_ORDER_P0_SIGNATURE_CORRECTIVE_003.json",
+    "src/**",
+    "scripts/**",
+    "installer/**",
+    "requirements/**",
+    "docs/evidence/agent_v3_1/REQUIREMENTS_TRACEABILITY_MATRIX.json",
+    "docs/evidence/agent_v3_1/rtm/**",
+    "tools/m9_maximum_assurance_control_plane.py",
+    ".github/workflows/m9-maximum-assurance-control-plane.yml",
+    "main"
+  ],
+  "hypothesis": "Module execution preserves repository-root package resolution for the unchanged generator, while path-script execution does not; the workflow-only correction restores runtime generation without changing product behavior.",
+  "marketplace_writes": false,
+  "next_test": [
+    "python -m unittest -v tests.test_pilot_v3_generate_overlay",
+    "python -m tools.pilot_v3_generate_overlay --repo-root . --output <temp>/PILOT_APPLICABILITY_OVERLAY.json",
+    "python -m unittest -v tests.test_a0_manifest_diagnostic tests.test_b1a_artifact_manifest",
+    "PYTHONPATH=src python -m quantum.scripts.ci"
+  ],
+  "parent_exact_head": "9757cb8bee18c5122361b973f321455a040f90c0",
+  "release_authorized": false,
+  "requirement_ids": [
+    "PILOT-P0-002",
+    "PILOT-P0-003",
+    "PILOT-P0-004",
+    "PILOT-P0-005"
+  ],
+  "rollback_action": "Do not advance or merge the canonical branch; retain exact head 9757cb8bee18c5122361b973f321455a040f90c0.",
+  "rollback_condition": "Any forbidden path change, invalid signature, module CLI regression, requirement count other than 712, manifest mismatch, source regression failure or noncanonical branch use.",
+  "schema_version": "3.0.0",
+  "target_evidence_level": "L1_UNIT_THEN_L2_SOURCE_RUNTIME",
+  "work_order_id": "WO-PILOT-P0-GENERATOR-INVOCATION-CORRECTIVE-004",
+  "work_order_sha256": "64c0b363c66ae13de6e94d07a76e7ef4336c6c9f32e28a50e08e91176b776d38"
+}

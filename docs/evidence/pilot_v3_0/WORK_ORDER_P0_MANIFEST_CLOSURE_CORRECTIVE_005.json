@@ -1,0 +1,63 @@
+{
+  "active_pilot_milestone": "P0_CANONICAL_REANCHOR_RECOVERY",
+  "artifact_type": "SIGNED_WORK_ORDER",
+  "canonical_branch": "fix/quantum-pilot-v3-canonical",
+  "change_boundary": "Preserve all prior failed attempts and signed work orders; correct only the effective-manifest extension so shared CONTROL_PATHS excludes pilot overlay control files, add one closure overlay with exact tracked identities, and update append-only P0 failure/state evidence.",
+  "defect_ids": [
+    "PILOT-D-P0-007"
+  ],
+  "expected_result": "Six generator controls and 712-row generation remain green; effective manifest diff becomes zero; complete source regression executes. P0 remains IN_PROGRESS until generated overlay and exact runtime evidence are committed and reverified.",
+  "files_allowed_to_change": [
+    "tests/integration_manifest_support_pilot_v3.py",
+    "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_V3_0_P0_MANIFEST_CLOSURE.json",
+    "docs/evidence/pilot_v3_0/WORK_ORDER_P0_MANIFEST_CLOSURE_CORRECTIVE_005.json",
+    "docs/evidence/pilot_v3_0/PILOT_P0_ATTEMPT_003_FAILURE.json",
+    "docs/evidence/pilot_v3_0/PILOT_AUTONOMOUS_EXECUTION_STATE.json",
+    "docs/evidence/pilot_v3_0/PILOT_DEFECT_REGISTER.json",
+    "docs/evidence/pilot_v3_0/PILOT_FAILURE_CLASSIFICATION_REGISTER.json",
+    "docs/evidence/pilot_v3_0/PILOT_WORK_ORDER_CHAIN.json",
+    "docs/evidence/pilot_v3_0/PILOT_P0_EXECUTION_REGISTER.json"
+  ],
+  "files_forbidden_to_change": [
+    ".github/workflows/pilot-v3-canonical-recovery.yml",
+    "tools/pilot_v3_generate_overlay.py",
+    "tests/test_pilot_v3_generate_overlay.py",
+    "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_V3_0_CANONICAL_RECOVERY.json",
+    "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_V3_0_P0_EXECUTION.json",
+    "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_V3_0_P0_SIGNATURE_CORRECTIVE.json",
+    "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_V3_0_P0_GENERATOR_INVOCATION_CORRECTIVE.json",
+    "docs/evidence/pilot_v3_0/WORK_ORDER_P0_CANONICAL_EXECUTION_002.json",
+    "docs/evidence/pilot_v3_0/WORK_ORDER_P0_SIGNATURE_CORRECTIVE_003.json",
+    "docs/evidence/pilot_v3_0/WORK_ORDER_P0_GENERATOR_INVOCATION_CORRECTIVE_004.json",
+    "src/**",
+    "scripts/**",
+    "installer/**",
+    "requirements/**",
+    "docs/evidence/agent_v3_1/REQUIREMENTS_TRACEABILITY_MATRIX.json",
+    "docs/evidence/agent_v3_1/rtm/**",
+    "tools/m9_maximum_assurance_control_plane.py",
+    ".github/workflows/m9-maximum-assurance-control-plane.yml",
+    "main"
+  ],
+  "hypothesis": "The manifest mismatch is caused by a local-only CONTROL_PATHS extension and three stale tracked identities. Mutating the shared base globals and applying one exact closure overlay will remove exactly those discrepancies without changing product behavior.",
+  "marketplace_writes": false,
+  "next_test": [
+    "python -m unittest -v tests.test_pilot_v3_generate_overlay",
+    "python -m tools.pilot_v3_generate_overlay --repo-root . --output <temp>/PILOT_APPLICABILITY_OVERLAY.json",
+    "python -m unittest -v tests.test_a0_manifest_diagnostic tests.test_b1a_artifact_manifest",
+    "PYTHONPATH=src python -m quantum.scripts.ci"
+  ],
+  "parent_exact_head": "92c97e64161a3da5d96b7b68686025f5826fac0a",
+  "release_authorized": false,
+  "requirement_ids": [
+    "PILOT-P0-003",
+    "PILOT-P0-004",
+    "PILOT-P0-005"
+  ],
+  "rollback_action": "Do not advance or merge the canonical branch; retain exact head 92c97e64161a3da5d96b7b68686025f5826fac0a.",
+  "rollback_condition": "Any discrepancy beyond the isolated manifest set, invalid signature, generator regression, manifest mismatch, source regression failure or noncanonical branch use.",
+  "schema_version": "3.0.0",
+  "target_evidence_level": "L1_UNIT_THEN_L2_SOURCE_RUNTIME",
+  "work_order_id": "WO-PILOT-P0-MANIFEST-CLOSURE-CORRECTIVE-005",
+  "work_order_sha256": "74070b2823997153f16f555784dd7eb385400b772141264342852d5eb41e22cc"
+}

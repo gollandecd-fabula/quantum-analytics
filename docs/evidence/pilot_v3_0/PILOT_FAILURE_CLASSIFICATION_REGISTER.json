@@ -1,0 +1,76 @@
+{
+  "artifact_type": "PILOT_FAILURE_CLASSIFICATION_REGISTER",
+  "canonical_branch": "fix/quantum-pilot-v3-canonical",
+  "entries": [
+    {
+      "classification_id": "PILOT-FC-001",
+      "decision": "CLOSED_AND_EXCLUDED_FROM_CANONICAL_EVIDENCE",
+      "pilot_claim_allowed": false,
+      "primary_classification": "PROTOCOL_SCOPE_FAILURE",
+      "product_failure_proven": false,
+      "subject": "Historical PR contours 165-174"
+    },
+    {
+      "classification_id": "PILOT-FC-002",
+      "decision": "OPEN_FOR_P1_AFTER_P0",
+      "pilot_claim_allowed": false,
+      "primary_classification": "HARNESS_FAILURE",
+      "product_failure_proven": false,
+      "subject": "M1 union-against-primary work-order validation at 43d6230"
+    },
+    {
+      "classification_id": "PILOT-FC-003",
+      "decision": "OPEN_FOR_P3",
+      "pilot_claim_allowed": false,
+      "primary_classification": "PRODUCT_FAILURE",
+      "product_failure_proven": true,
+      "subject": "DesktopDirectory unavailable in Windows clean-room installer path"
+    },
+    {
+      "classification_id": "PILOT-FC-004",
+      "decision": "FAILED_ATTEMPT_PRESERVED_CORRECTIVE_WO_003_ACTIVE",
+      "evidence_ids": [
+        "EVD-PILOT-P0-ATTEMPT-001"
+      ],
+      "pilot_claim_allowed": false,
+      "primary_classification": "PROTOCOL_SCOPE_FAILURE",
+      "product_failure_proven": false,
+      "subject": "WO-PILOT-P0-CANONICAL-EXECUTION-002 signature mismatch"
+    },
+    {
+      "classification_id": "PILOT-FC-005",
+      "decision": "FAILED_ATTEMPT_PRESERVED_MODULE_INVOCATION_CORRECTIVE_004_ACTIVE",
+      "evidence_ids": [
+        "EVD-PILOT-P0-ATTEMPT-002"
+      ],
+      "pilot_claim_allowed": false,
+      "primary_classification": "HARNESS_FAILURE",
+      "product_failure_proven": false,
+      "subject": "P0 generator path-script invocation at exact head 9757cb8bee18c5122361b973f321455a040f90c0"
+    },
+    {
+      "classification_id": "PILOT-FC-006",
+      "decision": "FAILED_ATTEMPT_PRESERVED_MANIFEST_CLOSURE_CORRECTIVE_005_ACTIVE",
+      "evidence_ids": [
+        "EVD-PILOT-P0-ATTEMPT-003"
+      ],
+      "pilot_claim_allowed": false,
+      "primary_classification": "PROTOCOL_SCOPE_FAILURE",
+      "product_failure_proven": false,
+      "subject": "P0 effective manifest at exact head 92c97e64161a3da5d96b7b68686025f5826fac0a"
+    },
+    {
+      "classification_id": "PILOT-FC-007",
+      "decision": "FAILED_ATTEMPT_PRESERVED_SOURCE_RUNTIME_ENV_CORRECTIVE_006_ACTIVE",
+      "evidence_ids": [
+        "EVD-PILOT-P0-ATTEMPT-004"
+      ],
+      "pilot_claim_allowed": false,
+      "primary_classification": "HARNESS_FAILURE",
+      "product_failure_proven": false,
+      "subject": "P0 source runtime at exact head 825c1a4325b24fbae8ce8b616113ba087874a1ea"
+    }
+  ],
+  "release_authorized": false,
+  "schema_version": "3.0.0"
+}

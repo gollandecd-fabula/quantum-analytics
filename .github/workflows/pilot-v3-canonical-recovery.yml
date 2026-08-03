@@ -1,0 +1,45 @@
+name: Quantum Pilot v3 Canonical Overlay Materialization Final Manifest Staging Corrective
+
+on:
+  pull_request:
+    branches:
+      - fix/quantum-pilot-v3-canonical-base
+    types: [opened, synchronize, reopened]
+    paths:
+      - ".github/workflows/pilot-v3-canonical-recovery.yml"
+      - "docs/evidence/ARTIFACT_MANIFEST_OVERLAY_PILOT_V3_0_*.json"
+      - "docs/evidence/pilot_v3_0/**"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quantum-pilot-v3-canonical-overlay-historical
+  cancel-in-progress: false
+
+jobs:
+  p0-overlay-materialization:
+    # Completed one-shot transaction. It is non-applicable to every later head.
+    if: "${{ github.event.pull_request.head.ref == 'fix/quantum-pilot-v3-canonical' && github.event.pull_request.head.sha == '60ec657484df58cd96d43ec8df3a5703ef83a77c' }}"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout immutable historical head
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: 60ec657484df58cd96d43ec8df3a5703ef83a77c
+          clean: true
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Verify archived P0 source state
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "60ec657484df58cd96d43ec8df3a5703ef83a77c"
+          python3 - <<'PY'
+          import setuptools.build_meta  # noqa: F401
+          print("SOURCE_RUNTIME_BACKEND_AVAILABLE")
+          PY
+          PYTHONPATH=src python3 -m quantum.scripts.ci
+          echo "HISTORICAL_P0_TRANSACTION_NON_APPLICABLE_TO_LATER_HEADS"

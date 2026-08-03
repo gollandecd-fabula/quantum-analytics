@@ -1,0 +1,37 @@
+{
+  "artifact_digest": "sha256:02b3bc3567e986192a3082532da8a87b244467240cd1d7ef522c3c7358a89f43",
+  "artifact_id": 8660701673,
+  "artifact_type": "FAILED_ATTEMPT_EVIDENCE",
+  "attempt_id": "PILOT-P0-ATTEMPT-002",
+  "canonical_branch": "fix/quantum-pilot-v3-canonical",
+  "controls_not_run": [
+    "effective manifest equality",
+    "complete source regression"
+  ],
+  "controls_passed": [
+    "exact head checkout",
+    "canonical branch binding",
+    "forbidden-path scope",
+    "corrective work-order signature",
+    "failed work-order preservation",
+    "712-row generation",
+    "712 unique IDs",
+    "deterministic generator",
+    "literal overlay schema",
+    "production status unchanged"
+  ],
+  "failed_step": "Run P0 unit controls and generate full overlay",
+  "failure_code": "GENERATOR_PATH_SCRIPT_PACKAGE_IMPORT_FAILURE",
+  "failure_detail": "All five unit controls passed. The subsequent path-script invocation `python tools/pilot_v3_generate_overlay.py` terminated before producing stdout or the overlay; package import from `tools` is not valid under that script-path entry mode. Manifest and complete source regression were skipped.",
+  "generation_log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "generation_log_size_bytes": 0,
+  "generator_tests_log_sha256": "029396f8385dfc4e01fa03121c64e8c7c8c223fbb288c015d7f7a59682bd6d5b",
+  "job_id": 90042938274,
+  "pilot_claim_allowed": false,
+  "primary_classification": "HARNESS_FAILURE",
+  "product_failure_proven": false,
+  "release_authorized": false,
+  "schema_version": "3.0.0",
+  "subject_exact_head": "9757cb8bee18c5122361b973f321455a040f90c0",
+  "workflow_run_id": 30285721636
+}

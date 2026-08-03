@@ -1,0 +1,41 @@
+{
+  "active_lock": {
+    "governing_work_order_id": "WO-PILOT-P0-OVERLAY-FINAL-MANIFEST-STAGING-CORRECTIVE-011",
+    "lock_id": "LOCK-PILOT-P0-OVERLAY-FINAL-MANIFEST-STAGING-CORRECTIVE-011",
+    "owner_role": "IMPLEMENTER",
+    "parallel_write_authorized": false,
+    "state": "RELEASED_AFTER_GUARDED_FINAL_MANIFEST_STAGING_CORRECTIVE_MATERIALIZATION"
+  },
+  "active_lock_count": 0,
+  "active_pilot_milestone": "P0_CANONICAL_REANCHOR_RECOVERY",
+  "artifact_type": "PILOT_AUTONOMOUS_EXECUTION_STATE",
+  "canonical_pilot_branch": "fix/quantum-pilot-v3-canonical",
+  "canonical_registry_set_sha256": "4cd2561b2da074b73ebe9ac8a3ccec6f2c890f7f7bf7998ac1a0ca698ed1037a",
+  "canonical_requirement_count": 712,
+  "canonical_state_owner": "CONTROL_PLANE",
+  "evidence_ids": [
+    "EVD-PILOT-P0-ATTEMPT-001",
+    "EVD-PILOT-P0-ATTEMPT-002",
+    "EVD-PILOT-P0-ATTEMPT-003",
+    "EVD-PILOT-P0-ATTEMPT-004",
+    "EVD-PILOT-P0-ATTEMPT-005",
+    "EVD-PILOT-P0-ATTEMPT-009"
+  ],
+  "gatekeeper": "DISCONNECTED",
+  "marketplace_writes": false,
+  "ozon": "DEFERRED",
+  "p0_phase": "CANONICAL_OVERLAY_COMMITTED_AND_REVERIFIED",
+  "p0_status": "VERIFIED",
+  "parallel_write_authorized": false,
+  "physical_l5_status": "UNVERIFIED",
+  "pilot_decision": "PILOT_BLOCKED",
+  "product_ancestor_exact_head": "b151e67c2bea8d4d50c5c4a2aeb0695e89921c01",
+  "product_ancestry_status": "VERIFIED_REMOTE_COMPARE",
+  "production_release_decision": "RELEASE_BLOCKED",
+  "protocol_sha256": "be69b8f1f919066c67086d6dd4678acf5e3cb3c4f1db9bc587dc540018601a90",
+  "release_authorized": false,
+  "repository": "gollandecd-fabula/quantum-analytics",
+  "result_exact_head_binding": "REMOTE_CANONICAL_REF_READBACK_RECORDED_BY_EVD-PILOT-P0-ATTEMPT-009",
+  "schema_version": "3.0.0",
+  "work_order_base_exact_head": "22b404e5bcacc509ca463b0c3a83e714b80b0aee"
+}

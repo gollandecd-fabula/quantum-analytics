@@ -1,0 +1,43 @@
+{
+  "artifact_digest": "sha256:717834c4ffc08762e1ab92b4fc033fadded1f254347f59a65a9bb44e1dc914e4",
+  "artifact_id": 8661676590,
+  "artifact_type": "FAILED_ATTEMPT_EVIDENCE",
+  "attempt_id": "PILOT-P0-ATTEMPT-004",
+  "backend_error": "BackendUnavailable: Cannot import 'setuptools.build_meta'",
+  "canonical_branch": "fix/quantum-pilot-v3-canonical",
+  "controls_failed": [
+    "complete source regression: 1 of 1014 tests failed"
+  ],
+  "controls_passed": [
+    "exact head checkout",
+    "canonical branch binding",
+    "forbidden-path scope",
+    "six generator unit controls",
+    "module CLI generation",
+    "712 rows",
+    "712 unique IDs",
+    "production status unchanged",
+    "effective manifest diff zero",
+    "four manifest controls"
+  ],
+  "failed_step": "Run complete source regression",
+  "failed_test": "tests.test_plateau_m6_build_metadata.PlateauM6BuildMetadataTests.test_standard_backend_builds_installable_desktop_wheel",
+  "failure_code": "SOURCE_RUNTIME_BUILD_BACKEND_UNAVAILABLE",
+  "failure_detail": "The exact canonical head passed branch/scope verification, six generator controls, module generation, 712-row validation and all four manifest controls. The complete source regression executed 1014 tests and failed only the standard wheel-build test because actions/setup-python supplied Python 3.12.13 without importable setuptools.build_meta. Foundation CI passed on the same exact head with system python3, so this is classified as a harness failure and not a product failure.",
+  "full_source_ci_log_sha256": "a774fc743552dcd57268c17ad7a72d53aa32ee9f39f13f4465707703c492f07e",
+  "generated_overlay_sha256": "ef3d831d35ca6e2d2a39228b0974506d48bafae87c622a0f5adfc83271a8b954",
+  "generated_overlay_size_bytes": 434233,
+  "generation_log_sha256": "db9d024511af2270e36c54af6a190c231e477abccd1506a2646a0a282f8403c7",
+  "generator_tests_log_sha256": "4a3b8ddb25e249798602a76a194e64e1b946a7316dda680e4d54573d0ed0fdaf",
+  "job_id": 90051063678,
+  "manifest_tests_log_sha256": "407f56bfba2a8d683a30a9bb9a220a88fbf211c50dec109e8a68b1077dc00144",
+  "pilot_claim_allowed": false,
+  "primary_classification": "HARNESS_FAILURE",
+  "product_failure_proven": false,
+  "release_authorized": false,
+  "schema_version": "3.0.0",
+  "source_regression_failures": 1,
+  "source_regression_test_count": 1014,
+  "subject_exact_head": "825c1a4325b24fbae8ce8b616113ba087874a1ea",
+  "workflow_run_id": 30288158403
+}

@@ -1,0 +1,55 @@
+{
+  "artifact_type": "ARTIFACT_MANIFEST_OVERLAY",
+  "base_pilot_v3_0_canonical_recovery_overlay_git_blob_sha": "6711cf59cfb2334b83f86c4ae662070b37a0c155",
+  "entries": [
+    [
+      ".github/workflows/pilot-v3-canonical-recovery.yml",
+      "929fa26b58e77bd4ef813212c21153301f50e4b682f083a324518a48c9cdb372",
+      5391
+    ],
+    [
+      "docs/evidence/pilot_v3_0/PILOT_AUTONOMOUS_EXECUTION_STATE.json",
+      "d170fb3c6645b80038f21b461603b8a00eb5d15bd743f04c728defb059a30339",
+      1478
+    ],
+    [
+      "docs/evidence/pilot_v3_0/PILOT_DEFECT_REGISTER.json",
+      "1a22236624a43859a73e0781d8e219a5adbbc4a0721e765b78a1f6dc13207839",
+      2010
+    ],
+    [
+      "docs/evidence/pilot_v3_0/PILOT_FAILURE_CLASSIFICATION_REGISTER.json",
+      "a7fe890026f2b6423aa48fdc0cce65fa6f46ff97eac2c98cfd350d27f2968522",
+      1102
+    ],
+    [
+      "docs/evidence/pilot_v3_0/PILOT_P0_EXECUTION_REGISTER.json",
+      "c7f697958d142c10ddc746190551500160f86e936f64d0d3e5149e7ee1a79858",
+      2349
+    ],
+    [
+      "docs/evidence/pilot_v3_0/PILOT_WORK_ORDER_CHAIN.json",
+      "a70c2af667561f906b9875bc41d9b483fbd28dcdcb5c6af8d48d83a4616ce5a5",
+      789
+    ],
+    [
+      "docs/evidence/pilot_v3_0/WORK_ORDER_P0_CANONICAL_EXECUTION_002.json",
+      "4a9698cd5ad94853897ed01e6b0ee9bf8833c6c00c3d41bf3e2d62d132187692",
+      2981
+    ],
+    [
+      "tests/integration_manifest_support_pilot_v3.py",
+      "027072458b87b5905ec4b9ce291935a94b23d396e6f3e5f935308f02b0e2ee31",
+      1893
+    ],
+    [
+      "tests/test_pilot_v3_generate_overlay.py",
+      "3a481d5bd8ad2d1d4dd90924becbbc00b372b890747bf6210d9153c020ec63f2",
+      3219
+    ]
+  ],
+  "overlay_id": "PILOT-V3.0-P0-EXECUTION",
+  "release_authorized": false,
+  "schema_version": "1.0.0",
+  "scope": "Atomic P0 execution state, generator unit controls and exact manifest-chain update only; no product, UI, installer, dependency, canonical RTM, Protocol v3.1 or release change."
+}

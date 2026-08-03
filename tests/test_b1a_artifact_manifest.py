@@ -1,6 +1,6 @@
 import unittest
 
-from tests.integration_manifest_support_m8 import (
+from tests.integration_manifest_support_pilot_v3 import (
     ARTIFACT_FIELDS,
     B1A_SCHEMAS,
     CONTROL_PATHS,
