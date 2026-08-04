@@ -1,0 +1,91 @@
+name: Validation Agent Capability
+
+on:
+  push:
+    branches:
+      - "validation/quantum/agent-capability-*"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validation-agent-capability-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  capability:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Fetch exact validation head and base
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TARGET_SHA: ${{ github.sha }}
+          BASE_SHA: "144978c1bcf1de777fef3d161280a9016ea03998"
+        run: |
+          set -euo pipefail
+          test -n "${TARGET_SHA}"
+          test "${GITHUB_REF_NAME}" != "main"
+          case "${GITHUB_REF_NAME}" in validation/quantum/agent-capability-*) ;; *) exit 91 ;; esac
+          git init .
+          git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git fetch --no-tags --depth=4 origin "${TARGET_SHA}" "${BASE_SHA}"
+          git checkout --detach "${TARGET_SHA}"
+          test "$(git rev-parse HEAD)" = "${TARGET_SHA}"
+          git merge-base --is-ancestor "${BASE_SHA}" "${TARGET_SHA}"
+          git remote set-url origin "https://github.com/${GITHUB_REPOSITORY}.git"
+          echo "VALIDATION_AGENT_EXACT_SHA_VERIFIED=${TARGET_SHA}"
+
+      - name: Enforce capability-only scope
+        env:
+          BASE_SHA: "144978c1bcf1de777fef3d161280a9016ea03998"
+          TARGET_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          git diff --name-only "${BASE_SHA}..${TARGET_SHA}" | tee /tmp/changed-paths.txt
+          if grep -E '^(ImageLab|imagelab)/' /tmp/changed-paths.txt; then exit 92; fi
+          if grep -Ev '^(\.github/workflows/validation-agent-capability\.yml|\.validation-agent/FAIL_ON_PURPOSE)$' /tmp/changed-paths.txt | grep -q .; then
+            echo "BLOCKED_SCOPE: unexpected path"
+            exit 93
+          fi
+          test -s /tmp/changed-paths.txt
+          echo "VALIDATION_AGENT_SCOPE_VERIFIED"
+
+      - name: Controlled failure probe
+        run: |
+          set -euo pipefail
+          if test -f .validation-agent/FAIL_ON_PURPOSE; then
+            echo "INTENTIONAL_VALIDATION_FAILURE: expected first-run probe"
+            exit 42
+          fi
+          echo "CONTROLLED_FAILURE_REMOVED"
+
+      - name: Prove corrected capability green state
+        env:
+          TARGET_SHA: ${{ github.sha }}
+          BASE_SHA: "144978c1bcf1de777fef3d161280a9016ea03998"
+        run: |
+          set -euo pipefail
+          test ! -e .validation-agent/FAIL_ON_PURPOSE
+          test "$(git rev-parse HEAD)" = "${TARGET_SHA}"
+          git merge-base --is-ancestor "${BASE_SHA}" "${TARGET_SHA}"
+          python3 - <<'PY'
+          from pathlib import Path
+          workflow = Path('.github/workflows/validation-agent-capability.yml')
+          if not workflow.is_file():
+              raise SystemExit('capability workflow missing')
+          text = workflow.read_text(encoding='utf-8')
+          required = (
+              'INTENTIONAL_VALIDATION_FAILURE',
+              'VALIDATION_AGENT_SCOPE_VERIFIED',
+              'VALIDATION_AGENT_CAPABILITY_GREEN',
+          )
+          missing = [item for item in required if item not in text]
+          if missing:
+              raise SystemExit(f'missing capability markers: {missing}')
+          forbidden = ('quantum' + '.scripts.ci', 'Image' + 'Lab/', 'image' + 'lab/')
+          found = [item for item in forbidden if item in text]
+          if found:
+              raise SystemExit(f'forbidden product coupling: {found}')
+          PY
+          echo "VALIDATION_AGENT_CAPABILITY_GREEN"
