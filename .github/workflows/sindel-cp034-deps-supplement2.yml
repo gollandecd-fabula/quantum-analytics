@@ -1,0 +1,43 @@
+name: SINDEL CP034 deps supplement2
+on:
+  push:
+    branches: [sindel-cp034-buildfactory]
+    paths: ['.github/workflows/sindel-cp034-deps-supplement2.yml']
+permissions:
+  contents: read
+jobs:
+  supplement2:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Build tokenizer supplement
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir cp034_supplement2
+          python -m pip install --target cp034_supplement2 tokenizers sentencepiece huggingface_hub regex requests packaging
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib,json
+          root=Path('cp034_supplement2'); rows=[]
+          for p in sorted(root.rglob('*')):
+            if p.is_file():
+              h=hashlib.sha256();
+              with p.open('rb') as f:
+                for b in iter(lambda:f.read(1024*1024),b''): h.update(b)
+              rows.append({'path':p.as_posix(),'size':p.stat().st_size,'sha256':h.hexdigest()})
+          Path('CP034_SUPPLEMENT2_MANIFEST.json').write_text(json.dumps({'files':rows},indent=2))
+          print('SUPPLEMENT2_FILES',len(rows))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sindel-cp034-deps-supplement2
+          path: |
+            cp034_supplement2
+            CP034_SUPPLEMENT2_MANIFEST.json
+          compression-level: 6
+          retention-days: 2
