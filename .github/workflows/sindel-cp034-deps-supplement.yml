@@ -14,32 +14,38 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.13'
-      - name: Build exact supplement
+      - name: Build generic ExecuTorch export overlay
         shell: bash
         run: |
           set -euo pipefail
           mkdir cp034_supplement
           python -m pip install --upgrade pip
-          python -m pip install --target cp034_supplement onnx
           python -m pip install --target cp034_supplement --no-deps \
-            'git+https://github.com/resemble-ai/chatterbox.git@5de7a54aa4e5e2baadb0182dde554908b48b85c2'
+            executorch==1.1.0 torchao==0.16.0 flatbuffers expecttest hypothesis kgb \
+            parameterized hydra-core omegaconf pytorch-tokenizers ruamel.yaml tabulate typing-extensions
           python - <<'PY'
           from pathlib import Path
-          import hashlib,json
-          root=Path('cp034_supplement')
-          rows=[]
+          import hashlib,json,sys
+          sys.path.insert(0,'cp034_supplement')
+          from importlib.metadata import version
+          assert version('executorch')=='1.1.0', version('executorch')
+          assert version('torchao')=='0.16.0', version('torchao')
+          import executorch
+          from executorch.exir import to_edge_transform_and_lower, EdgeCompileConfig
+          from executorch.backends.xnnpack.partition.xnnpack_partitioner import XnnpackPartitioner
+          root=Path('cp034_supplement'); rows=[]
           for p in sorted(root.rglob('*')):
             if p.is_file():
               h=hashlib.sha256()
               with p.open('rb') as f:
                 for b in iter(lambda:f.read(1024*1024),b''): h.update(b)
               rows.append({'path':p.as_posix(),'size':p.stat().st_size,'sha256':h.hexdigest()})
-          Path('CP034_SUPPLEMENT_MANIFEST.json').write_text(json.dumps({'files':rows},indent=2))
-          print('SUPPLEMENT_FILES',len(rows))
+          Path('CP034_SUPPLEMENT_MANIFEST.json').write_text(json.dumps({'executorch':'1.1.0','torchao':'0.16.0','files':rows},indent=2))
+          print('CP034_GENERIC_EXPORT_OVERLAY_PASS',len(rows))
           PY
       - uses: actions/upload-artifact@v4
         with:
-          name: sindel-cp034-deps-supplement
+          name: sindel-cp034-export-overlay
           path: |
             cp034_supplement
             CP034_SUPPLEMENT_MANIFEST.json
