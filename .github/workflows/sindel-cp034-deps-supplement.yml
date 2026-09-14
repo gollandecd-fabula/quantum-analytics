@@ -20,17 +20,18 @@ jobs:
           set -euo pipefail
           mkdir cp034_supplement
           python -m pip install --upgrade pip
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu torch==2.10.0
           python -m pip install --target cp034_supplement --no-deps \
             executorch==1.1.0 torchao==0.16.0 flatbuffers expecttest hypothesis kgb \
             parameterized hydra-core omegaconf pytorch-tokenizers ruamel.yaml tabulate typing-extensions
           python - <<'PY'
           from pathlib import Path
-          import hashlib,json,sys
+          import hashlib,json,sys,torch
           sys.path.insert(0,'cp034_supplement')
           from importlib.metadata import version
-          assert version('executorch')=='1.1.0', version('executorch')
-          assert version('torchao')=='0.16.0', version('torchao')
-          import executorch
+          assert torch.__version__.split('+')[0]=='2.10.0'
+          assert version('executorch')=='1.1.0'
+          assert version('torchao')=='0.16.0'
           from executorch.exir import to_edge_transform_and_lower, EdgeCompileConfig
           from executorch.backends.xnnpack.partition.xnnpack_partitioner import XnnpackPartitioner
           root=Path('cp034_supplement'); rows=[]
@@ -40,14 +41,16 @@ jobs:
               with p.open('rb') as f:
                 for b in iter(lambda:f.read(1024*1024),b''): h.update(b)
               rows.append({'path':p.as_posix(),'size':p.stat().st_size,'sha256':h.hexdigest()})
-          Path('CP034_SUPPLEMENT_MANIFEST.json').write_text(json.dumps({'executorch':'1.1.0','torchao':'0.16.0','files':rows},indent=2))
+          Path('CP034_SUPPLEMENT_MANIFEST.json').write_text(json.dumps({'executorch':'1.1.0','torchao':'0.16.0','torch':'2.10.0','files':rows},indent=2))
           print('CP034_GENERIC_EXPORT_OVERLAY_PASS',len(rows))
           PY
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: sindel-cp034-export-overlay
           path: |
             cp034_supplement
             CP034_SUPPLEMENT_MANIFEST.json
+          if-no-files-found: ignore
           compression-level: 6
           retention-days: 2
