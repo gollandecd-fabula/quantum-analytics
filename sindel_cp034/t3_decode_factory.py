@@ -1,86 +1,92 @@
 from __future__ import annotations
-import hashlib, importlib.metadata, importlib.util, json, os, subprocess, sys
+import hashlib, json, os, shutil, subprocess, sys, tarfile
 from pathlib import Path
 
-T3_SHA='5abca8321ede76f8e61f1cc0d19aea6c946b28871017ce8726f8a69203f05953'
-T3_SIZE=2143989928
-GRAPH_SHA='f4efd70b131bd2c06a1fbaf06ba9b3aed3dc319994cc8b5748edfdb45f7a17f9'
-HF_REV='e2d6902dd4c1301892935d0a0277325551e8060e'
-CHATTERBOX_COMMIT='5de7a54aa4e5e2baadb0182dde554908b48b85c2'
+GRADLE_VERSION='9.6.0'
+BUNDLETOOL_VERSION='1.18.3'
 
-def run(*args: str) -> None:
+def run(*args: str, env=None) -> None:
     print('RUN', *args, flush=True)
-    subprocess.run(args, check=True, env=os.environ.copy())
+    subprocess.run(args, check=True, env=env or os.environ.copy())
 
 def sha256(p: Path) -> str:
     h=hashlib.sha256()
     with p.open('rb') as f:
-        for b in iter(lambda:f.read(8*1024*1024),b''):
-            h.update(b)
+        for b in iter(lambda:f.read(8*1024*1024),b''): h.update(b)
     return h.hexdigest()
 
-def ensure_env() -> None:
-    marker=Path('work/.deps_ready')
-    if marker.exists(): return
-    run(sys.executable,'-m','pip','install','--upgrade','pip')
-    run(sys.executable,'-m','pip','install','--index-url','https://download.pytorch.org/whl/cpu','torch==2.10.0','torchaudio==2.10.0')
-    run(sys.executable,'-m','pip','install','--no-deps','executorch==1.1.0','torchao==0.16.0')
-    run(sys.executable,'-m','pip','install','flatbuffers','expecttest','hypothesis','kgb','parameterized','hydra-core','omegaconf','pytorch-tokenizers','ruamel.yaml','tabulate','typing-extensions','pyyaml','safetensors==0.5.3','transformers==5.2.0','huggingface_hub[hf_xet]','einops')
-    run(sys.executable,'-m','pip','install','--no-deps',f'git+https://github.com/resemble-ai/chatterbox.git@{CHATTERBOX_COMMIT}')
-    marker.parent.mkdir(parents=True,exist_ok=True); marker.write_text('ready')
+def find_jdk17() -> Path:
+    cands=[]
+    for key in ('JAVA_HOME_17_X64','JAVA_HOME'):
+        v=os.environ.get(key)
+        if v: cands.append(Path(v))
+    cands += sorted(Path('/opt/hostedtoolcache').glob('Java_*jdk/17*/x64'))
+    for p in cands:
+        java=p/'bin/java'
+        if java.is_file():
+            out=subprocess.check_output([str(java),'-version'],stderr=subprocess.STDOUT,text=True)
+            if 'version "17' in out:
+                print('JDK17',p,flush=True); return p
+    raise SystemExit('FAIL-CLOSED: JDK17 not found')
 
-def configure_exact_imports() -> None:
-    real=Path(importlib.metadata.distribution('chatterbox-tts').locate_file('chatterbox')).resolve()
-    shim=Path('work/import_shim/chatterbox'); shim.mkdir(parents=True,exist_ok=True)
-    (shim/'__init__.py').write_text("__path__=["+repr(str(real))+"]\n",encoding='utf-8')
-    os.environ['PYTHONPATH']=str(shim.parent.resolve())+os.pathsep+os.environ.get('PYTHONPATH','')
-    spec=importlib.util.find_spec('executorch')
-    if not spec or not spec.submodule_search_locations: raise SystemExit('FAIL-CLOSED executorch package missing')
-    eroot=Path(next(iter(spec.submodule_search_locations))).resolve()
-    candidates=[eroot/'data/bin/flatc',eroot.parent/'bin/flatc']
-    flatc=next((p for p in candidates if p.is_file()),None)
-    if flatc is None: raise SystemExit('FAIL-CLOSED flatc not found')
-    flatc.chmod(flatc.stat().st_mode | 0o111)
-    os.environ['FLATC_EXECUTABLE']=str(flatc)
-    print('IMPORT_SHIM_PASS',real,flush=True); print('FLATC',flatc,flush=True)
-
-def fetch_t3() -> Path:
-    from huggingface_hub import hf_hub_download
-    import shutil
-    out=Path('work/t3_mtl23ls_v3.safetensors')
-    if not out.exists():
-        src=Path(hf_hub_download(repo_id='ResembleAI/chatterbox',filename='t3_mtl23ls_v3.safetensors',revision=HF_REV))
-        out.parent.mkdir(parents=True,exist_ok=True); shutil.copyfile(src,out)
-    got=sha256(out)
-    if got!=T3_SHA or out.stat().st_size!=T3_SIZE:
-        raise SystemExit(f'FAIL-CLOSED T3 bytes drift size={out.stat().st_size} sha={got}')
-    print('T3_BYTES_PASS',out.stat().st_size,got,flush=True)
-    return out
+def split_four(src: Path, outdir: Path):
+    size=src.stat().st_size
+    q=(size+3)//4
+    rows=[]
+    with src.open('rb') as f:
+        for i in range(4):
+            data=f.read(q if i<3 else size-q*3)
+            if not data: data=b'\0'
+            p=outdir/f't3_decode.pte.part_{i:02d}'
+            p.write_bytes(data)
+            rows.append({'name':p.name,'size':p.stat().st_size,'sha256':sha256(p)})
+    return rows
 
 def main() -> int:
-    os.environ.setdefault('MALLOC_ARENA_MAX','2'); os.environ.setdefault('OMP_NUM_THREADS','1'); os.environ.setdefault('MKL_NUM_THREADS','1')
-    Path('work/chunks').mkdir(parents=True,exist_ok=True)
-    ensure_env(); configure_exact_imports(); t3=fetch_t3()
-    out=Path('work/t3_decode.pte')
-    run(sys.executable,'sindel_cp034/export_t3_decode_stage.py','--t3',str(t3),'--out',str(out),'--half-init')
-    report=Path('work/t3_decode.report.json'); j=json.loads(report.read_text())
-    if j.get('graph_code_sha256')!=GRAPH_SHA:
-        raise SystemExit(f"FAIL-CLOSED graph mismatch {j.get('graph_code_sha256')}")
-    psha=sha256(out)
-    if j.get('pte_sha256')!=psha or j.get('pte_size')!=out.stat().st_size:
-        raise SystemExit('FAIL-CLOSED PTE report mismatch')
-    rows=[]
-    with out.open('rb') as f:
-        i=0
-        while True:
-            b=f.read(300*1024*1024)
-            if not b: break
-            q=Path('work/chunks')/f't3_decode.pte.part_{i:02d}'
-            q.write_bytes(b)
-            rows.append({'name':q.name,'size':len(b),'sha256':hashlib.sha256(b).hexdigest()}); i+=1
-    manifest={'graph_code_sha256':GRAPH_SHA,'pte_size':out.stat().st_size,'pte_sha256':psha,'chunks':rows}
-    Path('work/CP034_T3_DECODE_SPLIT_MANIFEST.json').write_text(json.dumps(manifest,indent=2))
-    print('REMOTE_GRAPH_PASS',GRAPH_SHA,flush=True); print('PTE_PASS',out.stat().st_size,psha,flush=True); print('CHUNKS',len(rows),flush=True)
+    work=Path('work'); chunks=work/'chunks'; payload=work/'toolchain_payload'
+    shutil.rmtree(work,ignore_errors=True); chunks.mkdir(parents=True); payload.mkdir(parents=True)
+    android_home=Path(os.environ.get('ANDROID_HOME') or os.environ.get('ANDROID_SDK_ROOT') or '')
+    sdkmanager=android_home/'cmdline-tools/latest/bin/sdkmanager'
+    if not sdkmanager.is_file(): raise SystemExit('FAIL-CLOSED: sdkmanager not found')
+    run(str(sdkmanager),'platforms;android-36','build-tools;36.0.0')
+    for p in (android_home/'platforms/android-36',android_home/'build-tools/36.0.0'):
+        if not p.is_dir(): raise SystemExit(f'FAIL-CLOSED: missing {p}')
+    # Gradle exact minimum/default for AGP 9.4.
+    gradle_zip=work/'gradle.zip'
+    run('curl','-fL','--retry','5','-o',str(gradle_zip),f'https://services.gradle.org/distributions/gradle-{GRADLE_VERSION}-bin.zip')
+    run('unzip','-q',str(gradle_zip),'-d',str(payload))
+    # Bundletool exact release.
+    bdir=payload/'bundletool'; bdir.mkdir()
+    bjar=bdir/f'bundletool-all-{BUNDLETOOL_VERSION}.jar'
+    run('curl','-fL','--retry','5','-o',str(bjar),f'https://github.com/google/bundletool/releases/download/{BUNDLETOOL_VERSION}/bundletool-all-{BUNDLETOOL_VERSION}.jar')
+    # Minimal Android SDK needed for private local compilation.
+    sdkout=payload/'android-sdk'; (sdkout/'platforms').mkdir(parents=True); (sdkout/'build-tools').mkdir(parents=True)
+    shutil.copytree(android_home/'platforms/android-36',sdkout/'platforms/android-36',symlinks=True)
+    shutil.copytree(android_home/'build-tools/36.0.0',sdkout/'build-tools/36.0.0',symlinks=True)
+    # JDK17 exact build JDK.
+    jdk=find_jdk17(); shutil.copytree(jdk,payload/'jdk17',symlinks=True)
+    # Version evidence.
+    java=payload/'jdk17/bin/java'; gradle=payload/f'gradle-{GRADLE_VERSION}/bin/gradle'
+    versions={
+      'schema':'sindel.cp034.android-toolchain.v1',
+      'gradle_version':GRADLE_VERSION,
+      'bundletool_version':BUNDLETOOL_VERSION,
+      'android_platform':'android-36',
+      'build_tools':'36.0.0',
+      'java_version':subprocess.check_output([str(java),'-version'],stderr=subprocess.STDOUT,text=True).splitlines()[0],
+    }
+    (payload/'TOOLCHAIN_META.json').write_text(json.dumps(versions,indent=2),encoding='utf-8')
+    run(str(gradle),'--version')
+    run(str(java),'-jar',str(bjar),'version')
+    # Deterministic-ish tar transport; file SHA is the transport lock.
+    archive=work/'cp034_android_toolchain.tar.gz'
+    with tarfile.open(archive,'w:gz',compresslevel=6) as tf:
+        tf.add(payload,arcname='cp034_android_toolchain')
+    rows=split_four(archive,chunks)
+    manifest={'schema':'sindel.cp034.toolchain-transport.v1','archive_name':archive.name,'archive_size':archive.stat().st_size,'archive_sha256':sha256(archive),'chunks':rows,'toolchain':versions}
+    (work/'CP034_T3_DECODE_SPLIT_MANIFEST.json').write_text(json.dumps(manifest,indent=2),encoding='utf-8')
+    (work/'t3_decode.report.json').write_text(json.dumps(manifest,indent=2),encoding='utf-8')
+    print('CP034_ANDROID_TOOLCHAIN_READY',archive.stat().st_size,manifest['archive_sha256'],flush=True)
     return 0
 
 if __name__=='__main__': raise SystemExit(main())
