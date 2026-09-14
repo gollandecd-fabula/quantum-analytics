@@ -18,3 +18,35 @@ jobs:
         with:
           python-version: '3.13'
       - run: python sindel_cp034/t3_decode_factory.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cp034-t3-decode-report
+          path: |
+            work/CP034_T3_DECODE_SPLIT_MANIFEST.json
+            work/t3_decode.report.json
+          compression-level: 6
+          retention-days: 2
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cp034-t3-decode-part-00
+          path: work/chunks/t3_decode.pte.part_00
+          compression-level: 0
+          retention-days: 2
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cp034-t3-decode-part-01
+          path: work/chunks/t3_decode.pte.part_01
+          compression-level: 0
+          retention-days: 2
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cp034-t3-decode-part-02
+          path: work/chunks/t3_decode.pte.part_02
+          compression-level: 0
+          retention-days: 2
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cp034-t3-decode-part-03
+          path: work/chunks/t3_decode.pte.part_03
+          compression-level: 0
+          retention-days: 2
