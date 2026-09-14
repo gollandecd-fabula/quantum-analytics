@@ -1,0 +1,46 @@
+name: SINDEL CP034 Python prep deps
+on:
+  push:
+    branches: [sindel-cp034-buildfactory]
+    paths: ['.github/workflows/sindel-cp034-python-deps.yml']
+permissions:
+  contents: read
+jobs:
+  deps:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Build portable dependency layer without Torch
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir cp034_deps
+          python -m pip install --upgrade pip
+          python -m pip install --target cp034_deps --no-deps \
+            transformers==5.2.0 diffusers==0.29.0 conformer==0.3.2 \
+            s3tokenizer spacy-pkuseg pykakasi==2.3.0 \
+            'resemble-perth @ git+https://github.com/resemble-ai/Perth.git@master'
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib, json
+          root=Path('cp034_deps')
+          rows=[]
+          for p in sorted(root.rglob('*')):
+            if p.is_file():
+              h=hashlib.sha256(p.read_bytes()).hexdigest()
+              rows.append({'path':p.as_posix(),'size':p.stat().st_size,'sha256':h})
+          Path('CP034_DEPS_MANIFEST.json').write_text(json.dumps({'files':rows},indent=2))
+          print('files',len(rows))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sindel-cp034-python-prep-deps
+          path: |
+            cp034_deps
+            CP034_DEPS_MANIFEST.json
+          compression-level: 6
+          retention-days: 2
