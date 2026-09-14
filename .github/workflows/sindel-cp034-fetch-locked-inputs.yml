@@ -39,10 +39,10 @@ jobs:
           out=Path('locked_model')
           expected={
             't3_mtl23ls_v3.safetensors':('5abca8321ede76f8e61f1cc0d19aea6c946b28871017ce8726f8a69203f05953',2143989928),
-            's3gen.pt':('9b9ff07e60b20c136e2b1b3d7563a24604e8d2c4c267888d1ee929dd0151d2a3',None),
-            've.pt':('4b16d836bc598509860f6fa068165a8bb5e9ac84f05582dfcf278a5a372879f1',None),
-            'conds.pt':('6552d70568833628ba019c6b03459e77fe71ca197d5c560cef9411bee9d87f4e',None),
-            'grapheme_mtl_merged_expanded_v1.json':('69632f47220a788a52ce2661d096453c5655e9bf25289d89a8d832c46ee07dbf',69989),
+            's3gen.pt':('9b9ff07e60b20c136e2b1b3d7563a24604e8d2c4c267888d1ee929dd0151d2a3',1057165844),
+            've.pt':('4b16d836bc598509860f6fa068165a8bb5e9ac84f05582dfcf278a5a372879f1',5698626),
+            'conds.pt':('6552d70568833628ba019c6b03459e77fe71ca197d5c560cef9411bee9d87f4e',107374),
+            'grapheme_mtl_merged_expanded_v1.json':('df81a7ca7c31796cbe97f7a7142d5a53b12e88e12417ebe98f66602cafaf0461',70011),
           }
           def sha(p):
             h=hashlib.sha256()
@@ -55,7 +55,7 @@ jobs:
             dst=out/name
             shutil.copyfile(src,dst)
             got=sha(dst)
-            if got!=exp or (size is not None and dst.stat().st_size!=size):
+            if got!=exp or dst.stat().st_size!=size:
               raise SystemExit(f'FAIL {name} size={dst.stat().st_size} sha={got}')
             print('PASS',name,dst.stat().st_size,got,flush=True)
           PY
