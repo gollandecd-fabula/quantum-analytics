@@ -1,7 +1,6 @@
 name: SINDEL CP034 Actions smoke
 on:
-  push:
-    branches: [sindel-cp034-buildfactory]
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:
@@ -9,8 +8,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: |
-          echo SINDEL_CP034_ACTIONS_OK
-          uname -a
-          free -h
-          df -h
+      - run: echo SINDEL_CP034_ACTIONS_OK
