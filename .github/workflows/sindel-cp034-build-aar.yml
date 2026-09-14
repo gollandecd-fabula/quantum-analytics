@@ -1,0 +1,80 @@
+name: SINDEL CP034 build patched ExecuTorch AAR
+on:
+  push:
+    branches: [sindel-cp034-buildfactory]
+    paths:
+      - '.github/workflows/sindel-cp034-build-aar.yml'
+      - 'sindel_cp034/patch_executorch_asset_mmap.py'
+permissions:
+  contents: read
+jobs:
+  build-aar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      ET_COMMIT: 17adba19d0051b4a184f7ff7e7a0612cf8bd3000
+      NDK_VERSION: 27.2.12479018
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Resolve Android SDK and pin NDK
+        shell: bash
+        run: |
+          set -euo pipefail
+          SDK="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-}}"
+          test -n "$SDK" && test -d "$SDK"
+          echo "ANDROID_SDK=$SDK" >> "$GITHUB_ENV"
+          yes | "$SDK/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null || true
+          "$SDK/cmdline-tools/latest/bin/sdkmanager" "ndk;${NDK_VERSION}" "platforms;android-36" "build-tools;36.0.0"
+          NDK="$SDK/ndk/${NDK_VERSION}"
+          test -f "$NDK/build/cmake/android.toolchain.cmake"
+          echo "ANDROID_NDK=$NDK" >> "$GITHUB_ENV"
+          cmake --version
+          java -version
+      - name: Clone exact ExecuTorch source
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --filter=blob:none https://github.com/pytorch/executorch.git executorch
+          git -C executorch checkout --detach "$ET_COMMIT"
+          git -C executorch submodule update --init --recursive --depth 1
+          test "$(git -C executorch rev-parse HEAD)" = "$ET_COMMIT"
+      - name: Apply SHA-guarded mmap patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 sindel_cp034/patch_executorch_asset_mmap.py executorch | tee patch.log
+          grep -F 'CP034_EXECUTORCH_ASSET_MMAP_PATCH_PASS' patch.log
+      - name: Build native Android AAR and unit tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p out
+          cd executorch
+          export BUILD_AAR_DIR="$GITHUB_WORKSPACE/out"
+          export ANDROID_SDK="$ANDROID_SDK"
+          export ANDROID_NDK="$ANDROID_NDK"
+          export EXECUTORCH_BUILD_EXTENSION_LLM=OFF
+          export EXECUTORCH_BUILD_VULKAN=OFF
+          bash scripts/build_android_library.sh 2>&1 | tee "$GITHUB_WORKSPACE/aar-build.log"
+          cd "$GITHUB_WORKSPACE"
+          test -f out/executorch.aar
+          mv out/executorch.aar out/executorch-android-1.1.0-cp034-assetmmap.aar
+          sha256sum out/executorch-android-1.1.0-cp034-assetmmap.aar | tee out/AAR_SHA256.txt
+          unzip -t out/executorch-android-1.1.0-cp034-assetmmap.aar >/dev/null
+          unzip -l out/executorch-android-1.1.0-cp034-assetmmap.aar | tee out/AAR_CONTENTS.txt
+          grep -q 'jni/arm64-v8a/libexecutorch.so' out/AAR_CONTENTS.txt
+          grep -q 'jni/x86_64/libexecutorch.so' out/AAR_CONTENTS.txt
+          echo CP034_AAR_NATIVE_BUILD_PASS | tee out/STATUS.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sindel-cp034-executorch-aar
+          path: |
+            out
+            patch.log
+            aar-build.log
+          compression-level: 0
+          retention-days: 3
