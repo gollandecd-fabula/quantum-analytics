@@ -8,6 +8,10 @@ permissions:
 jobs:
   run:
     runs-on: ubuntu-latest
+    timeout-minutes: 180
     steps:
       - uses: actions/checkout@v4
-      - uses: ./.github/actions/sindel-cp034-t3-decode
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: python sindel_cp034/t3_decode_factory.py
