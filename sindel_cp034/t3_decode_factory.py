@@ -25,7 +25,7 @@ def ensure_env() -> None:
     run(sys.executable,'-m','pip','install','--upgrade','pip')
     run(sys.executable,'-m','pip','install','--index-url','https://download.pytorch.org/whl/cpu','torch==2.10.0','torchaudio==2.10.0')
     run(sys.executable,'-m','pip','install','--no-deps','executorch==1.1.0','torchao==0.16.0')
-    run(sys.executable,'-m','pip','install','flatbuffers','expecttest','hypothesis','kgb','parameterized','hydra-core','omegaconf','pytorch-tokenizers','ruamel.yaml','tabulate','typing-extensions','pyyaml','safetensors==0.5.3','transformers==5.2.0','huggingface_hub[hf_xet]')
+    run(sys.executable,'-m','pip','install','flatbuffers','expecttest','hypothesis','kgb','parameterized','hydra-core','omegaconf','pytorch-tokenizers','ruamel.yaml','tabulate','typing-extensions','pyyaml','safetensors==0.5.3','transformers==5.2.0','huggingface_hub[hf_xet]','einops')
     run(sys.executable,'-m','pip','install','--no-deps',f'git+https://github.com/resemble-ai/chatterbox.git@{CHATTERBOX_COMMIT}')
     marker.parent.mkdir(parents=True,exist_ok=True); marker.write_text('ready')
 
