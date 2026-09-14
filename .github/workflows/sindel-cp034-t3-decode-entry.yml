@@ -2,7 +2,10 @@ name: SINDEL CP034 T3 decode entry
 on:
   push:
     branches: [sindel-cp034-buildfactory]
-    paths: ['.github/workflows/sindel-cp034-t3-decode-entry.yml']
+    paths:
+      - '.github/workflows/sindel-cp034-t3-decode-entry.yml'
+      - 'sindel_cp034/t3_decode_factory.py'
+      - 'sindel_cp034/export_t3_decode_stage.py'
 permissions:
   contents: read
 jobs:
@@ -15,4 +18,3 @@ jobs:
         with:
           python-version: '3.13'
       - run: python sindel_cp034/t3_decode_factory.py
-# retry: exact import shim + flatc
