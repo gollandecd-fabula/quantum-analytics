@@ -1,5 +1,5 @@
 from __future__ import annotations
-import hashlib, json, os, subprocess, sys
+import hashlib, importlib.metadata, importlib.util, json, os, subprocess, sys
 from pathlib import Path
 
 T3_SHA='5abca8321ede76f8e61f1cc0d19aea6c946b28871017ce8726f8a69203f05953'
@@ -10,7 +10,7 @@ CHATTERBOX_COMMIT='5de7a54aa4e5e2baadb0182dde554908b48b85c2'
 
 def run(*args: str) -> None:
     print('RUN', *args, flush=True)
-    subprocess.run(args, check=True)
+    subprocess.run(args, check=True, env=os.environ.copy())
 
 def sha256(p: Path) -> str:
     h=hashlib.sha256()
@@ -29,6 +29,21 @@ def ensure_env() -> None:
     run(sys.executable,'-m','pip','install','--no-deps',f'git+https://github.com/resemble-ai/chatterbox.git@{CHATTERBOX_COMMIT}')
     marker.parent.mkdir(parents=True,exist_ok=True); marker.write_text('ready')
 
+def configure_exact_imports() -> None:
+    real=Path(importlib.metadata.distribution('chatterbox-tts').locate_file('chatterbox')).resolve()
+    shim=Path('work/import_shim/chatterbox'); shim.mkdir(parents=True,exist_ok=True)
+    (shim/'__init__.py').write_text("__path__=["+repr(str(real))+"]\n",encoding='utf-8')
+    os.environ['PYTHONPATH']=str(shim.parent.resolve())+os.pathsep+os.environ.get('PYTHONPATH','')
+    spec=importlib.util.find_spec('executorch')
+    if not spec or not spec.submodule_search_locations: raise SystemExit('FAIL-CLOSED executorch package missing')
+    eroot=Path(next(iter(spec.submodule_search_locations))).resolve()
+    candidates=[eroot/'data/bin/flatc',eroot.parent/'bin/flatc']
+    flatc=next((p for p in candidates if p.is_file()),None)
+    if flatc is None: raise SystemExit('FAIL-CLOSED flatc not found')
+    flatc.chmod(flatc.stat().st_mode | 0o111)
+    os.environ['FLATC_EXECUTABLE']=str(flatc)
+    print('IMPORT_SHIM_PASS',real,flush=True); print('FLATC',flatc,flush=True)
+
 def fetch_t3() -> Path:
     from huggingface_hub import hf_hub_download
     import shutil
@@ -45,7 +60,7 @@ def fetch_t3() -> Path:
 def main() -> int:
     os.environ.setdefault('MALLOC_ARENA_MAX','2'); os.environ.setdefault('OMP_NUM_THREADS','1'); os.environ.setdefault('MKL_NUM_THREADS','1')
     Path('work/chunks').mkdir(parents=True,exist_ok=True)
-    ensure_env(); t3=fetch_t3()
+    ensure_env(); configure_exact_imports(); t3=fetch_t3()
     out=Path('work/t3_decode.pte')
     run(sys.executable,'sindel_cp034/export_t3_decode_stage.py','--t3',str(t3),'--out',str(out),'--half-init')
     report=Path('work/t3_decode.report.json'); j=json.loads(report.read_text())
