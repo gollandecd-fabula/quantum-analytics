@@ -1,0 +1,101 @@
+name: SINDEL CP034 fetch locked inputs
+on:
+  push:
+    branches: [sindel-cp034-buildfactory]
+    paths: ['.github/workflows/sindel-cp034-fetch-locked-inputs.yml']
+permissions:
+  contents: read
+jobs:
+  fetch-locked-inputs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      HF_REV: e2d6902dd4c1301892935d0a0277325551e8060e
+      HF_REPO: ResembleAI/chatterbox
+    steps:
+      - uses: actions/checkout@v4
+      - name: Free runner disk
+        run: |
+          sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc || true
+          df -h
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install downloader
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install 'huggingface_hub[hf_xet]'
+      - name: Download and verify exact locked model bytes
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p locked_model
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib, shutil
+          from huggingface_hub import hf_hub_download
+          repo='ResembleAI/chatterbox'
+          rev='e2d6902dd4c1301892935d0a0277325551e8060e'
+          out=Path('locked_model')
+          expected={
+            't3_mtl23ls_v3.safetensors':('5abca8321ede76f8e61f1cc0d19aea6c946b28871017ce8726f8a69203f05953',2143989928),
+            's3gen.pt':('9b9ff07e60b20c136e2b1b3d7563a24604e8d2c4c267888d1ee929dd0151d2a3',None),
+            've.pt':('4b16d836bc598509860f6fa068165a8bb5e9ac84f05582dfcf278a5a372879f1',None),
+            'conds.pt':('6552d70568833628ba019c6b03459e77fe71ca197d5c560cef9411bee9d87f4e',None),
+            'grapheme_mtl_merged_expanded_v1.json':('69632f47220a788a52ce2661d096453c5655e9bf25289d89a8d832c46ee07dbf',69989),
+          }
+          def sha(p):
+            h=hashlib.sha256()
+            with p.open('rb') as f:
+              for b in iter(lambda:f.read(8*1024*1024),b''): h.update(b)
+            return h.hexdigest()
+          for name,(exp,size) in expected.items():
+            print('FETCH',name,flush=True)
+            src=Path(hf_hub_download(repo_id=repo,filename=name,revision=rev))
+            dst=out/name
+            shutil.copyfile(src,dst)
+            got=sha(dst)
+            if got!=exp or (size is not None and dst.stat().st_size!=size):
+              raise SystemExit(f'FAIL {name} size={dst.stat().st_size} sha={got}')
+            print('PASS',name,dst.stat().st_size,got,flush=True)
+          PY
+          sha256sum locked_model/* | sort | tee locked_model/SHA256SUMS.txt
+      - name: Exact source archive
+        run: |
+          curl -fL --retry 5 --retry-all-errors -o chatterbox-source.tar.gz 'https://github.com/resemble-ai/chatterbox/archive/5de7a54aa4e5e2baadb0182dde554908b48b85c2.tar.gz'
+          tar -tzf chatterbox-source.tar.gz >/dev/null
+          sha256sum chatterbox-source.tar.gz > chatterbox-source.tar.gz.sha256
+      - name: Upload T3
+        uses: actions/upload-artifact@v4
+        with:
+          name: sindel-cp034-t3-v3
+          path: locked_model/t3_mtl23ls_v3.safetensors
+          compression-level: 0
+          retention-days: 2
+      - name: Upload S3
+        uses: actions/upload-artifact@v4
+        with:
+          name: sindel-cp034-s3
+          path: locked_model/s3gen.pt
+          compression-level: 0
+          retention-days: 2
+      - name: Upload small model inputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: sindel-cp034-model-small
+          path: |
+            locked_model/ve.pt
+            locked_model/conds.pt
+            locked_model/grapheme_mtl_merged_expanded_v1.json
+            locked_model/SHA256SUMS.txt
+          compression-level: 0
+          retention-days: 2
+      - name: Upload exact source
+        uses: actions/upload-artifact@v4
+        with:
+          name: sindel-cp034-chatterbox-source
+          path: |
+            chatterbox-source.tar.gz
+            chatterbox-source.tar.gz.sha256
+          compression-level: 0
+          retention-days: 2
