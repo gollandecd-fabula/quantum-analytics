@@ -15,3 +15,4 @@ jobs:
         with:
           python-version: '3.13'
       - run: python sindel_cp034/t3_decode_factory.py
+# retry: exact import shim + flatc
