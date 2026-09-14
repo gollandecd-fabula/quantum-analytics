@@ -1,0 +1,13 @@
+name: SINDEL CP034 T3 decode entry
+on:
+  push:
+    branches: [sindel-cp034-buildfactory]
+    paths: ['.github/workflows/sindel-cp034-t3-decode-entry.yml']
+permissions:
+  contents: read
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/sindel-cp034-t3-decode
