@@ -20,6 +20,22 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install exact Torch headers required by ExecuTorch CMake
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu torch==2.10.0
+          python - <<'PY'
+          import torch, pathlib
+          print('TORCH', torch.__version__)
+          assert torch.__version__.split('+')[0] == '2.10.0'
+          assert pathlib.Path(torch.__file__).is_file()
+          PY
+          echo "PYTHON_EXECUTABLE=$(command -v python)" >> "$GITHUB_ENV"
       - name: Resolve Android SDK and pin NDK
         shell: bash
         run: |
@@ -46,7 +62,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 sindel_cp034/patch_executorch_asset_mmap.py executorch | tee patch.log
+          "$PYTHON_EXECUTABLE" sindel_cp034/patch_executorch_asset_mmap.py executorch | tee patch.log
           grep -F 'CP034_EXECUTORCH_ASSET_MMAP_PATCH_PASS' patch.log
       - name: Build native Android AAR and unit tests
         shell: bash
@@ -57,6 +73,7 @@ jobs:
           export BUILD_AAR_DIR="$GITHUB_WORKSPACE/out"
           export ANDROID_SDK="$ANDROID_SDK"
           export ANDROID_NDK="$ANDROID_NDK"
+          export PYTHON_EXECUTABLE="$PYTHON_EXECUTABLE"
           export EXECUTORCH_BUILD_EXTENSION_LLM=OFF
           export EXECUTORCH_BUILD_VULKAN=OFF
           bash scripts/build_android_library.sh 2>&1 | tee "$GITHUB_WORKSPACE/aar-build.log"
@@ -70,11 +87,13 @@ jobs:
           grep -q 'jni/x86_64/libexecutorch.so' out/AAR_CONTENTS.txt
           echo CP034_AAR_NATIVE_BUILD_PASS | tee out/STATUS.txt
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: sindel-cp034-executorch-aar
           path: |
             out
             patch.log
             aar-build.log
+          if-no-files-found: ignore
           compression-level: 0
           retention-days: 3
