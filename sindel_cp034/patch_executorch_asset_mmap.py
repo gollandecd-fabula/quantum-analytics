@@ -3,6 +3,8 @@
 
 Adds Java Module.loadAsset(AssetManager, assetPath, numThreads) and a native
 fd64 -> mmap -> BufferDataLoader path. Refuses any upstream source drift.
+The Build Factory also ensures the exact PyYAML codegen dependency needed by
+ExecuTorch's generated operator bindings before native compilation begins.
 """
 from __future__ import annotations
 
@@ -17,6 +19,19 @@ FILES = {
     "extension/android/jni/jni_layer.cpp": "1f8457e00c591491481d80638cd7f79ba91ae640",
     "extension/android/CMakeLists.txt": "38b28a1407a6317781034decd0a4a4141c888db8",
 }
+
+
+def ensure_codegen_dependency() -> None:
+    try:
+        import yaml  # type: ignore
+        if getattr(yaml, "__version__", None) == "6.0.2":
+            return
+    except Exception:
+        pass
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "PyYAML==6.0.2"])
+    import yaml  # type: ignore
+    if getattr(yaml, "__version__", None) != "6.0.2":
+        raise SystemExit("FAIL-CLOSED: PyYAML 6.0.2 codegen dependency not active")
 
 
 def run(root: pathlib.Path, *args: str) -> str:
@@ -265,6 +280,7 @@ def patch_cmake(path: pathlib.Path) -> None:
 
 
 def main() -> int:
+    ensure_codegen_dependency()
     ap = argparse.ArgumentParser()
     ap.add_argument("root", type=pathlib.Path)
     ap.add_argument("--skip-git-head", action="store_true", help="fixture self-test only")
