@@ -1,0 +1,77 @@
+name: SINDEL CP034 split model transport
+on:
+  push:
+    branches: [sindel-cp034-buildfactory]
+    paths: ['.github/workflows/sindel-cp034-split-model-transport.yml']
+permissions:
+  contents: read
+jobs:
+  split-models:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc || true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: python -m pip install 'huggingface_hub[hf_xet]'
+      - name: Fetch exact T3/S3 and split into <=400MiB transport chunks
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p raw chunks/t3 chunks/s3 manifests
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib, shutil
+          from huggingface_hub import hf_hub_download
+          rev='e2d6902dd4c1301892935d0a0277325551e8060e'
+          exp={
+            't3_mtl23ls_v3.safetensors':'5abca8321ede76f8e61f1cc0d19aea6c946b28871017ce8726f8a69203f05953',
+            's3gen.pt':'9b9ff07e60b20c136e2b1b3d7563a24604e8d2c4c267888d1ee929dd0151d2a3',
+          }
+          for n,h0 in exp.items():
+            p=Path(hf_hub_download(repo_id='ResembleAI/chatterbox',filename=n,revision=rev))
+            d=Path('raw')/n; shutil.copyfile(p,d)
+            h=hashlib.sha256(d.read_bytes()).hexdigest()
+            if h!=h0: raise SystemExit(f'SHA mismatch {n}: {h}')
+            print('PASS',n,d.stat().st_size,h)
+          PY
+          split -b 400M -d -a 2 raw/t3_mtl23ls_v3.safetensors chunks/t3/t3.part
+          split -b 400M -d -a 2 raw/s3gen.pt chunks/s3/s3.part
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib,json
+          def sha(p):
+            h=hashlib.sha256()
+            with p.open('rb') as f:
+              for b in iter(lambda:f.read(8*1024*1024),b''): h.update(b)
+            return h.hexdigest()
+          for k in ['t3','s3']:
+            rows=[{'name':p.name,'size':p.stat().st_size,'sha256':sha(p)} for p in sorted((Path('chunks')/k).iterdir())]
+            (Path('manifests')/(k+'.json')).write_text(json.dumps({'chunks':rows},indent=2))
+            print(k,rows)
+          PY
+      - uses: actions/upload-artifact@v4
+        with: {name: cp034-t3-part00, path: chunks/t3/t3.part00, compression-level: 0, retention-days: 2}
+      - uses: actions/upload-artifact@v4
+        with: {name: cp034-t3-part01, path: chunks/t3/t3.part01, compression-level: 0, retention-days: 2}
+      - uses: actions/upload-artifact@v4
+        with: {name: cp034-t3-part02, path: chunks/t3/t3.part02, compression-level: 0, retention-days: 2}
+      - uses: actions/upload-artifact@v4
+        with: {name: cp034-t3-part03, path: chunks/t3/t3.part03, compression-level: 0, retention-days: 2}
+      - uses: actions/upload-artifact@v4
+        with: {name: cp034-t3-part04, path: chunks/t3/t3.part04, compression-level: 0, retention-days: 2}
+      - uses: actions/upload-artifact@v4
+        with: {name: cp034-t3-part05, path: chunks/t3/t3.part05, compression-level: 0, retention-days: 2}
+      - uses: actions/upload-artifact@v4
+        with: {name: cp034-s3-part00, path: chunks/s3/s3.part00, compression-level: 0, retention-days: 2}
+      - uses: actions/upload-artifact@v4
+        with: {name: cp034-s3-part01, path: chunks/s3/s3.part01, compression-level: 0, retention-days: 2}
+      - uses: actions/upload-artifact@v4
+        with: {name: cp034-s3-part02, path: chunks/s3/s3.part02, compression-level: 0, retention-days: 2}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cp034-model-chunk-manifests
+          path: manifests
+          retention-days: 2
